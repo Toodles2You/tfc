@@ -17,6 +17,9 @@
 //
 #include "hud.h"
 #include "cl_util.h"
+#include "com_model.h"
+#include "r_studioint.h"
+#include "triangleapi.h"
 
 #include "vgui_TeamFortressViewport.h"
 
@@ -67,6 +70,29 @@ bool CHud::Redraw(float flTime, bool intermission)
 	// Clock was reset, reset delta
 	if (m_flTimeDelta < 0)
 		m_flTimeDelta = 0;
+
+	gEngfuncs.pTriAPI->CullFace(TRI_FRONT);
+	
+	bool bWantWidescreen = m_pCvarWidescreen->value != 0.0F;
+
+	if (bWantWidescreen != m_bIsWidescreen)
+	{
+		if (bWantWidescreen)
+		{
+			m_iConWidth = m_iConHeight * (ScreenWidth / (float)ScreenHeight);
+		}
+		else
+		{
+			m_iConWidth = m_iRes;
+		}
+		m_flOffsetX = (ScreenWidth - m_iConWidth * m_flScaleX) / 2.0F;
+		m_bIsWidescreen = bWantWidescreen;
+	}
+
+	auto ulRGB = strtoul(m_pCvarColor->string, NULL, 16);
+	m_cColors[CHud::COLOR_PRIMARY].r = (ulRGB & 0xFF0000) >> 16;
+	m_cColors[CHud::COLOR_PRIMARY].g = (ulRGB & 0xFF00) >> 8;
+	m_cColors[CHud::COLOR_PRIMARY].b = (ulRGB & 0xFF);
 
 	// Bring up the scoreboard during intermission
 	if (gViewPort)
@@ -169,6 +195,8 @@ bool CHud::Redraw(float flTime, bool intermission)
 	}
 	*/
 
+	gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
+
 	return true;
 }
 
@@ -178,6 +206,132 @@ void ScaleColors(int& r, int& g, int& b, int a)
 	r = (int)(r * x);
 	g = (int)(g * x);
 	b = (int)(b * x);
+}
+
+void CHud::DrawHudSprite(HSPRITE pic, int frame, Rect *rect, int x, int y, int r, int g, int b, int a, hudalign_e alignment)
+{
+	auto pSprite = const_cast<model_t *>(gEngfuncs.GetSpritePointer (pic));
+
+	auto sprw = gEngfuncs.pfnSPR_Width (pic, frame);
+	auto sprh = gEngfuncs.pfnSPR_Height (pic, frame);
+
+	if (!rect)
+	{
+		static Rect rc;
+		rc.left = 0;
+		rc.right = sprw;
+		rc.top = 0;
+		rc.bottom = sprh;
+		rect = &rc;
+	}
+
+	float xf = x;
+	float yf = y;
+	auto width = rect->right - rect->left;
+	auto height = rect->bottom - rect->top;
+	
+	switch (alignment)
+	{
+	case a_north:
+	case a_center:
+	case a_south:
+		xf -= width / 2.0F - 0.5F;
+		break;
+	case a_northeast:
+	case a_east:
+	case a_southeast:
+		xf -= width;
+		break;
+	}
+
+	switch (alignment)
+	{
+	case a_west:
+	case a_center:
+	case a_east:
+		yf -= height / 2.0F - 0.5F;
+		break;
+	case a_southwest:
+	case a_south:
+	case a_southeast:
+		yf -= height;
+		break;
+	}
+
+	auto x1 = roundf (m_flOffsetX + xf * m_flScaleX);
+	auto y1 = roundf (m_flOffsetY + yf * m_flScaleY);
+	auto x2 = roundf (m_flOffsetX + (xf + width) * m_flScaleX);
+	auto y2 = roundf (m_flOffsetY + (yf + height) * m_flScaleY);
+
+	auto left = rect->left / (float)sprw;
+	auto right = rect->right / (float)sprw;
+	auto top = rect->top / (float)sprh;
+	auto bottom = rect->bottom / (float)sprh;
+	
+	gEngfuncs.pTriAPI->SpriteTexture (pSprite, frame);
+
+	auto rendermode = kRenderTransAdd;
+
+	// Toodles FIXME: Hack for the crosshair.
+	if (alignment == a_center)
+	{
+		rendermode = kRenderTransAlpha;
+	}
+
+	gEngfuncs.pTriAPI->Color4fRendermode (r / 255.0F, g / 255.0F, b / 255.0F, a / 255.0F, rendermode);
+	gEngfuncs.pTriAPI->RenderMode (rendermode);
+
+	gEngfuncs.pTriAPI->Begin (TRI_QUADS);
+
+	gEngfuncs.pTriAPI->TexCoord2f (left, top);
+	gEngfuncs.pTriAPI->Vertex3f (x1, y1, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (right, top);
+	gEngfuncs.pTriAPI->Vertex3f (x2, y1, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (right, bottom);
+	gEngfuncs.pTriAPI->Vertex3f (x2, y2, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (left, bottom);
+	gEngfuncs.pTriAPI->Vertex3f (x1, y2, 0);
+
+	gEngfuncs.pTriAPI->End ();
+}
+
+void CHud::DrawHudSprite(HSPRITE pic, int frame, Rect *rect, int x, int y, hudcolor_e color, int a, hudalign_e alignment)
+{
+	int r, g, b;
+	GetColor(r, g, b, color);
+	DrawHudSprite(pic, frame, rect, x, y, r, g, b, a, alignment);
+}
+
+void CHud::DrawHudSpriteIndex(int index, int x, int y, int r, int g, int b, int a, hudalign_e alignment)
+{
+	DrawHudSprite(GetSprite(index), 0, &GetSpriteRect(index), x, y, r, g, b, a, alignment);
+}
+
+void CHud::DrawHudSpriteIndex(int index, int x, int y, hudcolor_e color, int a, hudalign_e alignment)
+{
+	int r, g, b;
+	GetColor(r, g, b, color);
+	DrawHudSprite(GetSprite(index), 0, &GetSpriteRect(index), x, y, r, g, b, a, alignment);
+}
+
+void CHud::DrawHudFill(int x, int y, int w, int h, int r, int g, int b, int a)
+{
+	x = roundf (m_flOffsetX + x * m_flScaleX);
+	y = roundf (m_flOffsetY + y * m_flScaleY);
+	w = roundf (w * m_flScaleX);
+	h = roundf (h * m_flScaleY);
+	
+	gEngfuncs.pfnFillRGBA(x, y, w, h, r, g, b, a);
+}
+
+void CHud::DrawHudFill(int x, int y, int w, int h, hudcolor_e color, int a)
+{
+	int r, g, b;
+	GetColor(r, g, b, color);
+	DrawHudFill(x, y, w, h, r, g, b, a);
 }
 
 int CHud::DrawHudString(int xpos, int ypos, int iMaxX, const char* szIt, int r, int g, int b)
@@ -198,7 +352,7 @@ int CHud::DrawHudStringReverse(int xpos, int ypos, int iMinX, const char* szStri
 	return xpos - gEngfuncs.pfnDrawStringReverse(xpos, ypos, szString, r, g, b);
 }
 
-int CHud::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b)
+int CHud::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b, int a, hudalign_e alignment)
 {
 	int iWidth = GetSpriteRect(m_HUD_number_0).right - GetSpriteRect(m_HUD_number_0).left;
 	int k;
@@ -209,8 +363,7 @@ int CHud::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 		if (iNumber >= 100)
 		{
 			k = iNumber / 100;
-			SPR_Set(GetSprite(m_HUD_number_0 + k), r, g, b);
-			SPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0 + k));
+			DrawHudSpriteIndex(m_HUD_number_0 + k, x, y, r, g, b, a, alignment);
 			x += iWidth;
 		}
 		else if ((iFlags & DHN_3DIGITS) != 0)
@@ -223,8 +376,7 @@ int CHud::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 		if (iNumber >= 10)
 		{
 			k = (iNumber % 100) / 10;
-			SPR_Set(GetSprite(m_HUD_number_0 + k), r, g, b);
-			SPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0 + k));
+			DrawHudSpriteIndex(m_HUD_number_0 + k, x, y, r, g, b, a, alignment);
 			x += iWidth;
 		}
 		else if ((iFlags & (DHN_3DIGITS | DHN_2DIGITS)) != 0)
@@ -235,14 +387,11 @@ int CHud::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 
 		// SPR_Draw ones
 		k = iNumber % 10;
-		SPR_Set(GetSprite(m_HUD_number_0 + k), r, g, b);
-		SPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0 + k));
+		DrawHudSpriteIndex(m_HUD_number_0 + k, x, y, r, g, b, a, alignment);
 		x += iWidth;
 	}
 	else if ((iFlags & DHN_DRAWZERO) != 0)
 	{
-		SPR_Set(GetSprite(m_HUD_number_0), r, g, b);
-
 		// SPR_Draw 100's
 		if ((iFlags & DHN_3DIGITS) != 0)
 		{
@@ -258,13 +407,19 @@ int CHud::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 
 		// SPR_Draw ones
 
-		SPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0));
+		DrawHudSpriteIndex(m_HUD_number_0, x, y, r, g, b, a, alignment);
 		x += iWidth;
 	}
 
 	return x;
 }
 
+int CHud::DrawHudNumber(int x, int y, int iFlags, int iNumber, hudcolor_e color, int a, hudalign_e alignment)
+{
+	int r, g, b;
+	GetColor(r, g, b, color);
+	return DrawHudNumber(x, y, iFlags, iNumber, r, g, b, a, alignment);
+}
 
 int CHud::GetNumWidth(int iNumber, int iFlags)
 {
@@ -311,7 +466,7 @@ int CHud::GetHudNumberWidth(int number, int width, int flags)
 	return totalDigits * digitWidth;
 }
 
-int CHud::DrawHudNumberReverse(int x, int y, int number, int flags, int r, int g, int b)
+int CHud::DrawHudNumberReverse(int x, int y, int number, int flags, int r, int g, int b, int a, hudalign_e alignment)
 {
 	if (number > 0 || (flags & DHN_DRAWZERO) != 0)
 	{
@@ -327,12 +482,18 @@ int CHud::DrawHudNumberReverse(int x, int y, int number, int flags, int r, int g
 			//This has to happen *before* drawing because we're drawing in reverse
 			x -= digitWidth;
 
-			SPR_Set(GetSprite(digitSpriteIndex), r, g, b);
-			SPR_DrawAdditive(0, x, y, &GetSpriteRect(digitSpriteIndex));
+			DrawHudSpriteIndex(digitSpriteIndex, x, y, r, g, b, a, alignment);
 
 			remainder /= 10;
 		} while (remainder > 0);
 	}
 
 	return x;
+}
+
+int CHud::DrawHudNumberReverse(int x, int y, int number, int flags, hudcolor_e color, int a, hudalign_e alignment)
+{
+	int r, g, b;
+	GetColor(r, g, b, color);
+	return DrawHudNumberReverse(x, y, number, flags, r, g, b, a, alignment);
 }

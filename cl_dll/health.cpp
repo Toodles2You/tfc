@@ -159,21 +159,18 @@ void CHudHealth::GetPainColor(int& r, int& g, int& b)
 #else
 	if (m_iHealth > 25)
 	{
-		UnpackRGB(r, g, b, RGB_YELLOWISH);
+		gHUD.GetColor(r, g, b, CHud::COLOR_PRIMARY);
 	}
 	else
 	{
-		r = 250;
-		g = 0;
-		b = 0;
+		gHUD.GetColor(r, g, b, CHud::COLOR_WARNING);
 	}
 #endif
 }
 
 bool CHudHealth::Draw(float flTime)
 {
-	int r, g, b;
-	int a = 0, x, y;
+	int a, x, y;
 	int HealthWidth;
 
 	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) != 0 || 0 != gEngfuncs.IsSpectateOnly())
@@ -202,9 +199,8 @@ bool CHudHealth::Draw(float flTime)
 	// If health is getting low, make it bright red
 	if (m_iHealth <= 15)
 		a = 255;
-
-	GetPainColor(r, g, b);
-	ScaleColors(r, g, b, a);
+	
+	auto color = (m_iHealth <= 25) ? CHud::COLOR_WARNING : CHud::COLOR_PRIMARY;
 
 	// Only draw health if we have the suit.
 	if (gHUD.HasSuit())
@@ -212,27 +208,27 @@ bool CHudHealth::Draw(float flTime)
 		HealthWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
 		int CrossWidth = gHUD.GetSpriteRect(m_HUD_cross).right - gHUD.GetSpriteRect(m_HUD_cross).left;
 
-		y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
+		y = gHUD.GetHeight() - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
 		x = CrossWidth / 2;
 
-		SPR_Set(gHUD.GetSprite(m_HUD_cross), r, g, b);
-		SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_cross));
+		gHUD.DrawHudSpriteIndex(m_HUD_cross, x, y, color, a);
 
 		x = CrossWidth + HealthWidth / 2;
 
 		//Reserve space for 3 digits by default, but allow it to expand
 		x += gHUD.GetHudNumberWidth(m_iHealth, 3, DHN_DRAWZERO);
 
-		gHUD.DrawHudNumberReverse(x, y, m_iHealth, DHN_DRAWZERO, r, g, b);
-
-		//x = gHUD.DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iHealth, r, g, b);
+		gHUD.DrawHudNumberReverse(x, y, m_iHealth, DHN_DRAWZERO, color, a);
 
 		x += HealthWidth / 2;
 
 		int iHeight = gHUD.m_iFontHeight;
 		int iWidth = HealthWidth / 10;
-		UnpackRGB(r, g, b, RGB_YELLOWISH);
-		FillRGBA(x, y, iWidth, iHeight, r, g, b, a);
+
+		gHUD.DrawHudFill(x, y, iWidth, iHeight, CHud::COLOR_PRIMARY, MIN_ALPHA);
+
+		gHUD.m_Battery.m_iAnchorX = x + HealthWidth / 2;
+		gHUD.m_Battery.m_iAnchorY = gHUD.GetHeight();
 	}
 
 	DrawDamage(flTime);
@@ -303,25 +299,18 @@ bool CHudHealth::DrawPain(float flTime)
 	if (!(0 != m_fAttackFront || 0 != m_fAttackRear || 0 != m_fAttackLeft || 0 != m_fAttackRight))
 		return true;
 
-	int r, g, b;
-	int x, y, a, shade;
-
-	// TODO:  get the shift value of the health
-	a = 255; // max brightness until then
+	int x, y, shade;
 
 	float fFade = gHUD.m_flTimeDelta * 2;
 
 	// SPR_Draw top
 	if (m_fAttackFront > 0.4)
 	{
-		GetPainColor(r, g, b);
-		shade = a * V_max(m_fAttackFront, 0.5);
-		ScaleColors(r, g, b, shade);
-		SPR_Set(m_hSprite, r, g, b);
+		shade = 255 * V_max(m_fAttackFront, 0.5);
 
-		x = ScreenWidth / 2 - SPR_Width(m_hSprite, 0) / 2;
-		y = ScreenHeight / 2 - SPR_Height(m_hSprite, 0) * 3;
-		SPR_DrawAdditive(0, x, y, NULL);
+		x = gHUD.GetWidth() / 2 - SPR_Width(m_hSprite, 0) / 2;
+		y = gHUD.GetHeight() / 2 - SPR_Height(m_hSprite, 0) * 3;
+		gHUD.DrawHudSprite(m_hSprite, 0, NULL, x, y, CHud::COLOR_DEFAULT, shade);
 		m_fAttackFront = V_max(0, m_fAttackFront - fFade);
 	}
 	else
@@ -329,14 +318,11 @@ bool CHudHealth::DrawPain(float flTime)
 
 	if (m_fAttackRight > 0.4)
 	{
-		GetPainColor(r, g, b);
-		shade = a * V_max(m_fAttackRight, 0.5);
-		ScaleColors(r, g, b, shade);
-		SPR_Set(m_hSprite, r, g, b);
+		shade = 255 * V_max(m_fAttackRight, 0.5);
 
-		x = ScreenWidth / 2 + SPR_Width(m_hSprite, 1) * 2;
-		y = ScreenHeight / 2 - SPR_Height(m_hSprite, 1) / 2;
-		SPR_DrawAdditive(1, x, y, NULL);
+		x = gHUD.GetWidth() / 2 + SPR_Width(m_hSprite, 1) * 2;
+		y = gHUD.GetHeight() / 2 - SPR_Height(m_hSprite, 1) / 2;
+		gHUD.DrawHudSprite(m_hSprite, 1, NULL, x, y, CHud::COLOR_DEFAULT, shade);
 		m_fAttackRight = V_max(0, m_fAttackRight - fFade);
 	}
 	else
@@ -344,14 +330,11 @@ bool CHudHealth::DrawPain(float flTime)
 
 	if (m_fAttackRear > 0.4)
 	{
-		GetPainColor(r, g, b);
-		shade = a * V_max(m_fAttackRear, 0.5);
-		ScaleColors(r, g, b, shade);
-		SPR_Set(m_hSprite, r, g, b);
+		shade = 255 * V_max(m_fAttackRear, 0.5);
 
-		x = ScreenWidth / 2 - SPR_Width(m_hSprite, 2) / 2;
-		y = ScreenHeight / 2 + SPR_Height(m_hSprite, 2) * 2;
-		SPR_DrawAdditive(2, x, y, NULL);
+		x = gHUD.GetWidth() / 2 - SPR_Width(m_hSprite, 2) / 2;
+		y = gHUD.GetHeight() / 2 + SPR_Height(m_hSprite, 2) * 2;
+		gHUD.DrawHudSprite(m_hSprite, 2, NULL, x, y, CHud::COLOR_DEFAULT, shade);
 		m_fAttackRear = V_max(0, m_fAttackRear - fFade);
 	}
 	else
@@ -359,14 +342,11 @@ bool CHudHealth::DrawPain(float flTime)
 
 	if (m_fAttackLeft > 0.4)
 	{
-		GetPainColor(r, g, b);
-		shade = a * V_max(m_fAttackLeft, 0.5);
-		ScaleColors(r, g, b, shade);
-		SPR_Set(m_hSprite, r, g, b);
+		shade = 255 * V_max(m_fAttackLeft, 0.5);
 
-		x = ScreenWidth / 2 - SPR_Width(m_hSprite, 3) * 3;
-		y = ScreenHeight / 2 - SPR_Height(m_hSprite, 3) / 2;
-		SPR_DrawAdditive(3, x, y, NULL);
+		x = gHUD.GetWidth() / 2 - SPR_Width(m_hSprite, 3) * 3;
+		y = gHUD.GetHeight() / 2 - SPR_Height(m_hSprite, 3) / 2;
+		gHUD.DrawHudSprite(m_hSprite, 3, NULL, x, y, CHud::COLOR_DEFAULT, shade);
 
 		m_fAttackLeft = V_max(0, m_fAttackLeft - fFade);
 	}
@@ -384,11 +364,7 @@ bool CHudHealth::DrawDamage(float flTime)
 	if (0 == m_bitsDamage)
 		return true;
 
-	UnpackRGB(r, g, b, RGB_YELLOWISH);
-
 	a = (int)(fabs(sin(flTime * 2)) * 256.0);
-
-	ScaleColors(r, g, b, a);
 
 	// Draw all the items
 	int i;
@@ -397,8 +373,7 @@ bool CHudHealth::DrawDamage(float flTime)
 		if ((m_bitsDamage & giDmgFlags[i]) != 0)
 		{
 			pdmg = &m_dmg[i];
-			SPR_Set(gHUD.GetSprite(m_HUD_dmg_bio + i), r, g, b);
-			SPR_DrawAdditive(0, pdmg->x, pdmg->y, &gHUD.GetSpriteRect(m_HUD_dmg_bio + i));
+			gHUD.DrawHudSpriteIndex(m_HUD_dmg_bio + i, pdmg->x, pdmg->y, CHud::COLOR_PRIMARY, a);
 		}
 	}
 
@@ -461,7 +436,7 @@ void CHudHealth::UpdateTiles(float flTime, long bitsDamage)
 		{
 			// put this one at the bottom
 			pdmg->x = giDmgWidth / 8;
-			pdmg->y = ScreenHeight - giDmgHeight * 2;
+			pdmg->y = gHUD.GetHeight() - giDmgHeight * 2;
 			pdmg->fExpire = flTime + DMG_IMAGE_LIFE;
 
 			// move everyone else up

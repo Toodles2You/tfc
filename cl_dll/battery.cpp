@@ -81,14 +81,12 @@ bool CHudBattery::Draw(float flTime)
 	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) != 0)
 		return true;
 
-	int r, g, b, x, y, a;
+	int x, y, a;
 	Rect rc;
 
 	rc = *m_prc2;
 
 	rc.top += m_iHeight * ((float)(100 - (V_min(100, m_iBat))) * 0.01); // battery can go from 0 to 100 so * 0.01 goes from 0 to 1
-
-	UnpackRGB(r, g, b, RGB_YELLOWISH);
 
 	if (!gHUD.HasSuit())
 		return true;
@@ -113,12 +111,10 @@ bool CHudBattery::Draw(float flTime)
 	else
 		a = MIN_ALPHA;
 
-	ScaleColors(r, g, b, a);
-
 	int iOffset = (m_prc1->bottom - m_prc1->top) / 6;
 
-	y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
-	x = ScreenWidth / 4;
+	y = m_iAnchorY - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
+	x = m_iAnchorX;
 
 	// make sure we have the right sprite handles
 	if (0 == m_hSprite1)
@@ -126,17 +122,15 @@ bool CHudBattery::Draw(float flTime)
 	if (0 == m_hSprite2)
 		m_hSprite2 = gHUD.GetSprite(gHUD.GetSpriteIndex("suit_full"));
 
-	SPR_Set(m_hSprite1, r, g, b);
-	SPR_DrawAdditive(0, x, y - iOffset, m_prc1);
+	gHUD.DrawHudSprite(m_hSprite1, 0, m_prc1, x, y - iOffset, CHud::COLOR_PRIMARY, a);
 
 	if (rc.bottom > rc.top)
 	{
-		SPR_Set(m_hSprite2, r, g, b);
-		SPR_DrawAdditive(0, x, y - iOffset + (rc.top - m_prc2->top), &rc);
+		gHUD.DrawHudSprite(m_hSprite2, 0, &rc, x, y - iOffset + (rc.top - m_prc2->top), CHud::COLOR_PRIMARY, a);
 	}
 
 	x += (m_prc1->right - m_prc1->left);
-	x = gHUD.DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iBat, r, g, b);
+	x = gHUD.DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iBat, CHud::COLOR_PRIMARY, a);
 
 	return true;
 }

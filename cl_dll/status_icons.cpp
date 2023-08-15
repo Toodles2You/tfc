@@ -57,7 +57,7 @@ bool CHudStatusIcons::Draw(float flTime)
 		return true;
 	// find starting position to draw from, along right-hand side of screen
 	int x = 5;
-	int y = ScreenHeight / 2;
+	int y = gHUD.GetHeight() / 2;
 
 	// loop through icon list, and draw any valid icons drawing up from the middle of screen
 	for (int i = 0; i < MAX_ICONSPRITES; i++)
@@ -66,8 +66,7 @@ bool CHudStatusIcons::Draw(float flTime)
 		{
 			y -= (m_IconList[i].rc.bottom - m_IconList[i].rc.top) + 5;
 
-			SPR_Set(m_IconList[i].spr, m_IconList[i].r, m_IconList[i].g, m_IconList[i].b);
-			SPR_DrawAdditive(0, x, y, &m_IconList[i].rc);
+			gHUD.DrawHudSprite(m_IconList[i].spr, 0, &m_IconList[i].rc, x, y, m_IconList[i].r, m_IconList[i].g, m_IconList[i].b, 255);
 		}
 	}
 

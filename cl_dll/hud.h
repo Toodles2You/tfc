@@ -138,6 +138,7 @@ private:
 	float m_fFade;
 	RGBA m_rgba;
 	WEAPON* m_pWeapon;
+	bool m_fOnTarget;
 	int m_HUD_bucket0;
 	int m_HUD_selection;
 	cvar_t* hud_fastswitch;
@@ -331,6 +332,8 @@ private:
 class CHudBattery : public CHudBase
 {
 public:
+	friend class CHudHealth;
+	
 	bool Init() override;
 	bool VidInit() override;
 	bool Draw(float flTime) override;
@@ -346,6 +349,8 @@ private:
 	int m_iBatMax;
 	float m_fFade;
 	int m_iHeight; // width of the battery innards
+	int m_iAnchorX; // our x position, set by the health hud
+	int m_iAnchorY; // our y position, set by the health hud
 };
 
 
@@ -503,6 +508,14 @@ private:
 	int m_iSpriteCountAllRes;
 	float m_flMouseSensitivity;
 	int m_iConcussionEffect;
+	unsigned int m_iConWidth;
+	unsigned int m_iConHeight;
+	float m_flScaleX;
+	float m_flScaleY;
+	float m_flOffsetX;
+	float m_flOffsetY;
+	byte m_bIsWidescreen;
+	HSPRITE m_hSprDummy;
 
 public:
 	HSPRITE m_hsprCursor;
@@ -518,16 +531,46 @@ public:
 	int m_iRes;
 	cvar_t* m_pCvarStealMouse;
 	cvar_t* m_pCvarDraw;
+	cvar_t* m_pCvarWidescreen;
+	cvar_t* m_pCvarColor;
+
+	typedef enum {
+		COLOR_DEFAULT = 0,
+		COLOR_PRIMARY,
+		COLOR_SECONDARY,
+		COLOR_WARNING,
+		COLOR_COUNT
+	} hudcolor_e;
+
+	typedef enum {
+		a_northwest = 0,
+		a_north,
+		a_northeast,
+		a_west,
+		a_center,
+		a_east,
+		a_southwest,
+		a_south,
+		a_southeast,
+	} hudalign_e;
 
 	int m_iFontHeight;
-	int DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b);
+	void DrawHudSprite(HSPRITE pic, int frame, Rect *rect, int x, int y, int r, int g, int b, int a = 255, hudalign_e alignment = a_northwest);
+	void DrawHudSprite(HSPRITE pic, int frame, Rect *rect, int x, int y, hudcolor_e color, int a = 255, hudalign_e alignment = a_northwest);
+	void DrawHudSpriteIndex(int index, int x, int y, hudcolor_e color, int a = 255, hudalign_e alignment = a_northwest);
+	void DrawHudSpriteIndex(int index, int x, int y, int r, int g, int b, int a = 255, hudalign_e alignment = a_northwest);
+	void DrawHudFill(int x, int y, int w, int h, int r, int g, int b, int a);
+	void DrawHudFill(int x, int y, int w, int h, hudcolor_e color, int a);
+	int DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b, int a = 255, hudalign_e alignment = a_northwest);
+	int DrawHudNumber(int x, int y, int iFlags, int iNumber, hudcolor_e color, int a = 255, hudalign_e alignment = a_northwest);
 	int DrawHudString(int x, int y, int iMaxX, const char* szString, int r, int g, int b);
 	int DrawHudStringReverse(int xpos, int ypos, int iMinX, const char* szString, int r, int g, int b);
 	int DrawHudNumberString(int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b);
 	int GetNumWidth(int iNumber, int iFlags);
 
 	int GetHudNumberWidth(int number, int width, int flags);
-	int DrawHudNumberReverse(int x, int y, int number, int flags, int r, int g, int b);
+	int DrawHudNumberReverse(int x, int y, int number, int flags, int r, int g, int b, int a = 255, hudalign_e alignment = a_northwest);
+	int DrawHudNumberReverse(int x, int y, int number, int flags, hudcolor_e color, int a = 255, hudalign_e alignment = a_northwest);
 
 	bool HasWeapon(int id) const
 	{
@@ -542,6 +585,23 @@ public:
 	bool HasAnyWeapons() const
 	{
 		return (m_iWeaponBits & ~(1ULL << WEAPON_SUIT)) != 0;
+	}
+
+	inline unsigned int GetWidth() const
+	{
+		return m_iConWidth;
+	}
+
+	inline unsigned int GetHeight() const
+	{
+		return m_iConHeight;
+	}
+
+	inline void GetColor(int &r, int &g, int &b, hudcolor_e color) const
+	{
+		r = m_cColors[color].r;
+		g = m_cColors[color].g;
+		b = m_cColors[color].b;
 	}
 
 private:
@@ -610,6 +670,7 @@ public:
 	std::uint64_t m_iWeaponBits;
 	bool m_fPlayerDead;
 	bool m_iIntermission;
+	RGBA m_cColors[CHud::COLOR_COUNT];
 
 	// sprite indexes
 	int m_HUD_number_0;

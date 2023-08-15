@@ -320,6 +320,25 @@ void CHud::Init()
 	CVAR_CREATE("hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO); // controls whether or not to suicide immediately on TF class switch
 	CVAR_CREATE("hud_takesshots", "0", FCVAR_ARCHIVE);					   // controls whether or not to automatically take screenshots at the end of a round
 
+	m_cColors[CHud::COLOR_DEFAULT].r = 255;
+	m_cColors[CHud::COLOR_DEFAULT].g = 255;
+	m_cColors[CHud::COLOR_DEFAULT].b = 255;
+	m_cColors[CHud::COLOR_DEFAULT].a = 255;
+
+	m_cColors[CHud::COLOR_PRIMARY].r = 255;		// 255
+	m_cColors[CHud::COLOR_PRIMARY].g = 160;		// 160
+	m_cColors[CHud::COLOR_PRIMARY].b = 0;		// 0
+	m_cColors[CHud::COLOR_PRIMARY].a = 255;
+
+	m_cColors[CHud::COLOR_SECONDARY].r = 0;		// 0
+	m_cColors[CHud::COLOR_SECONDARY].g = 160;	// 160
+	m_cColors[CHud::COLOR_SECONDARY].b = 0;		// 0
+	m_cColors[CHud::COLOR_SECONDARY].a = 255;
+
+	m_cColors[CHud::COLOR_WARNING].r = 255;		// 255
+	m_cColors[CHud::COLOR_WARNING].g = 16;		// 16
+	m_cColors[CHud::COLOR_WARNING].b = 16;		// 16
+	m_cColors[CHud::COLOR_WARNING].a = 255;
 
 	m_iLogo = 0;
 	m_iFOV = 0;
@@ -329,6 +348,8 @@ void CHud::Init()
 	default_fov = CVAR_CREATE("default_fov", "90", FCVAR_ARCHIVE);
 	m_pCvarStealMouse = CVAR_CREATE("hud_capturemouse", "1", FCVAR_ARCHIVE);
 	m_pCvarDraw = CVAR_CREATE("hud_draw", "1", FCVAR_ARCHIVE);
+	m_pCvarWidescreen = CVAR_CREATE("hud_widescreen", "1", 0);
+	m_pCvarColor = CVAR_CREATE("hud_color", "FFA000", 0);
 	cl_rollangle = CVAR_CREATE("cl_rollangle", "2.0", FCVAR_ARCHIVE);
 	cl_rollspeed = CVAR_CREATE("cl_rollspeed", "200", FCVAR_ARCHIVE);
 	cl_bobtilt = CVAR_CREATE("cl_bobtilt", "0", FCVAR_ARCHIVE);
@@ -427,6 +448,15 @@ void CHud::VidInit()
 	else
 		m_iRes = 640;
 
+	m_iConHeight = m_iRes * 0.75F;
+
+	m_flScaleY = m_scrinfo.iHeight / (float)m_iConHeight;
+	m_flScaleX = m_flScaleY;
+
+	m_flOffsetY = 0.0F;
+
+	m_bIsWidescreen = m_pCvarWidescreen->value == 0.0F;
+
 	// Only load this once
 	if (!m_pSpriteList)
 	{
@@ -492,6 +522,8 @@ void CHud::VidInit()
 
 	// assumption: number_1, number_2, etc, are all listed and loaded sequentially
 	m_HUD_number_0 = GetSpriteIndex("number_0");
+
+	m_hSprDummy = SPR_Load("sprites/tile.spr");
 
 	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
 
