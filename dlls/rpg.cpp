@@ -29,12 +29,14 @@ LINK_ENTITY_TO_CLASS(laser_spot, CLaserSpot);
 
 //=========================================================
 //=========================================================
-CLaserSpot* CLaserSpot::CreateSpot()
+CLaserSpot* CLaserSpot::CreateSpot(CBaseEntity* pOwner)
 {
 	CLaserSpot* pSpot = GetClassPtr((CLaserSpot*)NULL);
 	pSpot->Spawn();
 
 	pSpot->pev->classname = MAKE_STRING("laser_spot");
+	pSpot->pev->owner = pOwner->edict();
+	pSpot->pev->flags |= FL_SKIPLOCALHOST;
 
 	return pSpot;
 }
@@ -297,13 +299,11 @@ void CRpg::Reload()
 		return;
 	}
 
-#ifndef CLIENT_DLL
 	if (m_pSpot && m_fSpotActive)
 	{
-		m_pSpot->Suspend(2.1);
+		SuspendLaserDot(2.1);
 		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 2.1;
 	}
-#endif
 
 	if (m_iClip == 0)
 	{
@@ -355,6 +355,8 @@ void CRpg::Precache()
 	PRECACHE_SOUND("weapons/glauncher.wav"); // alternative fire sound
 
 	m_usRpg = PRECACHE_EVENT(1, "events/rpg.sc");
+	m_usLaserDotOn = PRECACHE_EVENT(1, "events/laser_on.sc");
+	m_usLaserDotOff = PRECACHE_EVENT(1, "events/laser_off.sc");
 }
 
 
@@ -405,13 +407,7 @@ void CRpg::Holster()
 
 	SendWeaponAnim(RPG_HOLSTER1);
 
-#ifndef CLIENT_DLL
-	if (m_pSpot)
-	{
-		m_pSpot->Killed(NULL, GIB_NEVER);
-		m_pSpot = NULL;
-	}
-#endif
+	ToggleLaserDot(false);
 }
 
 
@@ -465,13 +461,10 @@ void CRpg::SecondaryAttack()
 {
 	m_fSpotActive = !m_fSpotActive;
 
-#ifndef CLIENT_DLL
-	if (!m_fSpotActive && m_pSpot)
+	if (!m_fSpotActive)
 	{
-		m_pSpot->Killed(NULL, GIB_NORMAL);
-		m_pSpot = NULL;
+		ToggleLaserDot(false);
 	}
-#endif
 
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.2;
 }
@@ -525,15 +518,14 @@ void CRpg::WeaponIdle()
 
 void CRpg::UpdateSpot()
 {
-
-#ifndef CLIENT_DLL
 	if (m_fSpotActive)
 	{
 		if (!m_pSpot)
 		{
-			m_pSpot = CLaserSpot::CreateSpot();
+			ToggleLaserDot(true);
 		}
 
+#ifndef CLIENT_DLL
 		UTIL_MakeVectors(m_pPlayer->pev->v_angle);
 		Vector vecSrc = m_pPlayer->GetGunPosition();
 		Vector vecAiming = gpGlobals->v_forward;
@@ -542,8 +534,67 @@ void CRpg::UpdateSpot()
 		UTIL_TraceLine(vecSrc, vecSrc + vecAiming * 8192, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr);
 
 		UTIL_SetOrigin(m_pSpot->pev, tr.vecEndPos);
-	}
 #endif
+	}
+}
+
+void CRpg::ToggleLaserDot(bool bOn)
+{
+	if (bOn)
+	{
+		if (m_pSpot == nullptr)
+		{
+#ifdef CLIENT_DLL
+			m_pSpot = (CLaserSpot*)1;
+#else
+			m_pSpot = CLaserSpot::CreateSpot(m_pPlayer);
+#endif
+		}
+	}
+	else
+	{
+		if (m_pSpot != nullptr)
+		{
+#ifndef CLIENT_DLL
+			m_pSpot->Killed(nullptr, GIB_NEVER);
+#endif
+			m_pSpot = nullptr;
+		}
+	}
+	
+	PLAYBACK_EVENT_FULL(
+		FEV_GLOBAL | FEV_RELIABLE,
+		m_pPlayer->edict(),
+		bOn ? m_usLaserDotOn : m_usLaserDotOff,
+		0,
+		m_pPlayer->pev->origin,
+		m_pPlayer->pev->angles,
+		0.0,
+		0.0,
+		0,
+		0,
+		0,
+		0);
+}
+
+void CRpg::SuspendLaserDot(float flSuspendTime)
+{
+	if (m_pSpot == nullptr)
+		return;
+
+	PLAYBACK_EVENT_FULL(
+		FEV_GLOBAL | FEV_RELIABLE | FEV_UPDATE,
+		m_pPlayer->edict(),
+		m_usLaserDotOn,
+		0,
+		m_pPlayer->pev->origin,
+		m_pPlayer->pev->angles,
+		flSuspendTime,
+		0.0,
+		0,
+		0,
+		0,
+		0);
 }
 
 class CRpgAmmo : public CBasePlayerAmmo

@@ -1267,6 +1267,48 @@ void EV_FireRpg(event_args_t* args)
 		V_PunchAxis(0, -5.0);
 	}
 }
+
+TEMPENTITY* pLaserDot;
+
+void EV_LaserDotOn(event_args_t* args)
+{
+	if (!EV_IsLocal(args->entindex))
+		return;
+
+	if (pLaserDot == nullptr)
+	{
+		pLaserDot = gEngfuncs.pEfxAPI->R_TempSprite(
+			args->origin,
+			g_vecZero,
+			1.0,
+			gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/laserdot.spr"),
+			kRenderGlow,
+			kRenderFxNoDissipation,
+			1.0,
+			99999,
+			FTENT_SPRCYCLE | FTENT_PERSIST);
+	}
+	
+	const auto flSuspendTime = args->fparam1;
+
+	if (flSuspendTime > 0 && pLaserDot != nullptr)
+	{
+		pLaserDot->entity.baseline.fuser4 = gEngfuncs.GetClientTime() + flSuspendTime;
+		pLaserDot->flags |= FTENT_NOMODEL;
+	}
+}
+
+void EV_LaserDotOff(event_args_t* args)
+{
+	if (!EV_IsLocal(args->entindex))
+		return;
+	
+	if (pLaserDot != nullptr)
+	{
+		pLaserDot->die = gEngfuncs.GetClientTime();
+		pLaserDot = nullptr;
+	}
+}
 //======================
 //	     RPG END
 //======================

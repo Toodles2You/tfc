@@ -767,7 +767,7 @@ public:
 	void Suspend(float flSuspendTime);
 	void EXPORT Revive();
 
-	static CLaserSpot* CreateSpot();
+	static CLaserSpot* CreateSpot(CBaseEntity* pOwner);
 };
 
 enum rpg_e
@@ -824,7 +824,12 @@ public:
 	}
 
 private:
+	void ToggleLaserDot(bool bOn);
+	void SuspendLaserDot(float flSuspendTime);
+
 	unsigned short m_usRpg;
+	unsigned short m_usLaserDotOn;
+	unsigned short m_usLaserDotOff;
 };
 
 class CRpgRocket : public CGrenade

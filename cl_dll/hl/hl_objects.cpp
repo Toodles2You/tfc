@@ -29,13 +29,13 @@
 extern BEAM* pBeam;
 extern BEAM* pBeam2;
 extern TEMPENTITY* pFlare; // Vit_amiN: egon's energy flare
+extern TEMPENTITY* pLaserDot;
 void HUD_GetLastOrg(float* org);
 
-void UpdateBeams()
+void GetCrosshairTarget(pmtrace_t* tr, float distance)
 {
 	Vector forward, vecSrc, vecEnd, origin, angles, right, up;
 	Vector view_ofs;
-	pmtrace_t tr;
 	cl_entity_t* pthisplayer = gEngfuncs.GetLocalPlayer();
 	int idx = pthisplayer->index;
 
@@ -49,7 +49,7 @@ void UpdateBeams()
 
 	VectorCopy(origin, vecSrc);
 
-	VectorMA(vecSrc, 2048, forward, vecEnd);
+	VectorMA(vecSrc, distance, forward, vecEnd);
 
 	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(0, 1);
 
@@ -60,26 +60,33 @@ void UpdateBeams()
 	gEngfuncs.pEventAPI->EV_SetSolidPlayers(idx - 1);
 
 	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
-	gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_STUDIO_BOX, -1, &tr);
+	gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_STUDIO_BOX, -1, tr);
 
 	gEngfuncs.pEventAPI->EV_PopPMStates();
+}
+
+void UpdateBeams(const float time)
+{
+	pmtrace_t tr;
+
+	GetCrosshairTarget(&tr, 2048);
 
 	if (pBeam)
 	{
 		pBeam->target = tr.endpos;
-		pBeam->die = gEngfuncs.GetClientTime() + 0.1; // We keep it alive just a little bit forward in the future, just in case.
+		pBeam->die = time + 0.1; // We keep it alive just a little bit forward in the future, just in case.
 	}
 
 	if (pBeam2)
 	{
 		pBeam2->target = tr.endpos;
-		pBeam2->die = gEngfuncs.GetClientTime() + 0.1; // We keep it alive just a little bit forward in the future, just in case.
+		pBeam2->die = time + 0.1; // We keep it alive just a little bit forward in the future, just in case.
 	}
 
 	if (pFlare) // Vit_amiN: beam flare
 	{
 		pFlare->entity.origin = tr.endpos;
-		pFlare->die = gEngfuncs.GetClientTime() + 0.1f; // We keep it alive just a little bit forward in the future, just in case.
+		pFlare->die = time + 0.1f; // We keep it alive just a little bit forward in the future, just in case.
 
 		if (gEngfuncs.GetMaxClients() != 1) // Singleplayer always draws the egon's energy beam flare
 		{
@@ -99,6 +106,27 @@ void UpdateBeams()
 	}
 }
 
+void UpdateLaserDot(const float time)
+{
+	pmtrace_t tr;
+
+	pLaserDot->die = time + 0.1f;
+
+	if ((pLaserDot->flags & FTENT_NOMODEL) != 0)
+	{
+		if (pLaserDot->entity.baseline.fuser4 > time)
+		{
+			return;
+		}
+		pLaserDot->entity.baseline.fuser4 = 0.0f;
+		pLaserDot->flags &= ~FTENT_NOMODEL;
+	}
+
+	GetCrosshairTarget(&tr, 8192);
+
+	pLaserDot->entity.origin = tr.endpos;
+}
+
 /*
 =====================
 Game_AddObjects
@@ -108,6 +136,11 @@ Add game specific, client-side objects here
 */
 void Game_AddObjects()
 {
+	const auto time = gEngfuncs.GetClientTime();
+
 	if (pBeam || pBeam2 || pFlare)
-		UpdateBeams();
+		UpdateBeams(time);
+	
+	if (pLaserDot)
+		UpdateLaserDot(time);
 }
