@@ -33,12 +33,10 @@ HLDLL_OBJS = \
 	$(HLDLL_OBJ_DIR)/combat.o \
 	$(HLDLL_OBJ_DIR)/crossbow.o \
 	$(HLDLL_OBJ_DIR)/crowbar.o \
-	$(HLDLL_OBJ_DIR)/defaultai.o \
 	$(HLDLL_OBJ_DIR)/doors.o \
 	$(HLDLL_OBJ_DIR)/effects.o \
 	$(HLDLL_OBJ_DIR)/egon.o \
 	$(HLDLL_OBJ_DIR)/explode.o \
-	$(HLDLL_OBJ_DIR)/flyingmonster.o \
 	$(HLDLL_OBJ_DIR)/func_break.o \
 	$(HLDLL_OBJ_DIR)/func_tank.o \
 	$(HLDLL_OBJ_DIR)/game.o \
@@ -46,7 +44,6 @@ HLDLL_OBJS = \
 	$(HLDLL_OBJ_DIR)/gauss.o \
 	$(HLDLL_OBJ_DIR)/ggrenade.o \
 	$(HLDLL_OBJ_DIR)/glock.o \
-	$(HLDLL_OBJ_DIR)/h_ai.o \
 	$(HLDLL_OBJ_DIR)/h_battery.o \
 	$(HLDLL_OBJ_DIR)/h_cycler.o \
 	$(HLDLL_OBJ_DIR)/h_export.o \
@@ -58,8 +55,6 @@ HLDLL_OBJS = \
 	$(HLDLL_OBJ_DIR)/lights.o \
 	$(HLDLL_OBJ_DIR)/maprules.o \
 	$(HLDLL_OBJ_DIR)/monstermaker.o \
-	$(HLDLL_OBJ_DIR)/monsters.o \
-	$(HLDLL_OBJ_DIR)/monsterstate.o \
 	$(HLDLL_OBJ_DIR)/mortar.o \
 	$(HLDLL_OBJ_DIR)/mp5.o \
 	$(HLDLL_OBJ_DIR)/nodes.o \
@@ -71,17 +66,13 @@ HLDLL_OBJS = \
 	$(HLDLL_OBJ_DIR)/python.o \
 	$(HLDLL_OBJ_DIR)/rpg.o \
 	$(HLDLL_OBJ_DIR)/satchel.o \
-	$(HLDLL_OBJ_DIR)/schedule.o \
-	$(HLDLL_OBJ_DIR)/scripted.o \
 	$(HLDLL_OBJ_DIR)/shotgun.o \
 	$(HLDLL_OBJ_DIR)/skill.o \
 	$(HLDLL_OBJ_DIR)/sound.o \
 	$(HLDLL_OBJ_DIR)/soundent.o \
 	$(HLDLL_OBJ_DIR)/spectator.o \
-	$(HLDLL_OBJ_DIR)/squadmonster.o \
 	$(HLDLL_OBJ_DIR)/squeakgrenade.o \
 	$(HLDLL_OBJ_DIR)/subs.o \
-	$(HLDLL_OBJ_DIR)/talkmonster.o \
 	$(HLDLL_OBJ_DIR)/teamplay_gamerules.o \
 	$(HLDLL_OBJ_DIR)/multiplay_gamerules.o \
 	$(HLDLL_OBJ_DIR)/singleplay_gamerules.o \

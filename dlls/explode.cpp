@@ -82,7 +82,7 @@ void CShower::Touch(CBaseEntity* pOther)
 		pev->speed = 0;
 }
 
-class CEnvExplosion : public CBaseMonster
+class CEnvExplosion : public CBaseEntity
 {
 public:
 	void Spawn() override;
@@ -104,7 +104,7 @@ TYPEDESCRIPTION CEnvExplosion::m_SaveData[] =
 		DEFINE_FIELD(CEnvExplosion, m_spriteScale, FIELD_INTEGER),
 };
 
-IMPLEMENT_SAVERESTORE(CEnvExplosion, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CEnvExplosion, CBaseEntity);
 LINK_ENTITY_TO_CLASS(env_explosion, CEnvExplosion);
 
 bool CEnvExplosion::KeyValue(KeyValueData* pkvd)
@@ -215,7 +215,7 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	// do damage
 	if ((pev->spawnflags & SF_ENVEXPLOSION_NODAMAGE) == 0)
 	{
-		RadiusDamage(pev, pev, m_iMagnitude, CLASS_NONE, DMG_BLAST);
+		RadiusDamage(pev->origin, pev, pev, m_iMagnitude, m_iMagnitude * 2.5, CLASS_NONE, DMG_BLAST);
 	}
 
 	SetThink(&CEnvExplosion::Smoke);

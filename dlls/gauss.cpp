@@ -16,7 +16,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "monsters.h"
 #include "weapons.h"
 #include "player.h"
 #include "soundent.h"
@@ -425,7 +424,7 @@ void CGauss::Fire(Vector vecOrigSrc, Vector vecDir, float flDamage)
 				vecDest = vecSrc + vecDir * 8192;
 
 				// explode a bit
-				m_pPlayer->RadiusDamage(tr.vecEndPos, pev, m_pPlayer->pev, flDamage * n, CLASS_NONE, DMG_BLAST);
+				RadiusDamage(tr.vecEndPos, pev, m_pPlayer->pev, flDamage * n, flDamage * n * 2.5, CLASS_NONE, DMG_BLAST);
 
 				nTotal += 34;
 

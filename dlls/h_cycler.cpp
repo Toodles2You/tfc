@@ -23,12 +23,11 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "monsters.h"
 #include "animation.h"
 #include "weapons.h"
 #include "player.h"
 
-class CCycler : public CBaseMonster
+class CCycler : public CBaseAnimating
 {
 public:
 	void GenericCyclerSpawn(const char* szModel, Vector vecMin, Vector vecMax);
@@ -54,7 +53,7 @@ TYPEDESCRIPTION CCycler::m_SaveData[] =
 		DEFINE_FIELD(CCycler, m_animate, FIELD_BOOLEAN),
 };
 
-IMPLEMENT_SAVERESTORE(CCycler, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CCycler, CBaseAnimating);
 
 
 //
@@ -118,7 +117,7 @@ void CCycler::Spawn()
 	pev->health = 80000; // no cycler should die
 	pev->yaw_speed = 5;
 	pev->ideal_yaw = pev->angles.y;
-	ChangeYaw(360);
+	// ChangeYaw(360);
 
 	m_flFrameRate = 75;
 	m_flGroundSpeed = 0;
@@ -381,7 +380,7 @@ void CWeaponCycler::SecondaryAttack()
 
 
 // Flaming Wreakage
-class CWreckage : public CBaseMonster
+class CWreckage : public CBaseAnimating
 {
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
@@ -397,7 +396,7 @@ TYPEDESCRIPTION CWreckage::m_SaveData[] =
 	{
 		DEFINE_FIELD(CWreckage, m_flStartTime, FIELD_TIME),
 };
-IMPLEMENT_SAVERESTORE(CWreckage, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CWreckage, CBaseAnimating);
 
 
 LINK_ENTITY_TO_CLASS(cycler_wreckage, CWreckage);

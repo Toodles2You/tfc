@@ -21,10 +21,20 @@
 class CBasePlayer;
 class CBasePlayerWeapon;
 
+// Hit Group standards
+#define HITGROUP_GENERIC 0
+#define HITGROUP_HEAD 1
+#define HITGROUP_CHEST 2
+#define HITGROUP_STOMACH 3
+#define HITGROUP_LEFTARM 4
+#define HITGROUP_RIGHTARM 5
+#define HITGROUP_LEFTLEG 6
+#define HITGROUP_RIGHTLEG 7
+
 void DeactivateSatchels(CBasePlayer* pOwner);
 
 // Contact Grenade / Timed grenade / Satchel Charge
-class CGrenade : public CBaseMonster
+class CGrenade : public CBaseAnimating
 {
 public:
 	void Spawn() override;
@@ -58,6 +68,7 @@ public:
 	void Killed(entvars_t* pevAttacker, int iGib) override;
 
 	bool m_fRegisteredSound; // whether or not this grenade has issued its DANGER sound to the world sound list yet.
+	float m_flNextAttack;
 };
 
 

@@ -21,7 +21,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "monsters.h"
 #include "weapons.h"
 #include "soundent.h"
 #include "decals.h"
@@ -95,7 +94,7 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 	Vector origin = pev->origin;
 	origin.z -= 1;
 
-	RadiusDamage(origin, pev, pevOwner, pev->dmg, CLASS_NONE, bitsDamageType);
+	RadiusDamage(origin, pev, pevOwner, pev->dmg, pev->dmg * 2.5, CLASS_NONE, bitsDamageType);
 
 	if (RANDOM_FLOAT(0, 1) < 0.5)
 	{

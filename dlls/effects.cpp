@@ -15,7 +15,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "monsters.h"
 #include "customentity.h"
 #include "effects.h"
 #include "weapons.h"
@@ -1343,6 +1342,7 @@ void CSprite::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useTyp
 }
 
 
+#if 0
 class CGibShooter : public CBaseDelay
 {
 public:
@@ -1602,6 +1602,7 @@ CGib* CEnvShooter::CreateGib()
 
 	return pGib;
 }
+#endif
 
 
 

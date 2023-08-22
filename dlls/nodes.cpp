@@ -23,7 +23,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "monsters.h"
 #include "nodes.h"
 #include "animation.h"
 #include "doors.h"
@@ -1466,12 +1465,12 @@ int CGraph::RejectInlineLinks(CLink* pLinkPool, FSFile& file)
 // TestHull is a modelless clip hull that verifies reachable
 // nodes by walking from every node to each of it's connections
 //=========================================================
-class CTestHull : public CBaseMonster
+class CTestHull : public CBaseEntity
 {
 
 public:
 	void Spawn(entvars_t* pevMasterNode);
-	int ObjectCaps() override { return CBaseMonster::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	void EXPORT CallBuildNodeGraph();
 	void BuildNodeGraph();
 	void EXPORT ShowBadNode();

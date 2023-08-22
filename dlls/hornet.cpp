@@ -19,7 +19,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "monsters.h"
 #include "weapons.h"
 #include "soundent.h"
 #include "hornet.h"
@@ -41,7 +40,7 @@ TYPEDESCRIPTION CHornet::m_SaveData[] =
 		DEFINE_FIELD(CHornet, m_flFlySpeed, FIELD_FLOAT),
 };
 
-IMPLEMENT_SAVERESTORE(CHornet, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CHornet, CBaseAnimating);
 
 //=========================================================
 // don't let hornets gib, ever.
@@ -52,7 +51,7 @@ bool CHornet::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float 
 	bitsDamageType &= ~(DMG_ALWAYSGIB);
 	bitsDamageType |= DMG_NEVERGIB;
 
-	return CBaseMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
+	return CBaseAnimating::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 }
 
 //=========================================================
@@ -140,12 +139,23 @@ void CHornet::Precache()
 //=========================================================
 int CHornet::IRelationship(CBaseEntity* pTarget)
 {
-	if (pTarget->pev->modelindex == pev->modelindex)
+	if (pTarget->IsPlayer())
 	{
-		return R_NO;
+		if (!pev->owner)
+		{
+			return R_DL;
+		}
+
+		auto owner = CBaseEntity::Instance(pev->owner);
+		auto relationship = g_pGameRules->PlayerRelationship(owner, pTarget);
+
+		if (relationship != GR_TEAMMATE && relationship != GR_ALLY)
+		{
+			return R_DL;
+		}
 	}
 
-	return CBaseMonster::IRelationship(pTarget);
+	return R_NO;
 }
 
 //=========================================================
@@ -153,7 +163,6 @@ int CHornet::IRelationship(CBaseEntity* pTarget)
 //=========================================================
 int CHornet::Classify()
 {
-
 	if (pev->owner && (pev->owner->v.flags & FL_CLIENT) != 0)
 	{
 		return CLASS_PLAYER_BIOWEAPON;

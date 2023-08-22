@@ -84,7 +84,7 @@ enum sbar_data
 
 #define CHAT_INTERVAL 1.0f
 
-class CBasePlayer : public CBaseMonster
+class CBasePlayer : public CBaseAnimating
 {
 public:
 	// Spectator camera
@@ -213,7 +213,7 @@ public:
 	virtual void Duck();
 	virtual void PreThink();
 	virtual void PostThink();
-	Vector GetGunPosition() override;
+	Vector GetGunPosition();
 	bool TakeHealth(float flHealth, int bitsDamageType) override;
 	void TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) override;
 	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
@@ -223,7 +223,6 @@ public:
 	void StopSneaking() override { m_tSneaking = gpGlobals->time + 30; }
 	bool IsSneaking() override { return m_tSneaking <= gpGlobals->time; }
 	bool IsAlive() override { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
-	bool ShouldFadeOnDeath() override { return false; }
 	bool IsPlayer() override { return true; } // Spectators should return false for this, they aren't "players" as far as game logic is concerned
 
 	bool IsNetClient() override { return true; } // Bots should return false for this, they can't receive NET messages
@@ -254,7 +253,7 @@ public:
 	static TYPEDESCRIPTION m_playerSaveData[];
 
 	// Player is moved across the transition by other means
-	int ObjectCaps() override { return CBaseMonster::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseAnimating::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	void Precache() override;
 	bool IsOnLadder();
 	bool FlashlightIsOn();
@@ -262,10 +261,12 @@ public:
 	void FlashlightTurnOff();
 
 	void UpdatePlayerSound();
-	void DeathSound() override;
+	void DeathSound();
 
 	int Classify() override;
 	void SetAnimation(PLAYER_ANIM playerAnim);
+	Activity CBasePlayer::GetDeathActivity();
+	Activity CBasePlayer::GetSmallFlinchActivity();
 	void SetWeaponAnimType(const char* szExtention);
 	char m_szAnimExtention[32];
 
@@ -313,8 +314,6 @@ public:
 	void CheckTimeBasedDamage();
 
 	bool FBecomeProne() override;
-	void BarnacleVictimBitten(entvars_t* pevBarnacle) override;
-	void BarnacleVictimReleased() override;
 	static int GetAmmoIndex(const char* psz);
 	int AmmoInventory(int iAmmoIndex);
 	int Illumination() override;
@@ -356,6 +355,14 @@ public:
 
 	//True if the player is currently spawning.
 	bool m_bIsSpawning = false;
+
+	int m_bitsDamageType; // what types of damage has monster (player) taken
+	byte m_rgbTimeBasedDamage[CDMG_TIMEBASED];
+
+	Activity m_Activity;	  // what the monster is doing (animation)
+	Activity m_IdealActivity; // monster should switch to this activity
+
+	int m_LastHitGroup; // the last body region that took damage
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

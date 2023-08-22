@@ -47,7 +47,6 @@ CBaseEntity
 
 #include "Platform.h"
 #include "saverestore.h"
-#include "schedule.h"
 #include "monsterevent.h"
 
 // C functions for external declarations that call the appropriate C++ methods
@@ -63,6 +62,14 @@ extern "C" DLLEXPORT int GetNewDLLFunctions(NEW_DLL_FUNCTIONS* pFunctionTable, i
 *	while it builds the graph
 */
 inline bool gTouchDisabled = false;
+
+inline DLL_GLOBAL Vector g_vecAttackDir;
+
+/**
+*	@brief Set in combat.cpp.  Used to pass the damage inflictor for death messages.
+*	Better solution:  Add as parameter to all Killed() functions.
+*/
+inline entvars_t* g_pevLastInflictor = nullptr;
 
 extern int DispatchSpawn(edict_t* pent);
 extern void DispatchKeyValue(edict_t* pentKeyvalue, KeyValueData* pkvd);
@@ -108,12 +115,18 @@ typedef void (CBaseEntity::*USEPTR)(CBaseEntity* pActivator, CBaseEntity* pCalle
 #define CLASS_PLAYER_ALLY 11
 #define CLASS_PLAYER_BIOWEAPON 12 // hornets and snarks.launched by players
 #define CLASS_ALIEN_BIOWEAPON 13  // hornets and snarks.launched by the alien menace
-#define CLASS_BARNACLE 99		  // special because no one pays attention to it, and it eats a wide cross-section of creatures.
+
+
+// monster to monster relationship types
+#define R_AL -2 // (ALLY) pals. Good alternative to R_NO when applicable.
+#define R_FR -1 // (FEAR)will run
+#define R_NO 0	// (NO RELATIONSHIP) disregard
+#define R_DL 1	// (DISLIKE) will attack
+#define R_HT 2	// (HATE)will attack this character instead of any visible DISLIKEd characters
+#define R_NM 3	// (NEMESIS)  A monster Will ALWAYS attack its nemsis, no matter what
 
 class CBaseEntity;
-class CBaseMonster;
 class CBasePlayerItem;
-class CSquadMonster;
 
 
 #define SF_NORESPAWN (1 << 30) // !!!set this bit on guns and stuff that should never respawn.
@@ -186,8 +199,6 @@ public:
 	virtual int BloodColor() { return DONT_BLEED; }
 	virtual void TraceBleed(float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType);
 	virtual bool IsTriggered(CBaseEntity* pActivator) { return true; }
-	virtual CBaseMonster* MyMonsterPointer() { return NULL; }
-	virtual CSquadMonster* MySquadMonsterPointer() { return NULL; }
 	virtual int GetToggleState() { return TS_AT_TOP; }
 	virtual void AddPoints(int score, bool bAllowNegativeScore) {}
 	virtual void AddPointsToTeam(int score, bool bAllowNegativeScore) {}
@@ -283,21 +294,6 @@ public:
 
 	static CBaseEntity* Instance(entvars_t* pev);
 
-	CBaseMonster* GetMonsterPointer(entvars_t* pevMonster)
-	{
-		CBaseEntity* pEntity = Instance(pevMonster);
-		if (pEntity)
-			return pEntity->MyMonsterPointer();
-		return NULL;
-	}
-	CBaseMonster* GetMonsterPointer(edict_t* pentMonster)
-	{
-		CBaseEntity* pEntity = Instance(pentMonster);
-		if (pEntity)
-			return pEntity->MyMonsterPointer();
-		return NULL;
-	}
-
 
 	// Ugly code to lookup all functions to make sure they are exported when set.
 #ifdef _DEBUG
@@ -355,8 +351,16 @@ public:
 
 	virtual int Illumination() { return GETENTITYILLUM(ENT(pev)); }
 
+	virtual int IRelationship(CBaseEntity* pTarget) { return R_NO; }
+	bool FInViewCone(CBaseEntity* pEntity);
+	bool FInViewCone(const Vector& vecOrigin);
 	virtual bool FVisible(CBaseEntity* pEntity);
 	virtual bool FVisible(const Vector& vecOrigin);
+
+	virtual void Look(int iDistance); // basic sight function for monsters
+	virtual CBaseEntity* BestVisibleEnemy();		// finds best visible enemy for attack
+
+	float m_flNextAttack;
 
 	//We use this variables to store each ammo count.
 	int ammo_9mm;
@@ -374,6 +378,8 @@ public:
 	int m_fInAttack;
 
 	int m_fireState;
+
+	float m_flFieldOfView;
 };
 
 inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->edict()); }
@@ -608,12 +614,9 @@ public:
 #define GIB_NEVER 1	 // never gib, no matter how much death damage is done ( freezing, etc )
 #define GIB_ALWAYS 2 // always gib ( Houndeye Shock, Barnacle Bite )
 
-class CBaseMonster;
-class CCineMonster;
 class CSound;
 
-#include "basemonster.h"
-
+#include "skill.h"
 
 const char* ButtonSound(int sound); // get string of button sound number
 

@@ -16,7 +16,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "monsters.h"
 #include "weapons.h"
 #include "player.h"
 #include "soundent.h"
@@ -36,12 +35,13 @@ class CSqueakGrenade : public CGrenade
 {
 	void Spawn() override;
 	void Precache() override;
+	int IRelationship(CBaseEntity* pTarget) override;
 	int Classify() override;
 	void EXPORT SuperBounceTouch(CBaseEntity* pOther);
 	void EXPORT HuntThink();
 	int BloodColor() override { return BLOOD_COLOR_YELLOW; }
 	void Killed(entvars_t* pevAttacker, int iGib) override;
-	void GibMonster() override;
+	void GibMonster();
 
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
@@ -52,12 +52,12 @@ class CSqueakGrenade : public CGrenade
 
 	// CBaseEntity *m_pTarget;
 	float m_flDie;
+	EHANDLE m_hEnemy;
 	Vector m_vecTarget;
 	float m_flNextHunt;
 	float m_flNextHit;
 	Vector m_posPrev;
 	EHANDLE m_hOwner;
-	int m_iMyClass;
 };
 
 float CSqueakGrenade::m_flNextBounceSoundTime = 0;
@@ -77,23 +77,32 @@ IMPLEMENT_SAVERESTORE(CSqueakGrenade, CGrenade);
 
 #define SQUEEK_DETONATE_DELAY 15.0
 
+int CSqueakGrenade::IRelationship(CBaseEntity* pTarget)
+{
+	if (pTarget->IsPlayer())
+	{
+		if (!pev->owner || pev->owner == pTarget->edict())
+		{
+			return R_DL;
+		}
+
+		auto owner = CBaseEntity::Instance(pev->owner);
+		auto relationship = g_pGameRules->PlayerRelationship(owner, pTarget);
+		
+		if (relationship != GR_TEAMMATE && relationship != GR_ALLY)
+		{
+			return R_DL;
+		}
+	}
+
+	return R_NO;
+}
+
 int CSqueakGrenade::Classify()
 {
-	if (m_iMyClass != 0)
-		return m_iMyClass; // protect against recursion
-
-	if (m_hEnemy != NULL)
+	if (pev->owner && (pev->owner->v.flags & FL_CLIENT) != 0)
 	{
-		m_iMyClass = CLASS_INSECT; // no one cares about it
-		switch (m_hEnemy->Classify())
-		{
-		case CLASS_PLAYER:
-		case CLASS_HUMAN_PASSIVE:
-		case CLASS_HUMAN_MILITARY:
-			m_iMyClass = 0;
-			return CLASS_ALIEN_MILITARY; // barney's get mad, grunts get mad at it
-		}
-		m_iMyClass = 0;
+		return CLASS_PLAYER_BIOWEAPON;
 	}
 
 	return CLASS_ALIEN_BIOWEAPON;
@@ -169,15 +178,18 @@ void CSqueakGrenade::Killed(entvars_t* pevAttacker, int iGib)
 	UTIL_BloodDrips(pev->origin, g_vecZero, BloodColor(), 80);
 
 	if (m_hOwner != NULL)
-		RadiusDamage(pev, m_hOwner->pev, pev->dmg, CLASS_NONE, DMG_BLAST);
+		RadiusDamage(pev->origin, pev, m_hOwner->pev, pev->dmg, pev->dmg * 2.5, CLASS_NONE, DMG_BLAST);
 	else
-		RadiusDamage(pev, pev, pev->dmg, CLASS_NONE, DMG_BLAST);
+		RadiusDamage(pev->origin, pev, pev, pev->dmg, pev->dmg * 2.5, CLASS_NONE, DMG_BLAST);
 
 	// reset owner so death message happens
 	if (m_hOwner != NULL)
 		pev->owner = m_hOwner->edict();
 
-	CBaseMonster::Killed(pevAttacker, GIB_ALWAYS);
+	CBaseEntity::Killed(pevAttacker, GIB_ALWAYS);
+	
+	if (pev->owner && (pev->owner->v.flags & FL_CLIENT) == 0)
+		CBaseEntity::Instance(pev->owner)->DeathNotice(pev);
 }
 
 void CSqueakGrenade::GibMonster()

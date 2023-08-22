@@ -20,7 +20,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "monsters.h"
 #include "saverestore.h"
 
 // Monstermaker spawnflags
@@ -31,7 +30,7 @@
 //=========================================================
 // MonsterMaker - this ent creates monsters during the game.
 //=========================================================
-class CMonsterMaker : public CBaseMonster
+class CMonsterMaker : public CBaseToggle
 {
 public:
 	void Spawn() override;
@@ -76,7 +75,7 @@ TYPEDESCRIPTION CMonsterMaker::m_SaveData[] =
 };
 
 
-IMPLEMENT_SAVERESTORE(CMonsterMaker, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CMonsterMaker, CBaseToggle);
 
 bool CMonsterMaker::KeyValue(KeyValueData* pkvd)
 {
@@ -97,7 +96,7 @@ bool CMonsterMaker::KeyValue(KeyValueData* pkvd)
 		return true;
 	}
 
-	return CBaseMonster::KeyValue(pkvd);
+	return CBaseToggle::KeyValue(pkvd);
 }
 
 
@@ -150,7 +149,7 @@ void CMonsterMaker::Spawn()
 
 void CMonsterMaker::Precache()
 {
-	CBaseMonster::Precache();
+	CBaseToggle::Precache();
 
 	UTIL_PrecacheOther(STRING(m_iszMonsterClassname));
 }
@@ -208,11 +207,11 @@ void CMonsterMaker::MakeMonster()
 	pevCreate = VARS(pent);
 	pevCreate->origin = pev->origin;
 	pevCreate->angles = pev->angles;
-	SetBits(pevCreate->spawnflags, SF_MONSTER_FALL_TO_GROUND);
+	// SetBits(pevCreate->spawnflags, SF_MONSTER_FALL_TO_GROUND);
 
 	// Children hit monsterclip brushes
-	if ((pev->spawnflags & SF_MONSTERMAKER_MONSTERCLIP) != 0)
-		SetBits(pevCreate->spawnflags, SF_MONSTER_HITMONSTERCLIP);
+	// if ((pev->spawnflags & SF_MONSTERMAKER_MONSTERCLIP) != 0)
+	// 	SetBits(pevCreate->spawnflags, SF_MONSTER_HITMONSTERCLIP);
 
 	DispatchSpawn(ENT(pevCreate));
 	pevCreate->owner = edict();

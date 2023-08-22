@@ -2131,7 +2131,7 @@ void CFuncTrackAuto::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE
 
 #define FGUNTARGET_START_ON 0x0001
 
-class CGunTarget : public CBaseMonster
+class CGunTarget : public CBaseToggle
 {
 public:
 	void Spawn() override;
@@ -2139,7 +2139,7 @@ public:
 	void EXPORT Next();
 	void EXPORT Start();
 	void EXPORT Wait();
-	void Stop() override;
+	void Stop();
 
 	int BloodColor() override { return DONT_BLEED; }
 	int Classify() override { return CLASS_MACHINE; }
@@ -2155,6 +2155,7 @@ public:
 
 private:
 	bool m_on;
+	EHANDLE m_hTargetEnt;
 };
 
 
@@ -2165,7 +2166,7 @@ TYPEDESCRIPTION CGunTarget::m_SaveData[] =
 		DEFINE_FIELD(CGunTarget, m_on, FIELD_BOOLEAN),
 };
 
-IMPLEMENT_SAVERESTORE(CGunTarget, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CGunTarget, CBaseToggle);
 
 
 void CGunTarget::Spawn()

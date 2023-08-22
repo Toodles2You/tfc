@@ -32,7 +32,6 @@
 #include "nodes.h"
 #include "weapons.h"
 #include "soundent.h"
-#include "monsters.h"
 #include "shake.h"
 #include "decals.h"
 #include "gamerules.h"
@@ -41,6 +40,7 @@
 #include "hltv.h"
 #include "UserMessages.h"
 #include "client.h"
+#include "animation.h"
 
 // #define DUCKFIX
 
@@ -279,7 +279,12 @@ void CBasePlayer::DeathSound()
 
 bool CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
 {
-	return CBaseMonster::TakeHealth(flHealth, bitsDamageType);
+	if (0 == pev->takedamage)
+		return false;
+	
+	m_bitsDamageType &= ~(bitsDamageType & ~DMG_TIMEBASED);
+
+	return CBaseAnimating::TakeHealth(flHealth, bitsDamageType);
 }
 
 Vector CBasePlayer::GetGunPosition()
@@ -331,6 +336,12 @@ void CBasePlayer::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vec
 		TraceBleed(flDamage, vecDir, ptr, bitsDamageType);
 		AddMultiDamage(pevAttacker, this, flDamage, bitsDamageType);
 	}
+}
+
+static inline float DamageForce(entvars_t* pev, int damage)
+{
+	float size = (32 * 32 * 72) / (pev->size.x * pev->size.y * pev->size.z);
+	return std::clamp(damage * size * 5.0F, 0.0F, 1000.0F);
 }
 
 /*
@@ -405,9 +416,71 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 		flDamage = flNew;
 	}
 
-	// this cast to INT is critical!!! If a player ends up with 0.5 health, the engine will get that
-	// as an int (zero) and think the player is dead! (this will incite a clientside screentilt, etc)
-	fTookDamage = CBaseMonster::TakeDamage(pevInflictor, pevAttacker, (int)flDamage, bitsDamageType);
+	if (0 == pev->takedamage)
+		return false;
+
+	// if (pev->deadflag == DEAD_NO)
+	// {
+		// no pain sound during death animation.
+		// PainSound(); // "Ouch!"
+	// }
+
+	// set damage type sustained
+	m_bitsDamageType |= bitsDamageType;
+
+	// grab the vector of the incoming attack. ( pretend that the inflictor is a little lower than it really is, so the body will tend to fly upward a bit).
+	Vector vecDir = g_vecZero;
+	if (!FNullEnt(pevInflictor))
+	{
+		CBaseEntity* pInflictor = CBaseEntity::Instance(pevInflictor);
+		if (pInflictor)
+		{
+			vecDir = (pInflictor->Center() - Vector(0, 0, 10) - Center()).Normalize();
+			vecDir = g_vecAttackDir = vecDir.Normalize();
+		}
+	}
+
+	if (pevInflictor)
+		pev->dmg_inflictor = ENT(pevInflictor);
+
+	pev->dmg_take += (int)flDamage;
+
+	// check for godmode or invincibility
+	if ((pev->flags & FL_GODMODE) != 0)
+	{
+		return false;
+	}
+
+	// if this is a player, move him around!
+	if ((!FNullEnt(pevInflictor)) && (pev->movetype == MOVETYPE_WALK) && (!pevAttacker || pevAttacker->solid != SOLID_TRIGGER))
+	{
+		pev->velocity = pev->velocity + vecDir * -DamageForce(pev, flDamage);
+	}
+
+	// do the damage
+	pev->health -= (int)flDamage;
+
+	if (pev->health <= 0)
+	{
+		g_pevLastInflictor = pevInflictor;
+
+		if ((bitsDamageType & DMG_ALWAYSGIB) != 0)
+		{
+			Killed(pevAttacker, GIB_ALWAYS);
+		}
+		else if ((bitsDamageType & DMG_NEVERGIB) != 0)
+		{
+			Killed(pevAttacker, GIB_NEVER);
+		}
+		else
+		{
+			Killed(pevAttacker, GIB_NORMAL);
+		}
+
+		g_pevLastInflictor = NULL;
+
+		return false;
+	}
 
 	// reset damage time countdown for each type of time based damage player just sustained
 
@@ -826,7 +899,11 @@ void CBasePlayer::Killed(entvars_t* pevAttacker, int iGib)
 	if ((pev->health < -40 && iGib != GIB_NEVER) || iGib == GIB_ALWAYS)
 	{
 		pev->solid = SOLID_NOT;
-		GibMonster(); // This clears pev->model
+		EMIT_SOUND(ENT(pev), CHAN_WEAPON, "common/bodysplat.wav", 1, ATTN_NORM);
+#if 0
+		CGib::SpawnHeadGib(pev);
+		CGib::SpawnRandomGibs(pev, 4, true); // throw some human gibs.
+#endif
 		pev->effects |= EF_NODRAW;
 		return;
 	}
@@ -1010,6 +1087,179 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 	pev->sequence = animDesired;
 	pev->frame = 0;
 	ResetSequenceInfo();
+}
+
+//=========================================================
+// GetDeathActivity - determines the best type of death
+// anim to play.
+//=========================================================
+Activity CBasePlayer::GetDeathActivity()
+{
+	Activity deathActivity;
+	bool fTriedDirection;
+	float flDot;
+	TraceResult tr;
+	Vector vecSrc;
+
+	if (pev->deadflag != DEAD_NO)
+	{
+		// don't run this while dying.
+		return m_IdealActivity;
+	}
+
+	vecSrc = Center();
+
+	fTriedDirection = false;
+	deathActivity = ACT_DIESIMPLE; // in case we can't find any special deaths to do.
+
+	UTIL_MakeVectors(pev->angles);
+	flDot = DotProduct(gpGlobals->v_forward, g_vecAttackDir * -1);
+
+	switch (m_LastHitGroup)
+	{
+		// try to pick a region-specific death.
+	case HITGROUP_HEAD:
+		deathActivity = ACT_DIE_HEADSHOT;
+		break;
+
+	case HITGROUP_STOMACH:
+		deathActivity = ACT_DIE_GUTSHOT;
+		break;
+
+	case HITGROUP_GENERIC:
+		// try to pick a death based on attack direction
+		fTriedDirection = true;
+
+		if (flDot > 0.3)
+		{
+			deathActivity = ACT_DIEFORWARD;
+		}
+		else if (flDot <= -0.3)
+		{
+			deathActivity = ACT_DIEBACKWARD;
+		}
+		break;
+
+	default:
+		// try to pick a death based on attack direction
+		fTriedDirection = true;
+
+		if (flDot > 0.3)
+		{
+			deathActivity = ACT_DIEFORWARD;
+		}
+		else if (flDot <= -0.3)
+		{
+			deathActivity = ACT_DIEBACKWARD;
+		}
+		break;
+	}
+
+
+	// can we perform the prescribed death?
+	if (LookupActivity(deathActivity) == ACTIVITY_NOT_AVAILABLE)
+	{
+		// no! did we fail to perform a directional death?
+		if (fTriedDirection)
+		{
+			// if yes, we're out of options. Go simple.
+			deathActivity = ACT_DIESIMPLE;
+		}
+		else
+		{
+			// cannot perform the ideal region-specific death, so try a direction.
+			if (flDot > 0.3)
+			{
+				deathActivity = ACT_DIEFORWARD;
+			}
+			else if (flDot <= -0.3)
+			{
+				deathActivity = ACT_DIEBACKWARD;
+			}
+		}
+	}
+
+	if (LookupActivity(deathActivity) == ACTIVITY_NOT_AVAILABLE)
+	{
+		// if we're still invalid, simple is our only option.
+		deathActivity = ACT_DIESIMPLE;
+	}
+
+	if (deathActivity == ACT_DIEFORWARD)
+	{
+		// make sure there's room to fall forward
+		UTIL_TraceHull(vecSrc, vecSrc + gpGlobals->v_forward * 64, dont_ignore_monsters, head_hull, edict(), &tr);
+
+		if (tr.flFraction != 1.0)
+		{
+			deathActivity = ACT_DIESIMPLE;
+		}
+	}
+
+	if (deathActivity == ACT_DIEBACKWARD)
+	{
+		// make sure there's room to fall backward
+		UTIL_TraceHull(vecSrc, vecSrc - gpGlobals->v_forward * 64, dont_ignore_monsters, head_hull, edict(), &tr);
+
+		if (tr.flFraction != 1.0)
+		{
+			deathActivity = ACT_DIESIMPLE;
+		}
+	}
+
+	return deathActivity;
+}
+
+//=========================================================
+// GetSmallFlinchActivity - determines the best type of flinch
+// anim to play.
+//=========================================================
+Activity CBasePlayer::GetSmallFlinchActivity()
+{
+	Activity flinchActivity;
+	bool fTriedDirection;
+	float flDot;
+
+	fTriedDirection = false;
+	UTIL_MakeVectors(pev->angles);
+	flDot = DotProduct(gpGlobals->v_forward, g_vecAttackDir * -1);
+
+	switch (m_LastHitGroup)
+	{
+		// pick a region-specific flinch
+	case HITGROUP_HEAD:
+		flinchActivity = ACT_FLINCH_HEAD;
+		break;
+	case HITGROUP_STOMACH:
+		flinchActivity = ACT_FLINCH_STOMACH;
+		break;
+	case HITGROUP_LEFTARM:
+		flinchActivity = ACT_FLINCH_LEFTARM;
+		break;
+	case HITGROUP_RIGHTARM:
+		flinchActivity = ACT_FLINCH_RIGHTARM;
+		break;
+	case HITGROUP_LEFTLEG:
+		flinchActivity = ACT_FLINCH_LEFTLEG;
+		break;
+	case HITGROUP_RIGHTLEG:
+		flinchActivity = ACT_FLINCH_RIGHTLEG;
+		break;
+	case HITGROUP_GENERIC:
+	default:
+		// just get a generic flinch.
+		flinchActivity = ACT_SMALL_FLINCH;
+		break;
+	}
+
+
+	// do we have a sequence for the ideal activity?
+	if (LookupActivity(flinchActivity) == ACTIVITY_NOT_AVAILABLE)
+	{
+		flinchActivity = ACT_SMALL_FLINCH;
+	}
+
+	return flinchActivity;
 }
 
 /*
@@ -1210,7 +1460,7 @@ void CBasePlayer::PlayerDeathThink()
 	if (pev->deadflag == DEAD_DYING)
 		pev->deadflag = DEAD_DEAD;
 
-	StopAnimation();
+	// StopAnimation();
 
 	pev->effects |= EF_NOINTERP;
 	pev->framerate = 0.0;
@@ -1904,9 +2154,6 @@ void CBasePlayer::PreThink()
 	}
 
 	// StudioFrameAdvance( );//!!!HACKHACK!!! Can't be hit by traceline when not animating?
-
-	// Clear out ladder pointer
-	m_hEnemy = NULL;
 
 	if ((m_afPhysicsFlags & PFLAG_ONBARNACLE) != 0)
 	{
@@ -2819,9 +3066,7 @@ void CBasePlayer::Spawn()
 
 	m_flTimeStepSound = 0;
 	m_iStepLeft = 0;
-	m_flFieldOfView = 0.5; // some monsters use this to determine whether or not the player is looking at them.
 
-	m_bloodColor = BLOOD_COLOR_RED;
 	m_flNextAttack = UTIL_WeaponTimeBase();
 	StartSneaking();
 
@@ -2845,7 +3090,6 @@ void CBasePlayer::Spawn()
 
 	pev->view_ofs = VEC_VIEW;
 	Precache();
-	m_HackedGunPos = Vector(0, 32, 0);
 
 	if (m_iPlayerSound == SOUNDLIST_EMPTY)
 	{
@@ -2906,7 +3150,7 @@ void CBasePlayer::Precache()
 
 bool CBasePlayer::Save(CSave& save)
 {
-	if (!CBaseMonster::Save(save))
+	if (!CBaseAnimating::Save(save))
 		return false;
 
 	return save.WriteFields("PLAYER", this, m_playerSaveData, ARRAYSIZE(m_playerSaveData));
@@ -2923,7 +3167,7 @@ void CBasePlayer::RenewItems()
 
 bool CBasePlayer::Restore(CRestore& restore)
 {
-	if (!CBaseMonster::Restore(restore))
+	if (!CBaseAnimating::Restore(restore))
 		return false;
 
 	bool status = restore.ReadFields("PLAYER", this, m_playerSaveData, ARRAYSIZE(m_playerSaveData));
@@ -2952,9 +3196,6 @@ bool CBasePlayer::Restore(CRestore& restore)
 	{
 		m_SndRoomtype = 0;
 	}
-
-	// Copied from spawn() for now
-	m_bloodColor = BLOOD_COLOR_RED;
 
 	g_ulModelIndexPlayer = pev->modelindex;
 
@@ -3545,18 +3786,10 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 
 	case 102:
 		// Gibbage!!!
-		CGib::SpawnRandomGibs(pev, 1, true);
 		break;
 
 	case 103:
 		// What the hell are you doing?
-		pEntity = UTIL_FindEntityForward(this);
-		if (pEntity)
-		{
-			CBaseMonster* pMonster = pEntity->MyMonsterPointer();
-			if (pMonster)
-				pMonster->ReportAIState();
-		}
 		break;
 
 	case 104:
@@ -4279,25 +4512,6 @@ bool CBasePlayer::FBecomeProne()
 	return true;
 }
 
-//=========================================================
-// BarnacleVictimBitten - bad name for a function that is called
-// by Barnacle victims when the barnacle pulls their head
-// into its mouth. For the player, just die.
-//=========================================================
-void CBasePlayer::BarnacleVictimBitten(entvars_t* pevBarnacle)
-{
-	TakeDamage(pevBarnacle, pevBarnacle, pev->health + pev->armorvalue, DMG_SLASH | DMG_ALWAYSGIB);
-}
-
-//=========================================================
-// BarnacleVictimReleased - overridden for player who has
-// physics flags concerns.
-//=========================================================
-void CBasePlayer::BarnacleVictimReleased()
-{
-	m_afPhysicsFlags &= ~PFLAG_ONBARNACLE;
-}
-
 
 //=========================================================
 // Illumination
@@ -4519,12 +4733,12 @@ Vector CBasePlayer::AutoaimDeflection(Vector& vecSrc, float flDist, float flDelt
 		}
 
 		// don't shoot at friends
-		if (IRelationship(pEntity) < 0)
-		{
-			if (!pEntity->IsPlayer() && !g_pGameRules->IsDeathmatch())
-				// ALERT( at_console, "friend\n");
-				continue;
-		}
+		// if (IRelationship(pEntity) < 0)
+		// {
+		// 	if (!pEntity->IsPlayer() && !g_pGameRules->IsDeathmatch())
+		// 		// ALERT( at_console, "friend\n");
+		// 		continue;
+		// }
 
 		// can shoot at this one
 		bestdot = dot;
@@ -4790,65 +5004,6 @@ void CBasePlayer::SetPrefsFromUserinfo(char* infobuffer)
 	{
 		m_iAutoWepSwitch = 1;
 	}
-}
-
-//=========================================================
-// Dead HEV suit prop
-//=========================================================
-class CDeadHEV : public CBaseMonster
-{
-public:
-	void Spawn() override;
-	int Classify() override { return CLASS_HUMAN_MILITARY; }
-
-	bool KeyValue(KeyValueData* pkvd) override;
-
-	int m_iPose; // which sequence to display	-- temporary, don't need to save
-	static const char* m_szPoses[4];
-};
-
-const char* CDeadHEV::m_szPoses[] = {"deadback", "deadsitting", "deadstomach", "deadtable"};
-
-bool CDeadHEV::KeyValue(KeyValueData* pkvd)
-{
-	if (FStrEq(pkvd->szKeyName, "pose"))
-	{
-		m_iPose = atoi(pkvd->szValue);
-		return true;
-	}
-
-	return CBaseMonster::KeyValue(pkvd);
-}
-
-LINK_ENTITY_TO_CLASS(monster_hevsuit_dead, CDeadHEV);
-
-//=========================================================
-// ********** DeadHEV SPAWN **********
-//=========================================================
-void CDeadHEV::Spawn()
-{
-	PRECACHE_MODEL("models/player.mdl");
-	SET_MODEL(ENT(pev), "models/player.mdl");
-
-	pev->effects = 0;
-	pev->yaw_speed = 8;
-	pev->sequence = 0;
-	pev->body = 1;
-	m_bloodColor = BLOOD_COLOR_RED;
-
-	pev->sequence = LookupSequence(m_szPoses[m_iPose]);
-
-	if (pev->sequence == -1)
-	{
-		ALERT(at_console, "Dead hevsuit with bad pose\n");
-		pev->sequence = 0;
-		pev->effects = EF_BRIGHTFIELD;
-	}
-
-	// Corpses have less health
-	pev->health = 8;
-
-	MonsterInitDead();
 }
 
 

@@ -32,13 +32,14 @@ extern int iHornetPuff;
 //=========================================================
 // Hornet - this is the projectile that the Alien Grunt fires.
 //=========================================================
-class CHornet : public CBaseMonster
+class CHornet : public CBaseAnimating
 {
 public:
 	void Spawn() override;
 	void Precache() override;
 	int Classify() override;
 	int IRelationship(CBaseEntity* pTarget) override;
+	int BloodColor() override { return BLOOD_COLOR_YELLOW; }
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
 	static TYPEDESCRIPTION m_SaveData[];
@@ -56,4 +57,6 @@ public:
 	float m_flStopAttack;
 	int m_iHornetType;
 	float m_flFlySpeed;
+	EHANDLE m_hEnemy;
+	Vector m_vecEnemyLKP;
 };

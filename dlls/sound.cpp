@@ -21,7 +21,6 @@
 #include "cbase.h"
 #include "weapons.h"
 #include "player.h"
-#include "talkmonster.h"
 #include "gamerules.h"
 #include "pm_defs.h"
 #include "pm_materials.h"
@@ -1896,14 +1895,6 @@ void CSpeaker::SpeakerThink()
 	int flags = 0;
 	int pitch = 100;
 
-
-	// Wait for the talkmonster to finish first.
-	if (gpGlobals->time <= CTalkMonster::g_talkWaitTime)
-	{
-		pev->nextthink = CTalkMonster::g_talkWaitTime + RANDOM_FLOAT(5, 10);
-		return;
-	}
-
 	const char* const szSoundFile = [this]()
 	{
 		// go lookup preset text, assign szSoundFile
@@ -1945,8 +1936,6 @@ void CSpeaker::SpeakerThink()
 		// set next announcement time for random 5 to 10 minute delay
 		pev->nextthink = gpGlobals->time +
 						 RANDOM_FLOAT(ANNOUNCE_MINUTES_MIN * 60.0, ANNOUNCE_MINUTES_MAX * 60.0);
-
-		CTalkMonster::g_talkWaitTime = gpGlobals->time + 5; // time delay until it's ok to speak: used so that two NPCs don't talk at once
 	}
 
 	return;
