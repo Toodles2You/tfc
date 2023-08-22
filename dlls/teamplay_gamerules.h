@@ -39,7 +39,7 @@ public:
 	void InitHUD(CBasePlayer* pl) override;
 	void DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pevInflictor) override;
 	const char* GetGameDescription() override { return "HL Teamplay"; } // this is the game name that gets seen in the server browser
-	void UpdateGameMode(CBasePlayer* pPlayer) override;					// the client needs to be informed of the current game mode
+	gamemode_e GetGameMode() override { return kGamemodeTeamplay; }
 	void PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pInflictor) override;
 	void Think() override;
 	int GetTeamIndex(const char* pTeamName) override;

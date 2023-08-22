@@ -92,10 +92,29 @@ void CHud::MsgFunc_InitHUD(const char* pszName, int iSize, void* pbuf)
 bool CHud::MsgFunc_GameMode(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
-	//Note: this user message could be updated to include multiple gamemodes, so make sure this checks for game mode 1
-	//See CHalfLifeTeamplay::UpdateGameMode
-	//TODO: define game mode constants
-	m_Teamplay = READ_BYTE() == 1;
+	
+	m_GameMode = static_cast<gamemode_e>(READ_BYTE());
+	
+	gEngfuncs.Con_DPrintf("Gamemode: ", static_cast<int>(m_GameMode));
+
+	switch (m_GameMode)
+	{
+		default:
+			gEngfuncs.Con_DPrintf("Unknown\n");
+			break;
+		case kGamemodeSingleplayer:
+			gEngfuncs.Con_DPrintf("Singleplayer\n");
+			break;
+		case kGamemodeCooperative:
+			gEngfuncs.Con_DPrintf("Cooperative\n");
+			break;
+		case kGamemodeDeathmatch:
+			gEngfuncs.Con_DPrintf("Deathmatch\n");
+			break;
+		case kGamemodeTeamplay:
+			gEngfuncs.Con_DPrintf("Teamplay\n");
+			break;
+	}
 
 	return true;
 }

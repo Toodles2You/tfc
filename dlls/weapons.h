@@ -482,7 +482,6 @@ public:
 };
 
 #ifdef CLIENT_DLL
-bool bIsMultiplayer();
 void LoadVModel(const char* szViewModel, CBasePlayer* m_pPlayer);
 #endif
 

@@ -321,7 +321,7 @@ void W_Precache()
 	// hornetgun
 	UTIL_PrecacheOtherWeapon("weapon_hornetgun");
 
-	if (g_pGameRules->IsDeathmatch())
+	if (UTIL_IsMultiplayer())
 	{
 		UTIL_PrecacheOther("weaponbox"); // container for dropped deathmatch weapons
 	}
@@ -353,6 +353,9 @@ void W_Precache()
 	PRECACHE_SOUND("weapons/bullet_hit2.wav"); // hit by bullet
 
 	PRECACHE_SOUND("items/weapondrop1.wav"); // weapon falls to the ground
+
+	PRECACHE_SOUND("weapons/desert_eagle_sight.wav");
+	PRECACHE_SOUND("weapons/desert_eagle_sight2.wav");
 }
 
 

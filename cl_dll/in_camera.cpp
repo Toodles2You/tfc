@@ -15,6 +15,7 @@
 #include "camera.h"
 #include "in_defs.h"
 #include "Exports.h"
+#include "com_weapons.h"
 
 #include "SDL2/SDL_mouse.h"
 
@@ -430,7 +431,7 @@ void CAM_ToThirdPerson()
 	Vector viewangles;
 
 #if !defined(_DEBUG)
-	if (gEngfuncs.GetMaxClients() > 1)
+	if (UTIL_IsDeathmatch())
 	{
 		// no thirdperson in multiplayer.
 		return;

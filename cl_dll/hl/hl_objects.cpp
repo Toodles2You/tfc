@@ -20,6 +20,7 @@
 #include "const.h"
 #include "entity_state.h"
 #include "cl_entity.h"
+#include "com_weapons.h"
 
 #include "pm_defs.h"
 #include "event_api.h"
@@ -88,7 +89,7 @@ void UpdateBeams(const float time)
 		pFlare->entity.origin = tr.endpos;
 		pFlare->die = time + 0.1f; // We keep it alive just a little bit forward in the future, just in case.
 
-		if (gEngfuncs.GetMaxClients() != 1) // Singleplayer always draws the egon's energy beam flare
+		if (UTIL_IsDeathmatch()) // Singleplayer always draws the egon's energy beam flare
 		{
 			pFlare->flags |= FTENT_NOMODEL;
 

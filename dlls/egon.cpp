@@ -232,7 +232,7 @@ void CEgon::Fire(const Vector& vecOrigSrc, const Vector& vecDir)
 	if (pEntity == NULL)
 		return;
 
-	if (g_pGameRules->IsMultiplayer())
+	if (UTIL_IsDeathmatch())
 	{
 		if (m_pSprite && 0 != pEntity->pev->takedamage)
 		{
@@ -264,7 +264,7 @@ void CEgon::Fire(const Vector& vecOrigSrc, const Vector& vecDir)
 			}
 			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 
-			if (g_pGameRules->IsMultiplayer())
+			if (UTIL_IsDeathmatch())
 			{
 				// multiplayer uses 1 ammo every 1/10th second
 				if (gpGlobals->time >= m_flAmmoUseTime)
@@ -301,7 +301,7 @@ void CEgon::Fire(const Vector& vecOrigSrc, const Vector& vecDir)
 			}
 			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 
-			if (g_pGameRules->IsMultiplayer())
+			if (UTIL_IsDeathmatch())
 			{
 				// radius damage a little more potent in multiplayer.
 				::RadiusDamage(tr.vecEndPos, pev, m_pPlayer->pev, gSkillData.plrDmgEgonWide / 4, 128, CLASS_NONE, DMG_ENERGYBEAM | DMG_BLAST | DMG_ALWAYSGIB);
@@ -310,7 +310,7 @@ void CEgon::Fire(const Vector& vecOrigSrc, const Vector& vecDir)
 			if (!m_pPlayer->IsAlive())
 				return;
 
-			if (g_pGameRules->IsMultiplayer())
+			if (UTIL_IsDeathmatch())
 			{
 				//multiplayer uses 5 ammo/second
 				if (gpGlobals->time >= m_flAmmoUseTime)

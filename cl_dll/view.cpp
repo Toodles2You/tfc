@@ -8,6 +8,7 @@
 
 #include "entity_state.h"
 #include "cl_entity.h"
+#include "com_weapons.h"
 #include "ref_params.h"
 #include "in_defs.h" // PITCH YAW ROLL
 #include "pm_movevars.h"
@@ -608,7 +609,7 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 	AngleVectors(angles, pparams->forward, pparams->right, pparams->up);
 
 	// don't allow cheats in multiplayer
-	if (pparams->maxclients <= 1)
+	if (!UTIL_IsMultiplayer())
 	{
 		for (i = 0; i < 3; i++)
 		{

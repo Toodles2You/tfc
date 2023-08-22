@@ -927,7 +927,7 @@ void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 	// HACKHACK -- In multiplayer, players touch this based on packet receipt.
 	// So the players who send packets later aren't always hurt.  Keep track of
 	// how much time has passed and whether or not you've touched that player
-	if (g_pGameRules->IsMultiplayer())
+	if (UTIL_IsMultiplayer())
 	{
 		if (pev->dmgtime > gpGlobals->time)
 		{
@@ -1481,7 +1481,7 @@ void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 	ASSERT(!FStrEq(m_szMapName, ""));
 
 	// Don't work in deathmatch
-	if (g_pGameRules->IsDeathmatch())
+	if (UTIL_IsDeathmatch())
 		return;
 
 	// Some people are firing these multiple times in a frame, disable
@@ -1947,7 +1947,7 @@ LINK_ENTITY_TO_CLASS(trigger_autosave, CTriggerSave);
 
 void CTriggerSave::Spawn()
 {
-	if (g_pGameRules->IsDeathmatch())
+	if (UTIL_IsDeathmatch())
 	{
 		REMOVE_ENTITY(ENT(pev));
 		return;
@@ -2001,7 +2001,7 @@ void CTriggerEndSection::EndSectionUse(CBaseEntity* pActivator, CBaseEntity* pCa
 
 void CTriggerEndSection::Spawn()
 {
-	if (g_pGameRules->IsDeathmatch())
+	if (UTIL_IsDeathmatch())
 	{
 		REMOVE_ENTITY(ENT(pev));
 		return;

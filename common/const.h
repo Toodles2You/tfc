@@ -716,6 +716,14 @@ enum
 	kRenderFxLightMultiplier, //CTM !!!CZERO added to tell the studiorender that the value in iuser2 is a lightmultiplier
 };
 
+typedef enum
+{
+	kGamemodeSingleplayer = 0,
+	kGamemodeCooperative,
+	kGamemodeDeathmatch,
+	kGamemodeTeamplay,
+} gamemode_e;
+
 #define _DEF_BYTE_
 
 typedef struct

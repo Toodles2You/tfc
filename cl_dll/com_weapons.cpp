@@ -263,6 +263,21 @@ float UTIL_SharedRandomFloat(unsigned int seed, float low, float high)
 	}
 }
 
+gamemode_e UTIL_GetGameMode()
+{
+	return gHUD.m_GameMode;
+}
+
+bool UTIL_IsMultiplayer()
+{
+	return UTIL_GetGameMode() > kGamemodeSingleplayer;
+}
+
+bool UTIL_IsDeathmatch()
+{
+	return UTIL_GetGameMode() > kGamemodeCooperative;
+}
+
 /*
 ======================
 stub_*

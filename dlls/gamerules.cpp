@@ -29,6 +29,18 @@
 
 extern edict_t* EntSelectSpawnPoint(CBaseEntity* pPlayer);
 
+void CGameRules::UpdateGameMode(CBasePlayer* pPlayer)
+{
+	MESSAGE_BEGIN(MSG_ONE, gmsgGameMode, NULL, pPlayer->edict());
+	WRITE_BYTE(GetGameMode());
+	MESSAGE_END();
+}
+
+void CGameRules::InitHUD(CBasePlayer* pl)
+{
+	UpdateGameMode(pl);
+}
+
 CBasePlayerItem* CGameRules::FindNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pCurrentWeapon)
 {
 	if (pCurrentWeapon != nullptr && !pCurrentWeapon->CanHolster())
@@ -375,9 +387,17 @@ CGameRules* InstallGameRules()
 
 	if (0 == gpGlobals->deathmatch)
 	{
-		// generic half-life
 		g_teamplay = false;
-		return new CHalfLifeRules;
+		if ((int)gpGlobals->coop != 0)
+		{
+			// coop
+			return new CHalfLifeMultiplay;
+		}
+		else
+		{
+			// generic half-life
+			return new CHalfLifeRules;
+		}
 	}
 	else
 	{

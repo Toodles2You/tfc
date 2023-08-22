@@ -48,6 +48,7 @@
 #include "keydefs.h"
 #include "demo.h"
 #include "demo_api.h"
+#include "com_weapons.h"
 
 #include "vgui_int.h"
 #include "vgui_TeamFortressViewport.h"
@@ -1057,7 +1058,7 @@ void TeamFortressViewport::ShowScoreBoard()
 	if (m_pScoreBoard)
 	{
 		// No Scoreboard in single-player
-		if (gEngfuncs.GetMaxClients() > 1)
+		if (UTIL_IsMultiplayer())
 		{
 			m_pScoreBoard->Open();
 			UpdateCursorState();

@@ -598,3 +598,7 @@ struct CallOnDestroy
 		Function();
 	}
 };
+
+gamemode_e UTIL_GetGameMode();
+bool UTIL_IsMultiplayer();
+bool UTIL_IsDeathmatch();

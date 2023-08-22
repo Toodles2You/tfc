@@ -370,7 +370,7 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	flBonus = ARMOR_BONUS;
 	flRatio = ARMOR_RATIO;
 
-	if ((bitsDamageType & DMG_BLAST) != 0 && g_pGameRules->IsMultiplayer())
+	if ((bitsDamageType & DMG_BLAST) != 0 && UTIL_IsDeathmatch())
 	{
 		// blasts damage armor more.
 		flBonus *= 2;
@@ -1485,7 +1485,7 @@ void CBasePlayer::PlayerDeathThink()
 	// if the player has been dead for one second longer than allowed by forcerespawn,
 	// forcerespawn isn't on. Send the player off to an intermission camera until they
 	// choose to respawn.
-	if (g_pGameRules->IsMultiplayer() && (gpGlobals->time > (m_fDeadTime + 6)) && (m_afPhysicsFlags & PFLAG_OBSERVER) == 0)
+	if (UTIL_IsMultiplayer() && (gpGlobals->time > (m_fDeadTime + 6)) && (m_afPhysicsFlags & PFLAG_OBSERVER) == 0)
 	{
 		// go to dead camera.
 		StartDeathCam();
@@ -1495,7 +1495,7 @@ void CBasePlayer::PlayerDeathThink()
 		return;
 
 	// wait for any button down,  or mp_forcerespawn is set and the respawn time is up
-	if (!fAnyButtonDown && !(g_pGameRules->IsMultiplayer() && forcerespawn.value > 0 && (gpGlobals->time > (m_fDeadTime + 5))))
+	if (!fAnyButtonDown && !(UTIL_IsMultiplayer() && forcerespawn.value > 0 && (gpGlobals->time > (m_fDeadTime + 5))))
 		return;
 
 	pev->button = 0;
@@ -2458,7 +2458,7 @@ void CBasePlayer::CheckSuitUpdate()
 	// if in range of radiation source, ping geiger counter
 	UpdateGeigerCounter();
 
-	if (g_pGameRules->IsMultiplayer())
+	if (UTIL_IsDeathmatch())
 	{
 		// don't bother updating HEV voice in multiplayer.
 		return;
@@ -2519,7 +2519,7 @@ void CBasePlayer::SetSuitUpdate(const char* name, bool fgroup, int iNoRepeatTime
 	if (!HasSuit())
 		return;
 
-	if (g_pGameRules->IsMultiplayer())
+	if (UTIL_IsDeathmatch())
 	{
 		// due to static channel design, etc. We don't play HEV sounds in multiplayer right now.
 		return;
@@ -2808,7 +2808,7 @@ void CBasePlayer::PostThink()
 
 	if (FBitSet(pev->flags, FL_ONGROUND))
 	{
-		if (m_flFallVelocity > 64 && !g_pGameRules->IsMultiplayer())
+		if (m_flFallVelocity > 64 && !UTIL_IsDeathmatch())
 		{
 			CSoundEnt::InsertSound(bits_SOUND_PLAYER, pev->origin, m_flFallVelocity, 0.2);
 			// ALERT( at_console, "fall %f\n", m_flFallVelocity );
@@ -2947,7 +2947,7 @@ edict_t* EntSelectSpawnPoint(CBaseEntity* pPlayer)
 		if (!FNullEnt(pSpot))
 			goto ReturnSpot;
 	}
-	else if (g_pGameRules->IsDeathmatch())
+	else if (UTIL_IsDeathmatch())
 	{
 		pSpot = g_pLastSpawn;
 		// Randomize the start spot
@@ -4233,7 +4233,7 @@ void CBasePlayer::UpdateClientData()
 
 			m_iObserverLastMode = OBS_ROAMING;
 
-			if (g_pGameRules->IsMultiplayer())
+			if (UTIL_IsMultiplayer())
 			{
 				FireTargets("game_playerjoin", this, this, USE_TOGGLE, 0);
 			}
@@ -4735,7 +4735,7 @@ Vector CBasePlayer::AutoaimDeflection(Vector& vecSrc, float flDist, float flDelt
 		// don't shoot at friends
 		// if (IRelationship(pEntity) < 0)
 		// {
-		// 	if (!pEntity->IsPlayer() && !g_pGameRules->IsDeathmatch())
+		// 	if (!pEntity->IsPlayer() && !UTIL_IsDeathmatch())
 		// 		// ALERT( at_console, "friend\n");
 		// 		continue;
 		// }
@@ -4808,7 +4808,7 @@ int CBasePlayer::GetCustomDecalFrames()
 //=========================================================
 void CBasePlayer::DropPlayerItem(char* pszItemName)
 {
-	if (!g_pGameRules->IsMultiplayer() || (weaponstay.value > 0))
+	if (!UTIL_IsMultiplayer() || (weaponstay.value > 0))
 	{
 		// no dropping in single player.
 		return;
@@ -5025,7 +5025,7 @@ void CStripWeapons::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	{
 		pPlayer = (CBasePlayer*)pActivator;
 	}
-	else if (!g_pGameRules->IsDeathmatch())
+	else if (!UTIL_IsDeathmatch())
 	{
 		pPlayer = (CBasePlayer*)UTIL_GetLocalPlayer();
 	}
@@ -5122,7 +5122,7 @@ void CRevertSaved::MessageThink()
 
 void CRevertSaved::LoadThink()
 {
-	if (0 == gpGlobals->deathmatch)
+	if (!UTIL_IsMultiplayer())
 	{
 		SERVER_COMMAND("reload\n");
 	}

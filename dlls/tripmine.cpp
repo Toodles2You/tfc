@@ -372,11 +372,7 @@ void CTripmine::Spawn()
 	pev->body = 0;
 #endif
 
-#ifdef CLIENT_DLL
-	if (!bIsMultiplayer())
-#else
-	if (!g_pGameRules->IsDeathmatch())
-#endif
+	if (!UTIL_IsDeathmatch())
 	{
 		UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 28));
 	}

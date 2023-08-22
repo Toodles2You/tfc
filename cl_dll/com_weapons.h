@@ -11,12 +11,17 @@
 #pragma once
 
 #include "Exports.h"
+#include "const.h"
 
 void COM_Log(const char* pszFile, const char* fmt, ...);
 bool CL_IsDead();
 
 float UTIL_SharedRandomFloat(unsigned int seed, float low, float high);
 int UTIL_SharedRandomLong(unsigned int seed, int low, int high);
+
+gamemode_e UTIL_GetGameMode();
+bool UTIL_IsMultiplayer();
+bool UTIL_IsDeathmatch();
 
 int HUD_GetWeaponAnim();
 void HUD_SendWeaponAnim(int iAnim, int body, bool force);

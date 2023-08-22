@@ -221,7 +221,7 @@ bool CCrowbar::Swing(bool fFirst)
 
 		ClearMultiDamage();
 
-		if ((m_flNextPrimaryAttack + 1 < UTIL_WeaponTimeBase()) || g_pGameRules->IsMultiplayer())
+		if ((m_flNextPrimaryAttack + 1 < UTIL_WeaponTimeBase()) || UTIL_IsDeathmatch())
 		{
 			// first swing does full damage
 			pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgCrowbar, gpGlobals->v_forward, &tr, DMG_CLUB);
@@ -274,14 +274,11 @@ bool CCrowbar::Swing(bool fFirst)
 
 		if (fHitWorld)
 		{
-			float fvolbar = TEXTURETYPE_PlaySound(&tr, vecSrc, vecSrc + (vecEnd - vecSrc) * 2, BULLET_PLAYER_CROWBAR);
+			float fvolbar = 1;
 
-			if (g_pGameRules->IsMultiplayer())
+			if (g_pGameRules->PlayTextureSounds())
 			{
-				// override the volume here, cause we don't play texture sounds in multiplayer,
-				// and fvolbar is going to be 0 from the above call.
-
-				fvolbar = 1;
+				fvolbar = TEXTURETYPE_PlaySound(&tr, vecSrc, vecSrc + (vecEnd - vecSrc) * 2, BULLET_PLAYER_CROWBAR);
 			}
 
 			// also play crowbar strike

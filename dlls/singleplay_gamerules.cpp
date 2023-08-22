@@ -98,10 +98,6 @@ bool CHalfLifeRules::ClientConnected(edict_t* pEntity, const char* pszName, cons
 	return true;
 }
 
-void CHalfLifeRules::InitHUD(CBasePlayer* pl)
-{
-}
-
 //=========================================================
 //=========================================================
 void CHalfLifeRules::ClientDisconnected(edict_t* pClient)

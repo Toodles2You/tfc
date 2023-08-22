@@ -78,9 +78,10 @@ public:
 
 	// Client connection/disconnection
 	virtual bool ClientConnected(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128]) = 0; // a client just connected to the server (player hasn't spawned yet)
-	virtual void InitHUD(CBasePlayer* pl) = 0;																				   // the client dll is ready for updating
+	virtual void InitHUD(CBasePlayer* pl);																				   // the client dll is ready for updating
 	virtual void ClientDisconnected(edict_t* pClient) = 0;																	   // a client just disconnected from the server
-	virtual void UpdateGameMode(CBasePlayer* pPlayer) {}																	   // the client needs to be informed of the current game mode
+	virtual void UpdateGameMode(CBasePlayer* pPlayer);																	   // the client needs to be informed of the current game mode
+	virtual gamemode_e GetGameMode() { return kGamemodeSingleplayer; }
 
 	// Client damage rules
 	virtual float FlPlayerFallDamage(CBasePlayer* pPlayer) = 0;										 // this client just hit the ground after a fall. How much damage?
@@ -191,7 +192,6 @@ public:
 
 	// Client connection/disconnection
 	bool ClientConnected(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128]) override;
-	void InitHUD(CBasePlayer* pl) override; // the client dll is ready for updating
 	void ClientDisconnected(edict_t* pClient) override;
 
 	// Client damage rules
@@ -282,7 +282,7 @@ public:
 	bool ClientConnected(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128]) override;
 	void InitHUD(CBasePlayer* pl) override; // the client dll is ready for updating
 	void ClientDisconnected(edict_t* pClient) override;
-	void UpdateGameMode(CBasePlayer* pPlayer) override; // the client needs to be informed of the current game mode
+	gamemode_e GetGameMode() override { return IsCoOp() ? kGamemodeCooperative : kGamemodeDeathmatch; }
 
 	// Client damage rules
 	float FlPlayerFallDamage(CBasePlayer* pPlayer) override;
@@ -345,7 +345,7 @@ public:
 	const char* GetTeamID(CBaseEntity* pEntity) override { return ""; }
 	int PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget) override;
 
-	bool PlayTextureSounds() override { return false; }
+	bool PlayTextureSounds() override;
 	bool PlayFootstepSounds(CBasePlayer* pl, float fvol) override;
 
 	// Monsters

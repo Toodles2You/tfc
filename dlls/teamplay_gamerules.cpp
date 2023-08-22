@@ -161,13 +161,6 @@ bool CHalfLifeTeamplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 	return false;
 }
 
-void CHalfLifeTeamplay::UpdateGameMode(CBasePlayer* pPlayer)
-{
-	MESSAGE_BEGIN(MSG_ONE, gmsgGameMode, NULL, pPlayer->edict());
-	WRITE_BYTE(1); // game mode teamplay
-	MESSAGE_END();
-}
-
 
 const char* CHalfLifeTeamplay::SetDefaultPlayerTeam(CBasePlayer* pPlayer)
 {

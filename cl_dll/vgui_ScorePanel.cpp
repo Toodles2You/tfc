@@ -24,6 +24,7 @@
 #include "const.h"
 #include "entity_state.h"
 #include "cl_entity.h"
+#include "com_weapons.h"
 #include "vgui_TeamFortressViewport.h"
 #include "vgui_ScorePanel.h"
 #include "vgui_helpers.h"
@@ -285,7 +286,7 @@ void ScorePanel::Update()
 	}
 
 	// If it's not teamplay, sort all the players. Otherwise, sort the teams.
-	if (!gHUD.m_Teamplay)
+	if (UTIL_GetGameMode() < kGamemodeTeamplay)
 		SortPlayers(0, NULL);
 	else
 		SortTeams();

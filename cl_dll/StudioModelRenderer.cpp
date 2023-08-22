@@ -8,6 +8,7 @@
 #include "studio.h"
 #include "entity_state.h"
 #include "cl_entity.h"
+#include "com_weapons.h"
 #include "dlight.h"
 #include "triangleapi.h"
 
@@ -1502,7 +1503,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 			m_pCurrentEntity->curstate.body = 255;
 		}
 
-		if (!(m_pCvarDeveloper->value == 0 && gEngfuncs.GetMaxClients() == 1) && (m_pRenderModel == m_pCurrentEntity->model))
+		if (!(m_pCvarDeveloper->value == 0 && !UTIL_IsDeathmatch()) && (m_pRenderModel == m_pCurrentEntity->model))
 		{
 			m_pCurrentEntity->curstate.body = 1; // force helmet
 		}

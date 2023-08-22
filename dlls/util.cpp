@@ -1193,7 +1193,7 @@ void UTIL_BloodDrips(const Vector& origin, const Vector& direction, int color, i
 	if (g_Language == LANGUAGE_GERMAN && color == BLOOD_COLOR_RED)
 		color = 0;
 
-	if (g_pGameRules->IsMultiplayer())
+	if (UTIL_IsDeathmatch())
 	{
 		// scale up blood effect in multiplayer for better visibility
 		amount *= 2;
@@ -1654,6 +1654,20 @@ void UTIL_StripToken(const char* pKey, char* pDest)
 	pDest[i] = 0;
 }
 
+gamemode_e UTIL_GetGameMode()
+{
+	return g_pGameRules->GetGameMode();
+}
+
+bool UTIL_IsMultiplayer()
+{
+	return UTIL_GetGameMode() > kGamemodeSingleplayer;
+}
+
+bool UTIL_IsDeathmatch()
+{
+	return UTIL_GetGameMode() > kGamemodeCooperative;
+}
 
 // --------------------------------------------------------------
 //

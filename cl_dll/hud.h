@@ -29,6 +29,7 @@
 #include "common_types.h"
 #include "cl_dll.h"
 #include "ammo.h"
+#include "const.h"
 
 #define DHN_DRAWZERO 1
 #define DHN_2DIGITS 2
@@ -503,7 +504,7 @@ public:
 	int m_iKeyBits;
 	int m_iHideHUDDisplay;
 	int m_iFOV;
-	bool m_Teamplay;
+	gamemode_e m_GameMode;
 	int m_iRes;
 	cvar_t* m_pCvarStealMouse;
 	cvar_t* m_pCvarDraw;

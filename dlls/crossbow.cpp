@@ -130,7 +130,7 @@ void CCrossbowBolt::BoltTouch(CBaseEntity* pOther)
 			break;
 		}
 
-		if (!g_pGameRules->IsMultiplayer())
+		if (!UTIL_IsDeathmatch())
 		{
 			Killed(pev, GIB_NEVER);
 		}
@@ -162,7 +162,7 @@ void CCrossbowBolt::BoltTouch(CBaseEntity* pOther)
 		}
 	}
 
-	if (g_pGameRules->IsMultiplayer())
+	if (UTIL_IsDeathmatch())
 	{
 		SetThink(&CCrossbowBolt::ExplodeThink);
 		pev->nextthink = gpGlobals->time + 0.1;
@@ -291,12 +291,7 @@ void CCrossbow::Holster()
 
 void CCrossbow::PrimaryAttack()
 {
-
-#ifdef CLIENT_DLL
-	if (m_pPlayer->m_iFOV != 0 && bIsMultiplayer())
-#else
-	if (m_pPlayer->m_iFOV != 0 && g_pGameRules->IsMultiplayer())
-#endif
+	if (m_pPlayer->m_iFOV != 0 && UTIL_IsDeathmatch())
 	{
 		FireSniperBolt();
 		return;

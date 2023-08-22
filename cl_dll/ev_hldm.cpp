@@ -567,7 +567,7 @@ void EV_FireShotGunDouble(event_args_t* args)
 	EV_GetGunPosition(args, vecSrc, origin);
 	VectorCopy(forward, vecAiming);
 
-	if (gEngfuncs.GetMaxClients() > 1)
+	if (UTIL_IsDeathmatch())
 	{
 		EV_HLDM_FireBullets(idx, forward, right, up, 8, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.17365, 0.04362);
 	}
@@ -617,7 +617,7 @@ void EV_FireShotGunSingle(event_args_t* args)
 	EV_GetGunPosition(args, vecSrc, origin);
 	VectorCopy(forward, vecAiming);
 
-	if (gEngfuncs.GetMaxClients() > 1)
+	if (UTIL_IsDeathmatch())
 	{
 		EV_HLDM_FireBullets(idx, forward, right, up, 4, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.08716, 0.04362);
 	}
@@ -738,11 +738,10 @@ void EV_FirePython(event_args_t* args)
 	if (EV_IsLocal(idx))
 	{
 		// Python uses different body in multiplayer versus single player
-		bool multiplayer = gEngfuncs.GetMaxClients() != 1;
 
 		// Add muzzle flash to current weapon model
 		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(PYTHON_FIRE1, multiplayer ? 1 : 0);
+		gEngfuncs.pEventAPI->EV_WeaponAnimation(PYTHON_FIRE1, UTIL_IsDeathmatch() ? 1 : 0);
 
 		V_PunchAxis(0, -10.0);
 	}
@@ -1272,11 +1271,26 @@ TEMPENTITY* pLaserDot;
 
 void EV_LaserDotOn(event_args_t* args)
 {
+	const auto bMakeNoise = args->iparam1 != 0;
+	
 	if (!EV_IsLocal(args->entindex))
 		return;
 
 	if (pLaserDot == nullptr)
 	{
+		if (bMakeNoise)
+		{
+			gEngfuncs.pEventAPI->EV_PlaySound(
+				args->entindex,
+				args->origin,
+				CHAN_WEAPON,
+				"weapons/desert_eagle_sight.wav",
+				0.9,
+				ATTN_IDLE,
+				0,
+				PITCH_NORM);
+		}
+		
 		pLaserDot = gEngfuncs.pEfxAPI->R_TempSprite(
 			args->origin,
 			g_vecZero,
@@ -1300,11 +1314,26 @@ void EV_LaserDotOn(event_args_t* args)
 
 void EV_LaserDotOff(event_args_t* args)
 {
+	const auto bMakeNoise = args->iparam1 != 0;
+
 	if (!EV_IsLocal(args->entindex))
 		return;
 	
 	if (pLaserDot != nullptr)
 	{
+		if (bMakeNoise)
+		{
+			gEngfuncs.pEventAPI->EV_PlaySound(
+				args->entindex,
+				args->origin,
+				CHAN_WEAPON,
+				"weapons/desert_eagle_sight2.wav",
+				0.9,
+				ATTN_IDLE,
+				0,
+				PITCH_NORM);
+		}
+		
 		pLaserDot->die = gEngfuncs.GetClientTime();
 		pLaserDot = nullptr;
 	}
@@ -1468,7 +1497,7 @@ void EV_EgonStop(event_args_t* args)
 		{
 			pFlare->die = gEngfuncs.GetClientTime();
 
-			if (gEngfuncs.GetMaxClients() == 1 || (pFlare->flags & FTENT_NOMODEL) == 0)
+			if (!UTIL_IsDeathmatch() || (pFlare->flags & FTENT_NOMODEL) == 0)
 			{
 				if (pFlare->tentOffset.x != 0.0f) // true for iFireMode == FIRE_WIDE
 				{
