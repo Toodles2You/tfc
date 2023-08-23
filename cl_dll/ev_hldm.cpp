@@ -339,7 +339,7 @@ FireBullets
 Go to the trouble of combining multiple pellets into a single damage call.
 ================
 */
-void EV_HLDM_FireBullets(int idx, float* forward, float* right, float* up, int cShots, float* vecSrc, float* vecDirShooting, float flDistance, int iBulletType, int iTracerFreq, int* tracerCount, float flSpreadX, float flSpreadY)
+void EV_HLDM_FireBullets(int idx, float* forward, float* right, float* up, int cShots, float* vecSrc, float* vecDirShooting, float flDistance, int iBulletType, int iTracerFreq, int* tracerCount, float flSpreadX, float flSpreadY, int iRandomSeed = 0)
 {
 	int i;
 	pmtrace_t tr;
@@ -353,12 +353,9 @@ void EV_HLDM_FireBullets(int idx, float* forward, float* right, float* up, int c
 		//We randomize for the Shotgun.
 		if (iBulletType == BULLET_PLAYER_BUCKSHOT)
 		{
-			do
-			{
-				x = gEngfuncs.pfnRandomFloat(-0.5, 0.5) + gEngfuncs.pfnRandomFloat(-0.5, 0.5);
-				y = gEngfuncs.pfnRandomFloat(-0.5, 0.5) + gEngfuncs.pfnRandomFloat(-0.5, 0.5);
-				z = x * x + y * y;
-			} while (z > 1);
+			x = UTIL_SharedRandomFloat(iRandomSeed + iShot, -0.5, 0.5) + UTIL_SharedRandomFloat(iRandomSeed + (1 + iShot), -0.5, 0.5);
+			y = UTIL_SharedRandomFloat(iRandomSeed + (2 + iShot), -0.5, 0.5) + UTIL_SharedRandomFloat(iRandomSeed + (3 + iShot), -0.5, 0.5);
+			z = x * x + y * y;
 
 			for (i = 0; i < 3; i++)
 			{
@@ -569,11 +566,11 @@ void EV_FireShotGunDouble(event_args_t* args)
 
 	if (UTIL_IsDeathmatch())
 	{
-		EV_HLDM_FireBullets(idx, forward, right, up, 8, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.17365, 0.04362);
+		EV_HLDM_FireBullets(idx, forward, right, up, 8, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.17365, 0.04362, args->iparam1);
 	}
 	else
 	{
-		EV_HLDM_FireBullets(idx, forward, right, up, 12, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.08716, 0.08716);
+		EV_HLDM_FireBullets(idx, forward, right, up, 12, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.08716, 0.08716, args->iparam1);
 	}
 }
 
@@ -619,11 +616,11 @@ void EV_FireShotGunSingle(event_args_t* args)
 
 	if (UTIL_IsDeathmatch())
 	{
-		EV_HLDM_FireBullets(idx, forward, right, up, 4, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.08716, 0.04362);
+		EV_HLDM_FireBullets(idx, forward, right, up, 4, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.08716, 0.04362, args->iparam1);
 	}
 	else
 	{
-		EV_HLDM_FireBullets(idx, forward, right, up, 6, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.08716, 0.08716);
+		EV_HLDM_FireBullets(idx, forward, right, up, 6, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.08716, 0.08716, args->iparam1);
 	}
 }
 //======================
