@@ -97,6 +97,18 @@ void CCrossbowBolt::BoltTouch(CBaseEntity* pOther)
 	SetTouch(NULL);
 	SetThink(NULL);
 
+	Vector vecDir = pev->velocity.Normalize();
+	
+	if (pOther->IsBSPModel())
+	{
+		UTIL_SetOrigin(pev, pev->origin - vecDir * 12);
+	}
+
+	pev->angles = UTIL_VecToAngles(vecDir);
+	pev->solid = SOLID_NOT;
+	pev->movetype = MOVETYPE_FLY;
+	pev->velocity = Vector(0, 0, 0);
+
 	if (0 != pOther->pev->takedamage)
 	{
 		TraceResult tr = UTIL_GetGlobalTrace();
@@ -142,18 +154,16 @@ void CCrossbowBolt::BoltTouch(CBaseEntity* pOther)
 		SetThink(&CCrossbowBolt::SUB_Remove);
 		pev->nextthink = gpGlobals->time; // this will get changed below if the bolt is allowed to stick in what it hit.
 
-		if (FClassnameIs(pOther->pev, "worldspawn"))
+		if (FClassnameIs(pOther->pev, "worldspawn") || FClassnameIs(pOther->pev, "func_wall"))
 		{
 			// if what we hit is static architecture, can stay around for a while.
-			Vector vecDir = pev->velocity.Normalize();
-			UTIL_SetOrigin(pev, pev->origin - vecDir * 12);
-			pev->angles = UTIL_VecToAngles(vecDir);
-			pev->solid = SOLID_NOT;
-			pev->movetype = MOVETYPE_FLY;
-			pev->velocity = Vector(0, 0, 0);
 			pev->avelocity.z = 0;
 			pev->angles.z = RANDOM_LONG(0, 360);
 			pev->nextthink = gpGlobals->time + 10.0;
+		}
+		else if (!UTIL_IsDeathmatch())
+		{
+			Killed(pev, GIB_NEVER);
 		}
 
 		if (UTIL_PointContents(pev->origin) != CONTENTS_WATER)
