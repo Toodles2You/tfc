@@ -478,27 +478,30 @@ bool CSqueak::Deploy()
 
 	if (result)
 	{
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.7;
+		m_iTimeWeaponIdle = 1700;
 	}
 
 	return result;
 }
 
 
-void CSqueak::Holster()
+bool CSqueak::Holster()
 {
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
-
-	if (0 == m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
+	const auto bHasAmmo = m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] != 0;
+	
+	if (DefaultHolster(bHasAmmo ? SQUEAK_DOWN : -1))
 	{
-		m_pPlayer->ClearWeaponBit(m_iId);
-		SetThink(&CSqueak::DestroyItem);
-		pev->nextthink = gpGlobals->time + 0.1;
-		return;
+		m_fJustThrown = false;
+		if (!bHasAmmo)
+		{
+			m_pPlayer->ClearWeaponBit(m_iId);
+			SetThink(&CSqueak::DestroyItem);
+			pev->nextthink = gpGlobals->time + 0.1;
+		}
+		return true;
 	}
 
-	SendWeaponAnim(SQUEAK_DOWN);
-	EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "common/null.wav", 1.0, ATTN_NORM);
+	return false;
 }
 
 
@@ -547,8 +550,8 @@ void CSqueak::PrimaryAttack()
 
 			m_fJustThrown = true;
 
-			m_flNextPrimaryAttack = GetNextAttackDelay(0.3);
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
+			m_iNextPrimaryAttack = 300;
+			m_iTimeWeaponIdle = 1000;
 		}
 	}
 }
@@ -561,7 +564,7 @@ void CSqueak::SecondaryAttack()
 
 void CSqueak::WeaponIdle()
 {
-	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
+	if (m_iTimeWeaponIdle > 0)
 		return;
 
 	if (m_fJustThrown)
@@ -575,7 +578,7 @@ void CSqueak::WeaponIdle()
 		}
 
 		SendWeaponAnim(SQUEAK_UP);
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+		m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 		return;
 	}
 
@@ -584,17 +587,17 @@ void CSqueak::WeaponIdle()
 	if (flRand <= 0.75)
 	{
 		iAnim = SQUEAK_IDLE1;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 30.0 / 16 * (2);
+		m_iTimeWeaponIdle = 3750;
 	}
 	else if (flRand <= 0.875)
 	{
 		iAnim = SQUEAK_FIDGETFIT;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 70.0 / 16.0;
+		m_iTimeWeaponIdle = 4375;
 	}
 	else
 	{
 		iAnim = SQUEAK_FIDGETNIP;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 80.0 / 16.0;
+		m_iTimeWeaponIdle = 5000;
 	}
 	SendWeaponAnim(iAnim);
 }

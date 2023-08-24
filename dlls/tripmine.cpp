@@ -411,20 +411,22 @@ bool CTripmine::Deploy()
 }
 
 
-void CTripmine::Holster()
+bool CTripmine::Holster()
 {
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
-
-	if (0 == m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
+	const auto bHasAmmo = m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] != 0;
+	
+	if (DefaultHolster(bHasAmmo ? TRIPMINE_HOLSTER : -1))
 	{
-		// out of mines
-		m_pPlayer->ClearWeaponBit(m_iId);
-		SetThink(&CTripmine::DestroyItem);
-		pev->nextthink = gpGlobals->time + 0.1;
+		if (!bHasAmmo)
+		{
+			m_pPlayer->ClearWeaponBit(m_iId);
+			SetThink(&CTripmine::DestroyItem);
+			pev->nextthink = gpGlobals->time + 0.1;
+		}
+		return true;
 	}
 
-	SendWeaponAnim(TRIPMINE_HOLSTER);
-	EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "common/null.wav", 1.0, ATTN_NORM);
+	return false;
 }
 
 void CTripmine::PrimaryAttack()
@@ -472,8 +474,8 @@ void CTripmine::PrimaryAttack()
 	{
 	}
 
-	m_flNextPrimaryAttack = GetNextAttackDelay(0.3);
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+	m_iNextPrimaryAttack = 300;
+	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 }
 
 void CTripmine::WeaponIdle()
@@ -481,7 +483,7 @@ void CTripmine::WeaponIdle()
 	//If we're here then we're in a player's inventory, and need to use this body
 	pev->body = 0;
 
-	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
+	if (m_iTimeWeaponIdle > 0)
 		return;
 
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0)
@@ -499,17 +501,17 @@ void CTripmine::WeaponIdle()
 	if (flRand <= 0.25)
 	{
 		iAnim = TRIPMINE_IDLE1;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 90.0 / 30.0;
+		m_iTimeWeaponIdle = 3000;
 	}
 	else if (flRand <= 0.75)
 	{
 		iAnim = TRIPMINE_IDLE2;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 60.0 / 30.0;
+		m_iTimeWeaponIdle = 2000;
 	}
 	else
 	{
 		iAnim = TRIPMINE_FIDGET;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 100.0 / 30.0;
+		m_iTimeWeaponIdle = 3333;
 	}
 
 	SendWeaponAnim(iAnim);

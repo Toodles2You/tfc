@@ -163,8 +163,30 @@ bool CBasePlayerWeapon::DefaultDeploy(const char* szViewModel, const char* szWea
 	SendWeaponAnim(iAnim, body);
 
 	g_irunninggausspred = false;
-	m_pPlayer->m_flNextAttack = 0.5;
-	m_flTimeWeaponIdle = 1.0;
+	m_pPlayer->m_iNextAttack = 500;
+	m_iNextPrimaryAttack = V_max(m_iNextPrimaryAttack, 500);
+	m_iNextSecondaryAttack = V_max(m_iNextSecondaryAttack, 500);
+	m_iTimeWeaponIdle = 1000;
+	return true;
+}
+
+bool CBasePlayerWeapon::DefaultHolster(int iAnim, int body)
+{
+	// if (!CanHolster())
+	// 	return false;
+
+	if (iAnim >= 0)
+		SendWeaponAnim(iAnim, body);
+
+	m_pPlayer->m_iNextAttack = 500;
+	m_iNextPrimaryAttack = V_max(m_iNextPrimaryAttack, 500);
+	m_iNextSecondaryAttack = V_max(m_iNextSecondaryAttack, 500);
+	m_iTimeWeaponIdle = 1000;
+	m_flLastFireTime = 0.0;
+	m_fInReload = false; // Cancel any reload in progress.
+	m_pPlayer->m_iFOV = 0;
+	g_irunninggausspred = false;
+
 	return true;
 }
 
@@ -192,11 +214,12 @@ CBasePlayerWeapon::Holster
 Put away weapon
 =====================
 */
-void CBasePlayerWeapon::Holster()
+bool CBasePlayerWeapon::Holster()
 {
 	m_fInReload = false; // cancel any reload in progress.
 	g_irunninggausspred = false;
 	m_pPlayer->pev->viewmodel = 0;
+	return true;
 }
 
 /*
@@ -587,9 +610,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		pCurrent->m_fInSpecialReload = pfrom->m_fInSpecialReload;
 		//		pCurrent->m_flPumpTime			= pfrom->m_flPumpTime;
 		pCurrent->m_iClip = pfrom->m_iClip;
-		pCurrent->m_flNextPrimaryAttack = pfrom->m_flNextPrimaryAttack;
-		pCurrent->m_flNextSecondaryAttack = pfrom->m_flNextSecondaryAttack;
-		pCurrent->m_flTimeWeaponIdle = pfrom->m_flTimeWeaponIdle;
+		pCurrent->m_iNextPrimaryAttack = *(int*)&pfrom->m_flNextPrimaryAttack;
+		pCurrent->m_iNextSecondaryAttack = *(int*)&pfrom->m_flNextSecondaryAttack;
+		pCurrent->m_iTimeWeaponIdle = *(int*)&pfrom->m_flTimeWeaponIdle;
 		pCurrent->pev->fuser1 = pfrom->fuser1;
 		pCurrent->m_flStartThrow = pfrom->fuser2;
 		pCurrent->m_flReleaseThrow = pfrom->fuser3;
@@ -632,7 +655,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	player.m_iFOV = from->client.fov;
 	player.pev->weaponanim = from->client.weaponanim;
 	player.pev->viewmodel = from->client.viewmodel;
-	player.m_flNextAttack = from->client.m_flNextAttack;
+	player.m_iNextAttack = *(int*)&from->client.m_flNextAttack;
 	player.m_flNextAmmoBurn = from->client.fuser2;
 	player.m_flAmmoStartCharge = from->client.fuser3;
 
@@ -664,7 +687,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	if ((player.pev->deadflag != (DEAD_DISCARDBODY + 1)) &&
 		!CL_IsDead() && 0 != player.pev->viewmodel && 0 == g_iUser1)
 	{
-		if (player.m_flNextAttack <= 0)
+		if (player.m_iNextAttack <= 0)
 		{
 			pWeapon->ItemPostFrame();
 		}
@@ -705,7 +728,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	to->client.viewmodel = player.pev->viewmodel;
 	to->client.fov = player.m_iFOV;
 	to->client.weaponanim = player.pev->weaponanim;
-	to->client.m_flNextAttack = player.m_flNextAttack;
+	*(int*)&to->client.m_flNextAttack = player.m_iNextAttack;
 	to->client.fuser2 = player.m_flNextAmmoBurn;
 	to->client.fuser3 = player.m_flAmmoStartCharge;
 	to->client.maxspeed = player.pev->maxspeed;
@@ -754,9 +777,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		pto->m_fInSpecialReload = pCurrent->m_fInSpecialReload;
 		//		pto->m_flPumpTime				= pCurrent->m_flPumpTime;
 		pto->m_iClip = pCurrent->m_iClip;
-		pto->m_flNextPrimaryAttack = pCurrent->m_flNextPrimaryAttack;
-		pto->m_flNextSecondaryAttack = pCurrent->m_flNextSecondaryAttack;
-		pto->m_flTimeWeaponIdle = pCurrent->m_flTimeWeaponIdle;
+		*(int*)&pto->m_flNextPrimaryAttack = pCurrent->m_iNextPrimaryAttack;
+		*(int*)&pto->m_flNextSecondaryAttack = pCurrent->m_iNextSecondaryAttack;
+		*(int*)&pto->m_flTimeWeaponIdle = pCurrent->m_iTimeWeaponIdle;
 		pto->fuser1 = pCurrent->pev->fuser1;
 		pto->fuser2 = pCurrent->m_flStartThrow;
 		pto->fuser3 = pCurrent->m_flReleaseThrow;
@@ -767,9 +790,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		// Decrement weapon counters, server does this at same time ( during post think, after doing everything else )
 		pto->m_flNextReload -= cmd->msec / 1000.0;
 		pto->m_fNextAimBonus -= cmd->msec / 1000.0;
-		pto->m_flNextPrimaryAttack -= cmd->msec / 1000.0;
-		pto->m_flNextSecondaryAttack -= cmd->msec / 1000.0;
-		pto->m_flTimeWeaponIdle -= cmd->msec / 1000.0;
+		*(int*)&pto->m_flNextPrimaryAttack -= cmd->msec;
+		*(int*)&pto->m_flNextSecondaryAttack -= cmd->msec;
+		*(int*)&pto->m_flTimeWeaponIdle -= cmd->msec;
 		pto->fuser1 -= cmd->msec / 1000.0;
 
 		to->client.vuser3[2] = pCurrent->m_iSecondaryAmmoType;
@@ -793,19 +816,19 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 			pto->m_fNextAimBonus = -1.0;
 		}
 
-		if (pto->m_flNextPrimaryAttack < -1.1)
+		if (*(int*)&pto->m_flNextPrimaryAttack < -1100)
 		{
-			pto->m_flNextPrimaryAttack = -1.1;
+			*(int*)&pto->m_flNextPrimaryAttack = -1100;
 		}
 
-		if (pto->m_flNextSecondaryAttack < -0.001)
+		if (*(int*)&pto->m_flNextSecondaryAttack < -1)
 		{
-			pto->m_flNextSecondaryAttack = -0.001;
+			*(int*)&pto->m_flNextSecondaryAttack = -1;
 		}
 
-		if (pto->m_flTimeWeaponIdle < -0.001)
+		if (*(int*)&pto->m_flTimeWeaponIdle < -1)
 		{
-			pto->m_flTimeWeaponIdle = -0.001;
+			*(int*)&pto->m_flTimeWeaponIdle = -1;
 		}
 
 		if (pto->m_flNextReload < -0.001)
@@ -820,10 +843,10 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	}
 
 	// m_flNextAttack is now part of the weapons, but is part of the player instead
-	to->client.m_flNextAttack -= cmd->msec / 1000.0;
-	if (to->client.m_flNextAttack < -0.001)
+	*(int*)&to->client.m_flNextAttack -= cmd->msec;
+	if (*(int*)&to->client.m_flNextAttack < -1)
 	{
-		to->client.m_flNextAttack = -0.001;
+		*(int*)&to->client.m_flNextAttack = -1;
 	}
 
 	to->client.fuser2 -= cmd->msec / 1000.0;

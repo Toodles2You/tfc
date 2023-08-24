@@ -84,6 +84,10 @@ bool CMP5::Deploy()
 	return DefaultDeploy("models/v_9mmAR.mdl", "models/p_9mmAR.mdl", MP5_DEPLOY, "mp5");
 }
 
+bool CMP5::Holster()
+{
+	return DefaultHolster(MP5_HOLSTER);
+}
 
 void CMP5::PrimaryAttack()
 {
@@ -91,21 +95,35 @@ void CMP5::PrimaryAttack()
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
 		PlayEmptySound();
-		m_flNextPrimaryAttack = 0.15;
+		m_iNextPrimaryAttack = 150;
 		return;
 	}
 
 	if (m_iClip <= 0)
 	{
 		PlayEmptySound();
-		m_flNextPrimaryAttack = 0.15;
+		m_iNextPrimaryAttack = 150;
 		return;
 	}
 
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
 
-	m_iClip--;
+	auto shots = 0;
+
+	while (m_iNextPrimaryAttack <= 0)
+	{
+		m_iNextPrimaryAttack += 100;
+		shots++;
+	}
+
+	if (shots > m_iClip)
+	{
+		shots = m_iClip;
+		PlayEmptySound();
+	}
+
+	m_iClip -= shots;
 
 
 	m_pPlayer->pev->effects = (int)(m_pPlayer->pev->effects) | EF_MUZZLEFLASH;
@@ -120,26 +138,21 @@ void CMP5::PrimaryAttack()
 	if (UTIL_IsDeathmatch())
 	{
 		// optimized multiplayer. Widened to make it easier to hit a moving player
-		vecDir = m_pPlayer->FireBulletsPlayer(1, vecSrc, vecAiming, VECTOR_CONE_6DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed);
+		vecDir = m_pPlayer->FireBulletsPlayer(shots, vecSrc, vecAiming, VECTOR_CONE_6DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed);
 	}
 	else
 	{
 		// single player spread
-		vecDir = m_pPlayer->FireBulletsPlayer(1, vecSrc, vecAiming, VECTOR_CONE_3DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed);
+		vecDir = m_pPlayer->FireBulletsPlayer(shots, vecSrc, vecAiming, VECTOR_CONE_3DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed);
 	}
 
-	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usMP5, 0.0, g_vecZero, g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0);
+	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usMP5, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, m_pPlayer->random_seed, shots, 0, 0);
 
 	if (0 == m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", false, 0);
 
-	m_flNextPrimaryAttack = GetNextAttackDelay(0.1);
-
-	if (m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.1;
-
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 }
 
 
@@ -150,7 +163,7 @@ void CMP5::SecondaryAttack()
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
 		PlayEmptySound();
-		m_flNextPrimaryAttack = 0.15;
+		m_iNextPrimaryAttack = 150;
 		return;
 	}
 
@@ -180,10 +193,8 @@ void CMP5::SecondaryAttack()
 
 	PLAYBACK_EVENT(FEV_NOTHOST, m_pPlayer->edict(), m_usMP52);
 
-
-	m_flNextPrimaryAttack = GetNextAttackDelay(1);
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 1;
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 5; // idle pretty soon after shooting.
+	m_iNextPrimaryAttack = m_iNextSecondaryAttack = 1000;
+	m_iTimeWeaponIdle = 5000; // idle pretty soon after shooting.
 
 	if (0 == m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType])
 		// HEV suit - indicate out of ammo condition
@@ -192,10 +203,7 @@ void CMP5::SecondaryAttack()
 
 void CMP5::Reload()
 {
-	if (m_pPlayer->ammo_9mm <= 0)
-		return;
-
-	DefaultReload(MP5_MAX_CLIP, MP5_RELOAD, 1.5);
+	DefaultReload(MP5_MAX_CLIP, MP5_RELOAD, 1500);
 }
 
 
@@ -205,7 +213,7 @@ void CMP5::WeaponIdle()
 
 	m_pPlayer->GetAutoaimVector(AUTOAIM_5DEGREES);
 
-	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
+	if (m_iTimeWeaponIdle > 0)
 		return;
 
 	int iAnim;
@@ -223,7 +231,7 @@ void CMP5::WeaponIdle()
 
 	SendWeaponAnim(iAnim);
 
-	m_flTimeWeaponIdle = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15); // how long till we do this again.
+	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000); // how long till we do this again.
 }
 
 

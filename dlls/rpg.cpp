@@ -290,7 +290,7 @@ void CRpg::Reload()
 	// Set the next attack time into the future so that WeaponIdle will get called more often
 	// than reload, allowing the RPG LTD to be updated
 
-	m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
+	m_iNextPrimaryAttack = 500;
 
 	if (0 != m_cActiveRockets && m_fSpotActive)
 	{
@@ -302,15 +302,15 @@ void CRpg::Reload()
 	if (m_pSpot && m_fSpotActive)
 	{
 		SuspendLaserDot(2.1);
-		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 2.1;
+		m_iNextSecondaryAttack = 2100;
 	}
 
 	if (m_iClip == 0)
 	{
-		const bool iResult = DefaultReload(RPG_MAX_CLIP, RPG_RELOAD, 2);
+		const bool iResult = DefaultReload(RPG_MAX_CLIP, RPG_RELOAD, 2000);
 
 		if (iResult)
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+			m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 	}
 }
 
@@ -393,15 +393,14 @@ bool CRpg::CanHolster()
 	return true;
 }
 
-void CRpg::Holster()
+bool CRpg::Holster()
 {
-	m_fInReload = false; // cancel any reload in progress.
-
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
-
-	SendWeaponAnim(RPG_HOLSTER1);
-
-	ToggleLaserDot(false);
+	if (DefaultHolster(0 != m_iClip ? RPG_HOLSTER1 : RPG_HOLSTER2))
+	{
+		ToggleLaserDot(false);
+		return true;
+	}
+	return false;
 }
 
 
@@ -433,8 +432,8 @@ void CRpg::PrimaryAttack()
 
 		m_iClip--;
 
-		m_flNextPrimaryAttack = GetNextAttackDelay(1.5);
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.5;
+		m_iNextPrimaryAttack = 1500;
+		m_iTimeWeaponIdle = 1500;
 	}
 	else
 	{
@@ -453,7 +452,7 @@ void CRpg::SecondaryAttack()
 		ToggleLaserDot(false);
 	}
 
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.2;
+	m_iNextSecondaryAttack = 200;
 }
 
 
@@ -467,7 +466,7 @@ void CRpg::WeaponIdle()
 
 	UpdateSpot();
 
-	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
+	if (m_iTimeWeaponIdle > 0)
 		return;
 
 	if (0 != m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
@@ -481,7 +480,7 @@ void CRpg::WeaponIdle()
 			else
 				iAnim = RPG_IDLE;
 
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 90.0 / 15.0;
+			m_iTimeWeaponIdle = 6000;
 		}
 		else
 		{
@@ -490,14 +489,14 @@ void CRpg::WeaponIdle()
 			else
 				iAnim = RPG_FIDGET;
 
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 6.1;
+			m_iTimeWeaponIdle = 6100;
 		}
 
 		SendWeaponAnim(iAnim);
 	}
 	else
 	{
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1;
+		m_iTimeWeaponIdle = 1000;
 	}
 }
 

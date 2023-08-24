@@ -72,26 +72,27 @@ bool CGlock::Deploy()
 	return DefaultDeploy("models/v_9mmhandgun.mdl", "models/p_9mmhandgun.mdl", GLOCK_DRAW, "onehanded");
 }
 
+bool CGlock::Holster()
+{
+	return DefaultHolster(GLOCK_HOLSTER);
+}
+
 void CGlock::SecondaryAttack()
 {
-	GlockFire(0.1, 0.2, false);
+	GlockFire(0.1, 200, false);
 }
 
 void CGlock::PrimaryAttack()
 {
-	GlockFire(0.01, 0.3, true);
+	GlockFire(0.01, 300, true);
 }
 
-void CGlock::GlockFire(float flSpread, float flCycleTime, bool fUseAutoAim)
+void CGlock::GlockFire(float flSpread, int fCycleTime, bool fUseAutoAim)
 {
 	if (m_iClip <= 0)
 	{
-		//if (m_fFireOnEmpty)
-		{
-			PlayEmptySound();
-			m_flNextPrimaryAttack = m_flNextSecondaryAttack = GetNextAttackDelay(0.2);
-		}
-
+		PlayEmptySound();
+		m_iNextPrimaryAttack = m_iNextSecondaryAttack = 200;
 		return;
 	}
 
@@ -132,13 +133,13 @@ void CGlock::GlockFire(float flSpread, float flCycleTime, bool fUseAutoAim)
 
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), fUseAutoAim ? m_usFireGlock1 : m_usFireGlock2, 0.0, g_vecZero, g_vecZero, vecDir.x, vecDir.y, 0, 0, (m_iClip == 0) ? 1 : 0, 0);
 
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = GetNextAttackDelay(flCycleTime);
+	m_iNextPrimaryAttack = m_iNextSecondaryAttack = fCycleTime;
 
 	if (0 == m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", false, 0);
 
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 }
 
 
@@ -150,13 +151,13 @@ void CGlock::Reload()
 	bool iResult;
 
 	if (m_iClip == 0)
-		iResult = DefaultReload(17, GLOCK_RELOAD, 1.5);
+		iResult = DefaultReload(GLOCK_MAX_CLIP, GLOCK_RELOAD, 1500);
 	else
-		iResult = DefaultReload(17, GLOCK_RELOAD_NOT_EMPTY, 1.5);
+		iResult = DefaultReload(GLOCK_MAX_CLIP, GLOCK_RELOAD_NOT_EMPTY, 1500);
 
 	if (iResult)
 	{
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+		m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 	}
 }
 
@@ -168,7 +169,7 @@ void CGlock::WeaponIdle()
 
 	m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
 
-	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
+	if (m_iTimeWeaponIdle > 0)
 		return;
 
 	// only idle if the slid isn't back
@@ -180,17 +181,17 @@ void CGlock::WeaponIdle()
 		if (flRand <= 0.3 + 0 * 0.75)
 		{
 			iAnim = GLOCK_IDLE3;
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 49.0 / 16;
+			m_iTimeWeaponIdle = 3063;
 		}
 		else if (flRand <= 0.6 + 0 * 0.875)
 		{
 			iAnim = GLOCK_IDLE1;
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 60.0 / 16.0;
+			m_iTimeWeaponIdle = 3750;
 		}
 		else
 		{
 			iAnim = GLOCK_IDLE2;
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 40.0 / 16.0;
+			m_iTimeWeaponIdle = 2500;
 		}
 		SendWeaponAnim(iAnim);
 	}

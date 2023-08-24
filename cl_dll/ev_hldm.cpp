@@ -678,7 +678,14 @@ void EV_FireMP5(event_args_t* args)
 	EV_GetGunPosition(args, vecSrc, origin);
 	VectorCopy(forward, vecAiming);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 2, &tracerCount[idx - 1], args->fparam1, args->fparam2);
+	if (UTIL_IsDeathmatch())
+	{
+		EV_HLDM_FireBullets(idx, forward, right, up, args->iparam2, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 2, &tracerCount[idx - 1], 0.05234, 0.05234, args->iparam1);
+	}
+	else
+	{
+		EV_HLDM_FireBullets(idx, forward, right, up, args->iparam2, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 2, &tracerCount[idx - 1], 0.02618, 0.02618, args->iparam1);
+	}
 }
 
 // We only predict the animation and sound

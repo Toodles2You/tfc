@@ -360,7 +360,7 @@ public:
 	virtual void Look(int iDistance); // basic sight function for monsters
 	virtual CBaseEntity* BestVisibleEnemy();		// finds best visible enemy for attack
 
-	float m_flNextAttack;
+	int m_iNextAttack;
 
 	//We use this variables to store each ammo count.
 	int ammo_9mm;

@@ -85,18 +85,9 @@ bool CPython::Deploy()
 }
 
 
-void CPython::Holster()
+bool CPython::Holster()
 {
-	m_fInReload = false; // cancel any reload in progress.
-
-	if (m_pPlayer->m_iFOV != 0)
-	{
-		SecondaryAttack();
-	}
-
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 1.0;
-	m_flTimeWeaponIdle = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
-	SendWeaponAnim(PYTHON_HOLSTER);
+	return DefaultHolster(PYTHON_HOLSTER);
 }
 
 void CPython::SecondaryAttack()
@@ -115,7 +106,7 @@ void CPython::SecondaryAttack()
 		m_pPlayer->m_iFOV = 40;
 	}
 
-	m_flNextSecondaryAttack = 0.5;
+	m_iNextSecondaryAttack = 500;
 }
 
 void CPython::PrimaryAttack()
@@ -124,7 +115,7 @@ void CPython::PrimaryAttack()
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
 		PlayEmptySound();
-		m_flNextPrimaryAttack = 0.15;
+		m_iNextPrimaryAttack = 150;
 		return;
 	}
 
@@ -133,7 +124,7 @@ void CPython::PrimaryAttack()
 		if (m_fFireOnEmpty)
 		{
 			PlayEmptySound();
-			m_flNextPrimaryAttack = 0.15;
+			m_iNextPrimaryAttack = 150;
 		}
 
 		return;
@@ -164,8 +155,8 @@ void CPython::PrimaryAttack()
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", false, 0);
 
-	m_flNextPrimaryAttack = 0.75;
-	m_flTimeWeaponIdle = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+	m_iNextPrimaryAttack = 750;
+	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 }
 
 
@@ -179,7 +170,7 @@ void CPython::Reload()
 		m_pPlayer->m_iFOV = 0; // 0 means reset to default fov
 	}
 
-	DefaultReload(6, PYTHON_RELOAD, 2.0, UTIL_IsDeathmatch() ? 1 : 0);
+	DefaultReload(6, PYTHON_RELOAD, 2000, UTIL_IsDeathmatch() ? 1 : 0);
 }
 
 
@@ -189,7 +180,7 @@ void CPython::WeaponIdle()
 
 	m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
 
-	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
+	if (m_iTimeWeaponIdle > 0)
 		return;
 
 	int iAnim;
@@ -197,22 +188,22 @@ void CPython::WeaponIdle()
 	if (flRand <= 0.5)
 	{
 		iAnim = PYTHON_IDLE1;
-		m_flTimeWeaponIdle = (70.0 / 30.0);
+		m_iTimeWeaponIdle = 2333;
 	}
 	else if (flRand <= 0.7)
 	{
 		iAnim = PYTHON_IDLE2;
-		m_flTimeWeaponIdle = (60.0 / 30.0);
+		m_iTimeWeaponIdle = 2000;
 	}
 	else if (flRand <= 0.9)
 	{
 		iAnim = PYTHON_IDLE3;
-		m_flTimeWeaponIdle = (88.0 / 30.0);
+		m_iTimeWeaponIdle = 2933;
 	}
 	else
 	{
 		iAnim = PYTHON_FIDGET;
-		m_flTimeWeaponIdle = (170.0 / 30.0);
+		m_iTimeWeaponIdle = 5667;
 	}
 
 	SendWeaponAnim(iAnim, UTIL_IsDeathmatch() ? 1 : 0);

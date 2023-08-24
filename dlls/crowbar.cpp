@@ -74,10 +74,9 @@ bool CCrowbar::Deploy()
 	return DefaultDeploy("models/v_crowbar.mdl", "models/p_crowbar.mdl", CROWBAR_DRAW, "crowbar");
 }
 
-void CCrowbar::Holster()
+bool CCrowbar::Holster()
 {
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
-	SendWeaponAnim(CROWBAR_HOLSTER);
+	return DefaultHolster(CROWBAR_HOLSTER);
 }
 
 
@@ -189,7 +188,7 @@ bool CCrowbar::Swing(bool fFirst)
 		if (fFirst)
 		{
 			// miss
-			m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
+			m_iNextPrimaryAttack = 500;
 
 			// player "shoot" animation
 			m_pPlayer->SetAnimation(PLAYER_ATTACK1);
@@ -221,7 +220,7 @@ bool CCrowbar::Swing(bool fFirst)
 
 		ClearMultiDamage();
 
-		if ((m_flNextPrimaryAttack + 1 < UTIL_WeaponTimeBase()) || UTIL_IsDeathmatch())
+		if ((m_iNextPrimaryAttack + 1000 < 0) || UTIL_IsDeathmatch())
 		{
 			// first swing does full damage
 			pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgCrowbar, gpGlobals->v_forward, &tr, DMG_CLUB);
@@ -235,7 +234,7 @@ bool CCrowbar::Swing(bool fFirst)
 
 #endif
 
-		m_flNextPrimaryAttack = GetNextAttackDelay(0.25);
+		m_iNextPrimaryAttack = 250;
 
 #ifndef CLIENT_DLL
 		// play thwack, smack, or dong sound

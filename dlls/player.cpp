@@ -2833,6 +2833,8 @@ void CBasePlayer::PostThink()
 	UpdatePlayerSound();
 
 pt_end:
+	const int msec = static_cast<int>(std::roundf(gpGlobals->frametime * 1000));
+
 	// Decay timers on weapons
 	// go through all of the weapons and make a list of the ones to pack
 	for (int i = 0; i < MAX_ITEM_TYPES; i++)
@@ -2847,13 +2849,9 @@ pt_end:
 
 				if (gun)
 				{
-					gun->m_flNextPrimaryAttack = V_max(gun->m_flNextPrimaryAttack - gpGlobals->frametime, -1.1);
-					gun->m_flNextSecondaryAttack = V_max(gun->m_flNextSecondaryAttack - gpGlobals->frametime, -0.001);
-
-					if (gun->m_flTimeWeaponIdle != 1000)
-					{
-						gun->m_flTimeWeaponIdle = V_max(gun->m_flTimeWeaponIdle - gpGlobals->frametime, -0.001);
-					}
+					gun->m_iNextPrimaryAttack = V_max(gun->m_iNextPrimaryAttack - msec, -1100);
+					gun->m_iNextSecondaryAttack = V_max(gun->m_iNextSecondaryAttack - msec, -1);
+					gun->m_iTimeWeaponIdle = V_max(gun->m_iTimeWeaponIdle - msec, -1);
 
 					if (gun->pev->fuser1 != 1000)
 					{
@@ -2874,9 +2872,9 @@ pt_end:
 		}
 	}
 
-	m_flNextAttack -= gpGlobals->frametime;
-	if (m_flNextAttack < -0.001)
-		m_flNextAttack = -0.001;
+	m_iNextAttack -= msec;
+	if (m_iNextAttack < -1)
+		m_iNextAttack = -1;
 
 	if (m_flNextAmmoBurn != 1000)
 	{
@@ -3065,7 +3063,7 @@ void CBasePlayer::Spawn()
 	m_flTimeStepSound = 0;
 	m_iStepLeft = 0;
 
-	m_flNextAttack = UTIL_WeaponTimeBase();
+	m_iNextAttack = 0;
 	StartSneaking();
 
 	m_iFlashBattery = 99;
@@ -3224,10 +3222,7 @@ bool CBasePlayer::Restore(CRestore& restore)
 
 	TabulateAmmo();
 
-	// HACK:	This variable is saved/restored in CBaseMonster as a time variable, but we're using it
-	//			as just a counter.  Ideally, this needs its own variable that's saved as a plain float.
-	//			Barring that, we clear it out here instead of using the incorrect restored time value.
-	m_flNextAttack = UTIL_WeaponTimeBase();
+	m_iNextAttack = 0;
 
 	m_bResetViewEntity = true;
 
@@ -3377,9 +3372,9 @@ void CBasePlayer::SelectItem(int iId)
 
 	if (m_pActiveItem)
 	{
-		m_pActiveItem->m_ForceSendAnimations = true;
+		// m_pActiveItem->m_ForceSendAnimations = true;
 		m_pActiveItem->Deploy();
-		m_pActiveItem->m_ForceSendAnimations = false;
+		// m_pActiveItem->m_ForceSendAnimations = false;
 		m_pActiveItem->UpdateItemInfo();
 	}
 }
@@ -4079,7 +4074,7 @@ Called every frame by the player PreThink
 */
 void CBasePlayer::ItemPreFrame()
 {
-	if (m_flNextAttack > 0)
+	if (m_iNextAttack > 0)
 	{
 		return;
 	}
@@ -4104,7 +4099,7 @@ void CBasePlayer::ItemPostFrame()
 	if (m_pTank != NULL)
 		return;
 
-	if (m_flNextAttack > 0)
+	if (m_iNextAttack > 0)
 	{
 		return;
 	}

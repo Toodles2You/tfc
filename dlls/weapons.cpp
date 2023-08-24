@@ -381,9 +381,9 @@ IMPLEMENT_SAVERESTORE(CBasePlayerItem, CBaseAnimating);
 
 TYPEDESCRIPTION CBasePlayerWeapon::m_SaveData[] =
 	{
-		DEFINE_FIELD(CBasePlayerWeapon, m_flNextPrimaryAttack, FIELD_FLOAT),
-		DEFINE_FIELD(CBasePlayerWeapon, m_flNextSecondaryAttack, FIELD_FLOAT),
-		DEFINE_FIELD(CBasePlayerWeapon, m_flTimeWeaponIdle, FIELD_FLOAT),
+		DEFINE_FIELD(CBasePlayerWeapon, m_iNextPrimaryAttack, FIELD_INTEGER),
+		DEFINE_FIELD(CBasePlayerWeapon, m_iNextSecondaryAttack, FIELD_INTEGER),
+		DEFINE_FIELD(CBasePlayerWeapon, m_iTimeWeaponIdle, FIELD_INTEGER),
 		DEFINE_FIELD(CBasePlayerWeapon, m_iPrimaryAmmoType, FIELD_INTEGER),
 		DEFINE_FIELD(CBasePlayerWeapon, m_iSecondaryAmmoType, FIELD_INTEGER),
 		DEFINE_FIELD(CBasePlayerWeapon, m_iClip, FIELD_INTEGER),
@@ -589,10 +589,11 @@ void CBasePlayerItem::Kill()
 	pev->nextthink = gpGlobals->time + .1;
 }
 
-void CBasePlayerItem::Holster()
+bool CBasePlayerItem::Holster()
 {
 	m_pPlayer->pev->viewmodel = 0;
 	m_pPlayer->pev->weaponmodel = 0;
+	return true;
 }
 
 void CBasePlayerItem::AttachToPlayer(CBasePlayer* pPlayer)
@@ -825,9 +826,30 @@ bool CBasePlayerWeapon::DefaultDeploy(const char* szViewModel, const char* szWea
 	strcpy(m_pPlayer->m_szAnimExtention, szAnimExt);
 	SendWeaponAnim(iAnim, body);
 
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
+	m_pPlayer->m_iNextAttack = 500;
+	m_iNextPrimaryAttack = V_max(m_iNextPrimaryAttack, 500);
+	m_iNextSecondaryAttack = V_max(m_iNextSecondaryAttack, 500);
+	m_iTimeWeaponIdle = 1000;
 	m_flLastFireTime = 0.0;
+
+	return true;
+}
+
+bool CBasePlayerWeapon::DefaultHolster(int iAnim, int body)
+{
+	// if (!CanHolster())
+	// 	return false;
+
+	if (iAnim >= 0)
+		SendWeaponAnim(iAnim, body);
+
+	m_pPlayer->m_iNextAttack = 500;
+	m_iNextPrimaryAttack = V_max(m_iNextPrimaryAttack, 500);
+	m_iNextSecondaryAttack = V_max(m_iNextSecondaryAttack, 500);
+	m_iTimeWeaponIdle = 1000;
+	m_flLastFireTime = 0.0;
+	m_fInReload = false; // Cancel any reload in progress.
+	m_pPlayer->m_iFOV = 0;
 
 	return true;
 }
@@ -857,11 +879,12 @@ int CBasePlayerWeapon::SecondaryAmmoIndex()
 	return m_iSecondaryAmmoType;
 }
 
-void CBasePlayerWeapon::Holster()
+bool CBasePlayerWeapon::Holster()
 {
 	m_fInReload = false; // cancel any reload in progress.
 	m_pPlayer->pev->viewmodel = 0;
 	m_pPlayer->pev->weaponmodel = 0;
+	return true;
 }
 
 void CBasePlayerAmmo::Spawn()
@@ -1015,7 +1038,7 @@ void CBasePlayerWeapon::DoRetireWeapon()
 //=========================================================================
 float CBasePlayerWeapon::GetNextAttackDelay(float delay)
 {
-	if (m_flLastFireTime == 0 || m_flNextPrimaryAttack <= -1.1)
+	if (m_flLastFireTime == 0 || m_iNextPrimaryAttack <= -1100)
 	{
 		// At this point, we are assuming that the client has stopped firing
 		// and we are going to reset our book keeping variables.
@@ -1371,8 +1394,8 @@ void CWeaponBox::SetObjectCollisionBox()
 
 void CBasePlayerWeapon::PrintState()
 {
-	ALERT(at_console, "primary:  %f\n", m_flNextPrimaryAttack);
-	ALERT(at_console, "idle   :  %f\n", m_flTimeWeaponIdle);
+	ALERT(at_console, "primary:  %i\n", m_iNextPrimaryAttack);
+	ALERT(at_console, "idle   :  %i\n", m_iTimeWeaponIdle);
 
 	//	ALERT( at_console, "nextrl :  %f\n", m_flNextReload );
 	//	ALERT( at_console, "nextpum:  %f\n", m_flPumpTime );

@@ -214,7 +214,7 @@ void CBasePlayerItem::DestroyItem() {}
 void CBasePlayerItem::AddToPlayer(CBasePlayer* pPlayer) {}
 void CBasePlayerItem::Drop() {}
 void CBasePlayerItem::Kill() {}
-void CBasePlayerItem::Holster() {}
+bool CBasePlayerItem::Holster() { return true; }
 void CBasePlayerItem::AttachToPlayer(CBasePlayer* pPlayer) {}
 bool CBasePlayerWeapon::AddDuplicate(CBasePlayerItem* pOriginal) { return false; }
 void CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer) {}

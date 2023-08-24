@@ -255,6 +255,8 @@ void CCyclerSprite::Spawn()
 	SET_MODEL(ENT(pev), STRING(pev->model));
 
 	m_maxFrame = (float)MODEL_FRAMES(pev->modelindex) - 1;
+
+	pev->flags |= FL_KILLME;
 }
 
 
@@ -307,7 +309,7 @@ public:
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
 	bool Deploy() override;
-	void Holster() override;
+	bool Holster() override;
 	int m_iszModel;
 	int m_iModel;
 };
@@ -334,16 +336,17 @@ void CWeaponCycler::Spawn()
 bool CWeaponCycler::Deploy()
 {
 	m_pPlayer->pev->viewmodel = m_iszModel;
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 1.0;
+	m_pPlayer->m_iNextAttack = 1000;
 	SendWeaponAnim(0);
 	m_iClip = 0;
 	return true;
 }
 
 
-void CWeaponCycler::Holster()
+bool CWeaponCycler::Holster()
 {
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
+	m_pPlayer->m_iNextAttack = 500;
+	return true;
 }
 
 
@@ -352,7 +355,7 @@ void CWeaponCycler::PrimaryAttack()
 
 	SendWeaponAnim(pev->sequence);
 
-	m_flNextPrimaryAttack = gpGlobals->time + 0.3;
+	m_iNextPrimaryAttack = 300;
 }
 
 
@@ -374,7 +377,7 @@ void CWeaponCycler::SecondaryAttack()
 
 	SendWeaponAnim(pev->sequence);
 
-	m_flNextSecondaryAttack = gpGlobals->time + 0.3;
+	m_iNextSecondaryAttack = 300;
 }
 
 

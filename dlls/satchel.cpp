@@ -265,9 +265,6 @@ bool CSatchel::CanDeploy()
 
 bool CSatchel::Deploy()
 {
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 1.0;
-	//m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat( m_pPlayer->random_seed, 10, 15 );
-
 	bool result;
 
 	if (0 != m_chargeReady)
@@ -277,33 +274,30 @@ bool CSatchel::Deploy()
 
 	if (result)
 	{
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2;
+		m_iTimeWeaponIdle = 2000;
 	}
 
 	return result;
 }
 
 
-void CSatchel::Holster()
+bool CSatchel::Holster()
 {
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
+	const auto bHasAmmo = m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] != 0;
+	const auto bReady = m_chargeReady != 0;
 
-	if (0 != m_chargeReady)
+	if (DefaultHolster(bReady ? SATCHEL_RADIO_HOLSTER : (bHasAmmo ? SATCHEL_DROP : -1)))
 	{
-		SendWeaponAnim(SATCHEL_RADIO_HOLSTER);
+		if (!bHasAmmo && !bReady)
+		{
+			m_pPlayer->ClearWeaponBit(m_iId);
+			SetThink(&CSatchel::DestroyItem);
+			pev->nextthink = gpGlobals->time + 0.1;
+		}
+		return true;
 	}
-	else
-	{
-		SendWeaponAnim(SATCHEL_DROP);
-	}
-	EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "common/null.wav", 1.0, ATTN_NORM);
-
-	if (0 == m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] && 0 == m_chargeReady)
-	{
-		m_pPlayer->ClearWeaponBit(m_iId);
-		SetThink(&CSatchel::DestroyItem);
-		pev->nextthink = gpGlobals->time + 0.1;
-	}
+	
+	return false;
 }
 
 
@@ -338,9 +332,8 @@ void CSatchel::PrimaryAttack()
 		}
 
 		m_chargeReady = 2;
-		m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
-		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.5;
+		m_iNextPrimaryAttack = m_iNextSecondaryAttack = 500;
+		m_iTimeWeaponIdle = 500;
 		break;
 	}
 
@@ -390,15 +383,15 @@ void CSatchel::Throw()
 
 		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
 
-		m_flNextPrimaryAttack = GetNextAttackDelay(1.0);
-		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5;
+		m_iNextPrimaryAttack = 1000;
+		m_iNextSecondaryAttack = 500;
 	}
 }
 
 
 void CSatchel::WeaponIdle()
 {
-	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
+	if (m_iTimeWeaponIdle > 0)
 		return;
 
 	switch (m_chargeReady)
@@ -433,12 +426,11 @@ void CSatchel::WeaponIdle()
 		// use tripmine animations
 		strcpy(m_pPlayer->m_szAnimExtention, "trip");
 
-		m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
-		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5;
+		m_iNextPrimaryAttack = m_iNextSecondaryAttack = 500;
 		m_chargeReady = 0;
 		break;
 	}
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15); // how long till we do this again.
+	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000); // how long till we do this again.
 }
 
 //=========================================================

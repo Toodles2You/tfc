@@ -74,12 +74,14 @@ bool CEgon::Deploy()
 	return DefaultDeploy("models/v_egon.mdl", "models/p_egon.mdl", EGON_DRAW, "egon");
 }
 
-void CEgon::Holster()
+bool CEgon::Holster()
 {
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
-	SendWeaponAnim(EGON_HOLSTER);
-
-	EndAttack();
+	if (DefaultHolster(EGON_HOLSTER))
+	{
+		EndAttack();
+		return true;
+	}
+	return false;
 }
 
 bool CEgon::GetItemInfo(ItemInfo* p)
@@ -155,7 +157,7 @@ void CEgon::Attack()
 	{
 		if (!HasAmmo())
 		{
-			m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.25;
+			m_iNextPrimaryAttack = m_iNextSecondaryAttack = 250;
 			PlayEmptySound();
 			return;
 		}
@@ -167,7 +169,7 @@ void CEgon::Attack()
 		m_shakeTime = 0;
 
 		m_pPlayer->m_iWeaponVolume = EGON_PRIMARY_VOLUME;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.1;
+		m_iTimeWeaponIdle = 100;
 		pev->fuser1 = UTIL_WeaponTimeBase() + 2;
 
 		pev->dmgtime = gpGlobals->time + GetPulseInterval();
@@ -189,7 +191,7 @@ void CEgon::Attack()
 		if (!HasAmmo())
 		{
 			EndAttack();
-			m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 1.0;
+			m_iNextPrimaryAttack = m_iNextSecondaryAttack = 1000;
 		}
 	}
 	break;
@@ -455,7 +457,7 @@ void CEgon::WeaponIdle()
 
 	ResetEmptySound();
 
-	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
+	if (m_iTimeWeaponIdle > 0)
 		return;
 
 	if (m_fireState != FIRE_OFF)
@@ -468,12 +470,12 @@ void CEgon::WeaponIdle()
 	if (flRand <= 0.5)
 	{
 		iAnim = EGON_IDLE1;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+		m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 	}
 	else
 	{
 		iAnim = EGON_FIDGET1;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 3;
+		m_iTimeWeaponIdle = 3000;
 	}
 
 	SendWeaponAnim(iAnim);
@@ -492,9 +494,9 @@ void CEgon::EndAttack()
 	PLAYBACK_EVENT_FULL(FEV_GLOBAL | FEV_RELIABLE, m_pPlayer->edict(), m_usEgonStop, 0, m_pPlayer->pev->origin, m_pPlayer->pev->angles, 0.0, 0.0,
 		static_cast<int>(bMakeNoise), 0, 0, 0);
 
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.0;
+	m_iTimeWeaponIdle = 2000;
 
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5;
+	m_iNextPrimaryAttack = m_iNextSecondaryAttack = 500;
 
 	m_fireState = FIRE_OFF;
 

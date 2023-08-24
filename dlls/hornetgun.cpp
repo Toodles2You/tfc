@@ -82,7 +82,7 @@ bool CHgun::GetItemInfo(ItemInfo* p)
 	p->iSlot = 3;
 	p->iPosition = 3;
 	p->iId = m_iId = WEAPON_HORNETGUN;
-	p->iFlags = ITEM_FLAG_NOAUTOSWITCHEMPTY | ITEM_FLAG_NOAUTORELOAD;
+	p->iFlags = ITEM_FLAG_SELECTONEMPTY | ITEM_FLAG_NOAUTOSWITCHEMPTY | ITEM_FLAG_NOAUTORELOAD;
 	p->iWeight = HORNETGUN_WEIGHT;
 
 	return true;
@@ -91,19 +91,18 @@ bool CHgun::GetItemInfo(ItemInfo* p)
 
 bool CHgun::Deploy()
 {
-	return DefaultDeploy("models/v_hgun.mdl", "models/p_hgun.mdl", HGUN_UP, "hive");
+	if (DefaultDeploy("models/v_hgun.mdl", "models/p_hgun.mdl", HGUN_UP, "hive"))
+	{
+		// Let ItemPostFrame run so the hornets start recharging.
+		m_pPlayer->m_iNextAttack = 0;
+		return true;
+	}
+	return false;
 }
 
-void CHgun::Holster()
+bool CHgun::Holster()
 {
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
-	SendWeaponAnim(HGUN_DOWN);
-
-	//!!!HACKHACK - can't select hornetgun if it's empty! no way to get ammo for it, either.
-	if (0 == m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()])
-	{
-		m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] = 1;
-	}
+	return DefaultHolster(HGUN_DOWN);
 }
 
 
@@ -138,14 +137,9 @@ void CHgun::PrimaryAttack()
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	m_flNextPrimaryAttack = GetNextAttackDelay(0.25);
+	m_iNextPrimaryAttack = m_iNextSecondaryAttack = 250;
 
-	if (m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
-	{
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.25;
-	}
-
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 }
 
 
@@ -221,8 +215,8 @@ void CHgun::SecondaryAttack()
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.1;
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+	m_iNextPrimaryAttack = m_iNextSecondaryAttack = 100;
+	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 }
 
 
@@ -247,7 +241,7 @@ void CHgun::WeaponIdle()
 {
 	Reload();
 
-	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
+	if (m_iTimeWeaponIdle > 0)
 		return;
 
 	int iAnim;
@@ -255,17 +249,17 @@ void CHgun::WeaponIdle()
 	if (flRand <= 0.75)
 	{
 		iAnim = HGUN_IDLE1;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 30.0 / 16 * (2);
+		m_iTimeWeaponIdle = 3750;
 	}
 	else if (flRand <= 0.875)
 	{
 		iAnim = HGUN_FIDGETSWAY;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 40.0 / 16.0;
+		m_iTimeWeaponIdle = 2500;
 	}
 	else
 	{
 		iAnim = HGUN_FIDGETSHAKE;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 35.0 / 16.0;
+		m_iTimeWeaponIdle = 2188;
 	}
 	SendWeaponAnim(iAnim);
 }

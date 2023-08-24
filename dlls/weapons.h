@@ -247,7 +247,7 @@ public:
 	}
 
 	virtual bool CanHolster() { return true; } // can this weapon be put away right now?
-	virtual void Holster();
+	virtual bool Holster();
 	virtual void UpdateItemInfo() {}
 
 	virtual void ItemPreFrame() {}	// called each frame by the player PreThink
@@ -330,7 +330,8 @@ public:
 	bool CanDeploy() override;
 	virtual bool IsUseable();
 	bool DefaultDeploy(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, int body = 0);
-	bool DefaultReload(int iClipSize, int iAnim, float fDelay, int body = 0);
+	bool DefaultHolster(int iAnim, int body = 0);
+	bool DefaultReload(int iClipSize, int iAnim, int fDelay, int body = 0);
 
 	void ItemPostFrame() override; // called each frame by the player PostThink
 	// called by CBasePlayerWeapons ItemPostFrame()
@@ -349,7 +350,7 @@ public:
 
 	virtual void DoRetireWeapon();
 	virtual bool ShouldWeaponIdle() { return false; }
-	void Holster() override;
+	bool Holster() override;
 
 	int PrimaryAmmoIndex() override;
 	int SecondaryAmmoIndex() override;
@@ -361,9 +362,9 @@ public:
 
 	float m_flPumpTime;
 	int m_fInSpecialReload;		   // Are we in the middle of a reload for the shotguns
-	float m_flNextPrimaryAttack;   // soonest time ItemPostFrame will call PrimaryAttack
-	float m_flNextSecondaryAttack; // soonest time ItemPostFrame will call SecondaryAttack
-	float m_flTimeWeaponIdle;	   // soonest time ItemPostFrame will call WeaponIdle
+	int m_iNextPrimaryAttack;   // soonest time ItemPostFrame will call PrimaryAttack
+	int m_iNextSecondaryAttack; // soonest time ItemPostFrame will call SecondaryAttack
+	int m_iTimeWeaponIdle;	   // soonest time ItemPostFrame will call WeaponIdle
 	int m_iPrimaryAmmoType;		   // "primary" ammo index into players m_rgAmmo[]
 	int m_iSecondaryAmmoType;	   // "secondary" ammo index into players m_rgAmmo[]
 	int m_iClip;				   // number of shots left in the primary weapon clip, -1 it not used
@@ -527,8 +528,9 @@ public:
 
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
-	void GlockFire(float flSpread, float flCycleTime, bool fUseAutoAim);
+	void GlockFire(float flSpread, int fCycleTime, bool fUseAutoAim);
 	bool Deploy() override;
+	bool Holster() override;
 	void Reload() override;
 	void WeaponIdle() override;
 
@@ -563,7 +565,7 @@ public:
 	void PrimaryAttack() override;
 	bool Swing(bool fFirst);
 	bool Deploy() override;
-	void Holster() override;
+	bool Holster() override;
 	int m_iSwing;
 	TraceResult m_trHit;
 
@@ -593,7 +595,7 @@ public:
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
 	bool Deploy() override;
-	void Holster() override;
+	bool Holster() override;
 	void Reload() override;
 	void WeaponIdle() override;
 
@@ -611,6 +613,7 @@ enum mp5_e
 	MP5_FIRE1,
 	MP5_FIRE2,
 	MP5_FIRE3,
+	MP5_HOLSTER,
 };
 
 class CMP5 : public CBasePlayerWeapon
@@ -624,6 +627,7 @@ public:
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
 	bool Deploy() override;
+	bool Holster() override;
 	void Reload() override;
 	void WeaponIdle() override;
 
@@ -661,7 +665,7 @@ public:
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
 	bool Deploy() override;
-	void Holster() override;
+	bool Holster() override;
 	void Reload() override;
 	void WeaponIdle() override;
 
@@ -702,6 +706,7 @@ public:
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
 	bool Deploy() override;
+	bool Holster() override;
 	void Reload() override;
 	void WeaponIdle() override;
 	void ItemPostFrame() override;
@@ -756,7 +761,7 @@ public:
 
 	bool Deploy() override;
 	bool CanHolster() override;
-	void Holster() override;
+	bool Holster() override;
 
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
@@ -829,7 +834,7 @@ public:
 	bool GetItemInfo(ItemInfo* p) override;
 
 	bool Deploy() override;
-	void Holster() override;
+	bool Holster() override;
 
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
@@ -904,7 +909,7 @@ public:
 	bool GetItemInfo(ItemInfo* p) override;
 
 	bool Deploy() override;
-	void Holster() override;
+	bool Holster() override;
 
 	void UpdateEffect(const Vector& startPoint, const Vector& endPoint, float timeBlend);
 
@@ -972,7 +977,7 @@ public:
 	void SecondaryAttack() override;
 	bool Deploy() override;
 	bool IsUseable() override;
-	void Holster() override;
+	bool Holster() override;
 	void Reload() override;
 	void WeaponIdle() override;
 
@@ -1007,7 +1012,7 @@ public:
 	void PrimaryAttack() override;
 	bool Deploy() override;
 	bool CanHolster() override;
-	void Holster() override;
+	bool Holster() override;
 	void WeaponIdle() override;
 };
 
@@ -1049,7 +1054,7 @@ public:
 	bool Deploy() override;
 	bool IsUseable() override;
 
-	void Holster() override;
+	bool Holster() override;
 	void WeaponIdle() override;
 	void Throw();
 };
@@ -1083,7 +1088,7 @@ public:
 
 	void PrimaryAttack() override;
 	bool Deploy() override;
-	void Holster() override;
+	bool Holster() override;
 	void WeaponIdle() override;
 
 private:
@@ -1111,7 +1116,7 @@ public:
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
 	bool Deploy() override;
-	void Holster() override;
+	bool Holster() override;
 	void WeaponIdle() override;
 	bool m_fJustThrown;
 
