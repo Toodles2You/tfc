@@ -204,7 +204,7 @@ public:
 	virtual void AddPointsToTeam(int score, bool bAllowNegativeScore) {}
 	virtual bool AddPlayerItem(CBasePlayerItem* pItem) { return 0; }
 	virtual bool RemovePlayerItem(CBasePlayerItem* pItem) { return 0; }
-	virtual int GiveAmmo(int iAmount, const char* szName, int iMax) { return -1; }
+	virtual int GiveAmmo(int iAmount, int iType, int iMax) { return -1; }
 	virtual float GetDelay() { return 0; }
 	virtual bool IsMoving() { return pev->velocity != g_vecZero; }
 	virtual void OverrideReset() {}
@@ -362,15 +362,6 @@ public:
 
 	int m_iNextAttack;
 
-	//We use this variables to store each ammo count.
-	int ammo_9mm;
-	int ammo_357;
-	int ammo_bolts;
-	int ammo_buckshot;
-	int ammo_rockets;
-	int ammo_uranium;
-	int ammo_hornets;
-	int ammo_argrens;
 	//Special stuff for grenades and satchels.
 	float m_flStartThrow;
 	float m_flReleaseThrow;

@@ -390,9 +390,9 @@ void CTripmine::Precache()
 bool CTripmine::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "Trip Mine";
+	p->iAmmo1 = AMMO_TRIPMINES;
 	p->iMaxAmmo1 = TRIPMINE_MAX_CARRY;
-	p->pszAmmo2 = NULL;
+	p->iAmmo2 = AMMO_NONE;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
 	p->iSlot = 4;
@@ -413,7 +413,7 @@ bool CTripmine::Deploy()
 
 bool CTripmine::Holster()
 {
-	const auto bHasAmmo = m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] != 0;
+	const auto bHasAmmo = m_pPlayer->m_rgAmmo[iAmmo1()] != 0;
 	
 	if (DefaultHolster(bHasAmmo ? TRIPMINE_HOLSTER : -1))
 	{
@@ -431,7 +431,7 @@ bool CTripmine::Holster()
 
 void CTripmine::PrimaryAttack()
 {
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+	if (m_pPlayer->m_rgAmmo[iAmmo1()] <= 0)
 		return;
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
@@ -453,12 +453,12 @@ void CTripmine::PrimaryAttack()
 
 			CBaseEntity* pEnt = CBaseEntity::Create("monster_tripmine", tr.vecEndPos + tr.vecPlaneNormal * 8, angles, m_pPlayer->edict());
 
-			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
+			m_pPlayer->m_rgAmmo[iAmmo1()]--;
 
 			// player "shoot" animation
 			m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-			if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+			if (m_pPlayer->m_rgAmmo[iAmmo1()] <= 0)
 			{
 				// no more mines!
 				RetireWeapon();
@@ -486,7 +486,7 @@ void CTripmine::WeaponIdle()
 	if (m_iTimeWeaponIdle > 0)
 		return;
 
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0)
+	if (m_pPlayer->m_rgAmmo[iAmmo1()] > 0)
 	{
 		SendWeaponAnim(TRIPMINE_DRAW);
 	}

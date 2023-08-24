@@ -296,7 +296,7 @@ public:
 	void GiveNamedItem(const char* szName, int defaultAmmo);
 	void EnableControl(bool fControl);
 
-	int GiveAmmo(int iAmount, const char* szName, int iMax) override;
+	int GiveAmmo(int iAmount, int iType, int iMax) override;
 	void SendAmmoUpdate();
 	void SendSingleAmmoUpdate(int ammoIndex);
 
@@ -312,9 +312,9 @@ public:
 	void SetSuitUpdate(const char* name, bool fgroup, int iNoRepeat);
 	void UpdateGeigerCounter();
 	void CheckTimeBasedDamage();
+	void CheckAmmoLevel(CBasePlayerItem* pItem, bool bPrimary = true);
 
 	bool FBecomeProne() override;
-	static int GetAmmoIndex(const char* psz);
 	int AmmoInventory(int iAmmoIndex);
 	int Illumination() override;
 
@@ -328,8 +328,6 @@ public:
 
 	void SetCustomDecalFrames(int nFrames);
 	int GetCustomDecalFrames();
-
-	void TabulateAmmo();
 
 	float m_flStartCharge;
 	float m_flAmmoStartCharge;

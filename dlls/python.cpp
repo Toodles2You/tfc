@@ -27,9 +27,9 @@ LINK_ENTITY_TO_CLASS(weapon_357, CPython);
 bool CPython::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "357";
+	p->iAmmo1 = AMMO_357;
 	p->iMaxAmmo1 = _357_MAX_CARRY;
-	p->pszAmmo2 = NULL;
+	p->iAmmo2 = AMMO_NONE;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = PYTHON_MAX_CLIP;
 	p->iFlags = 0;
@@ -151,9 +151,7 @@ void CPython::PrimaryAttack()
 
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usFirePython, 0.0, g_vecZero, g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0);
 
-	if (0 == m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
-		// HEV suit - indicate out of ammo condition
-		m_pPlayer->SetSuitUpdate("!HEV_AMO0", false, 0);
+	m_pPlayer->CheckAmmoLevel(this);
 
 	m_iNextPrimaryAttack = 750;
 	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
@@ -162,15 +160,10 @@ void CPython::PrimaryAttack()
 
 void CPython::Reload()
 {
-	if (m_pPlayer->ammo_357 <= 0)
-		return;
-
-	if (m_pPlayer->m_iFOV != 0)
+	if (DefaultReload(6, PYTHON_RELOAD, 2000, UTIL_IsDeathmatch() ? 1 : 0))
 	{
 		m_pPlayer->m_iFOV = 0; // 0 means reset to default fov
 	}
-
-	DefaultReload(6, PYTHON_RELOAD, 2000, UTIL_IsDeathmatch() ? 1 : 0);
 }
 
 
@@ -209,4 +202,4 @@ void CPython::WeaponIdle()
 	SendWeaponAnim(iAnim, UTIL_IsDeathmatch() ? 1 : 0);
 }
 
-IMPLEMENT_AMMO_CLASS(ammo_357, CPythonAmmo, "models/w_357ammobox.mdl", AMMO_357BOX_GIVE, "357", _357_MAX_CARRY);
+IMPLEMENT_AMMO_CLASS(ammo_357, CPythonAmmo, "models/w_357ammobox.mdl", AMMO_357BOX_GIVE, AMMO_357, _357_MAX_CARRY);

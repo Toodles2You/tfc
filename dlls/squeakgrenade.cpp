@@ -446,9 +446,9 @@ void CSqueak::Precache()
 bool CSqueak::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "Snarks";
+	p->iAmmo1 = AMMO_SNARKS;
 	p->iMaxAmmo1 = SNARK_MAX_CARRY;
-	p->pszAmmo2 = NULL;
+	p->iAmmo2 = AMMO_NONE;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
 	p->iSlot = 4;
@@ -487,7 +487,7 @@ bool CSqueak::Deploy()
 
 bool CSqueak::Holster()
 {
-	const auto bHasAmmo = m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] != 0;
+	const auto bHasAmmo = m_pPlayer->m_rgAmmo[iAmmo1()] != 0;
 	
 	if (DefaultHolster(bHasAmmo ? SQUEAK_DOWN : -1))
 	{
@@ -507,7 +507,7 @@ bool CSqueak::Holster()
 
 void CSqueak::PrimaryAttack()
 {
-	if (0 != m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
+	if (0 != m_pPlayer->m_rgAmmo[iAmmo1()])
 	{
 		UTIL_MakeVectors(m_pPlayer->pev->v_angle);
 		TraceResult tr;
@@ -546,7 +546,7 @@ void CSqueak::PrimaryAttack()
 
 			m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;
 
-			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
+			m_pPlayer->m_rgAmmo[iAmmo1()]--;
 
 			m_fJustThrown = true;
 
@@ -571,7 +571,7 @@ void CSqueak::WeaponIdle()
 	{
 		m_fJustThrown = false;
 
-		if (0 == m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()])
+		if (0 == m_pPlayer->m_rgAmmo[iAmmo1()])
 		{
 			RetireWeapon();
 			return;

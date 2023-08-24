@@ -727,12 +727,12 @@ void CBasePlayer::PackDeadPlayerItems()
 					break;
 
 				case GR_PLR_DROP_AMMO_ACTIVE:
-					if (m_pActiveItem && i == m_pActiveItem->PrimaryAmmoIndex())
+					if (m_pActiveItem && i == m_pActiveItem->iAmmo1())
 					{
 						// this is the primary ammo type for the active weapon
 						iPackAmmo[iPA++] = i;
 					}
-					else if (m_pActiveItem && i == m_pActiveItem->SecondaryAmmoIndex())
+					else if (m_pActiveItem && i == m_pActiveItem->iAmmo2())
 					{
 						// this is the secondary ammo type for the active weapon
 						iPackAmmo[iPA++] = i;
@@ -762,7 +762,7 @@ void CBasePlayer::PackDeadPlayerItems()
 	// pack the ammo
 	while (iPackAmmo[iPA] != -1)
 	{
-		pWeaponBox->PackAmmo(MAKE_STRING(CBasePlayerItem::AmmoInfoArray[iPackAmmo[iPA]].pszName), m_rgAmmo[iPackAmmo[iPA]]);
+		pWeaponBox->PackAmmo(iPackAmmo[iPA], m_rgAmmo[iPackAmmo[iPA]]);
 		iPA++;
 	}
 
@@ -1260,25 +1260,6 @@ Activity CBasePlayer::GetSmallFlinchActivity()
 	}
 
 	return flinchActivity;
-}
-
-/*
-===========
-TabulateAmmo
-This function is used to find and store 
-all the ammo we have into the ammo vars.
-============
-*/
-void CBasePlayer::TabulateAmmo()
-{
-	ammo_9mm = AmmoInventory(GetAmmoIndex("9mm"));
-	ammo_357 = AmmoInventory(GetAmmoIndex("357"));
-	ammo_argrens = AmmoInventory(GetAmmoIndex("ARgrenades"));
-	ammo_bolts = AmmoInventory(GetAmmoIndex("bolts"));
-	ammo_buckshot = AmmoInventory(GetAmmoIndex("buckshot"));
-	ammo_rockets = AmmoInventory(GetAmmoIndex("rockets"));
-	ammo_uranium = AmmoInventory(GetAmmoIndex("uranium"));
-	ammo_hornets = AmmoInventory(GetAmmoIndex("Hornets"));
 }
 
 
@@ -2600,6 +2581,29 @@ void CBasePlayer::SetSuitUpdate(const char* name, bool fgroup, int iNoRepeatTime
 	}
 }
 
+void CBasePlayer::CheckAmmoLevel(CBasePlayerItem* pItem, bool bPrimary)
+{
+	if (UTIL_IsDeathmatch())
+	{
+		return;
+	}
+	
+	if (bPrimary)
+	{
+		if (pItem->iAmmo1() > WEAPON_NONE && static_cast<CBasePlayerWeapon*>(pItem)->m_iClip == 0 && m_rgAmmo[pItem->iAmmo1()] <= 0)
+		{
+			SetSuitUpdate("!HEV_AMO0", false, 0);
+		}
+	}
+	else
+	{
+		if (pItem->iAmmo2() > WEAPON_NONE && m_rgAmmo[pItem->iAmmo2()] == 0)
+		{
+			SetSuitUpdate("!HEV_AMO0", false, 0);
+		}
+	}
+}
+
 /*
 ================
 CheckPowerups
@@ -3219,8 +3223,6 @@ bool CBasePlayer::Restore(CRestore& restore)
 	}
 
 	RenewItems();
-
-	TabulateAmmo();
 
 	m_iNextAttack = 0;
 
@@ -3935,14 +3937,14 @@ bool CBasePlayer::AddPlayerItem(CBasePlayerItem* pItem)
 			weapon->ExtractAmmo(weapon);
 
 			//Immediately update the ammo HUD so weapon pickup isn't sometimes red because the HUD doesn't know about regenerating/free ammo yet.
-			if (-1 != weapon->m_iPrimaryAmmoType)
+			if (weapon->iAmmo1() > AMMO_NONE)
 			{
-				SendSingleAmmoUpdate(CBasePlayer::GetAmmoIndex(weapon->pszAmmo1()));
+				SendSingleAmmoUpdate(weapon->iAmmo1());
 			}
 
-			if (-1 != weapon->m_iSecondaryAmmoType)
+			if (weapon->iAmmo2() > AMMO_NONE)
 			{
-				SendSingleAmmoUpdate(CBasePlayer::GetAmmoIndex(weapon->pszAmmo2()));
+				SendSingleAmmoUpdate(weapon->iAmmo2());
 			}
 
 			//Don't show weapon pickup if we're spawning or if it's an exhaustible weapon (will show ammo pickup instead).
@@ -4013,32 +4015,30 @@ bool CBasePlayer::RemovePlayerItem(CBasePlayerItem* pItem)
 //
 // Returns the unique ID for the ammo, or -1 if error
 //
-int CBasePlayer::GiveAmmo(int iCount, const char* szName, int iMax)
+int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax)
 {
-	if (!szName)
+	if (iType <= AMMO_NONE)
 	{
 		// no ammo.
 		return -1;
 	}
 
-	if (!g_pGameRules->CanHaveAmmo(this, szName, iMax))
+	if (!g_pGameRules->CanHaveAmmo(this, iType, iMax))
 	{
 		// game rules say I can't have any more of this ammo type.
 		return -1;
 	}
 
-	int i = 0;
-
-	i = GetAmmoIndex(szName);
-
-	if (i < 0 || i >= MAX_AMMO_SLOTS)
+	if (iType <= AMMO_NONE || iType >= MAX_AMMO_SLOTS)
 		return -1;
 
-	int iAdd = V_min(iCount, iMax - m_rgAmmo[i]);
+	int iAdd = V_min(iCount, iMax - m_rgAmmo[iType]);
 	if (iAdd < 1)
-		return i;
+		return iType;
 
+	// Toodles FIXME:
 	// If this is an exhaustible weapon make sure the player has it.
+	/*
 	if (const auto& ammoType = CBasePlayerItem::AmmoInfoArray[i]; ammoType.WeaponName != nullptr)
 	{
 		if (!HasNamedPlayerItem(ammoType.WeaponName))
@@ -4046,22 +4046,21 @@ int CBasePlayer::GiveAmmo(int iCount, const char* szName, int iMax)
 			GiveNamedItem(ammoType.WeaponName, 0);
 		}
 	}
+	*/
 
-	m_rgAmmo[i] += iAdd;
+	m_rgAmmo[iType] += iAdd;
 
 
 	if (0 != gmsgAmmoPickup) // make sure the ammo messages have been linked first
 	{
 		// Send the message that ammo has been picked up
 		MESSAGE_BEGIN(MSG_ONE, gmsgAmmoPickup, NULL, pev);
-		WRITE_BYTE(GetAmmoIndex(szName)); // ammo ID
+		WRITE_BYTE(iType); // ammo ID
 		WRITE_BYTE(iAdd);				  // amount
 		MESSAGE_END();
 	}
 
-	TabulateAmmo();
-
-	return i;
+	return iType;
 }
 
 
@@ -4118,31 +4117,12 @@ void CBasePlayer::ItemPostFrame()
 
 int CBasePlayer::AmmoInventory(int iAmmoIndex)
 {
-	if (iAmmoIndex == -1)
+	if (iAmmoIndex <= AMMO_NONE)
 	{
 		return -1;
 	}
 
 	return m_rgAmmo[iAmmoIndex];
-}
-
-int CBasePlayer::GetAmmoIndex(const char* psz)
-{
-	int i;
-
-	if (!psz)
-		return -1;
-
-	for (i = 1; i < MAX_AMMO_SLOTS; i++)
-	{
-		if (!CBasePlayerItem::AmmoInfoArray[i].pszName)
-			continue;
-
-		if (stricmp(psz, CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
-			return i;
-	}
-
-	return -1;
 }
 
 // Called from UpdateClientData
@@ -4157,7 +4137,7 @@ void CBasePlayer::SendAmmoUpdate()
 
 void CBasePlayer::SendSingleAmmoUpdate(int ammoIndex)
 {
-	if (ammoIndex < 0 || ammoIndex >= MAX_AMMO_SLOTS)
+	if (ammoIndex <= AMMO_NONE || ammoIndex >= MAX_AMMO_SLOTS)
 	{
 		return;
 	}
@@ -4425,9 +4405,9 @@ void CBasePlayer::UpdateClientData()
 
 			MESSAGE_BEGIN(MSG_ONE, gmsgWeaponList, NULL, pev);
 			WRITE_STRING(pszName);				   // string	weapon name
-			WRITE_BYTE(GetAmmoIndex(II.pszAmmo1)); // byte		Ammo Type
+			WRITE_BYTE(II.iAmmo1); // byte		Ammo Type
 			WRITE_BYTE(II.iMaxAmmo1);			   // byte     Max Ammo 1
-			WRITE_BYTE(GetAmmoIndex(II.pszAmmo2)); // byte		Ammo2 Type
+			WRITE_BYTE(II.iAmmo2); // byte		Ammo2 Type
 			WRITE_BYTE(II.iMaxAmmo2);			   // byte     Max Ammo 2
 			WRITE_BYTE(II.iSlot);				   // byte		bucket
 			WRITE_BYTE(II.iPosition);			   // byte		bucket pos
@@ -4855,23 +4835,21 @@ void CBasePlayer::DropPlayerItem(char* pszItemName)
 			pWeaponBox->pev->velocity = gpGlobals->v_forward * 300 + gpGlobals->v_forward * 100;
 
 			// drop half of the ammo for this weapon.
-			int iAmmoIndex;
+			int iAmmoIndex = pWeapon->iAmmo1();
 
-			iAmmoIndex = GetAmmoIndex(pWeapon->pszAmmo1()); // ???
-
-			if (iAmmoIndex != -1)
+			if (iAmmoIndex > AMMO_NONE)
 			{
 				// this weapon weapon uses ammo, so pack an appropriate amount.
 				if ((pWeapon->iFlags() & ITEM_FLAG_EXHAUSTIBLE) != 0)
 				{
 					// pack up all the ammo, this weapon is its own ammo type
-					pWeaponBox->PackAmmo(MAKE_STRING(pWeapon->pszAmmo1()), m_rgAmmo[iAmmoIndex]);
+					pWeaponBox->PackAmmo(pWeapon->iAmmo1(), m_rgAmmo[iAmmoIndex]);
 					m_rgAmmo[iAmmoIndex] = 0;
 				}
 				else
 				{
 					// pack half of the ammo
-					pWeaponBox->PackAmmo(MAKE_STRING(pWeapon->pszAmmo1()), m_rgAmmo[iAmmoIndex] / 2);
+					pWeaponBox->PackAmmo(pWeapon->iAmmo1(), m_rgAmmo[iAmmoIndex] / 2);
 					m_rgAmmo[iAmmoIndex] /= 2;
 				}
 			}

@@ -114,21 +114,14 @@ bool CGameRules::GetNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pCurre
 
 //=========================================================
 //=========================================================
-bool CGameRules::CanHaveAmmo(CBasePlayer* pPlayer, const char* pszAmmoName, int iMaxCarry)
+bool CGameRules::CanHaveAmmo(CBasePlayer* pPlayer, int iAmmoType, int iMaxCarry)
 {
-	int iAmmoIndex;
-
-	if (pszAmmoName)
+	if (iAmmoType > AMMO_NONE)
 	{
-		iAmmoIndex = pPlayer->GetAmmoIndex(pszAmmoName);
-
-		if (iAmmoIndex > -1)
+		if (pPlayer->AmmoInventory(iAmmoType) < iMaxCarry)
 		{
-			if (pPlayer->AmmoInventory(iAmmoIndex) < iMaxCarry)
-			{
-				// player has room for more of this type of ammo
-				return true;
-			}
+			// player has room for more of this type of ammo
+			return true;
 		}
 	}
 
@@ -159,9 +152,9 @@ bool CGameRules::CanHavePlayerItem(CBasePlayer* pPlayer, CBasePlayerItem* pWeapo
 	if (pPlayer->pev->deadflag != DEAD_NO)
 		return false;
 
-	if (pWeapon->pszAmmo1())
+	if (pWeapon->iAmmo1() > AMMO_NONE)
 	{
-		if (!CanHaveAmmo(pPlayer, pWeapon->pszAmmo1(), pWeapon->iMaxAmmo1()))
+		if (!CanHaveAmmo(pPlayer, pWeapon->iAmmo1(), pWeapon->iMaxAmmo1()))
 		{
 			// we can't carry anymore ammo for this gun. We can only
 			// have the gun if we aren't already carrying one of this type

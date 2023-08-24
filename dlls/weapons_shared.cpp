@@ -19,37 +19,11 @@
 #include "weapons.h"
 #include "gamerules.h"
 
-// Precaches the ammo and queues the ammo info for sending to clients
-void AddAmmoNameToAmmoRegistry(const char* szAmmoname, const char* weaponName)
-{
-	// make sure it's not already in the registry
-	for (int i = 0; i < MAX_AMMO_SLOTS; i++)
-	{
-		if (!CBasePlayerItem::AmmoInfoArray[i].pszName)
-			continue;
-
-		if (stricmp(CBasePlayerItem::AmmoInfoArray[i].pszName, szAmmoname) == 0)
-			return; // ammo already in registry, just quite
-	}
-
-
-	giAmmoIndex++;
-	ASSERT(giAmmoIndex < MAX_AMMO_SLOTS);
-	if (giAmmoIndex >= MAX_AMMO_SLOTS)
-		giAmmoIndex = 0;
-
-	auto& ammoType = CBasePlayerItem::AmmoInfoArray[giAmmoIndex];
-
-	ammoType.pszName = szAmmoname;
-	ammoType.iId = giAmmoIndex; // yes, this info is redundant
-	ammoType.WeaponName = weaponName;
-}
-
 bool CBasePlayerWeapon::CanDeploy()
 {
 	bool bHasAmmo = false;
 
-	if (!pszAmmo1())
+	if (iAmmo1() <= AMMO_NONE)
 	{
 		// this weapon doesn't use ammo, can always deploy.
 		return true;
@@ -60,13 +34,13 @@ bool CBasePlayerWeapon::CanDeploy()
 		return true;
 	}
 
-	if (pszAmmo1())
+	if (iAmmo1() > AMMO_NONE)
 	{
-		bHasAmmo |= (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] != 0);
+		bHasAmmo |= (m_pPlayer->m_rgAmmo[iAmmo1()] != 0);
 	}
-	if (pszAmmo2())
+	if (iAmmo2() > AMMO_NONE)
 	{
-		bHasAmmo |= (m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType] != 0);
+		bHasAmmo |= (m_pPlayer->m_rgAmmo[iAmmo2()] != 0);
 	}
 	if (m_iClip > 0)
 	{
@@ -82,10 +56,10 @@ bool CBasePlayerWeapon::CanDeploy()
 
 bool CBasePlayerWeapon::DefaultReload(int iClipSize, int iAnim, int fDelay, int body)
 {
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+	if (m_pPlayer->m_rgAmmo[iAmmo1()] <= 0)
 		return false;
 
-	int j = V_min(iClipSize - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
+	int j = V_min(iClipSize - m_iClip, m_pPlayer->m_rgAmmo[iAmmo1()]);
 
 	if (j == 0)
 		return false;
@@ -116,13 +90,11 @@ void CBasePlayerWeapon::ItemPostFrame()
 	if ((m_fInReload) && (m_pPlayer->m_iNextAttack <= 0))
 	{
 		// complete the reload.
-		int j = V_min(iMaxClip() - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
+		int j = V_min(iMaxClip() - m_iClip, m_pPlayer->m_rgAmmo[iAmmo1()]);
 
 		// Add them to the clip
 		m_iClip += j;
-		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= j;
-
-		m_pPlayer->TabulateAmmo();
+		m_pPlayer->m_rgAmmo[iAmmo1()] -= j;
 
 		m_fInReload = false;
 
@@ -145,23 +117,21 @@ void CBasePlayerWeapon::ItemPostFrame()
 
 	if ((m_pPlayer->pev->button & IN_ATTACK2) != 0 && bCanSecondaryAttack)
 	{
-		if (pszAmmo2() && 0 == m_pPlayer->m_rgAmmo[SecondaryAmmoIndex()])
+		if (iAmmo2() > AMMO_NONE && 0 == m_pPlayer->m_rgAmmo[iAmmo2()])
 		{
 			m_fFireOnEmpty = true;
 		}
 
-		m_pPlayer->TabulateAmmo();
 		SecondaryAttack();
 		m_pPlayer->pev->button &= ~IN_ATTACK2;
 	}
 	else if ((m_pPlayer->pev->button & IN_ATTACK) != 0 && bCanPrimaryAttack)
 	{
-		if ((m_iClip == 0 && pszAmmo1()) || (iMaxClip() == -1 && 0 == m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()]))
+		if ((m_iClip == 0 && iAmmo1() > AMMO_NONE) || (iMaxClip() == -1 && 0 == m_pPlayer->m_rgAmmo[iAmmo1()]))
 		{
 			m_fFireOnEmpty = true;
 		}
 
-		m_pPlayer->TabulateAmmo();
 		PrimaryAttack();
 	}
 	else if ((m_pPlayer->pev->button & IN_RELOAD) != 0 && iMaxClip() != WEAPON_NOCLIP && !m_fInReload)

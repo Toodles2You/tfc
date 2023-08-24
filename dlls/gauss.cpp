@@ -74,9 +74,9 @@ void CGauss::Precache()
 bool CGauss::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "uranium";
+	p->iAmmo1 = AMMO_URANIUM;
 	p->iMaxAmmo1 = URANIUM_MAX_CARRY;
-	p->pszAmmo2 = NULL;
+	p->iAmmo2 = AMMO_NONE;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
 	p->iSlot = 3;
@@ -116,7 +116,7 @@ void CGauss::PrimaryAttack()
 		return;
 	}
 
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < 2)
+	if (m_pPlayer->m_rgAmmo[iAmmo1()] < 2)
 	{
 		PlayEmptySound();
 		m_pPlayer->m_iNextAttack = 500;
@@ -126,7 +126,7 @@ void CGauss::PrimaryAttack()
 	m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
 	m_fPrimaryFire = true;
 
-	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= 2;
+	m_pPlayer->m_rgAmmo[iAmmo1()] -= 2;
 
 	StartFire();
 	m_fInAttack = 0;
@@ -158,7 +158,7 @@ void CGauss::SecondaryAttack()
 
 	if (m_fInAttack == 0)
 	{
-		if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+		if (m_pPlayer->m_rgAmmo[iAmmo1()] <= 0)
 		{
 			EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/357_cock1.wav", 0.8, ATTN_NORM);
 			m_pPlayer->m_iNextAttack = 500;
@@ -167,7 +167,7 @@ void CGauss::SecondaryAttack()
 
 		m_fPrimaryFire = false;
 
-		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--; // take one ammo just to start the spin
+		m_pPlayer->m_rgAmmo[iAmmo1()]--; // take one ammo just to start the spin
 		m_pPlayer->m_flNextAmmoBurn = UTIL_WeaponTimeBase();
 
 		// spin up
@@ -193,25 +193,25 @@ void CGauss::SecondaryAttack()
 	}
 	else
 	{
-		if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0)
+		if (m_pPlayer->m_rgAmmo[iAmmo1()] > 0)
 		{
 			// during the charging process, eat one bit of ammo every once in a while
 			if (UTIL_WeaponTimeBase() >= m_pPlayer->m_flNextAmmoBurn && m_pPlayer->m_flNextAmmoBurn != 1000)
 			{
 				if (UTIL_IsDeathmatch())
 				{
-					m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
+					m_pPlayer->m_rgAmmo[iAmmo1()]--;
 					m_pPlayer->m_flNextAmmoBurn = UTIL_WeaponTimeBase() + 0.1;
 				}
 				else
 				{
-					m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
+					m_pPlayer->m_rgAmmo[iAmmo1()]--;
 					m_pPlayer->m_flNextAmmoBurn = UTIL_WeaponTimeBase() + 0.3;
 				}
 			}
 		}
 
-		if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+		if (m_pPlayer->m_rgAmmo[iAmmo1()] <= 0)
 		{
 			// out of ammo! force the gun to fire
 			StartFire();
@@ -578,4 +578,4 @@ void CGauss::SendStopEvent(bool sendToHost)
 }
 
 
-IMPLEMENT_AMMO_CLASS(ammo_gaussclip, CGaussAmmo, "models/w_gaussammo.mdl", AMMO_URANIUMBOX_GIVE, "uranium", URANIUM_MAX_CARRY);
+IMPLEMENT_AMMO_CLASS(ammo_gaussclip, CGaussAmmo, "models/w_gaussammo.mdl", AMMO_URANIUMBOX_GIVE, AMMO_URANIUM, URANIUM_MAX_CARRY);

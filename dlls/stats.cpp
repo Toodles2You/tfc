@@ -19,31 +19,33 @@
 #include "gamerules.h"
 
 
-float AmmoDamage( const char *pName )
+float AmmoDamage( int iType )
 {
-	if ( !pName )
-		return 0;
-
-	if ( !strcmp( pName, "9mm" ) )
+	switch (iType)
+	{
+	case AMMO_9MM:
 		return gSkillData.plrDmg9MM;
-	if ( !strcmp( pName, "357" ) )
+	case AMMO_357:
 		return gSkillData.plrDmg357;
-	if ( !strcmp( pName, "ARgrenades" ) )
+	case AMMO_ARGRENADES:
 		return gSkillData.plrDmgM203Grenade;
-	if ( !strcmp( pName, "buckshot" ) )
+	case AMMO_BUCKSHOT:
 		return gSkillData.plrDmgBuckshot;
-	if ( !strcmp( pName, "bolts") )
+	case AMMO_BOLTS:
 		return gSkillData.plrDmgCrossbowMonster;
-	if ( !strcmp( pName, "rockets") )
+	case AMMO_ROCKETS:
 		return gSkillData.plrDmgRPG;
-	if ( !strcmp( pName, "uranium") )
+	case AMMO_URANIUM:
 		return gSkillData.plrDmgGauss;
-	if ( !strcmp( pName, "Hand Grenade") )
+	case AMMO_HANDGRENADES:
 		return gSkillData.plrDmgHandGrenade;
-	if ( !strcmp( pName, "Satchel Charge") )
+	case AMMO_SATCHELS:
 		return gSkillData.plrDmgSatchel;
-	if ( !strcmp( pName, "Trip Mine") )
+	case AMMO_TRIPMINES:
 		return gSkillData.plrDmgTripmine;
+	default:
+		break;
+	}
 
 	return 0;
 }
@@ -106,8 +108,8 @@ void UpdateStats( CBasePlayer *pPlayer )
 			memset(&II, 0, sizeof(II));
 			p->GetItemInfo(&II);
 
-			int index = pPlayer->GetAmmoIndex(II.pszAmmo1);
-			if ( index >= 0 )
+			int index = II.iAmmo1;
+			if ( index > AMMO_NONE )
 				ammoCount[ index ] += ((CBasePlayerWeapon *)p)->m_iClip;
 			
 			p = p->m_pNext;
@@ -117,7 +119,7 @@ void UpdateStats( CBasePlayer *pPlayer )
 	float ammo = 0;
 	for (i = 1; i < MAX_AMMO_SLOTS; i++)
 	{
-		ammo += ammoCount[i] * AmmoDamage( CBasePlayerItem::AmmoInfoArray[i].pszName );
+		ammo += ammoCount[i] * AmmoDamage( i );
 	}
 
 	float health = pPlayer->pev->health + pPlayer->pev->armorvalue * 2;	// Armor is 2X health

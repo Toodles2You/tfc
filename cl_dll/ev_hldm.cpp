@@ -1572,11 +1572,11 @@ void EV_HornetGunFire(event_args_t* args)
 void EV_TripmineFire(event_args_t* args)
 {
 	int idx;
-	Vector vecSrc, angles, view_ofs, forward;
+	Vector vecSrc, origin, angles, forward;
 	pmtrace_t tr;
 
 	idx = args->entindex;
-	VectorCopy(args->origin, vecSrc);
+	VectorCopy(args->origin, origin);
 	VectorCopy(args->angles, angles);
 
 	AngleVectors(angles, forward, NULL, NULL);
@@ -1585,9 +1585,7 @@ void EV_TripmineFire(event_args_t* args)
 		return;
 
 	// Grab predicted result for local player
-	gEngfuncs.pEventAPI->EV_LocalPlayerViewheight(view_ofs);
-
-	vecSrc = vecSrc + view_ofs;
+	EV_GetGunPosition(args, vecSrc, origin);
 
 	// Store off the old count
 	gEngfuncs.pEventAPI->EV_PushPMStates();

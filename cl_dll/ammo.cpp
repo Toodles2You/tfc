@@ -65,7 +65,7 @@ bool WeaponsResource::HasAmmo(WEAPON* p)
 	if (p->iMax1 == -1)
 		return true;
 
-	return (p->iAmmoType == -1) || p->iClip > 0 || 0 != CountAmmo(p->iAmmoType) || 0 != CountAmmo(p->iAmmo2Type) || (p->iFlags & WEAPON_FLAGS_SELECTONEMPTY) != 0;
+	return (p->iAmmoType <= AMMO_NONE) || p->iClip > 0 || 0 != CountAmmo(p->iAmmoType) || 0 != CountAmmo(p->iAmmo2Type) || (p->iFlags & WEAPON_FLAGS_SELECTONEMPTY) != 0;
 }
 
 
@@ -645,7 +645,7 @@ bool CHudAmmo::MsgFunc_WeaponList(const char* pszName, int iSize, void* pbuf)
 	if (Weapon.iMax1 == 255)
 		Weapon.iMax1 = -1;
 
-	Weapon.iAmmo2Type = READ_CHAR();
+	Weapon.iAmmo2Type = (int)READ_CHAR();
 	Weapon.iMax2 = READ_BYTE();
 	if (Weapon.iMax2 == 255)
 		Weapon.iMax2 = -1;
@@ -850,7 +850,7 @@ bool CHudAmmo::Draw(float flTime)
 	WEAPON* pw = m_pWeapon; // shorthand
 
 	// SPR_Draw Ammo
-	if ((pw->iAmmoType < 0) && (pw->iAmmo2Type < 0))
+	if ((pw->iAmmoType <= AMMO_NONE) && (pw->iAmmo2Type <= AMMO_NONE))
 		return false;
 
 
@@ -871,7 +871,7 @@ bool CHudAmmo::Draw(float flTime)
 	y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
 
 	// Does weapon have any ammo at all?
-	if (m_pWeapon->iAmmoType > 0)
+	if (m_pWeapon->iAmmoType > AMMO_NONE)
 	{
 		int iIconWidth = m_pWeapon->rcAmmo.right - m_pWeapon->rcAmmo.left;
 
@@ -917,12 +917,12 @@ bool CHudAmmo::Draw(float flTime)
 	}
 
 	// Does weapon have seconday ammo?
-	if (pw->iAmmo2Type > 0)
+	if (pw->iAmmo2Type > AMMO_NONE)
 	{
 		int iIconWidth = m_pWeapon->rcAmmo2.right - m_pWeapon->rcAmmo2.left;
 
 		// Do we have secondary ammo?
-		if ((pw->iAmmo2Type != 0) && (gWR.CountAmmo(pw->iAmmo2Type) > 0))
+		if (gWR.CountAmmo(pw->iAmmo2Type) > 0)
 		{
 			y -= gHUD.m_iFontHeight + gHUD.m_iFontHeight / 4;
 			x = ScreenWidth - 4 * AmmoWidth - iIconWidth;
@@ -977,10 +977,12 @@ void DrawAmmoBar(WEAPON* p, int x, int y, int width, int height)
 	if (!p)
 		return;
 
-	if (p->iAmmoType != -1)
+	if (p->iAmmoType > AMMO_NONE)
 	{
+		/*
 		if (0 == gWR.CountAmmo(p->iAmmoType))
 			return;
+		*/
 
 		float f = (float)gWR.CountAmmo(p->iAmmoType) / (float)p->iMax1;
 
@@ -989,7 +991,7 @@ void DrawAmmoBar(WEAPON* p, int x, int y, int width, int height)
 
 		// Do we have secondary ammo too?
 
-		if (p->iAmmo2Type != -1)
+		if (p->iAmmo2Type > AMMO_NONE)
 		{
 			f = (float)gWR.CountAmmo(p->iAmmo2Type) / (float)p->iMax2;
 

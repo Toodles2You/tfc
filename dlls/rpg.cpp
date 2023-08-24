@@ -271,15 +271,6 @@ void CRpgRocket::FollowThink()
 
 void CRpg::Reload()
 {
-	if (m_iClip == 1)
-	{
-		// don't bother with any of this if don't need to reload.
-		return;
-	}
-
-	if (m_pPlayer->ammo_rockets <= 0)
-		return;
-
 	// because the RPG waits to autoreload when no missiles are active while  the LTD is on, the
 	// weapons code is constantly calling into this function, but is often denied because
 	// a) missiles are in flight, but the LTD is on
@@ -299,18 +290,15 @@ void CRpg::Reload()
 		return;
 	}
 
-	if (m_pSpot && m_fSpotActive)
+	if (DefaultReload(RPG_MAX_CLIP, RPG_RELOAD, 2000))
 	{
-		SuspendLaserDot(2.1);
-		m_iNextSecondaryAttack = 2100;
-	}
+		if (m_pSpot && m_fSpotActive)
+		{
+			SuspendLaserDot(2.1);
+			m_iNextSecondaryAttack = 2100;
+		}
 
-	if (m_iClip == 0)
-	{
-		const bool iResult = DefaultReload(RPG_MAX_CLIP, RPG_RELOAD, 2000);
-
-		if (iResult)
-			m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
+		m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 	}
 }
 
@@ -357,9 +345,9 @@ void CRpg::Precache()
 bool CRpg::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "rockets";
+	p->iAmmo1 = AMMO_ROCKETS;
 	p->iMaxAmmo1 = ROCKET_MAX_CARRY;
-	p->pszAmmo2 = NULL;
+	p->iAmmo2 = AMMO_NONE;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = RPG_MAX_CLIP;
 	p->iSlot = 3;
@@ -469,7 +457,7 @@ void CRpg::WeaponIdle()
 	if (m_iTimeWeaponIdle > 0)
 		return;
 
-	if (0 != m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
+	if (0 != m_pPlayer->m_rgAmmo[iAmmo1()])
 	{
 		int iAnim;
 		float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
@@ -583,4 +571,4 @@ void CRpg::SuspendLaserDot(float flSuspendTime)
 		0);
 }
 
-IMPLEMENT_AMMO_CLASS(ammo_rpgclip, CRpgAmmo, "models/w_357ammobox.mdl", (UTIL_IsDeathmatch() ? AMMO_RPGCLIP_GIVE * 2 : AMMO_RPGCLIP_GIVE), "rockets", ROCKET_MAX_CARRY);
+IMPLEMENT_AMMO_CLASS(ammo_rpgclip, CRpgAmmo, "models/w_357ammobox.mdl", (UTIL_IsDeathmatch() ? AMMO_RPGCLIP_GIVE * 2 : AMMO_RPGCLIP_GIVE), AMMO_ROCKETS, ROCKET_MAX_CARRY);

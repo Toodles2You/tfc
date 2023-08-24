@@ -1279,13 +1279,6 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 		}
 	}
 
-	// HACK:  Somewhat...
-	// Class is overridden for non-players to signify a breakable glass object ( sort of a class? )
-	if (0 == player)
-	{
-		state->playerclass = ent->v.playerclass;
-	}
-
 	// Special stuff for players only
 	if (0 != player)
 	{
@@ -1298,9 +1291,15 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 
 		state->gravity = ent->v.gravity;
 		//		state->team			= ent->v.team;
-		//
+
 		state->usehull = (ent->v.flags & FL_DUCKING) != 0 ? 1 : 0;
-		state->health = ent->v.health;
+		state->health = (ent->v.deadflag == DEAD_NO) ? static_cast<int>(std::max(ent->v.health, 1.0F)) : 0;
+	}
+	else
+	{
+		// HACK:  Somewhat...
+		// Class is overridden for non-players to signify a breakable glass object ( sort of a class? )
+		state->playerclass = ent->v.playerclass;
 	}
 
 	return 1;
@@ -1702,7 +1701,8 @@ void UpdateClientData(const edict_t* ent, int sendweapons, struct clientdata_s* 
 	}
 
 	cd->flags = pev->flags;
-	cd->health = pev->health;
+	cd->health = (pev->deadflag == DEAD_NO) ? std::max(pev->health, 1.0F) : 0.0F;
+	cd->vuser4.z = pev->armorvalue;
 
 	cd->viewmodel = MODEL_INDEX(STRING(pev->viewmodel));
 
@@ -1747,19 +1747,31 @@ void UpdateClientData(const edict_t* ent, int sendweapons, struct clientdata_s* 
 
 	if (0 != sendweapons)
 	{
+		byte* ammo_shells = (byte*)&cd->ammo_shells;
+		byte* ammo_nails = (byte*)&cd->ammo_nails;
+		byte* ammo_cells = (byte*)&cd->ammo_cells;
+		byte* ammo_rockets = (byte*)&cd->ammo_rockets;
+
 		if (pl)
 		{
 			*(int*)&cd->m_flNextAttack = pl->m_iNextAttack;
 			cd->fuser2 = pl->m_flNextAmmoBurn;
 			cd->fuser3 = pl->m_flAmmoStartCharge;
-			cd->vuser1.x = pl->ammo_9mm;
-			cd->vuser1.y = pl->ammo_357;
-			cd->vuser1.z = pl->ammo_argrens;
-			cd->ammo_nails = pl->ammo_bolts;
-			cd->ammo_shells = pl->ammo_buckshot;
-			cd->ammo_rockets = pl->ammo_rockets;
-			cd->ammo_cells = pl->ammo_uranium;
-			cd->vuser2.x = pl->ammo_hornets;
+
+			ammo_shells[0] = pl->m_rgAmmo[AMMO_9MM];
+			ammo_shells[1] = pl->m_rgAmmo[AMMO_357];
+			ammo_shells[2] = pl->m_rgAmmo[AMMO_ARGRENADES];
+			ammo_shells[3] = pl->m_rgAmmo[AMMO_BOLTS];
+
+			ammo_nails[0] = pl->m_rgAmmo[AMMO_BUCKSHOT];
+			ammo_nails[1] = pl->m_rgAmmo[AMMO_URANIUM];
+			ammo_nails[2] = pl->m_rgAmmo[AMMO_ROCKETS];
+			ammo_nails[3] = pl->m_rgAmmo[AMMO_HORNETS];
+
+			ammo_cells[0] = pl->m_rgAmmo[AMMO_HANDGRENADES];
+			ammo_cells[1] = pl->m_rgAmmo[AMMO_SATCHELS];
+			ammo_cells[2] = pl->m_rgAmmo[AMMO_TRIPMINES];
+			ammo_cells[3] = pl->m_rgAmmo[AMMO_SNARKS];
 
 
 			if (pl->m_pActiveItem)
@@ -1772,11 +1784,6 @@ void UpdateClientData(const edict_t* ent, int sendweapons, struct clientdata_s* 
 					gun->GetItemInfo(&II);
 
 					cd->m_iId = II.iId;
-
-					cd->vuser3.z = gun->m_iSecondaryAmmoType;
-					cd->vuser4.x = gun->m_iPrimaryAmmoType;
-					cd->vuser4.y = pl->m_rgAmmo[gun->m_iPrimaryAmmoType];
-					cd->vuser4.z = pl->m_rgAmmo[gun->m_iSecondaryAmmoType];
 
 					if (pl->m_pActiveItem->m_iId == WEAPON_RPG)
 					{

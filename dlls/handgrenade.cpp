@@ -50,9 +50,9 @@ void CHandGrenade::Precache()
 bool CHandGrenade::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "Hand Grenade";
+	p->iAmmo1 = AMMO_HANDGRENADES;
 	p->iMaxAmmo1 = HANDGRENADE_MAX_CARRY;
-	p->pszAmmo2 = NULL;
+	p->iAmmo2 = AMMO_NONE;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
 	p->iSlot = 4;
@@ -79,7 +79,7 @@ bool CHandGrenade::CanHolster()
 
 bool CHandGrenade::Holster()
 {
-	const auto bHasAmmo = m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] != 0;
+	const auto bHasAmmo = m_pPlayer->m_rgAmmo[iAmmo1()] != 0;
 	
 	if (DefaultHolster(bHasAmmo ? HANDGRENADE_HOLSTER : -1))
 	{
@@ -100,7 +100,7 @@ bool CHandGrenade::Holster()
 
 void CHandGrenade::PrimaryAttack()
 {
-	if (0 == m_flStartThrow && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0)
+	if (0 == m_flStartThrow && m_pPlayer->m_rgAmmo[iAmmo1()] > 0)
 	{
 		m_flStartThrow = gpGlobals->time;
 		m_flReleaseThrow = 0;
@@ -166,9 +166,9 @@ void CHandGrenade::WeaponIdle()
 		m_iNextPrimaryAttack = 500;
 		m_iTimeWeaponIdle = 500;
 
-		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
+		m_pPlayer->m_rgAmmo[iAmmo1()]--;
 
-		if (0 == m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
+		if (0 == m_pPlayer->m_rgAmmo[iAmmo1()])
 		{
 			// just threw last grenade
 			// set attack times in the future, and weapon idle in the future so we can see the whole throw
@@ -183,7 +183,7 @@ void CHandGrenade::WeaponIdle()
 		// we've finished the throw, restart.
 		m_flStartThrow = 0;
 
-		if (0 != m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
+		if (0 != m_pPlayer->m_rgAmmo[iAmmo1()])
 		{
 			SendWeaponAnim(HANDGRENADE_DRAW);
 		}
@@ -198,7 +198,7 @@ void CHandGrenade::WeaponIdle()
 		return;
 	}
 
-	if (0 != m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
+	if (0 != m_pPlayer->m_rgAmmo[iAmmo1()])
 	{
 		int iAnim;
 		float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0, 1);

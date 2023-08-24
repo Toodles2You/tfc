@@ -262,9 +262,9 @@ void CCrossbow::Precache()
 bool CCrossbow::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "bolts";
+	p->iAmmo1 = AMMO_BOLTS;
 	p->iMaxAmmo1 = BOLT_MAX_CARRY;
-	p->pszAmmo2 = NULL;
+	p->iAmmo2 = AMMO_NONE;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = CROSSBOW_MAX_CLIP;
 	p->iSlot = 2;
@@ -382,9 +382,7 @@ void CCrossbow::FireBolt()
 	pBolt->pev->avelocity.z = 10;
 #endif
 
-	if (0 == m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
-		// HEV suit - indicate out of ammo condition
-		m_pPlayer->SetSuitUpdate("!HEV_AMO0", false, 0);
+	m_pPlayer->CheckAmmoLevel(this);
 
 	m_iNextPrimaryAttack = m_iNextSecondaryAttack = 750;
 
@@ -413,9 +411,6 @@ void CCrossbow::SecondaryAttack()
 
 void CCrossbow::Reload()
 {
-	if (m_pPlayer->ammo_bolts <= 0)
-		return;
-
 	if (m_pPlayer->m_iFOV != 0)
 	{
 		SecondaryAttack();
@@ -466,4 +461,4 @@ void CCrossbow::WeaponIdle()
 }
 
 
-IMPLEMENT_AMMO_CLASS(ammo_crossbow, CCrossbowAmmo, "models/w_crossbow_clip.mdl", AMMO_CROSSBOWCLIP_GIVE, "bolts", BOLT_MAX_CARRY);
+IMPLEMENT_AMMO_CLASS(ammo_crossbow, CCrossbowAmmo, "models/w_crossbow_clip.mdl", AMMO_CROSSBOWCLIP_GIVE, AMMO_BOLTS, BOLT_MAX_CARRY);

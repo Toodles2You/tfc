@@ -64,9 +64,9 @@ void CShotgun::Precache()
 bool CShotgun::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "buckshot";
+	p->iAmmo1 = AMMO_BUCKSHOT;
 	p->iMaxAmmo1 = BUCKSHOT_MAX_CARRY;
-	p->pszAmmo2 = NULL;
+	p->iAmmo2 = AMMO_NONE;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = SHOTGUN_MAX_CLIP;
 	p->iSlot = 2;
@@ -132,10 +132,7 @@ void CShotgun::PrimaryAttack()
 
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usSingleFire, 0.0, g_vecZero, g_vecZero, vecDir.x, vecDir.y, m_pPlayer->random_seed, 0, 0, 0);
 
-
-	if (0 == m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
-		// HEV suit - indicate out of ammo condition
-		m_pPlayer->SetSuitUpdate("!HEV_AMO0", false, 0);
+	m_pPlayer->CheckAmmoLevel(this);
 
 	//if (m_iClip != 0)
 	m_flPumpTime = gpGlobals->time + 0.5;
@@ -194,9 +191,7 @@ void CShotgun::SecondaryAttack()
 
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usDoubleFire, 0.0, g_vecZero, g_vecZero, vecDir.x, vecDir.y, m_pPlayer->random_seed, 0, 0, 0);
 
-	if (0 == m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
-		// HEV suit - indicate out of ammo condition
-		m_pPlayer->SetSuitUpdate("!HEV_AMO0", false, 0);
+	m_pPlayer->CheckAmmoLevel(this);
 
 	//if (m_iClip != 0)
 	m_flPumpTime = gpGlobals->time + 0.95;
@@ -213,7 +208,7 @@ void CShotgun::SecondaryAttack()
 
 void CShotgun::Reload()
 {
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == SHOTGUN_MAX_CLIP)
+	if (m_pPlayer->m_rgAmmo[iAmmo1()] <= 0 || m_iClip == SHOTGUN_MAX_CLIP)
 		return;
 
 	// don't reload until recoil is done
@@ -248,9 +243,11 @@ void CShotgun::Reload()
 	}
 	else
 	{
+		if (m_iTimeWeaponIdle > 0)
+			return;
 		// Add them to the clip
 		m_iClip += 1;
-		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= 1;
+		m_pPlayer->m_rgAmmo[iAmmo1()] -= 1;
 		m_fInSpecialReload = 1;
 	}
 }
@@ -274,13 +271,13 @@ void CShotgun::WeaponIdle()
 
 	if (m_iTimeWeaponIdle <= 0)
 	{
-		if (m_iClip == 0 && m_fInSpecialReload == 0 && 0 != m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
+		if (m_iClip == 0 && m_fInSpecialReload == 0 && 0 != m_pPlayer->m_rgAmmo[iAmmo1()])
 		{
 			Reload();
 		}
 		else if (m_fInSpecialReload != 0)
 		{
-			if (m_iClip != 8 && 0 != m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
+			if (m_iClip != SHOTGUN_MAX_CLIP && 0 != m_pPlayer->m_rgAmmo[iAmmo1()])
 			{
 				Reload();
 			}
@@ -331,4 +328,4 @@ void CShotgun::ItemPostFrame()
 	CBasePlayerWeapon::ItemPostFrame();
 }
 
-IMPLEMENT_AMMO_CLASS(ammo_buckshot, CShotgunAmmo, "models/w_shotbox.mdl", AMMO_BUCKSHOTBOX_GIVE, "buckshot", BUCKSHOT_MAX_CARRY);
+IMPLEMENT_AMMO_CLASS(ammo_buckshot, CShotgunAmmo, "models/w_shotbox.mdl", AMMO_BUCKSHOTBOX_GIVE, AMMO_BUCKSHOT, BUCKSHOT_MAX_CARRY);

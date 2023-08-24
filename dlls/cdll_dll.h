@@ -32,7 +32,6 @@ constexpr int MAX_PLAYERS = 32;
 #define HIDEHUD_ALL (1 << 2)
 #define HIDEHUD_HEALTH (1 << 3)
 
-#define MAX_AMMO_TYPES 32 // ???
 #define MAX_AMMO_SLOTS 32 // not really slots
 
 #define HUD_PRINTNOTIFY 1
@@ -60,6 +59,23 @@ enum WeaponId
 	WEAPON_SNARK,
 
 	WEAPON_SUIT = 31
+};
+
+enum AmmoId
+{
+	AMMO_NONE = 0,
+	AMMO_9MM,
+	AMMO_357,
+	AMMO_ARGRENADES,
+	AMMO_BOLTS,
+	AMMO_BUCKSHOT,
+	AMMO_ROCKETS,
+	AMMO_URANIUM,
+	AMMO_HORNETS,
+	AMMO_HANDGRENADES,
+	AMMO_SATCHELS,
+	AMMO_TRIPMINES,
+	AMMO_SNARKS
 };
 
 

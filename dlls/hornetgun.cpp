@@ -74,9 +74,9 @@ void CHgun::AddToPlayer(CBasePlayer* pPlayer)
 bool CHgun::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "Hornets";
+	p->iAmmo1 = AMMO_HORNETS;
 	p->iMaxAmmo1 = HORNET_MAX_CARRY;
-	p->pszAmmo2 = NULL;
+	p->iAmmo2 = AMMO_NONE;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
 	p->iSlot = 3;
@@ -110,7 +110,7 @@ void CHgun::PrimaryAttack()
 {
 	Reload();
 
-	if (m_pPlayer->ammo_hornets <= 0)
+	if (m_pPlayer->m_rgAmmo[iAmmo1()] <= 0)
 	{
 		return;
 	}
@@ -124,7 +124,7 @@ void CHgun::PrimaryAttack()
 	m_flRechargeTime = gpGlobals->time + 0.5;
 #endif
 
-	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
+	m_pPlayer->m_rgAmmo[iAmmo1()]--;
 
 
 	m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;
@@ -148,7 +148,7 @@ void CHgun::SecondaryAttack()
 {
 	Reload();
 
-	if (m_pPlayer->ammo_hornets <= 0)
+	if (m_pPlayer->m_rgAmmo[iAmmo1()] <= 0)
 	{
 		return;
 	}
@@ -208,7 +208,7 @@ void CHgun::SecondaryAttack()
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usHornetFire, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 
 
-	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
+	m_pPlayer->m_rgAmmo[iAmmo1()]--;
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
 
@@ -223,16 +223,14 @@ void CHgun::SecondaryAttack()
 void CHgun::Reload()
 {
 #ifndef CLIENT_DLL
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= HORNET_MAX_CARRY)
+	if (m_pPlayer->m_rgAmmo[iAmmo1()] >= HORNET_MAX_CARRY)
 		return;
 
-	while (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < HORNET_MAX_CARRY && m_flRechargeTime < gpGlobals->time)
+	while (m_pPlayer->m_rgAmmo[iAmmo1()] < HORNET_MAX_CARRY && m_flRechargeTime < gpGlobals->time)
 	{
-		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]++;
+		m_pPlayer->m_rgAmmo[iAmmo1()]++;
 		m_flRechargeTime += 0.5;
 	}
-
-	m_pPlayer->TabulateAmmo();
 #endif
 }
 

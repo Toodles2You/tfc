@@ -119,18 +119,6 @@ void HUD_PrepEntity(CBaseEntity* pEntity, CBasePlayer* pWeaponOwner)
 
 		CBasePlayerItem::ItemInfoArray[info.iId] = info;
 
-		const char* weaponName = ((info.iFlags & ITEM_FLAG_EXHAUSTIBLE) != 0) ? STRING(pEntity->pev->classname) : nullptr;
-
-		if (info.pszAmmo1 && '\0' != *info.pszAmmo1)
-		{
-			AddAmmoNameToAmmoRegistry(info.pszAmmo1, weaponName);
-		}
-
-		if (info.pszAmmo2 && '\0' != *info.pszAmmo2)
-		{
-			AddAmmoNameToAmmoRegistry(info.pszAmmo2, weaponName);
-		}
-
 		g_pWpns[info.iId] = (CBasePlayerWeapon*)pEntity;
 	}
 }
@@ -184,6 +172,7 @@ bool CBasePlayerWeapon::DefaultHolster(int iAnim, int body)
 	m_iTimeWeaponIdle = 1000;
 	m_flLastFireTime = 0.0;
 	m_fInReload = false; // Cancel any reload in progress.
+	m_fInSpecialReload = 0;
 	m_pPlayer->m_iFOV = 0;
 	g_irunninggausspred = false;
 
@@ -217,6 +206,7 @@ Put away weapon
 bool CBasePlayerWeapon::Holster()
 {
 	m_fInReload = false; // cancel any reload in progress.
+	m_fInSpecialReload = 0;
 	g_irunninggausspred = false;
 	m_pPlayer->pev->viewmodel = 0;
 	return true;
@@ -620,11 +610,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		pCurrent->m_fInAttack = pfrom->iuser2;
 		pCurrent->m_fireState = pfrom->iuser3;
 
-		pCurrent->m_iSecondaryAmmoType = (int)from->client.vuser3[2];
-		pCurrent->m_iPrimaryAmmoType = (int)from->client.vuser4[0];
-		player.m_rgAmmo[pCurrent->m_iPrimaryAmmoType] = (int)from->client.vuser4[1];
-		player.m_rgAmmo[pCurrent->m_iSecondaryAmmoType] = (int)from->client.vuser4[2];
-
 		pCurrent->SetWeaponData(*pfrom);
 	}
 
@@ -660,14 +645,25 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	player.m_flAmmoStartCharge = from->client.fuser3;
 
 	//Stores all our ammo info, so the client side weapons can use them.
-	player.ammo_9mm = (int)from->client.vuser1[0];
-	player.ammo_357 = (int)from->client.vuser1[1];
-	player.ammo_argrens = (int)from->client.vuser1[2];
-	player.ammo_bolts = (int)from->client.ammo_nails; //is an int anyways...
-	player.ammo_buckshot = (int)from->client.ammo_shells;
-	player.ammo_uranium = (int)from->client.ammo_cells;
-	player.ammo_hornets = (int)from->client.vuser2[0];
-	player.ammo_rockets = (int)from->client.ammo_rockets;
+	byte* ammo_shells = (byte*)&from->client.ammo_shells;
+	byte* ammo_nails = (byte*)&from->client.ammo_nails;
+	byte* ammo_cells = (byte*)&from->client.ammo_cells;
+	byte* ammo_rockets = (byte*)&from->client.ammo_rockets;
+
+	player.m_rgAmmo[AMMO_9MM] = ammo_shells[0];
+	player.m_rgAmmo[AMMO_357] = ammo_shells[1];
+	player.m_rgAmmo[AMMO_ARGRENADES] = ammo_shells[2];
+	player.m_rgAmmo[AMMO_BOLTS] = ammo_shells[3];
+
+	player.m_rgAmmo[AMMO_BUCKSHOT] = ammo_nails[0];
+	player.m_rgAmmo[AMMO_URANIUM] = ammo_nails[1];
+	player.m_rgAmmo[AMMO_ROCKETS] = ammo_nails[2];
+	player.m_rgAmmo[AMMO_HORNETS] = ammo_nails[3];
+
+	player.m_rgAmmo[AMMO_HANDGRENADES] = ammo_cells[0];
+	player.m_rgAmmo[AMMO_SATCHELS] = ammo_cells[1];
+	player.m_rgAmmo[AMMO_TRIPMINES] = ammo_cells[2];
+	player.m_rgAmmo[AMMO_SNARKS] = ammo_cells[3];
 
 
 	// Point to current weapon object
@@ -734,15 +730,25 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	to->client.maxspeed = player.pev->maxspeed;
 
 	//HL Weapons
-	to->client.vuser1[0] = player.ammo_9mm;
-	to->client.vuser1[1] = player.ammo_357;
-	to->client.vuser1[2] = player.ammo_argrens;
+	ammo_shells = (byte*)&to->client.ammo_shells;
+	ammo_nails = (byte*)&to->client.ammo_nails;
+	ammo_cells = (byte*)&to->client.ammo_cells;
+	ammo_rockets = (byte*)&to->client.ammo_rockets;
 
-	to->client.ammo_nails = player.ammo_bolts;
-	to->client.ammo_shells = player.ammo_buckshot;
-	to->client.ammo_cells = player.ammo_uranium;
-	to->client.vuser2[0] = player.ammo_hornets;
-	to->client.ammo_rockets = player.ammo_rockets;
+	ammo_shells[0] = player.m_rgAmmo[AMMO_9MM];
+	ammo_shells[1] = player.m_rgAmmo[AMMO_357];
+	ammo_shells[2] = player.m_rgAmmo[AMMO_ARGRENADES];
+	ammo_shells[3] = player.m_rgAmmo[AMMO_BOLTS];
+
+	ammo_nails[0] = player.m_rgAmmo[AMMO_BUCKSHOT];
+	ammo_nails[1] = player.m_rgAmmo[AMMO_URANIUM];
+	ammo_nails[2] = player.m_rgAmmo[AMMO_ROCKETS];
+	ammo_nails[3] = player.m_rgAmmo[AMMO_HORNETS];
+
+	ammo_cells[0] = player.m_rgAmmo[AMMO_HANDGRENADES];
+	ammo_cells[1] = player.m_rgAmmo[AMMO_SATCHELS];
+	ammo_cells[2] = player.m_rgAmmo[AMMO_TRIPMINES];
+	ammo_cells[3] = player.m_rgAmmo[AMMO_SNARKS];
 
 	if (player.m_pActiveItem->m_iId == WEAPON_RPG)
 	{
@@ -760,6 +766,11 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		// Force a fixed anim down to viewmodel
 		HUD_SendWeaponAnim(to->client.weaponanim, pWeapon->pev->body, true);
 	}
+
+	static bool bAmmoUpdated[MAX_AMMO_SLOTS];
+	int iAmmoType, iAmmo2Type;
+
+	memset(bAmmoUpdated, 0, sizeof(bAmmoUpdated));
 
 	for (i = 0; i < MAX_WEAPONS; i++)
 	{
@@ -795,21 +806,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		*(int*)&pto->m_flTimeWeaponIdle -= cmd->msec;
 		pto->fuser1 -= cmd->msec / 1000.0;
 
-		to->client.vuser3[2] = pCurrent->m_iSecondaryAmmoType;
-		to->client.vuser4[0] = pCurrent->m_iPrimaryAmmoType;
-		to->client.vuser4[1] = player.m_rgAmmo[pCurrent->m_iPrimaryAmmoType];
-		to->client.vuser4[2] = player.m_rgAmmo[pCurrent->m_iSecondaryAmmoType];
-
 		pCurrent->DecrementTimers();
 
 		pCurrent->GetWeaponData(*pto);
-
-		/*		if ( pto->m_flPumpTime != -9999 )
-		{
-			pto->m_flPumpTime -= cmd->msec / 1000.0;
-			if ( pto->m_flPumpTime < -0.001 )
-				pto->m_flPumpTime = -0.001;
-		}*/
 
 		if (pto->m_fNextAimBonus < -1.0)
 		{

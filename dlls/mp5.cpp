@@ -65,9 +65,9 @@ void CMP5::Precache()
 bool CMP5::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "9mm";
+	p->iAmmo1 = AMMO_9MM;
 	p->iMaxAmmo1 = _9MM_MAX_CARRY;
-	p->pszAmmo2 = "ARgrenades";
+	p->iAmmo2 = AMMO_ARGRENADES;
 	p->iMaxAmmo2 = M203_GRENADE_MAX_CARRY;
 	p->iMaxClip = MP5_MAX_CLIP;
 	p->iSlot = 2;
@@ -148,9 +148,7 @@ void CMP5::PrimaryAttack()
 
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usMP5, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, m_pPlayer->random_seed, shots, 0, 0);
 
-	if (0 == m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
-		// HEV suit - indicate out of ammo condition
-		m_pPlayer->SetSuitUpdate("!HEV_AMO0", false, 0);
+	m_pPlayer->CheckAmmoLevel(this);
 
 	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 }
@@ -167,7 +165,7 @@ void CMP5::SecondaryAttack()
 		return;
 	}
 
-	if (m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType] == 0)
+	if (m_pPlayer->m_rgAmmo[iAmmo2()] == 0)
 	{
 		PlayEmptySound();
 		return;
@@ -179,7 +177,7 @@ void CMP5::SecondaryAttack()
 	m_pPlayer->m_iExtraSoundTypes = bits_SOUND_DANGER;
 	m_pPlayer->m_flStopExtraSoundTime = UTIL_WeaponTimeBase() + 0.2;
 
-	m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType]--;
+	m_pPlayer->m_rgAmmo[iAmmo2()]--;
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
@@ -196,9 +194,7 @@ void CMP5::SecondaryAttack()
 	m_iNextPrimaryAttack = m_iNextSecondaryAttack = 1000;
 	m_iTimeWeaponIdle = 5000; // idle pretty soon after shooting.
 
-	if (0 == m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType])
-		// HEV suit - indicate out of ammo condition
-		m_pPlayer->SetSuitUpdate("!HEV_AMO0", false, 0);
+	m_pPlayer->CheckAmmoLevel(this, false);
 }
 
 void CMP5::Reload()
@@ -235,10 +231,10 @@ void CMP5::WeaponIdle()
 }
 
 
-IMPLEMENT_AMMO_CLASS(ammo_mp5clip, CMP5AmmoClip, "models/w_9mmARclip.mdl", AMMO_MP5CLIP_GIVE, "9mm", _9MM_MAX_CARRY);
+IMPLEMENT_AMMO_CLASS(ammo_mp5clip, CMP5AmmoClip, "models/w_9mmARclip.mdl", AMMO_MP5CLIP_GIVE, AMMO_9MM, _9MM_MAX_CARRY);
 LINK_ENTITY_TO_CLASS(ammo_9mmAR, CMP5AmmoClip);
 
-IMPLEMENT_AMMO_CLASS(ammo_9mmbox, CMP5Chainammo, "models/w_chainammo.mdl", AMMO_CHAINBOX_GIVE, "9mm", _9MM_MAX_CARRY);
+IMPLEMENT_AMMO_CLASS(ammo_9mmbox, CMP5Chainammo, "models/w_chainammo.mdl", AMMO_CHAINBOX_GIVE, AMMO_9MM, _9MM_MAX_CARRY);
 
-IMPLEMENT_AMMO_CLASS(ammo_mp5grenades, CMP5AmmoGrenade, "models/w_ARgrenade.mdl", AMMO_M203BOX_GIVE, "ARgrenades", M203_GRENADE_MAX_CARRY);
+IMPLEMENT_AMMO_CLASS(ammo_mp5grenades, CMP5AmmoGrenade, "models/w_ARgrenade.mdl", AMMO_M203BOX_GIVE, AMMO_ARGRENADES, M203_GRENADE_MAX_CARRY);
 LINK_ENTITY_TO_CLASS(ammo_ARgrenades, CMP5AmmoGrenade);

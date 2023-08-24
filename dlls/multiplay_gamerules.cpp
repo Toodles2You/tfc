@@ -492,7 +492,7 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 	{
 		pPlayer->GiveNamedItem("weapon_crowbar");
 		pPlayer->GiveNamedItem("weapon_9mmhandgun");
-		pPlayer->GiveAmmo(68, "9mm", _9MM_MAX_CARRY); // 4 full reloads
+		pPlayer->GiveAmmo(GLOCK_MAX_CLIP * 4, AMMO_9MM, _9MM_MAX_CARRY); // 4 full reloads
 	}
 
 	pPlayer->m_iAutoWepSwitch = originalAutoWepSwitch;

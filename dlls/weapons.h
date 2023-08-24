@@ -190,9 +190,9 @@ typedef struct
 {
 	int iSlot;
 	int iPosition;
-	const char* pszAmmo1; // ammo 1 type
+	int iAmmo1;			  // ammo 1 type
 	int iMaxAmmo1;		  // max ammo 1
-	const char* pszAmmo2; // ammo 2 type
+	int iAmmo2;			  // ammo 2 type
 	int iMaxAmmo2;		  // max ammo 2
 	const char* pszName;
 	int iMaxClip;
@@ -211,10 +211,6 @@ struct AmmoInfo
 	*/
 	const char* WeaponName = nullptr;
 };
-
-inline int giAmmoIndex = 0;
-
-void AddAmmoNameToAmmoRegistry(const char* szAmmoname, const char* weaponName);
 
 // Items that the player has in their inventory that they can use
 class CBasePlayerItem : public CBaseAnimating
@@ -257,9 +253,6 @@ public:
 	virtual void Kill();
 	virtual void AttachToPlayer(CBasePlayer* pPlayer);
 
-	virtual int PrimaryAmmoIndex() { return -1; }
-	virtual int SecondaryAmmoIndex() { return -1; }
-
 	virtual bool UpdateClientData(CBasePlayer* pPlayer) { return false; }
 
 	virtual CBasePlayerWeapon* GetWeaponPtr() { return NULL; }
@@ -271,7 +264,6 @@ public:
 	virtual void DecrementTimers() {}
 
 	static inline ItemInfo ItemInfoArray[MAX_WEAPONS];
-	static inline AmmoInfo AmmoInfoArray[MAX_AMMO_SLOTS];
 
 	CBasePlayer* m_pPlayer;
 	CBasePlayerItem* m_pNext;
@@ -280,9 +272,9 @@ public:
 	virtual int iItemSlot() { return 0; } // return 0 to MAX_ITEMS_SLOTS, used in hud
 
 	int iItemPosition() { return ItemInfoArray[m_iId].iPosition; }
-	const char* pszAmmo1() { return ItemInfoArray[m_iId].pszAmmo1; }
+	int iAmmo1() { return ItemInfoArray[m_iId].iAmmo1; }
 	int iMaxAmmo1() { return ItemInfoArray[m_iId].iMaxAmmo1; }
-	const char* pszAmmo2() { return ItemInfoArray[m_iId].pszAmmo2; }
+	int iAmmo2() { return ItemInfoArray[m_iId].iAmmo2; }
 	int iMaxAmmo2() { return ItemInfoArray[m_iId].iMaxAmmo2; }
 	const char* pszName() { return ItemInfoArray[m_iId].pszName; }
 	int iMaxClip() { return ItemInfoArray[m_iId].iMaxClip; }
@@ -314,8 +306,8 @@ public:
 	virtual bool ExtractClipAmmo(CBasePlayerWeapon* pWeapon); // { return true; }			// Return true if you can add ammo to yourself when picked up
 
 	// generic "shared" ammo handlers
-	bool AddPrimaryAmmo(CBasePlayerWeapon* origin, int iCount, char* szName, int iMaxClip, int iMaxCarry);
-	bool AddSecondaryAmmo(int iCount, char* szName, int iMaxCarry);
+	bool AddPrimaryAmmo(CBasePlayerWeapon* origin, int iCount, int iType, int iMaxClip, int iMaxCarry);
+	bool AddSecondaryAmmo(int iCount, int iType, int iMaxCarry);
 
 	void UpdateItemInfo() override {} // updates HUD state
 
@@ -352,9 +344,6 @@ public:
 	virtual bool ShouldWeaponIdle() { return false; }
 	bool Holster() override;
 
-	int PrimaryAmmoIndex() override;
-	int SecondaryAmmoIndex() override;
-
 	void PrintState();
 
 	CBasePlayerWeapon* GetWeaponPtr() override { return this; }
@@ -365,8 +354,6 @@ public:
 	int m_iNextPrimaryAttack;   // soonest time ItemPostFrame will call PrimaryAttack
 	int m_iNextSecondaryAttack; // soonest time ItemPostFrame will call SecondaryAttack
 	int m_iTimeWeaponIdle;	   // soonest time ItemPostFrame will call WeaponIdle
-	int m_iPrimaryAmmoType;		   // "primary" ammo index into players m_rgAmmo[]
-	int m_iSecondaryAmmoType;	   // "secondary" ammo index into players m_rgAmmo[]
 	int m_iClip;				   // number of shots left in the primary weapon clip, -1 it not used
 	int m_iClientClip;			   // the last version of m_iClip sent to hud dll
 	int m_iClientWeaponState;	   // the last version of the weapon state sent to hud dll (is current weapon, is on target)
@@ -479,7 +466,7 @@ class CWeaponBox : public CBaseEntity
 	void Touch(CBaseEntity* pOther) override;
 	bool KeyValue(KeyValueData* pkvd) override;
 	bool IsEmpty();
-	int GiveAmmo(int iCount, const char* szName, int iMax, int* pIndex = NULL);
+	int GiveAmmo(int iCount, int iType, int iMax, int* pIndex = NULL);
 	void SetObjectCollisionBox() override;
 
 public:
@@ -490,11 +477,10 @@ public:
 
 	bool HasWeapon(CBasePlayerItem* pCheckItem);
 	bool PackWeapon(CBasePlayerItem* pWeapon);
-	bool PackAmmo(int iszName, int iCount);
+	bool PackAmmo(int iType, int iCount);
 
 	CBasePlayerItem* m_rgpPlayerItems[MAX_ITEM_TYPES]; // one slot for each
 
-	int m_rgiszAmmo[MAX_AMMO_SLOTS]; // ammo names
 	int m_rgAmmo[MAX_AMMO_SLOTS];	 // ammo quantities
 
 	int m_cAmmoTypes; // how many ammo types packed into this box (if packed by a level designer)

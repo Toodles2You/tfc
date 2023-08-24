@@ -29,7 +29,7 @@ private:
 
 	// counts of weapons * ammo
 	WEAPON* rgSlots[MAX_WEAPON_SLOTS + 1][MAX_WEAPON_POSITIONS + 1]; // The slots currently in use by weapons.  The value is a pointer to the weapon;  if it's NULL, no weapon is there
-	int riAmmo[MAX_AMMO_TYPES];										 // count of each ammo type
+	int riAmmo[MAX_AMMO_SLOTS];										 // count of each ammo type
 
 public:
 	void Init()

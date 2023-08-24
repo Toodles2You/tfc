@@ -52,9 +52,9 @@ void CGlock::Precache()
 bool CGlock::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "9mm";
+	p->iAmmo1 = AMMO_9MM;
 	p->iMaxAmmo1 = _9MM_MAX_CARRY;
-	p->pszAmmo2 = NULL;
+	p->iAmmo2 = AMMO_NONE;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = GLOCK_MAX_CLIP;
 	p->iSlot = 1;
@@ -135,9 +135,7 @@ void CGlock::GlockFire(float flSpread, int fCycleTime, bool fUseAutoAim)
 
 	m_iNextPrimaryAttack = m_iNextSecondaryAttack = fCycleTime;
 
-	if (0 == m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
-		// HEV suit - indicate out of ammo condition
-		m_pPlayer->SetSuitUpdate("!HEV_AMO0", false, 0);
+	m_pPlayer->CheckAmmoLevel(this);
 
 	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 }
@@ -145,9 +143,6 @@ void CGlock::GlockFire(float flSpread, int fCycleTime, bool fUseAutoAim)
 
 void CGlock::Reload()
 {
-	if (m_pPlayer->ammo_9mm <= 0)
-		return;
-
 	bool iResult;
 
 	if (m_iClip == 0)
@@ -202,5 +197,5 @@ void CGlock::WeaponIdle()
 
 
 
-IMPLEMENT_AMMO_CLASS(ammo_glockclip, CGlockAmmo, "models/w_9mmclip.mdl", AMMO_GLOCKCLIP_GIVE, "9mm", _9MM_MAX_CARRY);
+IMPLEMENT_AMMO_CLASS(ammo_glockclip, CGlockAmmo, "models/w_9mmclip.mdl", AMMO_GLOCKCLIP_GIVE, AMMO_9MM, _9MM_MAX_CARRY);
 LINK_ENTITY_TO_CLASS(ammo_9mmclip, CGlockAmmo);

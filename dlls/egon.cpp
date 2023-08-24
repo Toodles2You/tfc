@@ -87,9 +87,9 @@ bool CEgon::Holster()
 bool CEgon::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "uranium";
+	p->iAmmo1 = AMMO_URANIUM;
 	p->iMaxAmmo1 = URANIUM_MAX_CARRY;
-	p->pszAmmo2 = NULL;
+	p->iAmmo2 = AMMO_NONE;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
 	p->iSlot = 3;
@@ -116,18 +116,15 @@ float CEgon::GetDischargeInterval()
 
 bool CEgon::HasAmmo()
 {
-	if (m_pPlayer->ammo_uranium <= 0)
-		return false;
-
-	return true;
+	return m_pPlayer->m_rgAmmo[iAmmo1()] > 0;
 }
 
 void CEgon::UseAmmo(int count)
 {
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= count)
-		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= count;
+	if (m_pPlayer->m_rgAmmo[iAmmo1()] >= count)
+		m_pPlayer->m_rgAmmo[iAmmo1()] -= count;
 	else
-		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] = 0;
+		m_pPlayer->m_rgAmmo[iAmmo1()] = 0;
 }
 
 void CEgon::Attack()
@@ -504,4 +501,4 @@ void CEgon::EndAttack()
 }
 
 
-IMPLEMENT_AMMO_CLASS(ammo_egonclip, CEgonAmmo, "models/w_chainammo.mdl", AMMO_URANIUMBOX_GIVE, "uranium", URANIUM_MAX_CARRY);
+IMPLEMENT_AMMO_CLASS(ammo_egonclip, CEgonAmmo, "models/w_chainammo.mdl", AMMO_URANIUMBOX_GIVE, AMMO_URANIUM, URANIUM_MAX_CARRY);
