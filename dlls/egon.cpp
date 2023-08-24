@@ -52,7 +52,6 @@ void CEgon::Precache()
 	PRECACHE_MODEL("models/p_egon.mdl");
 
 	PRECACHE_MODEL("models/w_9mmclip.mdl");
-	PRECACHE_SOUND("items/9mmclip1.wav");
 
 	PRECACHE_SOUND(EGON_SOUND_OFF);
 	PRECACHE_SOUND(EGON_SOUND_RUN);
@@ -503,28 +502,4 @@ void CEgon::EndAttack()
 }
 
 
-
-class CEgonAmmo : public CBasePlayerAmmo
-{
-	void Spawn() override
-	{
-		Precache();
-		SET_MODEL(ENT(pev), "models/w_chainammo.mdl");
-		CBasePlayerAmmo::Spawn();
-	}
-	void Precache() override
-	{
-		PRECACHE_MODEL("models/w_chainammo.mdl");
-		PRECACHE_SOUND("items/9mmclip1.wav");
-	}
-	bool AddAmmo(CBaseEntity* pOther) override
-	{
-		if (pOther->GiveAmmo(AMMO_URANIUMBOX_GIVE, "uranium", URANIUM_MAX_CARRY) != -1)
-		{
-			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
-			return true;
-		}
-		return false;
-	}
-};
-LINK_ENTITY_TO_CLASS(ammo_egonclip, CEgonAmmo);
+IMPLEMENT_AMMO_CLASS(ammo_egonclip, CEgonAmmo, "models/w_chainammo.mdl", AMMO_URANIUMBOX_GIVE, "uranium", URANIUM_MAX_CARRY);

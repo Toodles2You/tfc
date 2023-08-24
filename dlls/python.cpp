@@ -61,9 +61,7 @@ void CPython::Precache()
 	PRECACHE_MODEL("models/p_357.mdl");
 
 	PRECACHE_MODEL("models/w_357ammobox.mdl");
-	PRECACHE_SOUND("items/9mmclip1.wav");
 
-	PRECACHE_SOUND("weapons/357_reload1.wav");
 	PRECACHE_SOUND("weapons/357_cock1.wav");
 	PRECACHE_SOUND("weapons/357_shot1.wav");
 	PRECACHE_SOUND("weapons/357_shot2.wav");
@@ -220,28 +218,4 @@ void CPython::WeaponIdle()
 	SendWeaponAnim(iAnim, UTIL_IsDeathmatch() ? 1 : 0);
 }
 
-
-class CPythonAmmo : public CBasePlayerAmmo
-{
-	void Spawn() override
-	{
-		Precache();
-		SET_MODEL(ENT(pev), "models/w_357ammobox.mdl");
-		CBasePlayerAmmo::Spawn();
-	}
-	void Precache() override
-	{
-		PRECACHE_MODEL("models/w_357ammobox.mdl");
-		PRECACHE_SOUND("items/9mmclip1.wav");
-	}
-	bool AddAmmo(CBaseEntity* pOther) override
-	{
-		if (pOther->GiveAmmo(AMMO_357BOX_GIVE, "357", _357_MAX_CARRY) != -1)
-		{
-			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
-			return true;
-		}
-		return false;
-	}
-};
-LINK_ENTITY_TO_CLASS(ammo_357, CPythonAmmo);
+IMPLEMENT_AMMO_CLASS(ammo_357, CPythonAmmo, "models/w_357ammobox.mdl", AMMO_357BOX_GIVE, "357", _357_MAX_CARRY);

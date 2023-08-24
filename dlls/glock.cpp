@@ -41,11 +41,6 @@ void CGlock::Precache()
 	PRECACHE_MODEL("models/w_9mmhandgun.mdl");
 	PRECACHE_MODEL("models/p_9mmhandgun.mdl");
 
-	m_iShell = PRECACHE_MODEL("models/shell.mdl"); // brass shell
-
-	PRECACHE_SOUND("items/9mmclip1.wav");
-	PRECACHE_SOUND("items/9mmclip2.wav");
-
 	PRECACHE_SOUND("weapons/pl_gun1.wav"); //silenced handgun
 	PRECACHE_SOUND("weapons/pl_gun2.wav"); //silenced handgun
 	PRECACHE_SOUND("weapons/pl_gun3.wav"); //handgun
@@ -206,30 +201,5 @@ void CGlock::WeaponIdle()
 
 
 
-
-
-class CGlockAmmo : public CBasePlayerAmmo
-{
-	void Spawn() override
-	{
-		Precache();
-		SET_MODEL(ENT(pev), "models/w_9mmclip.mdl");
-		CBasePlayerAmmo::Spawn();
-	}
-	void Precache() override
-	{
-		PRECACHE_MODEL("models/w_9mmclip.mdl");
-		PRECACHE_SOUND("items/9mmclip1.wav");
-	}
-	bool AddAmmo(CBaseEntity* pOther) override
-	{
-		if (pOther->GiveAmmo(AMMO_GLOCKCLIP_GIVE, "9mm", _9MM_MAX_CARRY) != -1)
-		{
-			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
-			return true;
-		}
-		return false;
-	}
-};
-LINK_ENTITY_TO_CLASS(ammo_glockclip, CGlockAmmo);
+IMPLEMENT_AMMO_CLASS(ammo_glockclip, CGlockAmmo, "models/w_9mmclip.mdl", AMMO_GLOCKCLIP_GIVE, "9mm", _9MM_MAX_CARRY);
 LINK_ENTITY_TO_CLASS(ammo_9mmclip, CGlockAmmo);

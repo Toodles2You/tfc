@@ -131,7 +131,7 @@ void CSatchelCharge::SatchelThink()
 
 void CSatchelCharge::Precache()
 {
-	PRECACHE_MODEL("models/grenade.mdl");
+	PRECACHE_MODEL("models/w_satchel.mdl");
 	PRECACHE_SOUND("weapons/g_bounce1.wav");
 	PRECACHE_SOUND("weapons/g_bounce2.wav");
 	PRECACHE_SOUND("weapons/g_bounce3.wav");

@@ -341,6 +341,9 @@ void W_Precache()
 	PRECACHE_MODEL("models/grenade.mdl");
 	PRECACHE_MODEL("sprites/explode1.spr");
 
+	PRECACHE_MODEL("models/shell.mdl"); // brass shell
+	PRECACHE_MODEL("models/shotgunshell.mdl"); // shotgun shell
+
 	PRECACHE_SOUND("weapons/debris1.wav"); // explosion aftermaths
 	PRECACHE_SOUND("weapons/debris2.wav"); // explosion aftermaths
 	PRECACHE_SOUND("weapons/debris3.wav"); // explosion aftermaths
@@ -353,6 +356,9 @@ void W_Precache()
 	PRECACHE_SOUND("weapons/bullet_hit2.wav"); // hit by bullet
 
 	PRECACHE_SOUND("items/weapondrop1.wav"); // weapon falls to the ground
+
+	PRECACHE_SOUND("items/9mmclip1.wav");
+	PRECACHE_SOUND("items/9mmclip2.wav");
 
 	PRECACHE_SOUND("weapons/desert_eagle_sight.wav");
 	PRECACHE_SOUND("weapons/desert_eagle_sight2.wav");
@@ -903,6 +909,8 @@ void CBasePlayerAmmo::DefaultTouch(CBaseEntity* pOther)
 
 	if (AddAmmo(pOther))
 	{
+		EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
+
 		if (g_pGameRules->AmmoShouldRespawn(this) == GR_AMMO_RESPAWN_YES)
 		{
 			Respawn();
@@ -1393,9 +1401,7 @@ IMPLEMENT_SAVERESTORE(CRpgRocket, CGrenade);
 
 TYPEDESCRIPTION CShotgun::m_SaveData[] =
 	{
-		DEFINE_FIELD(CShotgun, m_flNextReload, FIELD_TIME),
 		DEFINE_FIELD(CShotgun, m_fInSpecialReload, FIELD_INTEGER),
-		DEFINE_FIELD(CShotgun, m_flNextReload, FIELD_TIME),
 		// DEFINE_FIELD( CShotgun, m_iShell, FIELD_INTEGER ),
 		DEFINE_FIELD(CShotgun, m_flPumpTime, FIELD_TIME),
 };

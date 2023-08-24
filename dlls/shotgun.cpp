@@ -45,10 +45,6 @@ void CShotgun::Precache()
 	PRECACHE_MODEL("models/w_shotgun.mdl");
 	PRECACHE_MODEL("models/p_shotgun.mdl");
 
-	m_iShell = PRECACHE_MODEL("models/shotgunshell.mdl"); // shotgun shell
-
-	PRECACHE_SOUND("items/9mmclip1.wav");
-
 	PRECACHE_SOUND("weapons/dbarrel1.wav"); //shotgun
 	PRECACHE_SOUND("weapons/sbarrel1.wav"); //shotgun
 
@@ -246,7 +242,6 @@ void CShotgun::Reload()
 
 		SendWeaponAnim(SHOTGUN_RELOAD);
 
-		m_flNextReload = UTIL_WeaponTimeBase() + 0.5;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.5;
 	}
 	else
@@ -334,28 +329,4 @@ void CShotgun::ItemPostFrame()
 	CBasePlayerWeapon::ItemPostFrame();
 }
 
-
-class CShotgunAmmo : public CBasePlayerAmmo
-{
-	void Spawn() override
-	{
-		Precache();
-		SET_MODEL(ENT(pev), "models/w_shotbox.mdl");
-		CBasePlayerAmmo::Spawn();
-	}
-	void Precache() override
-	{
-		PRECACHE_MODEL("models/w_shotbox.mdl");
-		PRECACHE_SOUND("items/9mmclip1.wav");
-	}
-	bool AddAmmo(CBaseEntity* pOther) override
-	{
-		if (pOther->GiveAmmo(AMMO_BUCKSHOTBOX_GIVE, "buckshot", BUCKSHOT_MAX_CARRY) != -1)
-		{
-			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
-			return true;
-		}
-		return false;
-	}
-};
-LINK_ENTITY_TO_CLASS(ammo_buckshot, CShotgunAmmo);
+IMPLEMENT_AMMO_CLASS(ammo_buckshot, CShotgunAmmo, "models/w_shotbox.mdl", AMMO_BUCKSHOTBOX_GIVE, "buckshot", BUCKSHOT_MAX_CARRY);

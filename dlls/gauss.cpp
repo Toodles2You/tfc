@@ -57,8 +57,6 @@ void CGauss::Precache()
 	PRECACHE_MODEL("models/v_gauss.mdl");
 	PRECACHE_MODEL("models/p_gauss.mdl");
 
-	PRECACHE_SOUND("items/9mmclip1.wav");
-
 	PRECACHE_SOUND("weapons/gauss2.wav");
 	PRECACHE_SOUND("weapons/electro4.wav");
 	PRECACHE_SOUND("weapons/electro5.wav");
@@ -579,28 +577,4 @@ void CGauss::SendStopEvent(bool sendToHost)
 }
 
 
-
-class CGaussAmmo : public CBasePlayerAmmo
-{
-	void Spawn() override
-	{
-		Precache();
-		SET_MODEL(ENT(pev), "models/w_gaussammo.mdl");
-		CBasePlayerAmmo::Spawn();
-	}
-	void Precache() override
-	{
-		PRECACHE_MODEL("models/w_gaussammo.mdl");
-		PRECACHE_SOUND("items/9mmclip1.wav");
-	}
-	bool AddAmmo(CBaseEntity* pOther) override
-	{
-		if (pOther->GiveAmmo(AMMO_URANIUMBOX_GIVE, "uranium", URANIUM_MAX_CARRY) != -1)
-		{
-			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
-			return true;
-		}
-		return false;
-	}
-};
-LINK_ENTITY_TO_CLASS(ammo_gaussclip, CGaussAmmo);
+IMPLEMENT_AMMO_CLASS(ammo_gaussclip, CGaussAmmo, "models/w_gaussammo.mdl", AMMO_URANIUMBOX_GIVE, "uranium", URANIUM_MAX_CARRY);

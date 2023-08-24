@@ -390,6 +390,25 @@ public:
 	void EXPORT Materialize();
 };
 
+#define IMPLEMENT_AMMO_CLASS(mapClassName, DLLClassName, modelName, give, ammoType, maxCarry) \
+class DLLClassName : public CBasePlayerAmmo \
+{ \
+	void Spawn() override \
+	{ \
+		Precache(); \
+		SET_MODEL(ENT(pev), modelName); \
+		CBasePlayerAmmo::Spawn(); \
+	} \
+	void Precache() override \
+	{ \
+		PRECACHE_MODEL(modelName); \
+	} \
+	bool AddAmmo(CBaseEntity* pOther) override \
+	{ \
+		return pOther->GiveAmmo(give, ammoType, maxCarry) != -1; \
+	} \
+}; \
+LINK_ENTITY_TO_CLASS(mapClassName, DLLClassName) \
 
 inline DLL_GLOBAL short g_sModelIndexLaser; // holds the index for the laser beam
 constexpr DLL_GLOBAL const char* g_pModelNameLaser = "sprites/laserbeam.spr";
@@ -514,9 +533,6 @@ public:
 	void WeaponIdle() override;
 
 private:
-	int m_iShell;
-
-
 	unsigned short m_usFireGlock1;
 	unsigned short m_usFireGlock2;
 };
@@ -610,9 +626,6 @@ public:
 	bool Deploy() override;
 	void Reload() override;
 	void WeaponIdle() override;
-	float m_flNextAnimTime;
-	int m_iShell;
-
 
 private:
 	unsigned short m_usMP5;
@@ -692,10 +705,6 @@ public:
 	void Reload() override;
 	void WeaponIdle() override;
 	void ItemPostFrame() override;
-	int m_fInReload; //TODO: not used, remove
-	float m_flNextReload;
-	int m_iShell;
-
 
 private:
 	unsigned short m_usDoubleFire;
@@ -966,7 +975,6 @@ public:
 	void Holster() override;
 	void Reload() override;
 	void WeaponIdle() override;
-	float m_flNextAnimTime;
 
 	float m_flRechargeTime;
 
