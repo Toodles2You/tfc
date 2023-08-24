@@ -521,14 +521,7 @@ void CSqueak::PrimaryAttack()
 		// find place to toss monster
 		UTIL_TraceLine(trace_origin + gpGlobals->v_forward * 20, trace_origin + gpGlobals->v_forward * 64, dont_ignore_monsters, NULL, &tr);
 
-		int flags;
-#ifdef CLIENT_WEAPONS
-		flags = FEV_NOTHOST;
-#else
-		flags = 0;
-#endif
-
-		PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usSnarkFire, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
+		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usSnarkFire, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 
 		if (tr.fAllSolid == 0 && tr.fStartSolid == 0 && tr.flFraction > 0.25)
 		{

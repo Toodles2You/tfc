@@ -350,7 +350,6 @@ public:
 	virtual void DoRetireWeapon();
 	virtual bool ShouldWeaponIdle() { return false; }
 	void Holster() override;
-	virtual bool UseDecrement() { return false; }
 
 	int PrimaryAmmoIndex() override;
 	int SecondaryAmmoIndex() override;
@@ -514,15 +513,6 @@ public:
 	void Reload() override;
 	void WeaponIdle() override;
 
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
-
 private:
 	int m_iShell;
 
@@ -561,15 +551,6 @@ public:
 	int m_iSwing;
 	TraceResult m_trHit;
 
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
-
 private:
 	unsigned short m_usCrowbar;
 };
@@ -599,15 +580,6 @@ public:
 	void Holster() override;
 	void Reload() override;
 	void WeaponIdle() override;
-
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
 
 private:
 	unsigned short m_usFirePython;
@@ -641,14 +613,6 @@ public:
 	float m_flNextAnimTime;
 	int m_iShell;
 
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
 
 private:
 	unsigned short m_usMP5;
@@ -687,15 +651,6 @@ public:
 	void Holster() override;
 	void Reload() override;
 	void WeaponIdle() override;
-
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
 
 private:
 	unsigned short m_usCrossbow;
@@ -741,14 +696,6 @@ public:
 	float m_flNextReload;
 	int m_iShell;
 
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
 
 private:
 	unsigned short m_usDoubleFire;
@@ -812,15 +759,6 @@ public:
 	CLaserSpot* m_pSpot;
 	bool m_fSpotActive;
 	int m_cActiveRockets; // how many missiles in flight from this launcher right now?
-
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
 
 private:
 	void ToggleLaserDot(bool bOn);
@@ -899,15 +837,6 @@ public:
 	// was this weapon just fired primary or secondary?
 	// we need to know so we can pick the right set of effects.
 	bool m_fPrimaryFire;
-
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
 
 private:
 	void SendStopEvent(bool sendToHost);
@@ -994,15 +923,6 @@ public:
 	CBeam* m_pNoise;
 	CSprite* m_pSprite;
 
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
-
 	unsigned short m_usEgonStop;
 
 private:
@@ -1052,15 +972,6 @@ public:
 
 	int m_iFirePhase; // don't save me.
 
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
-
 private:
 	unsigned short m_usHornetFire;
 };
@@ -1090,15 +1001,6 @@ public:
 	bool CanHolster() override;
 	void Holster() override;
 	void WeaponIdle() override;
-
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
 };
 
 enum satchel_e
@@ -1142,15 +1044,6 @@ public:
 	void Holster() override;
 	void WeaponIdle() override;
 	void Throw();
-
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
 };
 
 enum tripmine_e
@@ -1185,15 +1078,6 @@ public:
 	void Holster() override;
 	void WeaponIdle() override;
 
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
-
 private:
 	unsigned short m_usTripFire;
 };
@@ -1222,15 +1106,6 @@ public:
 	void Holster() override;
 	void WeaponIdle() override;
 	bool m_fJustThrown;
-
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
 
 private:
 	unsigned short m_usSnarkFire;

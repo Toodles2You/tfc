@@ -2833,7 +2833,6 @@ void CBasePlayer::PostThink()
 	UpdatePlayerSound();
 
 pt_end:
-#if defined(CLIENT_WEAPONS)
 	// Decay timers on weapons
 	// go through all of the weapons and make a list of the ones to pack
 	for (int i = 0; i < MAX_ITEM_TYPES; i++)
@@ -2846,7 +2845,7 @@ pt_end:
 			{
 				CBasePlayerWeapon* gun = pPlayerItem->GetWeaponPtr();
 
-				if (gun && gun->UseDecrement())
+				if (gun)
 				{
 					gun->m_flNextPrimaryAttack = V_max(gun->m_flNextPrimaryAttack - gpGlobals->frametime, -1.1);
 					gun->m_flNextSecondaryAttack = V_max(gun->m_flNextSecondaryAttack - gpGlobals->frametime, -0.001);
@@ -2894,7 +2893,6 @@ pt_end:
 		if (m_flAmmoStartCharge < -0.001)
 			m_flAmmoStartCharge = -0.001;
 	}
-#endif
 
 	// Track button info so we can detect 'pressed' and 'released' buttons next frame
 	m_afButtonLast = pev->button;
@@ -3226,12 +3224,10 @@ bool CBasePlayer::Restore(CRestore& restore)
 
 	TabulateAmmo();
 
-#if defined(CLIENT_WEAPONS)
 	// HACK:	This variable is saved/restored in CBaseMonster as a time variable, but we're using it
 	//			as just a counter.  Ideally, this needs its own variable that's saved as a plain float.
 	//			Barring that, we clear it out here instead of using the incorrect restored time value.
 	m_flNextAttack = UTIL_WeaponTimeBase();
-#endif
 
 	m_bResetViewEntity = true;
 
@@ -4083,11 +4079,7 @@ Called every frame by the player PreThink
 */
 void CBasePlayer::ItemPreFrame()
 {
-#if defined(CLIENT_WEAPONS)
 	if (m_flNextAttack > 0)
-#else
-	if (gpGlobals->time < m_flNextAttack)
-#endif
 	{
 		return;
 	}
@@ -4112,11 +4104,7 @@ void CBasePlayer::ItemPostFrame()
 	if (m_pTank != NULL)
 		return;
 
-#if defined(CLIENT_WEAPONS)
 	if (m_flNextAttack > 0)
-#else
-	if (gpGlobals->time < m_flNextAttack)
-#endif
 	{
 		return;
 	}

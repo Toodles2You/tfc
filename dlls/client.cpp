@@ -1615,7 +1615,6 @@ int GetWeaponData(struct edict_s* player, struct weapon_data_s* info)
 {
 	memset(info, 0, MAX_WEAPONS * sizeof(weapon_data_t));
 
-#if defined(CLIENT_WEAPONS)
 	int i;
 	weapon_data_t* item;
 	entvars_t* pev = &player->v;
@@ -1638,7 +1637,7 @@ int GetWeaponData(struct edict_s* player, struct weapon_data_s* info)
 			while (pPlayerItem)
 			{
 				gun = pPlayerItem->GetWeaponPtr();
-				if (gun && gun->UseDecrement())
+				if (gun)
 				{
 					// Get The ID.
 					memset(&II, 0, sizeof(II));
@@ -1672,7 +1671,6 @@ int GetWeaponData(struct edict_s* player, struct weapon_data_s* info)
 			}
 		}
 	}
-#endif
 	return 1;
 }
 
@@ -1747,7 +1745,6 @@ void UpdateClientData(const edict_t* ent, int sendweapons, struct clientdata_s* 
 
 
 
-#if defined(CLIENT_WEAPONS)
 	if (0 != sendweapons)
 	{
 		if (pl)
@@ -1768,7 +1765,7 @@ void UpdateClientData(const edict_t* ent, int sendweapons, struct clientdata_s* 
 			if (pl->m_pActiveItem)
 			{
 				CBasePlayerWeapon* gun = pl->m_pActiveItem->GetWeaponPtr();
-				if (gun && gun->UseDecrement())
+				if (gun)
 				{
 					ItemInfo II;
 					memset(&II, 0, sizeof(II));
@@ -1790,7 +1787,6 @@ void UpdateClientData(const edict_t* ent, int sendweapons, struct clientdata_s* 
 			}
 		}
 	}
-#endif
 }
 
 /*

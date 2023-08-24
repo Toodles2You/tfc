@@ -339,7 +339,7 @@ FireBullets
 Go to the trouble of combining multiple pellets into a single damage call.
 ================
 */
-void EV_HLDM_FireBullets(int idx, float* forward, float* right, float* up, int cShots, float* vecSrc, float* vecDirShooting, float flDistance, int iBulletType, int iTracerFreq, int* tracerCount, float flSpreadX, float flSpreadY, int iRandomSeed = 0)
+void EV_HLDM_FireBullets(int idx, float* forward, float* right, float* up, int cShots, float* vecSrc, float* vecDirShooting, float flDistance, int iBulletType, int iTracerFreq, int* tracerCount, float flSpreadX, float flSpreadY, int iRandomSeed = -1)
 {
 	int i;
 	pmtrace_t tr;
@@ -351,7 +351,7 @@ void EV_HLDM_FireBullets(int idx, float* forward, float* right, float* up, int c
 
 		float x, y, z;
 		//We randomize for the Shotgun.
-		if (iBulletType == BULLET_PLAYER_BUCKSHOT)
+		if (iRandomSeed != -1)
 		{
 			x = UTIL_SharedRandomFloat(iRandomSeed + iShot, -0.5, 0.5) + UTIL_SharedRandomFloat(iRandomSeed + (1 + iShot), -0.5, 0.5);
 			y = UTIL_SharedRandomFloat(iRandomSeed + (2 + iShot), -0.5, 0.5) + UTIL_SharedRandomFloat(iRandomSeed + (3 + iShot), -0.5, 0.5);

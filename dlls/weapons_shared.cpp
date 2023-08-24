@@ -101,20 +101,9 @@ void CBasePlayerWeapon::ResetEmptySound()
 	m_iPlayEmptySound = true;
 }
 
-bool CanAttack(float attack_time, float curtime, bool isPredicted)
+bool CanAttack(float attack_time)
 {
-#if defined(CLIENT_WEAPONS)
-	if (!isPredicted)
-#else
-	if (1)
-#endif
-	{
-		return (attack_time <= curtime) ? true : false;
-	}
-	else
-	{
-		return ((static_cast<int>(std::floor(attack_time * 1000.0)) * 1000.0) <= 0.0) ? true : false;
-	}
+	return ((static_cast<int>(std::floor(attack_time * 1000.0)) * 1000.0) <= 0.0) ? true : false;
 }
 
 void CBasePlayerWeapon::ItemPostFrame()
@@ -138,7 +127,7 @@ void CBasePlayerWeapon::ItemPostFrame()
 		m_flLastFireTime = 0.0f;
 	}
 
-	if ((m_pPlayer->pev->button & IN_ATTACK2) != 0 && CanAttack(m_flNextSecondaryAttack, gpGlobals->time, UseDecrement()))
+	if ((m_pPlayer->pev->button & IN_ATTACK2) != 0 && CanAttack(m_flNextSecondaryAttack))
 	{
 		if (pszAmmo2() && 0 == m_pPlayer->m_rgAmmo[SecondaryAmmoIndex()])
 		{
@@ -149,7 +138,7 @@ void CBasePlayerWeapon::ItemPostFrame()
 		SecondaryAttack();
 		m_pPlayer->pev->button &= ~IN_ATTACK2;
 	}
-	else if ((m_pPlayer->pev->button & IN_ATTACK) != 0 && CanAttack(m_flNextPrimaryAttack, gpGlobals->time, UseDecrement()))
+	else if ((m_pPlayer->pev->button & IN_ATTACK) != 0 && CanAttack(m_flNextPrimaryAttack))
 	{
 		if ((m_iClip == 0 && pszAmmo1()) || (iMaxClip() == -1 && 0 == m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()]))
 		{
@@ -170,13 +159,13 @@ void CBasePlayerWeapon::ItemPostFrame()
 
 		m_fFireOnEmpty = false;
 
-		if (!IsUseable() && m_flNextPrimaryAttack < (UseDecrement() ? 0.0 : gpGlobals->time))
+		if (!IsUseable() && m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
 		{
 #ifndef CLIENT_DLL
 			// weapon isn't useable, switch.
 			if ((iFlags() & ITEM_FLAG_NOAUTOSWITCHEMPTY) == 0 && g_pGameRules->GetNextBestWeapon(m_pPlayer, this))
 			{
-				m_flNextPrimaryAttack = (UseDecrement() ? 0.0 : gpGlobals->time) + 0.3;
+				m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.3;
 				return;
 			}
 #endif
@@ -184,7 +173,7 @@ void CBasePlayerWeapon::ItemPostFrame()
 		else
 		{
 			// weapon is useable. Reload if empty and weapon has waited as long as it has to after firing
-			if (m_iClip == 0 && (iFlags() & ITEM_FLAG_NOAUTORELOAD) == 0 && m_flNextPrimaryAttack < (UseDecrement() ? 0.0 : gpGlobals->time))
+			if (m_iClip == 0 && (iFlags() & ITEM_FLAG_NOAUTORELOAD) == 0 && m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
 			{
 				Reload();
 				return;
