@@ -87,7 +87,6 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 
 		DEFINE_ARRAY(CBasePlayer, m_rgpPlayerItems, FIELD_CLASSPTR, MAX_ITEM_TYPES),
 		DEFINE_FIELD(CBasePlayer, m_pActiveItem, FIELD_CLASSPTR),
-		DEFINE_FIELD(CBasePlayer, m_pLastItem, FIELD_CLASSPTR),
 		DEFINE_FIELD(CBasePlayer, m_WeaponBits, FIELD_INT64),
 
 		DEFINE_ARRAY(CBasePlayer, m_rgAmmo, FIELD_INTEGER, MAX_AMMO_SLOTS),
@@ -784,8 +783,6 @@ void CBasePlayer::RemoveAllItems(bool removeSuit)
 		m_pActiveItem->Holster();
 		m_pActiveItem = NULL;
 	}
-
-	m_pLastItem = NULL;
 
 	if (m_pTank != NULL)
 	{
@@ -3066,7 +3063,6 @@ void CBasePlayer::Spawn()
 
 	m_fNoPlayerSound = false; // normal sound behavior.
 
-	m_pLastItem = NULL;
 	m_fInitHUD = true;
 	m_iClientHideHUD = -1; // force this to be recalculated
 	m_pClientActiveItem = NULL;
@@ -3280,7 +3276,6 @@ void CBasePlayer::SelectItem(const char* pstr)
 	if (m_pActiveItem)
 		m_pActiveItem->Holster();
 
-	m_pLastItem = m_pActiveItem;
 	m_pActiveItem = pItem;
 
 	if (m_pActiveItem)
@@ -3330,7 +3325,6 @@ void CBasePlayer::SelectItem(int iId)
 	if (m_pActiveItem)
 		m_pActiveItem->Holster();
 
-	m_pLastItem = m_pActiveItem;
 	m_pActiveItem = pItem;
 
 	if (m_pActiveItem)
@@ -3932,8 +3926,6 @@ bool CBasePlayer::RemovePlayerItem(CBasePlayerItem* pItem)
 		pev->viewmodel = 0;
 		pev->weaponmodel = 0;
 	}
-	if (m_pLastItem == pItem)
-		m_pLastItem = NULL;
 
 	CBasePlayerItem* pPrev = m_rgpPlayerItems[pItem->iItemSlot()];
 

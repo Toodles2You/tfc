@@ -177,7 +177,6 @@ public:
 	CBasePlayerItem* m_rgpPlayerItems[MAX_ITEM_TYPES];
 	CBasePlayerItem* m_pActiveItem;
 	CBasePlayerItem* m_pClientActiveItem; // client version of the active item
-	CBasePlayerItem* m_pLastItem;
 
 	std::uint64_t m_WeaponBits;
 
@@ -282,7 +281,6 @@ public:
 	bool HasWeapons(); // do I have ANY weapons?
 	void SelectPrevItem(int iItem);
 	void SelectNextItem(int iItem);
-	void SelectLastItem();
 	void SelectItem(const char* pstr);
 	void SelectItem(int iId);
 	void ItemPreFrame();

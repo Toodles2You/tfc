@@ -37,7 +37,8 @@ client_sprite_t* GetSpriteList(client_sprite_t* pList, const char* psz, int iRes
 
 WeaponsResource gWR;
 
-int g_weaponselect = 0;
+int g_weaponselect = WEAPON_NONE;
+int g_lastselect = WEAPON_NONE;
 
 void WeaponsResource::LoadAllWeaponSprites()
 {
@@ -250,6 +251,7 @@ DECLARE_COMMAND(m_Ammo, Slot10);
 DECLARE_COMMAND(m_Ammo, Close);
 DECLARE_COMMAND(m_Ammo, NextWeapon);
 DECLARE_COMMAND(m_Ammo, PrevWeapon);
+DECLARE_COMMAND(m_Ammo, LastWeapon);
 
 // width of ammo fonts
 #define AMMO_SMALL_WIDTH 10
@@ -282,11 +284,12 @@ bool CHudAmmo::Init()
 	HOOK_COMMAND("cancelselect", Close);
 	HOOK_COMMAND("invnext", NextWeapon);
 	HOOK_COMMAND("invprev", PrevWeapon);
+	HOOK_COMMAND("lastinv", LastWeapon);
 
 	Reset();
 
 	CVAR_CREATE("hud_drawhistory_time", HISTORY_DRAW_TIME, 0);
-	CVAR_CREATE("hud_fastswitch", "0", FCVAR_ARCHIVE); // controls whether or not weapons can be selected in one keypress
+	hud_fastswitch = CVAR_CREATE("hud_fastswitch", "0", FCVAR_ARCHIVE); // controls whether or not weapons can be selected in one keypress
 
 	m_iFlags |= HUD_ACTIVE; //!!!
 
@@ -431,11 +434,11 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 		return;
 
 	WEAPON* p = NULL;
-	bool fastSwitch = CVAR_GET_FLOAT("hud_fastswitch") != 0;
+	bool fastSwitch = gHUD.m_Ammo.hud_fastswitch->value != 0;
+	bool newSlot = (gpActiveSel == NULL) || (gpActiveSel == (WEAPON*)1) || (iSlot != gpActiveSel->iSlot);
 
-	if ((gpActiveSel == NULL) || (gpActiveSel == (WEAPON*)1) || (iSlot != gpActiveSel->iSlot))
+	if (newSlot)
 	{
-		PlaySound("common/wpn_hudon.wav", 1);
 		p = GetFirstPos(iSlot);
 
 		if (p && fastSwitch) // check for fast weapon switch mode
@@ -447,13 +450,16 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 			{ // only one active item in bucket, so change directly to weapon
 				// ServerCmd(p->szName);
 				g_weaponselect = p->iId;
+
+				gpLastSel = gpActiveSel;
+				gpActiveSel = nullptr;
+				gHUD.m_iKeyBits &= ~IN_ATTACK;
 				return;
 			}
 		}
 	}
 	else
 	{
-		PlaySound("common/wpn_moveselect.wav", 1);
 		if (gpActiveSel)
 			p = GetNextActivePos(gpActiveSel->iSlot, gpActiveSel->iSlotPos);
 		if (!p)
@@ -468,9 +474,18 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 			gpActiveSel = (WEAPON*)1;
 		else
 			gpActiveSel = NULL;
+
+		PlaySound("common/wpn_denyselect.wav", 1);
 	}
 	else
+	{
 		gpActiveSel = p;
+
+		if (newSlot)
+			PlaySound("common/wpn_hudon.wav", 1);
+		else
+			PlaySound("common/wpn_moveselect.wav", 1);
+	}
 }
 
 //------------------------------------------------------------------------
@@ -497,6 +512,7 @@ void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip)
 	{
 		SetCrosshair(0, nullrc, 0, 0, 0);
 		m_pWeapon = nullptr;
+		g_lastselect = WEAPON_NONE;
 		return;
 	}
 
@@ -525,6 +541,9 @@ void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip)
 
 	if (iState == 0) // we're not the current weapon, so update no more
 		return;
+
+	if (m_pWeapon && m_pWeapon != pWeapon)
+		g_lastselect = m_pWeapon->iId;
 
 	m_pWeapon = pWeapon;
 
@@ -826,6 +845,26 @@ void CHudAmmo::UserCmd_PrevWeapon()
 	}
 
 	gpActiveSel = NULL;
+}
+
+// Selects the previous item in the menu
+void CHudAmmo::UserCmd_LastWeapon()
+{
+	if (g_lastselect <= WEAPON_NONE)
+		return;
+
+	auto pWeapon = gWR.GetWeapon(g_lastselect);
+
+	if (pWeapon && gHUD.HasWeapon(g_lastselect) && gWR.HasAmmo(pWeapon))
+	{
+		// ServerCmd(gpActiveSel->szName);
+		g_weaponselect = g_lastselect;
+		gHUD.m_iKeyBits &= ~IN_ATTACK;
+	}
+	else
+	{
+		PlaySound("common/wpn_denyselect.wav", 1);
+	}
 }
 
 
