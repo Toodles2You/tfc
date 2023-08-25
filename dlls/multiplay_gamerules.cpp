@@ -305,7 +305,7 @@ bool CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerIt
 	}
 
 	//Only switch if not attacking
-	if (pPlayer->m_iAutoWepSwitch == 2 && (pPlayer->m_afButtonLast & (IN_ATTACK | IN_ATTACK2)) != 0)
+	if (pPlayer->m_iAutoWepSwitch == 2 && ((pPlayer->m_afButtonLast & (IN_ATTACK | IN_ATTACK2)) != 0 || pPlayer->m_pActiveItem->IsReloading()))
 	{
 		return false;
 	}

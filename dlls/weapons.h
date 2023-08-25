@@ -259,6 +259,8 @@ public:
 
 	virtual void DecrementTimers() {}
 
+	virtual bool IsReloading() { return false; }
+
 	static inline ItemInfo ItemInfoArray[MAX_WEAPONS];
 
 	CBasePlayer* m_pPlayer;
@@ -343,6 +345,8 @@ public:
 
 	CBasePlayerWeapon* GetWeaponPtr() override { return this; }
 	float GetNextAttackDelay(float delay);
+
+	virtual bool IsReloading() override { return m_fInReload; }
 
 	float m_flPumpTime;
 	int m_fInSpecialReload;		   // Are we in the middle of a reload for the shotguns
@@ -692,6 +696,8 @@ public:
 	void Reload() override;
 	void WeaponIdle() override;
 	void ItemPostFrame() override;
+
+	bool IsReloading() override { return m_fInSpecialReload != 0; }
 
 private:
 	unsigned short m_usDoubleFire;
