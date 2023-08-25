@@ -477,6 +477,76 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 // Message Handlers
 //------------------------------------------------------------------------
 
+void CHudAmmo::Update_AmmoX(int iIndex, int iCount)
+{
+	gWR.SetAmmo(iIndex, abs(iCount));
+}
+
+void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip)
+{
+	static Rect nullrc;
+	bool fOnTarget = false;
+
+	// detect if we're also on target
+	if (iState > 1)
+	{
+		fOnTarget = true;
+	}
+
+	if (iId < 1)
+	{
+		SetCrosshair(0, nullrc, 0, 0, 0);
+		m_pWeapon = nullptr;
+		return;
+	}
+
+	if (g_iUser1 != OBS_IN_EYE)
+	{
+		// Is player dead???
+		if ((iId == -1) && (iClip == -1))
+		{
+			gHUD.m_fPlayerDead = true;
+			gpActiveSel = NULL;
+			return;
+		}
+		gHUD.m_fPlayerDead = false;
+	}
+
+	WEAPON* pWeapon = gWR.GetWeapon(iId);
+
+	if (!pWeapon)
+		return;
+
+	if (iClip < -1)
+		pWeapon->iClip = abs(iClip);
+	else
+		pWeapon->iClip = iClip;
+
+
+	if (iState == 0) // we're not the current weapon, so update no more
+		return;
+
+	m_pWeapon = pWeapon;
+
+	if (gHUD.m_iFOV >= 90)
+	{ // normal crosshairs
+		if (fOnTarget && 0 != m_pWeapon->hAutoaim)
+			SetCrosshair(m_pWeapon->hAutoaim, m_pWeapon->rcAutoaim, 255, 255, 255);
+		else
+			SetCrosshair(m_pWeapon->hCrosshair, m_pWeapon->rcCrosshair, 255, 255, 255);
+	}
+	else
+	{ // zoomed crosshairs
+		if (fOnTarget && 0 != m_pWeapon->hZoomedAutoaim)
+			SetCrosshair(m_pWeapon->hZoomedAutoaim, m_pWeapon->rcZoomedAutoaim, 255, 255, 255);
+		else
+			SetCrosshair(m_pWeapon->hZoomedCrosshair, m_pWeapon->rcZoomedCrosshair, 255, 255, 255);
+	}
+
+	m_fFade = 200.0f; //!!!
+	m_iFlags |= HUD_ACTIVE;
+}
+
 //
 // AmmoX  -- Update the count of a known type of ammo
 //
@@ -486,8 +556,8 @@ bool CHudAmmo::MsgFunc_AmmoX(const char* pszName, int iSize, void* pbuf)
 
 	int iIndex = READ_BYTE();
 	int iCount = READ_BYTE();
-
-	gWR.SetAmmo(iIndex, abs(iCount));
+	
+	Update_AmmoX(iIndex, iCount);
 
 	return true;
 }
@@ -558,73 +628,13 @@ bool CHudAmmo::MsgFunc_HideWeapon(const char* pszName, int iSize, void* pbuf)
 //
 bool CHudAmmo::MsgFunc_CurWeapon(const char* pszName, int iSize, void* pbuf)
 {
-	static Rect nullrc;
-	bool fOnTarget = false;
-
 	BEGIN_READ(pbuf, iSize);
 
 	int iState = READ_BYTE();
 	int iId = READ_CHAR();
 	int iClip = READ_CHAR();
 
-	// detect if we're also on target
-	if (iState > 1)
-	{
-		fOnTarget = true;
-	}
-
-	if (iId < 1)
-	{
-		SetCrosshair(0, nullrc, 0, 0, 0);
-		m_pWeapon = nullptr;
-		return false;
-	}
-
-	if (g_iUser1 != OBS_IN_EYE)
-	{
-		// Is player dead???
-		if ((iId == -1) && (iClip == -1))
-		{
-			gHUD.m_fPlayerDead = true;
-			gpActiveSel = NULL;
-			return true;
-		}
-		gHUD.m_fPlayerDead = false;
-	}
-
-	WEAPON* pWeapon = gWR.GetWeapon(iId);
-
-	if (!pWeapon)
-		return false;
-
-	if (iClip < -1)
-		pWeapon->iClip = abs(iClip);
-	else
-		pWeapon->iClip = iClip;
-
-
-	if (iState == 0) // we're not the current weapon, so update no more
-		return true;
-
-	m_pWeapon = pWeapon;
-
-	if (gHUD.m_iFOV >= 90)
-	{ // normal crosshairs
-		if (fOnTarget && 0 != m_pWeapon->hAutoaim)
-			SetCrosshair(m_pWeapon->hAutoaim, m_pWeapon->rcAutoaim, 255, 255, 255);
-		else
-			SetCrosshair(m_pWeapon->hCrosshair, m_pWeapon->rcCrosshair, 255, 255, 255);
-	}
-	else
-	{ // zoomed crosshairs
-		if (fOnTarget && 0 != m_pWeapon->hZoomedAutoaim)
-			SetCrosshair(m_pWeapon->hZoomedAutoaim, m_pWeapon->rcZoomedAutoaim, 255, 255, 255);
-		else
-			SetCrosshair(m_pWeapon->hZoomedCrosshair, m_pWeapon->rcZoomedCrosshair, 255, 255, 255);
-	}
-
-	m_fFade = 200.0f; //!!!
-	m_iFlags |= HUD_ACTIVE;
+	Update_CurWeapon(iState, iId, iClip);
 
 	return true;
 }

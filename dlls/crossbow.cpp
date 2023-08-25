@@ -404,8 +404,7 @@ void CCrossbow::SecondaryAttack()
 		m_pPlayer->m_iFOV = 20;
 	}
 
-	pev->nextthink = UTIL_WeaponTimeBase() + 0.1;
-	m_iNextSecondaryAttack = 1000;
+	m_iNextSecondaryAttack = 200;
 }
 
 
@@ -418,6 +417,7 @@ void CCrossbow::Reload()
 
 	if (DefaultReload(5, CROSSBOW_RELOAD, 4500))
 	{
+		m_pPlayer->m_iFOV = 0;
 		EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/xbow_reload1.wav", RANDOM_FLOAT(0.95, 1.0), ATTN_NORM, 0, 93 + RANDOM_LONG(0, 0xF));
 	}
 }

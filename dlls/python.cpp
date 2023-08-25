@@ -106,7 +106,7 @@ void CPython::SecondaryAttack()
 		m_pPlayer->m_iFOV = 40;
 	}
 
-	m_iNextSecondaryAttack = 500;
+	m_iNextSecondaryAttack = 200;
 }
 
 void CPython::PrimaryAttack()

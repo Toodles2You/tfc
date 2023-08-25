@@ -54,18 +54,23 @@ bool CHudBattery::VidInit()
 	return true;
 }
 
-bool CHudBattery::MsgFunc_Battery(const char* pszName, int iSize, void* pbuf)
+void CHudBattery::Update_Battery(int iBat)
 {
 	m_iFlags |= HUD_ACTIVE;
 
+	if (iBat != m_iBat)
+	{
+		m_fFade = FADE_TIME;
+		m_iBat = iBat;
+	}
+}
+
+bool CHudBattery::MsgFunc_Battery(const char* pszName, int iSize, void* pbuf)
+{
 	BEGIN_READ(pbuf, iSize);
 	int x = READ_SHORT();
 
-	if (x != m_iBat)
-	{
-		m_fFade = FADE_TIME;
-		m_iBat = x;
-	}
+	Update_Battery(x);
 
 	return true;
 }

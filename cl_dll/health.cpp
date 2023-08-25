@@ -95,20 +95,25 @@ bool CHudHealth::VidInit()
 	return true;
 }
 
+void CHudHealth::Update_Health(int iHealth)
+{
+	m_iFlags |= HUD_ACTIVE;
+
+	// Only update the fade if we've changed health
+	if (iHealth != m_iHealth)
+	{
+		m_fFade = FADE_TIME;
+		m_iHealth = iHealth;
+	}
+}
+
 bool CHudHealth::MsgFunc_Health(const char* pszName, int iSize, void* pbuf)
 {
 	// TODO: update local health data
 	BEGIN_READ(pbuf, iSize);
 	int x = READ_SHORT();
 
-	m_iFlags |= HUD_ACTIVE;
-
-	// Only update the fade if we've changed health
-	if (x != m_iHealth)
-	{
-		m_fFade = FADE_TIME;
-		m_iHealth = x;
-	}
+	Update_Health(x);
 
 	return true;
 }

@@ -129,11 +129,7 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 		//DEFINE_ARRAY( CBasePlayer, m_szTextureName, FIELD_CHARACTER, CBTEXTURENAMEMAX ), // Don't need to restore
 		//DEFINE_FIELD( CBasePlayer, m_chTextureType, FIELD_CHARACTER ), // Don't need to restore
 		//DEFINE_FIELD( CBasePlayer, m_fNoPlayerSound, FIELD_BOOLEAN ), // Don't need to restore, debug
-		//DEFINE_FIELD( CBasePlayer, m_iUpdateTime, FIELD_INTEGER ), // Don't need to restore
-		//DEFINE_FIELD( CBasePlayer, m_iClientHealth, FIELD_INTEGER ), // Don't restore, client needs reset
-		//DEFINE_FIELD( CBasePlayer, m_iClientBattery, FIELD_INTEGER ), // Don't restore, client needs reset
 		//DEFINE_FIELD( CBasePlayer, m_iClientHideHUD, FIELD_INTEGER ), // Don't restore, client needs reset
-		//DEFINE_FIELD( CBasePlayer, m_fWeapon, FIELD_BOOLEAN ),  // Don't restore, client needs reset
 		//DEFINE_FIELD( CBasePlayer, m_nCustomSprayFrames, FIELD_INTEGER ), // Don't restore, depends on server message after spawning and only matters in multiplayer
 		//DEFINE_FIELD( CBasePlayer, m_vecAutoAim, FIELD_VECTOR ), // Don't save/restore - this is recomputed
 		//DEFINE_ARRAY( CBasePlayer, m_rgAmmoLast, FIELD_INTEGER, MAX_AMMO_SLOTS ), // Don't need to restore
@@ -872,25 +868,8 @@ void CBasePlayer::Killed(entvars_t* pevAttacker, int iGib)
 	// clear out the suit message cache so we don't keep chattering
 	SetSuitUpdate(NULL, false, 0);
 
-	// send "health" update message to zero
-	m_iClientHealth = 0;
-	MESSAGE_BEGIN(MSG_ONE, gmsgHealth, NULL, pev);
-	WRITE_SHORT(m_iClientHealth);
-	MESSAGE_END();
-
-	// Tell Ammo Hud that the player is dead
-	MESSAGE_BEGIN(MSG_ONE, gmsgCurWeapon, NULL, pev);
-	WRITE_BYTE(0);
-	WRITE_BYTE(0XFF);
-	WRITE_BYTE(0xFF);
-	MESSAGE_END();
-
 	// reset FOV
-	m_iFOV = m_iClientFOV = 0;
-
-	MESSAGE_BEGIN(MSG_ONE, gmsgSetFOV, NULL, pev);
-	WRITE_BYTE(0);
-	MESSAGE_END();
+	m_iFOV = 0;
 
 
 	// UNDONE: Put this in, but add FFADE_PERMANENT and make fade time 8.8 instead of 4.12
@@ -1570,18 +1549,8 @@ void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle)
 	// clear out the suit message cache so we don't keep chattering
 	SetSuitUpdate(NULL, false, 0);
 
-	// Tell Ammo Hud that the player is dead
-	MESSAGE_BEGIN(MSG_ONE, gmsgCurWeapon, NULL, pev);
-	WRITE_BYTE(0);
-	WRITE_BYTE(0XFF);
-	WRITE_BYTE(0xFF);
-	MESSAGE_END();
-
 	// reset FOV
-	m_iFOV = m_iClientFOV = 0;
-	MESSAGE_BEGIN(MSG_ONE, gmsgSetFOV, NULL, pev);
-	WRITE_BYTE(0);
-	MESSAGE_END();
+	m_iFOV = 0;
 
 	// Setup flags
 	m_iHideHUD = (HIDEHUD_HEALTH | HIDEHUD_WEAPONS);
@@ -3056,7 +3025,6 @@ void CBasePlayer::Spawn()
 	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "bj", UTIL_dtos1(sv_allowbunnyhopping.value != 0 ? 1 : 0));
 
 	m_iFOV = 0;		   // init field of view.
-	m_iClientFOV = -1; // make sure fov reset is sent
 	m_ClientSndRoomtype = -1;
 
 	m_flNextDecalTime = 0; // let this player decal as soon as he spawns.
@@ -3101,9 +3069,7 @@ void CBasePlayer::Spawn()
 	m_pLastItem = NULL;
 	m_fInitHUD = true;
 	m_iClientHideHUD = -1; // force this to be recalculated
-	m_fWeapon = false;
 	m_pClientActiveItem = NULL;
-	m_iClientBattery = -1;
 
 	// reset all ammo values to 0
 	for (int i = 0; i < MAX_AMMO_SLOTS; i++)
@@ -3134,14 +3100,10 @@ void CBasePlayer::Precache()
 	m_bitsDamageType = 0;
 	m_bitsHUDDamage = -1;
 
-	m_iClientBattery = -1;
-
 	m_iTrain |= TRAIN_NEW;
 
 	// Make sure any necessary user messages have been registered
 	LinkUserMessages();
-
-	m_iUpdateTime = 5; // won't update for 1/2 a second
 
 	if (gInitHUD)
 		m_fInitHUD = true;
@@ -3188,7 +3150,6 @@ bool CBasePlayer::Restore(CRestore& restore)
 
 	pev->fixangle = 1; // turn this way immediately
 
-	m_iClientFOV = -1; // Make sure the client gets the right FOV value.
 	m_ClientSndRoomtype = -1;
 
 	// Reset room type on level change.
@@ -3614,10 +3575,7 @@ Reset stuff so that the state is transmitted.
 */
 void CBasePlayer::ForceClientDllUpdate()
 {
-	m_iClientHealth = -1;
-	m_iClientBattery = -1;
 	m_iClientHideHUD = -1;
-	m_iClientFOV = -1;
 	m_ClientWeaponBits = 0;
 	m_ClientSndRoomtype = -1;
 
@@ -3627,7 +3585,6 @@ void CBasePlayer::ForceClientDllUpdate()
 	}
 
 	m_iTrain |= TRAIN_NEW; // Force new train message.
-	m_fWeapon = false;	   // Force weapon send
 	m_fKnownItem = false;  // Force weaponinit messages.
 	m_fInitHUD = true;	   // Force HUD gmsgResetHUD message
 
@@ -3936,17 +3893,6 @@ bool CBasePlayer::AddPlayerItem(CBasePlayerItem* pItem)
 		{
 			weapon->ExtractAmmo(weapon);
 
-			//Immediately update the ammo HUD so weapon pickup isn't sometimes red because the HUD doesn't know about regenerating/free ammo yet.
-			if (weapon->iAmmo1() > AMMO_NONE)
-			{
-				SendSingleAmmoUpdate(weapon->iAmmo1());
-			}
-
-			if (weapon->iAmmo2() > AMMO_NONE)
-			{
-				SendSingleAmmoUpdate(weapon->iAmmo2());
-			}
-
 			//Don't show weapon pickup if we're spawning or if it's an exhaustible weapon (will show ammo pickup instead).
 			if (!m_bIsSpawning && (weapon->iFlags() & ITEM_FLAG_EXHAUSTIBLE) == 0)
 			{
@@ -4125,43 +4071,6 @@ int CBasePlayer::AmmoInventory(int iAmmoIndex)
 	return m_rgAmmo[iAmmoIndex];
 }
 
-// Called from UpdateClientData
-// makes sure the client has all the necessary ammo info,  if values have changed
-void CBasePlayer::SendAmmoUpdate()
-{
-	for (int i = 0; i < MAX_AMMO_SLOTS; i++)
-	{
-		InternalSendSingleAmmoUpdate(i);
-	}
-}
-
-void CBasePlayer::SendSingleAmmoUpdate(int ammoIndex)
-{
-	if (ammoIndex <= AMMO_NONE || ammoIndex >= MAX_AMMO_SLOTS)
-	{
-		return;
-	}
-
-	InternalSendSingleAmmoUpdate(ammoIndex);
-}
-
-void CBasePlayer::InternalSendSingleAmmoUpdate(int ammoIndex)
-{
-	if (m_rgAmmo[ammoIndex] != m_rgAmmoLast[ammoIndex])
-	{
-		m_rgAmmoLast[ammoIndex] = m_rgAmmo[ammoIndex];
-
-		ASSERT(m_rgAmmo[ammoIndex] >= 0);
-		ASSERT(m_rgAmmo[ammoIndex] < 255);
-
-		// send "Ammo" update message
-		MESSAGE_BEGIN(MSG_ONE, gmsgAmmoX, NULL, pev);
-		WRITE_BYTE(ammoIndex);
-		WRITE_BYTE(V_max(V_min(m_rgAmmo[ammoIndex], 254), 0)); // clamp the value to one byte
-		MESSAGE_END();
-	}
-}
-
 /*
 =========================================================
 	UpdateClientData
@@ -4216,15 +4125,6 @@ void CBasePlayer::UpdateClientData()
 		m_iClientHideHUD = m_iHideHUD;
 	}
 
-	if (m_iFOV != m_iClientFOV)
-	{
-		MESSAGE_BEGIN(MSG_ONE, gmsgSetFOV, NULL, pev);
-		WRITE_BYTE(m_iFOV);
-		MESSAGE_END();
-
-		// cache FOV change at end of function, so weapon updates can see that FOV has changed
-	}
-
 	// HACKHACK -- send the message to display the game title
 	//TODO: will not work properly in multiplayer
 	if (gDisplayTitle)
@@ -4233,32 +4133,6 @@ void CBasePlayer::UpdateClientData()
 		WRITE_BYTE(0);
 		MESSAGE_END();
 		gDisplayTitle = false;
-	}
-
-	if (pev->health != m_iClientHealth)
-	{
-		int iHealth = std::clamp<float>(pev->health, 0.f, (float)(std::numeric_limits<short>::max())); // make sure that no negative health values are sent
-		if (pev->health > 0.0f && pev->health <= 1.0f)
-			iHealth = 1;
-
-		// send "health" update message
-		MESSAGE_BEGIN(MSG_ONE, gmsgHealth, NULL, pev);
-		WRITE_SHORT(iHealth);
-		MESSAGE_END();
-
-		m_iClientHealth = pev->health;
-	}
-
-
-	if (pev->armorvalue != m_iClientBattery)
-	{
-		m_iClientBattery = pev->armorvalue;
-
-		ASSERT(gmsgBattery > 0);
-		// send "health" update message
-		MESSAGE_BEGIN(MSG_ONE, gmsgBattery, NULL, pev);
-		WRITE_SHORT((int)pev->armorvalue);
-		MESSAGE_END();
 	}
 
 	if (m_WeaponBits != m_ClientWeaponBits)
@@ -4417,16 +4291,6 @@ void CBasePlayer::UpdateClientData()
 		}
 	}
 
-
-	SendAmmoUpdate();
-
-	// Update all the items
-	for (int i = 0; i < MAX_ITEM_TYPES; i++)
-	{
-		if (m_rgpPlayerItems[i]) // each item updates it's successors
-			m_rgpPlayerItems[i]->UpdateClientData(this);
-	}
-
 	//Active item is becoming null, or we're sending all HUD state to client
 	//Only if we're not in Observer mode, which uses the target player's weapon
 	if (pev->iuser1 == OBS_NONE && !m_pActiveItem && ((m_pClientActiveItem != m_pActiveItem) || fullHUDInitRequired))
@@ -4441,7 +4305,6 @@ void CBasePlayer::UpdateClientData()
 
 	// Cache and client weapon change
 	m_pClientActiveItem = m_pActiveItem;
-	m_iClientFOV = m_iFOV;
 
 	// Update Status Bar
 	if (m_flNextSBarUpdateTime < gpGlobals->time)

@@ -626,61 +626,6 @@ void CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer)
 	pPlayer->SetWeaponBit(m_iId);
 }
 
-bool CBasePlayerWeapon::UpdateClientData(CBasePlayer* pPlayer)
-{
-	bool bSend = false;
-	int state = 0;
-	if (pPlayer->m_pActiveItem == this)
-	{
-		if (pPlayer->m_fOnTarget)
-			state = WEAPON_IS_ONTARGET;
-		else
-			state = 1;
-	}
-
-	// Forcing send of all data!
-	if (!pPlayer->m_fWeapon)
-	{
-		bSend = true;
-	}
-
-	// This is the current or last weapon, so the state will need to be updated
-	if (this == pPlayer->m_pActiveItem ||
-		this == pPlayer->m_pClientActiveItem)
-	{
-		if (pPlayer->m_pActiveItem != pPlayer->m_pClientActiveItem)
-		{
-			bSend = true;
-		}
-	}
-
-	// If the ammo, state, or fov has changed, update the weapon
-	if (m_iClip != m_iClientClip ||
-		state != m_iClientWeaponState ||
-		pPlayer->m_iFOV != pPlayer->m_iClientFOV)
-	{
-		bSend = true;
-	}
-
-	if (bSend)
-	{
-		MESSAGE_BEGIN(MSG_ONE, gmsgCurWeapon, NULL, pPlayer->pev);
-		WRITE_BYTE(state);
-		WRITE_BYTE(m_iId);
-		WRITE_BYTE(m_iClip);
-		MESSAGE_END();
-
-		m_iClientClip = m_iClip;
-		m_iClientWeaponState = state;
-		pPlayer->m_fWeapon = true;
-	}
-
-	if (m_pNext)
-		m_pNext->UpdateClientData(pPlayer);
-
-	return true;
-}
-
 
 void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int body)
 {

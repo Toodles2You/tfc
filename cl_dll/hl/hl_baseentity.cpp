@@ -147,6 +147,7 @@ void CBasePlayer::CheckTimeBasedDamage() {}
 void CBasePlayer::UpdateGeigerCounter() {}
 void CBasePlayer::CheckSuitUpdate() {}
 void CBasePlayer::SetSuitUpdate(const char* name, bool fgroup, int iNoRepeatTime) {}
+void CBasePlayer::CheckAmmoLevel(CBasePlayerItem* pItem, bool bPrimary) {}
 void CBasePlayer::UpdatePlayerSound() {}
 void CBasePlayer::PostThink() {}
 void CBasePlayer::Precache() {}
@@ -169,8 +170,6 @@ bool CBasePlayer::RemovePlayerItem(CBasePlayerItem* pItem) { return false; }
 void CBasePlayer::ItemPreFrame() {}
 void CBasePlayer::ItemPostFrame() {}
 int CBasePlayer::AmmoInventory(int iAmmoIndex) { return -1; }
-int CBasePlayer::GetAmmoIndex(const char* psz) { return -1; }
-void CBasePlayer::SendAmmoUpdate() {}
 void CBasePlayer::UpdateClientData() {}
 bool CBasePlayer::FBecomeProne() { return true; }
 int CBasePlayer::Illumination() { return 0; }
@@ -185,10 +184,9 @@ bool CBasePlayer::HasPlayerItem(CBasePlayerItem* pCheckItem) { return false; }
 bool CBasePlayer::SwitchWeapon(CBasePlayerItem* pWeapon) { return false; }
 Vector CBasePlayer::GetGunPosition() { return g_vecZero; }
 const char* CBasePlayer::TeamID() { return ""; }
-int CBasePlayer::GiveAmmo(int iCount, const char* szName, int iMax) { return 0; }
+int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax) { return 0; }
 void CBasePlayer::AddPoints(int score, bool bAllowNegativeScore) {}
 void CBasePlayer::AddPointsToTeam(int score, bool bAllowNegativeScore) {}
-void CBasePlayer::TabulateAmmo() {}
 
 void ClearMultiDamage() {}
 void ApplyMultiDamage(entvars_t* pevInflictor, entvars_t* pevAttacker) {}
@@ -218,10 +216,7 @@ bool CBasePlayerItem::Holster() { return true; }
 void CBasePlayerItem::AttachToPlayer(CBasePlayer* pPlayer) {}
 bool CBasePlayerWeapon::AddDuplicate(CBasePlayerItem* pOriginal) { return false; }
 void CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer) {}
-bool CBasePlayerWeapon::UpdateClientData(CBasePlayer* pPlayer) { return false; }
 bool CBasePlayerWeapon::IsUseable() { return true; }
-int CBasePlayerWeapon::PrimaryAmmoIndex() { return m_iPrimaryAmmoType; }
-int CBasePlayerWeapon::SecondaryAmmoIndex() { return m_iSecondaryAmmoType; }
 void CBasePlayerAmmo::Spawn() {}
 CBaseEntity* CBasePlayerAmmo::Respawn() { return this; }
 void CBasePlayerAmmo::Materialize() {}

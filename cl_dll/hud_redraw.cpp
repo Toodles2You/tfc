@@ -51,40 +51,7 @@ void CHud::Think()
 		pList = pList->pNext;
 	}
 
-	newfov = HUD_GetFOV();
-	if (newfov == 0)
-	{
-		m_iFOV = default_fov->value;
-	}
-	else
-	{
-		m_iFOV = newfov;
-	}
-
-	// the clients fov is actually set in the client data update section of the hud
-
-	// Set a new sensitivity
-	if (m_iFOV == default_fov->value)
-	{
-		// reset to saved sensitivity
-		m_flMouseSensitivity = 0;
-	}
-	else
-	{
-		// set a new sensitivity that is proportional to the change from the FOV default
-		m_flMouseSensitivity = sensitivity->value * ((float)newfov / (float)default_fov->value) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
-	}
-
-	// think about default fov
-	if (m_iFOV == 0)
-	{ // only let players adjust up in fov,  and only if they are not overriden by something else
-		m_iFOV = V_max(default_fov->value, 90);
-	}
-
-	if (0 != gEngfuncs.IsSpectateOnly())
-	{
-		m_iFOV = gHUD.m_Spectator.GetFOV(); // default_fov->value;
-	}
+	HUD_GetFOV();
 }
 
 // Redraw

@@ -81,7 +81,6 @@ static CHLVoiceStatusHelper g_VoiceStatusHelper;
 extern client_sprite_t* GetSpriteList(client_sprite_t* pList, const char* psz, int iRes, int iCount);
 
 extern cvar_t* sensitivity;
-cvar_t* cl_lw = NULL;
 cvar_t* cl_rollangle = nullptr;
 cvar_t* cl_rollspeed = nullptr;
 cvar_t* cl_bobtilt = nullptr;
@@ -330,7 +329,6 @@ void CHud::Init()
 	default_fov = CVAR_CREATE("default_fov", "90", FCVAR_ARCHIVE);
 	m_pCvarStealMouse = CVAR_CREATE("hud_capturemouse", "1", FCVAR_ARCHIVE);
 	m_pCvarDraw = CVAR_CREATE("hud_draw", "1", FCVAR_ARCHIVE);
-	cl_lw = gEngfuncs.pfnGetCvarPointer("cl_lw");
 	cl_rollangle = CVAR_CREATE("cl_rollangle", "2.0", FCVAR_ARCHIVE);
 	cl_rollspeed = CVAR_CREATE("cl_rollspeed", "200", FCVAR_ARCHIVE);
 	cl_bobtilt = CVAR_CREATE("cl_bobtilt", "0", FCVAR_ARCHIVE);
@@ -525,8 +523,6 @@ bool CHud::MsgFunc_Logo(const char* pszName, int iSize, void* pbuf)
 	return true;
 }
 
-float g_lastFOV = 0.0;
-
 /*
 ============
 COM_FileBase
@@ -606,7 +602,7 @@ float HUD_GetFOV()
 		unsigned char buf[100];
 
 		// Active
-		*(float*)&buf[i] = g_lastFOV;
+		*(float*)&buf[i] = gHUD.m_iFOV;
 		i += sizeof(float);
 
 		Demo_WriteBuffer(TYPE_ZOOM, i, buf);
@@ -614,9 +610,23 @@ float HUD_GetFOV()
 
 	if (0 != gEngfuncs.pDemoAPI->IsPlayingback())
 	{
-		g_lastFOV = g_demozoom;
+		gHUD.m_iFOV = g_demozoom;
 	}
-	return g_lastFOV;
+	return gHUD.m_iFOV;
+}
+
+void CHud::Update_SetFOV(int iFov)
+{
+	if (iFov <= 0)
+	{
+		m_iFOV = default_fov->value;
+		m_flMouseSensitivity = 0;
+	}
+	else if (m_iFOV != iFov)
+	{
+		m_iFOV = iFov;
+		m_flMouseSensitivity = sensitivity->value * ((float)iFov / (float)default_fov->value) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
+	}
 }
 
 bool CHud::MsgFunc_SetFOV(const char* pszName, int iSize, void* pbuf)
@@ -624,39 +634,8 @@ bool CHud::MsgFunc_SetFOV(const char* pszName, int iSize, void* pbuf)
 	BEGIN_READ(pbuf, iSize);
 
 	int newfov = READ_BYTE();
-	int def_fov = CVAR_GET_FLOAT("default_fov");
 
-	//Weapon prediction already takes care of changing the fog. ( g_lastFOV ).
-	//But it doesn't restore correctly so this still needs to be used
-	/*
-	if ( cl_lw && cl_lw->value )
-		return 1;
-		*/
-
-	g_lastFOV = newfov;
-
-	if (newfov == 0)
-	{
-		m_iFOV = def_fov;
-	}
-	else
-	{
-		m_iFOV = newfov;
-	}
-
-	// the clients fov is actually set in the client data update section of the hud
-
-	// Set a new sensitivity
-	if (m_iFOV == def_fov)
-	{
-		// reset to saved sensitivity
-		m_flMouseSensitivity = 0;
-	}
-	else
-	{
-		// set a new sensitivity that is proportional to the change from the FOV default
-		m_flMouseSensitivity = sensitivity->value * ((float)newfov / (float)def_fov) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
-	}
+	Update_SetFOV(newfov);
 
 	return true;
 }

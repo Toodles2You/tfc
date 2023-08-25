@@ -253,8 +253,6 @@ public:
 	virtual void Kill();
 	virtual void AttachToPlayer(CBasePlayer* pPlayer);
 
-	virtual bool UpdateClientData(CBasePlayer* pPlayer) { return false; }
-
 	virtual CBasePlayerWeapon* GetWeaponPtr() { return NULL; }
 
 	virtual void GetWeaponData(weapon_data_t& data) {}
@@ -331,7 +329,6 @@ public:
 	virtual void SecondaryAttack() {}					  // do "+ATTACK2"
 	virtual void Reload() {}							  // do "+RELOAD"
 	virtual void WeaponIdle() {}						  // called when no buttons pressed
-	bool UpdateClientData(CBasePlayer* pPlayer) override; // sends hud info to client dll, if things have changed
 	void RetireWeapon();
 
 	// Can't use virtual functions as think functions so this wrapper is needed.

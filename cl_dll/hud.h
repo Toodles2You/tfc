@@ -92,6 +92,7 @@ struct HUDLIST
 #include "voice_status.h" // base voice handling class
 #include "hud_spectator.h"
 
+class WeaponsResource;
 
 //
 //-----------------------------------------------------
@@ -105,6 +106,8 @@ public:
 	void Think() override;
 	void Reset() override;
 	bool DrawWList(float flTime);
+	void Update_AmmoX(int iIndex, int iCount);
+	void Update_CurWeapon(int iState, int iId, int iClip);
 	bool MsgFunc_CurWeapon(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_WeaponList(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_AmmoX(const char* pszName, int iSize, void* pbuf);
@@ -127,6 +130,9 @@ public:
 	void UserCmd_Close();
 	void UserCmd_NextWeapon();
 	void UserCmd_PrevWeapon();
+	void UserCmd_LastWeapon();
+
+	friend class WeaponsResource;
 
 private:
 	float m_fFade;
@@ -134,6 +140,7 @@ private:
 	WEAPON* m_pWeapon;
 	int m_HUD_bucket0;
 	int m_HUD_selection;
+	cvar_t* hud_fastswitch;
 };
 
 //
@@ -327,6 +334,7 @@ public:
 	bool Init() override;
 	bool VidInit() override;
 	bool Draw(float flTime) override;
+	void Update_Battery(int iBat);
 	bool MsgFunc_Battery(const char* pszName, int iSize, void* pbuf);
 
 private:
@@ -582,6 +590,7 @@ public:
 	CHud() : m_iSpriteCount(0), m_pHudList(NULL) {}
 	~CHud(); // destructor, frees allocated memory
 
+	void Update_SetFOV(int iFov);
 	// user messages
 	bool MsgFunc_Damage(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_GameMode(const char* pszName, int iSize, void* pbuf);

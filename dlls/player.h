@@ -160,7 +160,6 @@ public:
 	bool m_fInitHUD;	 // True when deferred HUD restart msg needs to be sent
 	bool m_fGameHUDInitialized;
 	int m_iTrain;	// Train control position
-	bool m_fWeapon; // Set this to false to force a reset of the current weapon HUD info
 
 	EHANDLE m_pTank;		 // the tank which the player is currently controlling,  NULL if no tank
 	EHANDLE m_hViewEntity;	 // The view entity being used, or null if the player is using itself as the view entity
@@ -171,13 +170,9 @@ public:
 	bool m_fLongJump;	   // does this player have the longjump module?
 
 	float m_tSneaking;
-	int m_iUpdateTime;	  // stores the number of frame ticks before sending HUD update messages
-	int m_iClientHealth;  // the health currently known by the client.  If this changes, send a new
-	int m_iClientBattery; // the Battery currently known by the client.  If this changes, send a new
 	int m_iHideHUD;		  // the players hud weapon info is to be hidden
 	int m_iClientHideHUD;
 	int m_iFOV;		  // field of view
-	int m_iClientFOV; // client's known FOV
 	// usable player items
 	CBasePlayerItem* m_rgpPlayerItems[MAX_ITEM_TYPES];
 	CBasePlayerItem* m_pActiveItem;
@@ -297,11 +292,6 @@ public:
 	void EnableControl(bool fControl);
 
 	int GiveAmmo(int iAmount, int iType, int iMax) override;
-	void SendAmmoUpdate();
-	void SendSingleAmmoUpdate(int ammoIndex);
-
-private:
-	void InternalSendSingleAmmoUpdate(int ammoIndex);
 
 public:
 	void WaterMove();

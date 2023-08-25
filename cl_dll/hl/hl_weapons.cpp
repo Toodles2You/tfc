@@ -28,6 +28,7 @@
 #include "cl_dll.h"
 #include "../com_weapons.h"
 #include "../demo.h"
+#include "../hud.h"
 
 extern int g_iUser1;
 
@@ -573,6 +574,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		if (to->client.health <= 0 && lasthealth > 0)
 		{
 			player.Killed(NULL, 0);
+			gHUD.m_Ammo.Update_CurWeapon(0, -1, -1);
 		}
 		else if (to->client.health > 0 && lasthealth <= 0)
 		{
@@ -580,6 +582,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		}
 
 		lasthealth = to->client.health;
+
+		gHUD.m_Health.Update_Health(to->client.health);
+		gHUD.m_Battery.Update_Battery(to->client.vuser4.z);
 	}
 
 	// We are not predicting the current weapon, just bow out here.
@@ -705,7 +710,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 				if (player.m_pActiveItem)
 					player.m_pActiveItem->Holster();
 
-				player.m_pLastItem = player.m_pActiveItem;
 				player.m_pActiveItem = pNew;
 
 				// Deploy new weapon
@@ -767,6 +771,11 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		HUD_SendWeaponAnim(to->client.weaponanim, pWeapon->pev->body, true);
 	}
 
+	if (g_runfuncs)
+	{
+		gHUD.Update_SetFOV(to->client.fov);
+	}
+
 	static bool bAmmoUpdated[MAX_AMMO_SLOTS];
 	int iAmmoType, iAmmo2Type;
 
@@ -782,6 +791,27 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		{
 			memset(pto, 0, sizeof(weapon_data_t));
 			continue;
+		}
+
+		if (g_runfuncs)
+		{
+			gHUD.m_Ammo.Update_CurWeapon(to->client.m_iId == pCurrent->m_iId ? 1 : 0, pCurrent->m_iId, pCurrent->m_iClip);
+
+			iAmmoType = pCurrent->iAmmo1();
+
+			if (iAmmoType > AMMO_NONE && !bAmmoUpdated[iAmmoType])
+			{
+				gHUD.m_Ammo.Update_AmmoX(iAmmoType, player.m_rgAmmo[iAmmoType]);
+				bAmmoUpdated[iAmmoType] = true;
+			}
+
+			iAmmo2Type = pCurrent->iAmmo2();
+
+			if (iAmmo2Type > AMMO_NONE && !bAmmoUpdated[iAmmo2Type])
+			{
+				gHUD.m_Ammo.Update_AmmoX(iAmmo2Type, player.m_rgAmmo[iAmmo2Type]);
+				bAmmoUpdated[iAmmo2Type] = true;
+			}
 		}
 
 		pto->m_fInReload = static_cast<int>(pCurrent->m_fInReload);
@@ -886,15 +916,7 @@ void DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* 
 
 	//Event code depends on this stuff, so always initialize it.
 	HUD_InitClientWeapons();
-
-	if (cl_lw && 0 != cl_lw->value)
-	{
-		HUD_WeaponsPostThink(from, to, cmd, time, random_seed);
-	}
-	else
-	{
-		to->client.fov = g_lastFOV;
-	}
+	HUD_WeaponsPostThink(from, to, cmd, time, random_seed);
 
 	if (g_irunninggausspred)
 	{
@@ -904,7 +926,5 @@ void DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* 
 		g_irunninggausspred = false;
 	}
 
-	// All games can use FOV state
-	g_lastFOV = to->client.fov;
 	g_CurrentWeaponId = to->client.m_iId;
 }

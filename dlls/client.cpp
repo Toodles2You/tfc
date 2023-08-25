@@ -535,13 +535,16 @@ void ClientCommand(edict_t* pEntity)
 	}
 	else if (FStrEq(pcmd, "fov"))
 	{
-		if (0 != g_psv_cheats->value && CMD_ARGC() > 1)
+		if (0 != g_psv_cheats->value)
 		{
-			player->m_iFOV = atoi(CMD_ARGV(1));
-		}
-		else
-		{
-			CLIENT_PRINTF(pEntity, print_console, UTIL_VarArgs("\"fov\" is \"%d\"\n", (int)player->m_iFOV));
+			if (CMD_ARGC() > 1)
+			{
+				player->m_iFOV = atoi(CMD_ARGV(1));
+			}
+			else
+			{
+				CLIENT_PRINTF(pEntity, print_console, UTIL_VarArgs("\"fov\" is \"%d\"\n", (int)player->m_iFOV));
+			}
 		}
 	}
 	else if (FStrEq(pcmd, "use"))

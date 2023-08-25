@@ -50,6 +50,7 @@ public:
 	bool VidInit() override;
 	bool Draw(float fTime) override;
 	void Reset() override;
+	void Update_Health(int iHealth);
 	bool MsgFunc_Health(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_Damage(const char* pszName, int iSize, void* pbuf);
 	int m_iHealth;
