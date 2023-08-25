@@ -20,78 +20,10 @@
 
 struct skilldata_t
 {
-
-	int iSkillLevel; // game skill level
-
 	// Monster Health & Damage
-	float agruntHealth;
-	float agruntDmgPunch;
-
-	float apacheHealth;
-
-	float barneyHealth;
-
-	float bigmommaHealthFactor; // Multiply each node's health by this
-	float bigmommaDmgSlash;		// melee attack damage
-	float bigmommaDmgBlast;		// mortar attack damage
-	float bigmommaRadiusBlast;	// mortar attack radius
-
-	float bullsquidHealth;
-	float bullsquidDmgBite;
-	float bullsquidDmgWhip;
-	float bullsquidDmgSpit;
-
-	float gargantuaHealth;
-	float gargantuaDmgSlash;
-	float gargantuaDmgFire;
-	float gargantuaDmgStomp;
-
-	float hassassinHealth;
-
-	float headcrabHealth;
-	float headcrabDmgBite;
-
-	float hgruntHealth;
-	float hgruntDmgKick;
-	float hgruntShotgunPellets;
-	float hgruntGrenadeSpeed;
-
-	float houndeyeHealth;
-	float houndeyeDmgBlast;
-
-	float slaveHealth;
-	float slaveDmgClaw;
-	float slaveDmgClawrake;
-	float slaveDmgZap;
-
-	float ichthyosaurHealth;
-	float ichthyosaurDmgShake;
-
-	float leechHealth;
-	float leechDmgBite;
-
-	float controllerHealth;
-	float controllerDmgZap;
-	float controllerSpeedBall;
-	float controllerDmgBall;
-
-	float nihilanthHealth;
-	float nihilanthZap;
-
-	float scientistHealth;
-
 	float snarkHealth;
 	float snarkDmgBite;
 	float snarkDmgPop;
-
-	float zombieHealth;
-	float zombieDmgOneSlash;
-	float zombieDmgBothSlash;
-
-	float turretHealth;
-	float miniturretHealth;
-	float sentryHealth;
-
 
 	// Player Weapons
 	float plrDmgCrowbar;
@@ -122,7 +54,6 @@ struct skilldata_t
 	float batteryCapacity;
 	float healthchargerCapacity;
 	float healthkitCapacity;
-	float scientistHeal;
 
 	// monster damage adj
 	float monHead;
@@ -140,10 +71,3 @@ struct skilldata_t
 };
 
 inline DLL_GLOBAL skilldata_t gSkillData;
-float GetSkillCvar(const char* pName);
-
-inline DLL_GLOBAL int g_iSkillLevel;
-
-#define SKILL_EASY 1
-#define SKILL_MEDIUM 2
-#define SKILL_HARD 3

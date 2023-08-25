@@ -115,9 +115,13 @@ void CHalfLifeMultiplay::RefreshSkillData()
 	// override some values for multiplay.
 	if (!IsDeathmatch())
 		return;
+	
+	// Snark
+	gSkillData.snarkHealth = 2;
+	gSkillData.snarkDmgBite = 10;
+	gSkillData.snarkDmgPop = 5;
 
-	// suitcharger
-	gSkillData.suitchargerCapacity = 30;
+	// PLAYER WEAPONS
 
 	// Crowbar whack
 	gSkillData.plrDmgCrowbar = 25;
@@ -135,17 +139,21 @@ void CHalfLifeMultiplay::RefreshSkillData()
 	gSkillData.plrDmgM203Grenade = 100;
 
 	// Shotgun buckshot
-	gSkillData.plrDmgBuckshot = 20; // fewer pellets in deathmatch
+	gSkillData.plrDmgBuckshot = 20;
 
 	// Crossbow
 	gSkillData.plrDmgCrossbowClient = 20;
+	gSkillData.plrDmgCrossbowMonster = 50;
 
 	// RPG
 	gSkillData.plrDmgRPG = 120;
 
-	// Egon
-	gSkillData.plrDmgEgonWide = 20;
+	// Gauss gun
+	gSkillData.plrDmgGauss = 20;
+
+	// Egon Gun
 	gSkillData.plrDmgEgonNarrow = 10;
+	gSkillData.plrDmgEgonWide = 20;
 
 	// Hand Grendade
 	gSkillData.plrDmgHandGrenade = 100;
@@ -156,8 +164,36 @@ void CHalfLifeMultiplay::RefreshSkillData()
 	// Tripmine
 	gSkillData.plrDmgTripmine = 150;
 
-	// hornet
+	// MONSTER WEAPONS
+	gSkillData.monDmg12MM = 10;
+	gSkillData.monDmgMP5 = 4;
+	gSkillData.monDmg9MM = 5;
+
+	// MONSTER HORNET
+	gSkillData.monDmgHornet = 5;
+
+	// PLAYER HORNET
 	gSkillData.plrDmgHornet = 10;
+
+	// HEALTH/CHARGE
+	gSkillData.suitchargerCapacity = 30;
+	gSkillData.batteryCapacity = 15;
+	gSkillData.healthchargerCapacity = 40;
+	gSkillData.healthkitCapacity = 15;
+
+	// monster damage adj
+	gSkillData.monHead = 3;
+	gSkillData.monChest = 1;
+	gSkillData.monStomach = 1;
+	gSkillData.monLeg = 1;
+	gSkillData.monArm = 1;
+
+	// player damage adj
+	gSkillData.plrHead = 3;
+	gSkillData.plrChest = 1;
+	gSkillData.plrStomach = 1;
+	gSkillData.plrLeg = 1;
+	gSkillData.plrArm = 1;
 }
 
 // longest the intermission can last, in seconds
