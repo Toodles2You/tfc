@@ -359,8 +359,10 @@ public:
 	bool VidInit() override;
 	bool Draw(float flTime) override;
 	void Reset() override;
+	void Update_Flashlight(bool bOn);
 	bool MsgFunc_Flashlight(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_FlashBat(const char* pszName, int iSize, void* pbuf);
+	bool IsFlashlightOn() { return m_fOn; }
 
 private:
 	HSPRITE m_hSprite1;
@@ -616,6 +618,8 @@ public:
 	void AddHudElem(CHudBase* p);
 
 	float GetSensitivity();
+
+	bool ImpulseCommands(int impulse);
 };
 
 extern CHud gHUD;

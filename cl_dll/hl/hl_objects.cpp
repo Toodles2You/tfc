@@ -144,4 +144,21 @@ void Game_AddObjects()
 	
 	if (pLaserDot)
 		UpdateLaserDot(time);
+	
+	if (gHUD.m_Flash.IsFlashlightOn())
+	{
+		pmtrace_t tr;
+		GetCrosshairTarget(&tr, 2048);
+		auto light = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
+
+		if (light)
+		{
+			light->origin = tr.endpos;
+			light->color.r = 255;
+			light->color.g = 255;
+			light->color.b = 255;
+			light->die = time + 0.001;
+			light->radius = 64;
+		}
+	}
 }

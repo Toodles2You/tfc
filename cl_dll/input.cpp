@@ -501,7 +501,12 @@ void IN_Cancel()
 
 void IN_Impulse()
 {
-	in_impulse = atoi(gEngfuncs.Cmd_Argv(1));
+	auto impulse = atoi(gEngfuncs.Cmd_Argv(1));
+
+	if (!gHUD.ImpulseCommands(impulse))
+	{
+		in_impulse = impulse;
+	}
 }
 
 void IN_ScoreDown()

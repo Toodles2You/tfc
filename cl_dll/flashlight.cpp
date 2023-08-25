@@ -36,6 +36,8 @@ bool CHudFlashlight::Init()
 {
 	m_fFade = 0;
 	m_fOn = false;
+	m_iBat = 100;
+	m_flBat = 1.0;
 
 	HOOK_MESSAGE(Flashlight);
 	HOOK_MESSAGE(FlashBat);
@@ -51,6 +53,8 @@ void CHudFlashlight::Reset()
 {
 	m_fFade = 0;
 	m_fOn = false;
+	m_iBat = 100;
+	m_flBat = 1.0;
 }
 
 bool CHudFlashlight::VidInit()
@@ -70,6 +74,23 @@ bool CHudFlashlight::VidInit()
 	return true;
 }
 
+void CHudFlashlight::Update_Flashlight(bool bOn)
+{
+	if (m_fOn == bOn)
+		return;
+
+	m_fOn = bOn;
+
+	if (m_fOn)
+	{
+		PlaySound("items/flashlight1.wav", 1.0);
+	}
+	else
+	{
+		PlaySound("items/flashlight2.wav", 1.0);
+	}
+}
+
 bool CHudFlashlight::MsgFunc_FlashBat(const char* pszName, int iSize, void* pbuf)
 {
 
@@ -86,8 +107,11 @@ bool CHudFlashlight::MsgFunc_Flashlight(const char* pszName, int iSize, void* pb
 {
 
 	BEGIN_READ(pbuf, iSize);
-	m_fOn = READ_BYTE() != 0;
+	bool bOn = READ_BYTE() != 0;
 	int x = READ_BYTE();
+
+	Update_Flashlight(bOn);
+
 	m_iBat = x;
 	m_flBat = ((float)x) / 100.0;
 

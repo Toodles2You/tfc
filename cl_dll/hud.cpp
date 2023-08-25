@@ -675,3 +675,15 @@ float CHud::GetSensitivity()
 {
 	return m_flMouseSensitivity;
 }
+
+bool CHud::ImpulseCommands(int impulse)
+{
+	switch (impulse)
+	{
+	case 100:
+		m_Flash.Update_Flashlight(!m_Flash.IsFlashlightOn());
+		return true;
+	}
+
+	return false;
+}
