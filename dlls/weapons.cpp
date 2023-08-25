@@ -651,7 +651,7 @@ bool CBasePlayerWeapon::AddPrimaryAmmo(CBasePlayerWeapon* origin, int iCount, in
 		m_iClip = -1;
 		iIdAmmo = m_pPlayer->GiveAmmo(iCount, iType, iMaxCarry);
 	}
-	else if (m_iClip == 0)
+	else if (m_iClip == 0 && this == origin)
 	{
 		int i;
 		i = V_min(m_iClip + iCount, iMaxClip) - m_iClip;
