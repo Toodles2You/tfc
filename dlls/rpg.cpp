@@ -385,7 +385,7 @@ bool CRpg::Holster()
 {
 	if (DefaultHolster(0 != m_iClip ? RPG_HOLSTER1 : RPG_HOLSTER2))
 	{
-		ToggleLaserDot(false);
+		ToggleLaserDot(false, false);
 		return true;
 	}
 	return false;
@@ -397,9 +397,6 @@ void CRpg::PrimaryAttack()
 {
 	if (0 != m_iClip)
 	{
-		m_pPlayer->m_iWeaponVolume = LOUD_GUN_VOLUME;
-		m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
-
 #ifndef CLIENT_DLL
 		// player "shoot" animation
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
@@ -446,12 +443,6 @@ void CRpg::SecondaryAttack()
 
 void CRpg::WeaponIdle()
 {
-	// Reset when the player lets go of the trigger.
-	if ((m_pPlayer->pev->button & (IN_ATTACK | IN_ATTACK2)) == 0)
-	{
-		ResetEmptySound();
-	}
-
 	UpdateSpot();
 
 	if (m_iTimeWeaponIdle > 0)
@@ -512,7 +503,7 @@ void CRpg::UpdateSpot()
 	}
 }
 
-void CRpg::ToggleLaserDot(bool bOn)
+void CRpg::ToggleLaserDot(bool bOn, bool bSound)
 {
 	if (bOn)
 	{
@@ -545,7 +536,7 @@ void CRpg::ToggleLaserDot(bool bOn)
 		m_pPlayer->pev->angles,
 		0.0,
 		0.0,
-		0,
+		bSound ? 1 : 0,
 		0,
 		0,
 		0);
@@ -571,4 +562,4 @@ void CRpg::SuspendLaserDot(float flSuspendTime)
 		0);
 }
 
-IMPLEMENT_AMMO_CLASS(ammo_rpgclip, CRpgAmmo, "models/w_357ammobox.mdl", (UTIL_IsDeathmatch() ? AMMO_RPGCLIP_GIVE * 2 : AMMO_RPGCLIP_GIVE), AMMO_ROCKETS, ROCKET_MAX_CARRY);
+IMPLEMENT_AMMO_CLASS(ammo_rpgclip, CRpgAmmo, "models/w_rpgammo.mdl", (UTIL_IsDeathmatch() ? AMMO_RPGCLIP_GIVE * 2 : AMMO_RPGCLIP_GIVE), AMMO_ROCKETS, ROCKET_MAX_CARRY);

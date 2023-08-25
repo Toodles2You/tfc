@@ -12,8 +12,6 @@
 *   without written permission from Valve LLC.
 *
 ****/
-// Robin, 4-22-98: Moved set_suicide_frame() here from player.cpp to allow us to
-//				   have one without a hardcoded player.mdl in tf_client.cpp
 
 /*
 
@@ -31,7 +29,6 @@
 #include "player.h"
 #include "spectator.h"
 #include "client.h"
-#include "soundent.h"
 #include "gamerules.h"
 #include "game.h"
 #include "customentity.h"
@@ -48,21 +45,7 @@ extern void CopyToBodyQue(entvars_t* pev);
 
 void LinkUserMessages();
 
-/*
- * used by kill command and disconnect command
- * ROBIN: Moved here from player.cpp, to allow multiple player models
- */
-void set_suicide_frame(entvars_t* pev)
-{
-	if (!FStrEq(STRING(pev->model), "models/player.mdl"))
-		return; // allready gibbed
-
-	//	pev->frame		= $deatha11;
-	pev->solid = SOLID_NOT;
-	pev->movetype = MOVETYPE_TOSS;
-	pev->deadflag = DEAD_DEAD;
-	pev->nextthink = -1;
-}
+static std::vector<CBasePlayer*> the_bots[MAX_PLAYERS];
 
 
 /*
@@ -104,16 +87,6 @@ void ClientDisconnect(edict_t* pEntity)
 	WRITE_BYTE(ENTINDEX(pEntity));
 	WRITE_STRING(text);
 	MESSAGE_END();
-
-	CSound* pSound;
-	pSound = CSoundEnt::SoundPointerForIndex(CSoundEnt::ClientSoundIndex(pEntity));
-	{
-		// since this client isn't around to think anymore, reset their sound.
-		if (pSound)
-		{
-			pSound->Reset();
-		}
-	}
 
 	// since the edict doesn't get deleted, fix it so it doesn't interfere.
 	pEntity->v.takedamage = DAMAGE_NO; // don't attract autoaim
@@ -554,10 +527,6 @@ void ClientCommand(edict_t* pEntity)
 	else if (((pstr = strstr(pcmd, "weapon_")) != NULL) && (pstr == pcmd))
 	{
 		player->SelectItem(pcmd);
-	}
-	else if (FStrEq(pcmd, "lastinv"))
-	{
-		player->SelectLastItem();
 	}
 	else if (FStrEq(pcmd, "spectate")) // clients wants to become a spectator
 	{

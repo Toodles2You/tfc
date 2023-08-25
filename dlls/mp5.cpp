@@ -18,7 +18,6 @@
 #include "cbase.h"
 #include "weapons.h"
 #include "player.h"
-#include "soundent.h"
 #include "gamerules.h"
 #include "UserMessages.h"
 
@@ -68,8 +67,6 @@ void CMP5::Precache()
 	PRECACHE_SOUND("weapons/glauncher.wav");
 	PRECACHE_SOUND("weapons/glauncher2.wav");
 
-	PRECACHE_SOUND("weapons/357_cock1.wav");
-
 	m_usMP5 = PRECACHE_EVENT(1, "events/mp5.sc");
 	m_usMP52 = PRECACHE_EVENT(1, "events/mp52.sc");
 }
@@ -118,9 +115,6 @@ void CMP5::PrimaryAttack()
 		return;
 	}
 
-	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
-	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
-
 	auto shots = 0;
 
 	while (m_iNextPrimaryAttack <= 0)
@@ -138,24 +132,21 @@ void CMP5::PrimaryAttack()
 	m_iClip -= shots;
 
 
-	m_pPlayer->pev->effects = (int)(m_pPlayer->pev->effects) | EF_MUZZLEFLASH;
-
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecAiming = m_pPlayer->GetAutoaimVector(AUTOAIM_5DEGREES);
-	Vector vecDir;
+	Vector vecAiming = m_pPlayer->GetAimVector();
 
 	if (UTIL_IsDeathmatch())
 	{
 		// optimized multiplayer. Widened to make it easier to hit a moving player
-		vecDir = m_pPlayer->FireBulletsPlayer(shots, vecSrc, vecAiming, VECTOR_CONE_6DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed);
+		m_pPlayer->FireBulletsPlayer(shots, vecSrc, vecAiming, VECTOR_CONE_6DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed);
 	}
 	else
 	{
 		// single player spread
-		vecDir = m_pPlayer->FireBulletsPlayer(shots, vecSrc, vecAiming, VECTOR_CONE_3DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed);
+		m_pPlayer->FireBulletsPlayer(shots, vecSrc, vecAiming, VECTOR_CONE_3DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed);
 	}
 
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usMP5, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, m_pPlayer->random_seed, shots, 0, 0);
@@ -182,12 +173,6 @@ void CMP5::SecondaryAttack()
 		PlayEmptySound();
 		return;
 	}
-
-	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
-	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
-
-	m_pPlayer->m_iExtraSoundTypes = bits_SOUND_DANGER;
-	m_pPlayer->m_flStopExtraSoundTime = UTIL_WeaponTimeBase() + 0.2;
 
 	m_pPlayer->m_rgAmmo[iAmmo2()]--;
 
@@ -217,10 +202,6 @@ void CMP5::Reload()
 
 void CMP5::WeaponIdle()
 {
-	ResetEmptySound();
-
-	m_pPlayer->GetAutoaimVector(AUTOAIM_5DEGREES);
-
 	if (m_iTimeWeaponIdle > 0)
 		return;
 

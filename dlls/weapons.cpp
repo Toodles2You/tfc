@@ -25,7 +25,6 @@
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
-#include "soundent.h"
 #include "decals.h"
 #include "gamerules.h"
 #include "UserMessages.h"
@@ -341,6 +340,8 @@ void W_Precache()
 	PRECACHE_SOUND("weapons/bullet_hit1.wav"); // hit by bullet
 	PRECACHE_SOUND("weapons/bullet_hit2.wav"); // hit by bullet
 
+	PRECACHE_SOUND("weapons/357_cock1.wav");
+
 	PRECACHE_SOUND("items/weapondrop1.wav"); // weapon falls to the ground
 
 	PRECACHE_SOUND("items/9mmclip1.wav");
@@ -642,6 +643,11 @@ void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int body)
 	MESSAGE_END();
 }
 
+void CBasePlayerWeapon::PlayWeaponSound(int iChannel, const char* szSound, float flVolume, float flAttn, int iFlags, float flPitch)
+{
+	EMIT_SOUND_PREDICTED(m_pPlayer->edict(), iChannel, szSound, flVolume, flAttn, iFlags, flPitch);
+}
+
 bool CBasePlayerWeapon::AddPrimaryAmmo(CBasePlayerWeapon* origin, int iCount, int iType, int iMaxClip, int iMaxCarry)
 {
 	int iIdAmmo;
@@ -750,15 +756,15 @@ bool CBasePlayerWeapon::DefaultDeploy(const char* szViewModel, const char* szWea
 	m_iNextPrimaryAttack = V_max(m_iNextPrimaryAttack, 500);
 	m_iNextSecondaryAttack = V_max(m_iNextSecondaryAttack, 500);
 	m_iTimeWeaponIdle = 1000;
-	m_flLastFireTime = 0.0;
+	m_bPlayEmptySound = true;
 
 	return true;
 }
 
 bool CBasePlayerWeapon::DefaultHolster(int iAnim, int body)
 {
-	// if (!CanHolster())
-	// 	return false;
+	if (!CanHolster())
+		return false;
 
 	if (iAnim >= 0)
 		SendWeaponAnim(iAnim, body);
@@ -767,7 +773,6 @@ bool CBasePlayerWeapon::DefaultHolster(int iAnim, int body)
 	m_iNextPrimaryAttack = V_max(m_iNextPrimaryAttack, 500);
 	m_iNextSecondaryAttack = V_max(m_iNextSecondaryAttack, 500);
 	m_iTimeWeaponIdle = 1000;
-	m_flLastFireTime = 0.0;
 	m_fInReload = false; // Cancel any reload in progress.
 	m_fInSpecialReload = 0;
 	m_pPlayer->m_iFOV = 0;
@@ -775,15 +780,13 @@ bool CBasePlayerWeapon::DefaultHolster(int iAnim, int body)
 	return true;
 }
 
-bool CBasePlayerWeapon::PlayEmptySound()
+void CBasePlayerWeapon::PlayEmptySound()
 {
-	if (m_iPlayEmptySound)
+	if (m_bPlayEmptySound)
 	{
-		EMIT_SOUND_PREDICTED(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/357_cock1.wav", 0.8, ATTN_NORM, 0, PITCH_NORM);
-		m_iPlayEmptySound = false;
-		return false;
+		PlayWeaponSound(CHAN_ITEM, "weapons/357_cock1.wav", 0.8);
+		m_bPlayEmptySound = false;
 	}
-	return false;
 }
 
 bool CBasePlayerWeapon::Holster()
@@ -939,37 +942,6 @@ void CBasePlayerWeapon::DoRetireWeapon()
 	{
 		m_pPlayer->SwitchWeapon(nullptr);
 	}
-}
-
-//=========================================================================
-// GetNextAttackDelay - An accurate way of calcualting the next attack time.
-//=========================================================================
-float CBasePlayerWeapon::GetNextAttackDelay(float delay)
-{
-	if (m_flLastFireTime == 0 || m_iNextPrimaryAttack <= -1100)
-	{
-		// At this point, we are assuming that the client has stopped firing
-		// and we are going to reset our book keeping variables.
-		m_flLastFireTime = gpGlobals->time;
-		m_flPrevPrimaryAttack = delay;
-	}
-	// calculate the time between this shot and the previous
-	float flTimeBetweenFires = gpGlobals->time - m_flLastFireTime;
-	float flCreep = 0.0f;
-	if (flTimeBetweenFires > 0)
-		flCreep = flTimeBetweenFires - m_flPrevPrimaryAttack; // postive or negative
-
-	// save the last fire time
-	m_flLastFireTime = gpGlobals->time;
-
-	float flNextAttack = UTIL_WeaponTimeBase() + delay - flCreep;
-	// we need to remember what the m_flNextPrimaryAttack time is set to for each shot,
-	// store it as m_flPrevPrimaryAttack.
-	m_flPrevPrimaryAttack = flNextAttack - UTIL_WeaponTimeBase();
-	// 	char szMsg[256];
-	// 	snprintf( szMsg, sizeof(szMsg), "next attack time: %0.4f\n", gpGlobals->time + flNextAttack );
-	// 	OutputDebugString( szMsg );
-	return flNextAttack;
 }
 
 

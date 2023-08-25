@@ -18,7 +18,6 @@
 #include "cbase.h"
 #include "weapons.h"
 #include "player.h"
-#include "soundent.h"
 #include "shake.h"
 #include "gamerules.h"
 #include "UserMessages.h"
@@ -90,7 +89,6 @@ bool CGauss::GetItemInfo(ItemInfo* p)
 
 bool CGauss::Deploy()
 {
-	m_pPlayer->m_flPlayAftershock = 0.0;
 	return DefaultDeploy("models/v_gauss.mdl", "models/p_gauss.mdl", GAUSS_DRAW, "gauss");
 }
 
@@ -123,7 +121,6 @@ void CGauss::PrimaryAttack()
 		return;
 	}
 
-	m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
 	m_fPrimaryFire = true;
 
 	m_pPlayer->m_rgAmmo[iAmmo1()] -= 2;
@@ -141,7 +138,7 @@ void CGauss::SecondaryAttack()
 	{
 		if (m_fInAttack != 0)
 		{
-			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/electro4.wav", 1.0, ATTN_NORM, 0, 80 + RANDOM_LONG(0, 0x3f));
+			PlayWeaponSound(CHAN_ITEM, "weapons/electro4.wav", 1.0, ATTN_NORM, 0, 80 + UTIL_SharedRandomLong(m_pPlayer->random_seed, 0, 0x3f));
 			//Have to send to the host as well because the client will predict the frame with m_fInAttack == 0
 			SendStopEvent(true);
 			SendWeaponAnim(GAUSS_IDLE);
@@ -160,7 +157,7 @@ void CGauss::SecondaryAttack()
 	{
 		if (m_pPlayer->m_rgAmmo[iAmmo1()] <= 0)
 		{
-			EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/357_cock1.wav", 0.8, ATTN_NORM);
+			PlayEmptySound();
 			m_pPlayer->m_iNextAttack = 500;
 			return;
 		}
@@ -171,7 +168,6 @@ void CGauss::SecondaryAttack()
 		m_pPlayer->m_flNextAmmoBurn = UTIL_WeaponTimeBase();
 
 		// spin up
-		m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_CHARGE_VOLUME;
 
 		SendWeaponAnim(GAUSS_SPINUP);
 		m_fInAttack = 1;
@@ -240,14 +236,12 @@ void CGauss::SecondaryAttack()
 
 		m_iSoundState = SND_CHANGE_PITCH; // hack for going through level transitions
 
-		m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_CHARGE_VOLUME;
-
 		// m_iTimeWeaponIdle = 100;
 		if (m_pPlayer->m_flStartCharge < gpGlobals->time - 10)
 		{
 			// Player charged up too long. Zap him.
-			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/electro4.wav", 1.0, ATTN_NORM, 0, 80 + RANDOM_LONG(0, 0x3f));
-			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/electro6.wav", 1.0, ATTN_NORM, 0, 75 + RANDOM_LONG(0, 0x3f));
+			PlayWeaponSound(CHAN_WEAPON, "weapons/electro4.wav", 1.0, ATTN_NORM, 0, 80 + UTIL_SharedRandomLong(m_pPlayer->random_seed, 0, 0x3f));
+			PlayWeaponSound(CHAN_ITEM, "weapons/electro6.wav", 1.0, ATTN_NORM, 0, 75 + UTIL_SharedRandomLong(m_pPlayer->random_seed, 0, 0x3f));
 
 			m_fInAttack = 0;
 			m_iTimeWeaponIdle = 1000;
@@ -313,7 +307,6 @@ void CGauss::StartFire()
 		}
 
 		if (!UTIL_IsDeathmatch())
-
 		{
 			// in deathmatch, gauss can pop you up into the air. Not in single play.
 			m_pPlayer->pev->velocity.z = flZVel;
@@ -323,16 +316,11 @@ void CGauss::StartFire()
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 	}
 
-	// time until aftershock 'static discharge' sound
-	m_pPlayer->m_flPlayAftershock = gpGlobals->time + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0.3, 0.8);
-
 	Fire(vecSrc, vecAiming, flDamage);
 }
 
 void CGauss::Fire(Vector vecOrigSrc, Vector vecDir, float flDamage)
 {
-	m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
-
 	Vector vecSrc = vecOrigSrc;
 	Vector vecDest = vecSrc + vecDir * 8192;
 	edict_t* pentIgnore;
@@ -381,7 +369,6 @@ void CGauss::Fire(Vector vecOrigSrc, Vector vecDir, float flDamage)
 
 		if (fFirstBeam)
 		{
-			m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 			fFirstBeam = false;
 
 			nTotal += 26;
@@ -469,8 +456,6 @@ void CGauss::Fire(Vector vecOrigSrc, Vector vecDir, float flDamage)
 
 							::RadiusDamage(beam_tr.vecEndPos + vecDir * 8, pev, m_pPlayer->pev, flDamage, damage_radius, CLASS_NONE, DMG_BLAST);
 
-							CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, NORMAL_EXPLOSION_VOLUME, 3.0);
-
 							nTotal += 53;
 
 							vecSrc = beam_tr.vecEndPos + vecDir;
@@ -505,28 +490,6 @@ void CGauss::Fire(Vector vecOrigSrc, Vector vecDir, float flDamage)
 
 void CGauss::WeaponIdle()
 {
-	ResetEmptySound();
-
-	// play aftershock static discharge
-	if (0 != m_pPlayer->m_flPlayAftershock && m_pPlayer->m_flPlayAftershock < gpGlobals->time)
-	{
-		switch (RANDOM_LONG(0, 3))
-		{
-		case 0:
-			EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/electro4.wav", RANDOM_FLOAT(0.7, 0.8), ATTN_NORM);
-			break;
-		case 1:
-			EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/electro5.wav", RANDOM_FLOAT(0.7, 0.8), ATTN_NORM);
-			break;
-		case 2:
-			EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/electro6.wav", RANDOM_FLOAT(0.7, 0.8), ATTN_NORM);
-			break;
-		case 3:
-			break; // no sound
-		}
-		m_pPlayer->m_flPlayAftershock = 0.0;
-	}
-
 	if (m_iTimeWeaponIdle > 0)
 		return;
 

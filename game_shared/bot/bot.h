@@ -190,7 +190,7 @@ public:
 
 	virtual void ExecuteCommand( void );
 	virtual void SetModel( const char *modelName );
-	virtual Vector GetAutoaimVector( float delta );
+	virtual Vector GetAimVector( void );
 
 	void Spawn( void );
 	void BotThink( void );

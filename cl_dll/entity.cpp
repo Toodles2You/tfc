@@ -442,7 +442,10 @@ void DLLEXPORT HUD_TempEntUpdate(
 			if ((pTemp->flags & FTENT_FADEOUT) != 0)
 			{
 				if (pTemp->entity.curstate.rendermode == kRenderNormal)
+				{
 					pTemp->entity.curstate.rendermode = kRenderTransTexture;
+					pTemp->entity.baseline.renderamt = 255;
+				}
 				pTemp->entity.curstate.renderamt = pTemp->entity.baseline.renderamt * (1 + life * pTemp->fadeSpeed);
 				if (pTemp->entity.curstate.renderamt <= 0)
 					active = false;

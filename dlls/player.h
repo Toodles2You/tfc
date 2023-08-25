@@ -101,16 +101,6 @@ public:
 
 	int random_seed; // See that is shared between client & server for shared weapons code
 
-	int m_iPlayerSound;		// the index of the sound list slot reserved for this player
-	int m_iTargetVolume;	// ideal sound volume.
-	int m_iWeaponVolume;	// how loud the player's weapon is right now.
-	int m_iExtraSoundTypes; // additional classification for this weapon's sound
-	int m_iWeaponFlash;		// brightness of the weapon flash
-	float m_flStopExtraSoundTime;
-
-	float m_flFlashLightTime; // Time until next battery draw/Recharge
-	int m_iFlashBattery;	  // Flashlight Battery Draw
-
 	int m_afButtonLast;
 	int m_afButtonPressed;
 	int m_afButtonReleased;
@@ -166,7 +156,6 @@ public:
 	bool m_bResetViewEntity; //True if the player's view needs to be set back to the view entity
 	float m_fDeadTime;		 // the time at which the player died  (used in PlayerDeathThink())
 
-	bool m_fNoPlayerSound; // a debugging feature. Player makes no sound if this is true.
 	bool m_fLongJump;	   // does this player have the longjump module?
 
 	float m_tSneaking;
@@ -250,11 +239,7 @@ public:
 	int ObjectCaps() override { return CBaseAnimating::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	void Precache() override;
 	bool IsOnLadder();
-	bool FlashlightIsOn();
-	void FlashlightTurnOn();
-	void FlashlightTurnOff();
 
-	void UpdatePlayerSound();
 	void DeathSound();
 
 	int Classify() override;
@@ -304,11 +289,8 @@ public:
 
 	bool FBecomeProne() override;
 	int AmmoInventory(int iAmmoIndex);
-	int Illumination() override;
 
-	void ResetAutoaim();
-	Vector GetAutoaimVector(float flDelta);
-	Vector AutoaimDeflection(Vector& vecSrc, float flDist, float flDelta);
+	Vector GetAimVector();
 
 	void ForceClientDllUpdate(); // Forces all client .dll specific data to be resent to client.
 
@@ -319,7 +301,6 @@ public:
 
 	float m_flStartCharge;
 	float m_flAmmoStartCharge;
-	float m_flPlayAftershock;
 	float m_flNextAmmoBurn; // while charging, when to absorb another unit of player's ammo?
 
 	//Player ID

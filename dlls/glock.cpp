@@ -45,8 +45,7 @@ void CGlock::Precache()
 	PRECACHE_SOUND("weapons/pl_gun2.wav"); //silenced handgun
 	PRECACHE_SOUND("weapons/pl_gun3.wav"); //handgun
 
-	m_usFireGlock1 = PRECACHE_EVENT(1, "events/glock1.sc");
-	m_usFireGlock2 = PRECACHE_EVENT(1, "events/glock2.sc");
+	m_usFireGlock = PRECACHE_EVENT(1, "events/glock1.sc");
 }
 
 bool CGlock::GetItemInfo(ItemInfo* p)
@@ -96,44 +95,32 @@ void CGlock::GlockFire(float flSpread, int fCycleTime, bool fUseAutoAim)
 		return;
 	}
 
-	m_iClip--;
+	auto shots = 0;
 
-	m_pPlayer->pev->effects = (int)(m_pPlayer->pev->effects) | EF_MUZZLEFLASH;
+	while (m_iNextPrimaryAttack <= 0)
+	{
+		m_iNextPrimaryAttack += fCycleTime;
+		shots++;
+	}
+	m_iNextSecondaryAttack = m_iNextPrimaryAttack;
+
+	if (shots > m_iClip)
+	{
+		shots = m_iClip;
+		PlayEmptySound();
+	}
+
+	m_iClip -= shots;
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	// silenced
-	if (pev->body == 1)
-	{
-		m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;
-		m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
-	}
-	else
-	{
-		// non-silenced
-		m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
-		m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
-	}
-
 	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecAiming;
+	Vector vecAiming = m_pPlayer->GetAimVector();
 
-	if (fUseAutoAim)
-	{
-		vecAiming = m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
-	}
-	else
-	{
-		vecAiming = gpGlobals->v_forward;
-	}
+	m_pPlayer->FireBulletsPlayer(shots, vecSrc, vecAiming, Vector(flSpread, flSpread, flSpread), 8192, BULLET_PLAYER_9MM, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed);
 
-	Vector vecDir;
-	vecDir = m_pPlayer->FireBulletsPlayer(1, vecSrc, vecAiming, Vector(flSpread, flSpread, flSpread), 8192, BULLET_PLAYER_9MM, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed);
-
-	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), fUseAutoAim ? m_usFireGlock1 : m_usFireGlock2, 0.0, g_vecZero, g_vecZero, vecDir.x, vecDir.y, 0, 0, (m_iClip == 0) ? 1 : 0, 0);
-
-	m_iNextPrimaryAttack = m_iNextSecondaryAttack = fCycleTime;
+	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usFireGlock, 0.0, g_vecZero, g_vecZero, flSpread, flSpread, m_pPlayer->random_seed, shots, (m_iClip == 0) ? 1 : 0, fUseAutoAim);
 
 	m_pPlayer->CheckAmmoLevel(this);
 
@@ -143,27 +130,13 @@ void CGlock::GlockFire(float flSpread, int fCycleTime, bool fUseAutoAim)
 
 void CGlock::Reload()
 {
-	bool iResult;
-
-	if (m_iClip == 0)
-		iResult = DefaultReload(GLOCK_MAX_CLIP, GLOCK_RELOAD, 1500);
-	else
-		iResult = DefaultReload(GLOCK_MAX_CLIP, GLOCK_RELOAD_NOT_EMPTY, 1500);
-
-	if (iResult)
-	{
-		m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
-	}
+	DefaultReload(GLOCK_MAX_CLIP, m_iClip == 0 ? GLOCK_RELOAD : GLOCK_RELOAD_NOT_EMPTY, 1500);
 }
 
 
 
 void CGlock::WeaponIdle()
 {
-	ResetEmptySound();
-
-	m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
-
 	if (m_iTimeWeaponIdle > 0)
 		return;
 

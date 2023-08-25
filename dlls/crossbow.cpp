@@ -312,7 +312,6 @@ void CCrossbow::FireSniperBolt()
 
 	TraceResult tr;
 
-	m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;
 	m_iClip--;
 
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usCrossbow2, 0.0, g_vecZero, g_vecZero, 0, 0, m_iClip, 0, 0, 0);
@@ -346,8 +345,6 @@ void CCrossbow::FireBolt()
 		PlayEmptySound();
 		return;
 	}
-
-	m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;
 
 	m_iClip--;
 
@@ -410,25 +407,16 @@ void CCrossbow::SecondaryAttack()
 
 void CCrossbow::Reload()
 {
-	if (m_pPlayer->m_iFOV != 0)
+	if (DefaultReload(CROSSBOW_MAX_CLIP, CROSSBOW_RELOAD, 4500))
 	{
-		SecondaryAttack();
-	}
-
-	if (DefaultReload(5, CROSSBOW_RELOAD, 4500))
-	{
+		PlayWeaponSound(CHAN_ITEM, "weapons/xbow_reload1.wav");
 		m_pPlayer->m_iFOV = 0;
-		EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/xbow_reload1.wav", RANDOM_FLOAT(0.95, 1.0), ATTN_NORM, 0, 93 + RANDOM_LONG(0, 0xF));
 	}
 }
 
 
 void CCrossbow::WeaponIdle()
 {
-	m_pPlayer->GetAutoaimVector(AUTOAIM_2DEGREES); // get the autoaim vector but ignore it;  used for autoaim crosshair in DM
-
-	ResetEmptySound();
-
 	if (m_iTimeWeaponIdle <= 0)
 	{
 		float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0, 1);

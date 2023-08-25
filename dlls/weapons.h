@@ -57,8 +57,6 @@ public:
 	void EXPORT BounceTouch(CBaseEntity* pOther);
 	void EXPORT SlideTouch(CBaseEntity* pOther);
 	void EXPORT ExplodeTouch(CBaseEntity* pOther);
-	void EXPORT DangerSoundThink();
-	void EXPORT PreDetonate();
 	void EXPORT Detonate();
 	void EXPORT DetonateUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
 	void EXPORT TumbleThink();
@@ -67,7 +65,6 @@ public:
 	int BloodColor() override { return DONT_BLEED; }
 	void Killed(entvars_t* pevAttacker, int iGib) override;
 
-	bool m_fRegisteredSound; // whether or not this grenade has issued its DANGER sound to the world sound list yet.
 	float m_flNextAttack;
 };
 
@@ -257,7 +254,7 @@ public:
 
 	virtual void SetWeaponData(const weapon_data_t& data) {}
 
-	virtual void DecrementTimers() {}
+	virtual void DecrementTimers(const int msec) {}
 
 	virtual bool IsReloading() { return false; }
 
@@ -309,13 +306,10 @@ public:
 
 	void UpdateItemInfo() override {} // updates HUD state
 
-	bool m_iPlayEmptySound;
-	bool m_fFireOnEmpty; // True when the gun is empty and the player is still holding down the
-						 // attack key(s)
-	virtual bool PlayEmptySound();
-	virtual void ResetEmptySound();
+	virtual void PlayEmptySound();
 
 	virtual void SendWeaponAnim(int iAnim, int body = 0);
+	virtual void PlayWeaponSound(int iChannel, const char* szSound, float flVolume = VOL_NORM, float flAttn = ATTN_IDLE, int iFlags = 0, float flPitch = PITCH_NORM);
 
 	bool CanDeploy() override;
 	virtual bool IsUseable();
@@ -344,7 +338,6 @@ public:
 	void PrintState();
 
 	CBasePlayerWeapon* GetWeaponPtr() override { return this; }
-	float GetNextAttackDelay(float delay);
 
 	virtual bool IsReloading() override { return m_fInReload; }
 
@@ -360,9 +353,7 @@ public:
 
 	int m_iDefaultAmmo; // how much ammo you get when you pick up this weapon as placed by a level designer.
 
-	// hle time creep vars
-	float m_flPrevPrimaryAttack;
-	float m_flLastFireTime;
+	bool m_bPlayEmptySound;
 };
 
 
@@ -520,8 +511,7 @@ public:
 	void WeaponIdle() override;
 
 private:
-	unsigned short m_usFireGlock1;
-	unsigned short m_usFireGlock2;
+	unsigned short m_usFireGlock;
 };
 
 enum crowbar_e
@@ -697,6 +687,9 @@ public:
 	void WeaponIdle() override;
 	void ItemPostFrame() override;
 
+	void GetWeaponData(weapon_data_t& data) override;
+	void SetWeaponData(const weapon_data_t& data) override;
+	void DecrementTimers(const int msec) override;
 	bool IsReloading() override { return m_fInSpecialReload != 0; }
 
 private:
@@ -763,7 +756,7 @@ public:
 	int m_cActiveRockets; // how many missiles in flight from this launcher right now?
 
 private:
-	void ToggleLaserDot(bool bOn);
+	void ToggleLaserDot(bool bOn, bool bSound = true);
 	void SuspendLaserDot(float flSuspendTime);
 
 	unsigned short m_usRpg;
@@ -897,6 +890,7 @@ public:
 	bool GetItemInfo(ItemInfo* p) override;
 
 	bool Deploy() override;
+	bool CanHolster() override;
 	bool Holster() override;
 
 	void UpdateEffect(const Vector& startPoint, const Vector& endPoint, float timeBlend);
@@ -904,7 +898,7 @@ public:
 	void CreateEffect();
 	void DestroyEffect();
 
-	void EndAttack();
+	void EndAttack(bool bSendAnim = true);
 	void Attack();
 	void PrimaryAttack() override;
 	bool ShouldWeaponIdle() override { return true; }

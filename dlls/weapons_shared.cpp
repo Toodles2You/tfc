@@ -75,11 +75,6 @@ bool CBasePlayerWeapon::DefaultReload(int iClipSize, int iAnim, int fDelay, int 
 	return true;
 }
 
-void CBasePlayerWeapon::ResetEmptySound()
-{
-	m_iPlayEmptySound = true;
-}
-
 bool CanAttack(int attack_time)
 {
 	return attack_time <= 0 ? true : false;
@@ -106,8 +101,6 @@ void CBasePlayerWeapon::ItemPostFrame()
 
 	if ((m_pPlayer->pev->button & IN_ATTACK) == 0)
 	{
-		m_flLastFireTime = 0.0f;
-
 		if (bCanPrimaryAttack)
 			m_iNextPrimaryAttack = 0;
 
@@ -117,21 +110,11 @@ void CBasePlayerWeapon::ItemPostFrame()
 
 	if ((m_pPlayer->pev->button & IN_ATTACK2) != 0 && bCanSecondaryAttack)
 	{
-		if (iAmmo2() > AMMO_NONE && 0 == m_pPlayer->m_rgAmmo[iAmmo2()])
-		{
-			m_fFireOnEmpty = true;
-		}
-
 		SecondaryAttack();
 		m_pPlayer->pev->button &= ~IN_ATTACK2;
 	}
 	else if ((m_pPlayer->pev->button & IN_ATTACK) != 0 && bCanPrimaryAttack)
 	{
-		if ((m_iClip == 0 && iAmmo1() > AMMO_NONE) || (iMaxClip() == -1 && 0 == m_pPlayer->m_rgAmmo[iAmmo1()]))
-		{
-			m_fFireOnEmpty = true;
-		}
-
 		PrimaryAttack();
 	}
 	else if ((m_pPlayer->pev->button & IN_RELOAD) != 0 && iMaxClip() != WEAPON_NOCLIP && !m_fInReload)
@@ -143,7 +126,7 @@ void CBasePlayerWeapon::ItemPostFrame()
 	{
 		// no fire buttons down
 
-		m_fFireOnEmpty = false;
+		m_bPlayEmptySound = true;
 
 		if (!IsUseable() && bCanPrimaryAttack)
 		{

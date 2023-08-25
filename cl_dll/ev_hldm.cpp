@@ -422,7 +422,7 @@ void EV_HLDM_FireBullets(int idx, float* forward, float* right, float* up, int c
 //======================
 //	    GLOCK START
 //======================
-void EV_FireGlock1(event_args_t* args)
+void EV_FireGlock(event_args_t* args)
 {
 	int idx;
 	Vector origin;
@@ -464,53 +464,7 @@ void EV_FireGlock1(event_args_t* args)
 
 	VectorCopy(forward, vecAiming);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_9MM, 0, &tracerCount[idx - 1], args->fparam1, args->fparam2);
-}
-
-void EV_FireGlock2(event_args_t* args)
-{
-	int idx;
-	Vector origin;
-	Vector angles;
-	Vector velocity;
-	bool empty;
-
-	Vector ShellVelocity;
-	Vector ShellOrigin;
-	int shell;
-	Vector vecSrc, vecAiming;
-	Vector up, right, forward;
-
-	idx = args->entindex;
-	VectorCopy(args->origin, origin);
-	VectorCopy(args->angles, angles);
-	VectorCopy(args->velocity, velocity);
-
-	empty = 0 != args->bparam1;
-	AngleVectors(angles, forward, right, up);
-
-	shell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shell.mdl"); // brass shell
-
-	if (EV_IsLocal(idx))
-	{
-		// Add muzzle flash to current weapon model
-		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(empty ? GLOCK_SHOOT_EMPTY : GLOCK_SHOOT, 0);
-
-		V_PunchAxis(0, -2.0);
-	}
-
-	EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20, -12, 4);
-
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[YAW], shell, TE_BOUNCE_SHELL);
-
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/pl_gun3.wav", gEngfuncs.pfnRandomFloat(0.92, 1.0), ATTN_NORM, 0, 98 + gEngfuncs.pfnRandomLong(0, 3));
-
-	EV_GetGunPosition(args, vecSrc, origin);
-
-	VectorCopy(forward, vecAiming);
-
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_9MM, 0, &tracerCount[idx - 1], args->fparam1, args->fparam2);
+	EV_HLDM_FireBullets(idx, forward, right, up, args->iparam2, vecSrc, vecAiming, 8192, BULLET_PLAYER_9MM, 0, &tracerCount[idx - 1], args->fparam1, args->fparam2, args->iparam1);
 }
 //======================
 //	   GLOCK END
@@ -656,7 +610,7 @@ void EV_FireMP5(event_args_t* args)
 		EV_MuzzleFlash();
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(MP5_FIRE1 + gEngfuncs.pfnRandomLong(0, 2), 0);
 
-		V_PunchAxis(0, gEngfuncs.pfnRandomFloat(-2, 2));
+		V_PunchAxis(0, -1);
 	}
 
 	EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20, -12, 4);
@@ -717,7 +671,7 @@ void EV_FireMP52(event_args_t* args)
 //======================
 
 //======================
-//	   PHYTON START
+//	   PYTHON START
 //	     ( .357 )
 //======================
 void EV_FirePython(event_args_t* args)
@@ -762,10 +716,10 @@ void EV_FirePython(event_args_t* args)
 
 	VectorCopy(forward, vecAiming);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_357, 0, &tracerCount[idx - 1], args->fparam1, args->fparam2);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_357, 0, &tracerCount[idx - 1], 0.00873, 0.00873, args->iparam1);
 }
 //======================
-//	    PHYTON END
+//	    PYTHON END
 //	     ( .357 )
 //======================
 
@@ -1023,9 +977,6 @@ void EV_FireGauss(event_args_t* args)
 									255, 100);
 							}
 
-							//////////////////////////////////// WHAT TO DO HERE
-							// CSoundEnt::InsertSound ( bits_SOUND_COMBAT, pev->origin, NORMAL_EXPLOSION_VOLUME, 3.0 );
-
 							EV_HLDM_DecalGunshot(&beam_tr, BULLET_MONSTER_12MM);
 
 							gEngfuncs.pEfxAPI->R_TempSprite(beam_tr.endpos, vec3_origin, 0.1, m_iGlow, kRenderGlow, kRenderFxNoDissipation, flDamage / 255.0, 6.0, FTENT_FADEOUT);
@@ -1208,12 +1159,14 @@ void EV_FireCrossbow2(event_args_t* args)
 
 			if (bolt)
 			{
-				bolt->flags |= (FTENT_CLIENTCUSTOM);					 //So it calls the callback function.
+				bolt->flags |= (FTENT_CLIENTCUSTOM | FTENT_FADEOUT);	 //So it calls the callback function.
 				bolt->entity.baseline.vuser1 = tr.endpos - forward * 10; // Pull out a little bit
 				bolt->entity.baseline.vuser2 = vBoltAngles;				 //Look forward!
 				bolt->callback = EV_BoltCallback;						 //So we can set the angles and origin back. (Stick the bolt to the wall)
 			}
 		}
+
+		EV_HLDM_DecalGunshot(&tr, BULLET_PLAYER_9MM);
 	}
 
 	gEngfuncs.pEventAPI->EV_PopPMStates();

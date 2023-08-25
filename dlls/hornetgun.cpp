@@ -126,10 +126,6 @@ void CHgun::PrimaryAttack()
 
 	m_pPlayer->m_rgAmmo[iAmmo1()]--;
 
-
-	m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;
-	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
-
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usHornetFire, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 
 
@@ -209,8 +205,6 @@ void CHgun::SecondaryAttack()
 
 
 	m_pPlayer->m_rgAmmo[iAmmo1()]--;
-	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
-	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);

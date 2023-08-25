@@ -258,7 +258,6 @@ bool CCrowbar::Swing(bool fFirst)
 					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hitbod3.wav", 1, ATTN_NORM);
 					break;
 				}
-				m_pPlayer->m_iWeaponVolume = CROWBAR_BODYHIT_VOLUME;
 				if (!pEntity->IsAlive())
 					return true;
 				else
@@ -294,8 +293,6 @@ bool CCrowbar::Swing(bool fFirst)
 			// delay the decal a bit
 			m_trHit = tr;
 		}
-
-		m_pPlayer->m_iWeaponVolume = flVol * CROWBAR_WALLHIT_VOLUME;
 #endif
 		SetThink(&CCrowbar::Smack);
 		pev->nextthink = gpGlobals->time + 0.2;

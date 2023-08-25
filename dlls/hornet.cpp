@@ -20,7 +20,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "weapons.h"
-#include "soundent.h"
 #include "hornet.h"
 #include "gamerules.h"
 
@@ -94,10 +93,6 @@ void CHornet::Spawn()
 
 	SetTouch(&CHornet::DieTouch);
 	SetThink(&CHornet::StartTrack);
-
-	edict_t* pSoundEnt = pev->owner;
-	if (!pSoundEnt)
-		pSoundEnt = edict();
 
 	if (!FNullEnt(pev->owner) && (pev->owner->v.flags & FL_CLIENT) != 0)
 	{

@@ -11,7 +11,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "weapons.h"
-#include "soundent.h"
 #include "gamerules.h"
 #include "player.h"
 #include "client.h"
@@ -85,7 +84,7 @@ void CBot::Spawn( void )
 
 
 //--------------------------------------------------------------------------------------------------------------
-Vector CBot::GetAutoaimVector( float flDelta )
+Vector CBot::GetAimVector( void )
 {
 	UTIL_MakeVectors( pev->v_angle + pev->punchangle );
 

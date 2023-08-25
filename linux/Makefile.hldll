@@ -69,7 +69,6 @@ HLDLL_OBJS = \
 	$(HLDLL_OBJ_DIR)/shotgun.o \
 	$(HLDLL_OBJ_DIR)/skill.o \
 	$(HLDLL_OBJ_DIR)/sound.o \
-	$(HLDLL_OBJ_DIR)/soundent.o \
 	$(HLDLL_OBJ_DIR)/spectator.o \
 	$(HLDLL_OBJ_DIR)/squeakgrenade.o \
 	$(HLDLL_OBJ_DIR)/subs.o \

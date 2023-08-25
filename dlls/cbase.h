@@ -279,7 +279,7 @@ public:
 	void EXPORT SUB_CallUseToggle() { this->Use(this, this, USE_TOGGLE, 0); }
 	bool ShouldToggle(USE_TYPE useType, bool currentState);
 	void FireBullets(unsigned int cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t* pevAttacker = NULL);
-	Vector FireBulletsPlayer(unsigned int cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t* pevAttacker = NULL, int shared_rand = 0);
+	void FireBulletsPlayer(unsigned int cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t* pevAttacker = NULL, int shared_rand = 0);
 
 	virtual CBaseEntity* Respawn() { return NULL; }
 
@@ -348,8 +348,6 @@ public:
 	virtual Vector EyePosition() { return pev->origin + pev->view_ofs; }  // position of eyes
 	virtual Vector EarPosition() { return pev->origin + pev->view_ofs; }  // position of ears
 	virtual Vector BodyTarget(const Vector& posSrc) { return Center(); }  // position to shoot at
-
-	virtual int Illumination() { return GETENTITYILLUM(ENT(pev)); }
 
 	virtual int IRelationship(CBaseEntity* pTarget) { return R_NO; }
 	bool FInViewCone(CBaseEntity* pEntity);

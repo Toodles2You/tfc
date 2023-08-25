@@ -62,7 +62,6 @@ void CPython::Precache()
 
 	PRECACHE_MODEL("models/w_357ammobox.mdl");
 
-	PRECACHE_SOUND("weapons/357_cock1.wav");
 	PRECACHE_SOUND("weapons/357_shot1.wav");
 	PRECACHE_SOUND("weapons/357_shot2.wav");
 
@@ -121,21 +120,13 @@ void CPython::PrimaryAttack()
 
 	if (m_iClip <= 0)
 	{
-		if (m_fFireOnEmpty)
-		{
-			PlayEmptySound();
-			m_iNextPrimaryAttack = 150;
-		}
-
+		PlayEmptySound();
+		m_iNextPrimaryAttack = 150;
 		return;
 	}
 
-	m_pPlayer->m_iWeaponVolume = LOUD_GUN_VOLUME;
-	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
-
 	m_iClip--;
 
-	m_pPlayer->pev->effects = (int)(m_pPlayer->pev->effects) | EF_MUZZLEFLASH;
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
@@ -144,12 +135,11 @@ void CPython::PrimaryAttack()
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecAiming = m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
+	Vector vecAiming = m_pPlayer->GetAimVector();
 
-	Vector vecDir;
-	vecDir = m_pPlayer->FireBulletsPlayer(1, vecSrc, vecAiming, VECTOR_CONE_1DEGREES, 8192, BULLET_PLAYER_357, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed);
+	m_pPlayer->FireBulletsPlayer(1, vecSrc, vecAiming, VECTOR_CONE_1DEGREES, 8192, BULLET_PLAYER_357, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed);
 
-	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usFirePython, 0.0, g_vecZero, g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0);
+	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usFirePython, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, m_pPlayer->random_seed, 0);
 
 	m_pPlayer->CheckAmmoLevel(this);
 
@@ -160,7 +150,7 @@ void CPython::PrimaryAttack()
 
 void CPython::Reload()
 {
-	if (DefaultReload(6, PYTHON_RELOAD, 2000, UTIL_IsDeathmatch() ? 1 : 0))
+	if (DefaultReload(PYTHON_MAX_CLIP, PYTHON_RELOAD, 2000, UTIL_IsDeathmatch() ? 1 : 0))
 	{
 		m_pPlayer->m_iFOV = 0; // 0 means reset to default fov
 	}
@@ -169,10 +159,6 @@ void CPython::Reload()
 
 void CPython::WeaponIdle()
 {
-	ResetEmptySound();
-
-	m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
-
 	if (m_iTimeWeaponIdle > 0)
 		return;
 

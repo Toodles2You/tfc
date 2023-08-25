@@ -18,7 +18,6 @@
 #include "cbase.h"
 #include "weapons.h"
 #include "player.h"
-#include "soundent.h"
 #include "gamerules.h"
 
 enum w_squeak_e
@@ -173,8 +172,6 @@ void CSqueakGrenade::Killed(entvars_t* pevAttacker, int iGib)
 	// play squeek blast
 	EMIT_SOUND_DYN(ENT(pev), CHAN_ITEM, "squeek/sqk_blast1.wav", 1, 0.5, 0, PITCH_NORM);
 
-	CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, SMALL_EXPLOSION_VOLUME, 3.0);
-
 	UTIL_BloodDrips(pev->origin, g_vecZero, BloodColor(), 80);
 
 	if (m_hOwner != NULL)
@@ -264,7 +261,6 @@ void CSqueakGrenade::HuntThink()
 	if ((m_flDie - gpGlobals->time <= 0.5) && (m_flDie - gpGlobals->time >= 0.3))
 	{
 		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "squeek/sqk_die1.wav", 1, ATTN_NORM, 0, 100 + RANDOM_LONG(0, 0x3F));
-		CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, 256, 0.25);
 	}
 
 	// higher pitch as squeeker gets closer to detonation time
@@ -398,12 +394,6 @@ void CSqueakGrenade::SuperBounceTouch(CBaseEntity* pOther)
 			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "squeek/sqk_hunt2.wav", 1, ATTN_NORM, 0, (int)flpitch);
 		else
 			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "squeek/sqk_hunt3.wav", 1, ATTN_NORM, 0, (int)flpitch);
-		CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, 256, 0.25);
-	}
-	else
-	{
-		// skittering sound
-		CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, 100, 0.1);
 	}
 
 	m_flNextBounceSoundTime = gpGlobals->time + 0.5; // half second.
@@ -471,8 +461,6 @@ bool CSqueak::Deploy()
 		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "squeek/sqk_hunt2.wav", 1, ATTN_NORM, 0, 100);
 	else
 		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "squeek/sqk_hunt3.wav", 1, ATTN_NORM, 0, 100);
-
-	m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;
 
 	const bool result = DefaultDeploy("models/v_squeak.mdl", "models/p_squeak.mdl", SQUEAK_UP, "squeak");
 
@@ -543,8 +531,6 @@ void CSqueak::PrimaryAttack()
 				EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "squeek/sqk_hunt2.wav", 1, ATTN_NORM, 0, 105);
 			else
 				EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "squeek/sqk_hunt3.wav", 1, ATTN_NORM, 0, 105);
-
-			m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;
 
 			m_pPlayer->m_rgAmmo[iAmmo1()]--;
 

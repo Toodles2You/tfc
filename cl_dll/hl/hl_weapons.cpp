@@ -156,13 +156,14 @@ bool CBasePlayerWeapon::DefaultDeploy(const char* szViewModel, const char* szWea
 	m_iNextPrimaryAttack = V_max(m_iNextPrimaryAttack, 500);
 	m_iNextSecondaryAttack = V_max(m_iNextSecondaryAttack, 500);
 	m_iTimeWeaponIdle = 1000;
+	m_bPlayEmptySound = true;
 	return true;
 }
 
 bool CBasePlayerWeapon::DefaultHolster(int iAnim, int body)
 {
-	// if (!CanHolster())
-	// 	return false;
+	if (!CanHolster())
+		return false;
 
 	if (iAnim >= 0)
 		SendWeaponAnim(iAnim, body);
@@ -171,7 +172,6 @@ bool CBasePlayerWeapon::DefaultHolster(int iAnim, int body)
 	m_iNextPrimaryAttack = V_max(m_iNextPrimaryAttack, 500);
 	m_iNextSecondaryAttack = V_max(m_iNextSecondaryAttack, 500);
 	m_iTimeWeaponIdle = 1000;
-	m_flLastFireTime = 0.0;
 	m_fInReload = false; // Cancel any reload in progress.
 	m_fInSpecialReload = 0;
 	m_pPlayer->m_iFOV = 0;
@@ -186,15 +186,16 @@ CBasePlayerWeapon:: PlayEmptySound
 
 =====================
 */
-bool CBasePlayerWeapon::PlayEmptySound()
+void CBasePlayerWeapon::PlayEmptySound()
 {
-	if (m_iPlayEmptySound)
+	if (!g_runfuncs)
+		return;
+
+	if (m_bPlayEmptySound)
 	{
-		HUD_PlaySound("weapons/357_cock1.wav", 0.8);
-		m_iPlayEmptySound = false;
-		return false;
+		PlayWeaponSound(CHAN_ITEM, "weapons/357_cock1.wav", 0.8);
+		m_bPlayEmptySound = false;
 	}
-	return false;
 }
 
 /*
@@ -227,6 +228,19 @@ void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int body)
 	HUD_SendWeaponAnim(iAnim, body, false);
 }
 
+void CBasePlayerWeapon::PlayWeaponSound(int iChannel, const char* szSound, float flVolume, float flAttn, int iFlags, float flPitch)
+{
+	if (!g_runfuncs)
+		return;
+
+	auto player = gEngfuncs.GetLocalPlayer();
+
+	if (!player)
+		return;
+
+	gEngfuncs.pEventAPI->EV_PlaySound(player->index, player->origin, iChannel, szSound, flVolume, flAttn, iFlags, flPitch);
+}
+
 /*
 =====================
 CBaseEntity::FireBulletsPlayer
@@ -234,33 +248,8 @@ CBaseEntity::FireBulletsPlayer
 Only produces random numbers to match the server ones.
 =====================
 */
-Vector CBaseEntity::FireBulletsPlayer(unsigned int cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t* pevAttacker, int shared_rand)
+void CBaseEntity::FireBulletsPlayer(unsigned int cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t* pevAttacker, int shared_rand)
 {
-	float x = 0, y = 0, z;
-
-	for (unsigned int iShot = 1; iShot <= cShots; iShot++)
-	{
-		if (pevAttacker == NULL)
-		{
-			// get circular gaussian spread
-			do
-			{
-				x = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
-				y = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
-				z = x * x + y * y;
-			} while (z > 1);
-		}
-		else
-		{
-			//Use player's random seed.
-			// get circular gaussian spread
-			x = UTIL_SharedRandomFloat(shared_rand + iShot, -0.5, 0.5) + UTIL_SharedRandomFloat(shared_rand + (1 + iShot), -0.5, 0.5);
-			y = UTIL_SharedRandomFloat(shared_rand + (2 + iShot), -0.5, 0.5) + UTIL_SharedRandomFloat(shared_rand + (3 + iShot), -0.5, 0.5);
-			z = x * x + y * y;
-		}
-	}
-
-	return Vector(x * vecSpread.x, y * vecSpread.y, 0.0);
 }
 
 /*
@@ -707,19 +696,13 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 			if (pNew && (pNew != pWeapon))
 			{
 				// Put away old weapon
-				if (player.m_pActiveItem)
-					player.m_pActiveItem->Holster();
-
-				player.m_pActiveItem = pNew;
-
 				// Deploy new weapon
-				if (player.m_pActiveItem)
+				if ((!player.m_pActiveItem || player.m_pActiveItem->Holster()) && pNew->Deploy())
 				{
-					player.m_pActiveItem->Deploy();
+					player.m_pActiveItem = pNew;
+					// Update weapon id so we can predict things correctly.
+					to->client.m_iId = cmd->weaponselect;
 				}
-
-				// Update weapon id so we can predict things correctly.
-				to->client.m_iId = cmd->weaponselect;
 			}
 		}
 	}
@@ -836,7 +819,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		*(int*)&pto->m_flTimeWeaponIdle -= cmd->msec;
 		pto->fuser1 -= cmd->msec / 1000.0;
 
-		pCurrent->DecrementTimers();
+		pCurrent->DecrementTimers(cmd->msec);
 
 		pCurrent->GetWeaponData(*pto);
 

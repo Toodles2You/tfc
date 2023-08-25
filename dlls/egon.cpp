@@ -51,16 +51,12 @@ void CEgon::Precache()
 	PRECACHE_MODEL("models/v_egon.mdl");
 	PRECACHE_MODEL("models/p_egon.mdl");
 
-	PRECACHE_MODEL("models/w_9mmclip.mdl");
-
 	PRECACHE_SOUND(EGON_SOUND_OFF);
 	PRECACHE_SOUND(EGON_SOUND_RUN);
 	PRECACHE_SOUND(EGON_SOUND_STARTUP);
 
 	PRECACHE_MODEL(EGON_BEAM_SPRITE);
 	PRECACHE_MODEL(EGON_FLARE_SPRITE);
-
-	PRECACHE_SOUND("weapons/357_cock1.wav");
 
 	m_usEgonFire = PRECACHE_EVENT(1, "events/egon_fire.sc");
 	m_usEgonStop = PRECACHE_EVENT(1, "events/egon_stop.sc");
@@ -74,11 +70,19 @@ bool CEgon::Deploy()
 	return DefaultDeploy("models/v_egon.mdl", "models/p_egon.mdl", EGON_DRAW, "egon");
 }
 
+bool CEgon::CanHolster()
+{
+	if (m_fireState != FIRE_OFF)
+		return false;
+
+	return CBasePlayerWeapon::CanHolster();
+}
+
 bool CEgon::Holster()
 {
 	if (DefaultHolster(EGON_HOLSTER))
 	{
-		EndAttack();
+		EndAttack(false);
 		return true;
 	}
 	return false;
@@ -165,7 +169,6 @@ void CEgon::Attack()
 
 		m_shakeTime = 0;
 
-		m_pPlayer->m_iWeaponVolume = EGON_PRIMARY_VOLUME;
 		m_iTimeWeaponIdle = 100;
 		pev->fuser1 = UTIL_WeaponTimeBase() + 2;
 
@@ -177,7 +180,6 @@ void CEgon::Attack()
 	case FIRE_CHARGE:
 	{
 		Fire(vecSrc, vecAiming);
-		m_pPlayer->m_iWeaponVolume = EGON_PRIMARY_VOLUME;
 
 		if (pev->fuser1 <= UTIL_WeaponTimeBase())
 		{
@@ -452,8 +454,6 @@ void CEgon::WeaponIdle()
 		return;
 	}
 
-	ResetEmptySound();
-
 	if (m_iTimeWeaponIdle > 0)
 		return;
 
@@ -481,7 +481,7 @@ void CEgon::WeaponIdle()
 
 
 
-void CEgon::EndAttack()
+void CEgon::EndAttack(bool bSendAnim)
 {
 	bool bMakeNoise = false;
 
@@ -489,11 +489,14 @@ void CEgon::EndAttack()
 		bMakeNoise = true;
 
 	PLAYBACK_EVENT_FULL(FEV_GLOBAL | FEV_RELIABLE, m_pPlayer->edict(), m_usEgonStop, 0, m_pPlayer->pev->origin, m_pPlayer->pev->angles, 0.0, 0.0,
-		static_cast<int>(bMakeNoise), 0, 0, 0);
+		static_cast<int>(bMakeNoise), 0, bSendAnim, 0);
 
-	m_iTimeWeaponIdle = 2000;
+	if (m_fireState != FIRE_OFF)
+	{
+		m_iTimeWeaponIdle = 2000;
 
-	m_iNextPrimaryAttack = m_iNextSecondaryAttack = 500;
+		m_iNextPrimaryAttack = m_iNextSecondaryAttack = 500;
+	}
 
 	m_fireState = FIRE_OFF;
 

@@ -22,7 +22,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "weapons.h"
-#include "soundent.h"
 #include "decals.h"
 
 
@@ -81,7 +80,6 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 	WRITE_BYTE(TE_EXPLFLAG_NONE);
 	MESSAGE_END();
 
-	CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, NORMAL_EXPLOSION_VOLUME, 3.0);
 	entvars_t* pevOwner;
 	if (pev->owner)
 		pevOwner = VARS(pev->owner);
@@ -168,14 +166,6 @@ void CGrenade::DetonateUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TY
 	pev->nextthink = gpGlobals->time;
 }
 
-void CGrenade::PreDetonate()
-{
-	CSoundEnt::InsertSound(bits_SOUND_DANGER, pev->origin, 400, 0.3);
-
-	SetThink(&CGrenade::Detonate);
-	pev->nextthink = gpGlobals->time + 1;
-}
-
 
 void CGrenade::Detonate()
 {
@@ -203,24 +193,6 @@ void CGrenade::ExplodeTouch(CBaseEntity* pOther)
 	UTIL_TraceLine(vecSpot, vecSpot + pev->velocity.Normalize() * 64, ignore_monsters, ENT(pev), &tr);
 
 	Explode(&tr, DMG_BLAST);
-}
-
-
-void CGrenade::DangerSoundThink()
-{
-	if (!IsInWorld())
-	{
-		UTIL_Remove(this);
-		return;
-	}
-
-	CSoundEnt::InsertSound(bits_SOUND_DANGER, pev->origin + pev->velocity * 0.5, pev->velocity.Length(), 0.2);
-	pev->nextthink = gpGlobals->time + 0.2;
-
-	if (pev->waterlevel != 0)
-	{
-		pev->velocity = pev->velocity * 0.5;
-	}
 }
 
 
@@ -252,18 +224,6 @@ void CGrenade::BounceTouch(CBaseEntity* pOther)
 	// trimming the Z velocity a bit seems to help quite a bit.
 	vecTestVelocity = pev->velocity;
 	vecTestVelocity.z *= 0.45;
-
-	if (!m_fRegisteredSound && vecTestVelocity.Length() <= 60)
-	{
-		//ALERT( at_console, "Grenade Registered!: %f\n", vecTestVelocity.Length() );
-
-		// grenade is moving really slow. It's probably very close to where it will ultimately stop moving.
-		// go ahead and emit the danger sound.
-
-		// register a radius louder than the explosion, so we make sure everyone gets out of the way
-		CSoundEnt::InsertSound(bits_SOUND_DANGER, pev->origin, pev->dmg / 0.4, 0.3);
-		m_fRegisteredSound = true;
-	}
 
 	if ((pev->flags & FL_ONGROUND) != 0)
 	{
@@ -338,11 +298,6 @@ void CGrenade::TumbleThink()
 	StudioFrameAdvance();
 	pev->nextthink = gpGlobals->time + 0.1;
 
-	if (pev->dmgtime - 1 < gpGlobals->time)
-	{
-		CSoundEnt::InsertSound(bits_SOUND_DANGER, pev->origin + pev->velocity * (pev->dmgtime - gpGlobals->time), 400, 0.1);
-	}
-
 	if (pev->dmgtime <= gpGlobals->time)
 	{
 		SetThink(&CGrenade::Detonate);
@@ -366,7 +321,6 @@ void CGrenade::Spawn()
 	UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
 
 	pev->dmg = 100;
-	m_fRegisteredSound = false;
 }
 
 
@@ -380,10 +334,6 @@ CGrenade* CGrenade::ShootContact(entvars_t* pevOwner, Vector vecStart, Vector ve
 	pGrenade->pev->velocity = vecVelocity;
 	pGrenade->pev->angles = UTIL_VecToAngles(pGrenade->pev->velocity);
 	pGrenade->pev->owner = ENT(pevOwner);
-
-	// make monsters afaid of it while in the air
-	pGrenade->SetThink(&CGrenade::DangerSoundThink);
-	pGrenade->pev->nextthink = gpGlobals->time;
 
 	// Tumble in air
 	pGrenade->pev->avelocity.x = RANDOM_FLOAT(-100, -500);
@@ -407,10 +357,6 @@ CGrenade* CGrenade::ShootTimed(entvars_t* pevOwner, Vector vecStart, Vector vecV
 	pGrenade->pev->owner = ENT(pevOwner);
 
 	pGrenade->SetTouch(&CGrenade::BounceTouch); // Bounce if touched
-
-	// Take one second off of the desired detonation time and set the think to PreDetonate. PreDetonate
-	// will insert a DANGER sound into the world sound list and delay detonation for one second so that
-	// the grenade explodes after the exact amount of time specified in the call to ShootTimed().
 
 	pGrenade->pev->dmgtime = gpGlobals->time + time;
 	pGrenade->SetThink(&CGrenade::TumbleThink);

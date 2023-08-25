@@ -13,8 +13,7 @@ void EV_HLDM_CheckTracer(int idx, float* vecSrc, float* end, float* forward, flo
 void EV_HLDM_FireBullets(int idx, float* forward, float* right, float* up, int cShots, float* vecSrc, float* vecDirShooting, float flDistance, int iBulletType, int iTracerFreq, int* tracerCount, float flSpreadX, float flSpreadY, int iRandomSeed);
 
 // HLDM
-void EV_FireGlock1(event_args_t* args);
-void EV_FireGlock2(event_args_t* args);
+void EV_FireGlock(event_args_t* args);
 void EV_FireShotGunSingle(event_args_t* args);
 void EV_FireShotGunDouble(event_args_t* args);
 void EV_FireMP5(event_args_t* args);
