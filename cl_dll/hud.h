@@ -318,9 +318,13 @@ public:
 	bool MsgFunc_SayText(const char* pszName, int iSize, void* pbuf);
 	void SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex = -1);
 	void EnsureTextFitsInOneLineAndWrapIfHaveTo(int line);
+	friend class CHud;
 	friend class CHudSpectator;
 
 private:
+	int m_iBaseX;
+	int m_iBaseY;
+	int m_iLineHeight;
 	struct cvar_s* m_HUD_saytext;
 	struct cvar_s* m_HUD_saytext_time;
 	struct cvar_s* m_con_color;
@@ -571,6 +575,12 @@ public:
 	int GetHudNumberWidth(int number, int width, int flags);
 	int DrawHudNumberReverse(int x, int y, int number, int flags, int r, int g, int b, int a = 255, hudalign_e alignment = a_northwest);
 	int DrawHudNumberReverse(int x, int y, int number, int flags, hudcolor_e color, int a = 255, hudalign_e alignment = a_northwest);
+
+	int DrawHudString(const char* string, int x, int y);
+	void GetHudStringSize(const char* string, int& width, int& height);
+	int HudStringLen(const char* string);
+
+	void GetChatInputPosition(int& x, int& y);
 
 	bool HasWeapon(int id) const
 	{

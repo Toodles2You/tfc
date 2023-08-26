@@ -186,9 +186,6 @@ bool CHudTextMessage::MsgFunc_TextMsg(const char* pszName, int iSize, void* pbuf
 	StripEndNewlineFromString(sstr4);
 	char* psz = szBuf[5];
 
-	if (gViewPort && !gViewPort->AllowedToPrintText())
-		return true;
-
 	switch (msg_dest)
 	{
 	case HUD_PRINTCENTER:

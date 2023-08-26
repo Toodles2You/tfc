@@ -33,7 +33,7 @@ extern float* GetClientColor(int clientIndex);
 #define MAX_CHARS_PER_LINE 256 /* it can be less than this, depending on char size */
 
 // allow 20 pixels on either side of the text
-#define MAX_LINE_WIDTH (ScreenWidth - 40)
+#define MAX_LINE_WIDTH (gHUD.GetWidth() - 40)
 #define LINE_START 10
 static float SCROLL_SPEED = 5;
 
@@ -41,9 +41,6 @@ static char g_szLineBuffer[MAX_LINES + 1][MAX_CHARS_PER_LINE];
 static float* g_pflNameColors[MAX_LINES + 1];
 static int g_iNameLengths[MAX_LINES + 1];
 static float flScrollTime = 0; // the time at which the lines next scroll up
-
-static int Y_START = 0;
-static int line_height = 0;
 
 DECLARE_MESSAGE(m_SayText, SayText);
 
@@ -61,6 +58,12 @@ bool CHudSayText::Init()
 
 	m_iFlags |= HUD_INTERMISSION; // is always drawn during an intermission
 
+	int iLineWidth;
+	gHUD.GetHudStringSize("0", iLineWidth, m_iLineHeight);
+
+	m_iBaseX = LINE_START;
+	m_iBaseY = gHUD.GetHeight() - 60 - m_iLineHeight;
+
 	return true;
 }
 
@@ -74,6 +77,12 @@ void CHudSayText::InitHUDData()
 
 bool CHudSayText::VidInit()
 {
+	int iLineWidth;
+	gHUD.GetHudStringSize("0", iLineWidth, m_iLineHeight);
+
+	m_iBaseX = LINE_START;
+	m_iBaseY = gHUD.GetHeight() - 60 - m_iLineHeight;
+
 	return true;
 }
 
@@ -97,13 +106,10 @@ int ScrollTextUp()
 
 bool CHudSayText::Draw(float flTime)
 {
-	int y = Y_START;
+	int y = m_iBaseY;
 
 	if ((gViewPort && !gViewPort->AllowedToPrintText()) || 0 == m_HUD_saytext->value)
 		return true;
-
-	// make sure the scrolltime is within reasonable bounds,  to guard against the clock being reset
-	flScrollTime = V_min(flScrollTime, flTime + m_HUD_saytext_time->value);
 
 	// make sure the scrolltime is within reasonable bounds,  to guard against the clock being reset
 	flScrollTime = V_min(flScrollTime, flTime + m_HUD_saytext_time->value);
@@ -131,42 +137,42 @@ bool CHudSayText::Draw(float flTime)
 
 	char line[MAX_CHARS_PER_LINE]{};
 
-	for (int i = 0; i < MAX_LINES; i++)
+	for (int i = MAX_LINES - 1; i >= 0; i--)
 	{
-		if ('\0' != *g_szLineBuffer[i])
+		if ('\0' == *g_szLineBuffer[i])
+			continue;
+
+		if (*g_szLineBuffer[i] == 2 && g_pflNameColors[i])
 		{
-			if (*g_szLineBuffer[i] == 2 && g_pflNameColors[i])
-			{
-				// it's a saytext string
+			// it's a saytext string
 
-				//Make a copy we can freely modify
-				strncpy(line, g_szLineBuffer[i], sizeof(line) - 1);
-				line[sizeof(line) - 1] = '\0';
+			//Make a copy we can freely modify
+			strncpy(line, g_szLineBuffer[i], sizeof(line) - 1);
+			line[sizeof(line) - 1] = '\0';
 
-				// draw the first x characters in the player color
-				const std::size_t playerNameEndIndex = V_min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH + 31);
+			// draw the first x characters in the player color
+			const std::size_t playerNameEndIndex = V_min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH + 31);
 
-				//Cut off the actual text so we can print player name
-				line[playerNameEndIndex] = '\0';
+			//Cut off the actual text so we can print player name
+			line[playerNameEndIndex] = '\0';
 
-				gEngfuncs.pfnDrawSetTextColor(g_pflNameColors[i][0], g_pflNameColors[i][1], g_pflNameColors[i][2]);
-				const int x = DrawConsoleString(LINE_START, y, line + 1); // don't draw the control code at the start
+			gEngfuncs.pfnDrawSetTextColor(g_pflNameColors[i][0], g_pflNameColors[i][1], g_pflNameColors[i][2]);
+			const int x = gHUD.DrawHudString(line + 1, m_iBaseX, y); // don't draw the control code at the start
 
-				//Reset last character
-				line[playerNameEndIndex] = g_szLineBuffer[i][playerNameEndIndex];
+			//Reset last character
+			line[playerNameEndIndex] = g_szLineBuffer[i][playerNameEndIndex];
 
-				// color is reset after each string draw
-				//Print the text without player name
-				DrawConsoleString(x, y, line + g_iNameLengths[i]);
-			}
-			else
-			{
-				// normal draw
-				DrawConsoleString(LINE_START, y, g_szLineBuffer[i]);
-			}
+			// color is reset after each string draw
+			//Print the text without player name
+			gHUD.DrawHudString(line + g_iNameLengths[i], x, y);
+		}
+		else
+		{
+			// normal draw
+			gHUD.DrawHudString(g_szLineBuffer[i], m_iBaseX, y);
 		}
 
-		y += line_height;
+		y -= m_iLineHeight;
 	}
 
 	return true;
@@ -185,12 +191,7 @@ bool CHudSayText::MsgFunc_SayText(const char* pszName, int iSize, void* pbuf)
 void CHudSayText::SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex)
 {
 	// Print it straight to the console
-	ConsolePrint(pszBuf);
-
-	if (gViewPort && gViewPort->AllowedToPrintText() == false)
-	{
-		return;
-	}
+	// ConsolePrint(pszBuf);
 
 	int i;
 	// find an empty string slot
@@ -240,19 +241,17 @@ void CHudSayText::SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex
 
 	m_iFlags |= HUD_ACTIVE;
 	PlaySound("misc/talk.wav", 1);
-
-	Y_START = ScreenHeight - 60 - (line_height * (MAX_LINES + 2));
 }
 
 void CHudSayText::EnsureTextFitsInOneLineAndWrapIfHaveTo(int line)
 {
 	int line_width = 0;
-	GetConsoleStringSize(g_szLineBuffer[line], &line_width, &line_height);
+	gHUD.GetHudStringSize(g_szLineBuffer[line], line_width, m_iLineHeight);
 
-	if ((line_width + LINE_START) > MAX_LINE_WIDTH)
+	if ((line_width + m_iBaseX) > MAX_LINE_WIDTH)
 	{ // string is too long to fit on line
 		// scan the string until we find what word is too long,  and wrap the end of the sentence after the word
-		int length = LINE_START;
+		int length = m_iBaseX;
 		int tmp_len = 0;
 		char* last_break = NULL;
 		for (char* x = g_szLineBuffer[line]; *x != 0; x++)
@@ -279,7 +278,7 @@ void CHudSayText::EnsureTextFitsInOneLineAndWrapIfHaveTo(int line)
 				last_break = x;
 
 			buf[0] = *x; // get the length of the current character
-			GetConsoleStringSize(buf, &tmp_len, &line_height);
+			gHUD.GetHudStringSize(buf, tmp_len, m_iLineHeight);
 			length += tmp_len;
 
 			if (length > MAX_LINE_WIDTH)

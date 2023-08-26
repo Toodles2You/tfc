@@ -497,3 +497,30 @@ int CHud::DrawHudNumberReverse(int x, int y, int number, int flags, hudcolor_e c
 	GetColor(r, g, b, color);
 	return DrawHudNumberReverse(x, y, number, flags, r, g, b, a, alignment);
 }
+
+int CHud::DrawHudString(const char* string, int x, int y)
+{
+	auto x1 = roundf (m_flOffsetX + x * m_flScaleX);
+	auto y1 = roundf (m_flOffsetY + y * m_flScaleY);
+	return (gEngfuncs.pfnDrawConsoleString(x1, y1, (char*)string) - m_flOffsetY) / m_flScaleX;
+}
+
+void CHud::GetHudStringSize(const char* string, int& width, int& height)
+{
+	gEngfuncs.pfnDrawConsoleStringLen(string, &width, &height);
+	width /= m_flScaleX;
+	height /= m_flScaleY;
+}
+
+int CHud::HudStringLen(const char* string)
+{
+	int width, height;
+	GetHudStringSize(string, width, height);
+	return width;
+}
+
+void CHud::GetChatInputPosition(int& x, int& y)
+{
+	x = roundf (m_flOffsetX + m_SayText.m_iBaseX * m_flScaleX);
+	y = roundf (m_flOffsetY + (m_SayText.m_iBaseY + m_SayText.m_iLineHeight) * m_flScaleY);
+}

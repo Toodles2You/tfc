@@ -103,6 +103,10 @@ bool CHudDeathNotice::Draw(float flTime)
 {
 	int x, y, r, g, b;
 
+	// Only draw if the viewport will let me
+	if (gViewPort && !gViewPort->AllowedToPrintText())
+		return true;
+
 	for (int i = 0; i < MAX_DEATHNOTICES; i++)
 	{
 		if (rgDeathNoticeList[i].iId == 0)
@@ -118,48 +122,43 @@ bool CHudDeathNotice::Draw(float flTime)
 
 		rgDeathNoticeList[i].flDisplayTime = V_min(rgDeathNoticeList[i].flDisplayTime, gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME);
 
-		// Only draw if the viewport will let me
-		if (gViewPort && gViewPort->AllowedToPrintText())
+		// Draw the death notice
+		y = DEATHNOTICE_TOP + 2 + (20 * i); //!!!
+
+		int id = (rgDeathNoticeList[i].iId == -1) ? m_HUD_d_skull : rgDeathNoticeList[i].iId;
+		x = gHUD.GetWidth() - gHUD.HudStringLen(rgDeathNoticeList[i].szVictim) - (gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left);
+
+		if (!rgDeathNoticeList[i].iSuicide)
 		{
-			// Draw the death notice
-			y = DEATHNOTICE_TOP + 2 + (20 * i); //!!!
+			x -= (5 + gHUD.HudStringLen(rgDeathNoticeList[i].szKiller));
 
-			int id = (rgDeathNoticeList[i].iId == -1) ? m_HUD_d_skull : rgDeathNoticeList[i].iId;
-			x = ScreenWidth - ConsoleStringLen(rgDeathNoticeList[i].szVictim) - (gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left);
+			// Draw killers name
+			if (rgDeathNoticeList[i].KillerColor)
+				gEngfuncs.pfnDrawSetTextColor(rgDeathNoticeList[i].KillerColor[0], rgDeathNoticeList[i].KillerColor[1], rgDeathNoticeList[i].KillerColor[2]);
+			x = 5 + gHUD.DrawHudString(rgDeathNoticeList[i].szKiller, x, y);
+		}
 
-			if (!rgDeathNoticeList[i].iSuicide)
-			{
-				x -= (5 + ConsoleStringLen(rgDeathNoticeList[i].szKiller));
+		r = 255;
+		g = 80;
+		b = 0;
+		if (rgDeathNoticeList[i].iTeamKill)
+		{
+			r = 10;
+			g = 240;
+			b = 10; // display it in sickly green
+		}
 
-				// Draw killers name
-				if (rgDeathNoticeList[i].KillerColor)
-					gEngfuncs.pfnDrawSetTextColor(rgDeathNoticeList[i].KillerColor[0], rgDeathNoticeList[i].KillerColor[1], rgDeathNoticeList[i].KillerColor[2]);
-				x = 5 + DrawConsoleString(x, y, rgDeathNoticeList[i].szKiller);
-			}
+		// Draw death weapon
+		gHUD.DrawHudSpriteIndex(id, x, y, r, g, b);
 
-			r = 255;
-			g = 80;
-			b = 0;
-			if (rgDeathNoticeList[i].iTeamKill)
-			{
-				r = 10;
-				g = 240;
-				b = 10; // display it in sickly green
-			}
+		x += (gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left);
 
-			// Draw death weapon
-			SPR_Set(gHUD.GetSprite(id), r, g, b);
-			SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(id));
-
-			x += (gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left);
-
-			// Draw victims name (if it was a player that was killed)
-			if (!rgDeathNoticeList[i].iNonPlayerKill)
-			{
-				if (rgDeathNoticeList[i].VictimColor)
-					gEngfuncs.pfnDrawSetTextColor(rgDeathNoticeList[i].VictimColor[0], rgDeathNoticeList[i].VictimColor[1], rgDeathNoticeList[i].VictimColor[2]);
-				x = DrawConsoleString(x, y, rgDeathNoticeList[i].szVictim);
-			}
+		// Draw victims name (if it was a player that was killed)
+		if (!rgDeathNoticeList[i].iNonPlayerKill)
+		{
+			if (rgDeathNoticeList[i].VictimColor)
+				gEngfuncs.pfnDrawSetTextColor(rgDeathNoticeList[i].VictimColor[0], rgDeathNoticeList[i].VictimColor[1], rgDeathNoticeList[i].VictimColor[2]);
+			x = gHUD.DrawHudString(rgDeathNoticeList[i].szVictim, x, y);
 		}
 	}
 
