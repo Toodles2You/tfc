@@ -15,20 +15,6 @@
 
 #pragma once
 
-/*
-
-Class Hierachy
-
-CBaseEntity
-	CBaseDelay
-		CBaseToggle
-			CBaseItem
-			CBaseMonster
-				CBaseCycler
-				CBasePlayer
-				CBaseGroup
-*/
-
 #define MAX_PATH_SIZE 10 // max number of nodes available for a path.
 
 // These are caps bits to indicate what an object's capabilities (currently used for save/restore and level transitions)
@@ -663,11 +649,6 @@ public:
 	int m_sounds;
 };
 
-//
-// Weapons
-//
-
-#define BAD_WEAPON 0x00007FFF
 
 //
 // Converts a entvars_t * to a class pointer
@@ -699,31 +680,6 @@ T* GetClassPtr(T* a)
 }
 
 
-/*
-bit_PUSHBRUSH_DATA | bit_TOGGLE_DATA
-bit_MONSTER_DATA
-bit_DELAY_DATA
-bit_TOGGLE_DATA | bit_DELAY_DATA | bit_MONSTER_DATA
-bit_PLAYER_DATA | bit_MONSTER_DATA
-bit_MONSTER_DATA | CYCLER_DATA
-bit_LIGHT_DATA
-path_corner_data
-bit_MONSTER_DATA | wildcard_data
-bit_MONSTER_DATA | bit_GROUP_DATA
-boid_flock_data
-boid_data
-CYCLER_DATA
-bit_ITEM_DATA
-bit_ITEM_DATA | func_hud_data
-bit_TOGGLE_DATA | bit_ITEM_DATA
-EOFFSET
-env_sound_data
-env_sound_data
-push_trigger_data
-*/
-
-#define TRACER_FREQ 4 // Tracers fire every 4 bullets
-
 // this moved here from world.cpp, to allow classes to be derived from it
 //=======================
 // CWorld
@@ -741,9 +697,10 @@ public:
 	bool KeyValue(KeyValueData* pkvd) override;
 
 	static inline CWorld* World = nullptr;
-};
 
-inline DLL_GLOBAL edict_t* g_pBodyQueueHead = nullptr;
+protected:
+	EXPORT void PostSpawn();
+};
 
 inline CBaseEntity* CBaseEntity::Instance(edict_t* pent)
 {

@@ -623,25 +623,31 @@ void CWorld::Precache()
 	for (int i = 0; i < ARRAYSIZE(gDecals); i++)
 		gDecals[i].index = DECAL_INDEX(gDecals[i].name);
 
-	// init the WorldGraph.
-	WorldGraph.InitGraph();
+	if (g_pGameRules->FAllowMonsters())
+	{
+		// init the WorldGraph.
+		WorldGraph.InitGraph();
 
-	// make sure the .NOD file is newer than the .BSP file.
-	if (!WorldGraph.CheckNODFile((char*)STRING(gpGlobals->mapname)))
-	{ // NOD file is not present, or is older than the BSP file.
-		WorldGraph.AllocNodes();
-	}
-	else
-	{ // Load the node graph for this level
-		if (!WorldGraph.FLoadGraph((char*)STRING(gpGlobals->mapname)))
-		{ // couldn't load, so alloc and prepare to build a graph.
-			ALERT(at_console, "*Error opening .NOD file\n");
+		// make sure the .NOD file is newer than the .BSP file.
+		if (!WorldGraph.CheckNODFile((char*)STRING(gpGlobals->mapname)))
+		{ // NOD file is not present, or is older than the BSP file.
 			WorldGraph.AllocNodes();
 		}
 		else
-		{
-			ALERT(at_console, "\n*Graph Loaded!\n");
+		{ // Load the node graph for this level
+			if (!WorldGraph.FLoadGraph((char*)STRING(gpGlobals->mapname)))
+			{ // couldn't load, so alloc and prepare to build a graph.
+				ALERT(at_console, "*Error opening .NOD file\n");
+				WorldGraph.AllocNodes();
+			}
+			else
+			{
+				ALERT(at_console, "\n*Graph Loaded!\n");
+			}
 		}
+
+		SetThink(&CWorld::PostSpawn);
+		pev->nextthink = gpGlobals->time + 0.5f;
 	}
 
 	if (pev->speed > 0)
@@ -752,4 +758,25 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 	}
 
 	return CBaseEntity::KeyValue(pkvd);
+}
+
+
+void CWorld::PostSpawn()
+{
+	if (0 != WorldGraph.m_fGraphPresent)
+	{
+		if (0 == WorldGraph.m_fGraphPointersSet)
+		{
+			if (!WorldGraph.FSetGraphPointers())
+			{
+				ALERT(at_console, "**Graph pointers were not set!\n");
+				return;
+			}
+			else
+			{
+				ALERT(at_console, "**Graph Pointers Set!\n");
+			}
+		}
+	}
+	SetThink(nullptr);
 }
