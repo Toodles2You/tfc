@@ -45,8 +45,6 @@ extern void CopyToBodyQue(entvars_t* pev);
 
 void LinkUserMessages();
 
-static std::vector<CBasePlayer*> the_bots[MAX_PLAYERS];
-
 
 /*
 ===========
