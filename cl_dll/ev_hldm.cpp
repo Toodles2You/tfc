@@ -1231,6 +1231,16 @@ void EV_LaserDotOn(event_args_t* args)
 	if (!EV_IsLocal(args->entindex))
 		return;
 
+	if (g_CurrentWeaponId != WEAPON_RPG)
+	{
+		if (pLaserDot != nullptr)
+		{
+			pLaserDot->die = gEngfuncs.GetClientTime();
+			pLaserDot = nullptr;
+		}
+		return;
+	}
+
 	if (pLaserDot == nullptr)
 	{
 		if (bMakeNoise)

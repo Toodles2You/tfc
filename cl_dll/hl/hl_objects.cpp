@@ -111,6 +111,13 @@ void UpdateLaserDot(const float time)
 {
 	pmtrace_t tr;
 
+	if (g_CurrentWeaponId != WEAPON_RPG)
+	{
+		pLaserDot->die = time;
+		pLaserDot = nullptr;
+		return;
+	}
+
 	pLaserDot->die = time + 0.1f;
 
 	if ((pLaserDot->flags & FTENT_NOMODEL) != 0)
