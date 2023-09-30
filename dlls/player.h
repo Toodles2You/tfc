@@ -154,7 +154,7 @@ public:
 	EHANDLE m_pTank;		 // the tank which the player is currently controlling,  NULL if no tank
 	EHANDLE m_hViewEntity;	 // The view entity being used, or null if the player is using itself as the view entity
 	bool m_bResetViewEntity; //True if the player's view needs to be set back to the view entity
-	float m_fDeadTime;		 // the time at which the player died  (used in PlayerDeathThink())
+	float m_fDeadTime;		 // the time at which the player died  (used in PlayerDeathFrame())
 
 	bool m_fLongJump;	   // does this player have the longjump module?
 
@@ -179,7 +179,6 @@ public:
 	Vector m_vecAutoAim;
 	bool m_fOnTarget;
 	int m_iDeaths;
-	float m_iRespawnFrames; // used in PlayerDeathThink() to make sure players can always respawn
 
 	int m_lastx, m_lasty; // These are the previous update's crosshair angles, DON"T SAVE/RESTORE
 
@@ -278,7 +277,7 @@ public:
 
 public:
 	void WaterMove();
-	void EXPORT PlayerDeathThink();
+	void PlayerDeathFrame();
 	void PlayerUse();
 
 	void CheckSuitUpdate();
@@ -372,5 +371,4 @@ inline bool giPrecacheGrunt = false;
 *	@brief Display the game title if this key is set
 */
 inline DLL_GLOBAL bool gDisplayTitle = false;
-inline DLL_GLOBAL unsigned int g_ulModelIndexPlayer = 0;
 inline DLL_GLOBAL CBaseEntity* g_pLastSpawn = nullptr;

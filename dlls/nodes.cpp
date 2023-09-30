@@ -182,7 +182,7 @@ entvars_t* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
 
 				// trace from the node to the trigger, make sure it's one we can see from the node.
 				// !!!HACKHACK Use bodyqueue here cause there are no ents we really wish to ignore!
-				UTIL_TraceLine(pNode->m_vecOrigin, VecBModelOrigin(pevTrigger), ignore_monsters, g_pBodyQueueHead, &tr);
+				UTIL_TraceLine(pNode->m_vecOrigin, VecBModelOrigin(pevTrigger), ignore_monsters, NULL, &tr);
 
 
 				if (VARS(tr.pHit) == pevTrigger)
@@ -387,12 +387,12 @@ int	CGraph:: FindNearestLink ( const Vector &vecTestPoint, int *piNearestLink, b
 			if ( flDistToLine < flMinDist )
 			{// just found a line nearer than any other so far
 				
-				UTIL_TraceLine ( vecTestPoint, SourceNode( i, j ).m_vecOrigin, ignore_monsters, g_pBodyQueueHead, &tr );
+				UTIL_TraceLine ( vecTestPoint, SourceNode( i, j ).m_vecOrigin, ignore_monsters, NULL, &tr );
 
 				if ( tr.flFraction != 1.0 )
 				{// crap. can't see the first node of this link, try to see the other
 					
-					UTIL_TraceLine ( vecTestPoint, DestNode( i, j ).m_vecOrigin, ignore_monsters, g_pBodyQueueHead, &tr );
+					UTIL_TraceLine ( vecTestPoint, DestNode( i, j ).m_vecOrigin, ignore_monsters, NULL, &tr );
 					if ( tr.flFraction != 1.0 )
 					{// can't use this link, cause can't see either node!
 						continue;
@@ -1259,7 +1259,7 @@ int CGraph::LinkVisibleNodes(CLink* pLinkPool, FSFile& file, int* piBadNode)
 			UTIL_TraceLine(m_pNodes[i].m_vecOrigin,
 				m_pNodes[j].m_vecOrigin,
 				ignore_monsters,
-				g_pBodyQueueHead, //!!!HACKHACK no real ent to supply here, using a global we don't care about
+				NULL, //!!!HACKHACK no real ent to supply here, using a global we don't care about
 				&tr);
 
 
@@ -1274,7 +1274,7 @@ int CGraph::LinkVisibleNodes(CLink* pLinkPool, FSFile& file, int* piBadNode)
 				UTIL_TraceLine(m_pNodes[j].m_vecOrigin,
 					m_pNodes[i].m_vecOrigin,
 					ignore_monsters,
-					g_pBodyQueueHead, //!!!HACKHACK no real ent to supply here, using a global we don't care about
+					NULL, //!!!HACKHACK no real ent to supply here, using a global we don't care about
 					&tr);
 
 
@@ -1741,7 +1741,7 @@ void CTestHull::BuildNodeGraph()
 			UTIL_TraceLine(WorldGraph.m_pNodes[i].m_vecOrigin,
 				WorldGraph.m_pNodes[i].m_vecOrigin - Vector(0, 0, 384),
 				ignore_monsters,
-				g_pBodyQueueHead, //!!!HACKHACK no real ent to supply here, using a global we don't care about
+				NULL, //!!!HACKHACK no real ent to supply here, using a global we don't care about
 				&tr);
 
 			// This trace is ONLY used if we hit an entity flagged with FL_WORLDBRUSH
@@ -1749,7 +1749,7 @@ void CTestHull::BuildNodeGraph()
 			UTIL_TraceLine(WorldGraph.m_pNodes[i].m_vecOrigin,
 				WorldGraph.m_pNodes[i].m_vecOrigin - Vector(0, 0, 384),
 				dont_ignore_monsters,
-				g_pBodyQueueHead, //!!!HACKHACK no real ent to supply here, using a global we don't care about
+				NULL, //!!!HACKHACK no real ent to supply here, using a global we don't care about
 				&trEnt);
 
 

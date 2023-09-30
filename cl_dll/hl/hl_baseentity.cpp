@@ -134,7 +134,7 @@ void CBasePlayer::RemoveAllItems(bool removeSuit) {}
 void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim) {}
 void CBasePlayer::WaterMove() {}
 bool CBasePlayer::IsOnLadder() { return false; }
-void CBasePlayer::PlayerDeathThink() {}
+void CBasePlayer::PlayerDeathFrame() {}
 void CBasePlayer::StartDeathCam() {}
 void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle) {}
 void CBasePlayer::PlayerUse() {}

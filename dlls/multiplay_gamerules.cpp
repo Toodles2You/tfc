@@ -538,14 +538,21 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 //=========================================================
 bool CHalfLifeMultiplay::FPlayerCanRespawn(CBasePlayer* pPlayer)
 {
-	return true;
+	return FlPlayerSpawnTime(pPlayer) <= gpGlobals->time;
 }
 
 //=========================================================
 //=========================================================
 float CHalfLifeMultiplay::FlPlayerSpawnTime(CBasePlayer* pPlayer)
 {
-	return gpGlobals->time; //now!
+	return pPlayer->m_fDeadTime + 3.0f;
+}
+
+//=========================================================
+//=========================================================
+bool CHalfLifeMultiplay::FPlayerCanSuicide(CBasePlayer* pPlayer)
+{
+	return pPlayer->m_fNextSuicideTime <= gpGlobals->time;
 }
 
 bool CHalfLifeMultiplay::AllowAutoTargetCrosshair()

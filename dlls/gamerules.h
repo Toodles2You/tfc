@@ -94,6 +94,7 @@ public:
 	virtual bool FPlayerCanRespawn(CBasePlayer* pPlayer) = 0;  // is this player allowed to respawn now?
 	virtual float FlPlayerSpawnTime(CBasePlayer* pPlayer) = 0; // When in the future will this player be able to spawn?
 	virtual edict_t* GetPlayerSpawnSpot(CBasePlayer* pPlayer); // Place this player on their spawnspot and face them the proper direction.
+	virtual bool FPlayerCanSuicide(CBasePlayer *pPlayer) = 0;  // Prevent players from suiciding too often.
 
 	virtual bool AllowAutoTargetCrosshair() { return true; }
 	virtual bool ClientCommand(CBasePlayer* pPlayer, const char* pcmd) { return false; } // handles the user commands;  returns true if command handled properly
@@ -202,6 +203,7 @@ public:
 	void PlayerThink(CBasePlayer* pPlayer) override;
 	bool FPlayerCanRespawn(CBasePlayer* pPlayer) override;
 	float FlPlayerSpawnTime(CBasePlayer* pPlayer) override;
+	bool FPlayerCanSuicide(CBasePlayer *pPlayer) override;
 
 	bool AllowAutoTargetCrosshair() override;
 
@@ -294,6 +296,7 @@ public:
 	bool FPlayerCanRespawn(CBasePlayer* pPlayer) override;
 	float FlPlayerSpawnTime(CBasePlayer* pPlayer) override;
 	edict_t* GetPlayerSpawnSpot(CBasePlayer* pPlayer) override;
+	bool FPlayerCanSuicide(CBasePlayer *pPlayer) override;
 
 	bool AllowAutoTargetCrosshair() override;
 	bool ClientCommand(CBasePlayer* pPlayer, const char* pcmd) override;

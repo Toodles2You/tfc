@@ -149,6 +149,13 @@ float CHalfLifeRules::FlPlayerSpawnTime(CBasePlayer* pPlayer)
 }
 
 //=========================================================
+//=========================================================
+bool CHalfLifeRules::FPlayerCanSuicide(CBasePlayer* pPlayer)
+{
+	return false;
+}
+
+//=========================================================
 // IPointsForKill - how many points awarded to anyone
 // that kills this player?
 //=========================================================

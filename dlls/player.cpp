@@ -41,9 +41,6 @@
 #include "client.h"
 #include "animation.h"
 
-// #define DUCKFIX
-
-extern void CopyToBodyQue(entvars_t* pev);
 extern edict_t* EntSelectSpawnPoint(CBaseEntity* pPlayer);
 
 #define TRAIN_ACTIVE 0x80
@@ -60,7 +57,7 @@ extern edict_t* EntSelectSpawnPoint(CBaseEntity* pPlayer);
 
 // Global Savedata for player
 TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
-	{
+{
 		DEFINE_FIELD(CBasePlayer, m_afButtonLast, FIELD_INTEGER),
 		DEFINE_FIELD(CBasePlayer, m_afButtonPressed, FIELD_INTEGER),
 		DEFINE_FIELD(CBasePlayer, m_afButtonReleased, FIELD_INTEGER),
@@ -786,11 +783,6 @@ void CBasePlayer::RemoveAllItems(bool removeSuit)
 	UpdateClientData();
 }
 
-/*
- * GLOBALS ASSUMED SET:  g_ulModelIndexPlayer
- *
- * ENTITY_METHOD(PlayerDie)
- */
 
 void CBasePlayer::Killed(entvars_t* pevAttacker, int iGib)
 {
@@ -808,9 +800,8 @@ void CBasePlayer::Killed(entvars_t* pevAttacker, int iGib)
 
 	SetAnimation(PLAYER_DIE);
 
-	m_iRespawnFrames = 0;
-
-	pev->modelindex = g_ulModelIndexPlayer; // don't use eyes
+	m_fDeadTime = gpGlobals->time;
+	m_fNextSuicideTime = gpGlobals->time + 1.0f;
 
 	pev->deadflag = DEAD_DYING;
 	pev->movetype = MOVETYPE_TOSS;
@@ -818,15 +809,9 @@ void CBasePlayer::Killed(entvars_t* pevAttacker, int iGib)
 	if (pev->velocity.z < 10)
 		pev->velocity.z += RANDOM_FLOAT(0, 300);
 
-	// clear out the suit message cache so we don't keep chattering
 	SetSuitUpdate(NULL, false, 0);
 
-	// reset FOV
 	m_iFOV = 0;
-
-
-	// UNDONE: Put this in, but add FFADE_PERMANENT and make fade time 8.8 instead of 4.12
-	// UTIL_ScreenFade( edict(), Vector(128,0,0), 6, 15, 255, FFADE_OUT | FFADE_MODULATE );
 
 	if ((pev->health < -40 && iGib != GIB_NEVER) || iGib == GIB_ALWAYS)
 	{
@@ -844,9 +829,6 @@ void CBasePlayer::Killed(entvars_t* pevAttacker, int iGib)
 
 	pev->angles.x = 0;
 	pev->angles.z = 0;
-
-	SetThink(&CBasePlayer::PlayerDeathThink);
-	pev->nextthink = gpGlobals->time + 0.1;
 }
 
 
@@ -1333,91 +1315,49 @@ bool CBasePlayer::IsOnLadder()
 	return (pev->movetype == MOVETYPE_FLY);
 }
 
-void CBasePlayer::PlayerDeathThink()
+void CBasePlayer::PlayerDeathFrame()
 {
-	float flForward;
-
-	if (FBitSet(pev->flags, FL_ONGROUND))
-	{
-		flForward = pev->velocity.Length() - 20;
-		if (flForward <= 0)
-			pev->velocity = g_vecZero;
-		else
-			pev->velocity = flForward * pev->velocity.Normalize();
-	}
+	const auto bIsMultiplayer = UTIL_IsMultiplayer();
 
 	if (HasWeapons())
 	{
-		// we drop the guns here because weapons that have an area effect and can kill their user
-		// will sometimes crash coming back from CBasePlayer::Killed() if they kill their owner because the
-		// player class sometimes is freed. It's safer to manipulate the weapons once we know
-		// we aren't calling into any of their code anymore through the player pointer.
 		PackDeadPlayerItems();
 	}
 
-
-	if (0 != pev->modelindex && (!m_fSequenceFinished) && (pev->deadflag == DEAD_DYING))
+	// If the player has been dead for 5 seconds,
+	// send the player off to an intermission
+	// camera until they respawn.
+	if (bIsMultiplayer && (m_afPhysicsFlags & PFLAG_OBSERVER) == 0 && (m_fDeadTime + 5.0f) <= gpGlobals->time)
 	{
-		StudioFrameAdvance();
-
-		m_iRespawnFrames++;			// Note, these aren't necessarily real "frames", so behavior is dependent on # of client movement commands
-		if (m_iRespawnFrames < 120) // Animations should be no longer than this
-			return;
-	}
-
-	// once we're done animating our death and we're on the ground, we want to set movetype to None so our dead body won't do collisions and stuff anymore
-	// this prevents a bug where the dead body would go to a player's head if he walked over it while the dead player was clicking their button to respawn
-	if (pev->movetype != MOVETYPE_NONE && FBitSet(pev->flags, FL_ONGROUND))
-		pev->movetype = MOVETYPE_NONE;
-
-	if (pev->deadflag == DEAD_DYING)
-		pev->deadflag = DEAD_DEAD;
-
-	// StopAnimation();
-
-	pev->effects |= EF_NOINTERP;
-	pev->framerate = 0.0;
-
-	bool fAnyButtonDown = (pev->button & ~IN_SCORE) != 0;
-
-	// wait for all buttons released
-	if (pev->deadflag == DEAD_DEAD)
-	{
-		if (fAnyButtonDown)
-			return;
-
-		if (g_pGameRules->FPlayerCanRespawn(this))
-		{
-			m_fDeadTime = gpGlobals->time;
-			pev->deadflag = DEAD_RESPAWNABLE;
-		}
-
-		return;
-	}
-
-	// if the player has been dead for one second longer than allowed by forcerespawn,
-	// forcerespawn isn't on. Send the player off to an intermission camera until they
-	// choose to respawn.
-	if (UTIL_IsMultiplayer() && (gpGlobals->time > (m_fDeadTime + 6)) && (m_afPhysicsFlags & PFLAG_OBSERVER) == 0)
-	{
-		// go to dead camera.
 		StartDeathCam();
 	}
 
-	if (0 != pev->iuser1) // player is in spectator mode
-		return;
+	if (pev->deadflag != DEAD_RESPAWNABLE)
+	{
+		if (!g_pGameRules->FPlayerCanRespawn(this))
+		{
+			return;
+		}
+		pev->deadflag = DEAD_RESPAWNABLE;
+	}
 
-	// wait for any button down,  or mp_forcerespawn is set and the respawn time is up
-	if (!fAnyButtonDown && !(UTIL_IsMultiplayer() && forcerespawn.value > 0 && (gpGlobals->time > (m_fDeadTime + 5))))
-		return;
-
-	pev->button = 0;
-	m_iRespawnFrames = 0;
-
-	//ALERT(at_console, "Respawn\n");
-
-	respawn(pev, (m_afPhysicsFlags & PFLAG_OBSERVER) == 0); // don't copy a corpse if we're in deathcam.
-	pev->nextthink = -1;
+	if (bIsMultiplayer)
+	{
+		if (forcerespawn.value > 0.0f || m_afButtonPressed != 0)
+		{
+			m_afButtonPressed = 0;
+			pev->button = 0;
+			m_afButtonReleased = 0;
+			Spawn();
+		}
+	}
+	else
+	{
+		if (m_afButtonPressed != 0)
+		{
+			SERVER_COMMAND("reload\n");
+		}
+	}
 }
 
 //=========================================================
@@ -1454,8 +1394,6 @@ void CBasePlayer::StartDeathCam()
 			iRand--;
 		}
 
-		CopyToBodyQue(pev);
-
 		UTIL_SetOrigin(pev, pSpot->v.origin);
 		pev->angles = pev->v_angle = pSpot->v.v_angle;
 	}
@@ -1463,7 +1401,6 @@ void CBasePlayer::StartDeathCam()
 	{
 		// no intermission spot. Push them up in the air, looking down at their corpse
 		TraceResult tr;
-		CopyToBodyQue(pev);
 		UTIL_TraceLine(pev->origin, pev->origin + Vector(0, 0, 128), ignore_monsters, edict(), &tr);
 
 		UTIL_SetOrigin(pev, tr.vecEndPos);
@@ -1950,9 +1887,9 @@ void CBasePlayer::PreThink()
 		return;
 	}
 
-	if (pev->deadflag >= DEAD_DYING)
+	if (!IsAlive())
 	{
-		PlayerDeathThink();
+		PlayerDeathFrame();
 		return;
 	}
 
@@ -2034,8 +1971,6 @@ void CBasePlayer::PreThink()
 	{
 		m_flFallVelocity = -pev->velocity.z;
 	}
-
-	// StudioFrameAdvance( );//!!!HACKHACK!!! Can't be hit by traceline when not animating?
 
 	if ((m_afPhysicsFlags & PFLAG_ONBARNACLE) != 0)
 	{
@@ -2567,10 +2502,7 @@ void CBasePlayer::PostThink()
 			}
 		}
 
-		if (IsAlive())
-		{
-			SetAnimation(PLAYER_WALK);
-		}
+		SetAnimation(PLAYER_WALK);
 	}
 
 	if (FBitSet(pev->flags, FL_ONGROUND))
@@ -2579,19 +2511,22 @@ void CBasePlayer::PostThink()
 	}
 
 	// select the proper animation for the player character
-	if (IsAlive())
+	if (0 == pev->velocity.x && 0 == pev->velocity.y)
 	{
-		if (0 == pev->velocity.x && 0 == pev->velocity.y)
-			SetAnimation(PLAYER_IDLE);
-		else if ((0 != pev->velocity.x || 0 != pev->velocity.y) && (FBitSet(pev->flags, FL_ONGROUND)))
-			SetAnimation(PLAYER_WALK);
-		else if (pev->waterlevel > 1)
-			SetAnimation(PLAYER_WALK);
+		SetAnimation(PLAYER_IDLE);
+	}
+	else if (FBitSet(pev->flags, FL_ONGROUND))
+	{
+		SetAnimation(PLAYER_WALK);
+	}
+	else if (pev->waterlevel > 1)
+	{
+		SetAnimation(PLAYER_WALK);
 	}
 
+pt_end:
 	StudioFrameAdvance();
 
-pt_end:
 	const int msec = static_cast<int>(std::roundf(gpGlobals->frametime * 1000));
 
 	// Decay timers on weapons
@@ -2822,7 +2757,6 @@ void CBasePlayer::Spawn()
 	g_pGameRules->GetPlayerSpawnSpot(this);
 
 	SET_MODEL(ENT(pev), "models/player.mdl");
-	g_ulModelIndexPlayer = pev->modelindex;
 	pev->sequence = LookupActivity(ACT_IDLE);
 
 	if (FBitSet(pev->flags, FL_DUCKING))
@@ -2923,8 +2857,6 @@ bool CBasePlayer::Restore(CRestore& restore)
 	{
 		m_SndRoomtype = 0;
 	}
-
-	g_ulModelIndexPlayer = pev->modelindex;
 
 	if (FBitSet(pev->flags, FL_DUCKING))
 	{

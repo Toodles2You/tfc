@@ -41,8 +41,6 @@
 
 DLL_GLOBAL unsigned int g_ulFrameCount;
 
-extern void CopyToBodyQue(entvars_t* pev);
-
 void LinkUserMessages();
 
 
@@ -106,53 +104,25 @@ void ClientDisconnect(edict_t* pEntity)
 }
 
 
-// called by ClientKill and DeadThink
-void respawn(entvars_t* pev, bool fCopyCorpse)
-{
-	if (UTIL_IsMultiplayer())
-	{
-		if (fCopyCorpse)
-		{
-			// make a copy of the dead body for appearances sake
-			CopyToBodyQue(pev);
-		}
-
-		// respawn player
-		GetClassPtr((CBasePlayer*)pev)->Spawn();
-	}
-	else
-	{ // restart the entire server
-		SERVER_COMMAND("reload\n");
-	}
-}
-
 /*
 ============
 ClientKill
 
 Player entered the suicide command
-
-GLOBALS ASSUMED SET:  g_ulModelIndexPlayer
 ============
 */
 void ClientKill(edict_t* pEntity)
 {
 	entvars_t* pev = &pEntity->v;
-
 	CBasePlayer* pl = (CBasePlayer*)CBasePlayer::Instance(pev);
 
-	if (pl->m_fNextSuicideTime > gpGlobals->time)
-		return; // prevent suiciding too ofter
+	if (!g_pGameRules->FPlayerCanSuicide(pl))
+	{
+		return;
+	}
 
-	pl->m_fNextSuicideTime = gpGlobals->time + 1; // don't let them suicide for 5 seconds after suiciding
-
-	// have the player kill themself
 	pev->health = 0;
 	pl->Killed(pev, GIB_NEVER);
-
-	//	pev->modelindex = g_ulModelIndexPlayer;
-	//	pev->frags -= 2;		// extra penalty
-	//	respawn( pev );
 }
 
 /*
