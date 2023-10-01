@@ -38,7 +38,7 @@ bool UTIL_IsNameTaken( const char *name, bool ignoreHumans )
 		if (FStrEq( STRING( player->pev->netname ), "" ))
 			continue;
 
-		if (player->IsPlayer() && (((CBasePlayer *)player)->IsBot() == TRUE))
+		if (player->IsPlayer() && ((CBasePlayer *)player)->IsBot())
 		{
 			// bots can have prefixes so we need to check the name
 			// against the profile name instead.
@@ -110,10 +110,7 @@ int UTIL_ActivePlayersInGame( void )
 		CBasePlayer *player = static_cast<CBasePlayer *>( entity );
 
 		// ignore spectators
-		if (player->m_iTeam != TERRORIST && player->m_iTeam != CT)
-			continue;
-
-		if (player->m_iJoiningState != JOINED)
+		if (!player->IsPlayer())
 			continue;
 
 		iCount++;
@@ -147,10 +144,7 @@ int UTIL_HumansInGame( bool ignoreSpectators )
 		if (player->IsBot())
 			continue;
 
-		if (ignoreSpectators && player->m_iTeam != TERRORIST && player->m_iTeam != CT)
-			continue;
-
-		if (ignoreSpectators && player->m_iJoiningState != JOINED)
+		if (ignoreSpectators && !player->IsPlayer())
 			continue;
 
 		iCount++;
@@ -193,7 +187,7 @@ int UTIL_HumansOnTeam( int teamID, bool isAlive )
 		if (player->IsBot())
 			continue;
 
-		if (player->m_iTeam != teamID)
+		if (player->TeamNumber() != teamID)
 			continue;
 
 		if (isAlive && !player->IsAlive())
@@ -237,7 +231,7 @@ int UTIL_BotsInGame( void )
 /**
  * Kick a bot from the given team. If no bot exists on the team, return false.
  */
-bool UTIL_KickBotFromTeam( TeamName kickTeam )
+bool UTIL_KickBotFromTeam( int kickTeam )
 {
 	int i;
 
@@ -259,7 +253,7 @@ bool UTIL_KickBotFromTeam( TeamName kickTeam )
 		if (!player->IsBot())
 			continue;	
 
-		if (!player->IsAlive() && player->m_iTeam == kickTeam)
+		if (!player->IsAlive() && player->TeamNumber() == kickTeam)
 		{
 			// its a bot on the right team - kick it
 			SERVER_COMMAND( UTIL_VarArgs( "kick \"%s\"\n", STRING( player->pev->netname ) ) );
@@ -286,7 +280,7 @@ bool UTIL_KickBotFromTeam( TeamName kickTeam )
 		if (!player->IsBot())
 			continue;	
 
-		if (player->m_iTeam == kickTeam)
+		if (player->TeamNumber() == kickTeam)
 		{
 			// its a bot on the right team - kick it
 			SERVER_COMMAND( UTIL_VarArgs( "kick \"%s\"\n", STRING( player->pev->netname ) ) );
@@ -314,7 +308,7 @@ bool UTIL_IsTeamAllBots( int team )
 			continue;
 
 		// skip players on other teams
-		if (player->m_iTeam != team)
+		if (player->TeamNumber() != team)
 			continue;
 
 		if (FNullEnt( player->pev ))
@@ -340,7 +334,7 @@ bool UTIL_IsTeamAllBots( int team )
  * Return the closest active player to the given position.
  * If 'distance' is non-NULL, the distance to the closest player is returned in it.
  */
-extern CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, float *distance )
+CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, float *distance, CBasePlayer *ignore )
 {
 	CBasePlayer *closePlayer = NULL;
 	float closeDistSq = 999999999999.9f;
@@ -350,6 +344,9 @@ extern CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, float *distance )
 		CBasePlayer *player = static_cast<CBasePlayer *>( UTIL_PlayerByIndex( i ) );
 
 		if (!IsEntityValid( player ))
+			continue;
+
+		if (player == ignore)
 			continue;
 
 		if (!player->IsAlive())
@@ -374,7 +371,7 @@ extern CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, float *distance )
  * Return the closest active player on the given team to the given position.
  * If 'distance' is non-NULL, the distance to the closest player is returned in it.
  */
-extern CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, int team, float *distance )
+CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, int team, float *distance, CBasePlayer *ignore )
 {
 	CBasePlayer *closePlayer = NULL;
 	float closeDistSq = 999999999999.9f;
@@ -386,10 +383,13 @@ extern CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, int team, float *d
 		if (!IsEntityValid( player ))
 			continue;
 
+		if (player == ignore)
+			continue;
+
 		if (!player->IsAlive())
 			continue;
 
-		if (player->m_iTeam != team)
+		if (player->TeamNumber() != team)
 			continue;
 
 		float distSq = (player->pev->origin - *pos).LengthSquared();
@@ -430,7 +430,7 @@ void UTIL_ConstructBotNetName(char *name, int nameLength, const BotProfile *prof
 		return;
 	}
 
-	_snprintf(name, nameLength, "%s %s", UTIL_GetBotPrefix(), profile->GetName());
+	snprintf(name, nameLength, "%s %s", UTIL_GetBotPrefix(), profile->GetName());
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -455,10 +455,10 @@ bool UTIL_IsVisibleToTeam( const Vector &spot, int team, float maxRange )
 		if (!player->IsAlive())
 			continue;
 
-		if (player->m_iTeam != team)
+		if (player->TeamNumber() != team)
 			continue;
 
-		if (maxRange > 0.0f && (spot - player->Center()).IsLengthGreaterThan( maxRange ))
+		if (maxRange > 0.0f && (spot - player->Center()) > maxRange)
 			continue;
 
 		TraceResult result;
@@ -473,17 +473,6 @@ bool UTIL_IsVisibleToTeam( const Vector &spot, int team, float maxRange )
 
 
 //--------------------------------------------------------------------------------------------------------------
-/**
- * Return the local player
- */
-CBasePlayer *UTIL_GetLocalPlayer( void )
-{
-	if ( IS_DEDICATED_SERVER() )
-	{
-		return NULL;
-	}
-	return static_cast<CBasePlayer *>( UTIL_PlayerByIndex( 1 ) );
-}
 
 
 //------------------------------------------------------------------------------------------------------------
@@ -598,6 +587,8 @@ void BotPrecache( void )
 	PRECACHE_SOUND( "buttons/button11.wav" );
 	PRECACHE_SOUND( "buttons/latchunlocked2.wav" );
 	PRECACHE_SOUND( "buttons/lightswitch2.wav" );
+
+#ifdef CSTRIKE
 	PRECACHE_SOUND( "ambience/quail1.wav" );
 
 	/// @todo This is for the Tutor - move it somewhere sane
@@ -607,6 +598,7 @@ void BotPrecache( void )
 
 	/// @todo This is for the Career mode UI - move it somewhere sane
 	PRECACHE_SOUND( "events/task_complete.wav" );
+#endif
 
 #ifdef TERRORSTRIKE
 	/// @todo Zombie mode experiment
@@ -708,6 +700,7 @@ bool IsGameEventAudible( GameEventType event, CBaseEntity *entity, CBaseEntity *
 			if (player->m_pActiveItem == NULL)
 				return false;
 
+#if 0
 			switch( player->m_pActiveItem->m_iId )
 			{
 				// silent "firing"
@@ -764,7 +757,9 @@ bool IsGameEventAudible( GameEventType event, CBaseEntity *entity, CBaseEntity *
 					*range = NormalRange;
 					break;
 			}
+#endif
 
+			*range = NormalRange;
 			*priority = PRIORITY_HIGH;
 			*isHostile = true;
 			return true;

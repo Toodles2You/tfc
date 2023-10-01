@@ -16,8 +16,7 @@
 #include <stdio.h>
 #endif
 
-#undef min
-#undef max
+#include <Platform.h>
 #include <list>
 #include <vector>
 #include "bot_constants.h"

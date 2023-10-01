@@ -7,7 +7,7 @@ OS:=$(shell uname)
 HOSTNAME:=$(shell hostname)
 
 ifeq "$(CFG)" ""
-	CFG=release
+	CFG=debug
 endif
 
 SOURCE_DIR=..
@@ -40,7 +40,13 @@ else
 endif
 
 BASE_CFLAGS=-std=c++17 -fpermissive -fno-strict-aliasing -fno-exceptions -fexpensive-optimizations -Werror=return-type -w
-BASE_CFLAGS+=-DNDEBUG -DPOSIX -D_POSIX -DLINUX -D_LINUX -DGNUC -DNO_MALLOC_OVERRIDE -DCLIENT_WEAPONS
+BASE_CFLAGS+=-DPOSIX -D_POSIX -DLINUX -D_LINUX -DGNUC -DNO_MALLOC_OVERRIDE
+
+ifeq "$(CFG)" "release"
+	BASE_CFLAGS+=-DNDEBUG
+else
+	BASE_CFLAGS+=-D_DEBUG
+endif
 
 # flifetime-dse=1 is needed to disable a compiler optimization that optimizes out std::memset calls in CBaseEntity::operator new
 # See https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html#index-flifetime-dse for more information about the flifetime-dse flag
@@ -68,6 +74,8 @@ MAKE_HL_CDLL=$(MAKE) -f Makefile.hl_cdll
 #############################################################################
 
 all: build_dir targets
+
+rebuild: clean all
 
 TARGETS=
 

@@ -343,7 +343,19 @@ void CBot::ExecuteCommand( void )
 
 	// player model is "munged"
 	pev->angles = pev->v_angle;
-	pev->angles.x /= -3.0;
+
+	float pitch = pev->angles.x;
+
+	// Normalize angles
+	if (pitch > 180)
+		pitch -= 360.0;
+	else if (pitch < -180)
+		pitch += 360;
+
+	// Player pitch is inverted
+	pitch /= -3.0;
+
+	pev->angles.x = pitch;
 
 	// save the command time
 	m_flPreviousCommandTime = gpGlobals->time;
@@ -416,10 +428,11 @@ bool CBot::IsEnemy( CBaseEntity *ent ) const
 	if (!ent->IsAlive())
 		return false;	
 
+	CBaseEntity *bot = (CBaseEntity *)this;
 	CBasePlayer *player = static_cast<CBasePlayer *>( ent );
 
 	// if they are on our team, they are our friends
-	if (player->m_iTeam == m_iTeam)
+	if (g_pGameRules->PlayerRelationship(bot, player) == GR_TEAMMATE)
 		return false;
 
 	// yep, we hate 'em
@@ -507,11 +520,11 @@ bool CBot::IsLocalPlayerWatchingMe( void ) const
 
 	int myIndex = const_cast<CBot *>(this)->entindex();
 
-	CBasePlayer *player = UTIL_GetLocalPlayer();
+	CBasePlayer *player = static_cast<CBasePlayer *>(UTIL_GetLocalPlayer());
 	if (player == NULL)
 		return false;
 
-	if (player->pev->flags & FL_SPECTATOR || player->m_iTeam == SPECTATOR)
+	if (player->pev->flags & FL_SPECTATOR /*|| player->TeamNumber() == SPECTATOR*/)
 	{
 		if (player->pev->iuser2 == myIndex)
 		{
@@ -595,13 +608,14 @@ ActiveGrenade::ActiveGrenade( int weaponID, CGrenade *grenadeEntity )
 //--------------------------------------------------------------------------------------------------------------
 void ActiveGrenade::OnEntityGone( void )									///< called when the grenade in the world goes away
 {
+#ifdef CSTRIKE
 	if (m_id == WEAPON_SMOKEGRENADE)
 	{
 		// smoke lingers after grenade is gone
 		const float smokeLingerTime = 4.0f;
 		m_dieTimestamp = gpGlobals->time + smokeLingerTime;
 	}
-
+#endif
 	m_entity = NULL;
 }
 

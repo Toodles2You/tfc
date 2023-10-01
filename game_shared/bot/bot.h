@@ -8,17 +8,11 @@
 #ifndef BOT_H
 #define BOT_H
 
-#if !defined ( _WIN32 )
-#define MAX_OSPATH PATH_MAX
-#else
-// stolen from quakedef.h
-#define MAX_OSPATH 260
-#endif
-
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
 #include "player.h"
+#include "weapons.h"
 
 #include "bot_manager.h"
 #include "bot_util.h"
@@ -27,7 +21,7 @@
 extern DLL_GLOBAL float g_flBotCommandInterval;
 extern DLL_GLOBAL float g_flBotFullThinkInterval;
 
-extern DLL_GLOBAL CBotManager *TheBots;
+extern DLL_GLOBAL CBotManager *g_pBotMan;
 
 class BotProfile;
 
@@ -81,7 +75,7 @@ public:
 
 	unsigned int GetID( void ) const	{ return m_id; }	///< return bot's unique ID
 
-	virtual BOOL IsBot( void ) { return true; }	
+	virtual bool IsBot( void ) { return true; }	
 
 	virtual void SpawnBot( void ) = 0;
 	virtual void Upkeep( void ) = 0;						///< lightweight maintenance, invoked frequently
@@ -135,7 +129,7 @@ public:
 	//
 
 	/// invoked when injured by something (EXTEND)
-	virtual int TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType )
+	virtual bool TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType )
 	{
 		return CBasePlayer::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 	}
@@ -166,10 +160,10 @@ public:
 	};
 
 	#define CHECK_FOV true
-	virtual bool IsVisible( const Vector *pos, bool testFOV = false ) const = 0;	///< return true if we can see the point
-	virtual bool IsVisible( CBasePlayer *player, bool testFOV = false, unsigned char *visParts = NULL ) const = 0;	///< return true if we can see any part of the player
+	virtual bool IsVisible( const Vector *pos, bool testFOV = false ) = 0;	///< return true if we can see the point
+	virtual bool IsVisible( CBasePlayer *player, bool testFOV = false, unsigned char *visParts = NULL ) = 0;	///< return true if we can see any part of the player
 
-	virtual bool IsEnemyPartVisible( VisiblePartType part ) const = 0;	///< if enemy is visible, return the part we see
+	virtual bool IsEnemyPartVisible( VisiblePartType part ) = 0;	///< if enemy is visible, return the part we see
 
 	virtual bool IsPlayerFacingMe( CBasePlayer *enemy ) const;		///< return true if player is facing towards us
 	virtual bool IsPlayerLookingAtMe( CBasePlayer *enemy ) const;	///< returns true if other player is pointing right at us
@@ -194,7 +188,7 @@ public:
 
 	void Spawn( void );
 	void BotThink( void );
-	bool IsNetClient( void ) const			{ return FALSE; }
+	bool IsNetClient( void ) const			{ return false; }
 	int Save( CSave &save )	const			{ return 0; }
 	int Restore( CRestore &restore ) const	{ return 0; }
 	virtual void Think( void ) { }
@@ -301,7 +295,11 @@ inline bool CBot::IsActiveWeaponRecoilHigh( void ) const
 		return false;
 
 	const float highRecoil = 0.4f;
+#ifdef CSTRIKE
 	return (gun->m_flAccuracy > highRecoil) ? true : false;
+#else
+	return false;
+#endif
 }
 
 //-----------------------------------------------------------------------------------------------------------

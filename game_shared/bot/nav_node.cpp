@@ -83,7 +83,7 @@ const CNavNode *CNavNode::GetNode( const Vector *pos )
  * Return true if this node is bidirectionally linked to 
  * another node in the given direction
  */
-BOOL CNavNode::IsBiLinked( NavDirType dir ) const
+bool CNavNode::IsBiLinked( NavDirType dir ) const
 {
 	if (m_to[ dir ] && 
 			m_to[ dir ]->m_to[ Opposite[dir] ] == this)
@@ -97,7 +97,7 @@ BOOL CNavNode::IsBiLinked( NavDirType dir ) const
  * Return true if this node is the NW corner of a quad of nodes
  * that are all bidirectionally linked.
  */
-BOOL CNavNode::IsClosedCell( void ) const
+bool CNavNode::IsClosedCell( void ) const
 {
 	if (IsBiLinked( SOUTH ) &&
 			IsBiLinked( EAST ) &&

@@ -197,18 +197,17 @@ public:
 	virtual int DamageDecal(int bitsDamageType);
 	// This is ONLY used by the node graph to test movement through a door
 	virtual void SetToggleState(int state) {}
-	virtual void StartSneaking() {}
-	virtual void StopSneaking() {}
 	virtual bool OnControls(entvars_t* pev) { return false; }
-	virtual bool IsSneaking() { return false; }
 	virtual bool IsAlive() { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
 	virtual bool IsBSPModel() { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }
 	virtual bool ReflectGauss() { return (IsBSPModel() && !pev->takedamage); }
 	virtual bool HasTarget(string_t targetname) { return FStrEq(STRING(targetname), STRING(pev->target)); }
 	virtual bool IsInWorld();
 	virtual bool IsPlayer() { return false; }
+	virtual bool IsBot() { return false; }
 	virtual bool IsNetClient() { return false; }
 	virtual const char* TeamID() { return ""; }
+	virtual int TeamNumber() { return 0; }
 
 
 	//	virtual void	SetActivator( CBaseEntity *pActivator ) {}

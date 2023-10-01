@@ -121,7 +121,6 @@ public:
 
 
 	// these are time-sensitive things that we keep track of
-	float m_flTimeStepSound;  // when the last stepping sound was made
 	float m_flTimeWeaponIdle; // when to play another weapon idle animation.
 	float m_flSwimTime;		  // how long player has been underwater
 	float m_flDuckTime;		  // how long we've been ducking
@@ -138,7 +137,6 @@ public:
 	float m_flgeigerRange; // range to nearest radiation source
 	float m_flgeigerDelay; // delay per update of range msg to client
 	int m_igeigerRangePrev;
-	int m_iStepLeft;						// alternate left/right foot stepping sound
 	char m_szTextureName[CBTEXTURENAMEMAX]; // current texture name we're standing on
 	char m_chTextureType;					// current texture type
 
@@ -158,7 +156,6 @@ public:
 
 	bool m_fLongJump;	   // does this player have the longjump module?
 
-	float m_tSneaking;
 	int m_iHideHUD;		  // the players hud weapon info is to be hidden
 	int m_iClientHideHUD;
 	int m_iFOV;		  // field of view
@@ -201,15 +198,13 @@ public:
 	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
 	void Killed(entvars_t* pevAttacker, int iGib) override;
 	Vector BodyTarget(const Vector& posSrc) override { return Center() + pev->view_ofs * RANDOM_FLOAT(0.5, 1.1); } // position to shoot at
-	void StartSneaking() override { m_tSneaking = gpGlobals->time - 1; }
-	void StopSneaking() override { m_tSneaking = gpGlobals->time + 30; }
-	bool IsSneaking() override { return m_tSneaking <= gpGlobals->time; }
 	bool IsAlive() override { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
 	bool IsPlayer() override { return true; } // Spectators should return false for this, they aren't "players" as far as game logic is concerned
 
 	bool IsNetClient() override { return true; } // Bots should return false for this, they can't receive NET messages
 												 // Spectators should return true for this
 	const char* TeamID() override;
+	int TeamNumber() override;
 
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;

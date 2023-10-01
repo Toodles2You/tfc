@@ -32,6 +32,8 @@
 #include "weapons.h"
 #include "gamerules.h"
 #include "teamplay_gamerules.h"
+#include "bot/hl_bot.h"
+#include "bot/hl_bot_manager.h"
 
 CGlobalState gGlobalState;
 
@@ -445,20 +447,17 @@ void CWorld::Precache()
 
 	g_pLastSpawn = NULL;
 
-#if 1
 	CVAR_SET_STRING("sv_gravity", "800"); // 67ft/sec
 	CVAR_SET_STRING("sv_stepsize", "18");
-#else
-	CVAR_SET_STRING("sv_gravity", "384"); // 32ft/sec
-	CVAR_SET_STRING("sv_stepsize", "24");
-#endif
-
-	CVAR_SET_STRING("room_type", "0"); // clear DSP
 
 	// Set up game rules
 	delete g_pGameRules;
 
 	g_pGameRules = InstallGameRules();
+
+	delete g_pBotMan;
+
+	g_pBotMan = new CGameBotManager();
 
 	//!!!UNDONE why is there so much Spawn code in the Precache function? I'll just keep it here
 
@@ -478,6 +477,8 @@ void CWorld::Precache()
 	W_Precache(); // get weapon precaches
 
 	ClientPrecache();
+
+	BotPrecache();
 
 	// sounds used from C physics code
 	PRECACHE_SOUND("common/null.wav"); // clears sound channels

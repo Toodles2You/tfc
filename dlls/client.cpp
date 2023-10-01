@@ -38,8 +38,7 @@
 #include "netadr.h"
 #include "pm_shared.h"
 #include "UserMessages.h"
-
-DLL_GLOBAL unsigned int g_ulFrameCount;
+#include "bot/hl_bot_manager.h"
 
 void LinkUserMessages();
 
@@ -101,6 +100,11 @@ void ClientDisconnect(edict_t* pEntity)
 	}
 
 	g_pGameRules->ClientDisconnected(pEntity);
+
+	if (g_pBotMan)
+	{
+		g_pBotMan->ClientDisconnect(pPlayer);
+	}
 }
 
 
@@ -529,6 +533,10 @@ void ClientCommand(edict_t* pEntity)
 	{
 		// MenuSelect returns true only if the command is properly handled,  so don't print a warning
 	}
+	else if (g_pBotMan->ClientCommand(player, pcmd))
+	{
+
+	}
 	else
 	{
 		// tell the user they entered an unknown command
@@ -628,6 +636,10 @@ void ServerDeactivate()
 
 	// Peform any shutdown operations here...
 	//
+	if (g_pBotMan)
+	{
+		g_pBotMan->ServerDeactivate();
+	}
 }
 
 void ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
@@ -662,6 +674,11 @@ void ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
 
 	// Link user messages here to make sure first client can get them...
 	LinkUserMessages();
+
+	if (g_pBotMan)
+	{
+		g_pBotMan->ServerActivate();
+	}
 }
 
 
@@ -715,19 +732,22 @@ void ParmsChangeLevel()
 
 static bool g_LastAllowBunnyHoppingState = false;
 
-//
-// GLOBALS ASSUMED SET:  g_ulFrameCount
-//
 void StartFrame()
 {
 	if (g_pGameRules)
+	{
 		g_pGameRules->Think();
+	}
+	
+	if (g_pBotMan)
+	{
+		g_pBotMan->StartFrame();
+	}
 
 	if (g_fGameOver)
 		return;
 
 	gpGlobals->teamplay = teamplay.value;
-	g_ulFrameCount++;
 
 	const bool allowBunnyHopping = sv_allowbunnyhopping.value != 0;
 
@@ -1058,28 +1078,34 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 
 	auto entity = reinterpret_cast<CBaseEntity*>(GET_PRIVATE(ent));
 
-	// don't send if flagged for NODRAW and it's not the host getting the message
-	if ((ent->v.effects & EF_NODRAW) != 0 &&
-		(ent != host))
-		return 0;
-
-	// Ignore ents without valid / visible models
-	if (0 == ent->v.modelindex || !STRING(ent->v.model))
-		return 0;
-
-	// Don't send spectators to other players
-	if ((ent->v.flags & FL_SPECTATOR) != 0 && (ent != host))
+	if (ent != host)
 	{
-		return 0;
-	}
-
-	// Ignore if not the host and not touching a PVS/PAS leaf
-	// If pSet is NULL, then the test will always succeed and the entity will be added to the update
-	if (ent != host && (ent->v.flags & (FL_CLIENT | FL_FAKECLIENT)) == 0)
-	{
-		if (!ENGINE_CHECK_VISIBILITY((const struct edict_s*)ent, pSet))
+		// don't send if flagged for NODRAW and it's not the host getting the message
+		if ((ent->v.effects & EF_NODRAW) != 0)
 		{
 			return 0;
+		}
+
+		// Ignore ents without valid / visible models
+		if (0 == ent->v.modelindex || !STRING(ent->v.model))
+		{
+			return 0;
+		}
+
+		// Don't send spectators to other players
+		if ((ent->v.flags & FL_SPECTATOR) != 0)
+		{
+			return 0;
+		}
+
+		// Ignore if not the host and not touching a PVS/PAS leaf
+		// If pSet is NULL, then the test will always succeed and the entity will be added to the update
+		if ((ent->v.flags & (FL_CLIENT | FL_FAKECLIENT)) == 0)
+		{
+			if (!ENGINE_CHECK_VISIBILITY((const struct edict_s*)ent, pSet))
+			{
+				return 0;
+			}
 		}
 	}
 

@@ -20,7 +20,6 @@
 #include <unistd.h>
 #define _write write
 #define _close close
-#define MAX_OSPATH PATH_MAX
 #endif
 
 #include "extdll.h"
@@ -31,9 +30,13 @@
 
 #include "bot_util.h"
 
-/// @todo Abstract these out of here (TheBotPhrases)
+#ifdef CSTRIKE
 #include "cs_bot.h"
 #include "cs_bot_manager.h"
+#else
+#include "hl_bot.h"
+#include "hl_bot_manager.h"
+#endif
 
 #include "nav.h"
 #include "nav_node.h"
@@ -121,6 +124,7 @@ public:
 	/// store the directory
 	void Save( int fd )
 	{
+#ifdef CSTRIKE
 		// store number of entries in directory
 		EntryType count = m_directory.size();
 		_write( fd, &count, sizeof(EntryType) );
@@ -136,6 +140,10 @@ public:
 			_write( fd, &len, sizeof(unsigned short) );
 			_write( fd, placeName, len );
 		}
+#else
+		EntryType count = 0;
+		_write( fd, &count, sizeof(EntryType) );
+#endif
 	}
 
 	/// load the directory
@@ -154,8 +162,9 @@ public:
 		{
 			file->Read( &len, sizeof(unsigned short) );
 			file->Read( placeName, len );
-
+#ifdef CSTRIKE
 			AddPlace( TheBotPhrases->NameToID( placeName ) );
+#endif
 		}
 	}
 
@@ -740,7 +749,7 @@ bool SaveNavigationMap( const char *filename )
 	if (bspFilename == NULL)
 		return false;
 
-	unsigned int bspSize = (unsigned int)GET_FILE_SIZE( bspFilename );
+	unsigned int bspSize = (unsigned int)g_engfuncs.pfnGetFileSize( bspFilename );
 	CONSOLE_ECHO( "Size of bsp file '%s' is %u bytes.\n", bspFilename, bspSize );
 
 	_write( fd, &bspSize, sizeof(unsigned int) );
@@ -808,6 +817,7 @@ bool SaveNavigationMap( const char *filename )
 // Load place map
 // This is legacy code - Places are stored directly in the nav file now
 //
+#ifdef CSTRIKE
 void LoadLocationFile( const char *filename )
 {
 	char locFilename[256];
@@ -867,6 +877,7 @@ void LoadLocationFile( const char *filename )
 		}
 	}
 }
+#endif
 
 
 //--------------------------------------------------------------------------------------------------------------
@@ -882,11 +893,11 @@ void SanityCheckNavigationMap( const char *mapName )
 	}
 
 	// nav filename is derived from map filename
-	const int BufLen = MAX_OSPATH;
-	char bspFilename[MAX_OSPATH];
-	char navFilename[MAX_OSPATH];
-	snprintf( bspFilename, MAX_OSPATH, "maps\\%s.bsp", mapName );
-	snprintf( navFilename, MAX_OSPATH, "maps\\%s.nav", mapName );
+	const int BufLen = PATH_MAX;
+	char bspFilename[PATH_MAX];
+	char navFilename[PATH_MAX];
+	snprintf( bspFilename, PATH_MAX, "maps\\%s.bsp", mapName );
+	snprintf( navFilename, PATH_MAX, "maps\\%s.nav", mapName );
 
 	SteamFile navFile( navFilename );
 
@@ -928,7 +939,7 @@ void SanityCheckNavigationMap( const char *mapName )
 			return;
 		}
 
-		unsigned int bspSize = (unsigned int)GET_FILE_SIZE( bspFilename );
+		unsigned int bspSize = (unsigned int)g_engfuncs.pfnGetFileSize( bspFilename );
 
 		if (bspSize != saveBspSize)
 		{
@@ -997,7 +1008,7 @@ NavErrorType LoadNavigationMap( void )
 		if (bspFilename == NULL)
 			return NAV_INVALID_FILE;
 
-		unsigned int bspSize = (unsigned int)GET_FILE_SIZE( bspFilename );
+		unsigned int bspSize = (unsigned int)g_engfuncs.pfnGetFileSize( bspFilename );
 
 		if (bspSize != saveBspSize)
 		{
@@ -1068,7 +1079,9 @@ NavErrorType LoadNavigationMap( void )
 	// load legacy location file (Places)
 	if (version < 5)
 	{
+#ifdef CSTRIKE
 		LoadLocationFile( filename );
+#endif
 	}
 
 	//

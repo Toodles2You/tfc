@@ -17,16 +17,6 @@
 #include <list>
 #include "GameEvent.h" // Game event enum used by career mode, tutor system, and bots
 
-#ifndef _WIN32
-// DAL <list> undefs max and min 
-#ifndef max
-#define max(a,b) ((a) > (b) ? (a) : (b))
-#endif
-#ifndef min
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#endif
-#endif
-
 
 class CNavArea;
 
@@ -71,7 +61,7 @@ public:
 	CBotManager();
 
 	virtual void ClientDisconnect( CBasePlayer * pPlayer ) = 0;
-	virtual BOOL ClientCommand( CBasePlayer * pPlayer, const char * pcmd ) = 0;
+	virtual bool ClientCommand( CBasePlayer * pPlayer, const char * pcmd ) = 0;
 
 	virtual void ServerActivate( void ) = 0;
 	virtual void ServerDeactivate( void ) = 0;

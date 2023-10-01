@@ -20,7 +20,6 @@
 #include <unistd.h>
 #define _write write
 #define _close close
-#define MAX_OSPATH PATH_MAX
 #endif
 
 #include "extdll.h"
@@ -30,10 +29,14 @@
 #include "gamerules.h"
 #include "bot_util.h"
 
-/// @todo Abstract hostages and cs-bots out of here
+#ifdef CSTRIKE
 #include "cs_bot.h"
 #include "cs_bot_manager.h"
 #include "hostage.h"
+#else
+#include "hl_bot.h"
+#include "hl_bot_manager.h"
+#endif
 
 #include "nav.h"
 #include "nav_node.h"
@@ -750,8 +753,8 @@ bool CNavArea::SpliceEdit( CNavArea *other )
 	if (m_extent.lo.x > other->m_extent.hi.x)
 	{
 		// 'this' is east of 'other'
-		float top = max( m_extent.lo.y, other->m_extent.lo.y );
-		float bottom = min( m_extent.hi.y, other->m_extent.hi.y );
+		float top = std::max( m_extent.lo.y, other->m_extent.lo.y );
+		float bottom = std::min( m_extent.hi.y, other->m_extent.hi.y );
 
 		nw.x = other->m_extent.hi.x;
 		nw.y = top;
@@ -780,8 +783,8 @@ bool CNavArea::SpliceEdit( CNavArea *other )
 	else if (m_extent.hi.x < other->m_extent.lo.x)
 	{
 		// 'this' is west of 'other'
-		float top = max( m_extent.lo.y, other->m_extent.lo.y );
-		float bottom = min( m_extent.hi.y, other->m_extent.hi.y );
+		float top = std::max( m_extent.lo.y, other->m_extent.lo.y );
+		float bottom = std::min( m_extent.hi.y, other->m_extent.hi.y );
 
 		nw.x = m_extent.hi.x;
 		nw.y = top;
@@ -812,8 +815,8 @@ bool CNavArea::SpliceEdit( CNavArea *other )
 		if (m_extent.lo.y > other->m_extent.hi.y)
 		{
 			// 'this' is south of 'other'
-			float left = max( m_extent.lo.x, other->m_extent.lo.x );
-			float right = min( m_extent.hi.x, other->m_extent.hi.x );
+			float left = std::max( m_extent.lo.x, other->m_extent.lo.x );
+			float right = std::min( m_extent.hi.x, other->m_extent.hi.x );
 
 			nw.x = left;
 			nw.y = other->m_extent.hi.y;
@@ -842,8 +845,8 @@ bool CNavArea::SpliceEdit( CNavArea *other )
 		else if (m_extent.hi.y < other->m_extent.lo.y)
 		{
 			// 'this' is north of 'other'
-			float left = max( m_extent.lo.x, other->m_extent.lo.x );
-			float right = min( m_extent.hi.x, other->m_extent.hi.x );
+			float left = std::max( m_extent.lo.x, other->m_extent.lo.x );
+			float right = std::min( m_extent.hi.x, other->m_extent.hi.x );
 
 			nw.x = left;
 			nw.y = m_extent.hi.y;
@@ -2328,8 +2331,8 @@ void CNavArea::ComputePortal( const CNavArea *to, NavDirType dir, Vector *center
 		else
 			center->y = m_extent.hi.y;
 
-		float left = max( m_extent.lo.x, to->m_extent.lo.x );
-		float right = min( m_extent.hi.x, to->m_extent.hi.x );
+		float left = std::max( m_extent.lo.x, to->m_extent.lo.x );
+		float right = std::min( m_extent.hi.x, to->m_extent.hi.x );
 
 		// clamp to our extent in case areas are disjoint
 		if (left < m_extent.lo.x)
@@ -2352,8 +2355,8 @@ void CNavArea::ComputePortal( const CNavArea *to, NavDirType dir, Vector *center
 		else
 			center->x = m_extent.hi.x;
 
-		float top = max( m_extent.lo.y, to->m_extent.lo.y );
-		float bottom = min( m_extent.hi.y, to->m_extent.hi.y );
+		float top = std::max( m_extent.lo.y, to->m_extent.lo.y );
+		float bottom = std::min( m_extent.hi.y, to->m_extent.hi.y );
 
 		// clamp to our extent in case areas are disjoint
 		if (top < m_extent.lo.y)
@@ -2386,8 +2389,8 @@ void CNavArea::ComputeClosestPointInPortal( const CNavArea *to, NavDirType dir, 
 		else
 			closePos->y = m_extent.hi.y;
 
-		float left = max( m_extent.lo.x, to->m_extent.lo.x );
-		float right = min( m_extent.hi.x, to->m_extent.hi.x );
+		float left = std::max( m_extent.lo.x, to->m_extent.lo.x );
+		float right = std::min( m_extent.hi.x, to->m_extent.hi.x );
 
 		// clamp to our extent in case areas are disjoint
 		if (left < m_extent.lo.x)
@@ -2420,8 +2423,8 @@ void CNavArea::ComputeClosestPointInPortal( const CNavArea *to, NavDirType dir, 
 		else
 			closePos->x = m_extent.hi.x;
 
-		float top = max( m_extent.lo.y, to->m_extent.lo.y );
-		float bottom = min( m_extent.hi.y, to->m_extent.hi.y );
+		float top = std::max( m_extent.lo.y, to->m_extent.lo.y );
+		float bottom = std::min( m_extent.hi.y, to->m_extent.hi.y );
 
 		// clamp to our extent in case areas are disjoint
 		if (top < m_extent.lo.y)
@@ -2781,7 +2784,7 @@ bool CNavArea::IsHidingSpotCollision( const Vector *pos ) const
 	{
 		const HidingSpot *spot = *iter;
 
-		if ((*spot->GetPosition() - *pos).IsLengthLessThan( collisionRange ))
+		if ((*spot->GetPosition() - *pos) < collisionRange)
 			return true;
 	}
 
@@ -3151,7 +3154,7 @@ void CNavArea::AddSpotEncounters( const CNavArea *from, NavDirType fromDir, cons
 			delta.z = (spotPos->z + eyeHeight) - eye.z;
 
 			// check if in range
-			if (delta.IsLengthGreaterThan( seeSpotRange ))
+			if (delta > seeSpotRange)
 				continue;
 
 			// check if we have LOS
@@ -3367,6 +3370,7 @@ bool IsSpotOccupied( CBaseEntity *me, const Vector *pos )
 			return true;
 	}
 
+#ifdef CSTRIKE
 	// is there is a hostage in this spot
 	if (g_pHostages)
 	{
@@ -3374,6 +3378,7 @@ bool IsSpotOccupied( CBaseEntity *me, const Vector *pos )
 		if (hostage && hostage != me && range < closeRange)
 			return true;
 	}
+#endif
 
 	return false;
 }
@@ -3417,7 +3422,7 @@ public:
 
 			// make sure hiding spot is in range
 			if (m_range > 0.0f)
-				if ((*spot->GetPosition() - *m_origin).IsLengthGreaterThan( m_range ))
+				if ((*spot->GetPosition() - *m_origin) > m_range)
 					continue;
 
 			// if a Player is using this hiding spot, don't consider it
@@ -3603,7 +3608,7 @@ bool IsCrossingLineOfFire( const Vector &start, const Vector &finish, CBaseEntit
 		if (!player->IsAlive())
 			continue;
 
-		if (ignoreTeam && player->m_iTeam == ignoreTeam)
+		if (ignoreTeam && player->TeamNumber() == ignoreTeam)
 			continue;
 
 		// compute player's unit aiming vector 
@@ -3724,7 +3729,7 @@ int CNavArea::GetPlayerCount( int teamID, CBasePlayer *ignore ) const
 		if (!player->IsAlive())
 			continue;
 
-		if (teamID == 0 || player->m_iTeam == teamID)
+		if (teamID == 0 || player->TeamNumber() == teamID)
 			if (Contains( &player->pev->origin ))
 				++count;
 	}
@@ -3801,11 +3806,11 @@ void DrawHidingSpots( const CNavArea *area )
  */
 void CNavArea::DrawConnectedAreas( void )
 {
-	CBasePlayer *player = UTIL_GetLocalPlayer();
+	CBasePlayer *player = static_cast<CBasePlayer *>(UTIL_GetLocalPlayer());
 	if (player == NULL)
 		return;
 
-	CCSBotManager *ctrl = static_cast<CCSBotManager *>( TheBots );
+	CGameBotManager *ctrl = static_cast<CGameBotManager *>( g_pBotMan );
 	const float maxRange = 500.0f;
 
 	// draw self
@@ -3980,7 +3985,7 @@ public:
 
 	bool operator() ( CNavArea *area )
 	{
-		CCSBotManager *ctrl = static_cast<CCSBotManager *>( TheBots );
+		CGameBotManager *ctrl = static_cast<CGameBotManager *>( g_pBotMan );
 
 		if (area->GetPlace() != m_initialPlace)
 			return false;
@@ -4001,9 +4006,9 @@ private:
  */
 void EditNavAreas( NavEditCmdType cmd )
 {
-	CCSBotManager *ctrl = static_cast<CCSBotManager *>( TheBots );
+	CGameBotManager *ctrl = static_cast<CGameBotManager *>( g_pBotMan );
 
-	CBasePlayer *player = UTIL_GetLocalPlayer();
+	CBasePlayer *player = static_cast<CBasePlayer *>(UTIL_GetLocalPlayer());
 	if (player == NULL)
 		return;
 
@@ -4159,10 +4164,12 @@ void EditNavAreas( NavEditCmdType cmd )
 
 				if (area->GetPlace())
 				{
+#ifdef CSTRIKE
 					const char *name = TheBotPhrases->IDToName( area->GetPlace() );
 					if (name)
 						strcpy( locName, name );
 					else
+#endif
 						strcpy( locName, "ERROR" );
 				}
 				else
@@ -4437,8 +4444,8 @@ void EditNavAreas( NavEditCmdType cmd )
 					case EDIT_WARP_TO_MARK:
 						if (markedArea)
 						{
-							CBasePlayer *pLocalPlayer = UTIL_GetLocalPlayer();
-							if ( pLocalPlayer && pLocalPlayer->m_iTeam == SPECTATOR && pLocalPlayer->pev->iuser1 == OBS_ROAMING )
+							CBasePlayer *pLocalPlayer = static_cast<CBasePlayer *>(UTIL_GetLocalPlayer());
+							if ( pLocalPlayer && /*pLocalPlayer->TeamNumber() == SPECTATOR &&*/ pLocalPlayer->pev->iuser1 == OBS_ROAMING )
 							{
 								Vector origin = *markedArea->GetCenter() + Vector( 0, 0, 0.75f * HumanHeight );
 								UTIL_SetOrigin( pLocalPlayer->pev, origin );

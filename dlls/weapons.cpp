@@ -29,10 +29,6 @@
 #include "gamerules.h"
 #include "UserMessages.h"
 
-#define NOT_USED 255
-
-#define TRACER_FREQ 4 // Tracers fire every fourth bullet
-
 
 //=========================================================
 // MaxAmmoCarry - pass in a name and this function will tell

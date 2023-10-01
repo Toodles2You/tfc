@@ -9,7 +9,9 @@
 #include "gamerules.h"
 #include "player.h"
 #include "client.h"
+#ifdef CSTRIKE
 #include "cmd.h"
+#endif
 
 #include "nav.h"
 #include "nav_path.h"
@@ -150,7 +152,7 @@ bool CNavPath::IsAtEnd( const Vector &pos ) const
 		return false;
 
 	const float epsilon = 20.0f;
-	return (pos - GetEndpoint()).IsLengthLessThan( epsilon );
+	return (pos - GetEndpoint()) < epsilon;
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -504,7 +506,7 @@ void CNavPathFollower::Update( float deltaT, bool avoidObstacles )
 	// Check if we reached the end of the path
 	//
 	const float closeRange = 20.0f;
-	if ((m_improv->GetFeet() - node->pos).IsLengthLessThan( closeRange ))
+	if ((m_improv->GetFeet() - node->pos) < closeRange)
 	{
 		++m_segmentIndex;
 
@@ -559,7 +561,7 @@ void CNavPathFollower::Update( float deltaT, bool avoidObstacles )
 			Vector close;
 			to->GetClosestPointOnArea( &m_improv->GetCentroid(), &close );
 
-			if ((close - m_improv->GetFeet()).Make2D().IsLengthGreaterThan( crouchRange ))
+			if ((close - m_improv->GetFeet()).Make2D() > crouchRange)
 				break;
 
 			if (to->GetAttributes() & NAV_CROUCH)
@@ -606,7 +608,7 @@ void CNavPathFollower::Update( float deltaT, bool avoidObstacles )
 	{
 		const float closeRange = 75.0f;
 		Vector2D to( m_improv->GetFeet().x - m_goal.x, m_improv->GetFeet().y - m_goal.y );
-		if (to.IsLengthLessThan( closeRange ))
+		if (to < closeRange)
 		{
 			// we can't reach the goal position
 			// check if we can reach the next node, in case this was a "jump down" situation
@@ -779,7 +781,7 @@ int CNavPathFollower::FindPathPoint( float aheadRange, Vector *point, int *prevI
 		// if we are very close to the next point in the path, skip ahead to the next one to avoid wiggling
 		// we must do a 2D check here, in case the goal point is floating in space due to jump down, etc
 		const float closeEpsilon = 20.0f;	// 10
-		while ((*point - close).Make2D().IsLengthLessThan( closeEpsilon ))
+		while ((*point - close).Make2D() < closeEpsilon)
 		{
 			++index;
 
@@ -802,7 +804,7 @@ int CNavPathFollower::FindPathPoint( float aheadRange, Vector *point, int *prevI
 
 		// we must do a 2D check here, in case the goal point is floating in space due to jump down, etc
 		const float closeEpsilon = 20.0f;
-		if ((pos - close).Make2D().IsLengthLessThan( closeEpsilon ))
+		if ((pos - close).Make2D() < closeEpsilon)
 		{
 			++startIndex;
 		}
@@ -960,14 +962,14 @@ int CNavPathFollower::FindPathPoint( float aheadRange, Vector *point, int *prevI
 		toPoint.x = point->x - centroid.x;
 		toPoint.y = point->y - centroid.y;
 
-		if (DotProduct( toPoint, initDir.Make2D() ) < 0.0f || toPoint.IsLengthLessThan( epsilon ))
+		if (DotProduct( toPoint, initDir.Make2D() ) < 0.0f || toPoint < epsilon)
 		{
 			int i;
 			for( i=startIndex; i<m_path->GetSegmentCount(); ++i )
 			{
 				toPoint.x = (*m_path)[i]->pos.x - centroid.x;
 				toPoint.y = (*m_path)[i]->pos.y - centroid.y;
-				if ((*m_path)[i]->ladder || (*m_path)[i]->area->GetAttributes() & NAV_JUMP || toPoint.IsLengthGreaterThan( epsilon ))
+				if ((*m_path)[i]->ladder || (*m_path)[i]->area->GetAttributes() & NAV_JUMP || toPoint > epsilon)
 				{
 					*point = (*m_path)[i]->pos;
 					startIndex = i;
@@ -1121,7 +1123,7 @@ void CStuckMonitor::Update( CImprov *improv )
 	{
 		// improv is stuck - see if it has moved far enough to be considered unstuck
 		const float unstuckRange = 75.0f;
-		if ((improv->GetCentroid() - m_stuckSpot).IsLengthGreaterThan( unstuckRange ))
+		if ((improv->GetCentroid() - m_stuckSpot) > unstuckRange)
 		{
 			// no longer stuck
 			Reset();

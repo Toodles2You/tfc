@@ -285,7 +285,7 @@ public:
 	//- A* pathfinding algorithm ------------------------------------------------------------------------
 	static void MakeNewMarker( void )					{ ++m_masterMarker; if (m_masterMarker == 0) m_masterMarker = 1; }
 	void Mark( void )													{ m_marker = m_masterMarker; }
-	BOOL IsMarked( void ) const								{ return (m_marker == m_masterMarker) ? true : false; }
+	bool IsMarked( void ) const								{ return (m_marker == m_masterMarker) ? true : false; }
 	
 	void SetParent( CNavArea *parent, NavTraverseType how = NUM_TRAVERSE_TYPES )	{ m_parent = parent; m_parentHow = how; }
 	CNavArea *GetParent( void ) const						{ return m_parent; }
@@ -333,7 +333,7 @@ private:
 	friend void DestroyHidingSpots( void );
 	friend void StripNavigationAreas( void );
 	friend class CNavAreaGrid;
-	friend class CCSBotManager;
+	friend class CBotManager;
 
 	void Initialize( void );								///< to keep constructors consistent
 	static bool m_isReset;									///< if true, don't bother cleaning up in destructor since everything is going away
@@ -1003,7 +1003,7 @@ inline void AddAreaToOpenList( CNavArea *area, CNavArea *parent, const Vector *s
 			// make sure this area overlaps range
 			Vector closePos;
 			area->GetClosestPointOnArea( startPos, &closePos );
-			if ((closePos - *startPos).Make2D().IsLengthLessThan( maxRange ))
+			if ((closePos - *startPos).Make2D() < maxRange)
 			{
 				// compute approximate distance along path to limit travel range, too
 				float distAlong = parent->GetCostSoFar();

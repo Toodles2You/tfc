@@ -17,6 +17,7 @@
 #include "util.h"
 #include "game.h"
 #include "filesystem_utils.h"
+#include "bot/hl_bot.h"
 
 cvar_t displaysoundlist = {"displaysoundlist", "0"};
 
@@ -89,6 +90,8 @@ void GameDLLInit()
 	CVAR_REGISTER(&mp_chattime);
 
 	CVAR_REGISTER(&sv_allowbunnyhopping);
+
+	Bot_RegisterCvars();
 }
 
 void GameDLLShutdown()

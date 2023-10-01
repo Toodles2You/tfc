@@ -38,7 +38,9 @@ BotProfileManager *TheBotProfiles = NULL;
 	#include "gamerules.h"
 	#include "player.h"
 	#include "client.h"
+#ifdef CSTRIKE
 	#include "cmd.h"
+#endif
 	#include "pm_shared.h"
 	#include "bot.h"
 	#include "bot_util.h"
@@ -50,11 +52,7 @@ BotProfileManager *TheBotProfiles = NULL;
  */
 static const char * GetDecoratedSkinName( const char *name, const char *filename )
 {
-#ifdef _WIN32
-	const int BufLen = _MAX_PATH + 64;
-#else
-	const int BufLen = MAX_PATH + 64;
-#endif
+	const int BufLen = PATH_MAX + 64;
 	static char buf[BufLen];
 	snprintf( buf, BufLen, "%s/%s", filename, name );
 	return buf;
@@ -63,10 +61,14 @@ static const char * GetDecoratedSkinName( const char *name, const char *filename
 //--------------------------------------------------------------------------------------------------------------
 const char* BotProfile::GetWeaponPreferenceAsString( int i ) const
 {
+#ifdef CSTRIKE
 	if ( i < 0 || i >= m_weaponPreferenceCount )
 		return NULL;
 
 	return WeaponIDToAlias( m_weaponPreference[ i ] );
+#else
+	return NULL;
+#endif
 }
 
 
@@ -76,6 +78,7 @@ const char* BotProfile::GetWeaponPreferenceAsString( int i ) const
  */
 bool BotProfile::HasPrimaryPreference( void ) const
 {
+#ifdef CSTRIKE
 	for( int i=0; i<m_weaponPreferenceCount; ++i )
 	{
 		int weaponClass = AliasToWeaponClass( WeaponIDToAlias( m_weaponPreference[i] ) );
@@ -87,7 +90,7 @@ bool BotProfile::HasPrimaryPreference( void ) const
 				weaponClass == WEAPONCLASS_SNIPERRIFLE)
 			return true;
 	}
-
+#endif
 	return false;
 }
 
@@ -97,10 +100,11 @@ bool BotProfile::HasPrimaryPreference( void ) const
  */
 bool BotProfile::HasPistolPreference( void ) const
 {
+#ifdef CSTRIKE
 	for( int i=0; i<m_weaponPreferenceCount; ++i )
 		if (AliasToWeaponClass( WeaponIDToAlias( m_weaponPreference[i] ) ) == WEAPONCLASS_PISTOL)
 			return true;
-
+#endif
 	return false;
 }
 
@@ -141,7 +145,9 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 
 	if (dataFile == NULL)
 	{
+#ifdef CSTRIKE
 		if ( UTIL_IsGame( "czero" ) )
+#endif
 		{
 			CONSOLE_ECHO( "WARNING: Cannot access bot profile database '%s'\n", filename );
 		}
@@ -435,6 +441,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 					profile->m_weaponPreferenceCount = 0;
 				}
 
+#ifdef CSTRIKE
 				if (!stricmp( token, "none" ))
 				{
 					profile->m_weaponPreferenceCount = 0;
@@ -446,6 +453,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 						profile->m_weaponPreference[ profile->m_weaponPreferenceCount++ ] = AliasToWeaponID( token );
 					}
 				}
+#endif
 			}
 			else if (!stricmp( "ReactionTime", attributeName ))
 			{

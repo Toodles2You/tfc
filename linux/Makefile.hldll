@@ -89,7 +89,18 @@ PM_OBJS = \
 
 GAME_SHARED_OBJS = \
 	$(GAME_SHARED_OBJ_DIR)/filesystem_utils.o \
-	$(GAME_SHARED_OBJ_DIR)/voice_gamemgr.o
+	$(GAME_SHARED_OBJ_DIR)/voice_gamemgr.o \
+	$(GAME_SHARED_OBJ_DIR)/shared_util.o \
+	$(GAME_SHARED_OBJ_DIR)/bot/bot_manager.o \
+	$(GAME_SHARED_OBJ_DIR)/bot/bot_profile.o \
+	$(GAME_SHARED_OBJ_DIR)/bot/bot_util.o \
+	$(GAME_SHARED_OBJ_DIR)/bot/bot.o \
+	$(GAME_SHARED_OBJ_DIR)/bot/nav_area.o \
+	$(GAME_SHARED_OBJ_DIR)/bot/nav_file.o \
+	$(GAME_SHARED_OBJ_DIR)/bot/nav_node.o \
+	$(GAME_SHARED_OBJ_DIR)/bot/nav_path.o \
+	$(GAME_SHARED_OBJ_DIR)/bot/hl_bot_manager.o \
+	$(GAME_SHARED_OBJ_DIR)/bot/hl_bot.o \
 
 PUBLIC_OBJS = \
 	$(PUBLIC_OBJ_DIR)/interface.o \
@@ -104,6 +115,7 @@ dirs:
 	-mkdir -p $(HLDLL_OBJ_DIR)
 	-mkdir -p $(PM_OBJ_DIR)
 	-mkdir -p $(GAME_SHARED_OBJ_DIR)
+	-mkdir -p $(GAME_SHARED_OBJ_DIR)/bot
 	-mkdir -p $(PUBLIC_OBJ_DIR)
 	-mkdir -p $(COMMON_OBJ_DIR)
 

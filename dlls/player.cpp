@@ -65,7 +65,6 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 		DEFINE_ARRAY(CBasePlayer, m_rgItems, FIELD_INTEGER, MAX_ITEMS),
 		DEFINE_FIELD(CBasePlayer, m_afPhysicsFlags, FIELD_INTEGER),
 
-		DEFINE_FIELD(CBasePlayer, m_flTimeStepSound, FIELD_TIME),
 		DEFINE_FIELD(CBasePlayer, m_flTimeWeaponIdle, FIELD_TIME),
 		DEFINE_FIELD(CBasePlayer, m_flSwimTime, FIELD_TIME),
 		DEFINE_FIELD(CBasePlayer, m_flDuckTime, FIELD_TIME),
@@ -85,7 +84,6 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 		DEFINE_ARRAY(CBasePlayer, m_rgAmmo, FIELD_INTEGER, MAX_AMMO_SLOTS),
 		DEFINE_FIELD(CBasePlayer, m_idrowndmg, FIELD_INTEGER),
 		DEFINE_FIELD(CBasePlayer, m_idrownrestored, FIELD_INTEGER),
-		DEFINE_FIELD(CBasePlayer, m_tSneaking, FIELD_TIME),
 
 		DEFINE_FIELD(CBasePlayer, m_iTrain, FIELD_INTEGER),
 		DEFINE_FIELD(CBasePlayer, m_bitsHUDDamage, FIELD_INTEGER),
@@ -2744,11 +2742,7 @@ void CBasePlayer::Spawn()
 	m_flgeigerDelay = gpGlobals->time + 2.0; // wait a few seconds until user-defined message registrations
 											 // are recieved by all clients
 
-	m_flTimeStepSound = 0;
-	m_iStepLeft = 0;
-
 	m_iNextAttack = 0;
-	StartSneaking();
 
 	// dont let uninitialized value here hurt the player
 	m_flFallVelocity = 0;
@@ -3054,6 +3048,11 @@ const char* CBasePlayer::TeamID()
 
 	// return their team name
 	return m_szTeamName;
+}
+
+int CBasePlayer::TeamNumber()
+{
+	return pev->team;
 }
 
 

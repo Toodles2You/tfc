@@ -34,6 +34,7 @@ extern cvar_t cv_bot_quicksave;
 extern cvar_t cv_bot_quota;
 extern cvar_t cv_bot_quota_match;
 extern cvar_t cv_bot_prefix;
+#ifdef CSTRIKE
 extern cvar_t cv_bot_allow_rogues;
 extern cvar_t cv_bot_allow_pistols;
 extern cvar_t cv_bot_allow_shotguns;
@@ -43,6 +44,7 @@ extern cvar_t cv_bot_allow_machine_guns;
 extern cvar_t cv_bot_allow_grenades;
 extern cvar_t cv_bot_allow_snipers;
 extern cvar_t cv_bot_allow_shield;
+#endif
 extern cvar_t cv_bot_join_team;
 extern cvar_t cv_bot_join_after_player;
 extern cvar_t cv_bot_auto_vacate;
@@ -94,10 +96,9 @@ extern Vector	UTIL_ComputeOrigin( CBaseEntity * pEntity );
 extern Vector	UTIL_ComputeOrigin( edict_t * pentEdict );
 extern void		UTIL_DrawBeamFromEnt( int iIndex, Vector vecEnd, int iLifetime, byte bRed, byte bGreen, byte bBlue );
 extern void		UTIL_DrawBeamPoints( Vector vecStart, Vector vecEnd, int iLifetime, byte bRed, byte bGreen, byte bBlue );
-extern CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, float *distance = NULL );
-extern CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, int team, float *distance = NULL );
-extern CBasePlayer *UTIL_GetLocalPlayer( void );
-extern bool UTIL_KickBotFromTeam( TeamName kickTeam ); ///< kick a bot from the given team. If no bot exists on the team, return false.
+extern CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, float *distance = NULL, CBasePlayer *ignore = NULL );
+extern CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, int team, float *distance = NULL, CBasePlayer *ignore = NULL );
+extern bool UTIL_KickBotFromTeam( int kickTeam ); ///< kick a bot from the given team. If no bot exists on the team, return false.
 
 extern bool UTIL_IsVisibleToTeam( const Vector &spot, int team, float maxRange = -1.0f ); ///< return true if anyone on the given team can see the given spot
 

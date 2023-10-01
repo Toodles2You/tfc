@@ -7,7 +7,7 @@
 
 // Author: Matthew D. Campbell (matt@turtlerockstudios.com), 2003
 
-#include <port.h>
+#include <string>
 #include <stdarg.h>
 #include "shared_util.h"
 

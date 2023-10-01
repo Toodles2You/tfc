@@ -36,7 +36,8 @@ public:
 	[[nodiscard]] constexpr Vector2D operator*(float fl) const { return Vector2D(x * fl, y * fl); }
 	[[nodiscard]] constexpr Vector2D operator/(float fl) const { return Vector2D(x / fl, y / fl); }
 
-	[[nodiscard]] float Length() const { return static_cast<float>(sqrt(x * x + y * y)); }
+	[[nodiscard]] constexpr float LengthSquared() const { return x * x + y * y; }
+	[[nodiscard]] constexpr float Length() const { return static_cast<float>(sqrt(LengthSquared())); }
 
 	[[nodiscard]] Vector2D Normalize() const
 	{
@@ -51,6 +52,15 @@ public:
 			return Vector2D(x * flLen, y * flLen);
 		}
 	}
+
+	[[nodiscard]] constexpr bool operator<(const Vector2D& v) const { return LengthSquared() < v.LengthSquared(); }
+	[[nodiscard]] constexpr bool operator<=(const Vector2D& v) const { return LengthSquared() <= v.LengthSquared(); }
+	[[nodiscard]] constexpr bool operator>(const Vector2D& v) const { return LengthSquared() > v.LengthSquared(); }
+	[[nodiscard]] constexpr bool operator>=(const Vector2D& v) const { return LengthSquared() >= v.LengthSquared(); }
+	[[nodiscard]] constexpr bool operator<(float fl) const { return LengthSquared() < fl * fl; }
+	[[nodiscard]] constexpr bool operator<=(float fl) const { return LengthSquared() <= fl * fl; }
+	[[nodiscard]] constexpr bool operator>(float fl) const { return LengthSquared() > fl * fl; }
+	[[nodiscard]] constexpr bool operator>=(float fl) const { return LengthSquared() >= fl * fl; }
 
 	vec_t x = 0, y = 0;
 };
@@ -99,7 +109,7 @@ public:
 	constexpr void CopyToArray(float* rgfl) const { rgfl[0] = x, rgfl[1] = y, rgfl[2] = z; }
 
 	[[nodiscard]] constexpr float LengthSquared() const { return x * x + y * y + z * z; }
-	[[nodiscard]] float Length() const { return static_cast<float>(sqrt(LengthSquared())); }
+	[[nodiscard]] constexpr float Length() const { return static_cast<float>(sqrt(LengthSquared())); }
 	[[nodiscard]] constexpr operator float*() { return &x; }			 // Vectors will now automatically convert to float * when needed
 	[[nodiscard]] constexpr operator const float*() const { return &x; } // Vectors will now automatically convert to float * when needed
 
@@ -111,6 +121,28 @@ public:
 		flLen = 1 / flLen;
 		return Vector(x * flLen, y * flLen, z * flLen);
 	}
+
+	[[nodiscard]] float NormalizeInPlace() const
+	{
+		float flLen = Length();
+		if (flLen != 0)
+		{
+			flLen = 1 / flLen;
+		}
+		*((vec_t*)&x) *= flLen;
+		*((vec_t*)&y) *= flLen;
+		*((vec_t*)&z) *= flLen;
+		return flLen;
+	}
+
+	[[nodiscard]] constexpr bool operator<(const Vector& v) const { return LengthSquared() < v.LengthSquared(); }
+	[[nodiscard]] constexpr bool operator<=(const Vector& v) const { return LengthSquared() <= v.LengthSquared(); }
+	[[nodiscard]] constexpr bool operator>(const Vector& v) const { return LengthSquared() > v.LengthSquared(); }
+	[[nodiscard]] constexpr bool operator>=(const Vector& v) const { return LengthSquared() >= v.LengthSquared(); }
+	[[nodiscard]] constexpr bool operator<(float fl) const { return LengthSquared() < fl * fl; }
+	[[nodiscard]] constexpr bool operator<=(float fl) const { return LengthSquared() <= fl * fl; }
+	[[nodiscard]] constexpr bool operator>(float fl) const { return LengthSquared() > fl * fl; }
+	[[nodiscard]] constexpr bool operator>=(float fl) const { return LengthSquared() >= fl * fl; }
 
 	[[nodiscard]] constexpr Vector2D Make2D() const
 	{

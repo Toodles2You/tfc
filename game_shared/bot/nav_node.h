@@ -33,12 +33,12 @@ public:
 	CNavNode *GetParent( void ) const;
 
 	void MarkAsVisited( NavDirType dir );					///< mark the given direction as having been visited
-	BOOL HasVisited( NavDirType dir );						///< return TRUE if the given direction has already been searched
-	BOOL IsBiLinked( NavDirType dir ) const;			///< node is bidirectionally linked to another node in the given direction
-	BOOL IsClosedCell( void ) const;							///< node is the NW corner of a bi-linked quad of nodes
+	bool HasVisited( NavDirType dir );						///< return TRUE if the given direction has already been searched
+	bool IsBiLinked( NavDirType dir ) const;			///< node is bidirectionally linked to another node in the given direction
+	bool IsClosedCell( void ) const;							///< node is the NW corner of a bi-linked quad of nodes
 
 	void Cover( void )								{ m_isCovered = true; }	///< @todo Should pass in area that is covering
-	BOOL IsCovered( void ) const			{ return m_isCovered; }	///< return true if this node has been covered by an area
+	bool IsCovered( void ) const			{ return m_isCovered; }	///< return true if this node has been covered by an area
 
 	void AssignArea( CNavArea *area );						///< assign the given area to this node
 	CNavArea *GetArea( void ) const;							///< return associated area
@@ -62,7 +62,7 @@ private:
 	// below are only needed when generating
 	unsigned char m_visited;											///< flags for automatic node generation. If direction bit is clear, that direction hasn't been explored yet.
 	CNavNode *m_parent;														///< the node prior to this in the search, which we pop back to when this node's search is done (a stack)
-	BOOL m_isCovered;															///< true when this node is "covered" by a CNavArea
+	bool m_isCovered;															///< true when this node is "covered" by a CNavArea
 	CNavArea *m_area;															///< the area this node is contained within
 };
 
@@ -91,7 +91,7 @@ inline void CNavNode::MarkAsVisited( NavDirType dir )
 	m_visited |= (1 << dir);
 }
 
-inline BOOL CNavNode::HasVisited( NavDirType dir )
+inline bool CNavNode::HasVisited( NavDirType dir )
 {
 	if (m_visited & (1 << dir))
 		return true;

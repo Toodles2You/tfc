@@ -24,9 +24,10 @@
 #include "bot_manager.h"
 #include "nav_area.h"
 #include "bot_util.h"
+#ifdef CSTRIKE
 #include "hostage.h"
-
 #include "tutor.h"
+#endif
 
 const float smokeRadius = 115.0f;		///< for smoke grenades
 
@@ -242,11 +243,13 @@ void CBotManager::OnEvent( GameEventType event, CBaseEntity *entity, CBaseEntity
 		bot->OnEvent( event, entity, other );
 	}
 
+#ifdef CSTRIKE
 	if (TheTutor)
 		TheTutor->OnEvent( event, entity, other );
 
 	if (g_pHostages)
 		g_pHostages->OnEvent( event, entity, other );
+#endif
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -315,6 +318,7 @@ void CBotManager::DestroyAllGrenades( void )
  */
 bool CBotManager::IsInsideSmokeCloud( const Vector *pos )
 {
+#ifdef CSTRIKE
 	ActiveGrenadeList::iterator iter = m_activeGrenadeList.begin();
 	while( iter != m_activeGrenadeList.end() )
 	{
@@ -336,11 +340,11 @@ bool CBotManager::IsInsideSmokeCloud( const Vector *pos )
 		{
 			const Vector *smokeOrigin = ag->GetDetonationPosition();
 
-			if ((*smokeOrigin - *pos).IsLengthLessThan( smokeRadius ))
+			if ((*smokeOrigin - *pos) < smokeRadius)
 				return true;			
 		}
 	}
-
+#endif
 	return false;
 }
 
@@ -353,6 +357,7 @@ bool CBotManager::IsInsideSmokeCloud( const Vector *pos )
  */
 bool CBotManager::IsLineBlockedBySmoke( const Vector *from, const Vector *to )
 {
+#ifdef CSTRIKE
 	const float smokeRadiusSq = smokeRadius * smokeRadius;
 	float totalSmokedLength = 0.0f;	// distance along line of sight covered by smoke
 
@@ -470,4 +475,7 @@ bool CBotManager::IsLineBlockedBySmoke( const Vector *from, const Vector *to )
 
 	// return true if the total length of smoke-covered line-of-sight is too much
 	return (totalSmokedLength > maxSmokedLength);
+#else
+	return false;
+#endif
 }
