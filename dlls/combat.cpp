@@ -435,7 +435,7 @@ void CBaseEntity::FireBulletsPlayer(unsigned int cShots, Vector vecSrc, Vector v
 		pevAttacker = pev; // the default attacker is ourselves
 
 	ClearMultiDamage();
-	gMultiDamage.type = DMG_BULLET | DMG_NEVERGIB;
+	gMultiDamage.type = DMG_BULLET | DMG_AIMED | DMG_NEVERGIB;
 
 	for (unsigned int iShot = 1; iShot <= cShots; iShot++)
 	{
@@ -460,7 +460,7 @@ void CBaseEntity::FireBulletsPlayer(unsigned int cShots, Vector vecSrc, Vector v
 
 			if (0 != iDamage)
 			{
-				pEntity->TraceAttack(pevAttacker, iDamage, vecDir, &tr, DMG_BULLET | ((iDamage > 16) ? DMG_ALWAYSGIB : DMG_NEVERGIB));
+				pEntity->TraceAttack(pevAttacker, iDamage, vecDir, &tr, DMG_BULLET | DMG_AIMED | ((iDamage > 16) ? DMG_ALWAYSGIB : DMG_NEVERGIB));
 
 				TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
 				DecalGunshot(&tr, iBulletType);
@@ -470,24 +470,24 @@ void CBaseEntity::FireBulletsPlayer(unsigned int cShots, Vector vecSrc, Vector v
 				{
 				default:
 				case BULLET_PLAYER_9MM:
-					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmg9MM, vecDir, &tr, DMG_BULLET);
+					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmg9MM, vecDir, &tr, DMG_BULLET | DMG_AIMED);
 					break;
 
 				case BULLET_PLAYER_MP5:
-					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgMP5, vecDir, &tr, DMG_BULLET);
+					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgMP5, vecDir, &tr, DMG_BULLET | DMG_AIMED);
 					break;
 
 				case BULLET_PLAYER_BUCKSHOT:
 					// make distance based!
-					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgBuckshot, vecDir, &tr, DMG_BULLET);
+					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgBuckshot, vecDir, &tr, DMG_BULLET | DMG_AIMED);
 					break;
 
 				case BULLET_PLAYER_357:
-					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmg357, vecDir, &tr, DMG_BULLET);
+					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmg357, vecDir, &tr, DMG_BULLET | DMG_AIMED);
 					break;
 
 				case BULLET_NONE: // FIX
-					pEntity->TraceAttack(pevAttacker, 50, vecDir, &tr, DMG_CLUB);
+					pEntity->TraceAttack(pevAttacker, 50, vecDir, &tr, DMG_CLUB | DMG_AIMED);
 					TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
 					// only decal glass
 					if (!FNullEnt(tr.pHit) && VARS(tr.pHit)->rendermode != 0)

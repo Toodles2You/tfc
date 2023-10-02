@@ -121,11 +121,11 @@ void CCrossbowBolt::BoltTouch(CBaseEntity* pOther)
 
 		if (pOther->IsPlayer())
 		{
-			pOther->TraceAttack(pevOwner, gSkillData.plrDmgCrossbowClient, pev->velocity.Normalize(), &tr, DMG_NEVERGIB);
+			pOther->TraceAttack(pevOwner, gSkillData.plrDmgCrossbowClient, pev->velocity.Normalize(), &tr, DMG_AIMED | DMG_NEVERGIB);
 		}
 		else
 		{
-			pOther->TraceAttack(pevOwner, gSkillData.plrDmgCrossbowMonster, pev->velocity.Normalize(), &tr, DMG_BULLET | DMG_NEVERGIB);
+			pOther->TraceAttack(pevOwner, gSkillData.plrDmgCrossbowMonster, pev->velocity.Normalize(), &tr, DMG_BULLET | DMG_AIMED | DMG_NEVERGIB);
 		}
 
 		ApplyMultiDamage(pev, pevOwner);
@@ -330,7 +330,7 @@ void CCrossbow::FireSniperBolt()
 	if (0 != tr.pHit->v.takedamage)
 	{
 		ClearMultiDamage();
-		CBaseEntity::Instance(tr.pHit)->TraceAttack(m_pPlayer->pev, 120, vecDir, &tr, DMG_BULLET | DMG_NEVERGIB);
+		CBaseEntity::Instance(tr.pHit)->TraceAttack(m_pPlayer->pev, 120, vecDir, &tr, DMG_BULLET | DMG_AIMED | DMG_NEVERGIB);
 		ApplyMultiDamage(pev, m_pPlayer->pev);
 	}
 #endif

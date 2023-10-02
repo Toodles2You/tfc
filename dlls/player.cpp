@@ -261,10 +261,15 @@ Vector CBasePlayer::GetGunPosition()
 //=========================================================
 void CBasePlayer::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
 {
-	if (0 != pev->takedamage)
+	if (pev->takedamage == DAMAGE_NO)
 	{
-		m_LastHitGroup = ptr->iHitgroup;
+		return;
+	}
 
+	m_LastHitGroup = ptr->iHitgroup;
+
+	if ((bitsDamageType & DMG_AIMED) != 0)
+	{
 		switch (ptr->iHitgroup)
 		{
 		case HITGROUP_GENERIC:
@@ -289,11 +294,9 @@ void CBasePlayer::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vec
 		default:
 			break;
 		}
-
-		SpawnBlood(ptr->vecEndPos, BloodColor(), flDamage); // a little surface blood.
-		TraceBleed(flDamage, vecDir, ptr, bitsDamageType);
-		AddMultiDamage(pevAttacker, this, flDamage, bitsDamageType);
 	}
+
+	AddMultiDamage(pevAttacker, this, flDamage, bitsDamageType);
 }
 
 static inline float DamageForce(entvars_t* pev, int damage)
