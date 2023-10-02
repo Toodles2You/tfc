@@ -135,50 +135,6 @@ Vector VecVelocityForDamage(float flDamage)
 	return vec;
 }
 
-#if 0 /*                                                                 \
-static void ThrowGib(entvars_t *pev, char *szGibModel, float flDamage)   \
-{                                                                        \
-	edict_t *pentNew = CREATE_ENTITY();                                  \
-	entvars_t *pevNew = VARS(pentNew);                                   \
-																	   \ \
-	pevNew->origin = pev->origin;                                        \
-	SET_MODEL(ENT(pevNew), szGibModel);                                  \
-	UTIL_SetSize(pevNew, g_vecZero, g_vecZero);                          \
-																	   \ \
-	pevNew->velocity		= VecVelocityForDamage(flDamage);                  \
-	pevNew->movetype		= MOVETYPE_BOUNCE;                                 \
-	pevNew->solid			= SOLID_NOT;                                         \
-	pevNew->avelocity.x		= RANDOM_FLOAT(0,600);                          \
-	pevNew->avelocity.y		= RANDOM_FLOAT(0,600);                          \
-	pevNew->avelocity.z		= RANDOM_FLOAT(0,600);                          \
-	CHANGE_METHOD(ENT(pevNew), em_think, SUB_Remove);                    \
-	pevNew->ltime		= gpGlobals->time;                                    \
-	pevNew->nextthink	= gpGlobals->time + RANDOM_FLOAT(10,20);           \
-	pevNew->frame		= 0;                                                  \
-	pevNew->flags		= 0;                                                  \
-}                                                                        \
-																	   \ \
-																	   \ \
-static void ThrowHead(entvars_t *pev, char *szGibModel, floatflDamage)   \
-{                                                                        \
-	SET_MODEL(ENT(pev), szGibModel);                                     \
-	pev->frame			= 0;                                                    \
-	pev->nextthink		= -1;                                                \
-	pev->movetype		= MOVETYPE_BOUNCE;                                    \
-	pev->takedamage		= DAMAGE_NO;                                        \
-	pev->solid			= SOLID_NOT;                                            \
-	pev->view_ofs		= Vector(0,0,8);                                      \
-	UTIL_SetSize(pev, Vector(-16,-16,0), Vector(16,16,56));              \
-	pev->velocity		= VecVelocityForDamage(flDamage);                     \
-	pev->avelocity		= RANDOM_FLOAT(-1,1) * Vector(0,600,0);              \
-	pev->origin.z -= 24;                                                 \
-	ClearBits(pev->flags, FL_ONGROUND);                                  \
-}                                                                        \
-																	   \ \
-																	   \ \
-*/
-#endif
-
 int TrainSpeed(int iSpeed, int iMax)
 {
 	float fSpeed, fMax;
@@ -237,8 +193,10 @@ void CBasePlayer::DeathSound()
 
 bool CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
 {
-	if (0 == pev->takedamage)
+	if (pev->takedamage == DAMAGE_NO)
+	{
 		return false;
+	}
 	
 	m_bitsDamageType &= ~(bitsDamageType & ~DMG_TIMEBASED);
 
@@ -305,121 +263,81 @@ static inline float DamageForce(entvars_t* pev, int damage)
 	return std::clamp(damage * size * 5.0F, 0.0F, 1000.0F);
 }
 
-/*
-	Take some damage.  
-	NOTE: each call to TakeDamage with bitsDamageType set to a time-based damage
-	type will cause the damage time countdown to be reset.  Thus the ongoing effects of poison, radiation
-	etc are implemented with subsequent calls to TakeDamage using DMG_GENERIC.
-*/
+static float ArmourBonus(float &damage, float armour, float ratio, float bonus)
+{
+	if (armour <= 0)
+	{
+		return 0.0f;
+	}
+	float newDamage = damage * ratio;
+	float take = (damage - newDamage) * bonus;
+	if (take > armour)
+	{
+		take = armour;
+		take *= 1 / bonus;
+		newDamage = damage - take;
+		return armour;
+	}
+	return take;
+}
 
-#define ARMOR_RATIO 0.2 // Armor Takes 80% of the damage
-#define ARMOR_BONUS 0.5 // Each Point of Armor is work 1/x points of health
+#define kArmourRatio 0.2f // Armor Takes 80% of the damage
+#define kArmourBonus 0.5f // Each Point of Armor is work 1/x points of health
 
 bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
 {
-	// have suit diagnose the problem - ie: report damage type
-	int bitsDamage = bitsDamageType;
-	bool ffound = true;
-	bool fmajor;
-	bool fcritical;
-	bool fTookDamage;
-	bool ftrivial;
-	float flRatio;
-	float flBonus;
-	float flHealthPrev = pev->health;
-
-	flBonus = ARMOR_BONUS;
-	flRatio = ARMOR_RATIO;
-
-	if ((bitsDamageType & DMG_BLAST) != 0 && UTIL_IsDeathmatch())
+	if (pev->takedamage == DAMAGE_NO || !IsAlive())
 	{
-		// blasts damage armor more.
-		flBonus *= 2;
-	}
-
-	// Already dead
-	if (!IsAlive())
 		return false;
-	// go take the damage first
-
-
+	}
 	CBaseEntity* pAttacker = CBaseEntity::Instance(pevAttacker);
-
 	if (!g_pGameRules->FPlayerCanTakeDamage(this, pAttacker))
 	{
-		// Refuse the damage
 		return false;
 	}
 
-	// keep track of amount of damage last sustained
 	m_lastDamageAmount = flDamage;
+	m_bitsDamageType |= bitsDamageType;
+	m_bitsHUDDamage = -1;
 
-	// Armor.
-	if (0 != pev->armorvalue && (bitsDamageType & (DMG_FALL | DMG_DROWN)) == 0) // armor doesn't protect against fall or drown damage!
+	float flArmour = 0.0f;
+	if ((bitsDamageType & DMG_ARMOR_PIERCING) == 0)
 	{
-		float flNew = flDamage * flRatio;
-
-		float flArmor;
-
-		flArmor = (flDamage - flNew) * flBonus;
-
-		// Does this use more armor than we have?
-		if (flArmor > pev->armorvalue)
+		float armourBonus = kArmourBonus;
+		if ((bitsDamageType & DMG_BLAST) != 0 && UTIL_IsDeathmatch())
 		{
-			flArmor = pev->armorvalue;
-			flArmor *= (1 / flBonus);
-			flNew = flDamage - flArmor;
-			pev->armorvalue = 0;
+			armourBonus *= 2;
 		}
-		else
-			pev->armorvalue -= flArmor;
-
-		flDamage = flNew;
+		flArmour = ArmourBonus(flDamage, pev->armorvalue, kArmourRatio, armourBonus);
 	}
 
-	if (0 == pev->takedamage)
-		return false;
-
-	// if (pev->deadflag == DEAD_NO)
-	// {
-		// no pain sound during death animation.
-		// PainSound(); // "Ouch!"
-	// }
-
-	// set damage type sustained
-	m_bitsDamageType |= bitsDamageType;
-
-	// grab the vector of the incoming attack. ( pretend that the inflictor is a little lower than it really is, so the body will tend to fly upward a bit).
-	Vector vecDir = g_vecZero;
+	// Grab the vector of the incoming attack. (Pretend that the inflictor is a little lower than it really is, so the body will tend to fly upward a bit.)
 	if (!FNullEnt(pevInflictor))
 	{
-		CBaseEntity* pInflictor = CBaseEntity::Instance(pevInflictor);
-		if (pInflictor)
+		if (FNullEnt(pevAttacker) || pevAttacker->solid != SOLID_TRIGGER)
 		{
-			vecDir = (pInflictor->Center() - Vector(0, 0, 10) - Center()).Normalize();
-			vecDir = g_vecAttackDir = vecDir.Normalize();
+			CBaseEntity* pInflictor = CBaseEntity::Instance(pevInflictor);
+			if (pInflictor)
+			{
+				// Move them around!
+				g_vecAttackDir = (pInflictor->Center() - Vector(0, 0, 10) - Center()).Normalize();
+
+				pev->velocity = pev->velocity + g_vecAttackDir * -DamageForce(pev, flDamage);
+			}
 		}
+		pev->dmg_inflictor = ENT(pevInflictor);
 	}
 
-	if (pevInflictor)
-		pev->dmg_inflictor = ENT(pevInflictor);
-
-	pev->dmg_take += (int)flDamage;
-
-	// check for godmode or invincibility
+	// Check for godmode or invincibility.
 	if ((pev->flags & FL_GODMODE) != 0)
 	{
 		return false;
 	}
 
-	// if this is a player, move him around!
-	if ((!FNullEnt(pevInflictor)) && (pev->movetype == MOVETYPE_WALK) && (!pevAttacker || pevAttacker->solid != SOLID_TRIGGER))
-	{
-		pev->velocity = pev->velocity + vecDir * -DamageForce(pev, flDamage);
-	}
-
-	// do the damage
-	pev->health -= (int)flDamage;
+	// Do the damage!
+	pev->dmg_take += flDamage;
+	pev->health -= flDamage;
+	pev->armorvalue -= flArmour;
 
 	if (pev->health <= 0)
 	{
@@ -436,170 +354,26 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 		return false;
 	}
 
-	// reset damage time countdown for each type of time based damage player just sustained
-
-	{
-		for (int i = 0; i < CDMG_TIMEBASED; i++)
-			if ((bitsDamageType & (DMG_PARALYZE << i)) != 0)
-				m_rgbTimeBasedDamage[i] = 0;
-	}
-
-	// tell director about it
-	MESSAGE_BEGIN(MSG_SPEC, SVC_DIRECTOR);
-	WRITE_BYTE(9);							  // command length in bytes
-	WRITE_BYTE(DRC_CMD_EVENT);				  // take damage event
-	WRITE_SHORT(ENTINDEX(this->edict()));	  // index number of primary entity
-	WRITE_SHORT(ENTINDEX(ENT(pevInflictor))); // index number of secondary entity
-	WRITE_LONG(5);							  // eventflags (priority and flags)
-	MESSAGE_END();
-
-
-	// how bad is it, doc?
-
-	ftrivial = (pev->health > 75 || m_lastDamageAmount < 5);
-	fmajor = (m_lastDamageAmount > 25);
-	fcritical = (pev->health < 30);
-
-	// handle all bits set in this damage message,
-	// let the suit give player the diagnosis
-
-	// UNDONE: add sounds for types of damage sustained (ie: burn, shock, slash )
-
-	// UNDONE: still need to record damage and heal messages for the following types
-
-	// DMG_BURN
-	// DMG_FREEZE
-	// DMG_BLAST
-	// DMG_SHOCK
-
-	m_bitsDamageType |= bitsDamage; // Save this so we can report it to the client
-	m_bitsHUDDamage = -1;			// make sure the damage bits get resent
-
-	while (fTookDamage && (!ftrivial || (bitsDamage & DMG_TIMEBASED) != 0) && ffound && 0 != bitsDamage)
-	{
-		ffound = false;
-
-		if ((bitsDamage & DMG_CLUB) != 0)
-		{
-			if (fmajor)
-				SetSuitUpdate("!HEV_DMG4", false, SUIT_NEXT_IN_30SEC); // minor fracture
-			bitsDamage &= ~DMG_CLUB;
-			ffound = true;
-		}
-		if ((bitsDamage & (DMG_FALL | DMG_CRUSH)) != 0)
-		{
-			if (fmajor)
-				SetSuitUpdate("!HEV_DMG5", false, SUIT_NEXT_IN_30SEC); // major fracture
-			else
-				SetSuitUpdate("!HEV_DMG4", false, SUIT_NEXT_IN_30SEC); // minor fracture
-
-			bitsDamage &= ~(DMG_FALL | DMG_CRUSH);
-			ffound = true;
-		}
-
-		if ((bitsDamage & DMG_BULLET) != 0)
-		{
-			if (m_lastDamageAmount > 5)
-				SetSuitUpdate("!HEV_DMG6", false, SUIT_NEXT_IN_30SEC); // blood loss detected
-			//else
-			//	SetSuitUpdate("!HEV_DMG0", false, SUIT_NEXT_IN_30SEC);	// minor laceration
-
-			bitsDamage &= ~DMG_BULLET;
-			ffound = true;
-		}
-
-		if ((bitsDamage & DMG_SLASH) != 0)
-		{
-			if (fmajor)
-				SetSuitUpdate("!HEV_DMG1", false, SUIT_NEXT_IN_30SEC); // major laceration
-			else
-				SetSuitUpdate("!HEV_DMG0", false, SUIT_NEXT_IN_30SEC); // minor laceration
-
-			bitsDamage &= ~DMG_SLASH;
-			ffound = true;
-		}
-
-		if ((bitsDamage & DMG_SONIC) != 0)
-		{
-			if (fmajor)
-				SetSuitUpdate("!HEV_DMG2", false, SUIT_NEXT_IN_1MIN); // internal bleeding
-			bitsDamage &= ~DMG_SONIC;
-			ffound = true;
-		}
-
-		if ((bitsDamage & (DMG_POISON | DMG_PARALYZE)) != 0)
-		{
-			SetSuitUpdate("!HEV_DMG3", false, SUIT_NEXT_IN_1MIN); // blood toxins detected
-			bitsDamage &= ~(DMG_POISON | DMG_PARALYZE);
-			ffound = true;
-		}
-
-		if ((bitsDamage & DMG_ACID) != 0)
-		{
-			SetSuitUpdate("!HEV_DET1", false, SUIT_NEXT_IN_1MIN); // hazardous chemicals detected
-			bitsDamage &= ~DMG_ACID;
-			ffound = true;
-		}
-
-		if ((bitsDamage & DMG_NERVEGAS) != 0)
-		{
-			SetSuitUpdate("!HEV_DET0", false, SUIT_NEXT_IN_1MIN); // biohazard detected
-			bitsDamage &= ~DMG_NERVEGAS;
-			ffound = true;
-		}
-
-		if ((bitsDamage & DMG_RADIATION) != 0)
-		{
-			SetSuitUpdate("!HEV_DET2", false, SUIT_NEXT_IN_1MIN); // radiation detected
-			bitsDamage &= ~DMG_RADIATION;
-			ffound = true;
-		}
-		if ((bitsDamage & DMG_SHOCK) != 0)
-		{
-			bitsDamage &= ~DMG_SHOCK;
-			ffound = true;
-		}
-	}
-
 	pev->punchangle.x = -2;
 
-	if (fTookDamage && !ftrivial && fmajor && flHealthPrev >= 75)
+	// Reset damage time countdown for each type of time based damage player just sustained.
+	for (int i = 0; i < CDMG_TIMEBASED; i++)
 	{
-		// first time we take major damage...
-		// turn automedic on if not on
-		SetSuitUpdate("!HEV_MED1", false, SUIT_NEXT_IN_30MIN); // automedic on
-
-		// give morphine shot if not given recently
-		SetSuitUpdate("!HEV_HEAL7", false, SUIT_NEXT_IN_30MIN); // morphine shot
-	}
-
-	if (fTookDamage && !ftrivial && fcritical && flHealthPrev < 75)
-	{
-
-		// already took major damage, now it's critical...
-		if (pev->health < 6)
-			SetSuitUpdate("!HEV_HLTH3", false, SUIT_NEXT_IN_10MIN); // near death
-		else if (pev->health < 20)
-			SetSuitUpdate("!HEV_HLTH2", false, SUIT_NEXT_IN_10MIN); // health critical
-
-		// give critical health warnings
-		if (!RANDOM_LONG(0, 3) && flHealthPrev < 50)
-			SetSuitUpdate("!HEV_DMG7", false, SUIT_NEXT_IN_5MIN); //seek medical attention
-	}
-
-	// if we're taking time based damage, warn about its continuing effects
-	if (fTookDamage && (bitsDamageType & DMG_TIMEBASED) != 0 && flHealthPrev < 75)
-	{
-		if (flHealthPrev < 50)
+		if ((bitsDamageType & (DMG_PARALYZE << i)) != 0)
 		{
-			if (!RANDOM_LONG(0, 3))
-				SetSuitUpdate("!HEV_DMG7", false, SUIT_NEXT_IN_5MIN); //seek medical attention
+			m_rgbTimeBasedDamage[i] = 0;
 		}
-		else
-			SetSuitUpdate("!HEV_HLTH1", false, SUIT_NEXT_IN_10MIN); // health dropping
 	}
 
-	return fTookDamage;
+	MESSAGE_BEGIN(MSG_SPEC, SVC_DIRECTOR);
+		WRITE_BYTE(9);							  // command length in bytes
+		WRITE_BYTE(DRC_CMD_EVENT);				  // take damage event
+		WRITE_SHORT(ENTINDEX(this->edict()));	  // index number of primary entity
+		WRITE_SHORT(ENTINDEX(ENT(pevInflictor))); // index number of secondary entity
+		WRITE_LONG(5);							  // eventflags (priority and flags)
+	MESSAGE_END();
+
+	return true;
 }
 
 //=========================================================
