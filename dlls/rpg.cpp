@@ -521,7 +521,7 @@ void CRpg::ToggleLaserDot(bool bOn, bool bSound)
 		if (m_pSpot != nullptr)
 		{
 #ifndef CLIENT_DLL
-			m_pSpot->Killed(nullptr, GIB_NEVER);
+			m_pSpot->Killed(nullptr, nullptr, GIB_NEVER);
 #endif
 			m_pSpot = nullptr;
 		}

@@ -51,12 +51,6 @@ inline bool gTouchDisabled = false;
 
 inline DLL_GLOBAL Vector g_vecAttackDir;
 
-/**
-*	@brief Set in combat.cpp.  Used to pass the damage inflictor for death messages.
-*	Better solution:  Add as parameter to all Killed() functions.
-*/
-inline entvars_t* g_pevLastInflictor = nullptr;
-
 extern int DispatchSpawn(edict_t* pent);
 extern void DispatchKeyValue(edict_t* pentKeyvalue, KeyValueData* pkvd);
 extern void DispatchTouch(edict_t* pentTouched, edict_t* pentOther);
@@ -181,7 +175,7 @@ public:
 	virtual void TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType);
 	virtual bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
 	virtual bool TakeHealth(float flHealth, int bitsDamageType);
-	virtual void Killed(entvars_t* pevAttacker, int iGib);
+	virtual void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iGib);
 	virtual int BloodColor() { return DONT_BLEED; }
 	virtual void TraceBleed(float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType);
 	virtual bool IsTriggered(CBaseEntity* pActivator) { return true; }
@@ -584,9 +578,11 @@ public:
 
 // when calling KILLED(), a value that governs gib behavior is expected to be
 // one of these three values
-#define GIB_NORMAL 0 // gib if entity was overkilled
-#define GIB_NEVER 1	 // never gib, no matter how much death damage is done ( freezing, etc )
-#define GIB_ALWAYS 2 // always gib ( Houndeye Shock, Barnacle Bite )
+enum {
+	GIB_NORMAL,	// gib if entity was overkilled
+	GIB_NEVER,	// never gib, no matter how much death damage is done ( freezing, etc )
+	GIB_ALWAYS,	// always gib ( Houndeye Shock, Barnacle Bite )
+};
 
 class CSound;
 

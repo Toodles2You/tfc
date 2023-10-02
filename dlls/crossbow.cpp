@@ -144,7 +144,7 @@ void CCrossbowBolt::BoltTouch(CBaseEntity* pOther)
 
 		if (!UTIL_IsDeathmatch())
 		{
-			Killed(pev, GIB_NEVER);
+			Killed(pev, pev, GIB_NEVER);
 		}
 	}
 	else
@@ -163,7 +163,7 @@ void CCrossbowBolt::BoltTouch(CBaseEntity* pOther)
 		}
 		else if (!UTIL_IsDeathmatch())
 		{
-			Killed(pev, GIB_NEVER);
+			Killed(pev, pev, GIB_NEVER);
 		}
 
 		if (UTIL_PointContents(pev->origin) != CONTENTS_WATER)

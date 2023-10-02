@@ -91,15 +91,19 @@
 #define SOLID_BSP 4		 // bsp clip, touch on edge, block
 
 // edict->deadflag values
-#define DEAD_NO 0	 // alive
-#define DEAD_DYING 1 // playing death animation or still falling off of a ledge waiting to hit ground
-#define DEAD_DEAD 2	 // dead. lying still.
-#define DEAD_RESPAWNABLE 3
-#define DEAD_DISCARDBODY 4
+enum {
+	DEAD_NO,	// alive
+	DEAD_DYING,	// playing death animation or still falling off of a ledge waiting to hit ground
+	DEAD_DEAD,	// dead. lying still.
+	DEAD_RESPAWNABLE,
+	DEAD_DISCARDBODY,
+};
 
-#define DAMAGE_NO 0
-#define DAMAGE_YES 1
-#define DAMAGE_AIM 2
+enum {
+	DAMAGE_NO,
+	DAMAGE_YES,
+	DAMAGE_AIM,
+};
 
 // entity effects
 #define EF_BRIGHTFIELD 1	// swirling cloud of particles

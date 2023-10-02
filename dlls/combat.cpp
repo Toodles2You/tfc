@@ -263,7 +263,7 @@ void CBaseEntity::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vec
 {
 	Vector vecOrigin = ptr->vecEndPos - vecDir * 4;
 
-	if (0 != pev->takedamage)
+	if (pev->takedamage != DAMAGE_NO)
 	{
 		AddMultiDamage(pevAttacker, this, flDamage, bitsDamageType);
 

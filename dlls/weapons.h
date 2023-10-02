@@ -22,14 +22,17 @@ class CBasePlayer;
 class CBasePlayerWeapon;
 
 // Hit Group standards
-#define HITGROUP_GENERIC 0
-#define HITGROUP_HEAD 1
-#define HITGROUP_CHEST 2
-#define HITGROUP_STOMACH 3
-#define HITGROUP_LEFTARM 4
-#define HITGROUP_RIGHTARM 5
-#define HITGROUP_LEFTLEG 6
-#define HITGROUP_RIGHTLEG 7
+enum {
+	HITGROUP_GENERIC,
+	HITGROUP_HEAD,
+	HITGROUP_CHEST,
+	HITGROUP_STOMACH,
+	HITGROUP_LEFTARM,
+	HITGROUP_RIGHTARM,
+	HITGROUP_LEFTLEG,
+	HITGROUP_RIGHTLEG,
+	HITGROUP_COUNT,
+};
 
 void DeactivateSatchels(CBasePlayer* pOwner);
 
@@ -63,7 +66,7 @@ public:
 
 	virtual void BounceSound();
 	int BloodColor() override { return DONT_BLEED; }
-	void Killed(entvars_t* pevAttacker, int iGib) override;
+	void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iGib) override;
 
 	float m_flNextAttack;
 };

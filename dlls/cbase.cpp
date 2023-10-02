@@ -525,8 +525,10 @@ CBaseEntity* EHANDLE::operator->()
 // give health
 bool CBaseEntity::TakeHealth(float flHealth, int bitsDamageType)
 {
-	if (0 == pev->takedamage)
+	if (pev->takedamage == DAMAGE_NO)
+	{
 		return false;
+	}
 
 	// heal
 	if (pev->health >= pev->max_health)
@@ -546,8 +548,10 @@ bool CBaseEntity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 {
 	Vector vecTemp;
 
-	if (0 == pev->takedamage)
+	if (pev->takedamage == DAMAGE_NO)
+	{
 		return false;
+	}
 
 	// UNDONE: some entity types may be immune or resistant to some bitsDamageType
 
@@ -585,7 +589,7 @@ bool CBaseEntity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	pev->health -= flDamage;
 	if (pev->health <= 0)
 	{
-		Killed(pevAttacker, GIB_NORMAL);
+		Killed(pevInflictor, pevAttacker, GIB_NORMAL);
 		return false;
 	}
 
@@ -593,7 +597,7 @@ bool CBaseEntity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 }
 
 
-void CBaseEntity::Killed(entvars_t* pevAttacker, int iGib)
+void CBaseEntity::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iGib)
 {
 	pev->takedamage = DAMAGE_NO;
 	pev->deadflag = DEAD_DEAD;

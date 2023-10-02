@@ -142,7 +142,6 @@ enum AmmoId
 // these are the damage types that have client hud art
 #define DMG_SHOWNHUD (DMG_POISON | DMG_ACID | DMG_FREEZE | DMG_SLOWFREEZE | DMG_DROWN | DMG_BURN | DMG_SLOWBURN | DMG_NERVEGAS | DMG_RADIATION | DMG_SHOCK)
 
-// NOTE: tweak these values based on gameplay feedback:
 
 #define PARALYZE_DURATION 2 // number of 2 second intervals to take damage
 #define PARALYZE_DAMAGE 1.0 // damage to take each 2 second interval
@@ -165,16 +164,17 @@ enum AmmoId
 #define SLOWFREEZE_DURATION 2
 #define SLOWFREEZE_DAMAGE 1.0
 
-
-#define itbd_Paralyze 0
-#define itbd_NerveGas 1
-#define itbd_Poison 2
-#define itbd_Radiation 3
-#define itbd_DrownRecover 4
-#define itbd_Acid 5
-#define itbd_SlowBurn 6
-#define itbd_SlowFreeze 7
-#define CDMG_TIMEBASED 8
+enum {
+	itbd_Paralyze,
+	itbd_NerveGas,
+	itbd_Poison,
+	itbd_Radiation,
+	itbd_DrownRecover,
+	itbd_Acid,
+	itbd_SlowBurn,
+	itbd_SlowFreeze,
+	CDMG_TIMEBASED,
+};
 
 constexpr Vector VEC_HULL_MIN(-16, -16, -36);
 constexpr Vector VEC_HULL_MAX(16, 16, 36);
