@@ -246,8 +246,8 @@ struct extra_player_info_t
 	short frags;
 	short deaths;
 	short playerclass;
-	short health; // UNUSED currently, spectator UI would like this
-	bool dead;	  // UNUSED currently, spectator UI would like this
+	short health;
+	bool dead;
 	short teamnumber;
 	char teamname[MAX_TEAM_NAME];
 };

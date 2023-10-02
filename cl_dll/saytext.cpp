@@ -40,6 +40,7 @@ static float SCROLL_SPEED = 5;
 static char g_szLineBuffer[MAX_LINES + 1][MAX_CHARS_PER_LINE];
 static float* g_pflNameColors[MAX_LINES + 1];
 static int g_iNameLengths[MAX_LINES + 1];
+static bool g_bPlayerDead[MAX_LINES + 1];
 static float flScrollTime = 0; // the time at which the lines next scroll up
 
 DECLARE_MESSAGE(m_SayText, SayText);
@@ -73,6 +74,7 @@ void CHudSayText::InitHUDData()
 	memset(g_szLineBuffer, 0, sizeof g_szLineBuffer);
 	memset(g_pflNameColors, 0, sizeof g_pflNameColors);
 	memset(g_iNameLengths, 0, sizeof g_iNameLengths);
+	memset(g_bPlayerDead, 0, sizeof g_bPlayerDead);
 }
 
 bool CHudSayText::VidInit()
@@ -93,6 +95,7 @@ int ScrollTextUp()
 	memmove(g_szLineBuffer[0], g_szLineBuffer[1], sizeof(g_szLineBuffer) - sizeof(g_szLineBuffer[0])); // overwrite the first line
 	memmove(&g_pflNameColors[0], &g_pflNameColors[1], sizeof(g_pflNameColors) - sizeof(g_pflNameColors[0]));
 	memmove(&g_iNameLengths[0], &g_iNameLengths[1], sizeof(g_iNameLengths) - sizeof(g_iNameLengths[0]));
+	memmove(&g_bPlayerDead[0], &g_bPlayerDead[1], sizeof(g_bPlayerDead) - sizeof(g_bPlayerDead[0]));
 	g_szLineBuffer[MAX_LINES - 1][0] = 0;
 
 	if (g_szLineBuffer[0][0] == ' ') // also scroll up following lines
@@ -150,6 +153,15 @@ bool CHudSayText::Draw(float flTime)
 			strncpy(line, g_szLineBuffer[i], sizeof(line) - 1);
 			line[sizeof(line) - 1] = '\0';
 
+			int x = m_iBaseX;
+
+			if (g_bPlayerDead[i])
+			{
+				char sz[16];
+				sprintf(sz, "*%s* ", CHudTextMessage::BufferedLocaliseTextString("#DEAD"));
+				x = gHUD.DrawHudString(sz, x, y);
+			}
+
 			// draw the first x characters in the player color
 			const std::size_t playerNameEndIndex = V_min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH + 31);
 
@@ -157,7 +169,7 @@ bool CHudSayText::Draw(float flTime)
 			line[playerNameEndIndex] = '\0';
 
 			gEngfuncs.pfnDrawSetTextColor(g_pflNameColors[i][0], g_pflNameColors[i][1], g_pflNameColors[i][2]);
-			const int x = gHUD.DrawHudString(line + 1, m_iBaseX, y); // don't draw the control code at the start
+			x = gHUD.DrawHudString(line + 1, x, y); // don't draw the control code at the start
 
 			//Reset last character
 			line[playerNameEndIndex] = g_szLineBuffer[i][playerNameEndIndex];
@@ -224,6 +236,7 @@ void CHudSayText::SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex
 			{
 				g_iNameLengths[i] = strlen(pName) + (nameInString - pszBuf);
 				g_pflNameColors[i] = GetClientColor(clientIndex);
+				g_bPlayerDead[i] = g_PlayerExtraInfo[clientIndex].dead;
 			}
 		}
 	}

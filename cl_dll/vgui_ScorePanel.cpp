@@ -777,31 +777,10 @@ void ScorePanel::FillGrid()
 					GetClientVoiceMgr()->UpdateSpeakerImage(pLabel, m_iSortedRows[row]);
 					break;
 				case COLUMN_CLASS:
-					// No class for other team's members (unless allied or spectator)
-					if (gViewPort && EV_TFC_IsAllyTeam(g_iTeamNumber, g_PlayerExtraInfo[m_iSortedRows[row]].teamnumber))
-						bShowClass = true;
-					// Don't show classes if this client hasnt picked a team yet
-					if (g_iTeamNumber == 0)
-						bShowClass = false;
-
-					if (bShowClass)
+					sz[0] = '\0';
+					if (g_PlayerExtraInfo[m_iSortedRows[row]].dead)
 					{
-						// Only print Civilian if this team are all civilians
-						bool bNoClass = false;
-						if (g_PlayerExtraInfo[m_iSortedRows[row]].playerclass == 0)
-						{
-							if (gViewPort->GetValidClasses(g_PlayerExtraInfo[m_iSortedRows[row]].teamnumber) != -1)
-								bNoClass = true;
-						}
-
-						if (bNoClass)
-							sz[0] = '\0';
-						else
-							sprintf(sz, "%s", CHudTextMessage::BufferedLocaliseTextString(sLocalisedClasses[g_PlayerExtraInfo[m_iSortedRows[row]].playerclass]));
-					}
-					else
-					{
-						strcpy(sz, "");
+						sprintf(sz, "*%s*", CHudTextMessage::BufferedLocaliseTextString("#DEAD"));
 					}
 					break;
 
@@ -829,7 +808,14 @@ void ScorePanel::FillGrid()
 					sprintf(sz, "%d", g_PlayerExtraInfo[m_iSortedRows[row]].deaths);
 					break;
 				case COLUMN_LATENCY:
-					sprintf(sz, "%d", g_PlayerInfoList[m_iSortedRows[row]].ping);
+					if (g_PlayerInfoList[m_iSortedRows[row]].m_nSteamID == 0)
+					{
+						strcpy(sz, CHudTextMessage::BufferedLocaliseTextString("#BOT"));
+					}
+					else
+					{
+						sprintf(sz, "%d", g_PlayerInfoList[m_iSortedRows[row]].ping);
+					}
 					break;
 				default:
 					break;

@@ -85,6 +85,8 @@ void DLLEXPORT HUD_TxferLocalOverrides(struct entity_state_s* state, const struc
 
 	// Fire prevention
 	state->iuser4 = client->iuser4;
+
+	state->health = static_cast<int>(client->health);
 }
 
 /*
@@ -139,7 +141,10 @@ void DLLEXPORT HUD_ProcessPlayerState(struct entity_state_s* dst, const struct e
 	dst->playerclass = src->playerclass;
 	dst->team = src->team;
 	dst->colormap = src->colormap;
+	dst->health = src->health;
 
+	g_PlayerExtraInfo[dst->number].health = dst->health;
+	g_PlayerExtraInfo[dst->number].dead = dst->health <= 0;
 
 	// Save off some data so other areas of the Client DLL can get to it
 	cl_entity_t* player = gEngfuncs.GetLocalPlayer(); // Get the local player's index
