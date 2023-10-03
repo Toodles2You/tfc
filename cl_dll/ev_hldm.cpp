@@ -48,13 +48,17 @@ static int tracerCount[MAX_PLAYERS];
 
 #include "pm_shared.h"
 
+extern cvar_t* r_decals;
+extern cvar_t* violence_hblood;
+extern cvar_t* violence_hgibs;
+
 void V_PunchAxis(int axis, float punch);
 void VectorAngles(const float* forward, float* angles);
 
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
 // original traceline endpoints used by the attacker, iBulletType is the type of bullet that hit the texture.
 // returns volume of strike instrument (crowbar) to play
-float EV_HLDM_PlayTextureSound(int idx, pmtrace_t* ptr, float* vecSrc, float* vecEnd, int iBulletType)
+static float EV_PlayTextureSound(int idx, pmtrace_t* ptr, float* vecSrc, float* vecEnd, int iBulletType)
 {
 	// hit the world, try to play sound based on texture material type
 	char chTextureType = CHAR_TEX_CONCRETE;
@@ -202,97 +206,123 @@ float EV_HLDM_PlayTextureSound(int idx, pmtrace_t* ptr, float* vecSrc, float* ve
 	return fvolbar;
 }
 
-char* EV_HLDM_DamageDecal(physent_t* pe)
+static void EV_DecalTrace(pmtrace_t *tr, char *decal)
 {
-	static char decalname[32];
-	int idx;
+	if (r_decals->value <= 0.0f)
+	{
+		return;
+	}
 
-	if (pe->classnumber == 1)
+	physent_t *pe = gEngfuncs.pEventAPI->EV_GetPhysent(tr->ent);
+
+	if (decal && decal[0] && pe && (pe->solid == SOLID_BSP || pe->movetype == MOVETYPE_PUSHSTEP))
 	{
-		idx = gEngfuncs.pfnRandomLong(0, 2);
-		sprintf(decalname, "{break%i", idx + 1);
+		gEngfuncs.pEfxAPI->R_DecalShoot(
+			gEngfuncs.pEfxAPI->Draw_DecalIndex(gEngfuncs.pEfxAPI->Draw_DecalIndexFromName(decal)), 
+			gEngfuncs.pEventAPI->EV_IndexFromTrace(tr),
+			0,
+			tr->endpos,
+			0
+		);
 	}
-	else if (pe->rendermode != kRenderNormal)
-	{
-		sprintf(decalname, "{bproof1");
-	}
-	else
-	{
-		idx = gEngfuncs.pfnRandomLong(0, 4);
-		sprintf(decalname, "{shot%i", idx + 1);
-	}
-	return decalname;
 }
 
-void EV_HLDM_GunshotDecalTrace(pmtrace_t* pTrace, char* decalName)
+static inline char* EV_DecalName(char* format, int count)
 {
-	int iRand;
-	physent_t* pe;
+	static char sz[32];
+	sprintf(sz, format, gEngfuncs.pfnRandomLong(1, count));
+	return sz;
+}
 
+static inline char* EV_DamageDecal(physent_t* pe)
+{
+	if (pe->classnumber == 1)
+	{
+		return EV_DecalName("{break%i", 3);
+	}
+	if (pe->rendermode != kRenderNormal)
+	{
+		return "{bproof1";
+	}
+	return EV_DecalName("{shot%i", 5);
+}
+
+static void EV_GunshotDecalTrace(pmtrace_t* pTrace, char* decalName)
+{
 	gEngfuncs.pEfxAPI->R_BulletImpactParticles(pTrace->endpos);
 
-	iRand = gEngfuncs.pfnRandomLong(0, 0x7FFF);
+	int iRand = gEngfuncs.pfnRandomLong(0, 0x7FFF);
 	if (iRand < (0x7fff / 2)) // not every bullet makes a sound.
 	{
 		switch (iRand % 5)
 		{
-		case 0:
-			gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-			break;
-		case 1:
-			gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-			break;
-		case 2:
-			gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-			break;
-		case 3:
-			gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-			break;
-		case 4:
-			gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-			break;
+		case 0: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+		case 1: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+		case 2: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+		case 3: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+		case 4: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
 		}
 	}
 
-	pe = gEngfuncs.pEventAPI->EV_GetPhysent(pTrace->ent);
-
-	// Only decal brush models such as the world etc.
-	if (decalName && '\0' != decalName[0] && pe && (pe->solid == SOLID_BSP || pe->movetype == MOVETYPE_PUSHSTEP))
-	{
-		if (CVAR_GET_FLOAT("r_decals"))
-		{
-			gEngfuncs.pEfxAPI->R_DecalShoot(
-				gEngfuncs.pEfxAPI->Draw_DecalIndex(gEngfuncs.pEfxAPI->Draw_DecalIndexFromName(decalName)),
-				gEngfuncs.pEventAPI->EV_IndexFromTrace(pTrace), 0, pTrace->endpos, 0);
-		}
-	}
+	EV_DecalTrace(pTrace, decalName);
 }
 
-void EV_HLDM_DecalGunshot(pmtrace_t* pTrace, int iBulletType)
+static void EV_BloodTrace(pmtrace_t* tr, Vector dir)
 {
-	physent_t* pe;
-
-	pe = gEngfuncs.pEventAPI->EV_GetPhysent(pTrace->ent);
-
-	if (pe && pe->solid == SOLID_BSP)
+	if (violence_hblood->value <= 0.0f)
 	{
-		switch (iBulletType)
+		return;
+	}
+
+	int spray = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/bloodspray.spr");
+	int drip = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/blood.spr");
+
+	gEngfuncs.pEfxAPI->R_BloodSprite(tr->endpos, BLOOD_COLOR_RED, spray, drip, 4.0);
+
+	float damage = 4.0f;
+	float noise = damage / 100.0f;
+	int count = V_max(floorf(noise * 10), 1);
+	Vector traceDir;
+	pmtrace_t tr2;
+
+	for (int i = 0; i < count; i++)
+	{
+		traceDir = dir * -1;
+		traceDir.x += gEngfuncs.pfnRandomFloat(-noise, noise);
+		traceDir.y += gEngfuncs.pfnRandomFloat(-noise, noise);
+		traceDir.z += gEngfuncs.pfnRandomFloat(-noise, noise);
+
+		gEngfuncs.pEventAPI->EV_PlayerTrace(tr->endpos, tr->endpos + traceDir * -172, PM_STUDIO_BOX | PM_WORLD_ONLY, -1, &tr2);
+
+		if (tr2.fraction != 1.0f)
 		{
-		case BULLET_PLAYER_9MM:
-		case BULLET_MONSTER_9MM:
-		case BULLET_PLAYER_MP5:
-		case BULLET_MONSTER_MP5:
-		case BULLET_PLAYER_BUCKSHOT:
-		case BULLET_PLAYER_357:
-		default:
-			// smoke and decal
-			EV_HLDM_GunshotDecalTrace(pTrace, EV_HLDM_DamageDecal(pe));
-			break;
+			EV_DecalTrace(&tr2, EV_DecalName("{blood%i", 6));
 		}
 	}
 }
 
-void EV_HLDM_CheckTracer(int idx, float* vecSrc, float* end, float* forward, float* right, int iBulletType, int iTracerFreq, int* tracerCount)
+static void EV_DecalGunshot(pmtrace_t* pTrace, int iBulletType, Vector vecDir)
+{
+	physent_t* pe = gEngfuncs.pEventAPI->EV_GetPhysent(pTrace->ent);
+
+	if (!pe)
+	{
+		return;
+	}
+
+	int entity = gEngfuncs.pEventAPI->EV_IndexFromTrace(pTrace);
+
+	if (entity >= 1 && entity <= gEngfuncs.GetMaxClients())
+	{
+		EV_BloodTrace(pTrace, vecDir);
+	}
+	else if (pe->solid == SOLID_BSP)
+	{
+		EV_GunshotDecalTrace(pTrace, EV_DamageDecal(pe));
+	}
+}
+
+static void EV_CheckTracer(int idx, float* vecSrc, float* end, float* forward, float* right, int iBulletType, int iTracerFreq, int* tracerCount)
 {
 	int i;
 	bool player = idx >= 1 && idx <= gEngfuncs.GetMaxClients();
@@ -337,7 +367,7 @@ FireBullets
 Go to the trouble of combining multiple pellets into a single damage call.
 ================
 */
-void EV_HLDM_FireBullets(int idx, float* forward, float* right, float* up, int cShots, float* vecSrc, float* vecDirShooting, float flDistance, int iBulletType, int iTracerFreq, int* tracerCount, float flSpreadX, float flSpreadY, int iRandomSeed = -1)
+static void EV_FireBullets(int idx, float* forward, float* right, float* up, int cShots, float* vecSrc, float* vecDirShooting, float flDistance, int iBulletType, int iTracerFreq, int* tracerCount, float flSpreadX, float flSpreadY, int iRandomSeed = -1)
 {
 	int i;
 	pmtrace_t tr;
@@ -382,37 +412,16 @@ void EV_HLDM_FireBullets(int idx, float* forward, float* right, float* up, int c
 		gEngfuncs.pEventAPI->EV_SetTraceHull(2);
 		gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_STUDIO_BOX, -1, &tr);
 
-		EV_HLDM_CheckTracer(idx, vecSrc, tr.endpos, forward, right, iBulletType, iTracerFreq, tracerCount);
+		EV_CheckTracer(idx, vecSrc, tr.endpos, forward, right, iBulletType, iTracerFreq, tracerCount);
 
 		// do damage, paint decals
 		if (tr.fraction != 1.0)
 		{
-			switch (iBulletType)
+			if (iBulletType != BULLET_PLAYER_MP5 && iBulletType != BULLET_PLAYER_BUCKSHOT)
 			{
-			default:
-			case BULLET_PLAYER_9MM:
-
-				EV_HLDM_PlayTextureSound(idx, &tr, vecSrc, vecEnd, iBulletType);
-				EV_HLDM_DecalGunshot(&tr, iBulletType);
-
-				break;
-			case BULLET_PLAYER_MP5:
-
-				EV_HLDM_PlayTextureSound(idx, &tr, vecSrc, vecEnd, iBulletType);
-				EV_HLDM_DecalGunshot(&tr, iBulletType);
-				break;
-			case BULLET_PLAYER_BUCKSHOT:
-
-				EV_HLDM_DecalGunshot(&tr, iBulletType);
-
-				break;
-			case BULLET_PLAYER_357:
-
-				EV_HLDM_PlayTextureSound(idx, &tr, vecSrc, vecEnd, iBulletType);
-				EV_HLDM_DecalGunshot(&tr, iBulletType);
-
-				break;
+				EV_PlayTextureSound(idx, &tr, vecSrc, vecEnd, iBulletType);
 			}
+			EV_DecalGunshot(&tr, iBulletType, vecDir);
 		}
 
 		gEngfuncs.pEventAPI->EV_PopPMStates();
@@ -464,7 +473,7 @@ void EV_FireGlock(event_args_t* args)
 
 	VectorCopy(forward, vecAiming);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, args->iparam2, vecSrc, vecAiming, 8192, BULLET_PLAYER_9MM, 0, &tracerCount[idx - 1], args->fparam1, args->fparam2, args->iparam1);
+	EV_FireBullets(idx, forward, right, up, args->iparam2, vecSrc, vecAiming, 8192, BULLET_PLAYER_9MM, 0, &tracerCount[idx - 1], args->fparam1, args->fparam2, args->iparam1);
 }
 //======================
 //	   GLOCK END
@@ -518,11 +527,11 @@ void EV_FireShotGunDouble(event_args_t* args)
 
 	if (UTIL_IsDeathmatch())
 	{
-		EV_HLDM_FireBullets(idx, forward, right, up, 8, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.17365, 0.04362, args->iparam1);
+		EV_FireBullets(idx, forward, right, up, 8, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.17365, 0.04362, args->iparam1);
 	}
 	else
 	{
-		EV_HLDM_FireBullets(idx, forward, right, up, 12, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.08716, 0.08716, args->iparam1);
+		EV_FireBullets(idx, forward, right, up, 12, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.08716, 0.08716, args->iparam1);
 	}
 }
 
@@ -568,11 +577,11 @@ void EV_FireShotGunSingle(event_args_t* args)
 
 	if (UTIL_IsDeathmatch())
 	{
-		EV_HLDM_FireBullets(idx, forward, right, up, 4, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.08716, 0.04362, args->iparam1);
+		EV_FireBullets(idx, forward, right, up, 4, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.08716, 0.04362, args->iparam1);
 	}
 	else
 	{
-		EV_HLDM_FireBullets(idx, forward, right, up, 6, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.08716, 0.08716, args->iparam1);
+		EV_FireBullets(idx, forward, right, up, 6, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.08716, 0.08716, args->iparam1);
 	}
 }
 //======================
@@ -632,11 +641,11 @@ void EV_FireMP5(event_args_t* args)
 
 	if (UTIL_IsDeathmatch())
 	{
-		EV_HLDM_FireBullets(idx, forward, right, up, args->iparam2, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 2, &tracerCount[idx - 1], 0.05234, 0.05234, args->iparam1);
+		EV_FireBullets(idx, forward, right, up, args->iparam2, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 2, &tracerCount[idx - 1], 0.05234, 0.05234, args->iparam1);
 	}
 	else
 	{
-		EV_HLDM_FireBullets(idx, forward, right, up, args->iparam2, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 2, &tracerCount[idx - 1], 0.02618, 0.02618, args->iparam1);
+		EV_FireBullets(idx, forward, right, up, args->iparam2, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 2, &tracerCount[idx - 1], 0.02618, 0.02618, args->iparam1);
 	}
 }
 
@@ -716,7 +725,7 @@ void EV_FirePython(event_args_t* args)
 
 	VectorCopy(forward, vecAiming);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_357, 0, &tracerCount[idx - 1], 0.00873, 0.00873, args->iparam1);
+	EV_FireBullets(idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_357, 0, &tracerCount[idx - 1], 0.00873, 0.00873, args->iparam1);
 }
 //======================
 //	    PYTHON END
@@ -923,7 +932,7 @@ void EV_FireGauss(event_args_t* args)
 			else
 			{
 				// tunnel
-				EV_HLDM_DecalGunshot(&tr, BULLET_MONSTER_12MM);
+				EV_DecalGunshot(&tr, BULLET_MONSTER_12MM, forward);
 
 				gEngfuncs.pEfxAPI->R_TempSprite(tr.endpos, vec3_origin, 1.0, m_iGlow, kRenderGlow, kRenderFxNoDissipation, flDamage / 255.0, 6.0, FTENT_FADEOUT);
 
@@ -977,7 +986,7 @@ void EV_FireGauss(event_args_t* args)
 									255, 100);
 							}
 
-							EV_HLDM_DecalGunshot(&beam_tr, BULLET_MONSTER_12MM);
+							EV_DecalGunshot(&beam_tr, BULLET_MONSTER_12MM, forward);
 
 							gEngfuncs.pEfxAPI->R_TempSprite(beam_tr.endpos, vec3_origin, 0.1, m_iGlow, kRenderGlow, kRenderFxNoDissipation, flDamage / 255.0, 6.0, FTENT_FADEOUT);
 
@@ -1166,7 +1175,7 @@ void EV_FireCrossbow2(event_args_t* args)
 			}
 		}
 
-		EV_HLDM_DecalGunshot(&tr, BULLET_PLAYER_9MM);
+		EV_DecalGunshot(&tr, BULLET_PLAYER_9MM, forward);
 	}
 
 	gEngfuncs.pEventAPI->EV_PopPMStates();
@@ -1664,3 +1673,103 @@ void EV_TrainPitchAdjust(event_args_t* args)
 		gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_STATIC, sz, m_flVolume, ATTN_NORM, SND_CHANGE_PITCH, pitch);
 	}
 }
+
+static void EV_GibTouch(struct tempent_s* ent, struct pmtrace_s* ptr)
+{
+	EV_DecalTrace(ptr, EV_DecalName("{blood%i", 6));
+
+	// 1 in 5 chance of squishy sound
+	if (gEngfuncs.pfnRandomLong(0, 4) > 0)
+	{
+		return;
+	}
+
+	switch (gEngfuncs.pfnRandomLong(0, 5))
+	{
+	case 0: gEngfuncs.pEventAPI->EV_PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	case 1: gEngfuncs.pEventAPI->EV_PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	case 2: gEngfuncs.pEventAPI->EV_PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	case 3: gEngfuncs.pEventAPI->EV_PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	case 4: gEngfuncs.pEventAPI->EV_PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh6.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	case 5: gEngfuncs.pEventAPI->EV_PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh7.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	}
+}
+
+static void EV_SpawnGibs(event_args_t* args, int count)
+{
+	auto rotate = Vector(
+		gEngfuncs.pfnRandomLong(-100, 100),
+		gEngfuncs.pfnRandomLong(-100, 100),
+		gEngfuncs.pfnRandomLong(-100, 100)
+	);
+	TEMPENTITY *gib;
+	Vector velocity, dir;
+	auto modelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex("models/hgibs.mdl");
+	auto body = 0;
+	Vector forward;
+	AngleVectors(args->angles, forward, nullptr, nullptr);
+	forward = forward * -1.0f;
+	while (--count >= 0)
+	{
+		dir = forward;
+		dir[0] += gEngfuncs.pfnRandomFloat(-0.30, 0.30);
+		dir[1] += gEngfuncs.pfnRandomFloat(-0.30, 0.30);
+		dir[2] += gEngfuncs.pfnRandomFloat(-0.30, 0.30);
+
+		velocity = dir * gEngfuncs.pfnRandomFloat(500, 1200);
+		velocity[2] += 600;
+
+		gib = gEngfuncs.pEfxAPI->R_TempModel(args->origin, velocity, rotate, 15.0f, modelIndex, TE_BOUNCE_NULL);
+
+		if (gib != nullptr)
+		{
+			gib->flags |= (FTENT_COLLIDEWORLD | FTENT_ROTATE | FTENT_FADEOUT | FTENT_CLIENTCUSTOM | FTENT_SMOKETRAIL);
+			gib->entity.curstate.body = body;
+			gib->hitcallback = EV_GibTouch;
+		}
+
+		body = gEngfuncs.pfnRandomLong(1, 5);
+	}
+}
+
+static void EV_SpawnCorpse(event_args_t* args)
+{
+	auto player = gEngfuncs.GetEntityByIndex(args->entindex);
+	if (player == nullptr)
+	{
+		return;
+	}
+	auto model = gEngfuncs.hudGetModelByIndex(gEngfuncs.pEventAPI->EV_FindModelIndex("models/player.mdl"));
+	if (model == nullptr)
+	{
+		return;
+	}
+	auto gib = gEngfuncs.pEfxAPI->CL_TempEntAllocHigh(args->origin, model);
+	if (gib == nullptr)
+	{
+		return;
+	}
+	/*! FIXME: Doesn't actually fade because dead player render mode uses render amount. */
+	/*! FIXME: Colormap doesn't get copied. */
+	gib->flags |= (FTENT_COLLIDEWORLD | FTENT_PERSIST | FTENT_GRAVITY | FTENT_FADEOUT);
+	gib->entity.origin = player->origin;
+	gib->entity.angles = player->angles;
+	gib->entity.curstate.sequence = args->iparam1;
+	gib->entity.curstate.frame = 0.0f;
+	gib->entity.curstate.framerate = 1.0f;
+	gib->entity.curstate.renderfx = kRenderFxDeadPlayer;
+	gib->entity.curstate.renderamt = args->entindex;
+	gib->die = gEngfuncs.GetClientTime() + 15.0f;
+}
+
+void EV_Gibbed(event_args_t* args)
+{
+	if (violence_hgibs->value != 0.0f && (args->iparam2 == GIB_ALWAYS || (args->iparam2 == GIB_NORMAL && args->fparam2 < -40.0f)))
+	{
+		gEngfuncs.pEventAPI->EV_PlaySound(0, args->origin, CHAN_STATIC, "common/bodysplat.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+		EV_SpawnGibs(args, 5);
+		return;
+	}
+	EV_SpawnCorpse(args);
+}
+

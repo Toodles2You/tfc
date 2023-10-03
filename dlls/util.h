@@ -291,7 +291,6 @@ extern bool UTIL_IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator);
 extern void UTIL_BloodStream(const Vector& origin, const Vector& direction, int color, int amount);
 extern void UTIL_BloodDrips(const Vector& origin, const Vector& direction, int color, int amount);
 extern Vector UTIL_RandomBloodVector();
-extern bool UTIL_ShouldShowBlood(int bloodColor);
 extern void UTIL_BloodDecalTrace(TraceResult* pTrace, int bloodColor);
 extern void UTIL_DecalTrace(TraceResult* pTrace, int decalNumber);
 extern void UTIL_PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber, bool bIsCustom);
@@ -393,12 +392,6 @@ void DBG_AssertFunction(bool fExpr, const char* szExpr, const char* szFile, int 
 //
 // Un-comment only as needed
 //
-#define LANGUAGE_ENGLISH 0
-#define LANGUAGE_GERMAN 1
-#define LANGUAGE_FRENCH 2
-#define LANGUAGE_BRITISH 3
-
-inline DLL_GLOBAL int g_Language;
 
 #define AMBIENT_SOUND_STATIC 0 // medium radius attenuation
 #define AMBIENT_SOUND_EVERYWHERE 1

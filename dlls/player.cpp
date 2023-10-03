@@ -43,6 +43,8 @@
 
 extern edict_t* EntSelectSpawnPoint(CBaseEntity* pPlayer);
 
+unsigned short g_usGibbed;
+
 #define TRAIN_ACTIVE 0x80
 #define TRAIN_NEW 0xc0
 #define TRAIN_OFF 0x00
@@ -556,7 +558,9 @@ void CBasePlayer::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iG
 {
 	// Holster weapon immediately, to allow it to cleanup
 	if (m_pActiveItem)
+	{
 		m_pActiveItem->Holster();
+	}
 
 	g_pGameRules->PlayerKilled(this, pevAttacker, pevInflictor);
 
@@ -572,31 +576,30 @@ void CBasePlayer::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iG
 	m_fNextSuicideTime = gpGlobals->time + 1.0f;
 
 	pev->deadflag = DEAD_DYING;
-	pev->movetype = MOVETYPE_TOSS;
-	ClearBits(pev->flags, FL_ONGROUND);
-	if (pev->velocity.z < 10)
-		pev->velocity.z += RANDOM_FLOAT(0, 300);
 
 	SetSuitUpdate(NULL, false, 0);
 
 	m_iFOV = 0;
 
-	if ((pev->health < -40 && iGib != GIB_NEVER) || iGib == GIB_ALWAYS)
-	{
-		pev->solid = SOLID_NOT;
-		EMIT_SOUND(ENT(pev), CHAN_WEAPON, "common/bodysplat.wav", 1, ATTN_NORM);
-#if 0
-		CGib::SpawnHeadGib(pev);
-		CGib::SpawnRandomGibs(pev, 4, true); // throw some human gibs.
-#endif
-		pev->effects |= EF_NODRAW;
-		return;
-	}
+	pev->solid = SOLID_NOT;
+	pev->effects |= EF_NODRAW;
 
 	DeathSound();
 
-	pev->angles.x = 0;
-	pev->angles.z = 0;
+	PLAYBACK_EVENT_FULL(
+		FEV_GLOBAL | FEV_RELIABLE,
+		edict(),
+		g_usGibbed,
+		0.0f,
+		pev->origin,
+		UTIL_VecToAngles(g_vecAttackDir),
+		0.0,
+		pev->health,
+		pev->sequence,
+		iGib,
+		false,
+		false
+	);
 }
 
 
@@ -2888,37 +2891,6 @@ void CSprayCan::Think()
 	pev->nextthink = gpGlobals->time + 0.1;
 }
 
-class CBloodSplat : public CBaseEntity
-{
-public:
-	void Spawn(entvars_t* pevOwner);
-	void Spray();
-};
-
-void CBloodSplat::Spawn(entvars_t* pevOwner)
-{
-	pev->origin = pevOwner->origin + Vector(0, 0, 32);
-	pev->angles = pevOwner->v_angle;
-	pev->owner = ENT(pevOwner);
-
-	SetThink(&CBloodSplat::Spray);
-	pev->nextthink = gpGlobals->time + 0.1;
-}
-
-void CBloodSplat::Spray()
-{
-	TraceResult tr;
-
-	if (g_Language != LANGUAGE_GERMAN)
-	{
-		UTIL_MakeVectors(pev->angles);
-		UTIL_TraceLine(pev->origin, pev->origin + gpGlobals->v_forward * 128, ignore_monsters, pev->owner, &tr);
-
-		UTIL_BloodDecalTrace(&tr, BLOOD_COLOR_RED);
-	}
-	SetThink(&CBloodSplat::SUB_Remove);
-	pev->nextthink = gpGlobals->time + 0.1;
-}
 
 //==============================================
 
@@ -3204,14 +3176,6 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 	}
 	break;
 	case 202: // Random blood splatter
-		UTIL_MakeVectors(pev->v_angle);
-		UTIL_TraceLine(pev->origin + pev->view_ofs, pev->origin + pev->view_ofs + gpGlobals->v_forward * 128, ignore_monsters, ENT(pev), &tr);
-
-		if (tr.flFraction != 1.0)
-		{ // line hit something, so paint a decal
-			CBloodSplat* pBlood = GetClassPtr((CBloodSplat*)NULL);
-			pBlood->Spawn(pev);
-		}
 		break;
 	case 203: // remove creature.
 		pEntity = UTIL_FindEntityForward(this);

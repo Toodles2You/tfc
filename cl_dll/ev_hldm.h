@@ -7,11 +7,6 @@
 
 #pragma once
 
-void EV_HLDM_GunshotDecalTrace(pmtrace_t* pTrace, char* decalName);
-void EV_HLDM_DecalGunshot(pmtrace_t* pTrace, int iBulletType);
-void EV_HLDM_CheckTracer(int idx, float* vecSrc, float* end, float* forward, float* right, int iBulletType, int iTracerFreq, int* tracerCount);
-void EV_HLDM_FireBullets(int idx, float* forward, float* right, float* up, int cShots, float* vecSrc, float* vecDirShooting, float flDistance, int iBulletType, int iTracerFreq, int* tracerCount, float flSpreadX, float flSpreadY, int iRandomSeed);
-
 // HLDM
 void EV_FireGlock(event_args_t* args);
 void EV_FireShotGunSingle(event_args_t* args);
@@ -32,6 +27,7 @@ void EV_EgonStop(event_args_t* args);
 void EV_HornetGunFire(event_args_t* args);
 void EV_TripmineFire(event_args_t* args);
 void EV_SnarkFire(event_args_t* args);
+void EV_Gibbed(event_args_t* args);
 
 
 

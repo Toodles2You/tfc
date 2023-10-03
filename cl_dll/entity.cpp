@@ -385,6 +385,7 @@ void DLLEXPORT HUD_TempEntUpdate(
 	int i;
 	TEMPENTITY *pTemp, *pnext, *pprev;
 	float freq, gravity, gravitySlow, life, fastFreq;
+	int hull;
 
 	Vector vAngles;
 
@@ -471,6 +472,8 @@ void DLLEXPORT HUD_TempEntUpdate(
 		{
 			pprev = pTemp;
 
+			hull = (pTemp->entity.curstate.renderfx == kRenderFxDeadPlayer) ? 0 : 2;
+
 			VectorCopy(pTemp->entity.origin, pTemp->entity.prevstate.origin);
 
 			if ((pTemp->flags & FTENT_SPARKSHOWER) != 0)
@@ -533,7 +536,11 @@ void DLLEXPORT HUD_TempEntUpdate(
 					pTemp->entity.origin[i] += pTemp->entity.baseline.origin[i] * frametime;
 			}
 
-			if ((pTemp->flags & FTENT_SPRANIMATE) != 0)
+			if (pTemp->entity.curstate.renderfx == kRenderFxDeadPlayer)
+			{
+				pTemp->entity.curstate.frame += 255 * frametime * pTemp->entity.curstate.framerate;
+			}
+			else if ((pTemp->flags & FTENT_SPRANIMATE) != 0)
 			{
 				pTemp->entity.curstate.frame += frametime * pTemp->entity.curstate.framerate;
 				if (pTemp->entity.curstate.frame >= pTemp->frameMax)
@@ -582,7 +589,7 @@ void DLLEXPORT HUD_TempEntUpdate(
 					pmtrace_t pmtrace;
 					physent_t* pe;
 
-					gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+					gEngfuncs.pEventAPI->EV_SetTraceHull(hull);
 
 					gEngfuncs.pEventAPI->EV_PlayerTrace(pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX, -1, &pmtrace);
 
@@ -607,7 +614,7 @@ void DLLEXPORT HUD_TempEntUpdate(
 				{
 					pmtrace_t pmtrace;
 
-					gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+					gEngfuncs.pEventAPI->EV_SetTraceHull(hull);
 
 					gEngfuncs.pEventAPI->EV_PlayerTrace(pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX | PM_WORLD_ONLY, -1, &pmtrace);
 
@@ -705,7 +712,16 @@ void DLLEXPORT HUD_TempEntUpdate(
 
 			if ((pTemp->flags & FTENT_SMOKETRAIL) != 0)
 			{
-				gEngfuncs.pEfxAPI->R_RocketTrail(pTemp->entity.prevstate.origin, pTemp->entity.origin, 1);
+				auto sequence = 2;
+				if (pTemp->entity.baseline.sequence == 69)
+				{
+					sequence = 1;
+				}
+				else if (pTemp->entity.baseline.sequence == 70)
+				{
+					sequence = 0;
+				}
+				gEngfuncs.pEfxAPI->R_RocketTrail(pTemp->entity.prevstate.origin, pTemp->entity.origin, sequence);
 			}
 
 			if ((pTemp->flags & FTENT_GRAVITY) != 0)

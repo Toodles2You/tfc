@@ -42,6 +42,8 @@
 
 void LinkUserMessages();
 
+extern unsigned short g_usGibbed;
+
 
 /*
 ===========
@@ -883,6 +885,7 @@ void ClientPrecache()
 
 	if (giPrecacheGrunt)
 		UTIL_PrecacheOther("monster_human_grunt");
+	g_usGibbed = PRECACHE_EVENT(1, "events/gibs.sc");
 }
 
 /*

@@ -1133,24 +1133,6 @@ bool UTIL_IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator)
 	return true;
 }
 
-bool UTIL_ShouldShowBlood(int color)
-{
-	if (color != DONT_BLEED)
-	{
-		if (color == BLOOD_COLOR_RED)
-		{
-			if (CVAR_GET_FLOAT("violence_hblood") != 0)
-				return true;
-		}
-		else
-		{
-			if (CVAR_GET_FLOAT("violence_ablood") != 0)
-				return true;
-		}
-	}
-	return false;
-}
-
 int UTIL_PointContents(const Vector& vec)
 {
 	return POINT_CONTENTS(vec);
@@ -1158,12 +1140,10 @@ int UTIL_PointContents(const Vector& vec)
 
 void UTIL_BloodStream(const Vector& origin, const Vector& direction, int color, int amount)
 {
-	if (!UTIL_ShouldShowBlood(color))
+	if (color == DONT_BLEED || amount == 0)
+	{
 		return;
-
-	if (g_Language == LANGUAGE_GERMAN && color == BLOOD_COLOR_RED)
-		color = 0;
-
+	}
 
 	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, origin);
 	WRITE_BYTE(TE_BLOODSTREAM);
@@ -1180,14 +1160,10 @@ void UTIL_BloodStream(const Vector& origin, const Vector& direction, int color, 
 
 void UTIL_BloodDrips(const Vector& origin, const Vector& direction, int color, int amount)
 {
-	if (!UTIL_ShouldShowBlood(color))
-		return;
-
 	if (color == DONT_BLEED || amount == 0)
+	{
 		return;
-
-	if (g_Language == LANGUAGE_GERMAN && color == BLOOD_COLOR_RED)
-		color = 0;
+	}
 
 	if (UTIL_IsDeathmatch())
 	{
@@ -1195,8 +1171,7 @@ void UTIL_BloodDrips(const Vector& origin, const Vector& direction, int color, i
 		amount *= 2;
 	}
 
-	if (amount > 255)
-		amount = 255;
+	amount = std::min(amount, 255);
 
 	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, origin);
 	WRITE_BYTE(TE_BLOODSPRITE);
@@ -1224,12 +1199,17 @@ Vector UTIL_RandomBloodVector()
 
 void UTIL_BloodDecalTrace(TraceResult* pTrace, int bloodColor)
 {
-	if (UTIL_ShouldShowBlood(bloodColor))
+	if (bloodColor == DONT_BLEED)
 	{
-		if (bloodColor == BLOOD_COLOR_RED)
-			UTIL_DecalTrace(pTrace, DECAL_BLOOD1 + RANDOM_LONG(0, 5));
-		else
-			UTIL_DecalTrace(pTrace, DECAL_YBLOOD1 + RANDOM_LONG(0, 5));
+		return;
+	}
+	if (bloodColor == BLOOD_COLOR_RED)
+	{
+		UTIL_DecalTrace(pTrace, DECAL_BLOOD1 + RANDOM_LONG(0, 5));
+	}
+	else
+	{
+		UTIL_DecalTrace(pTrace, DECAL_YBLOOD1 + RANDOM_LONG(0, 5));
 	}
 }
 
