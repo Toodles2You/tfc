@@ -1592,52 +1592,41 @@ int GetWeaponData(struct edict_s* player, struct weapon_data_s* info)
 	ItemInfo II;
 
 	if (!pl)
-		return 1;
-
-	// go through all of the weapons and make a list of the ones to pack
-	for (i = 0; i < MAX_ITEM_TYPES; i++)
 	{
-		if (pl->m_rgpPlayerItems[i])
+		return 1;
+	}
+
+	for (auto it : pl->m_lpPlayerItems)
+	{
+		gun = it->GetWeaponPtr();
+
+		if (!gun)
 		{
-			// there's a weapon here. Should I pack it?
-			CBasePlayerItem* pPlayerItem = pl->m_rgpPlayerItems[i];
-
-			while (pPlayerItem)
-			{
-				gun = pPlayerItem->GetWeaponPtr();
-				if (gun)
-				{
-					// Get The ID.
-					memset(&II, 0, sizeof(II));
-					gun->GetItemInfo(&II);
-
-					if (II.iId >= 0 && II.iId < MAX_WEAPONS)
-					{
-						item = &info[II.iId];
-
-						item->m_iId = II.iId;
-						item->m_iClip = gun->m_iClip;
-
-						*(int*)&item->m_flTimeWeaponIdle = V_max(gun->m_iTimeWeaponIdle, -1);
-						*(int*)&item->m_flNextPrimaryAttack = V_max(gun->m_iNextPrimaryAttack, -1);
-						*(int*)&item->m_flNextSecondaryAttack = V_max(gun->m_iNextSecondaryAttack, -1);
-						item->m_fInReload = static_cast<int>(gun->m_fInReload);
-						item->m_fInSpecialReload = gun->m_fInSpecialReload;
-						item->fuser1 = V_max(gun->pev->fuser1, -0.001);
-						item->fuser2 = gun->m_flStartThrow;
-						item->fuser3 = gun->m_flReleaseThrow;
-						item->iuser1 = gun->m_chargeReady;
-						item->iuser2 = gun->m_fInAttack;
-						item->iuser3 = gun->m_fireState;
-
-						gun->GetWeaponData(*item);
-
-						//						item->m_flPumpTime				= V_max( gun->m_flPumpTime, -0.001 );
-					}
-				}
-				pPlayerItem = pPlayerItem->m_pNext;
-			}
+			continue;
 		}
+
+		// Get The ID.
+		memset(&II, 0, sizeof(II));
+		gun->GetItemInfo(&II);
+
+		item = &info[II.iId];
+
+		item->m_iId = II.iId;
+		item->m_iClip = gun->m_iClip;
+
+		*(int*)&item->m_flTimeWeaponIdle = V_max(gun->m_iTimeWeaponIdle, -1);
+		*(int*)&item->m_flNextPrimaryAttack = V_max(gun->m_iNextPrimaryAttack, -1);
+		*(int*)&item->m_flNextSecondaryAttack = V_max(gun->m_iNextSecondaryAttack, -1);
+		item->m_fInReload = static_cast<int>(gun->m_fInReload);
+		item->m_fInSpecialReload = gun->m_fInSpecialReload;
+		item->fuser1 = V_max(gun->pev->fuser1, -0.001);
+		item->fuser2 = gun->m_flStartThrow;
+		item->fuser3 = gun->m_flReleaseThrow;
+		item->iuser1 = gun->m_chargeReady;
+		item->iuser2 = gun->m_fInAttack;
+		item->iuser3 = gun->m_fireState;
+
+		gun->GetWeaponData(*item);
 	}
 	return 1;
 }

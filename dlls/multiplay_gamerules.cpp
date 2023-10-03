@@ -919,22 +919,13 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, CBasePlayerItem
 	if (weaponstay.value > 0)
 	{
 		if ((pItem->iFlags() & ITEM_FLAG_LIMITINWORLD) != 0)
-			return CGameRules::CanHavePlayerItem(pPlayer, pItem);
-
-		// check if the player already has this weapon
-		for (int i = 0; i < MAX_ITEM_TYPES; i++)
 		{
-			CBasePlayerItem* it = pPlayer->m_rgpPlayerItems[i];
+			return CGameRules::CanHavePlayerItem(pPlayer, pItem);
+		}
 
-			while (it != NULL)
-			{
-				if (it->m_iId == pItem->m_iId)
-				{
-					return false;
-				}
-
-				it = it->m_pNext;
-			}
+		if (pPlayer->HasPlayerItem(pItem))
+		{
+			return false;
 		}
 	}
 

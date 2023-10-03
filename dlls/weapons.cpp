@@ -353,7 +353,6 @@ void W_Precache()
 TYPEDESCRIPTION CBasePlayerItem::m_SaveData[] =
 	{
 		DEFINE_FIELD(CBasePlayerItem, m_pPlayer, FIELD_CLASSPTR),
-		DEFINE_FIELD(CBasePlayerItem, m_pNext, FIELD_CLASSPTR),
 		//DEFINE_FIELD( CBasePlayerItem, m_fKnown, FIELD_INTEGER ),Reset to zero on load
 		DEFINE_FIELD(CBasePlayerItem, m_iId, FIELD_INTEGER),
 		// DEFINE_FIELD( CBasePlayerItem, m_iIdPrimary, FIELD_INTEGER ),
@@ -950,7 +949,7 @@ LINK_ENTITY_TO_CLASS(weaponbox, CWeaponBox);
 TYPEDESCRIPTION CWeaponBox::m_SaveData[] =
 	{
 		DEFINE_ARRAY(CWeaponBox, m_rgAmmo, FIELD_INTEGER, MAX_AMMO_SLOTS),
-		DEFINE_ARRAY(CWeaponBox, m_rgpPlayerItems, FIELD_CLASSPTR, MAX_ITEM_TYPES),
+		DEFINE_ARRAY(CWeaponBox, m_rgpPlayerItems, FIELD_CLASSPTR, MAX_WEAPONS),
 		DEFINE_FIELD(CWeaponBox, m_cAmmoTypes, FIELD_INTEGER),
 };
 
@@ -1009,16 +1008,15 @@ void CWeaponBox::Kill()
 	int i;
 
 	// destroy the weapons
-	for (i = 0; i < MAX_ITEM_TYPES; i++)
+	for (i = 0; i < MAX_WEAPONS; i++)
 	{
 		pWeapon = m_rgpPlayerItems[i];
-
-		while (pWeapon)
+		if (!pWeapon)
 		{
-			pWeapon->SetThink(&CBasePlayerItem::SUB_Remove);
-			pWeapon->pev->nextthink = gpGlobals->time + 0.1;
-			pWeapon = pWeapon->m_pNext;
+			continue;
 		}
+		pWeapon->SetThink(&CBasePlayerItem::SUB_Remove);
+		pWeapon->pev->nextthink = gpGlobals->time + 0.1;
 	}
 
 	// remove the box
@@ -1049,6 +1047,7 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 	}
 
 	CBasePlayer* pPlayer = (CBasePlayer*)pOther;
+	CBasePlayerItem* pWeapon;
 	int i;
 
 	// dole out ammo
@@ -1064,25 +1063,20 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 	// go through my weapons and try to give the usable ones to the player.
 	// it's important the the player be given ammo first, so the weapons code doesn't refuse
 	// to deploy a better weapon that the player may pick up because he has no ammo for it.
-	for (i = 0; i < MAX_ITEM_TYPES; i++)
+	for (i = 0; i < MAX_WEAPONS; i++)
 	{
-		if (m_rgpPlayerItems[i])
+		pWeapon = m_rgpPlayerItems[i];
+
+		if (!pWeapon)
 		{
-			CBasePlayerItem* pItem;
+			continue;
+		}
 
-			// have at least one weapon in this slot
-			while (m_rgpPlayerItems[i])
-			{
-				//ALERT ( at_console, "trying to give %s\n", STRING( m_rgpPlayerItems[ i ]->pev->classname ) );
+		//ALERT ( at_console, "trying to give %s\n", STRING( pWeapon[ i ]->pev->classname ) );
 
-				pItem = m_rgpPlayerItems[i];
-				m_rgpPlayerItems[i] = m_rgpPlayerItems[i]->m_pNext; // unlink this weapon from the box
-
-				if (pPlayer->AddPlayerItem(pItem))
-				{
-					pItem->AttachToPlayer(pPlayer);
-				}
-			}
+		if (pPlayer->AddPlayerItem(pWeapon))
+		{
+			pWeapon->AttachToPlayer(pPlayer);
 		}
 	}
 
@@ -1111,20 +1105,7 @@ bool CWeaponBox::PackWeapon(CBasePlayerItem* pWeapon)
 		}
 	}
 
-	int iWeaponSlot = pWeapon->iItemSlot();
-
-	if (m_rgpPlayerItems[iWeaponSlot])
-	{
-		// there's already one weapon in this slot, so link this into the slot's column
-		pWeapon->m_pNext = m_rgpPlayerItems[iWeaponSlot];
-		m_rgpPlayerItems[iWeaponSlot] = pWeapon;
-	}
-	else
-	{
-		// first weapon we have for this slot
-		m_rgpPlayerItems[iWeaponSlot] = pWeapon;
-		pWeapon->m_pNext = NULL;
-	}
+	m_rgpPlayerItems[pWeapon->m_iId] = pWeapon;
 
 	pWeapon->pev->spawnflags |= SF_NORESPAWN; // never respawn
 	pWeapon->pev->movetype = MOVETYPE_NONE;
@@ -1187,18 +1168,11 @@ int CWeaponBox::GiveAmmo(int iCount, int iType, int iMax, int* pIndex /* = NULL*
 //=========================================================
 bool CWeaponBox::HasWeapon(CBasePlayerItem* pCheckItem)
 {
-	CBasePlayerItem* pItem = m_rgpPlayerItems[pCheckItem->iItemSlot()];
-
-	while (pItem)
+	if (pCheckItem->m_iId <= WEAPON_NONE || pCheckItem->m_iId >= MAX_WEAPONS)
 	{
-		if (FClassnameIs(pItem->pev, STRING(pCheckItem->pev->classname)))
-		{
-			return true;
-		}
-		pItem = pItem->m_pNext;
+		return false;
 	}
-
-	return false;
+	return m_rgpPlayerItems[pCheckItem->m_iId] != nullptr;
 }
 
 //=========================================================
@@ -1208,9 +1182,9 @@ bool CWeaponBox::IsEmpty()
 {
 	int i;
 
-	for (i = 0; i < MAX_ITEM_TYPES; i++)
+	for (i = 0; i < MAX_WEAPONS; i++)
 	{
-		if (m_rgpPlayerItems[i])
+		if (m_rgpPlayerItems[i] != nullptr)
 		{
 			return false;
 		}

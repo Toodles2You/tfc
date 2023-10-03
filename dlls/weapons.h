@@ -264,7 +264,6 @@ public:
 	static inline ItemInfo ItemInfoArray[MAX_WEAPONS];
 
 	CBasePlayer* m_pPlayer;
-	CBasePlayerItem* m_pNext;
 	int m_iId; // WEAPON_???
 
 	virtual int iItemSlot() { return 0; } // return 0 to MAX_ITEMS_SLOTS, used in hud
@@ -472,7 +471,7 @@ public:
 	bool PackWeapon(CBasePlayerItem* pWeapon);
 	bool PackAmmo(int iType, int iCount);
 
-	CBasePlayerItem* m_rgpPlayerItems[MAX_ITEM_TYPES]; // one slot for each
+	CBasePlayerItem* m_rgpPlayerItems[MAX_WEAPONS]; // one slot for each
 
 	int m_rgAmmo[MAX_AMMO_SLOTS];	 // ammo quantities
 

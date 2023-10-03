@@ -17,6 +17,8 @@
 
 #include "pm_materials.h"
 
+#include <forward_list>
+
 
 #define PLAYER_FATAL_FALL_SPEED 1024															  // approx 60 feet
 #define PLAYER_MAX_SAFE_FALL_SPEED 580															  // approx 20 feet
@@ -160,7 +162,8 @@ public:
 	int m_iClientHideHUD;
 	int m_iFOV;		  // field of view
 	// usable player items
-	CBasePlayerItem* m_rgpPlayerItems[MAX_ITEM_TYPES];
+	CBasePlayerItem* m_rgpPlayerItems[MAX_WEAPONS];
+	std::forward_list<CBasePlayerItem *> m_lpPlayerItems;
 	CBasePlayerItem* m_pActiveItem;
 	CBasePlayerItem* m_pClientActiveItem; // client version of the active item
 
@@ -258,8 +261,6 @@ public:
 	bool HasPlayerItem(CBasePlayerItem* pCheckItem);
 	bool HasNamedPlayerItem(const char* pszItemName);
 	bool HasWeapons(); // do I have ANY weapons?
-	void SelectPrevItem(int iItem);
-	void SelectNextItem(int iItem);
 	void SelectItem(const char* pstr);
 	void SelectItem(int iId);
 	void ItemPreFrame();

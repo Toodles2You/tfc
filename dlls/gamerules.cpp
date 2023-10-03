@@ -55,39 +55,36 @@ CBasePlayerItem* CGameRules::FindNextBestWeapon(CBasePlayer* pPlayer, CBasePlaye
 
 	int iBestWeight = -1; // no weapon lower than -1 can be autoswitched to
 
-	for (int i = 0; i < MAX_ITEM_TYPES; i++)
+	for (auto pCheck : pPlayer->m_lpPlayerItems)
 	{
-		for (auto pCheck = pPlayer->m_rgpPlayerItems[i]; pCheck; pCheck = pCheck->m_pNext)
+		// don't reselect the weapon we're trying to get rid of
+		if (pCheck == pCurrentWeapon)
 		{
-			// don't reselect the weapon we're trying to get rid of
-			if (pCheck == pCurrentWeapon)
-			{
-				continue;
-			}
+			continue;
+		}
 
-			if (pCheck->iWeight() > -1 && pCheck->iWeight() == currentWeight)
+		if (pCheck->iWeight() > -1 && pCheck->iWeight() == currentWeight)
+		{
+			// this weapon is from the same category.
+			if (pCheck->CanDeploy())
 			{
-				// this weapon is from the same category.
-				if (pCheck->CanDeploy())
+				if (pPlayer->SwitchWeapon(pCheck))
 				{
-					if (pPlayer->SwitchWeapon(pCheck))
-					{
-						return pCheck;
-					}
+					return pCheck;
 				}
 			}
-			else if (pCheck->iWeight() > iBestWeight)
+		}
+		else if (pCheck->iWeight() > iBestWeight)
+		{
+			//ALERT ( at_console, "Considering %s\n", STRING( pCheck->pev->classname ) );
+			// we keep updating the 'best' weapon just in case we can't find a weapon of the same weight
+			// that the player was using. This will end up leaving the player with his heaviest-weighted
+			// weapon.
+			if (pCheck->CanDeploy())
 			{
-				//ALERT ( at_console, "Considering %s\n", STRING( pCheck->pev->classname ) );
-				// we keep updating the 'best' weapon just in case we can't find a weapon of the same weight
-				// that the player was using. This will end up leaving the player with his heaviest-weighted
-				// weapon.
-				if (pCheck->CanDeploy())
-				{
-					// if this weapon is useable, flag it as the best
-					iBestWeight = pCheck->iWeight();
-					pBest = pCheck;
-				}
+				// if this weapon is useable, flag it as the best
+				iBestWeight = pCheck->iWeight();
+				pBest = pCheck;
 			}
 		}
 	}
