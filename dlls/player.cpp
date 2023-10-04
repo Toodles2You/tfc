@@ -44,6 +44,7 @@
 extern edict_t* EntSelectSpawnPoint(CBaseEntity* pPlayer);
 
 unsigned short g_usGibbed;
+unsigned short g_usTeleport;
 
 #define TRAIN_ACTIVE 0x80
 #define TRAIN_NEW 0xc0

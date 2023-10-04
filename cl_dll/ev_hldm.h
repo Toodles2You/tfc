@@ -28,6 +28,7 @@ void EV_HornetGunFire(event_args_t* args);
 void EV_TripmineFire(event_args_t* args);
 void EV_SnarkFire(event_args_t* args);
 void EV_Gibbed(event_args_t* args);
+void EV_Teleport(event_args_t* args);
 
 
 

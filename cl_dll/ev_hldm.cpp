@@ -1773,3 +1773,9 @@ void EV_Gibbed(event_args_t* args)
 	EV_SpawnCorpse(args);
 }
 
+void EV_Teleport(event_args_t* args)
+{
+	gEngfuncs.pEventAPI->EV_PlaySound(0, args->origin, CHAN_STATIC, "misc/r_tele1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+	gEngfuncs.pEfxAPI->R_TeleportSplash(args->origin);
+}
+

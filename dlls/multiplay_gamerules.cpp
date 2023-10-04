@@ -35,6 +35,8 @@
 
 CVoiceGameMgr g_VoiceGameMgr;
 
+extern unsigned short g_usTeleport;
+
 class CMultiplayGameMgrHelper : public IVoiceGameMgrHelper
 {
 public:
@@ -532,6 +534,8 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 	}
 
 	pPlayer->m_iAutoWepSwitch = originalAutoWepSwitch;
+
+	PLAYBACK_EVENT(FEV_GLOBAL | FEV_RELIABLE, pPlayer->edict(), g_usTeleport);
 }
 
 //=========================================================

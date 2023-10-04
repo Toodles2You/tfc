@@ -43,6 +43,7 @@
 void LinkUserMessages();
 
 extern unsigned short g_usGibbed;
+extern unsigned short g_usTeleport;
 
 
 /*
@@ -885,7 +886,10 @@ void ClientPrecache()
 
 	if (giPrecacheGrunt)
 		UTIL_PrecacheOther("monster_human_grunt");
+	PRECACHE_SOUND("misc/r_tele1.wav");
+
 	g_usGibbed = PRECACHE_EVENT(1, "events/gibs.sc");
+	g_usTeleport = PRECACHE_EVENT(1, "events/teleport.sc");
 }
 
 /*
