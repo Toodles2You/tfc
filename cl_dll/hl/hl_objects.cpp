@@ -70,6 +70,26 @@ void UpdateBeams(const float time)
 {
 	pmtrace_t tr;
 
+	if (g_CurrentWeaponId != WEAPON_EGON)
+	{
+		if (pBeam)
+		{
+			pBeam->die = time;
+			pBeam = nullptr;
+		}
+		if (pBeam2)
+		{
+			pBeam2->die = time;
+			pBeam2 = nullptr;
+		}
+		if (pFlare)
+		{
+			pFlare->die = time;
+			pFlare = nullptr;
+		}
+		return;
+	}
+
 	GetCrosshairTarget(&tr, 2048);
 
 	if (pBeam)
