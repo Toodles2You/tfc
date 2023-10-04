@@ -172,7 +172,6 @@ int CBasePlayer::GetCustomDecalFrames() { return -1; }
 void CBasePlayer::DropPlayerItem(char* pszItemName) {}
 bool CBasePlayer::HasPlayerItem(CBasePlayerItem* pCheckItem) { return false; }
 bool CBasePlayer::SwitchWeapon(CBasePlayerItem* pWeapon) { return false; }
-Vector CBasePlayer::GetGunPosition() { return g_vecZero; }
 const char* CBasePlayer::TeamID() { return ""; }
 int CBasePlayer::TeamNumber() { return 0; }
 int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax) { return 0; }

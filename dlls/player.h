@@ -195,7 +195,7 @@ public:
 	virtual void Duck();
 	virtual void PreThink();
 	virtual void PostThink();
-	Vector GetGunPosition();
+	inline Vector GetGunPosition() { return pev->origin + pev->view_ofs; }
 	bool TakeHealth(float flHealth, int bitsDamageType) override;
 	void TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) override;
 	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
