@@ -55,6 +55,7 @@ CHLBotManager::CHLBotManager()
 
 void CHLBotManager::ClientDisconnect(CBasePlayer *pPlayer)
 {
+	m_NextQuotaCheckTime = gpGlobals->time;
 }
 
 
@@ -96,10 +97,44 @@ bool CHLBotManager::ClientCommand(CBasePlayer *pPlayer, const char *pcmd)
 }
 
 
+void CHLBotManager::StartFrame()
+{
+	if (m_NextQuotaCheckTime <= gpGlobals->time)
+	{
+		auto humans = UTIL_HumansInGame();
+		auto quota = static_cast<int>(cv_bot_quota.value);
+		if (cv_bot_quota_match.value > 0.0f || humans == 0)
+		{
+			quota = humans;
+		}
+		quota = std::min(quota, gpGlobals->maxClients - humans);
+		auto bots = UTIL_BotsInGame();
+
+		while (bots < quota)
+		{
+			AddBot(nullptr);
+			bots++;
+		}
+
+		while (bots > quota)
+		{
+			UTIL_KickBotFromTeam(0);
+			bots--;
+		}
+
+		m_NextQuotaCheckTime = gpGlobals->time + 1.0f;
+	}
+
+	CBotManager::StartFrame();
+}
+
+
 void CHLBotManager::ServerActivate()
 {
 	TheBotProfiles = new BotProfileManager();
 	TheBotProfiles->Init(cv_bot_profile_db.string);
+
+	m_NextQuotaCheckTime = gpGlobals->time;
 }
 
 

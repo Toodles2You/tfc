@@ -22,7 +22,8 @@ public:
 	CHLBotManager();
 
 	void ClientDisconnect(CBasePlayer *pPlayer) override;
-	bool ClientCommand(CBasePlayer *pPlayer, const char *pcmd) override;
+	bool ClientCommand(CBasePlayer* pPlayer, const char* pcmd) override;
+	void StartFrame() override;
 
 	void ServerActivate() override;
 	void ServerDeactivate() override;
@@ -39,6 +40,7 @@ protected:
 	void AddBot(const char *profile = nullptr);
 
 	Place m_NavPlace;
+	float m_NextQuotaCheckTime;
 };
 
 inline DLL_GLOBAL CBotManager *g_pBotMan = nullptr;
