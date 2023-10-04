@@ -2940,20 +2940,7 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 	switch (iImpulse)
 	{
 	case 76:
-	{
-		if (!giPrecacheGrunt)
-		{
-			giPrecacheGrunt = true;
-			ALERT(at_console, "You must now restart to use Grunt-o-matic.\n");
-		}
-		else
-		{
-			UTIL_MakeVectors(Vector(0, pev->v_angle.y, 0));
-			Create("monster_human_grunt", pev->origin + gpGlobals->v_forward * 128, pev->angles);
-		}
 		break;
-	}
-
 
 	case 101:
 		gEvilImpulse101 = true;

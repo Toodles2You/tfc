@@ -884,8 +884,6 @@ void ClientPrecache()
 	PRECACHE_SOUND("player/geiger2.wav");
 	PRECACHE_SOUND("player/geiger1.wav");
 
-	if (giPrecacheGrunt)
-		UTIL_PrecacheOther("monster_human_grunt");
 	PRECACHE_SOUND("misc/r_tele1.wav");
 
 	g_usGibbed = PRECACHE_EVENT(1, "events/gibs.sc");
