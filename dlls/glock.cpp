@@ -120,7 +120,7 @@ void CGlock::GlockFire(float flSpread, int fCycleTime, bool fUseAutoAim)
 
 	m_pPlayer->FireBulletsPlayer(shots, vecSrc, vecAiming, Vector(flSpread, flSpread, flSpread), 8192, BULLET_PLAYER_9MM, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed);
 
-	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usFireGlock, 0.0, g_vecZero, g_vecZero, flSpread, flSpread, m_pPlayer->random_seed, shots, (m_iClip == 0) ? 1 : 0, fUseAutoAim);
+	m_pPlayer->PlaybackEvent(m_usFireGlock, flSpread, flSpread, m_pPlayer->random_seed, shots, m_iClip == 0, fUseAutoAim);
 
 	m_pPlayer->CheckAmmoLevel(this);
 

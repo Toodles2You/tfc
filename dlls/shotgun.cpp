@@ -124,7 +124,7 @@ void CShotgun::PrimaryAttack()
 		m_pPlayer->FireBulletsPlayer(6, vecSrc, vecAiming, VECTOR_CONE_10DEGREES, 2048, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed);
 	}
 
-	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usSingleFire, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, m_pPlayer->random_seed, 0, 0, 0);
+	m_pPlayer->PlaybackEvent(m_usSingleFire, 0.0, 0.0, m_pPlayer->random_seed);
 
 	m_pPlayer->CheckAmmoLevel(this);
 
@@ -175,7 +175,7 @@ void CShotgun::SecondaryAttack()
 		m_pPlayer->FireBulletsPlayer(12, vecSrc, vecAiming, VECTOR_CONE_10DEGREES, 2048, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed);
 	}
 
-	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usDoubleFire, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, m_pPlayer->random_seed, 0, 0, 0);
+	m_pPlayer->PlaybackEvent(m_usDoubleFire, 0.0, 0.0, m_pPlayer->random_seed);
 
 	m_pPlayer->CheckAmmoLevel(this);
 

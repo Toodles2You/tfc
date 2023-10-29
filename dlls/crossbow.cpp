@@ -314,7 +314,7 @@ void CCrossbow::FireSniperBolt()
 
 	m_iClip--;
 
-	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usCrossbow2, 0.0, g_vecZero, g_vecZero, 0, 0, m_iClip, 0, 0, 0);
+	m_pPlayer->PlaybackEvent(m_usCrossbow2, 0.0, 0.0, m_iClip);
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
@@ -348,7 +348,7 @@ void CCrossbow::FireBolt()
 
 	m_iClip--;
 
-	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usCrossbow, 0.0, g_vecZero, g_vecZero, 0, 0, m_iClip, 0, 0, 0);
+	m_pPlayer->PlaybackEvent(m_usCrossbow, 0.0, 0.0, m_iClip);
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);

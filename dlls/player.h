@@ -271,6 +271,16 @@ public:
 
 	int GiveAmmo(int iAmount, int iType, int iMax) override;
 
+	void PlaybackEvent(
+		unsigned short event,
+		float fParam1 = 0.0F,
+		float fParam2 = 0.0F,
+		int iParam1 = 0,
+		int iParam2 = 0,
+		qboolean bParam1 = false,
+		qboolean bParam2 = false,
+		unsigned int flags = FEV_NOTHOST);
+
 public:
 	void WaterMove();
 	void PlayerDeathFrame();

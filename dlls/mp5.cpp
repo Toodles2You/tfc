@@ -149,7 +149,7 @@ void CMP5::PrimaryAttack()
 		m_pPlayer->FireBulletsPlayer(shots, vecSrc, vecAiming, VECTOR_CONE_3DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed);
 	}
 
-	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usMP5, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, m_pPlayer->random_seed, shots, 0, 0);
+	m_pPlayer->PlaybackEvent(m_usMP5, 0.0, 0.0, m_pPlayer->random_seed, shots);
 
 	m_pPlayer->CheckAmmoLevel(this);
 
@@ -186,7 +186,7 @@ void CMP5::SecondaryAttack()
 		m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_forward * 16,
 		gpGlobals->v_forward * 800);
 
-	PLAYBACK_EVENT(FEV_NOTHOST, m_pPlayer->edict(), m_usMP52);
+	m_pPlayer->PlaybackEvent(m_usMP52);
 
 	m_iNextPrimaryAttack = m_iNextSecondaryAttack = 1000;
 	m_iTimeWeaponIdle = 5000; // idle pretty soon after shooting.

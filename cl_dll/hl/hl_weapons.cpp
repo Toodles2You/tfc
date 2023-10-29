@@ -370,6 +370,28 @@ void UTIL_ParticleLine(CBasePlayer* player, float* start, float* end, float life
 
 /*
 =====================
+HUD_PlaybackEvent
+
+Directly queue up an event on the client
+=====================
+*/
+void HUD_PlaybackEvent(int flags, const edict_t* pInvoker, unsigned short eventindex, float delay,
+	const float* origin, const float* angles, float fparam1, float fparam2, int iparam1, int iparam2, int bparam1, int bparam2)
+{
+	Vector org;
+	Vector ang;
+
+	if (!g_runfuncs || !g_finalstate)
+		return;
+
+	// Weapon prediction events are assumed to occur at the player's origin
+	org = g_finalstate->playerstate.origin;
+	ang = player.pev->v_angle + player.pev->punchangle * 2;
+	gEngfuncs.pfnPlaybackEvent(flags, pInvoker, eventindex, delay, org, ang, fparam1, fparam2, iparam1, iparam2, bparam1, bparam2);
+}
+
+/*
+=====================
 HUD_InitClientWeapons
 
 Set up weapons, player and functions needed to run weapons code client-side.
@@ -637,6 +659,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	player.m_iNextAttack = *(int*)&from->client.m_flNextAttack;
 	player.m_flNextAmmoBurn = from->client.fuser2;
 	player.m_flAmmoStartCharge = from->client.fuser3;
+	gEngfuncs.GetViewAngles(player.pev->v_angle);
+	player.pev->origin = from->client.origin;
+	player.pev->punchangle = from->client.punchangle;
 
 	//Stores all our ammo info, so the client side weapons can use them.
 	byte* ammo_shells = (byte*)&from->client.ammo_shells;
@@ -715,6 +740,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	to->client.fuser2 = player.m_flNextAmmoBurn;
 	to->client.fuser3 = player.m_flAmmoStartCharge;
 	to->client.maxspeed = player.pev->maxspeed;
+	to->client.punchangle = player.pev->punchangle;
 
 	//HL Weapons
 	ammo_shells = (byte*)&to->client.ammo_shells;

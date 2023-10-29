@@ -442,7 +442,7 @@ void CTripmine::PrimaryAttack()
 
 	UTIL_TraceLine(vecSrc, vecSrc + vecAiming * 128, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr);
 
-	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usTripFire, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
+	m_pPlayer->PlaybackEvent(m_usTripFire);
 
 	if (tr.flFraction < 1.0)
 	{

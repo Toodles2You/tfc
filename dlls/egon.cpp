@@ -165,7 +165,7 @@ void CEgon::Attack()
 
 		m_flAmmoUseTime = gpGlobals->time; // start using ammo ASAP.
 
-		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usEgonFire, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, m_fireMode, 1, 0);
+		m_pPlayer->PlaybackEvent(m_usEgonFire, 0.0, 0.0, 0, m_fireMode, true, false);
 
 		m_shakeTime = 0;
 
@@ -183,7 +183,7 @@ void CEgon::Attack()
 
 		if (pev->fuser1 <= UTIL_WeaponTimeBase())
 		{
-			PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usEgonFire, 0, g_vecZero, g_vecZero, 0.0, 0.0, 0, m_fireMode, 0, 0);
+			m_pPlayer->PlaybackEvent(m_usEgonFire, 0.0, 0.0, 0, m_fireMode, false, false);
 			pev->fuser1 = 1000;
 		}
 
@@ -488,8 +488,7 @@ void CEgon::EndAttack(bool bSendAnim)
 	if (m_fireState != FIRE_OFF) //Checking the button just in case!.
 		bMakeNoise = true;
 
-	PLAYBACK_EVENT_FULL(FEV_GLOBAL | FEV_RELIABLE, m_pPlayer->edict(), m_usEgonStop, 0, m_pPlayer->pev->origin, m_pPlayer->pev->angles, 0.0, 0.0,
-		static_cast<int>(bMakeNoise), 0, bSendAnim, 0);
+	m_pPlayer->PlaybackEvent(m_usEgonStop, 0.0, 0.0, bMakeNoise, 0, bSendAnim, false, FEV_GLOBAL | FEV_RELIABLE);
 
 	if (m_fireState != FIRE_OFF)
 	{

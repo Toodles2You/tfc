@@ -37,6 +37,5 @@ void stub_SetModel(struct edict_s* e, const char* m);
 
 extern bool g_runfuncs;
 extern Vector v_angles;
-extern Vector v_client_aimangles;
 extern struct local_state_s* g_finalstate;
 extern int g_CurrentWeaponId;

@@ -410,10 +410,7 @@ void CRpg::PrimaryAttack()
 		pRocket->pev->velocity = pRocket->pev->velocity + gpGlobals->v_forward * DotProduct(m_pPlayer->pev->velocity, gpGlobals->v_forward);
 #endif
 
-		// firing RPG no longer turns on the designator. ALT fire is a toggle switch for the LTD.
-		// Ken signed up for this as a global change (sjb)
-
-		PLAYBACK_EVENT(FEV_NOTHOST, m_pPlayer->edict(), m_usRpg);
+		m_pPlayer->PlaybackEvent(m_usRpg);
 
 		m_iClip--;
 
@@ -526,20 +523,16 @@ void CRpg::ToggleLaserDot(bool bOn, bool bSound)
 			m_pSpot = nullptr;
 		}
 	}
-	
-	PLAYBACK_EVENT_FULL(
-		FEV_GLOBAL | FEV_RELIABLE,
-		m_pPlayer->edict(),
+
+	m_pPlayer->PlaybackEvent(
 		bOn ? m_usLaserDotOn : m_usLaserDotOff,
-		0,
-		m_pPlayer->pev->origin,
-		m_pPlayer->pev->angles,
 		0.0,
 		0.0,
 		bSound ? 1 : 0,
 		0,
-		0,
-		0);
+		false,
+		false,
+		FEV_GLOBAL | FEV_RELIABLE);
 }
 
 void CRpg::SuspendLaserDot(float flSuspendTime)
@@ -547,19 +540,15 @@ void CRpg::SuspendLaserDot(float flSuspendTime)
 	if (m_pSpot == nullptr)
 		return;
 
-	PLAYBACK_EVENT_FULL(
-		FEV_GLOBAL | FEV_RELIABLE | FEV_UPDATE,
-		m_pPlayer->edict(),
+	m_pPlayer->PlaybackEvent(
 		m_usLaserDotOn,
-		0,
-		m_pPlayer->pev->origin,
-		m_pPlayer->pev->angles,
 		flSuspendTime,
 		0.0,
 		0,
 		0,
-		0,
-		0);
+		false,
+		false,
+		FEV_GLOBAL | FEV_RELIABLE | FEV_UPDATE);
 }
 
 IMPLEMENT_AMMO_CLASS(ammo_rpgclip, CRpgAmmo, "models/w_rpgammo.mdl", (UTIL_IsDeathmatch() ? AMMO_RPGCLIP_GIVE * 2 : AMMO_RPGCLIP_GIVE), AMMO_ROCKETS, ROCKET_MAX_CARRY);
