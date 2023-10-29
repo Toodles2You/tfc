@@ -2311,9 +2311,13 @@ pt_end:
 
 	const int msec = static_cast<int>(std::roundf(gpGlobals->frametime * 1000));
 
+	float len = VectorNormalize(pev->punchangle);
+	len -= (10.0 + len * 0.5) * gpGlobals->frametime;
+	len = V_max(len, 0.0);
+	VectorScale(pev->punchangle, len, pev->punchangle);
+
 	CBasePlayerWeapon* gun;
 	// Decay timers on weapons
-	// go through all of the weapons and make a list of the ones to pack
 	for (auto pPlayerItem : m_lpPlayerItems)
 	{
 		gun = pPlayerItem->GetWeaponPtr();

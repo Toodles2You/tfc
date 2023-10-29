@@ -785,6 +785,11 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		gHUD.Update_SetFOV(to->client.fov);
 	}
 
+	float len = VectorNormalize(to->client.punchangle);
+	len -= (10.0 + len * 0.5) * cmd->msec / 1000.0;
+	len = V_max(len, 0.0);
+	VectorScale(to->client.punchangle, len, to->client.punchangle);
+
 	static bool bAmmoUpdated[MAX_AMMO_SLOTS];
 	int iAmmoType, iAmmo2Type;
 
