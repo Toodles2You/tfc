@@ -88,6 +88,7 @@ cvar_t* cl_bob;
 cvar_t* cl_bobup;
 cvar_t* cl_waterdist;
 cvar_t* cl_chasedist;
+cvar_t* cl_bobview;
 
 // These cvars are not registered (so users can't cheat), so set the ->value field directly
 // Register these cvars in V_Init() if needed for easy tweaking
@@ -521,22 +522,18 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 
 	// refresh position
 	VectorCopy(pparams->simorg, pparams->vieworg);
-	pparams->vieworg[2] += (bob);
+
+	if (0 != cl_bobview->value)
+	{
+		pparams->vieworg[2] += (bob);
+	}
+
 	VectorAdd(pparams->vieworg, pparams->viewheight, pparams->vieworg);
 
 	VectorCopy(pparams->cl_viewangles, pparams->viewangles);
 
 	gEngfuncs.V_CalcShake();
 	gEngfuncs.V_ApplyShake(pparams->vieworg, pparams->viewangles, 1.0);
-
-	// never let view origin sit exactly on a node line, because a water plane can
-	// dissapear when viewed with the eye exactly on it.
-	// FIXME, we send origin at 1/128 now, change this?
-	// the server protocol only specifies to 1/16 pixel, so add 1/32 in each axis
-
-	pparams->vieworg[0] += 1.0 / 32;
-	pparams->vieworg[1] += 1.0 / 32;
-	pparams->vieworg[2] += 1.0 / 32;
 
 	// Check for problems around water, move the viewer artificially if necessary
 	// -- this prevents drawing errors in GL due to waves
@@ -654,15 +651,19 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 	{
 		view->origin[i] += bob * 0.4 * pparams->forward[i];
 	}
-	view->origin[2] += bob;
+
+	if (0 != cl_bobview->value)
+	{
+		view->origin[2] += bob;
+	}
 
 	// throw in a little tilt.
-	view->angles[YAW] -= bob * 0.5;
-	view->angles[ROLL] -= bob * 1;
-	view->angles[PITCH] -= bob * 0.3;
-
 	if (0 != cl_bobtilt->value)
 	{
+		view->angles[YAW] -= bob * 0.5;
+		view->angles[ROLL] -= bob * 1;
+		view->angles[PITCH] -= bob * 0.3;
+
 		VectorCopy(view->angles, view->curstate.angles);
 	}
 
@@ -1706,6 +1707,7 @@ void V_Init()
 	cl_bobup = gEngfuncs.pfnRegisterVariable("cl_bobup", "0.5", 0);
 	cl_waterdist = gEngfuncs.pfnRegisterVariable("cl_waterdist", "4", 0);
 	cl_chasedist = gEngfuncs.pfnRegisterVariable("cl_chasedist", "112", 0);
+	cl_bobview = gEngfuncs.pfnRegisterVariable("cl_bobview", "0", 0);
 }
 
 
