@@ -49,6 +49,8 @@ bool g_irunninggausspred = false;
 
 Vector previousorigin;
 
+Vector g_PunchAngle;
+
 // HLDM Weapon placeholder entities.
 CGlock g_Glock;
 CCrowbar g_Crowbar;
@@ -941,4 +943,5 @@ void DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* 
 	}
 
 	g_CurrentWeaponId = to->client.m_iId;
+	g_PunchAngle = to->client.punchangle * 2;
 }

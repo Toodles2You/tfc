@@ -33,7 +33,11 @@ extern TEMPENTITY* pFlare; // Vit_amiN: egon's energy flare
 extern TEMPENTITY* pLaserDot;
 void HUD_GetLastOrg(float* org);
 
-void GetCrosshairTarget(pmtrace_t* tr, float distance)
+extern Vector g_PunchAngle;
+
+Vector g_CrosshairTarget;
+
+static void GetCrosshairTarget(pmtrace_t* tr, float distance)
 {
 	Vector forward, vecSrc, vecEnd, origin, angles, right, up;
 	Vector view_ofs;
@@ -42,6 +46,7 @@ void GetCrosshairTarget(pmtrace_t* tr, float distance)
 
 	// Get our exact viewangles from engine
 	gEngfuncs.GetViewAngles((float*)angles);
+	angles = angles + g_PunchAngle;
 
 	// Determine our last predicted origin
 	HUD_GetLastOrg((float*)&origin);
@@ -66,10 +71,8 @@ void GetCrosshairTarget(pmtrace_t* tr, float distance)
 	gEngfuncs.pEventAPI->EV_PopPMStates();
 }
 
-void UpdateBeams(const float time)
+static void UpdateBeams(const float time, const pmtrace_t *tr)
 {
-	pmtrace_t tr;
-
 	if (g_CurrentWeaponId != WEAPON_EGON)
 	{
 		if (pBeam)
@@ -90,32 +93,30 @@ void UpdateBeams(const float time)
 		return;
 	}
 
-	GetCrosshairTarget(&tr, 2048);
-
 	if (pBeam)
 	{
-		pBeam->target = tr.endpos;
+		pBeam->target = tr->endpos;
 		pBeam->die = time + 0.1; // We keep it alive just a little bit forward in the future, just in case.
 	}
 
 	if (pBeam2)
 	{
-		pBeam2->target = tr.endpos;
+		pBeam2->target = tr->endpos;
 		pBeam2->die = time + 0.1; // We keep it alive just a little bit forward in the future, just in case.
 	}
 
 	if (pFlare) // Vit_amiN: beam flare
 	{
-		pFlare->entity.origin = tr.endpos;
+		pFlare->entity.origin = tr->endpos;
 		pFlare->die = time + 0.1f; // We keep it alive just a little bit forward in the future, just in case.
 
 		if (UTIL_IsDeathmatch()) // Singleplayer always draws the egon's energy beam flare
 		{
 			pFlare->flags |= FTENT_NOMODEL;
 
-			if (!(0 != tr.allsolid || tr.ent <= 0 || tr.fraction == 1.0f)) // Beam hit some non-world entity
+			if (!(0 != tr->allsolid || tr->ent <= 0 || tr->fraction == 1.0f)) // Beam hit some non-world entity
 			{
-				physent_t* pEntity = gEngfuncs.pEventAPI->EV_GetPhysent(tr.ent);
+				physent_t* pEntity = gEngfuncs.pEventAPI->EV_GetPhysent(tr->ent);
 
 				// Not the world, let's assume that we hit something organic ( dog, cat, uncle joe, etc )
 				if (pEntity && !(pEntity->solid == SOLID_BSP || pEntity->movetype == MOVETYPE_PUSHSTEP))
@@ -127,10 +128,8 @@ void UpdateBeams(const float time)
 	}
 }
 
-void UpdateLaserDot(const float time)
+static void UpdateLaserDot(const float time, const pmtrace_t *tr)
 {
-	pmtrace_t tr;
-
 	if (g_CurrentWeaponId != WEAPON_RPG)
 	{
 		pLaserDot->die = time;
@@ -150,9 +149,7 @@ void UpdateLaserDot(const float time)
 		pLaserDot->flags &= ~FTENT_NOMODEL;
 	}
 
-	GetCrosshairTarget(&tr, 8192);
-
-	pLaserDot->entity.origin = tr.endpos;
+	pLaserDot->entity.origin = tr->endpos;
 }
 
 /*
@@ -165,27 +162,44 @@ Add game specific, client-side objects here
 void Game_AddObjects()
 {
 	const auto time = gEngfuncs.GetClientTime();
+	pmtrace_t trShort;
+	pmtrace_t trLong;
+
+	GetCrosshairTarget(&trShort, 2048);
+
+	if (trShort.fraction == 1.0f)
+	{
+		GetCrosshairTarget(&trLong, 8192);
+	}
+	else
+	{
+		trLong = trShort;
+	}
+
+	g_CrosshairTarget = trLong.endpos;
 
 	if (pBeam || pBeam2 || pFlare)
-		UpdateBeams(time);
+	{
+		UpdateBeams(time, &trShort);
+	}
 	
 	if (pLaserDot)
-		UpdateLaserDot(time);
+	{
+		UpdateLaserDot(time, &trLong);
+	}
 	
 	if (gHUD.m_Flash.IsFlashlightOn())
 	{
-		pmtrace_t tr;
-		GetCrosshairTarget(&tr, 2048);
 		auto light = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
 
 		if (light)
 		{
-			light->origin = tr.endpos;
+			light->origin = trShort.endpos;
 			light->color.r = 255;
 			light->color.g = 255;
 			light->color.b = 255;
 			light->die = time + 0.001;
-			light->radius = 64;
+			light->radius = 64 * (1.0f - trShort.fraction);
 		}
 	}
 }

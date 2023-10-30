@@ -367,8 +367,8 @@ void V_CalcGunAngle(struct ref_params_s* pparams)
 	if (!viewent)
 		return;
 
-	viewent->angles[YAW] = pparams->viewangles[YAW] + pparams->crosshairangle[YAW];
-	viewent->angles[PITCH] = -pparams->viewangles[PITCH] + pparams->crosshairangle[PITCH] * 0.25;
+	viewent->angles[YAW] = pparams->viewangles[YAW] + pparams->punchangle[YAW] * 2;
+	viewent->angles[PITCH] = -(pparams->viewangles[PITCH] + pparams->punchangle[PITCH] * 2);
 	viewent->angles[ROLL] -= v_idlescale * sin(pparams->time * v_iroll_cycle.value) * v_iroll_level.value;
 
 	// don't apply all of the v_ipitch to prevent normally unseen parts of viewmodel from coming into view.
@@ -692,7 +692,11 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 	}
 
 	// Add in the punchangle, if any
+#if 1
 	VectorAdd(pparams->viewangles, pparams->punchangle, pparams->viewangles);
+#else
+	VectorMA(pparams->viewangles, 2, pparams->punchangle, pparams->viewangles);
+#endif
 
 	// Include client side punch, too
 	VectorAdd(pparams->viewangles, (float*)&ev_punchangle, pparams->viewangles);
