@@ -1011,7 +1011,7 @@ bool CHudAmmo::Draw(float flTime)
 //
 // Draws the ammo bar on the hud
 //
-int DrawBar(int x, int y, int width, int height, float f, CHud::hudcolor_e color, int a)
+static int DrawBar(int x, int y, int width, int height, float f, CHud::hudcolor_e color, int a)
 {
 	if (f < 0)
 		f = 0;
@@ -1037,7 +1037,7 @@ int DrawBar(int x, int y, int width, int height, float f, CHud::hudcolor_e color
 
 
 
-void DrawAmmoBar(WEAPON* p, int x, int y, int width, int height, CHud::hudcolor_e color, int a)
+static void DrawAmmoBar(WEAPON* p, int x, int y, int width, int height, CHud::hudcolor_e color, int a)
 {
 	if (!p)
 		return;

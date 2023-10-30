@@ -105,8 +105,7 @@ GAME_SHARED_OBJS = \
 PUBLIC_OBJS = \
 	$(PUBLIC_OBJ_DIR)/interface.o \
 	
-COMMON_OBJS = \
-	$(COMMON_OBJ_DIR)/mathlib.o
+COMMON_OBJS =
 
 all: dirs hl.$(SHLIBEXT)
 

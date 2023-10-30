@@ -106,7 +106,6 @@ PUBLIC_OBJS = \
 	$(PUBLIC_OBJ_DIR)/interface.o \
 
 COMMON_OBJS = \
-	$(COMMON_OBJ_DIR)/mathlib.o \
 	$(COMMON_OBJ_DIR)/parsemsg.o \
 
 GAME_SHARED_OBJS = \

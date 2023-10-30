@@ -728,8 +728,6 @@ typedef enum
 	kGamemodeTeamplay,
 } gamemode_e;
 
-#define _DEF_BYTE_
-
 typedef struct
 {
 	byte r, g, b;
