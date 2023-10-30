@@ -4,7 +4,7 @@
 # Feb 2001 by Leon Hartwig (hartwig@valvesoftware.com)
 #
 
-HLDLL_SRC_DIR=$(SOURCE_DIR)/dlls
+HLDLL_SRC_DIR=$(SOURCE_DIR)/server
 
 HLDLL_OBJ_DIR=$(BUILD_OBJ_DIR)/hldll
 PM_OBJ_DIR=$(HLDLL_OBJ_DIR)/pm_shared

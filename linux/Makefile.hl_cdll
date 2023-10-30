@@ -3,9 +3,9 @@
 #
 #
 
-HL_SRC_DIR=$(SOURCE_DIR)/cl_dll
-HL_PARTICLEMAN_DIR=$(SOURCE_DIR)/cl_dll/particleman
-HL_SERVER_SRC_DIR=$(SOURCE_DIR)/dlls
+HL_SRC_DIR=$(SOURCE_DIR)/client
+HL_PARTICLEMAN_DIR=$(SOURCE_DIR)/client/particleman
+HL_SERVER_SRC_DIR=$(SOURCE_DIR)/server
 
 HL1_OBJ_DIR=$(BUILD_OBJ_DIR)/hl1_client
 HL1_PARTICLEMAN_OBJ_DIR=$(BUILD_OBJ_DIR)/particleman
@@ -17,7 +17,7 @@ PM_SHARED_OBJ_DIR=$(HL1_OBJ_DIR)/pm_shared
 
 CFLAGS=$(BASE_CFLAGS) $(ARCH_CFLAGS) -DCLIENT_DLL
 
-INCLUDEDIRS=-I$(HL_SRC_DIR) -I$(HL_PARTICLEMAN_DIR) -I../dlls -I/usr/include/malloc -I$(COMMON_SRC_DIR) -I$(PUBLIC_SRC_DIR) -I../pm_shared -I../engine -I../external/vgui -I../game_shared -I../external
+INCLUDEDIRS=-I$(HL_SRC_DIR) -I$(HL_PARTICLEMAN_DIR) -I../server -I/usr/include/malloc -I$(COMMON_SRC_DIR) -I$(PUBLIC_SRC_DIR) -I../pm_shared -I../engine -I../external/vgui -I../game_shared -I../external
 
 LDFLAGS=$(SHLIBLDFLAGS) $(CPP_LIB) -L$(CFG) vgui.so -L. libSDL2-2.0.so.0
 
@@ -134,7 +134,7 @@ $(HL1_OBJ_DIR):
 	mkdir -p $(HL1_OBJ_DIR)
 	mkdir -p $(HL1_PARTICLEMAN_OBJ_DIR)
 	mkdir -p $(HL1_OBJ_DIR)/hl
-	mkdir -p $(HL1_OBJ_DIR)/dlls/wpn_shared
+	mkdir -p $(HL1_OBJ_DIR)/server/wpn_shared
 	mkdir -p $(HL1_OBJ_DIR)/VGUI
 
 $(HL1_SERVER_OBJ_DIR):
@@ -165,7 +165,7 @@ $(HL1_SERVER_OBJ_DIR)/%.o: $(HL_SERVER_SRC_DIR)/%.cpp $(filter-out $(wildcard  $
 $(HL1_OBJ_DIR)/%.o: $(HL_SRC_DIR)/hl/%.cpp $(filter-out $(wildcard  $(HL1_OBJ_DIR)),  $(HL1_OBJ_DIR))
 	$(DO_CC)
 
-$(HL1_OBJ_DIR)/%.o: $(HL_SRC_DIR)/dlls/wpn_shared/%.cpp $(filter-out $(wildcard  $(HL1_OBJ_DIR)),  $(HL1_OBJ_DIR))
+$(HL1_OBJ_DIR)/%.o: $(HL_SRC_DIR)/server/wpn_shared/%.cpp $(filter-out $(wildcard  $(HL1_OBJ_DIR)),  $(HL1_OBJ_DIR))
 	$(DO_CC)
 
 $(HL1_OBJ_DIR)/%.o: $(HL_SRC_DIR)/VGUI/%.cpp $(filter-out $(wildcard  $(HL1_OBJ_DIR)),  $(HL1_OBJ_DIR))
