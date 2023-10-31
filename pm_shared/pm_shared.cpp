@@ -1976,7 +1976,7 @@ Use for ease-in, ease-out style interpolation (accel/decel)
 Used by ducking code.
 ==================
 */
-float PM_SplineFraction(float value, float scale)
+static inline float PM_SplineFraction(float value, float scale)
 {
 	float valueSquared;
 
@@ -1987,7 +1987,7 @@ float PM_SplineFraction(float value, float scale)
 	return 3 * valueSquared - 2 * valueSquared * value;
 }
 
-void PM_FixPlayerCrouchStuck(int direction)
+static void PM_FixPlayerCrouchStuck(int direction)
 {
 	int hitent;
 	int i;
@@ -2009,55 +2009,35 @@ void PM_FixPlayerCrouchStuck(int direction)
 	VectorCopy(test, pmove->origin); // Failed
 }
 
-void PM_UnDuck()
+static bool PM_UnDuck(Vector newOrigin)
 {
-	int i;
-	pmtrace_t trace;
-	Vector newOrigin;
+	pmtrace_t trace = pmove->PM_PlayerTrace(newOrigin, newOrigin, PM_NORMAL, -1);
 
-	VectorCopy(pmove->origin, newOrigin);
-
-	if (pmove->onground != -1)
+	if (trace.startsolid != 0)
 	{
-		for (i = 0; i < 3; i++)
-		{
-			newOrigin[i] += (pmove->player_mins[1][i] - pmove->player_mins[0][i]);
-		}
+		return false;
 	}
+	
+	pmove->usehull = 0;
 
+	// Oh, no, changing hulls stuck us into something, try unsticking downward first.
 	trace = pmove->PM_PlayerTrace(newOrigin, newOrigin, PM_NORMAL, -1);
-
-	if (0 == trace.startsolid)
+	if (trace.startsolid != 0)
 	{
-		pmove->usehull = 0;
-
-		// Oh, no, changing hulls stuck us into something, try unsticking downward first.
-		trace = pmove->PM_PlayerTrace(newOrigin, newOrigin, PM_NORMAL, -1);
-		if (0 != trace.startsolid)
-		{
-			// See if we are stuck?  If so, stay ducked with the duck hull until we have a clear spot
-			//Con_Printf( "unstick got stuck\n" );
-			pmove->usehull = 1;
-			return;
-		}
-
-		pmove->flags &= ~FL_DUCKING;
-		pmove->bInDuck = 0;
-		pmove->view_ofs = VEC_VIEW;
-		pmove->flDuckTime = 0;
-
-		VectorCopy(newOrigin, pmove->origin);
-
-		// Recatagorize position since ducking can change origin
-		PM_CatagorizePosition();
+		// See if we are stuck?  If so, stay ducked with the duck hull until we have a clear spot
+		//Con_Printf( "unstick got stuck\n" );
+		pmove->usehull = 1;
+		return false;
 	}
+
+	return true;
 }
 
-void PM_Duck()
+
+
+static void PM_Duck()
 {
 	int i;
-	float time;
-	float duckFraction;
 
 	int buttonsChanged = (pmove->oldbuttons ^ pmove->cmd.buttons); // These buttons have changed this frame
 	int nButtonPressed = buttonsChanged & pmove->cmd.buttons;	   // The changed ones still down are "pressed"
@@ -2074,76 +2054,90 @@ void PM_Duck()
 		pmove->oldbuttons &= ~IN_DUCK;
 	}
 
-	// Prevent ducking if the iuser3 variable is set
-	if (0 != pmove->iuser3 || 0 != pmove->dead)
-	{
-		// Try to unduck
-		if ((pmove->flags & FL_DUCKING) != 0)
-		{
-			PM_UnDuck();
-		}
-		return;
-	}
+	bool isDucking = (pmove->flags & FL_DUCKING) != 0;
 
-	if ((pmove->flags & FL_DUCKING) != 0)
+	if (isDucking)
 	{
 		pmove->cmd.forwardmove *= PLAYER_DUCKING_MULTIPLIER;
 		pmove->cmd.sidemove *= PLAYER_DUCKING_MULTIPLIER;
 		pmove->cmd.upmove *= PLAYER_DUCKING_MULTIPLIER;
 	}
 
-	if ((pmove->cmd.buttons & IN_DUCK) != 0 || (0 != pmove->bInDuck) || (pmove->flags & FL_DUCKING) != 0)
+	constexpr float fMore = (VEC_DUCK_HULL_MIN.z - VEC_HULL_MIN.z);
+	bool wantDucking = (pmove->cmd.buttons & IN_DUCK) != 0 || pmove->dead != 0;
+
+	if (pmove->flDuckTime <= 0)
 	{
-		if ((pmove->cmd.buttons & IN_DUCK) != 0)
+		if (wantDucking == isDucking)
 		{
-			if ((nButtonPressed & IN_DUCK) != 0 && (pmove->flags & FL_DUCKING) == 0)
+			return;
+		}
+
+		if (!wantDucking)
+		{
+			Vector newOrigin = pmove->origin;
+			if (pmove->onground != -1)
 			{
-				// Use 1 second so super long jump will work
-				pmove->flDuckTime = 1000;
-				pmove->bInDuck = 1;
+				newOrigin.z += (pmove->player_mins[1].z - pmove->player_mins[0].z);
 			}
-
-			time = V_max(0.0, (1.0 - (float)pmove->flDuckTime / 1000.0));
-
-			if (0 != pmove->bInDuck)
+			else
 			{
-				// Finish ducking immediately if duck time is over or not on ground
-				if (((float)pmove->flDuckTime / 1000.0 <= (1.0 - TIME_TO_DUCK)) ||
-					(pmove->onground == -1))
-				{
-					pmove->usehull = 1;
-					pmove->view_ofs = VEC_DUCK_VIEW;
-					pmove->flags |= FL_DUCKING;
-					pmove->bInDuck = 0;
-
-					// HACKHACK - Fudge for collision bug - no time to fix this properly
-					if (pmove->onground != -1)
-					{
-						for (i = 0; i < 3; i++)
-						{
-							pmove->origin[i] -= (pmove->player_mins[1][i] - pmove->player_mins[0][i]);
-						}
-						// See if we are stuck?
-						PM_FixPlayerCrouchStuck(STUCK_MOVEUP);
-
-						// Recatagorize position since ducking can change origin
-						PM_CatagorizePosition();
-					}
-				}
-				else
-				{
-					float fMore = (VEC_DUCK_HULL_MIN[2] - VEC_HULL_MIN[2]);
-
-					// Calc parametric time
-					duckFraction = PM_SplineFraction(time, (1.0 / TIME_TO_DUCK));
-					pmove->view_ofs[2] = ((VEC_DUCK_VIEW[2] - fMore) * duckFraction) + (VEC_VIEW[2] * (1 - duckFraction));
-				}
+				newOrigin.z -= VEC_VIEW.z - VEC_DUCK_VIEW.z;
 			}
+			if (!PM_UnDuck(newOrigin))
+			{
+				return;
+			}
+			pmove->flags &= ~FL_DUCKING;
+			pmove->origin = newOrigin;
+			pmove->usehull = 0;
+			PM_CatagorizePosition();
+		}
+		pmove->bInDuck = wantDucking;
+		pmove->flDuckTime = 1000;
+	}
+
+	float time = V_max(0.0, (1.0 - pmove->flDuckTime / 1000));
+	bool doneDucking = (pmove->onground == -1) || (pmove->flDuckTime / 1000 <= (1.0 - TIME_TO_DUCK));
+
+	if (doneDucking)
+	{
+		if (pmove->bInDuck)
+		{
+			pmove->flags |= FL_DUCKING;
+			pmove->view_ofs = VEC_DUCK_VIEW;
+			pmove->usehull = 1;
+			if (pmove->onground != -1)
+			{
+				pmove->origin.z -= (pmove->player_mins[1].z - pmove->player_mins[0].z);
+				PM_FixPlayerCrouchStuck(STUCK_MOVEUP);
+			}
+			else
+			{
+				pmove->origin.z += VEC_VIEW.z - VEC_DUCK_VIEW.z;
+				PM_FixPlayerCrouchStuck(STUCK_MOVEDOWN);
+			}
+			PM_CatagorizePosition();
 		}
 		else
 		{
-			// Try to unduck
-			PM_UnDuck();
+			pmove->flags &= ~FL_DUCKING;
+			pmove->view_ofs = VEC_VIEW;
+			pmove->usehull = 0;
+		}
+		pmove->bInDuck = false;
+		pmove->flDuckTime = 0;
+	}
+	else
+	{
+		float duckFraction = PM_SplineFraction(time, (1.0 / TIME_TO_DUCK));
+		if (pmove->bInDuck)
+		{
+			pmove->view_ofs.z = ((VEC_DUCK_VIEW.z - fMore) * duckFraction) + (VEC_VIEW.z * (1 - duckFraction));
+		}
+		else
+		{
+			pmove->view_ofs.z = ((VEC_DUCK_VIEW.z - fMore) * (1 - duckFraction)) + (VEC_VIEW.z * duckFraction);
 		}
 	}
 }
