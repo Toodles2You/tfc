@@ -60,7 +60,6 @@ cvar_t* cl_movespeedkey;
 cvar_t* cl_yawspeed;
 cvar_t* cl_pitchspeed;
 cvar_t* cl_anglespeedkey;
-cvar_t* cl_vsmoothing;
 /*
 ===============================================================================
 
@@ -986,8 +985,6 @@ void InitInput()
 	cl_movespeedkey = gEngfuncs.pfnRegisterVariable("cl_movespeedkey", "0.3", 0);
 	cl_pitchup = gEngfuncs.pfnRegisterVariable("cl_pitchup", "89", 0);
 	cl_pitchdown = gEngfuncs.pfnRegisterVariable("cl_pitchdown", "89", 0);
-
-	cl_vsmoothing = gEngfuncs.pfnRegisterVariable("cl_vsmoothing", "0.05", FCVAR_ARCHIVE);
 
 	m_pitch = gEngfuncs.pfnRegisterVariable("m_pitch", "0.022", FCVAR_ARCHIVE);
 	m_yaw = gEngfuncs.pfnRegisterVariable("m_yaw", "0.022", FCVAR_ARCHIVE);

@@ -59,7 +59,6 @@ when crossing a water boudnary.
 extern cvar_t* cl_forwardspeed;
 extern cvar_t* chase_active;
 extern cvar_t *scr_ofsx, *scr_ofsy, *scr_ofsz;
-extern cvar_t* cl_vsmoothing;
 extern cvar_t* cl_rollangle;
 extern cvar_t* cl_rollspeed;
 extern cvar_t* cl_bobtilt;
@@ -466,21 +465,6 @@ void V_CalcIntermissionRefdef(struct ref_params_s* pparams)
 	v_angles = pparams->viewangles;
 }
 
-#define ORIGIN_BACKUP 64
-#define ORIGIN_MASK (ORIGIN_BACKUP - 1)
-
-typedef struct
-{
-	float Origins[ORIGIN_BACKUP][3];
-	float OriginTime[ORIGIN_BACKUP];
-
-	float Angles[ORIGIN_BACKUP][3];
-	float AngleTime[ORIGIN_BACKUP];
-
-	int CurrentOrigin;
-	int CurrentAngle;
-} viewinterp_t;
-
 /*
 ==================
 V_CalcRefdef
@@ -493,10 +477,6 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 	int i;
 	Vector angles;
 	float bob, waterOffset;
-	static viewinterp_t ViewInterp;
-
-	static float oldz = 0;
-	static float lasttime;
 
 	Vector camAngles, camForward, camRight, camUp;
 	cl_entity_t* pwater;
@@ -701,99 +681,7 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 	// Include client side punch, too
 	VectorAdd(pparams->viewangles, (float*)&ev_punchangle, pparams->viewangles);
 
-	V_DropPunchAngle(pparams->frametime, (float*)&ev_punchangle);
-
-	// smooth out stair step ups
-#if 1
-	if (0 == pparams->smoothing && 0 != pparams->onground && pparams->simorg[2] - oldz > 0)
-	{
-		float steptime;
-
-		steptime = pparams->time - lasttime;
-		if (steptime < 0)
-			//FIXME		I_Error ("steptime < 0");
-			steptime = 0;
-
-		oldz += steptime * 150;
-		if (oldz > pparams->simorg[2])
-			oldz = pparams->simorg[2];
-		if (pparams->simorg[2] - oldz > 18)
-			oldz = pparams->simorg[2] - 18;
-		pparams->vieworg[2] += oldz - pparams->simorg[2];
-		view->origin[2] += oldz - pparams->simorg[2];
-	}
-	else
-	{
-		oldz = pparams->simorg[2];
-	}
-#endif
-
-	{
-		static float lastorg[3];
-		Vector delta;
-
-		VectorSubtract(pparams->simorg, lastorg, delta);
-
-		if (Length(delta) != 0.0)
-		{
-			VectorCopy(pparams->simorg, ViewInterp.Origins[ViewInterp.CurrentOrigin & ORIGIN_MASK]);
-			ViewInterp.OriginTime[ViewInterp.CurrentOrigin & ORIGIN_MASK] = pparams->time;
-			ViewInterp.CurrentOrigin++;
-
-			VectorCopy(pparams->simorg, lastorg);
-		}
-	}
-
-	// Smooth out whole view in multiplayer when on trains, lifts
-	if (cl_vsmoothing && 0 != cl_vsmoothing->value &&
-		(0 != pparams->smoothing && (pparams->maxclients > 1)))
-	{
-		int foundidx;
-		int i;
-		float t;
-
-		if (cl_vsmoothing->value < 0.0)
-		{
-			gEngfuncs.Cvar_SetValue("cl_vsmoothing", 0.0);
-		}
-
-		t = pparams->time - cl_vsmoothing->value;
-
-		for (i = 1; i < ORIGIN_MASK; i++)
-		{
-			foundidx = ViewInterp.CurrentOrigin - 1 - i;
-			if (ViewInterp.OriginTime[foundidx & ORIGIN_MASK] <= t)
-				break;
-		}
-
-		if (i < ORIGIN_MASK && ViewInterp.OriginTime[foundidx & ORIGIN_MASK] != 0.0)
-		{
-			// Interpolate
-			Vector delta;
-			double frac;
-			double dt;
-			Vector neworg;
-
-			dt = ViewInterp.OriginTime[(foundidx + 1) & ORIGIN_MASK] - ViewInterp.OriginTime[foundidx & ORIGIN_MASK];
-			if (dt > 0.0)
-			{
-				frac = (t - ViewInterp.OriginTime[foundidx & ORIGIN_MASK]) / dt;
-				frac = V_min(1.0, frac);
-				VectorSubtract(ViewInterp.Origins[(foundidx + 1) & ORIGIN_MASK], ViewInterp.Origins[foundidx & ORIGIN_MASK], delta);
-				VectorMA(ViewInterp.Origins[foundidx & ORIGIN_MASK], frac, delta, neworg);
-
-				// Dont interpolate large changes
-				if (Length(delta) < 64)
-				{
-					VectorSubtract(neworg, pparams->simorg, delta);
-
-					VectorAdd(pparams->simorg, delta, pparams->simorg);
-					VectorAdd(pparams->vieworg, delta, pparams->vieworg);
-					VectorAdd(view->origin, delta, view->origin);
-				}
-			}
-		}
-	}
+	V_DropPunchAngle(pparams->frametime);
 
 	// Store off v_angles before munging for third person
 	v_angles = pparams->viewangles;
@@ -837,8 +725,6 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 			v_angles = pparams->viewangles;
 		}
 	}
-
-	lasttime = pparams->time;
 
 	v_origin = pparams->vieworg;
 }
