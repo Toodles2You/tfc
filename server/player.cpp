@@ -101,40 +101,11 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 		DEFINE_FIELD(CBasePlayer, m_iFOV, FIELD_INTEGER),
 
 		DEFINE_FIELD(CBasePlayer, m_SndRoomtype, FIELD_INTEGER),
-		// Don't save these. Let the game recalculate the closest env_sound, and continue to use the last room type like it always has.
-		//DEFINE_FIELD(CBasePlayer, m_SndLast, FIELD_EHANDLE),
-		//DEFINE_FIELD(CBasePlayer, m_flSndRange, FIELD_FLOAT),
 
 		DEFINE_FIELD(CBasePlayer, m_flStartCharge, FIELD_TIME),
-
-		//DEFINE_FIELD( CBasePlayer, m_fDeadTime, FIELD_FLOAT ), // only used in multiplayer games
-		//DEFINE_FIELD( CBasePlayer, m_fGameHUDInitialized, FIELD_INTEGER ), // only used in multiplayer games
-		//DEFINE_FIELD( CBasePlayer, m_flStopExtraSoundTime, FIELD_TIME ),
-		//DEFINE_FIELD( CBasePlayer, m_fKnownItem, FIELD_BOOLEAN ), // reset to zero on load
-		//DEFINE_FIELD( CBasePlayer, m_iPlayerSound, FIELD_INTEGER ),	// Don't restore, set in Precache()
-		//DEFINE_FIELD( CBasePlayer, m_fNewAmmo, FIELD_INTEGER ), // Don't restore, client needs reset
-		//DEFINE_FIELD( CBasePlayer, m_flgeigerRange, FIELD_FLOAT ),	// Don't restore, reset in Precache()
-		//DEFINE_FIELD( CBasePlayer, m_flgeigerDelay, FIELD_FLOAT ),	// Don't restore, reset in Precache()
-		//DEFINE_FIELD( CBasePlayer, m_igeigerRangePrev, FIELD_FLOAT ),	// Don't restore, reset in Precache()
-		//DEFINE_FIELD( CBasePlayer, m_iStepLeft, FIELD_INTEGER ), // Don't need to restore
-		//DEFINE_ARRAY( CBasePlayer, m_szTextureName, FIELD_CHARACTER, CBTEXTURENAMEMAX ), // Don't need to restore
-		//DEFINE_FIELD( CBasePlayer, m_chTextureType, FIELD_CHARACTER ), // Don't need to restore
-		//DEFINE_FIELD( CBasePlayer, m_fNoPlayerSound, FIELD_BOOLEAN ), // Don't need to restore, debug
-		//DEFINE_FIELD( CBasePlayer, m_iUpdateTime, FIELD_INTEGER ), // Don't need to restore
-		//DEFINE_FIELD( CBasePlayer, m_iClientHealth, FIELD_INTEGER ), // Don't restore, client needs reset
-		//DEFINE_FIELD( CBasePlayer, m_iClientBattery, FIELD_INTEGER ), // Don't restore, client needs reset
-		//DEFINE_FIELD( CBasePlayer, m_iClientHideHUD, FIELD_INTEGER ), // Don't restore, client needs reset
-		//DEFINE_FIELD( CBasePlayer, m_fWeapon, FIELD_BOOLEAN ),  // Don't restore, client needs reset
-		//DEFINE_FIELD( CBasePlayer, m_nCustomSprayFrames, FIELD_INTEGER ), // Don't restore, depends on server message after spawning and only matters in multiplayer
-		//DEFINE_FIELD( CBasePlayer, m_vecAutoAim, FIELD_VECTOR ), // Don't save/restore - this is recomputed
-		//DEFINE_ARRAY( CBasePlayer, m_rgAmmoLast, FIELD_INTEGER, MAX_AMMO_SLOTS ), // Don't need to restore
-		//DEFINE_FIELD( CBasePlayer, m_fOnTarget, FIELD_BOOLEAN ), // Don't need to restore
-		//DEFINE_FIELD( CBasePlayer, m_nCustomSprayFrames, FIELD_INTEGER ), // Don't need to restore
-
 };
 
 LINK_ENTITY_TO_CLASS(player, CBasePlayer);
-
 
 
 void CBasePlayer::Pain()
@@ -151,22 +122,6 @@ void CBasePlayer::Pain()
 		EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_pain7.wav", 1, ATTN_NORM);
 }
 
-/* 
- *
- */
-Vector VecVelocityForDamage(float flDamage)
-{
-	Vector vec(RANDOM_FLOAT(-100, 100), RANDOM_FLOAT(-100, 100), RANDOM_FLOAT(200, 300));
-
-	if (flDamage > -50)
-		vec = vec * 0.7;
-	else if (flDamage > -200)
-		vec = vec * 2;
-	else
-		vec = vec * 10;
-
-	return vec;
-}
 
 int TrainSpeed(int iSpeed, int iMax)
 {
@@ -1424,25 +1379,6 @@ void CBasePlayer::Jump()
 }
 
 
-
-// This is a glorious hack to find free space when you've crouched into some solid space
-// Our crouching collisions do not work correctly for some reason and this is easier
-// than fixing the problem :(
-void FixPlayerCrouchStuck(edict_t* pPlayer)
-{
-	TraceResult trace;
-
-	// Move up as many as 18 pixels if the player is stuck.
-	for (int i = 0; i < 18; i++)
-	{
-		UTIL_TraceHull(pPlayer->v.origin, pPlayer->v.origin, dont_ignore_monsters, head_hull, pPlayer, &trace);
-		if (0 != trace.fStartSolid)
-			pPlayer->v.origin.z++;
-		else
-			break;
-	}
-}
-
 void CBasePlayer::Duck()
 {
 	if ((pev->button & IN_DUCK) != 0)
@@ -1608,25 +1544,11 @@ void CBasePlayer::UpdateStatusBar()
 }
 
 
-
-
-
-
-
-
-
-#define CLIMB_SHAKE_FREQUENCY 22 // how many frames in between screen shakes when climbing
-#define MAX_CLIMB_SPEED 200		 // fastest vertical climbing speed possible
-#define CLIMB_SPEED_DEC 15		 // climbing deceleration rate
-#define CLIMB_PUNCH_X -7		 // how far to 'punch' client X axis when climbing
-#define CLIMB_PUNCH_Z 7			 // how far to 'punch' client Z axis when climbing
-
 void CBasePlayer::PreThink()
 {
 	int buttonsChanged = (m_afButtonLast ^ pev->button); // These buttons have changed this frame
 
 	// Debounced button codes for pressed/released
-	// UNDONE: Do we need auto-repeat?
 	m_afButtonPressed = buttonsChanged & pev->button;	  // The changed ones still down are "pressed"
 	m_afButtonReleased = buttonsChanged & (~pev->button); // The ones not down are "released"
 
@@ -1759,82 +1681,6 @@ void CBasePlayer::PreThink()
 		pev->velocity = g_vecZero;
 	}
 }
-/* Time based Damage works as follows: 
-	1) There are several types of timebased damage:
-
-		#define DMG_PARALYZE		(1 << 14)	// slows affected creature down
-		#define DMG_NERVEGAS		(1 << 15)	// nerve toxins, very bad
-		#define DMG_POISON			(1 << 16)	// blood poisioning
-		#define DMG_RADIATION		(1 << 17)	// radiation exposure
-		#define DMG_DROWNRECOVER	(1 << 18)	// drown recovery
-		#define DMG_ACID			(1 << 19)	// toxic chemicals or acid burns
-		#define DMG_SLOWBURN		(1 << 20)	// in an oven
-		#define DMG_SLOWFREEZE		(1 << 21)	// in a subzero freezer
-
-	2) A new hit inflicting tbd restarts the tbd counter - each monster has an 8bit counter,
-		per damage type. The counter is decremented every second, so the maximum time 
-		an effect will last is 255/60 = 4.25 minutes.  Of course, staying within the radius
-		of a damaging effect like fire, nervegas, radiation will continually reset the counter to max.
-
-	3) Every second that a tbd counter is running, the player takes damage.  The damage
-		is determined by the type of tdb.  
-			Paralyze		- 1/2 movement rate, 30 second duration.
-			Nervegas		- 5 points per second, 16 second duration = 80 points max dose.
-			Poison			- 2 points per second, 25 second duration = 50 points max dose.
-			Radiation		- 1 point per second, 50 second duration = 50 points max dose.
-			Drown			- 5 points per second, 2 second duration.
-			Acid/Chemical	- 5 points per second, 10 second duration = 50 points max.
-			Burn			- 10 points per second, 2 second duration.
-			Freeze			- 3 points per second, 10 second duration = 30 points max.
-
-	4) Certain actions or countermeasures counteract the damaging effects of tbds:
-
-		Armor/Heater/Cooler - Chemical(acid),burn, freeze all do damage to armor power, then to body
-							- recharged by suit recharger
-		Air In Lungs		- drowning damage is done to air in lungs first, then to body
-							- recharged by poking head out of water
-							- 10 seconds if swiming fast
-		Air In SCUBA		- drowning damage is done to air in tanks first, then to body
-							- 2 minutes in tanks. Need new tank once empty.
-		Radiation Syringe	- Each syringe full provides protection vs one radiation dosage
-		Antitoxin Syringe	- Each syringe full provides protection vs one poisoning (nervegas or poison).
-		Health kit			- Immediate stop to acid/chemical, fire or freeze damage.
-		Radiation Shower	- Immediate stop to radiation damage, acid/chemical or fire damage.
-		
-	
-*/
-
-// If player is taking time based damage, continue doing damage to player -
-// this simulates the effect of being poisoned, gassed, dosed with radiation etc -
-// anything that continues to do damage even after the initial contact stops.
-// Update all time based damage counters, and shut off any that are done.
-
-// The m_bitsDamageType bit MUST be set if any damage is to be taken.
-// This routine will detect the initial on value of the m_bitsDamageType
-// and init the appropriate counter.  Only processes damage every second.
-
-//#define PARALYZE_DURATION	30		// number of 2 second intervals to take damage
-//#define PARALYZE_DAMAGE		0.0		// damage to take each 2 second interval
-
-//#define NERVEGAS_DURATION	16
-//#define NERVEGAS_DAMAGE		5.0
-
-//#define POISON_DURATION		25
-//#define POISON_DAMAGE		2.0
-
-//#define RADIATION_DURATION	50
-//#define RADIATION_DAMAGE	1.0
-
-//#define ACID_DURATION		10
-//#define ACID_DAMAGE			5.0
-
-//#define SLOWBURN_DURATION	2
-//#define SLOWBURN_DAMAGE		1.0
-
-//#define SLOWFREEZE_DURATION	1.0
-//#define SLOWFREEZE_DAMAGE	3.0
-
-/* */
 
 
 void CBasePlayer::CheckTimeBasedDamage()
@@ -1934,72 +1780,6 @@ void CBasePlayer::CheckTimeBasedDamage()
 	}
 }
 
-/*
-THE POWER SUIT
-
-The Suit provides 3 main functions: Protection, Notification and Augmentation. 
-Some functions are automatic, some require power. 
-The player gets the suit shortly after getting off the train in C1A0 and it stays
-with him for the entire game.
-
-Protection
-
-	Heat/Cold
-		When the player enters a hot/cold area, the heating/cooling indicator on the suit 
-		will come on and the battery will drain while the player stays in the area. 
-		After the battery is dead, the player starts to take damage. 
-		This feature is built into the suit and is automatically engaged.
-	Radiation Syringe
-		This will cause the player to be immune from the effects of radiation for N seconds. Single use item.
-	Anti-Toxin Syringe
-		This will cure the player from being poisoned. Single use item.
-	Health
-		Small (1st aid kits, food, etc.)
-		Large (boxes on walls)
-	Armor
-		The armor works using energy to create a protective field that deflects a
-		percentage of damage projectile and explosive attacks. After the armor has been deployed,
-		it will attempt to recharge itself to full capacity with the energy reserves from the battery.
-		It takes the armor N seconds to fully charge. 
-
-Notification (via the HUD)
-
-x	Health
-x	Ammo  
-x	Automatic Health Care
-		Notifies the player when automatic healing has been engaged. 
-x	Geiger counter
-		Classic Geiger counter sound and status bar at top of HUD 
-		alerts player to dangerous levels of radiation. This is not visible when radiation levels are normal.
-x	Poison
-	Armor
-		Displays the current level of armor. 
-
-Augmentation 
-
-	Reanimation (w/adrenaline)
-		Causes the player to come back to life after he has been dead for 3 seconds. 
-		Will not work if player was gibbed. Single use.
-	Long Jump
-		Used by hitting the ??? key(s). Caused the player to further than normal.
-	SCUBA	
-		Used automatically after picked up and after player enters the water. 
-		Works for N seconds. Single use.	
-	
-Things powered by the battery
-
-	Armor		
-		Uses N watts for every M units of damage.
-	Heat/Cool	
-		Uses N watts for every second in hot/cold area.
-	Long Jump	
-		Uses N watts for every jump.
-	Alien Cloak	
-		Uses N watts for each use. Each use lasts M seconds.
-	Alien Shield	
-		Augments armor. Reduces Armor drain by one half
- 
-*/
 
 // if in range of radiation source, ping geiger counter
 
@@ -2386,8 +2166,6 @@ bool IsSpawnPointValid(CBaseEntity* pPlayer, CBaseEntity* pSpot)
 EntSelectSpawnPoint
 
 Returns the entity to spawn at
-
-USES AND SETS GLOBAL g_pLastSpawn
 ============
 */
 edict_t* EntSelectSpawnPoint(CBaseEntity* pPlayer)
@@ -2563,12 +2341,6 @@ void CBasePlayer::Spawn()
 
 void CBasePlayer::Precache()
 {
-	// SOUNDS / MODELS ARE PRECACHED in ClientPrecache() (game specific)
-	// because they need to precache before any clients have connected
-
-	// init geiger counter vars during spawn and each time
-	// we cross a level transition
-
 	m_flgeigerRange = 1000;
 	m_igeigerRangePrev = 1000;
 
@@ -2591,14 +2363,6 @@ bool CBasePlayer::Save(CSave& save)
 		return false;
 
 	return save.WriteFields("PLAYER", this, m_playerSaveData, ARRAYSIZE(m_playerSaveData));
-}
-
-
-//
-// Marks everything as new so the player will resend this to the hud.
-//
-void CBasePlayer::RenewItems()
-{
 }
 
 
@@ -2635,9 +2399,6 @@ bool CBasePlayer::Restore(CRestore& restore)
 
 	if (FBitSet(pev->flags, FL_DUCKING))
 	{
-		// Use the crouch HACK
-		//FixPlayerCrouchStuck( edict() );
-		// Don't need to do this with new player prediction code.
 		UTIL_SetSize(pev, VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX);
 	}
 	else
@@ -2655,8 +2416,6 @@ bool CBasePlayer::Restore(CRestore& restore)
 	{
 		g_engfuncs.pfnSetPhysicsKeyValue(edict(), "slj", "0");
 	}
-
-	RenewItems();
 
 	m_iNextAttack = 0;
 
@@ -2909,30 +2668,7 @@ void CBasePlayer::ImpulseCommands()
 	switch (iImpulse)
 	{
 	case 99:
-	{
-
-		bool iOn;
-
-		if (0 == gmsgLogo)
-		{
-			iOn = true;
-			gmsgLogo = REG_USER_MSG("Logo", 1);
-		}
-		else
-		{
-			iOn = false;
-		}
-
-		ASSERT(gmsgLogo > 0);
-		// send "health" update message
-		MESSAGE_BEGIN(MSG_ONE, gmsgLogo, NULL, pev);
-		WRITE_BYTE(static_cast<int>(iOn));
-		MESSAGE_END();
-
-		if (!iOn)
-			gmsgLogo = 0;
 		break;
-	}
 	case 100:
 		// temporary flashlight for level designers
 		break;
@@ -3267,6 +3003,8 @@ Called every frame by the player PostThink
 */
 void CBasePlayer::ItemPostFrame()
 {
+	ImpulseCommands();
+
 	// check if the player is using a tank
 	if (m_pTank != NULL)
 		return;
@@ -3275,8 +3013,6 @@ void CBasePlayer::ItemPostFrame()
 	{
 		return;
 	}
-
-	ImpulseCommands();
 
 	// check again if the player is using a tank if they started using it in PlayerUse
 	if (m_pTank != NULL)
@@ -3350,16 +3086,6 @@ void CBasePlayer::UpdateClientData()
 		MESSAGE_END();
 
 		m_iClientHideHUD = m_iHideHUD;
-	}
-
-	// HACKHACK -- send the message to display the game title
-	//TODO: will not work properly in multiplayer
-	if (gDisplayTitle)
-	{
-		MESSAGE_BEGIN(MSG_ONE, gmsgShowGameTitle, NULL, pev);
-		WRITE_BYTE(0);
-		MESSAGE_END();
-		gDisplayTitle = false;
 	}
 
 	if (m_WeaponBits != m_ClientWeaponBits)
@@ -3505,17 +3231,6 @@ void CBasePlayer::UpdateClientData()
 
 	//Handled anything that needs resetting
 	m_bRestored = false;
-}
-
-
-//=========================================================
-// FBecomeProne - Overridden for the player to set the proper
-// physics flags when a barnacle grabs player.
-//=========================================================
-bool CBasePlayer::FBecomeProne()
-{
-	m_afPhysicsFlags |= PFLAG_ONBARNACLE;
-	return true;
 }
 
 

@@ -87,14 +87,6 @@ DLL_DECALLIST gDecals[] = {
 	{"{mommablob", 0}, // DECAL_MOMMASPLAT		// BM Mortar spray?? need decal
 };
 
-/*
-==============================================================================
-
-BODY QUE
-
-==============================================================================
-*/
-
 #define SF_DECAL_NOTINDEATHMATCH 2048
 
 class CDecal : public CBaseEntity
@@ -447,9 +439,6 @@ void CWorld::Precache()
 
 	g_pLastSpawn = NULL;
 
-	CVAR_SET_STRING("sv_gravity", "800"); // 67ft/sec
-	CVAR_SET_STRING("sv_stepsize", "18");
-
 	// Set up game rules
 	delete g_pGameRules;
 
@@ -459,34 +448,25 @@ void CWorld::Precache()
 
 	g_pBotMan = new CGameBotManager();
 
-	//!!!UNDONE why is there so much Spawn code in the Precache function? I'll just keep it here
-
 	// init sentence group playback stuff from sentences.txt.
 	// ok to call this multiple times, calls after first are ignored.
-
 	SENTENCEG_Init();
 
 	// init texture type array from materials.txt
-
 	TEXTURETYPE_Init();
 
-
-	// the area based ambient sounds MUST be the first precache_sounds
-
 	// player precaches
-	W_Precache(); // get weapon precaches
-
+	W_Precache();
 	ClientPrecache();
-
 	BotPrecache();
 
 	// sounds used from C physics code
 	PRECACHE_SOUND("common/null.wav"); // clears sound channels
 
-	PRECACHE_SOUND("items/suitchargeok1.wav"); //!!! temporary sound for respawning weapons.
-	PRECACHE_SOUND("items/gunpickup2.wav");	   // player picks up a gun.
+	PRECACHE_SOUND("items/suitchargeok1.wav");
+	PRECACHE_SOUND("items/gunpickup2.wav");
 
-	PRECACHE_SOUND("common/bodydrop3.wav"); // dead bodies hitting the ground (animation events)
+	PRECACHE_SOUND("common/bodydrop3.wav");
 	PRECACHE_SOUND("common/bodydrop4.wav");
 
 	PRECACHE_MODEL("models/hgibs.mdl");
@@ -497,58 +477,26 @@ void CWorld::Precache()
 	PRECACHE_SOUND("weapons/ric3.wav");
 	PRECACHE_SOUND("weapons/ric4.wav");
 	PRECACHE_SOUND("weapons/ric5.wav");
-	//
-	// Setup light animation tables. 'a' is total darkness, 'z' is maxbright.
-	//
 
-	// 0 normal
 	LIGHT_STYLE(0, "m");
-
-	// 1 FLICKER (first variety)
 	LIGHT_STYLE(1, "mmnmmommommnonmmonqnmmo");
-
-	// 2 SLOW STRONG PULSE
 	LIGHT_STYLE(2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
-
-	// 3 CANDLE (first variety)
 	LIGHT_STYLE(3, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg");
-
-	// 4 FAST STROBE
 	LIGHT_STYLE(4, "mamamamamama");
-
-	// 5 GENTLE PULSE 1
 	LIGHT_STYLE(5, "jklmnopqrstuvwxyzyxwvutsrqponmlkj");
-
-	// 6 FLICKER (second variety)
 	LIGHT_STYLE(6, "nmonqnmomnmomomno");
-
-	// 7 CANDLE (second variety)
 	LIGHT_STYLE(7, "mmmaaaabcdefgmmmmaaaammmaamm");
-
-	// 8 CANDLE (third variety)
 	LIGHT_STYLE(8, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa");
-
-	// 9 SLOW STROBE (fourth variety)
 	LIGHT_STYLE(9, "aaaaaaaazzzzzzzz");
-
-	// 10 FLUORESCENT FLICKER
 	LIGHT_STYLE(10, "mmamammmmammamamaaamammma");
-
-	// 11 SLOW PULSE NOT FADE TO BLACK
 	LIGHT_STYLE(11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
-
-	// 12 UNDERWATER LIGHT MUTATION
-	// this light only distorts the lightmap - no contribution
-	// is made to the brightness of affected surfaces
 	LIGHT_STYLE(12, "mmnnmmnnnmmnn");
-
-	// styles 32-62 are assigned by the light program for switchable lights
-
-	// 63 testing
 	LIGHT_STYLE(63, "a");
 
 	for (int i = 0; i < ARRAYSIZE(gDecals); i++)
+	{
 		gDecals[i].index = DECAL_INDEX(gDecals[i].name);
+	}
 
 	if (g_pGameRules->FAllowMonsters())
 	{
@@ -577,46 +525,12 @@ void CWorld::Precache()
 		pev->nextthink = gpGlobals->time + 0.5f;
 	}
 
-	if (pev->speed > 0)
-		CVAR_SET_FLOAT("sv_zmax", pev->speed);
-	else
-		CVAR_SET_FLOAT("sv_zmax", 4096);
+	CVAR_SET_FLOAT("sv_zmax", (pev->speed > 0) ? pev->speed : 4096);
 
-	if (!FStringNull(pev->netname))
-	{
-		ALERT(at_aiconsole, "Chapter title: %s\n", STRING(pev->netname));
-		CBaseEntity* pEntity = CBaseEntity::Create("env_message", g_vecZero, g_vecZero, NULL);
-		if (pEntity)
-		{
-			pEntity->SetThink(&CBaseEntity::SUB_CallUseToggle);
-			pEntity->pev->message = pev->netname;
-			pev->netname = 0;
-			pEntity->pev->nextthink = gpGlobals->time + 0.3;
-			pEntity->pev->spawnflags = SF_MESSAGE_ONCE;
-		}
-	}
-
-	if ((pev->spawnflags & SF_WORLD_DARK) != 0)
-		CVAR_SET_FLOAT("v_dark", 1.0);
-	else
-		CVAR_SET_FLOAT("v_dark", 0.0);
-
-	gDisplayTitle = (pev->spawnflags & SF_WORLD_TITLE) != 0;
-
-	if ((pev->spawnflags & SF_WORLD_FORCETEAM) != 0)
-	{
-		CVAR_SET_FLOAT("mp_defaultteam", 1);
-	}
-	else
-	{
-		CVAR_SET_FLOAT("mp_defaultteam", 0);
-	}
+	CVAR_SET_FLOAT("mp_defaultteam", ((pev->spawnflags & SF_WORLD_FORCETEAM) != 0) ? 1 : 0);
 }
 
 
-//
-// Just to ignore the "wad" field.
-//
 bool CWorld::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "skyname"))
@@ -649,25 +563,27 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 	}
 	else if (FStrEq(pkvd->szKeyName, "startdark"))
 	{
-		// UNDONE: This is a gross hack!!! The CVAR is NOT sent over the client/sever link
-		// but it will work for single player
-		int flag = atoi(pkvd->szValue);
-		if (0 != flag)
+		if (0 != atoi(pkvd->szValue))
+		{	
 			pev->spawnflags |= SF_WORLD_DARK;
+		}
 		return true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "newunit"))
 	{
 		// Single player only.  Clear save directory if set
 		if (0 != atoi(pkvd->szValue))
+		{
 			CVAR_SET_FLOAT("sv_newunit", 1);
+		}
 		return true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "gametitle"))
 	{
 		if (0 != atoi(pkvd->szValue))
+		{
 			pev->spawnflags |= SF_WORLD_TITLE;
-
+		}
 		return true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "mapteams"))

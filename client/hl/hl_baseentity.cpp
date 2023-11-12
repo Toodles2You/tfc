@@ -150,7 +150,6 @@ void CBasePlayer::CheckAmmoLevel(CBasePlayerItem* pItem, bool bPrimary) {}
 void CBasePlayer::PostThink() {}
 void CBasePlayer::Precache() {}
 bool CBasePlayer::Save(CSave& save) { return false; }
-void CBasePlayer::RenewItems() {}
 bool CBasePlayer::Restore(CRestore& restore) { return false; }
 bool CBasePlayer::HasWeapons() { return false; }
 void CBasePlayer::SelectItem(const char* pstr) {}
@@ -164,7 +163,6 @@ void CBasePlayer::ItemPreFrame() {}
 void CBasePlayer::ItemPostFrame() {}
 int CBasePlayer::AmmoInventory(int iAmmoIndex) { return -1; }
 void CBasePlayer::UpdateClientData() {}
-bool CBasePlayer::FBecomeProne() { return true; }
 void CBasePlayer::EnableControl(bool fControl) {}
 Vector CBasePlayer::GetAimVector() { return g_vecZero; }
 void CBasePlayer::SetCustomDecalFrames(int nFrames) {}

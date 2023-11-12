@@ -76,10 +76,6 @@ typedef enum
 
 extern void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
 
-typedef void (CBaseEntity::*BASEPTR)();
-typedef void (CBaseEntity::*ENTITYFUNCPTR)(CBaseEntity* pOther);
-typedef void (CBaseEntity::*USEPTR)(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
-
 // For CLASSIFY
 #define CLASS_NONE 0
 #define CLASS_MACHINE 1
@@ -273,53 +269,11 @@ public:
 
 	static CBaseEntity* Instance(entvars_t* pev);
 
-
-	// Ugly code to lookup all functions to make sure they are exported when set.
-#ifdef _DEBUG
-	void FunctionCheck(void* pFunction, const char* name)
-	{
-		if (pFunction && !NAME_FOR_FUNCTION((uint32)pFunction))
-			ALERT(at_error, "No EXPORT: %s:%s (%08lx)\n", STRING(pev->classname), name, (uint32)pFunction);
-	}
-
-	BASEPTR ThinkSet(BASEPTR func, const char* name)
-	{
-		m_pfnThink = func;
-		FunctionCheck((void*)*((int*)((char*)this + (offsetof(CBaseEntity, m_pfnThink)))), name);
-		return func;
-	}
-	ENTITYFUNCPTR TouchSet(ENTITYFUNCPTR func, const char* name)
-	{
-		m_pfnTouch = func;
-		FunctionCheck((void*)*((int*)((char*)this + (offsetof(CBaseEntity, m_pfnTouch)))), name);
-		return func;
-	}
-	USEPTR UseSet(USEPTR func, const char* name)
-	{
-		m_pfnUse = func;
-		FunctionCheck((void*)*((int*)((char*)this + (offsetof(CBaseEntity, m_pfnUse)))), name);
-		return func;
-	}
-	ENTITYFUNCPTR BlockedSet(ENTITYFUNCPTR func, const char* name)
-	{
-		m_pfnBlocked = func;
-		FunctionCheck((void*)*((int*)((char*)this + (offsetof(CBaseEntity, m_pfnBlocked)))), name);
-		return func;
-	}
-
-#endif
-
-
-	// virtual functions used by a few classes
-
 	// used by monsters that are created by the MonsterMaker
 	virtual void UpdateOwner() {}
 
-
-	//
 	static CBaseEntity* Create(const char* szName, const Vector& vecOrigin, const Vector& vecAngles, edict_t* pentOwner = NULL);
 
-	virtual bool FBecomeProne() { return false; }
 	edict_t* edict() { return ENT(pev); }
 	int entindex() { return ENTINDEX(edict()); }
 
@@ -352,27 +306,10 @@ public:
 
 inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->edict()); }
 
-
-// Ugly technique to override base member functions
-// Normally it's illegal to cast a pointer to a member function of a derived class to a pointer to a
-// member function of a base class.  static_cast is a sleezy way around that problem.
-
-#ifdef _DEBUG
-
-#define SetThink(a) ThinkSet(static_cast<void (CBaseEntity::*)()>(a), #a)
-#define SetTouch(a) TouchSet(static_cast<void (CBaseEntity::*)(CBaseEntity*)>(a), #a)
-#define SetUse(a) UseSet(static_cast<void (CBaseEntity::*)(CBaseEntity * pActivator, CBaseEntity * pCaller, USE_TYPE useType, float value)>(a), #a)
-#define SetBlocked(a) BlockedSet(static_cast<void (CBaseEntity::*)(CBaseEntity*)>(a), #a)
-
-#else
-
 #define SetThink(a) m_pfnThink = static_cast<void (CBaseEntity::*)()>(a)
 #define SetTouch(a) m_pfnTouch = static_cast<void (CBaseEntity::*)(CBaseEntity*)>(a)
 #define SetUse(a) m_pfnUse = static_cast<void (CBaseEntity::*)(CBaseEntity * pActivator, CBaseEntity * pCaller, USE_TYPE useType, float value)>(a)
 #define SetBlocked(a) m_pfnBlocked = static_cast<void (CBaseEntity::*)(CBaseEntity*)>(a)
-
-#endif
-
 
 class CPointEntity : public CBaseEntity
 {
@@ -547,10 +484,6 @@ public:
 						// deactivated.
 };
 #define SetMoveDone(a) m_pfnCallWhenMoveDone = static_cast<void (CBaseToggle::*)()>(a)
-
-
-// people gib if their health is <= this at the time of death
-#define GIB_HEALTH_VALUE -30
 
 #define ROUTE_SIZE 8	  // how many waypoints a monster can store at one time
 #define MAX_OLD_ENEMIES 4 // how many old enemies to remember

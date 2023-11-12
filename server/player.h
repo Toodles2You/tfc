@@ -45,9 +45,6 @@
 //-----------------------------------------------------
 #define CSUITPLAYLIST 4 // max of 4 suit sentences queued up at any time
 
-#define SUIT_GROUP true
-#define SUIT_SENTENCE false
-
 #define SUIT_REPEAT_OK 0
 #define SUIT_NEXT_IN_30SEC 30
 #define SUIT_NEXT_IN_1MIN 60
@@ -211,7 +208,6 @@ public:
 
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
-	void RenewItems();
 	void PackDeadPlayerItems();
 	void RemoveAllItems(bool removeSuit);
 	bool SwitchWeapon(CBasePlayerItem* pWeapon);
@@ -292,14 +288,11 @@ public:
 	void CheckTimeBasedDamage();
 	void CheckAmmoLevel(CBasePlayerItem* pItem, bool bPrimary = true);
 
-	bool FBecomeProne() override;
 	int AmmoInventory(int iAmmoIndex);
 
 	Vector GetAimVector();
 
 	void ForceClientDllUpdate(); // Forces all client .dll specific data to be resent to client.
-
-	void DeathMessage(entvars_t* pevKiller);
 
 	void SetCustomDecalFrames(int nFrames);
 	int GetCustomDecalFrames();
@@ -364,16 +357,7 @@ inline void CBasePlayer::SetHasSuit(bool hasSuit)
 	}
 }
 
-#define AUTOAIM_2DEGREES 0.0348994967025
-#define AUTOAIM_5DEGREES 0.08715574274766
-#define AUTOAIM_8DEGREES 0.1391731009601
-#define AUTOAIM_10DEGREES 0.1736481776669
-
 inline bool gInitHUD = true;
 inline bool gEvilImpulse101 = false;
 
-/**
-*	@brief Display the game title if this key is set
-*/
-inline DLL_GLOBAL bool gDisplayTitle = false;
 inline DLL_GLOBAL CBaseEntity* g_pLastSpawn = nullptr;
