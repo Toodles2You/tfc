@@ -21,6 +21,8 @@
 #include "hltv.h"
 #include "Exports.h"
 
+#include <algorithm>
+
 int CL_IsThirdPerson();
 void CL_CameraOffset(float* ofs);
 
@@ -38,7 +40,7 @@ extern float vJumpOrigin[3];
 extern float vJumpAngles[3];
 
 
-void V_DropPunchAngle(float frametime, float* ev_punchangle);
+void V_DropPunchAngle(float frametime);
 void VectorAngles(const float* forward, float* angles);
 
 #include "r_studioint.h"
@@ -74,6 +76,7 @@ int v_cameraMode = CAM_MODE_FOCUS;
 bool v_resetCamera = true;
 
 Vector ev_punchangle;
+Vector ev_punchangleVel;
 
 cvar_t* scr_ofsx;
 cvar_t* scr_ofsy;
@@ -1548,20 +1551,40 @@ void DLLEXPORT V_CalcRefdef(struct ref_params_s* pparams)
 */
 }
 
+#define PUNCH_DAMPING 9.0f			// bigger number makes the response more damped, smaller is less damped
+									// currently the system will overshoot, with larger damping values it won't
+#define PUNCH_SPRING_CONSTANT 65.0f // bigger number increases the speed at which the view corrects
+
 /*
 =============
 V_DropPunchAngle
 
 =============
 */
-void V_DropPunchAngle(float frametime, float* ev_punchangle)
+void V_DropPunchAngle(float frametime)
 {
-	float len;
+	if (ev_punchangle.LengthSquared() > 0.001F || ev_punchangleVel.LengthSquared() > 0.001F)
+	{
+		ev_punchangle = ev_punchangle + ev_punchangleVel * frametime;
+		float damping = std::max(1 - (PUNCH_DAMPING * frametime), 0.0F);
 
-	len = VectorNormalize(ev_punchangle);
-	len -= (10.0 + len * 0.5) * frametime;
-	len = V_max(len, 0.0);
-	VectorScale(ev_punchangle, len, ev_punchangle);
+		ev_punchangleVel = ev_punchangleVel * damping;
+
+		// Torsional spring.
+		float springForceMagnitude = PUNCH_SPRING_CONSTANT * frametime;
+		springForceMagnitude = std::clamp(springForceMagnitude, 0.0F, 2.0F);
+		ev_punchangleVel = ev_punchangleVel - ev_punchangle * springForceMagnitude;
+
+		// Don't wrap around.
+		ev_punchangle.x = std::clamp(ev_punchangle.x, -89.F, 89.F),
+		ev_punchangle.y = std::clamp(ev_punchangle.y, -179.F, 179.F),
+		ev_punchangle.z = std::clamp(ev_punchangle.z, -89.F, 89.F);
+	}
+	else
+	{
+		ev_punchangle = g_vecZero;
+		ev_punchangleVel = g_vecZero;
+	}
 }
 
 /*
