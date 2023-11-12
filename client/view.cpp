@@ -84,6 +84,7 @@ cvar_t* scr_ofsz;
 
 cvar_t* v_centermove;
 cvar_t* v_centerspeed;
+cvar_t* v_oldpunch;
 
 cvar_t* cl_bobcycle;
 cvar_t* cl_bob;
@@ -1563,6 +1564,16 @@ V_DropPunchAngle
 */
 void V_DropPunchAngle(float frametime)
 {
+	if (v_oldpunch->value == 1)
+	{
+		float len;
+		len = VectorNormalize(ev_punchangle);
+		len -= (10.0 + len * 0.5) * frametime;
+		len = V_max(len, 0.0);
+		VectorScale(ev_punchangle, len, ev_punchangle);
+		return;
+	}
+
 	if (ev_punchangle.LengthSquared() > 0.001F || ev_punchangleVel.LengthSquared() > 0.001F)
 	{
 		ev_punchangle = ev_punchangle + ev_punchangleVel * frametime;
@@ -1614,6 +1625,7 @@ void V_Init()
 
 	v_centermove = gEngfuncs.pfnRegisterVariable("v_centermove", "0.15", 0);
 	v_centerspeed = gEngfuncs.pfnRegisterVariable("v_centerspeed", "500", 0);
+	v_oldpunch = gEngfuncs.pfnRegisterVariable("v_oldpunch", "0", 0);
 
 	cl_bobcycle = gEngfuncs.pfnRegisterVariable("cl_bobcycle", "0.8", 0); // best default for my experimental gun wag (sjb)
 	cl_bob = gEngfuncs.pfnRegisterVariable("cl_bob", "0.01", 0);		  // best default for my experimental gun wag (sjb)
