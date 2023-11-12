@@ -982,7 +982,7 @@ void CBasePlayer::WaterMove()
 
 				// Account for god mode, the unkillable flag, potential damage mitigation
 				// and gaining health from drowning to avoid counting damage not actually taken.
-				const float drownDamageTaken = std::min(0.f, std::floor(oldHealth - pev->health));
+				const float drownDamageTaken = std::max(0.f, std::floor(oldHealth - pev->health));
 
 				m_idrowndmg += drownDamageTaken;
 			}
@@ -2478,6 +2478,7 @@ void CBasePlayer::SelectItem(int iId)
 		m_pActiveItem->UpdateItemInfo();
 	}
 }
+
 
 //==============================================
 // HasWeapons - do I have any weapons at all?

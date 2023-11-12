@@ -15,6 +15,7 @@
 #include "extdll.h"
 #include "eiface.h"
 #include "util.h"
+#include "client.h"
 #include "game.h"
 #include "filesystem_utils.h"
 #include "bot/hl_bot.h"
@@ -92,6 +93,8 @@ void GameDLLInit()
 	CVAR_REGISTER(&sv_allowbunnyhopping);
 
 	Bot_RegisterCvars();
+	
+	InitMapLoadingUtils();
 }
 
 void GameDLLShutdown()
