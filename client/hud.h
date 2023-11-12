@@ -537,6 +537,7 @@ public:
 	cvar_t* m_pCvarDraw;
 	cvar_t* m_pCvarWidescreen;
 	cvar_t* m_pCvarColor;
+	cvar_t *m_pCvarCrosshair;
 
 	typedef enum {
 		COLOR_DEFAULT = 0,
@@ -621,7 +622,7 @@ private:
 	Rect* m_rgrcRects;							  /*[HUD_SPRITE_COUNT]*/
 	char* m_rgszSpriteNames;					  /*[HUD_SPRITE_COUNT][MAX_SPRITE_NAME_LENGTH]*/
 
-	struct cvar_s* default_fov;
+	cvar_t *default_fov;
 
 public:
 	HSPRITE GetSprite(int index)

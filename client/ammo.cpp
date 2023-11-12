@@ -937,7 +937,10 @@ bool CHudAmmo::Draw(float flTime)
 
 	WEAPON* pw = m_pWeapon; // shorthand
 
-	DrawCrosshair(pw, 255, gHUD.m_iFOV >= 90, m_fOnTarget);
+	if (gHUD.m_pCvarCrosshair->value != 0)
+	{
+		DrawCrosshair(pw, 255, gHUD.m_iFOV >= 90, m_fOnTarget);
+	}
 
 	// SPR_Draw Ammo
 	if ((pw->iAmmoType <= AMMO_NONE) && (pw->iAmmo2Type <= AMMO_NONE))
