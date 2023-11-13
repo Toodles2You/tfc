@@ -26,6 +26,7 @@
 #include "saverestore.h"
 #include "nodes.h"
 #include "doors.h"
+#include "gamerules.h"
 
 extern bool FEntIsVisible(entvars_t* pev, entvars_t* pevTarget);
 
@@ -51,19 +52,18 @@ void CNullEntity::Spawn()
 }
 LINK_ENTITY_TO_CLASS(info_null, CNullEntity);
 
+LINK_ENTITY_TO_CLASS(info_landmark, CPointEntity);
+
 class CBaseDMStart : public CPointEntity
 {
 public:
 	bool KeyValue(KeyValueData* pkvd) override;
-	bool IsTriggered(CBaseEntity* pEntity) override;
-
-private:
+	void Spawn() override;
 };
 
 // These are the new entry points to entities.
 LINK_ENTITY_TO_CLASS(info_player_deathmatch, CBaseDMStart);
-LINK_ENTITY_TO_CLASS(info_player_start, CPointEntity);
-LINK_ENTITY_TO_CLASS(info_landmark, CPointEntity);
+LINK_ENTITY_TO_CLASS(info_player_start, CBaseDMStart);
 
 bool CBaseDMStart::KeyValue(KeyValueData* pkvd)
 {
@@ -76,11 +76,10 @@ bool CBaseDMStart::KeyValue(KeyValueData* pkvd)
 	return CPointEntity::KeyValue(pkvd);
 }
 
-bool CBaseDMStart::IsTriggered(CBaseEntity* pEntity)
+void CBaseDMStart::Spawn()
 {
-	bool master = UTIL_IsMasterTriggered(pev->netname, pEntity);
-
-	return master;
+	g_pGameRules->AddPlayerSpawnSpot(this);
+	UTIL_Remove(this);
 }
 
 // This updates global tables that need to know about entities being removed

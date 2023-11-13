@@ -27,7 +27,58 @@
 #include "game.h"
 #include "UserMessages.h"
 
-extern edict_t* EntSelectSpawnPoint(CBaseEntity* pPlayer);
+CSpawnPoint::CSpawnPoint() :
+	m_origin{Vector(0, 0, -VEC_HULL_MIN.z + 1)},
+	m_angles{Vector(0, 0, 0)},
+	m_target{iStringNull},
+	m_master{iStringNull},
+	m_lastSpawnTime{-1000.0F}
+{
+}
+
+CSpawnPoint::CSpawnPoint(CBaseEntity *pEntity) :
+	m_origin{pEntity->pev->origin + Vector(0, 0, 1)},
+	m_angles{pEntity->pev->angles},
+	m_target{pEntity->pev->target},
+	m_master{pEntity->pev->netname},
+	m_lastSpawnTime{-1000.0F}
+{
+}
+
+bool CSpawnPoint::IsValid(CBasePlayer *pPlayer, int attempt)
+{
+	if (!FStringNull(m_master)
+	 && !UTIL_IsMasterTriggered(m_master, pPlayer))
+	{
+		return false;
+	}
+
+	if (attempt < 2)
+	{
+		if (attempt == 0)
+		{
+			if (gpGlobals->time - m_lastSpawnTime < 10.0F)
+			{
+				return false;
+			}
+		}
+		else if (gpGlobals->time - m_lastSpawnTime < 3.0F)
+		{
+			return false;
+		}
+		
+		CBaseEntity *entity = nullptr;
+		while ((entity = UTIL_FindEntityInSphere(entity, m_origin, 128.0F)) != nullptr)
+		{
+			if (entity->IsPlayer() && entity != pPlayer)
+			{
+				return false;
+			}
+		}
+	}
+	
+	return true;
+}
 
 void CGameRules::UpdateGameMode(CBasePlayer* pPlayer)
 {
@@ -127,18 +178,20 @@ bool CGameRules::CanHaveAmmo(CBasePlayer* pPlayer, int iAmmoType, int iMaxCarry)
 
 //=========================================================
 //=========================================================
-edict_t* CGameRules::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
+CSpawnPoint *CGameRules::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
 {
-	edict_t* pentSpawnSpot = EntSelectSpawnPoint(pPlayer);
+	return &m_startPoint;
+}
 
-	pPlayer->pev->origin = VARS(pentSpawnSpot)->origin + Vector(0, 0, 1);
-	pPlayer->pev->v_angle = g_vecZero;
-	pPlayer->pev->velocity = g_vecZero;
-	pPlayer->pev->angles = VARS(pentSpawnSpot)->angles;
-	pPlayer->pev->punchangle = g_vecZero;
-	pPlayer->pev->fixangle = 1;
-
-	return pentSpawnSpot;
+//=========================================================
+//=========================================================
+void CGameRules::AddPlayerSpawnSpot(CBaseEntity *pEntity)
+{
+	if (!FStrEq(STRING(pEntity->pev->classname), "info_player_start"))
+	{
+		return;
+	}
+	m_startPoint = CSpawnPoint{pEntity};
 }
 
 //=========================================================

@@ -437,8 +437,6 @@ void CWorld::Precache()
 		return;
 	}
 
-	g_pLastSpawn = NULL;
-
 	// Set up game rules
 	delete g_pGameRules;
 

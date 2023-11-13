@@ -1053,17 +1053,109 @@ int CHalfLifeMultiplay::DeadPlayerAmmo(CBasePlayer* pPlayer)
 	return GR_PLR_DROP_AMMO_ACTIVE;
 }
 
-edict_t* CHalfLifeMultiplay::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
+//=========================================================
+//=========================================================
+bool CHalfLifeMultiplay::IsSpawnSpotValid(CSpawnPoint *pSpawn, CBasePlayer *pPlayer, int attempt)
 {
-	edict_t* pentSpawnSpot = CGameRules::GetPlayerSpawnSpot(pPlayer);
-	if (IsMultiplayer() && !FStringNull(pentSpawnSpot->v.target))
+	if (!CGameRules::IsSpawnSpotValid(pSpawn, pPlayer, attempt))
 	{
-		FireTargets(STRING(pentSpawnSpot->v.target), pPlayer, pPlayer, USE_TOGGLE, 0);
+		return false;
 	}
-
-	return pentSpawnSpot;
+	return pSpawn->IsValid(pPlayer, attempt);
 }
 
+//=========================================================
+//=========================================================
+CSpawnPoint *CHalfLifeMultiplay::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
+{
+	std::size_t numValid;
+	std::size_t i;
+	int attempt;
+
+	/* Each successive attempt should have more lenient conditions. */
+	for (attempt = 0; attempt < 3; attempt++)
+	{
+		numValid = 0;
+		
+		for (i = 0; i < m_numSpawnPoints; i++)
+		{
+			if (IsSpawnSpotValid(&m_spawnPoints[i], pPlayer, attempt))
+			{
+				m_validSpawnPoints[numValid] = &m_spawnPoints[i];
+				numValid++;
+			}
+		}
+		
+		if (numValid != 0)
+		{
+			break;
+		}
+	}
+
+	/*
+	Default to the singleplayer spawn point.
+	This should only happen in a dire situation.
+	*/
+	if (numValid == 0)
+	{
+		return CGameRules::GetPlayerSpawnSpot(pPlayer);
+	}
+
+	auto index = g_engfuncs.pfnRandomLong(0, numValid - 1);
+	auto spawn = m_validSpawnPoints[index];
+
+	spawn->m_lastSpawnTime = gpGlobals->time;
+
+	/* Fire targets, if any. */
+	if (!FStringNull(spawn->m_target))
+	{
+		FireTargets(STRING(spawn->m_target), pPlayer, pPlayer, USE_TOGGLE, 0);
+	}
+
+	/* Telefrag! */
+	CBaseEntity *entity = nullptr;
+	while ((entity = UTIL_FindEntityInSphere(entity, spawn->m_origin, 128.0F)) != nullptr)
+	{
+		if (entity->IsPlayer() && entity != pPlayer)
+		{
+			if (g_pGameRules->FPlayerCanTakeDamage((CBasePlayer *)entity, pPlayer))
+			{
+				entity->TakeDamage(pPlayer->pev, pPlayer->pev, 300.0F, DMG_ALWAYSGIB);
+			}
+		}
+	}
+
+	return spawn;
+}
+
+//=========================================================
+//=========================================================
+void CHalfLifeMultiplay::AddPlayerSpawnSpot(CBaseEntity *pEntity)
+{
+	if (FStrEq(STRING(pEntity->pev->classname), "info_player_start"))
+	{
+		CGameRules::AddPlayerSpawnSpot(pEntity);
+		return;
+	}
+
+	CSpawnPoint spawn{pEntity};
+
+#if 0
+	ALERT(
+		at_aiconsole,
+		"%s %lu at (%g, %g, %g)\n",
+		STRING(pEntity->pev->classname),
+		m_numSpawnPoints,
+		spawn.m_origin.x,
+		spawn.m_origin.y,
+		spawn.m_origin.z);
+#endif
+	
+	m_spawnPoints.push_back(spawn);
+	
+	m_numSpawnPoints++;
+	m_validSpawnPoints.reserve(m_numSpawnPoints);
+}
 
 //=========================================================
 //=========================================================

@@ -359,5 +359,3 @@ inline void CBasePlayer::SetHasSuit(bool hasSuit)
 
 inline bool gInitHUD = true;
 inline bool gEvilImpulse101 = false;
-
-inline DLL_GLOBAL CBaseEntity* g_pLastSpawn = nullptr;

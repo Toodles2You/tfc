@@ -514,8 +514,8 @@ void ClientCommand(edict_t* pEntity)
 		// always allow proxies to become a spectator
 		if ((pev->flags & FL_PROXY) != 0 || 0 != allow_spectators.value)
 		{
-			edict_t* pentSpawnSpot = g_pGameRules->GetPlayerSpawnSpot(player);
-			player->StartObserver(pev->origin, VARS(pentSpawnSpot)->angles);
+			auto spawn = g_pGameRules->GetPlayerSpawnSpot(player);
+			player->StartObserver(spawn->m_origin, spawn->m_angles);
 
 			// notify other clients of player switching to spectator mode
 			UTIL_ClientPrintAll(HUD_PRINTNOTIFY, UTIL_VarArgs("%s switched to spectator mode\n",

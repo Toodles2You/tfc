@@ -18,6 +18,9 @@
 
 #pragma once
 
+#include <forward_list>
+#include <vector>
+
 //#include "weapons.h"
 //#include "items.h"
 class CBasePlayerItem;
@@ -58,6 +61,21 @@ enum
 	GR_NEUTRAL,
 };
 
+class CSpawnPoint
+{
+public:
+	CSpawnPoint();
+	CSpawnPoint(CBaseEntity *pEntity);
+
+	virtual bool IsValid(CBasePlayer *pPlayer, int attempt);
+
+	Vector m_origin;
+	Vector m_angles;
+    string_t m_target;
+    string_t m_master;
+	float m_lastSpawnTime;
+};
+
 class CGameRules
 {
 public:
@@ -93,7 +111,9 @@ public:
 	virtual void PlayerThink(CBasePlayer* pPlayer) = 0;		   // called by CBasePlayer::PreThink every frame, before physics are run and after keys are accepted
 	virtual bool FPlayerCanRespawn(CBasePlayer* pPlayer) = 0;  // is this player allowed to respawn now?
 	virtual float FlPlayerSpawnTime(CBasePlayer* pPlayer) = 0; // When in the future will this player be able to spawn?
-	virtual edict_t* GetPlayerSpawnSpot(CBasePlayer* pPlayer); // Place this player on their spawnspot and face them the proper direction.
+	virtual bool IsSpawnSpotValid(CSpawnPoint *pSpawn, CBasePlayer *pPlayer, int attempt) { return true; }
+	virtual CSpawnPoint *GetPlayerSpawnSpot(CBasePlayer* pPlayer); // Place this player on their spawnspot and face them the proper direction.
+	virtual void AddPlayerSpawnSpot(CBaseEntity *pEntity);
 	virtual bool FPlayerCanSuicide(CBasePlayer *pPlayer) = 0;  // Prevent players from suiciding too often.
 
 	virtual bool AllowAutoTargetCrosshair() { return true; }
@@ -164,6 +184,8 @@ public:
 
 protected:
 	CBasePlayerItem* FindNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pCurrentWeapon);
+
+	CSpawnPoint m_startPoint;
 };
 
 extern CGameRules* InstallGameRules();
@@ -295,7 +317,9 @@ public:
 	void PlayerThink(CBasePlayer* pPlayer) override;
 	bool FPlayerCanRespawn(CBasePlayer* pPlayer) override;
 	float FlPlayerSpawnTime(CBasePlayer* pPlayer) override;
-	edict_t* GetPlayerSpawnSpot(CBasePlayer* pPlayer) override;
+	bool IsSpawnSpotValid(CSpawnPoint *pSpawn, CBasePlayer *pPlayer, int attempt) override;
+	CSpawnPoint *GetPlayerSpawnSpot(CBasePlayer* pPlayer) override;
+	void AddPlayerSpawnSpot(CBaseEntity *pEntity) override;
 	bool FPlayerCanSuicide(CBasePlayer *pPlayer) override;
 
 	bool AllowAutoTargetCrosshair() override;
@@ -358,6 +382,9 @@ public:
 	void EndMultiplayerGame() override { GoToIntermission(); }
 
 protected:
+    std::vector<CSpawnPoint> m_spawnPoints;
+	std::vector<CSpawnPoint*> m_validSpawnPoints;
+	std::size_t m_numSpawnPoints = 0;
 	bool m_deathmatch = false;
 	bool m_coop = false;
 	bool m_allowMonsters = false;

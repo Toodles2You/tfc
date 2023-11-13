@@ -411,7 +411,7 @@ void UTIL_MoveToOrigin(edict_t* pent, const Vector& vecGoal, float flDist, int i
 }
 
 
-int UTIL_EntitiesInBox(CBaseEntity** pList, int listMax, const Vector& mins, const Vector& maxs, int flagMask)
+int UTIL_EntitiesInBox(CBaseEntity** pList, int listMax, const Vector& mins, const Vector& maxs, int flagMask, bool checkSolid)
 {
 	edict_t* pEdict = UTIL_GetEntityList();
 	CBaseEntity* pEntity;
@@ -431,6 +431,9 @@ int UTIL_EntitiesInBox(CBaseEntity** pList, int listMax, const Vector& mins, con
 			continue;
 
 		if (0 != flagMask && (pEdict->v.flags & flagMask) == 0) // Does it meet the criteria?
+			continue;
+
+		if (0 != checkSolid && (pEdict->v.solid == SOLID_NOT || pEdict->v.mins.x == pEdict->v.maxs.x))
 			continue;
 
 		if (mins.x > pEdict->v.absmax.x ||
