@@ -129,7 +129,9 @@ void CBasePlayerWeapon::ItemPostFrame()
 	{
 		if (bCanPrimaryAttack)
 			m_iNextPrimaryAttack = 0;
-
+	}
+	if ((m_pPlayer->pev->button & IN_ATTACK2) == 0)
+	{
 		if (bCanSecondaryAttack)
 			m_iNextSecondaryAttack = 0;
 	}
@@ -137,7 +139,6 @@ void CBasePlayerWeapon::ItemPostFrame()
 	if ((m_pPlayer->pev->button & IN_ATTACK2) != 0 && bCanSecondaryAttack)
 	{
 		SecondaryAttack();
-		m_pPlayer->pev->button &= ~IN_ATTACK2;
 	}
 	else if ((m_pPlayer->pev->button & IN_ATTACK) != 0 && bCanPrimaryAttack)
 	{
