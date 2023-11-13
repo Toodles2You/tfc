@@ -76,17 +76,6 @@ bool CHealthKit::MyTouch(CBasePlayer* pPlayer)
 		MESSAGE_END();
 
 		EMIT_SOUND(ENT(pPlayer->pev), CHAN_ITEM, "items/smallmedkit1.wav", 1, ATTN_NORM);
-
-		//TODO: incorrect check here, but won't respawn due to respawn delay being -1 in singleplayer
-		if (0 != g_pGameRules->ItemShouldRespawn(this))
-		{
-			Respawn();
-		}
-		else
-		{
-			UTIL_Remove(this);
-		}
-
 		return true;
 	}
 
