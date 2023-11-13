@@ -42,7 +42,7 @@ class CMultiplayGameMgrHelper : public IVoiceGameMgrHelper
 public:
 	bool CanPlayerHearPlayer(CBasePlayer* pListener, CBasePlayer* pTalker) override
 	{
-		if (g_teamplay)
+		if (g_pGameRules->IsTeamplay())
 		{
 			if (g_pGameRules->PlayerRelationship(pListener, pTalker) != GR_TEAMMATE)
 			{
@@ -375,7 +375,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 											 (!FStringNull(pl->pev->netname) && STRING(pl->pev->netname)[0] != 0) ? STRING(pl->pev->netname) : "unconnected"));
 
 	// team match?
-	if (g_teamplay)
+	if (IsTeamplay())
 	{
 		UTIL_LogPrintf("\"%s<%i><%s><%s>\" entered the game\n",
 			STRING(pl->pev->netname),
@@ -444,7 +444,7 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 			FireTargets("game_playerleave", pPlayer, pPlayer, USE_TOGGLE, 0);
 
 			// team match?
-			if (g_teamplay)
+			if (IsTeamplay())
 			{
 				UTIL_LogPrintf("\"%s<%i><%s><%s>\" disconnected\n",
 					STRING(pPlayer->pev->netname),
@@ -711,7 +711,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 		// killed self
 
 		// team match?
-		if (g_teamplay)
+		if (IsTeamplay())
 		{
 			UTIL_LogPrintf("\"%s<%i><%s><%s>\" committed suicide with \"%s\"\n",
 				STRING(pVictim->pev->netname),
@@ -733,7 +733,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 	else if ((pKiller->flags & FL_CLIENT) != 0)
 	{
 		// team match?
-		if (g_teamplay)
+		if (IsTeamplay())
 		{
 			UTIL_LogPrintf("\"%s<%i><%s><%s>\" killed \"%s<%i><%s><%s>\" with \"%s\"\n",
 				STRING(pKiller->netname),
@@ -765,7 +765,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 		// killed by the world
 
 		// team match?
-		if (g_teamplay)
+		if (IsTeamplay())
 		{
 			UTIL_LogPrintf("\"%s<%i><%s><%s>\" committed suicide with \"%s\" (world)\n",
 				STRING(pVictim->pev->netname),

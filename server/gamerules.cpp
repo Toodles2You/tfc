@@ -190,40 +190,25 @@ CGameRules* InstallGameRules()
 	SERVER_COMMAND("exec game.cfg\n");
 	SERVER_EXECUTE();
 
-	if (0 == gpGlobals->deathmatch)
+	gpGlobals->teamplay = teamplay.value;
+
+	if ((int)gpGlobals->coop != 0)
 	{
-		g_teamplay = false;
-		if ((int)gpGlobals->coop != 0)
-		{
-			// coop
-			return new CHalfLifeMultiplay;
-		}
-		else
-		{
-			// generic half-life
-			return new CHalfLifeRules;
-		}
+		// coop
+		return new CHalfLifeMultiplay;
 	}
-	else
+	
+	if ((int)gpGlobals->deathmatch != 0)
 	{
-		if (teamplay.value > 0)
+		if ((int)gpGlobals->teamplay != 0)
 		{
 			// teamplay
-
-			g_teamplay = true;
 			return new CHalfLifeTeamplay;
 		}
-		if ((int)gpGlobals->deathmatch == 1)
-		{
-			// vanilla deathmatch
-			g_teamplay = false;
-			return new CHalfLifeMultiplay;
-		}
-		else
-		{
-			// vanilla deathmatch??
-			g_teamplay = false;
-			return new CHalfLifeMultiplay;
-		}
+		// vanilla deathmatch
+		return new CHalfLifeMultiplay;
 	}
+	
+	// generic half-life
+	return new CHalfLifeRules;
 }

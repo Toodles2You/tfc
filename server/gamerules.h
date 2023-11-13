@@ -372,4 +372,3 @@ protected:
 
 inline DLL_GLOBAL CGameRules* g_pGameRules = nullptr;
 inline DLL_GLOBAL bool g_fGameOver;
-inline bool g_teamplay = false;

@@ -418,7 +418,7 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 		temp = "say";
 
 	// team match?
-	if (g_teamplay)
+	if (g_pGameRules->IsTeamplay())
 	{
 		UTIL_LogPrintf("\"%s<%i><%s><%s>\" %s \"%s\"\n",
 			STRING(pEntity->v.netname),
@@ -604,26 +604,26 @@ void ClientUserInfoChanged(edict_t* pEntity, char* infobuffer)
 			WRITE_BYTE(ENTINDEX(pEntity));
 			WRITE_STRING(text);
 			MESSAGE_END();
-		}
 
-		// team match?
-		if (g_teamplay)
-		{
-			UTIL_LogPrintf("\"%s<%i><%s><%s>\" changed name to \"%s\"\n",
-				STRING(pEntity->v.netname),
-				GETPLAYERUSERID(pEntity),
-				GETPLAYERAUTHID(pEntity),
-				g_engfuncs.pfnInfoKeyValue(infobuffer, "model"),
-				g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
-		}
-		else
-		{
-			UTIL_LogPrintf("\"%s<%i><%s><%i>\" changed name to \"%s\"\n",
-				STRING(pEntity->v.netname),
-				GETPLAYERUSERID(pEntity),
-				GETPLAYERAUTHID(pEntity),
-				GETPLAYERUSERID(pEntity),
-				g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
+			// team match?
+			if (g_pGameRules->IsTeamplay())
+			{
+				UTIL_LogPrintf("\"%s<%i><%s><%s>\" changed name to \"%s\"\n",
+					STRING(pEntity->v.netname),
+					GETPLAYERUSERID(pEntity),
+					GETPLAYERAUTHID(pEntity),
+					g_engfuncs.pfnInfoKeyValue(infobuffer, "model"),
+					g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
+			}
+			else
+			{
+				UTIL_LogPrintf("\"%s<%i><%s><%i>\" changed name to \"%s\"\n",
+					STRING(pEntity->v.netname),
+					GETPLAYERUSERID(pEntity),
+					GETPLAYERAUTHID(pEntity),
+					GETPLAYERUSERID(pEntity),
+					g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
+			}
 		}
 	}
 
@@ -850,8 +850,6 @@ void StartFrame()
 
 	if (g_fGameOver)
 		return;
-
-	gpGlobals->teamplay = teamplay.value;
 
 	const bool allowBunnyHopping = sv_allowbunnyhopping.value != 0;
 
