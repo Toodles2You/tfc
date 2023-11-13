@@ -27,6 +27,7 @@
 #include "animation.h"
 #include "doors.h"
 #include "filesystem_utils.h"
+#include "gamerules.h"
 
 #define HULL_STEP_SIZE 16 // how far the test hull moves on each step
 #define NODE_HEIGHT 8	  // how high to lift nodes off the ground after we drop them all (make stair/ramp mapping easier)
@@ -101,6 +102,11 @@ void CGraph::InitGraph()
 
 	m_iLastActiveIdleSearch = 0;
 	m_iLastCoverSearch = 0;
+}
+
+bool CGraph::IsAvailable()
+{
+	return m_fGraphPresent != 0 && m_fGraphPointersSet != 0;
 }
 
 //=========================================================
@@ -1555,6 +1561,12 @@ void CNodeEnt::Spawn()
 {
 	pev->movetype = MOVETYPE_NONE;
 	pev->solid = SOLID_NOT; // always solid_not
+
+	if (!g_pGameRules->FAllowMonsters())
+	{
+		REMOVE_ENTITY(edict());
+		return;
+	}
 
 	if (0 != WorldGraph.m_fGraphPresent)
 	{ // graph loaded from disk, so discard all these node ents as soon as they spawn

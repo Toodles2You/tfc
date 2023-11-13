@@ -989,9 +989,10 @@ void CHalfLifeMultiplay::PlayerGotAmmo(CBasePlayer* pPlayer, char* szName, int i
 //=========================================================
 bool CHalfLifeMultiplay::IsAllowedToSpawn(CBaseEntity* pEntity)
 {
-	//	if ( pEntity->pev->flags & FL_MONSTER )
-	//		return false;
-
+	if (!FAllowMonsters() && pEntity->pev->flags & FL_MONSTER)
+	{
+		return false;
+	}
 	return true;
 }
 

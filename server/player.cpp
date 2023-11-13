@@ -2794,23 +2794,35 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 	break;
 	case 195: // show shortest paths for entire level to nearest node
 	{
-		Create("node_viewer_fly", pev->origin, pev->angles);
+		if (WorldGraph.IsAvailable())
+		{
+			Create("node_viewer_fly", pev->origin, pev->angles);
+		}
 	}
 	break;
 	case 196: // show shortest paths for entire level to nearest node
 	{
-		Create("node_viewer_large", pev->origin, pev->angles);
+		if (WorldGraph.IsAvailable())
+		{
+			Create("node_viewer_large", pev->origin, pev->angles);
+		}
 	}
 	break;
 	case 197: // show shortest paths for entire level to nearest node
 	{
-		Create("node_viewer_human", pev->origin, pev->angles);
+		if (WorldGraph.IsAvailable())
+		{
+			Create("node_viewer_human", pev->origin, pev->angles);
+		}
 	}
 	break;
 	case 199: // show nearest node and all connections
 	{
-		ALERT(at_console, "%d\n", WorldGraph.FindNearestNode(pev->origin, bits_NODE_GROUP_REALM));
-		WorldGraph.ShowNodeConnections(WorldGraph.FindNearestNode(pev->origin, bits_NODE_GROUP_REALM));
+		if (WorldGraph.IsAvailable())
+		{
+			ALERT(at_console, "%d\n", WorldGraph.FindNearestNode(pev->origin, bits_NODE_GROUP_REALM));
+			WorldGraph.ShowNodeConnections(WorldGraph.FindNearestNode(pev->origin, bits_NODE_GROUP_REALM));
+		}
 	}
 	break;
 	case 202: // Random blood splatter

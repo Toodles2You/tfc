@@ -498,11 +498,11 @@ void CWorld::Precache()
 		gDecals[i].index = DECAL_INDEX(gDecals[i].name);
 	}
 
+	// init the WorldGraph.
+	WorldGraph.InitGraph();
+
 	if (g_pGameRules->FAllowMonsters())
 	{
-		// init the WorldGraph.
-		WorldGraph.InitGraph();
-
 		// make sure the .NOD file is newer than the .BSP file.
 		if (!WorldGraph.CheckNODFile((char*)STRING(gpGlobals->mapname)))
 		{ // NOD file is not present, or is older than the BSP file.

@@ -182,6 +182,7 @@ public:
 	entvars_t* LinkEntForLink(CLink* pLink, CNode* pNode);
 	void ShowNodeConnections(int iNode);
 	void InitGraph();
+	bool IsAvailable();
 	bool AllocNodes();
 
 	bool CheckNODFile(const char* szMapName);

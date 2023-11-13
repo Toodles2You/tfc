@@ -88,7 +88,7 @@ void CBaseEntity::UpdateOnRemove()
 {
 	int i;
 
-	if (FBitSet(pev->flags, FL_GRAPHED))
+	if (FBitSet(pev->flags, FL_GRAPHED) && WorldGraph.IsAvailable())
 	{
 		// this entity was a LinkEnt in the world node graph, so we must remove it from
 		// the graph since we are removing it from the world.
