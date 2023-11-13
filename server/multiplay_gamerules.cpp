@@ -63,6 +63,10 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 {
 	g_VoiceGameMgr.Init(&g_GameMgrHelper, gpGlobals->maxClients);
 
+	m_deathmatch = ((int)gpGlobals->deathmatch != 0);
+	m_coop = ((int)gpGlobals->coop != 0);
+	m_allowMonsters = (allowmonsters.value != 0);
+
 	RefreshSkillData();
 
 	// 11/8/98
@@ -304,14 +308,14 @@ bool CHalfLifeMultiplay::IsMultiplayer()
 //=========================================================
 bool CHalfLifeMultiplay::IsDeathmatch()
 {
-	return 0 != gpGlobals->deathmatch;
+	return m_deathmatch;
 }
 
 //=========================================================
 //=========================================================
 bool CHalfLifeMultiplay::IsCoOp()
 {
-	return 0 != gpGlobals->coop;
+	return m_coop;
 }
 
 //=========================================================
@@ -1094,7 +1098,7 @@ bool CHalfLifeMultiplay::FAllowFlashlight()
 //=========================================================
 bool CHalfLifeMultiplay::FAllowMonsters()
 {
-	return (allowmonsters.value != 0);
+	return m_allowMonsters;
 }
 
 //=========================================================

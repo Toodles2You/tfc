@@ -358,6 +358,10 @@ public:
 	void EndMultiplayerGame() override { GoToIntermission(); }
 
 protected:
+	bool m_deathmatch = false;
+	bool m_coop = false;
+	bool m_allowMonsters = false;
+
 	virtual void ChangeLevel();
 	virtual void GoToIntermission();
 	float m_flIntermissionStartTime = 0;
