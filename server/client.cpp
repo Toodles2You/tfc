@@ -62,10 +62,6 @@ called when a player connects to a server
 qboolean ClientConnect(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128])
 {
 	return static_cast<qboolean>(g_pGameRules->ClientConnected(pEntity, pszName, pszAddress, szRejectReason));
-
-	// a client connecting during an intermission can cause problems
-	//	if (intermission_running)
-	//		ExitIntermission ();
 }
 
 
@@ -481,7 +477,6 @@ void ClientCommand(edict_t* pEntity)
 			player->GiveNamedItem(STRING(iszItem));
 		}
 	}
-
 	else if (FStrEq(pcmd, "drop"))
 	{
 		// player is dropping an item.
@@ -1361,7 +1356,14 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 	{
 		memcpy(state->basevelocity, ent->v.basevelocity, 3 * sizeof(float));
 
-		state->weaponmodel = MODEL_INDEX(STRING(ent->v.weaponmodel));
+		if (FStringNull(ent->v.weaponmodel))
+		{
+			state->weaponmodel = 0;
+		}
+		else
+		{
+			state->weaponmodel = MODEL_INDEX(STRING(ent->v.weaponmodel));
+		}
 		state->gaitsequence = ent->v.gaitsequence;
 		state->spectator = ent->v.flags & FL_SPECTATOR;
 		state->friction = ent->v.friction;
