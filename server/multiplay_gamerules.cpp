@@ -370,15 +370,21 @@ bool CHalfLifeMultiplay::ClientConnected(edict_t* pEntity, const char* pszName, 
 
 void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 {
+	const char *name = "unconnected";
+	
+	if (!FStringNull(pl->pev->netname) && STRING(pl->pev->netname)[0] != '\0')
+	{
+		name = STRING(pl->pev->netname);
+	}
+
 	// notify other clients of player joining the game
-	UTIL_ClientPrintAll(HUD_PRINTNOTIFY, UTIL_VarArgs("%s has joined the game\n",
-											 (!FStringNull(pl->pev->netname) && STRING(pl->pev->netname)[0] != 0) ? STRING(pl->pev->netname) : "unconnected"));
+	UTIL_ClientPrintAll(HUD_PRINTNOTIFY, UTIL_VarArgs("%s has joined the game\n", name));
 
 	// team match?
 	if (IsTeamplay())
 	{
 		UTIL_LogPrintf("\"%s<%i><%s><%s>\" entered the game\n",
-			STRING(pl->pev->netname),
+			name,
 			GETPLAYERUSERID(pl->edict()),
 			GETPLAYERAUTHID(pl->edict()),
 			g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pl->edict()), "model"));
@@ -386,7 +392,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 	else
 	{
 		UTIL_LogPrintf("\"%s<%i><%s><%i>\" entered the game\n",
-			STRING(pl->pev->netname),
+			name,
 			GETPLAYERUSERID(pl->edict()),
 			GETPLAYERAUTHID(pl->edict()),
 			GETPLAYERUSERID(pl->edict()));
@@ -565,7 +571,7 @@ bool CHalfLifeMultiplay::FPlayerCanSuicide(CBasePlayer* pPlayer)
 
 bool CHalfLifeMultiplay::AllowAutoTargetCrosshair()
 {
-	return (aimcrosshair.value != 0);
+	return aimcrosshair.value != 0;
 }
 
 //=========================================================
@@ -795,55 +801,6 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 		WRITE_SHORT(ENTINDEX(ENT(pKiller))); // index number of secondary entity
 	WRITE_LONG(7 | DRC_FLAG_DRAMATIC);		 // eventflags (priority and flags)
 	MESSAGE_END();
-
-	//  Print a standard message
-	// TODO: make this go direct to console
-	return; // just remove for now
-			/*
-	char	szText[ 128 ];
-
-	if ( pKiller->flags & FL_MONSTER )
-	{
-		// killed by a monster
-		strcpy ( szText, STRING( pVictim->pev->netname ) );
-		strcat ( szText, " was killed by a monster.\n" );
-		return;
-	}
-
-	if ( pKiller == pVictim->pev )
-	{
-		strcpy ( szText, STRING( pVictim->pev->netname ) );
-		strcat ( szText, " commited suicide.\n" );
-	}
-	else if ( pKiller->flags & FL_CLIENT )
-	{
-		strcpy ( szText, STRING( pKiller->netname ) );
-
-		strcat( szText, " : " );
-		strcat( szText, killer_weapon_name );
-		strcat( szText, " : " );
-
-		strcat ( szText, STRING( pVictim->pev->netname ) );
-		strcat ( szText, "\n" );
-	}
-	else if ( FClassnameIs ( pKiller, "worldspawn" ) )
-	{
-		strcpy ( szText, STRING( pVictim->pev->netname ) );
-		strcat ( szText, " fell or drowned or something.\n" );
-	}
-	else if ( pKiller->solid == SOLID_BSP )
-	{
-		strcpy ( szText, STRING( pVictim->pev->netname ) );
-		strcat ( szText, " was mooshed.\n" );
-	}
-	else
-	{
-		strcpy ( szText, STRING( pVictim->pev->netname ) );
-		strcat ( szText, " died mysteriously.\n" );
-	}
-
-	UTIL_ClientPrintAll( szText );
-*/
 }
 
 //=========================================================
