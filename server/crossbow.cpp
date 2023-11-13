@@ -42,15 +42,29 @@ class CCrossbowBolt : public CBaseEntity
 	int m_iTrail;
 
 public:
-	static CCrossbowBolt* BoltCreate();
+	static CCrossbowBolt* BoltCreate(
+		const Vector origin,
+		const Vector dir,
+		const float speed,
+		CBaseEntity *owner);
 };
 LINK_ENTITY_TO_CLASS(crossbow_bolt, CCrossbowBolt);
 
-CCrossbowBolt* CCrossbowBolt::BoltCreate()
+CCrossbowBolt* CCrossbowBolt::BoltCreate(
+	const Vector origin,
+	const Vector dir,
+	const float speed,
+	CBaseEntity *owner)
 {
 	// Create a new entity with CCrossbowBolt private data
 	CCrossbowBolt* pBolt = GetClassPtr((CCrossbowBolt*)NULL);
 	pBolt->pev->classname = MAKE_STRING("bolt");
+	pBolt->pev->origin = origin;
+	pBolt->pev->angles = UTIL_VecToAngles(dir);
+	pBolt->pev->speed = speed;
+	pBolt->pev->velocity = dir * pBolt->pev->speed;
+	pBolt->pev->avelocity.z = 10;
+	pBolt->pev->owner = owner->edict();
 	pBolt->Spawn();
 
 	return pBolt;
@@ -355,28 +369,18 @@ void CCrossbow::FireBolt()
 
 	Vector anglesAim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
 	UTIL_MakeVectors(anglesAim);
-
-	anglesAim.x = -anglesAim.x;
 	Vector vecSrc = m_pPlayer->GetGunPosition() - gpGlobals->v_up * 2;
 	Vector vecDir = gpGlobals->v_forward;
 
 #ifndef CLIENT_DLL
-	CCrossbowBolt* pBolt = CCrossbowBolt::BoltCreate();
-	pBolt->pev->origin = vecSrc;
-	pBolt->pev->angles = anglesAim;
-	pBolt->pev->owner = m_pPlayer->edict();
-
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
-		pBolt->pev->velocity = vecDir * BOLT_WATER_VELOCITY;
-		pBolt->pev->speed = BOLT_WATER_VELOCITY;
+		CCrossbowBolt::BoltCreate(vecSrc, vecDir, BOLT_WATER_VELOCITY, m_pPlayer);
 	}
 	else
 	{
-		pBolt->pev->velocity = vecDir * BOLT_AIR_VELOCITY;
-		pBolt->pev->speed = BOLT_AIR_VELOCITY;
+		CCrossbowBolt::BoltCreate(vecSrc, vecDir, BOLT_AIR_VELOCITY, m_pPlayer);
 	}
-	pBolt->pev->avelocity.z = 10;
 #endif
 
 	m_pPlayer->CheckAmmoLevel(this);
