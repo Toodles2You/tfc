@@ -2722,8 +2722,7 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 
 	case 101:
 		gEvilImpulse101 = true;
-		GiveNamedItem("item_suit");
-		GiveNamedItem("item_battery");
+		SetHasSuit(true);
 		GiveNamedItem("weapon_crowbar");
 		GiveNamedItem("weapon_9mmhandgun");
 		GiveNamedItem("ammo_9mmclip");
