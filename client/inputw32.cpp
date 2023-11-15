@@ -315,6 +315,7 @@ void IN_StartupMouse()
 	if (0 != gEngfuncs.CheckParm("-nomouse", NULL))
 		return;
 
+	g_iVisibleMouse = true;
 	mouseinitialized = true;
 #ifdef WIN32
 	mouseparmsvalid = SystemParametersInfo(SPI_GETMOUSE, 0, originalmouseparms, 0) != FALSE;
@@ -414,7 +415,10 @@ void DLLEXPORT IN_MouseEvent(int mstate)
 	int i;
 
 	if (iMouseInUse || g_iVisibleMouse)
+	{
+		mouse_oldbuttonstate = mstate;
 		return;
+	}
 
 	// perform button actions
 	for (i = 0; i < mouse_buttons; i++)
@@ -1081,9 +1085,40 @@ IN_Move
 */
 void IN_Move(float frametime, usercmd_t* cmd)
 {
-	if (!iMouseInUse && mouseactive)
-	{
-		IN_MouseMove(frametime, cmd);
+	if (mouseactive)
+	{	
+#ifndef WIN32
+		if (g_iVisibleMouse == SDL_GetRelativeMouseMode())
+		{
+			SDL_SetRelativeMouseMode(g_iVisibleMouse ? SDL_FALSE : SDL_TRUE);
+#else
+		static bool bWasVisibleMouse = false;
+		if (g_iVisibleMouse != bWasVisibleMouse)
+		{
+			bWasVisibleMouse = g_iVisibleMouse;
+			if (IN_UseRawInput())
+			{
+				SDL_SetRelativeMouseMode(g_iVisibleMouse ? SDL_FALSE : SDL_TRUE);
+			}
+#endif
+			if (g_iVisibleMouse)
+			{
+				for (int i = 0; i < mouse_buttons; i++)
+				{
+					if ((mouse_oldbuttonstate & (1 << i)) != 0)
+					{
+						gEngfuncs.Key_Event(K_MOUSE1 + i, 0);
+					}
+				}
+				gEngfuncs.pfnSetMousePos(
+					gEngfuncs.GetWindowCenterX(),
+					gEngfuncs.GetWindowCenterY());
+			}
+		}
+		if (!iMouseInUse)
+		{
+			IN_MouseMove(frametime, cmd);
+		}
 	}
 
 	IN_JoyMove(frametime, cmd);
