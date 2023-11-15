@@ -2861,41 +2861,6 @@ void PM_PlayWaterSounds()
 }
 
 /*
-===============
-PM_CalcRoll
-
-===============
-*/
-float PM_CalcRoll(Vector angles, Vector velocity, float rollangle, float rollspeed)
-{
-	float sign;
-	float side;
-	float value;
-	Vector forward, right, up;
-
-	AngleVectors(angles, &forward, &right, &up);
-
-	side = DotProduct(velocity, right);
-
-	sign = side < 0 ? -1 : 1;
-
-	side = fabs(side);
-
-	value = rollangle;
-
-	if (side < rollspeed)
-	{
-		side = side * value / rollspeed;
-	}
-	else
-	{
-		side = value;
-	}
-
-	return side * sign;
-}
-
-/*
 ==============
 PM_CheckParamters
 
@@ -2905,7 +2870,6 @@ void PM_CheckParamters()
 {
 	float spd;
 	float maxspeed;
-	Vector v_angle;
 
 	spd = (pmove->cmd.forwardmove * pmove->cmd.forwardmove) +
 		  (pmove->cmd.sidemove * pmove->cmd.sidemove) +
@@ -2937,20 +2901,7 @@ void PM_CheckParamters()
 	}
 
 	// Take angles from command.
-	if (0 == pmove->dead)
-	{
-		VectorCopy(pmove->cmd.viewangles, v_angle);
-		VectorAdd(v_angle, pmove->punchangle, v_angle);
-
-		// Set up view angles.
-		pmove->angles[ROLL] = PM_CalcRoll(v_angle, pmove->velocity, pmove->movevars->rollangle, pmove->movevars->rollspeed) * 4;
-		pmove->angles[PITCH] = v_angle[PITCH];
-		pmove->angles[YAW] = v_angle[YAW];
-	}
-	else
-	{
-		VectorCopy(pmove->oldangles, pmove->angles);
-	}
+	pmove->angles = pmove->cmd.viewangles;
 
 	// Set dead player view_offset
 	if (0 != pmove->dead)
