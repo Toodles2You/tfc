@@ -1853,6 +1853,19 @@ bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurren
 		}
 	}
 
+	if (down && keynum == K_MOUSE2 && IsScoreBoardVisible() && 0 == gEngfuncs.Con_IsVisible())
+	{
+		if (!GetClientVoiceMgr()->IsInSquelchMode())
+		{
+			GetClientVoiceMgr()->StartSquelchMode();
+		}
+		else
+		{
+			GetClientVoiceMgr()->StopSquelchMode();
+		}
+		return false;
+	}
+
 	// if we're in a command menu, try hit one of it's buttons
 	if (down && m_pCurrentCommandMenu)
 	{

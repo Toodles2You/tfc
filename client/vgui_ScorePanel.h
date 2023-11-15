@@ -229,15 +229,6 @@ class ScoreTablePanel;
 class ScorePanel : public Panel, public vgui::CDefaultInputSignal
 {
 private:
-	// Default panel implementation doesn't forward mouse messages when there is no cursor and we need them.
-	class HitTestPanel : public Panel
-	{
-	public:
-		void internalMousePressed(MouseCode code) override;
-	};
-
-
-private:
 	Label m_TitleLabel;
 
 	// Here is how these controls are arranged hierarchically.
@@ -257,7 +248,6 @@ private:
 	CGrid m_PlayerGrids[NUM_ROWS];						 // The grid with player and team info.
 	CLabelHeader m_PlayerEntries[NUM_COLUMNS][NUM_ROWS]; // Labels for the grid entries.
 
-	ScorePanel::HitTestPanel m_HitTestPanel;
 	CommandButton* m_pCloseButton;
 	CLabelHeader* GetPlayerEntry(int x, int y) { return &m_PlayerEntries[x][y]; }
 

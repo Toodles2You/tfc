@@ -75,19 +75,6 @@ SBColumnInfo g_ColumnInfo[NUM_COLUMNS] =
 #define TEAM_BLANK 3
 
 
-//-----------------------------------------------------------------------------
-// ScorePanel::HitTestPanel.
-//-----------------------------------------------------------------------------
-
-void ScorePanel::HitTestPanel::internalMousePressed(MouseCode code)
-{
-	for (int i = 0; i < _inputSignalDar.getCount(); i++)
-	{
-		_inputSignalDar[i]->mousePressed(code, this);
-	}
-}
-
-
 
 //-----------------------------------------------------------------------------
 // Purpose: Create the ScoreBoard panel
@@ -215,13 +202,6 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 
 		m_PlayerList.AddItem(pGridRow);
 	}
-
-
-	// Add the hit test panel. It is invisible and traps mouse clicks so we can go into squelch mode.
-	m_HitTestPanel.setBgColor(0, 0, 0, 255);
-	m_HitTestPanel.setParent(this);
-	m_HitTestPanel.setBounds(0, 0, wide, tall);
-	m_HitTestPanel.addInputSignal(this);
 
 	m_pCloseButton = new CommandButton("x", wide - XRES(12 + 4), YRES(2), XRES(12), YRES(12));
 	m_pCloseButton->setParent(this);
@@ -862,7 +842,6 @@ void ScorePanel::Open()
 {
 	RebuildTeams();
 	setVisible(true);
-	m_HitTestPanel.setVisible(true);
 }
 
 
@@ -872,11 +851,9 @@ void ScorePanel::mousePressed(MouseCode code, Panel* panel)
 		return;
 
 	if (!GetClientVoiceMgr()->IsInSquelchMode())
-	{
-		GetClientVoiceMgr()->StartSquelchMode();
-		m_HitTestPanel.setVisible(false);
-	}
-	else if (m_iHighlightRow >= 0)
+		return;
+	
+	if (m_iHighlightRow >= 0)
 	{
 		// mouse has been pressed, toggle mute state
 		int iPlayer = m_iSortedRows[m_iHighlightRow];
