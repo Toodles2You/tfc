@@ -195,6 +195,12 @@ bool CHudSayText::MsgFunc_SayText(const char* pszName, int iSize, void* pbuf)
 	BEGIN_READ(pbuf, iSize);
 
 	int client_index = READ_BYTE(); // the client who spoke the message
+
+	if (client_index > 0 && GetClientVoiceMgr()->IsPlayerBlocked(client_index))
+	{
+		return true;
+	}
+	
 	SayTextPrint(READ_STRING(), iSize - 1, client_index);
 
 	return true;

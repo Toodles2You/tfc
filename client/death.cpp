@@ -103,10 +103,6 @@ bool CHudDeathNotice::Draw(float flTime)
 {
 	int x, y, r, g, b;
 
-	// Only draw if the viewport will let me
-	if (gViewPort && !gViewPort->AllowedToPrintText())
-		return true;
-
 	for (int i = 0; i < MAX_DEATHNOTICES; i++)
 	{
 		if (rgDeathNoticeList[i].iId == 0)
