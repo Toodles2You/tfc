@@ -36,7 +36,7 @@ CBasePlayer::PlaybackEvent(
 		event,
 		0.0f,
 		pev->origin,
-		pev->v_angle + pev->punchangle,
+		pev->angles + pev->punchangle,
 		fParam1,
 		fParam2,
 		iParam1,
