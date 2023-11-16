@@ -66,7 +66,7 @@ public:
 
 	virtual void BounceSound();
 	int BloodColor() override { return DONT_BLEED; }
-	void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iGib) override;
+	void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType) override;
 
 	float m_flNextAttack;
 };

@@ -25,7 +25,7 @@ class CAirtank : public CGrenade
 	void EXPORT TankThink();
 	void EXPORT TankTouch(CBaseEntity* pOther);
 	int BloodColor() override { return DONT_BLEED; }
-	void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iGib) override;
+	void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType) override;
 
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
@@ -73,7 +73,7 @@ void CAirtank::Precache()
 }
 
 
-void CAirtank::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iGib)
+void CAirtank::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
 {
 	pev->owner = ENT(pevAttacker);
 

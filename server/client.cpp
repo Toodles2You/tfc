@@ -131,7 +131,7 @@ void ClientKill(edict_t* pEntity)
 	}
 
 	pev->health = 0;
-	pl->Killed(pev, pev, GIB_NEVER);
+	pl->Killed(pev, pev, DMG_GENERIC);
 }
 
 /*

@@ -135,9 +135,9 @@ public:
 	}
 
 	/// invoked when killed (EXTEND)
-	virtual void Killed( entvars_t* pevInflictor, entvars_t *pevAttacker, int iGib )
+	virtual void Killed( entvars_t* pevInflictor, entvars_t *pevAttacker, int bitsDamageType )
 	{ 
-		CBasePlayer::Killed( pevInflictor, pevAttacker, iGib );
+		CBasePlayer::Killed( pevInflictor, pevAttacker, bitsDamageType );
 	}
 
 	virtual void OnTouchingWeapon( CWeaponBox *box ) { }	///< invoked when in contact with a CWeaponBox

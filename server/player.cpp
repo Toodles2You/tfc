@@ -316,16 +316,7 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 
 	if (pev->health <= 0)
 	{
-		auto gibMode = GIB_NORMAL;
-		if ((bitsDamageType & DMG_ALWAYSGIB) != 0)
-		{
-			gibMode = GIB_ALWAYS;
-		}
-		else if ((bitsDamageType & DMG_NEVERGIB) != 0)
-		{
-			gibMode = GIB_NEVER;
-		}
-		Killed(pevInflictor, pevAttacker, gibMode);
+		Killed(pevInflictor, pevAttacker, bitsDamageType);
 		return false;
 	}
 
@@ -511,7 +502,7 @@ void CBasePlayer::RemoveAllItems(bool removeSuit)
 }
 
 
-void CBasePlayer::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iGib)
+void CBasePlayer::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
 {
 	// Holster weapon immediately, to allow it to cleanup
 	if (m_pActiveItem)
@@ -519,7 +510,7 @@ void CBasePlayer::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iG
 		m_pActiveItem->Holster();
 	}
 
-	g_pGameRules->PlayerKilled(this, pevAttacker, pevInflictor);
+	g_pGameRules->PlayerKilled(this, pevAttacker, pevInflictor, bitsDamageType);
 
 	if (m_pTank != NULL)
 	{
@@ -543,6 +534,16 @@ void CBasePlayer::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iG
 
 	DeathSound();
 
+	auto gibMode = GIB_NORMAL;
+	if ((bitsDamageType & DMG_ALWAYSGIB) != 0)
+	{
+		gibMode = GIB_ALWAYS;
+	}
+	else if ((bitsDamageType & DMG_NEVERGIB) != 0)
+	{
+		gibMode = GIB_NEVER;
+	}
+
 	PLAYBACK_EVENT_FULL(
 		FEV_GLOBAL | FEV_RELIABLE,
 		edict(),
@@ -553,7 +554,7 @@ void CBasePlayer::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iG
 		0.0,
 		pev->health,
 		pev->sequence,
-		iGib,
+		gibMode,
 		false,
 		false
 	);

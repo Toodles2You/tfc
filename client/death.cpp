@@ -31,16 +31,17 @@ struct DeathNoticeItem
 	char szKiller[MAX_PLAYER_NAME_LENGTH * 2];
 	char szVictim[MAX_PLAYER_NAME_LENGTH * 2];
 	int iId; // the index number of the associated sprite
-	bool iSuicide;
-	bool iTeamKill;
-	bool iNonPlayerKill;
+	bool bSuicide;
+	bool bTeamKill;
+	bool bNonPlayerKill;
+	bool bHeadshot;
+	bool bLocalPlayerInvolved;
 	float flDisplayTime;
 	float* KillerColor;
 	float* VictimColor;
 };
 
 #define MAX_DEATHNOTICES 4
-static int DEATHNOTICE_DISPLAY_TIME = 6;
 
 #define DEATHNOTICE_TOP 64
 
@@ -80,7 +81,7 @@ bool CHudDeathNotice::Init()
 
 	HOOK_MESSAGE(DeathMsg);
 
-	CVAR_CREATE("hud_deathnotice_time", "6", 0);
+	hud_deathnotice_time = CVAR_CREATE("hud_deathnotice_time", "6", 0);
 
 	return true;
 }
@@ -95,6 +96,10 @@ void CHudDeathNotice::InitHUDData()
 bool CHudDeathNotice::VidInit()
 {
 	m_HUD_d_skull = gHUD.GetSpriteIndex("d_skull");
+	m_HUD_d_headshot = gHUD.GetSpriteIndex("d_headshot");
+
+	auto rect = gHUD.GetSpriteRect(m_HUD_d_headshot);
+	m_headshot_width = rect.right - rect.left;
 
 	return true;
 }
@@ -103,12 +108,25 @@ bool CHudDeathNotice::Draw(float flTime)
 {
 	int x, y, r, g, b;
 
+	if (hud_deathnotice_time->value <= 0.0F)
+	{
+		return true;
+	}
+
 	for (int i = 0; i < MAX_DEATHNOTICES; i++)
 	{
 		if (rgDeathNoticeList[i].iId == 0)
 			break; // we've gone through them all
+		
+		auto deltaTime = flTime - rgDeathNoticeList[i].flDisplayTime;
+		auto displayTime = hud_deathnotice_time->value;
 
-		if (rgDeathNoticeList[i].flDisplayTime < flTime)
+		if (rgDeathNoticeList[i].bLocalPlayerInvolved)
+		{
+			displayTime *= 2;
+		}
+
+		if (deltaTime >= displayTime)
 		{ // display time has expired
 			// remove the current item from the list
 			memmove(&rgDeathNoticeList[i], &rgDeathNoticeList[i + 1], sizeof(DeathNoticeItem) * (MAX_DEATHNOTICES - i));
@@ -116,41 +134,81 @@ bool CHudDeathNotice::Draw(float flTime)
 			continue;
 		}
 
-		rgDeathNoticeList[i].flDisplayTime = V_min(rgDeathNoticeList[i].flDisplayTime, gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME);
-
 		// Draw the death notice
 		y = DEATHNOTICE_TOP + 2 + (20 * i); //!!!
 
 		int id = (rgDeathNoticeList[i].iId == -1) ? m_HUD_d_skull : rgDeathNoticeList[i].iId;
-		x = gHUD.GetWidth() - gHUD.HudStringLen(rgDeathNoticeList[i].szVictim) - (gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left);
 
-		if (!rgDeathNoticeList[i].iSuicide)
+		auto rect = gHUD.GetSpriteRect(id);
+		int weaponWidth = rect.right - rect.left;
+		int weaponHeight = rect.bottom - rect.top;
+		
+		int w = gHUD.HudStringLen(rgDeathNoticeList[i].szVictim) + weaponWidth;
+
+		if (rgDeathNoticeList[i].bHeadshot)
 		{
-			x -= (5 + gHUD.HudStringLen(rgDeathNoticeList[i].szKiller));
+			w += m_headshot_width;
+		}
 
+		if (!rgDeathNoticeList[i].bSuicide)
+		{
+			w += 5 + gHUD.HudStringLen(rgDeathNoticeList[i].szKiller);
+		}
+
+		x = gHUD.GetWidth() - 5 - w;
+
+		if (rgDeathNoticeList[i].bLocalPlayerInvolved)
+		{
+			gHUD.DrawHudFill(
+				x - 2,
+				y - 2,
+				w + 4,
+				weaponHeight + 4,
+				CHud::COLOR_WARNING,
+				MIN_ALPHA * (1.0F - (deltaTime / displayTime)));
+		}
+
+		if (!rgDeathNoticeList[i].bSuicide)
+		{
 			// Draw killers name
 			if (rgDeathNoticeList[i].KillerColor)
 				gEngfuncs.pfnDrawSetTextColor(rgDeathNoticeList[i].KillerColor[0], rgDeathNoticeList[i].KillerColor[1], rgDeathNoticeList[i].KillerColor[2]);
 			x = 5 + gHUD.DrawHudString(rgDeathNoticeList[i].szKiller, x, y);
 		}
 
-		r = 255;
-		g = 80;
-		b = 0;
-		if (rgDeathNoticeList[i].iTeamKill)
+		if (rgDeathNoticeList[i].bTeamKill)
 		{
 			r = 10;
 			g = 240;
 			b = 10; // display it in sickly green
 		}
+#if 0
+		else if (rgDeathNoticeList[i].KillerColor)
+		{
+			r = 255 * rgDeathNoticeList[i].KillerColor[0];
+			g = 255 * rgDeathNoticeList[i].KillerColor[1];
+			b = 255 * rgDeathNoticeList[i].KillerColor[2];
+		}
+#endif
+		else
+		{
+			r = 255;
+			g = 80;
+			b = 0;
+		}
 
 		// Draw death weapon
 		gHUD.DrawHudSpriteIndex(id, x, y, r, g, b);
+		x += weaponWidth;
 
-		x += (gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left);
+		if (rgDeathNoticeList[i].bHeadshot)
+		{
+			gHUD.DrawHudSpriteIndex(m_HUD_d_headshot, x, y, r, g, b);
+			x += m_headshot_width;
+		}
 
 		// Draw victims name (if it was a player that was killed)
-		if (!rgDeathNoticeList[i].iNonPlayerKill)
+		if (!rgDeathNoticeList[i].bNonPlayerKill)
 		{
 			if (rgDeathNoticeList[i].VictimColor)
 				gEngfuncs.pfnDrawSetTextColor(rgDeathNoticeList[i].VictimColor[0], rgDeathNoticeList[i].VictimColor[1], rgDeathNoticeList[i].VictimColor[2]);
@@ -170,6 +228,10 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 
 	int killer = READ_BYTE();
 	int victim = READ_BYTE();
+	int flags = READ_BYTE();
+	
+	auto localPlayerInvolved =
+		g_PlayerInfoList[killer].thisplayer || g_PlayerInfoList[victim].thisplayer;
 
 	char killedwith[32];
 	strcpy(killedwith, "d_");
@@ -179,14 +241,15 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 		gViewPort->DeathMsg(killer, victim);
 
 	gHUD.m_Spectator.DeathMessage(victim);
-	int i;
+	int i, j;
 	for (i = 0; i < MAX_DEATHNOTICES; i++)
 	{
 		if (rgDeathNoticeList[i].iId == 0)
 			break;
 	}
 	if (i == MAX_DEATHNOTICES)
-	{ // move the rest of the list forward to make room for this item
+	{
+		// move the rest of the list forward to make room for this item
 		memmove(rgDeathNoticeList, rgDeathNoticeList + 1, sizeof(DeathNoticeItem) * MAX_DEATHNOTICES);
 		i = MAX_DEATHNOTICES - 1;
 	}
@@ -228,7 +291,7 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 	// Is it a non-player object kill?
 	if (((char)victim) == -1)
 	{
-		rgDeathNoticeList[i].iNonPlayerKill = true;
+		rgDeathNoticeList[i].bNonPlayerKill = true;
 
 		// Store the object's name in the Victim slot (skip the d_ bit)
 		strcpy(rgDeathNoticeList[i].szVictim, killedwith + 2);
@@ -236,21 +299,28 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 	else
 	{
 		if (killer == victim || killer == 0)
-			rgDeathNoticeList[i].iSuicide = true;
+		{
+			rgDeathNoticeList[i].bSuicide = true;
+		}
+		else if ((flags & kDamageFlagFriendlyFire) != 0)
+		{
+			rgDeathNoticeList[i].bTeamKill = true;
+		}
+	}
 
-		if (0 == strcmp(killedwith, "d_teammate"))
-			rgDeathNoticeList[i].iTeamKill = true;
+	if ((flags & kDamageFlagHeadshot) != 0)
+	{
+		rgDeathNoticeList[i].bHeadshot = true;
 	}
 
 	// Find the sprite in the list
 	int spr = gHUD.GetSpriteIndex(killedwith);
 
 	rgDeathNoticeList[i].iId = spr;
+	rgDeathNoticeList[i].flDisplayTime = gHUD.m_flTime;
+	rgDeathNoticeList[i].bLocalPlayerInvolved = localPlayerInvolved;
 
-	DEATHNOTICE_DISPLAY_TIME = CVAR_GET_FLOAT("hud_deathnotice_time");
-	rgDeathNoticeList[i].flDisplayTime = gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME;
-
-	if (rgDeathNoticeList[i].iNonPlayerKill)
+	if (rgDeathNoticeList[i].bNonPlayerKill)
 	{
 		ConsolePrint(rgDeathNoticeList[i].szKiller);
 		ConsolePrint(" killed a ");
@@ -260,7 +330,7 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 	else
 	{
 		// record the death notice in the console
-		if (rgDeathNoticeList[i].iSuicide)
+		if (rgDeathNoticeList[i].bSuicide)
 		{
 			ConsolePrint(rgDeathNoticeList[i].szVictim);
 
@@ -273,10 +343,10 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 				ConsolePrint(" killed self");
 			}
 		}
-		else if (rgDeathNoticeList[i].iTeamKill)
+		else if (rgDeathNoticeList[i].bTeamKill)
 		{
 			ConsolePrint(rgDeathNoticeList[i].szKiller);
-			ConsolePrint(" killed his teammate ");
+			ConsolePrint(" killed their teammate ");
 			ConsolePrint(rgDeathNoticeList[i].szVictim);
 		}
 		else
@@ -286,7 +356,7 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 			ConsolePrint(rgDeathNoticeList[i].szVictim);
 		}
 
-		if (killedwith && '\0' != *killedwith && (*killedwith > 13) && 0 != strcmp(killedwith, "d_world") && !rgDeathNoticeList[i].iTeamKill)
+		if (killedwith && '\0' != *killedwith && (*killedwith > 13) && 0 != strcmp(killedwith, "d_world") && !rgDeathNoticeList[i].bTeamKill)
 		{
 			ConsolePrint(" with ");
 

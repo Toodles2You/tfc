@@ -40,7 +40,7 @@ class CTripmineGrenade : public CGrenade
 	void EXPORT PowerupThink();
 	void EXPORT BeamBreakThink();
 	void EXPORT DelayDeathThink();
-	void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iGib) override;
+	void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType) override;
 
 	void MakeBeam();
 	void KillBeam();
@@ -302,7 +302,7 @@ void CTripmineGrenade::BeamBreakThink()
 		// CGrenade code knows who the explosive really belongs to.
 		pev->owner = m_pRealOwner;
 		pev->health = 0;
-		Killed(VARS(pev->owner), VARS(pev->owner), GIB_NORMAL);
+		Killed(VARS(pev->owner), VARS(pev->owner), DMG_GENERIC);
 		return;
 	}
 
@@ -323,7 +323,7 @@ bool CTripmineGrenade::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacke
 	return CGrenade::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 }
 
-void CTripmineGrenade::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iGib)
+void CTripmineGrenade::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
 {
 	pev->takedamage = DAMAGE_NO;
 

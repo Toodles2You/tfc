@@ -196,7 +196,7 @@ public:
 	bool TakeHealth(float flHealth, int bitsDamageType) override;
 	void TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) override;
 	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
-	void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iGib) override;
+	void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType) override;
 	Vector BodyTarget(const Vector& posSrc) override { return Center() + pev->view_ofs * 0.8; } // position to shoot at
 	bool IsAlive() override { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
 	bool IsPlayer() override { return true; } // Spectators should return false for this, they aren't "players" as far as game logic is concerned

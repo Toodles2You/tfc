@@ -587,9 +587,9 @@ int CHalfLifeMultiplay::IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKil
 //=========================================================
 // PlayerKilled - someone/something killed this player
 //=========================================================
-void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pInflictor)
+void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pInflictor, int bitsDamageType)
 {
-	DeathNotice(pVictim, pKiller, pInflictor);
+	DeathNotice(pVictim, pKiller, pInflictor, bitsDamageType);
 
 	pVictim->m_iDeaths += 1;
 
@@ -653,7 +653,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, 
 //=========================================================
 // Deathnotice.
 //=========================================================
-void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pevInflictor)
+void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pevInflictor, int bitsDamageType)
 {
 	// Work out what killed the player, and send a message to all clients about it
 	CBaseEntity* Killer = CBaseEntity::Instance(pKiller);
@@ -700,9 +700,22 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 	else if (strncmp(killer_weapon_name, "func_", 5) == 0)
 		killer_weapon_name += 5;
 
+	int flags = 0;
+
+	if ((bitsDamageType & DMG_AIMED) != 0
+	 && pVictim->m_LastHitGroup == HITGROUP_HEAD)
+	{
+		flags |= kDamageFlagHeadshot;
+	}
+	if (PlayerRelationship(pVictim, Killer) == GR_TEAMMATE)
+	{
+		flags |= kDamageFlagFriendlyFire;
+	}
+
 	MESSAGE_BEGIN(MSG_ALL, gmsgDeathMsg);
 	WRITE_BYTE(killer_index);				// the killer
 	WRITE_BYTE(ENTINDEX(pVictim->edict())); // the victim
+	WRITE_BYTE(flags);						// the flags
 	WRITE_STRING(killer_weapon_name);		// what they were killed by (should this be a string?)
 	MESSAGE_END();
 

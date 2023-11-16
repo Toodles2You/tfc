@@ -39,7 +39,7 @@ class CSqueakGrenade : public CGrenade
 	void EXPORT SuperBounceTouch(CBaseEntity* pOther);
 	void EXPORT HuntThink();
 	int BloodColor() override { return BLOOD_COLOR_YELLOW; }
-	void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iGib) override;
+	void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType) override;
 	void GibMonster();
 
 	bool Save(CSave& save) override;
@@ -157,7 +157,7 @@ void CSqueakGrenade::Precache()
 }
 
 
-void CSqueakGrenade::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int iGib)
+void CSqueakGrenade::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
 {
 	pev->model = iStringNull; // make invisible
 	SetThink(&CSqueakGrenade::SUB_Remove);
@@ -183,7 +183,7 @@ void CSqueakGrenade::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int
 	if (m_hOwner != NULL)
 		pev->owner = m_hOwner->edict();
 
-	CBaseEntity::Killed(pevInflictor, pevAttacker, GIB_ALWAYS);
+	CBaseEntity::Killed(pevInflictor, pevAttacker, bitsDamageType | DMG_ALWAYSGIB);
 	
 	if (pev->owner && (pev->owner->v.flags & FL_CLIENT) == 0)
 		CBaseEntity::Instance(pev->owner)->DeathNotice(pev);
@@ -215,7 +215,7 @@ void CSqueakGrenade::HuntThink()
 	{
 		g_vecAttackDir = pev->velocity.Normalize();
 		pev->health = -1;
-		Killed(pev, pev, 0);
+		Killed(pev, pev, DMG_ALWAYSGIB);
 		return;
 	}
 

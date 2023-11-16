@@ -37,10 +37,10 @@ public:
 	bool ShouldAutoAim(CBasePlayer* pPlayer, edict_t* target) override;
 	int IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled) override;
 	void InitHUD(CBasePlayer* pl) override;
-	void DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pevInflictor) override;
+	void DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pevInflictor, int bitsDamageType) override;
 	const char* GetGameDescription() override { return "HL Teamplay"; } // this is the game name that gets seen in the server browser
 	gamemode_e GetGameMode() override { return kGamemodeTeamplay; }
-	void PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pInflictor) override;
+	void PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pInflictor, int bitsDamageType) override;
 	void Think() override;
 	int GetTeamIndex(const char* pTeamName) override;
 	const char* GetIndexedTeamName(int teamIndex) override;
