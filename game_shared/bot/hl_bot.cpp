@@ -69,6 +69,11 @@ void CHLBot::Upkeep()
 
 void CHLBot::Update()
 {
+    if (TeamNumber() == TEAM_UNASSIGNED)
+    {
+        g_pGameRules->SetDefaultPlayerTeam(this);
+        return;
+    }
     if (!m_pActiveItem || m_pActiveItem->GetWeaponPtr()->m_iClip == 0)
     {
         ClearPrimaryAttack();
@@ -77,7 +82,7 @@ void CHLBot::Update()
     float distance;
     if (!m_pEnemy)
     {
-        m_pEnemy = UTIL_GetClosestPlayer(&pev->origin, &distance, this);
+        m_pEnemy = UTIL_GetClosestEnemyPlayer(this, &distance);
     }
     if (!m_pEnemy || !IsVisible(m_pEnemy))
     {

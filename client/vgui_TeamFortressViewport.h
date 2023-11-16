@@ -59,8 +59,6 @@ void ScaleColors( int &r, int &g, int &b, int a );
 extern const char *sTFClassSelection[];
 extern int sTFValidClassInts[];
 extern const char *sLocalisedClasses[];
-extern int iTeamColors[5][3];
-extern int iNumberOfTeamColors;
 extern TeamFortressViewport *gViewPort;
 
 
@@ -569,8 +567,6 @@ public:
 	void ShowScoreBoard( void );
 	void HideScoreBoard( void );
 	bool IsScoreBoardVisible( void );
-
-	bool AllowedToPrintText( void );
 
 	void ShowVGUIMenu( int iMenu );
 	void HideVGUIMenu( void );
@@ -1541,6 +1537,11 @@ public:
 	{
 		setVisible( false );
 		m_iIsActive = false;
+
+		if ( m_iMenuID == MENU_INTRO )
+		{
+			gEngfuncs.pfnClientCmd( "_firstspawn\n" );
+		}
 
 		if ( m_iRemoveMe )
 			gViewPort->removeChild( this );

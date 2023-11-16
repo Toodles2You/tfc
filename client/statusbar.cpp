@@ -31,9 +31,6 @@ DECLARE_MESSAGE(m_StatusBar, StatusValue);
 
 #define STATUSBAR_ID_LINE 1
 
-float* GetClientColor(int clientIndex);
-extern float g_ColorYellow[3];
-
 bool CHudStatusBar::Init()
 {
 	gHUD.AddHudElem(this);
@@ -68,7 +65,7 @@ void CHudStatusBar::Reset()
 
 	// reset our colors for the status bar lines (yellow is default)
 	for (i = 0; i < MAX_STATUSBAR_LINES; i++)
-		m_pflNameColors[i] = g_ColorYellow;
+		m_pflNameColors[i] = nullptr;
 }
 
 void CHudStatusBar::ParseStatusString(int line_num)
@@ -142,7 +139,7 @@ void CHudStatusBar::ParseStatusString(int line_num)
 							if (g_PlayerInfoList[indexval].name != NULL)
 							{
 								strncpy(szRepString, g_PlayerInfoList[indexval].name, MAX_PLAYER_NAME_LENGTH);
-								m_pflNameColors[line_num] = GetClientColor(indexval);
+								m_pflNameColors[line_num] = gHUD.GetClientColor(indexval);
 							}
 							else
 							{
@@ -178,7 +175,7 @@ bool CHudStatusBar::Draw(float fTime)
 	{
 		for (int i = 0; i < MAX_STATUSBAR_LINES; i++)
 		{
-			m_pflNameColors[i] = g_ColorYellow;
+			m_pflNameColors[i] = nullptr;
 			ParseStatusString(i);
 		}
 		m_bReparseString = false;

@@ -55,6 +55,66 @@ public:
 };
 static CMultiplayGameMgrHelper g_GameMgrHelper;
 
+CTeam::CTeam(std::string name) : m_name{name}, m_score{0}, m_numPlayers{0}
+{	
+	m_players.clear();
+}
+
+void CTeam::AddPlayer(CBasePlayer *player)
+{
+	if (player->m_team)
+	{
+		player->m_team->RemovePlayer(player);
+	}
+
+	player->m_team = this;
+
+	MESSAGE_BEGIN(MSG_ALL, gmsgTeamInfo);
+	WRITE_BYTE(player->entindex());
+	WRITE_STRING(m_name.c_str());
+	MESSAGE_END();
+
+	MESSAGE_BEGIN(MSG_ALL, gmsgScoreInfo);
+	WRITE_BYTE(player->entindex());
+	WRITE_SHORT(player->pev->frags);
+	WRITE_SHORT(player->m_iDeaths);
+	WRITE_SHORT(0);
+	WRITE_SHORT(player->pev->team);
+	MESSAGE_END();
+
+	m_players.push_back(player);
+	m_numPlayers = m_players.size();
+}
+
+void CTeam::RemovePlayer(CBasePlayer *player)
+{
+	for (auto p = m_players.begin(); p != m_players.end(); p++)
+	{
+		if (*p == player)
+		{
+			m_players.erase(p);
+			break;
+		}
+	}
+	m_numPlayers = m_players.size();
+}
+
+void CTeam::AddPoints(int score)
+{
+	if (score < 0)
+	{
+		return;
+	}
+
+	m_score += score;
+
+	MESSAGE_BEGIN(MSG_ALL, gmsgTeamScore);
+	WRITE_STRING(m_name.c_str());
+	WRITE_SHORT(m_score);
+	WRITE_SHORT(0);
+	MESSAGE_END();
+}
+
 //*********************************************************
 // Rules for the half-life multiplayer game.
 //*********************************************************
@@ -66,6 +126,10 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	m_deathmatch = ((int)gpGlobals->deathmatch != 0);
 	m_coop = ((int)gpGlobals->coop != 0);
 	m_allowMonsters = (allowmonsters.value != 0);
+
+	m_teams.clear();
+	m_teams.push_back(CTeam{"Players"});
+	m_numTeams = 1;
 
 	RefreshSkillData();
 
@@ -102,6 +166,13 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 {
 	if (g_VoiceGameMgr.ClientCommand(pPlayer, pcmd))
 		return true;
+
+	if (strcmp(pcmd, "_firstspawn") == 0
+	 && !IsValidTeam(pPlayer->TeamID()))
+	{
+		g_pGameRules->SetDefaultPlayerTeam(pPlayer);
+		return true;
+	}
 
 	return CGameRules::ClientCommand(pPlayer, pcmd);
 }
@@ -280,18 +351,6 @@ void CHalfLifeMultiplay::Think()
 		frags_remaining = bestfrags;
 	}
 
-	// Updates when frags change
-	if (frags_remaining != last_frags)
-	{
-		g_engfuncs.pfnCvar_DirectSet(&fragsleft, UTIL_VarArgs("%i", frags_remaining));
-	}
-
-	// Updates once per second
-	if (timeleft.value != last_time)
-	{
-		g_engfuncs.pfnCvar_DirectSet(&timeleft, UTIL_VarArgs("%i", time_remaining));
-	}
-
 	last_frags = frags_remaining;
 	last_time = time_remaining;
 }
@@ -368,6 +427,12 @@ bool CHalfLifeMultiplay::ClientConnected(edict_t* pEntity, const char* pszName, 
 	return true;
 }
 
+void CHalfLifeMultiplay::ClientPutInServer(CBasePlayer* pPlayer)
+{
+	pPlayer->m_team = nullptr;
+	pPlayer->pev->team = TEAM_UNASSIGNED;
+}
+
 void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 {
 	const char *name = "unconnected";
@@ -378,7 +443,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 	}
 
 	// notify other clients of player joining the game
-	UTIL_ClientPrintAll(HUD_PRINTNOTIFY, UTIL_VarArgs("%s has joined the game\n", name));
+	UTIL_ClientPrintAll(HUD_PRINTTALK, UTIL_VarArgs("- %s has joined the game\n", name));
 
 	// team match?
 	if (IsTeamplay())
@@ -425,7 +490,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 			WRITE_SHORT(plr->pev->frags);
 			WRITE_SHORT(plr->m_iDeaths);
 			WRITE_SHORT(0);
-			WRITE_SHORT(GetTeamIndex(plr->m_szTeamName) + 1);
+			WRITE_SHORT(plr->TeamNumber());
 			MESSAGE_END();
 		}
 	}
@@ -443,6 +508,15 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 {
 	if (pClient)
 	{
+		const char *name = "unconnected";
+		
+		if (!FStringNull(pClient->v.netname) && STRING(pClient->v.netname)[0] != '\0')
+		{
+			name = STRING(pClient->v.netname);
+		}
+		
+		UTIL_ClientPrintAll(HUD_PRINTTALK, UTIL_VarArgs("- %s has left the game\n", name));
+
 		CBasePlayer* pPlayer = (CBasePlayer*)CBaseEntity::Instance(pClient);
 
 		if (pPlayer)
@@ -519,6 +593,18 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer* pPlayer)
 //=========================================================
 void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 {
+	if (pPlayer->TeamNumber() == TEAM_UNASSIGNED)
+	{
+		pPlayer->pev->effects |= EF_NODRAW;
+		pPlayer->pev->solid = SOLID_NOT;
+		pPlayer->pev->takedamage = DAMAGE_NO;
+		pPlayer->pev->movetype = MOVETYPE_NONE;
+		pPlayer->m_iHideHUD |= (HIDEHUD_WEAPONS | HIDEHUD_HEALTH);
+		return;
+	}
+
+	pPlayer->m_iHideHUD &= ~(HIDEHUD_WEAPONS | HIDEHUD_HEALTH);
+
 	bool addDefault;
 	CBaseEntity* pWeaponEntity = NULL;
 
@@ -580,6 +666,10 @@ bool CHalfLifeMultiplay::AllowAutoTargetCrosshair()
 //=========================================================
 int CHalfLifeMultiplay::IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled)
 {
+	if (pAttacker == pKilled)
+	{
+		return 0;
+	}
 	return 1;
 }
 
@@ -600,20 +690,15 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, 
 	if (ktmp && (ktmp->Classify() == CLASS_PLAYER))
 		peKiller = (CBasePlayer*)ktmp;
 
-	if (pVictim->pev == pKiller)
-	{ // killed self
-		pKiller->frags -= 1;
-	}
-	else if (ktmp && ktmp->IsPlayer())
+	if (ktmp && ktmp->IsPlayer())
 	{
 		// if a player dies in a deathmatch game and the killer is a client, award the killer some points
-		pKiller->frags += IPointsForKill(peKiller, pVictim);
+		peKiller->AddPoints(IPointsForKill(peKiller, pVictim), false);
 
-		FireTargets("game_playerkill", ktmp, ktmp, USE_TOGGLE, 0);
-	}
-	else
-	{ // killed by the world
-		pKiller->frags -= 1;
+		if (pVictim->pev != pKiller)
+		{
+			FireTargets("game_playerkill", ktmp, ktmp, USE_TOGGLE, 0);
+		}
 	}
 
 	// update the scores
@@ -623,7 +708,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, 
 	WRITE_SHORT(pVictim->pev->frags);
 	WRITE_SHORT(pVictim->m_iDeaths);
 	WRITE_SHORT(0);
-	WRITE_SHORT(GetTeamIndex(pVictim->m_szTeamName) + 1);
+	WRITE_SHORT(pVictim->TeamNumber());
 	MESSAGE_END();
 
 	// killers score, if it's a player
@@ -637,7 +722,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, 
 		WRITE_SHORT(PK->pev->frags);
 		WRITE_SHORT(PK->m_iDeaths);
 		WRITE_SHORT(0);
-		WRITE_SHORT(GetTeamIndex(PK->m_szTeamName) + 1);
+		WRITE_SHORT(PK->TeamNumber());
 		MESSAGE_END();
 
 		// let the killer paint another decal as soon as he'd like.
@@ -1137,6 +1222,66 @@ int CHalfLifeMultiplay::PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pT
 {
 	// half life deathmatch has only enemies
 	return GR_NOTTEAMMATE;
+}
+
+int CHalfLifeMultiplay::GetTeamIndex(const char* pTeamName)
+{
+	auto i = 0;
+	for (auto t = m_teams.begin(); t != m_teams.end(); t++)
+	{
+		if (strcmp(pTeamName, (*t).m_name.c_str()) == 0)
+		{
+			return i + 1;
+		}
+		i++;
+	}
+	return TEAM_UNASSIGNED;
+}
+
+const char* CHalfLifeMultiplay::GetIndexedTeamName(int teamIndex)
+{
+	if (teamIndex <= TEAM_UNASSIGNED || teamIndex >= m_numTeams)
+	{
+		return nullptr;
+	}
+	return m_teams[teamIndex - 1].m_name.c_str();
+}
+
+bool CHalfLifeMultiplay::IsValidTeam(const char* pTeamName)
+{
+	return GetTeamIndex(pTeamName) > TEAM_UNASSIGNED;
+}
+
+void CHalfLifeMultiplay::SetDefaultPlayerTeam(CBasePlayer* pPlayer)
+{
+	pPlayer->pev->team = 1;
+	m_teams[0].AddPlayer(pPlayer);
+
+	pPlayer->Spawn();
+}
+
+void CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib)
+{
+	if (!IsValidTeam(pTeamName))
+	{
+		return;
+	}
+	
+	if (bKill)
+	{
+		pPlayer->Killed(
+			CWorld::World->pev,
+			CWorld::World->pev,
+			bGib ? DMG_ALWAYSGIB : DMG_GENERIC);
+	}
+
+	pPlayer->pev->team = GetTeamIndex(pTeamName);
+	m_teams[pPlayer->pev->team - 1].AddPlayer(pPlayer);
+
+	if (!bKill)
+	{
+		pPlayer->Spawn();
+	}
 }
 
 bool CHalfLifeMultiplay::PlayTextureSounds()

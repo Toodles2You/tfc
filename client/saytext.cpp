@@ -27,8 +27,6 @@
 
 #include "vgui_TeamFortressViewport.h"
 
-extern float* GetClientColor(int clientIndex);
-
 #define MAX_LINES 5
 #define MAX_CHARS_PER_LINE 256 /* it can be less than this, depending on char size */
 
@@ -111,7 +109,7 @@ bool CHudSayText::Draw(float flTime)
 {
 	int y = m_iBaseY;
 
-	if ((gViewPort && !gViewPort->AllowedToPrintText()) || 0 == m_HUD_saytext->value)
+	if (0 == m_HUD_saytext->value)
 		return true;
 
 	// make sure the scrolltime is within reasonable bounds,  to guard against the clock being reset
@@ -241,7 +239,7 @@ void CHudSayText::SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex
 			if (nameInString)
 			{
 				g_iNameLengths[i] = strlen(pName) + (nameInString - pszBuf);
-				g_pflNameColors[i] = GetClientColor(clientIndex);
+				g_pflNameColors[i] = gHUD.GetClientColor(clientIndex);
 				g_bPlayerDead[i] = g_PlayerExtraInfo[clientIndex].dead;
 			}
 		}

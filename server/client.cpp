@@ -79,15 +79,6 @@ void ClientDisconnect(edict_t* pEntity)
 	if (g_fGameOver)
 		return;
 
-	char text[256] = "";
-	if (!FStringNull(pEntity->v.netname))
-		snprintf(text, sizeof(text), "- %s has left the game\n", STRING(pEntity->v.netname));
-	text[sizeof(text) - 1] = 0;
-	MESSAGE_BEGIN(MSG_ALL, gmsgSayText, NULL);
-	WRITE_BYTE(ENTINDEX(pEntity));
-	WRITE_STRING(text);
-	MESSAGE_END();
-
 	// since the edict doesn't get deleted, fix it so it doesn't interfere.
 	pEntity->v.takedamage = DAMAGE_NO; // don't attract autoaim
 	pEntity->v.solid = SOLID_NOT;	   // nonsolid
@@ -131,7 +122,10 @@ void ClientKill(edict_t* pEntity)
 	}
 
 	pev->health = 0;
-	pl->Killed(pev, pev, DMG_GENERIC);
+	pl->Killed(
+		CWorld::World->pev,
+		CWorld::World->pev,
+		DMG_GENERIC);
 }
 
 /*
@@ -149,6 +143,8 @@ void ClientPutInServer(edict_t* pEntity)
 
 	pPlayer = GetClassPtr((CBasePlayer*)pev);
 	pPlayer->SetCustomDecalFrames(-1); // Assume none;
+
+	g_pGameRules->ClientPutInServer(pPlayer);
 
 	// Allocate a CBasePlayer for pev, and call spawn
 	pPlayer->Spawn();
@@ -1206,7 +1202,7 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 
 		// Ignore if not the host and not touching a PVS/PAS leaf
 		// If pSet is NULL, then the test will always succeed and the entity will be added to the update
-		if ((ent->v.flags & (FL_CLIENT | FL_FAKECLIENT)) == 0)
+		if (!entity->IsPlayer())
 		{
 			if (!ENGINE_CHECK_VISIBILITY((const struct edict_s*)ent, pSet))
 			{

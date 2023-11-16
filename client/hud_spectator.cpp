@@ -37,7 +37,6 @@ extern float vJumpAngles[3];
 extern void V_GetInEyePos(int entity, float* origin, float* angles);
 extern void V_ResetChaseCam();
 extern void V_GetChasePos(int target, float* cl_angles, float* origin, float* angles);
-extern float* GetClientColor(int clientIndex);
 
 extern Vector v_origin;	   // last view origin
 extern Vector v_angles;	   // last view angle
@@ -658,7 +657,7 @@ bool CHudSpectator::Draw(float flTime)
 				continue;
 		}
 
-		color = GetClientColor(i + 1);
+		color = gHUD.GetClientColor(i + 1);
 
 		// draw the players name and health underneath
 		sprintf(string, "%s", g_PlayerInfoList[i + 1].name);

@@ -79,20 +79,8 @@ int g_iUser3 = 0;
 
 void IN_ResetMouse();
 extern CMenuPanel* CMessageWindowPanel_Create(const char* szMOTD, const char* szTitle, bool iShadeFullscreen, bool iRemoveMe, int x, int y, int wide, int tall);
-extern float* GetClientColor(int clientIndex);
 
 using namespace vgui;
-
-// Team Colors
-int iNumberOfTeamColors = 5;
-int iTeamColors[5][3] =
-	{
-		{255, 170, 0},	 // HL orange (default)
-		{125, 165, 210}, // Blue
-		{200, 90, 70},	 // Red
-		{225, 205, 45},	 // Yellow
-		{145, 215, 140}, // Green
-};
 
 
 // Used for Class specific buttons
@@ -1243,7 +1231,7 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 		// in first person mode colorize player names
 		if ((g_iUser1 == OBS_IN_EYE) && 0 != player)
 		{
-			float* color = GetClientColor(player);
+			float* color = gHUD.GetClientColor(player);
 			int r = color[0] * 255;
 			int g = color[1] * 255;
 			int b = color[2] * 255;
@@ -1559,20 +1547,6 @@ void TeamFortressViewport::HideTopMenu()
 	}
 
 	UpdateCursorState();
-}
-
-// Return true if the HUD's allowed to print text messages
-bool TeamFortressViewport::AllowedToPrintText()
-{
-	// Prevent text messages when fullscreen menus are up
-	if (m_pCurrentMenu && g_iPlayerClass == 0)
-	{
-		int iId = m_pCurrentMenu->GetMenuID();
-		if (iId == MENU_TEAM || iId == MENU_CLASS || iId == MENU_INTRO || iId == MENU_CLASSHELP)
-			return false;
-	}
-
-	return true;
 }
 
 //======================================================================================

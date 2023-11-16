@@ -47,34 +47,6 @@ struct DeathNoticeItem
 
 DeathNoticeItem rgDeathNoticeList[MAX_DEATHNOTICES + 1];
 
-float g_ColorBlue[3] = {0.6, 0.8, 1.0};
-float g_ColorRed[3] = {1.0, 0.25, 0.25};
-float g_ColorGreen[3] = {0.6, 1.0, 0.6};
-float g_ColorYellow[3] = {1.0, 0.7, 0.0};
-float g_ColorGrey[3] = {0.8, 0.8, 0.8};
-
-float* GetClientColor(int clientIndex)
-{
-	switch (g_PlayerExtraInfo[clientIndex].teamnumber)
-	{
-	case 1:
-		return g_ColorBlue;
-	case 2:
-		return g_ColorRed;
-	case 3:
-		return g_ColorYellow;
-	case 4:
-		return g_ColorGreen;
-	case 0:
-		return g_ColorYellow;
-
-	default:
-		return g_ColorGrey;
-	}
-
-	return NULL;
-}
-
 bool CHudDeathNotice::Init()
 {
 	gHUD.AddHudElem(this);
@@ -266,7 +238,7 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 	}
 	else
 	{
-		rgDeathNoticeList[i].KillerColor = GetClientColor(killer);
+		rgDeathNoticeList[i].KillerColor = gHUD.GetClientColor(killer);
 		strncpy(rgDeathNoticeList[i].szKiller, killer_name, MAX_PLAYER_NAME_LENGTH);
 		rgDeathNoticeList[i].szKiller[MAX_PLAYER_NAME_LENGTH - 1] = 0;
 	}
@@ -283,7 +255,7 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 	}
 	else
 	{
-		rgDeathNoticeList[i].VictimColor = GetClientColor(victim);
+		rgDeathNoticeList[i].VictimColor = gHUD.GetClientColor(victim);
 		strncpy(rgDeathNoticeList[i].szVictim, victim_name, MAX_PLAYER_NAME_LENGTH);
 		rgDeathNoticeList[i].szVictim[MAX_PLAYER_NAME_LENGTH - 1] = 0;
 	}

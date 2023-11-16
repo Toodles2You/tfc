@@ -118,7 +118,7 @@ void CHLBotManager::StartFrame()
 
 		while (bots > quota)
 		{
-			UTIL_KickBotFromTeam(0);
+			UTIL_KickBotFromTeam(-1);
 			bots--;
 		}
 

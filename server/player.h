@@ -83,6 +83,8 @@ enum sbar_data
 
 #define CHAT_INTERVAL 1.0f
 
+class CTeam;
+
 class CBasePlayer : public CBaseAnimating
 {
 public:
@@ -177,12 +179,10 @@ public:
 	bool m_fOnTarget;
 	int m_iDeaths;
 
-	int m_lastx, m_lasty; // These are the previous update's crosshair angles, DON"T SAVE/RESTORE
-
 	int m_nCustomSprayFrames = -1; // Custom clan logo frames for this player
 	float m_flNextDecalTime;  // next time this player can spray a decal
 
-	char m_szTeamName[TEAM_NAME_LENGTH];
+	CTeam *m_team = nullptr;
 
 	void Spawn() override;
 	void Pain();

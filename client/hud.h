@@ -698,6 +698,9 @@ public:
 	float GetSensitivity();
 
 	bool ImpulseCommands(int impulse);
+
+	float* GetTeamColor(int teamNumber);
+	float* GetClientColor(int clientIndex);
 };
 
 extern CHud gHUD;

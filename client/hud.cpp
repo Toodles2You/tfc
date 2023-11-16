@@ -42,18 +42,11 @@ public:
 
 		if (entindex >= 0 && entindex < sizeof(g_PlayerExtraInfo) / sizeof(g_PlayerExtraInfo[0]))
 		{
-			int iTeam = g_PlayerExtraInfo[entindex].teamnumber;
+			auto c = gHUD.GetClientColor(entindex);
 
-			if (iTeam < 0)
-			{
-				iTeam = 0;
-			}
-
-			iTeam = iTeam % iNumberOfTeamColors;
-
-			color[0] = iTeamColors[iTeam][0];
-			color[1] = iTeamColors[iTeam][1];
-			color[2] = iTeamColors[iTeam][2];
+			color[0] = c[0] * 255;
+			color[1] = c[1] * 255;
+			color[2] = c[2] * 255;
 		}
 	}
 
@@ -726,4 +719,47 @@ bool CHud::ImpulseCommands(int impulse)
 	}
 
 	return false;
+}
+
+static float g_ColorBlue[3] = {0.6, 0.8, 1.0};
+static float g_ColorRed[3] = {1.0, 0.25, 0.25};
+static float g_ColorGreen[3] = {0.6, 1.0, 0.6};
+static float g_ColorYellow[3] = {1.0, 0.7, 0.0};
+static float g_ColorGrey[3] = {0.8, 0.8, 0.8};
+
+float* CHud::GetTeamColor(int teamNumber)
+{
+	if (gHUD.m_GameMode != kGamemodeTeamplay)
+	{
+		switch (teamNumber)
+		{
+			case 1:
+				return g_ColorYellow;
+			default:
+				break;
+		}
+		
+		return g_ColorGrey;
+	}
+
+	switch (teamNumber)
+	{
+	case 1:
+		return g_ColorBlue;
+	case 2:
+		return g_ColorRed;
+	case 3:
+		return g_ColorYellow;
+	case 4:
+		return g_ColorGreen;
+	default:
+		break;
+	}
+
+	return g_ColorGrey;
+}
+
+float* CHud::GetClientColor(int clientIndex)
+{
+	return GetTeamColor(g_PlayerExtraInfo[clientIndex].teamnumber);
 }

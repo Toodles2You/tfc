@@ -433,7 +433,7 @@ const char* CGameTeamMaster::TeamID()
 	if (m_teamIndex < 0) // Currently set to "no team"
 		return "";
 
-	return g_pGameRules->GetIndexedTeamName(m_teamIndex); // UNDONE: Fill this in with the team from the "teamlist"
+	return g_pGameRules->GetIndexedTeamName(m_teamIndex);
 }
 
 

@@ -128,14 +128,13 @@ CTeamMenuPanel::CTeamMenuPanel(int iTrans, bool iRemoveMe, int x, int y, int wid
 		m_pButtons[i]->addActionSignal(new CMenuHandler_StringCommandWatch(sz, true));
 		m_pButtons[i]->addInputSignal(new CHandler_MenuButtonOver(this, i));
 
+		auto color = gHUD.GetTeamColor(i);
+
 		// Create the Team Info panel
 		m_pTeamInfoPanel[i] = new TextPanel("", TEAMMENU_WINDOW_INFO_X, TEAMMENU_WINDOW_INFO_Y, TEAMMENU_WINDOW_SIZE_X - TEAMMENU_WINDOW_INFO_X, TEAMMENU_WINDOW_SIZE_X - TEAMMENU_WINDOW_INFO_Y);
 		m_pTeamInfoPanel[i]->setParent(m_pTeamWindow);
 		m_pTeamInfoPanel[i]->setFont(pSchemes->getFont(hTeamInfoText));
-		m_pTeamInfoPanel[i]->setFgColor(iTeamColors[i % iNumberOfTeamColors][0],
-			iTeamColors[i % iNumberOfTeamColors][1],
-			iTeamColors[i % iNumberOfTeamColors][2],
-			0);
+		m_pTeamInfoPanel[i]->setFgColor(color[0] * 255, color[1] * 255, color[2] * 255, 0);
 		m_pTeamInfoPanel[i]->setBgColor(0, 0, 0, 255);
 	}
 

@@ -3332,6 +3332,11 @@ void PM_Move(struct playermove_s* ppmove, qboolean server)
 
 	pmove = ppmove;
 
+	if (pmove->movetype == MOVETYPE_NONE)
+	{
+		return;
+	}
+
 	PM_PlayerMove(server);
 
 	if (pmove->onground != -1)

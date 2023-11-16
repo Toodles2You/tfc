@@ -1442,12 +1442,17 @@ void CBasePlayer::AddPoints(int score, bool bAllowNegativeScore)
 
 	pev->frags += score;
 
+	if (g_pGameRules->IsTeamplay() && m_team != nullptr)
+	{
+		m_team->AddPoints(score);
+	}
+
 	MESSAGE_BEGIN(MSG_ALL, gmsgScoreInfo);
 	WRITE_BYTE(ENTINDEX(edict()));
 	WRITE_SHORT(pev->frags);
 	WRITE_SHORT(m_iDeaths);
 	WRITE_SHORT(0);
-	WRITE_SHORT(g_pGameRules->GetTeamIndex(m_szTeamName) + 1);
+	WRITE_SHORT(TeamNumber());
 	MESSAGE_END();
 }
 
@@ -2215,8 +2220,6 @@ void CBasePlayer::Spawn()
 	// dont let uninitialized value here hurt the player
 	m_flFallVelocity = 0;
 
-	g_pGameRules->SetDefaultPlayerTeam(this);
-
 	auto spawn = g_pGameRules->GetPlayerSpawnSpot(this);
 
 	pev->origin = spawn->m_origin;
@@ -2247,8 +2250,6 @@ void CBasePlayer::Spawn()
 		m_rgAmmo[i] = 0;
 		m_rgAmmoLast[i] = 0; // client ammo values also have to be reset  (the death hud clear messages does on the client side)
 	}
-
-	m_lastx = m_lasty = 0;
 
 	m_flNextChatTime = gpGlobals->time;
 
@@ -2408,11 +2409,13 @@ bool CBasePlayer::HasWeapons()
 
 const char* CBasePlayer::TeamID()
 {
-	if (pev == NULL) // Not fully connected yet
+	if (!m_team)
+	{
 		return "";
+	}
 
 	// return their team name
-	return m_szTeamName;
+	return m_team->m_name.c_str();
 }
 
 int CBasePlayer::TeamNumber()

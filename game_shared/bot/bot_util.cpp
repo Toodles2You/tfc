@@ -11,6 +11,7 @@
 #include "util.h"
 #include "cbase.h"
 #include "player.h"
+#include "gamerules.h"
 
 #include "bot.h"
 #include "bot_util.h"
@@ -253,7 +254,7 @@ bool UTIL_KickBotFromTeam( int kickTeam )
 		if (!player->IsBot())
 			continue;	
 
-		if (!player->IsAlive() && player->TeamNumber() == kickTeam)
+		if (!player->IsAlive() && (kickTeam == -1 || player->TeamNumber() == kickTeam))
 		{
 			// its a bot on the right team - kick it
 			SERVER_COMMAND( UTIL_VarArgs( "kick \"%s\"\n", STRING( player->pev->netname ) ) );
@@ -280,7 +281,7 @@ bool UTIL_KickBotFromTeam( int kickTeam )
 		if (!player->IsBot())
 			continue;	
 
-		if (player->TeamNumber() == kickTeam)
+		if ((kickTeam == -1 || player->TeamNumber() == kickTeam))
 		{
 			// its a bot on the right team - kick it
 			SERVER_COMMAND( UTIL_VarArgs( "kick \"%s\"\n", STRING( player->pev->netname ) ) );
@@ -393,6 +394,41 @@ CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, int team, float *distance
 			continue;
 
 		float distSq = (player->pev->origin - *pos).LengthSquared();
+		if (distSq < closeDistSq)
+		{
+			closeDistSq = distSq;
+			closePlayer = static_cast<CBasePlayer *>( player );
+		}
+	}
+	
+	if (distance)
+		*distance = sqrt( closeDistSq );
+
+	return closePlayer;
+}
+
+CBasePlayer *UTIL_GetClosestEnemyPlayer( CBasePlayer *self, float *distance )
+{
+	CBasePlayer *closePlayer = NULL;
+	float closeDistSq = 999999999999.9f;
+
+	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
+	{
+		CBasePlayer *player = static_cast<CBasePlayer *>( UTIL_PlayerByIndex( i ) );
+
+		if (!IsEntityValid( player ))
+			continue;
+
+		if (player == self)
+			continue;
+
+		if (!player->IsAlive())
+			continue;
+
+		if (g_pGameRules->PlayerRelationship(self, player) > GR_NOTTEAMMATE)
+			continue;
+
+		float distSq = (player->pev->origin - self->pev->origin).LengthSquared();
 		if (distSq < closeDistSq)
 		{
 			closeDistSq = distSq;

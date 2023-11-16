@@ -20,6 +20,7 @@
 
 #include <forward_list>
 #include <vector>
+#include <string>
 
 //#include "weapons.h"
 //#include "items.h"
@@ -54,11 +55,18 @@ enum
 // Player relationship return codes
 enum
 {
-	GR_NOTTEAMMATE = 0,
-	GR_TEAMMATE,
-	GR_ENEMY,
-	GR_ALLY,
-	GR_NEUTRAL,
+	GR_ENEMY		= -2,
+	GR_NEUTRAL		= -1,
+	GR_NOTTEAMMATE	= 0,
+	GR_ALLY			= 1,
+	GR_TEAMMATE		= 2,
+};
+
+enum
+{
+	TEAM_UNASSIGNED = 0,
+	TEAM_PLAYERS,
+	TEAM_SPECTATORS = 5,
 };
 
 class CSpawnPoint
@@ -96,6 +104,7 @@ public:
 
 	// Client connection/disconnection
 	virtual bool ClientConnected(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128]) = 0; // a client just connected to the server (player hasn't spawned yet)
+	virtual void ClientPutInServer(CBasePlayer* pPlayer) = 0;
 	virtual void InitHUD(CBasePlayer* pl);																				   // the client dll is ready for updating
 	virtual void ClientDisconnected(edict_t* pClient) = 0;																	   // a client just disconnected from the server
 	virtual void UpdateGameMode(CBasePlayer* pPlayer);																	   // the client needs to be informed of the current game mode
@@ -164,13 +173,12 @@ public:
 	virtual int DeadPlayerAmmo(CBasePlayer* pPlayer) = 0; // Do I drop ammo when the player dies? How much?
 
 	// Teamplay stuff
-	virtual const char* GetTeamID(CBaseEntity* pEntity) = 0;						// what team is this entity on?
 	virtual int PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget) = 0; // What is the player's relationship with this entity?
 	virtual int GetTeamIndex(const char* pTeamName) { return -1; }
 	virtual const char* GetIndexedTeamName(int teamIndex) { return ""; }
 	virtual bool IsValidTeam(const char* pTeamName) { return true; }
 	virtual void ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib) {}
-	virtual const char* SetDefaultPlayerTeam(CBasePlayer* pPlayer) { return ""; }
+	virtual void SetDefaultPlayerTeam(CBasePlayer* pPlayer) {}
 
 	// Sounds
 	virtual bool PlayTextureSounds() { return true; }
@@ -215,6 +223,7 @@ public:
 
 	// Client connection/disconnection
 	bool ClientConnected(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128]) override;
+	void ClientPutInServer(CBasePlayer* pPlayer) override;
 	void ClientDisconnected(edict_t* pClient) override;
 
 	// Client damage rules
@@ -273,8 +282,24 @@ public:
 	bool FAllowMonsters() override;
 
 	// Teamplay stuff
-	const char* GetTeamID(CBaseEntity* pEntity) override { return ""; }
 	int PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget) override;
+};
+
+class CTeam
+{
+public:
+	CTeam(std::string name);
+
+	void AddPlayer(CBasePlayer *player);
+	void RemovePlayer(CBasePlayer *player);
+
+	void AddPoints(int score = 1);
+
+public:
+	std::string m_name;
+	int m_score;
+	int m_numPlayers;
+	std::vector<CBasePlayer *> m_players;
 };
 
 //=========================================================
@@ -304,6 +329,7 @@ public:
 	//  svRejectReason
 	// Only the client's name and remote address are provided to the dll for verification.
 	bool ClientConnected(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128]) override;
+	void ClientPutInServer(CBasePlayer* pPlayer) override;
 	void InitHUD(CBasePlayer* pl) override; // the client dll is ready for updating
 	void ClientDisconnected(edict_t* pClient) override;
 	gamemode_e GetGameMode() override { return IsCoOp() ? kGamemodeCooperative : kGamemodeDeathmatch; }
@@ -369,8 +395,12 @@ public:
 	int DeadPlayerAmmo(CBasePlayer* pPlayer) override;
 
 	// Teamplay stuff
-	const char* GetTeamID(CBaseEntity* pEntity) override { return ""; }
 	int PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget) override;
+	int GetTeamIndex(const char* pTeamName) override;
+	const char* GetIndexedTeamName(int teamIndex) override;
+	bool IsValidTeam(const char* pTeamName) override;
+	void SetDefaultPlayerTeam(CBasePlayer* pPlayer) override;
+	void ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib) override;
 
 	bool PlayTextureSounds() override;
 	bool PlayFootstepSounds(CBasePlayer* pl, float fvol) override;
@@ -388,6 +418,8 @@ protected:
 	bool m_deathmatch = false;
 	bool m_coop = false;
 	bool m_allowMonsters = false;
+	int m_numTeams;
+	std::vector<CTeam> m_teams;
 
 	virtual void ChangeLevel();
 	virtual void GoToIntermission();
