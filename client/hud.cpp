@@ -360,6 +360,7 @@ void CHud::Init()
 	r_decals = gEngfuncs.pfnGetCvarPointer("r_decals");
 	violence_hblood = gEngfuncs.pfnGetCvarPointer("violence_hblood");
 	violence_hgibs = gEngfuncs.pfnGetCvarPointer("violence_hgibs");
+	m_pCvarSuitVolume = gEngfuncs.pfnGetCvarPointer("suitvolume");
 
 	m_pSpriteList = NULL;
 

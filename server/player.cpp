@@ -314,6 +314,31 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	pev->health -= flDamage;
 	pev->armorvalue -= flArmour;
 
+	if (!FNullEnt(pevAttacker) && (pevAttacker->flags & FL_CLIENT) != 0)
+	{
+		int flags = 0;
+
+		if (pev->health <= 0)
+		{
+			flags |= kDamageFlagDead;
+		}
+		if ((bitsDamageType & DMG_AIMED) != 0
+		 && m_LastHitGroup == HITGROUP_HEAD)
+		{
+			flags |= kDamageFlagHeadshot;
+		}
+		if (pevAttacker == pev)
+		{
+			flags |= kDamageFlagSelf;
+		}
+
+		MESSAGE_BEGIN(MSG_ONE, gmsgHitFeedback, nullptr, pevAttacker);
+		WRITE_BYTE(entindex());
+		WRITE_BYTE(flags);
+		WRITE_SHORT(flDamage);
+		MESSAGE_END();
+	}
+
 	if (pev->health <= 0)
 	{
 		Killed(pevInflictor, pevAttacker, bitsDamageType);

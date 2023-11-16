@@ -238,6 +238,7 @@ DECLARE_MESSAGE(m_Ammo, AmmoPickup); // flashes an ammo pickup record
 DECLARE_MESSAGE(m_Ammo, WeapPickup); // flashes a weapon pickup record
 DECLARE_MESSAGE(m_Ammo, HideWeapon); // hides the weapon, ammo, and crosshair displays temporarily
 DECLARE_MESSAGE(m_Ammo, ItemPickup);
+DECLARE_MESSAGE(m_Ammo, HitFeedback);
 
 DECLARE_COMMAND(m_Ammo, Slot1);
 DECLARE_COMMAND(m_Ammo, Slot2);
@@ -271,6 +272,7 @@ bool CHudAmmo::Init()
 	HOOK_MESSAGE(ItemPickup);
 	HOOK_MESSAGE(HideWeapon);
 	HOOK_MESSAGE(AmmoX);
+	HOOK_MESSAGE(HitFeedback);
 
 	HOOK_COMMAND("slot1", Slot1);
 	HOOK_COMMAND("slot2", Slot2);
@@ -676,6 +678,49 @@ bool CHudAmmo::MsgFunc_WeaponList(const char* pszName, int iSize, void* pbuf)
 	return true;
 }
 
+bool CHudAmmo::MsgFunc_HitFeedback(const char* pszName, int iSize, void* pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+	int victim = READ_BYTE();
+	int flags = READ_BYTE();
+	int damage = READ_SHORT();
+
+	if (damage <= 0 || (flags & kDamageFlagSelf) != 0)
+	{
+		return true;
+	}
+
+	m_flHitFeedbackTime = gHUD.m_flTime;
+
+	if (gHUD.m_pCvarSuitVolume->value <= 0.0F)
+	{
+		return true;
+	}
+	
+	const char *sample = "misc/hit.wav";
+	byte pitch = PITCH_NORM;
+
+	if ((flags & kDamageFlagDead) != 0)
+	{
+		sample = "misc/kill.wav";
+	}
+	else if ((flags & kDamageFlagHeadshot) != 0)
+	{
+		sample = "misc/crit.wav";
+	}
+	else
+	{
+		pitch = pitch * std::max(1.5F - (damage / 100.0F), 0.5F);
+	}
+
+	gEngfuncs.pfnPlaySoundByNameAtPitch(
+		sample,
+		gHUD.m_pCvarSuitVolume->value,
+		pitch);
+
+	return true;
+}
+
 //------------------------------------------------------------------------
 // Command Handlers
 //------------------------------------------------------------------------
@@ -939,7 +984,7 @@ bool CHudAmmo::Draw(float flTime)
 
 	if (gHUD.m_pCvarCrosshair->value != 0)
 	{
-		DrawCrosshair(pw, 255, gHUD.m_iFOV >= 90, m_fOnTarget);
+		DrawCrosshair(pw, 255, gHUD.m_iFOV >= 90, m_fOnTarget || flTime - m_flHitFeedbackTime < 0.2);
 	}
 
 	// SPR_Draw Ammo

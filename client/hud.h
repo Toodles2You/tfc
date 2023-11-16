@@ -115,6 +115,7 @@ public:
 	bool MsgFunc_WeapPickup(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_ItemPickup(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_HideWeapon(const char* pszName, int iSize, void* pbuf);
+	bool MsgFunc_HitFeedback(const char* pszName, int iSize, void* pbuf);
 
 	void SlotInput(int iSlot);
 	void UserCmd_Slot1();
@@ -142,6 +143,7 @@ private:
 	int m_HUD_bucket0;
 	int m_HUD_selection;
 	cvar_t* hud_fastswitch;
+	float m_flHitFeedbackTime;
 };
 
 //
@@ -541,6 +543,7 @@ public:
 	cvar_t* m_pCvarWidescreen;
 	cvar_t* m_pCvarColor;
 	cvar_t *m_pCvarCrosshair;
+	cvar_t *m_pCvarSuitVolume;
 
 	typedef enum {
 		COLOR_DEFAULT = 0,

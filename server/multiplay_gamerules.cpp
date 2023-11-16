@@ -700,14 +700,18 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 	else if (strncmp(killer_weapon_name, "func_", 5) == 0)
 		killer_weapon_name += 5;
 
-	int flags = 0;
+	int flags = kDamageFlagDead;
 
 	if ((bitsDamageType & DMG_AIMED) != 0
 	 && pVictim->m_LastHitGroup == HITGROUP_HEAD)
 	{
 		flags |= kDamageFlagHeadshot;
 	}
-	if (PlayerRelationship(pVictim, Killer) == GR_TEAMMATE)
+	if (pVictim->pev == pKiller)
+	{
+		flags |= kDamageFlagSelf;
+	}
+	else if (PlayerRelationship(pVictim, Killer) == GR_TEAMMATE)
 	{
 		flags |= kDamageFlagFriendlyFire;
 	}

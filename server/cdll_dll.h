@@ -191,6 +191,8 @@ constexpr Vector VEC_DUCK_VIEW(0, 0, 12);
 constexpr Vector VEC_DEAD_VIEW(0, 0, -8);
 
 enum {
-	kDamageFlagHeadshot = 1,
-	kDamageFlagFriendlyFire = 2,
+	kDamageFlagDead = 1,
+	kDamageFlagHeadshot = 2,
+	kDamageFlagSelf = 4,
+	kDamageFlagFriendlyFire = 8,
 };
