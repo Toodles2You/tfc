@@ -477,7 +477,7 @@ int CHud::DrawHudString(const char* string, int x, int y)
 {
 	auto x1 = roundf (m_flOffsetX + x * m_flScaleX);
 	auto y1 = roundf (m_flOffsetY + y * m_flScaleY);
-	return (gEngfuncs.pfnDrawConsoleString(x1, y1, (char*)string) - m_flOffsetY) / m_flScaleX;
+	return (gEngfuncs.pfnDrawConsoleString(x1, y1, (char*)string) - m_flOffsetX) / m_flScaleX;
 }
 
 void CHud::GetHudStringSize(const char* string, int& width, int& height)
