@@ -2081,15 +2081,14 @@ void CBasePlayer::PostThink()
 
 			float flFallDamage = g_pGameRules->FlPlayerFallDamage(this);
 
-			if (flFallDamage > pev->health)
-			{ //splat
-				// note: play on item channel because we play footstep landing on body channel
-				EMIT_SOUND(ENT(pev), CHAN_ITEM, "common/bodysplat.wav", 1, ATTN_NORM);
-			}
-
 			if (flFallDamage > 0)
 			{
 				TakeDamage(CWorld::World->pev, CWorld::World->pev, flFallDamage, DMG_FALL);
+
+				if (pev->health <= 0)
+				{
+					EMIT_SOUND(ENT(pev), CHAN_ITEM, "common/bodysplat.wav", 1, ATTN_NORM);
+				}
 			}
 		}
 
