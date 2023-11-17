@@ -2666,8 +2666,6 @@ void PM_Jump()
 			(pmove->flDuckTime > 0) &&
 			Length(pmove->velocity) > 50)
 		{
-			pmove->punchangle[0] = -5;
-
 			for (i = 0; i < 2; i++)
 			{
 				pmove->velocity[i] = pmove->forward[i] * PLAYER_LONGJUMP_SPEED * 1.6;
@@ -2813,14 +2811,6 @@ void PM_CheckFalling()
 
 			// play step sound for current texture
 			PM_PlayStepSound(PM_MapTextureTypeStepType(pmove->chtexturetype), fvol);
-
-			// Knock the screen around a little bit, temporary effect
-			pmove->punchangle[2] = pmove->flFallVelocity * 0.013; // punch z axis
-
-			if (pmove->punchangle[0] > 8)
-			{
-				pmove->punchangle[0] = 8;
-			}
 		}
 	}
 

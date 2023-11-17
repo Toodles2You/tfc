@@ -345,8 +345,6 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 		return false;
 	}
 
-	pev->punchangle.x = -2;
-
 	// Reset damage time countdown for each type of time based damage player just sustained.
 	for (int i = 0; i < CDMG_TIMEBASED; i++)
 	{
@@ -2089,7 +2087,6 @@ void CBasePlayer::PostThink()
 			if (flFallDamage > 0)
 			{
 				TakeDamage(CWorld::World->pev, CWorld::World->pev, flFallDamage, DMG_FALL);
-				pev->punchangle.x = 0;
 			}
 		}
 
