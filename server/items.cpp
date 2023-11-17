@@ -185,12 +185,13 @@ class CItemSuit : public CItem
 		if (pPlayer->HasSuit())
 			return false;
 
-		if ((pev->spawnflags & SF_SUIT_SHORTLOGON) != 0)
-			EMIT_SOUND_SUIT(pPlayer->edict(), "!HEV_A0"); // short version of suit logon,
-		else
-			EMIT_SOUND_SUIT(pPlayer->edict(), "!HEV_AAx"); // long version of suit logon
-
 		pPlayer->SetHasSuit(true);
+
+		if ((pev->spawnflags & SF_SUIT_SHORTLOGON) != 0)
+			pPlayer->SetSuitUpdate("!HEV_A0", false, SUIT_REPEAT_OK); // short version of suit logon,
+		else
+			pPlayer->SetSuitUpdate("!HEV_AAx", false, SUIT_REPEAT_OK); // long version of suit logon
+
 		return true;
 	}
 };
@@ -244,7 +245,6 @@ class CItemBattery : public CItem
 
 			sprintf(szcharge, "!HEV_%1dP", pct);
 
-			//EMIT_SOUND_SUIT(ENT(pev), szcharge);
 			pPlayer->SetSuitUpdate(szcharge, false, SUIT_NEXT_IN_30SEC);
 			return true;
 		}
@@ -329,7 +329,7 @@ class CItemLongJump : public CItem
 			WRITE_STRING(STRING(pev->classname));
 			MESSAGE_END();
 
-			EMIT_SOUND_SUIT(pPlayer->edict(), "!HEV_A1"); // Play the longjump sound UNDONE: Kelly? correct sound?
+			pPlayer->SetSuitUpdate("!HEV_A1", false, SUIT_REPEAT_OK); // Play the longjump sound UNDONE: Kelly? correct sound?
 			return true;
 		}
 		return false;

@@ -171,7 +171,10 @@ void CBasePlayer::DeathSound()
 	}
 
 	// play one of the suit death alarms
-	EMIT_GROUPNAME_SUIT(ENT(pev), "HEV_DEAD");
+	if (!UTIL_IsDeathmatch())
+	{
+		EMIT_GROUPNAME_SUIT(ENT(pev), "HEV_DEAD");
+	}
 }
 
 // override takehealth
