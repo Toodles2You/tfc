@@ -30,6 +30,9 @@
 #include "demo_api.h"
 #include "vgui_ScorePanel.h"
 
+#include "r_studioint.h"
+extern engine_studio_api_t IEngineStudio;
+
 hud_player_info_t g_PlayerInfoList[MAX_PLAYERS_HUD + 1];	// player info from the engine
 extra_player_info_t g_PlayerExtraInfo[MAX_PLAYERS_HUD + 1]; // additional player info sent directly to the client dll
 
@@ -345,8 +348,8 @@ void CHud::Init()
 	m_pCvarCrosshair = gEngfuncs.pfnGetCvarPointer("crosshair");
 	m_pCvarStealMouse = CVAR_CREATE("hud_capturemouse", "0", FCVAR_ARCHIVE);
 	m_pCvarDraw = CVAR_CREATE("hud_draw", "1", FCVAR_ARCHIVE);
-	m_pCvarWidescreen = CVAR_CREATE("hud_widescreen", "1", 0);
-	m_pCvarColor = CVAR_CREATE("hud_color", "FFA000", 0);
+	m_pCvarWidescreen = CVAR_CREATE("hud_widescreen", "1", FCVAR_ARCHIVE);
+	m_pCvarColor = CVAR_CREATE("hud_color", "FFA000", FCVAR_ARCHIVE);
 	cl_rollangle = CVAR_CREATE("cl_rollangle", "2.0", FCVAR_ARCHIVE);
 	cl_rollspeed = CVAR_CREATE("cl_rollspeed", "200", FCVAR_ARCHIVE);
 	cl_bobtilt = CVAR_CREATE("cl_bobtilt", "0", FCVAR_ARCHIVE);
@@ -448,11 +451,20 @@ void CHud::VidInit()
 		m_iRes = 320;
 	else
 		m_iRes = 640;
+	
+	if (!IEngineStudio.IsHardware())
+	{
+		m_iConHeight = ScreenHeight;
 
-	m_iConHeight = m_iRes * 0.75F;
+		m_flScaleY = m_flScaleX = 1.0F;
+	}
+	else
+	{
+		m_iConHeight = m_iRes * 0.75F;
 
-	m_flScaleY = m_scrinfo.iHeight / (float)m_iConHeight;
-	m_flScaleX = m_flScaleY;
+		m_flScaleY = ScreenHeight / (float)m_iConHeight;
+		m_flScaleX = m_flScaleY;
+	}
 
 	m_flOffsetY = 0.0F;
 

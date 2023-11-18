@@ -23,6 +23,8 @@
 
 #include "vgui_TeamFortressViewport.h"
 
+extern engine_studio_api_t IEngineStudio;
+
 #define MAX_LOGO_FRAMES 56
 
 int grgLogoFrame[MAX_LOGO_FRAMES] =
@@ -185,8 +187,6 @@ void ScaleColors(int& r, int& g, int& b, int a)
 
 void CHud::DrawHudSprite(HSPRITE pic, int frame, Rect *rect, int x, int y, int r, int g, int b, int a, hudalign_e alignment)
 {
-	auto pSprite = const_cast<model_t *>(gEngfuncs.GetSpritePointer (pic));
-
 	auto sprw = gEngfuncs.pfnSPR_Width (pic, frame);
 	auto sprh = gEngfuncs.pfnSPR_Height (pic, frame);
 
@@ -232,6 +232,28 @@ void CHud::DrawHudSprite(HSPRITE pic, int frame, Rect *rect, int x, int y, int r
 		yf -= height;
 		break;
 	}
+
+	if (!IEngineStudio.IsHardware())
+	{
+		x += m_flOffsetX;
+		y += m_flOffsetY;
+
+		ScaleColors(r, g, b, a);
+		gEngfuncs.pfnSPR_Set(pic, r, g, b);
+		
+		// Toodles FIXME: Hack for the crosshair.
+		if (alignment == a_center)
+		{
+			gEngfuncs.pfnSPR_DrawHoles(frame, x, y, rect);
+		}
+		else
+		{
+			gEngfuncs.pfnSPR_DrawAdditive(frame, x, y, rect);
+		}
+		return;
+	}
+	
+	auto pSprite = const_cast<model_t *>(gEngfuncs.GetSpritePointer (pic));
 
 	auto x1 = roundf (m_flOffsetX + xf * m_flScaleX);
 	auto y1 = roundf (m_flOffsetY + yf * m_flScaleY);
