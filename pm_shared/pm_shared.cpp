@@ -2564,11 +2564,8 @@ void PM_Jump()
 		return;
 	}
 
-	const bool tfc = atoi(pmove->PM_Info_ValueForKey(pmove->physinfo, "tfc")) == 1;
-
 	// Spy that's feigning death cannot jump
-	if (tfc &&
-		(pmove->deadflag == (DEAD_DISCARDBODY + 1)))
+	if (pmove->deadflag == DEAD_FEIGNING)
 	{
 		return;
 	}
@@ -2625,8 +2622,6 @@ void PM_Jump()
 	if (pmove->onground == -1)
 	{
 		// Flag that we jumped.
-		// HACK HACK HACK
-		// Remove this when the game .dll no longer does physics code!!!!
 		pmove->oldbuttons |= IN_JUMP; // don't jump again until released
 		return;						  // in air, so no effect
 	}
@@ -2642,14 +2637,11 @@ void PM_Jump()
 	// Don't play jump sounds while frozen.
 	if ((pmove->flags & FL_FROZEN) == 0)
 	{
-		if (tfc)
-		{
-			pmove->PM_PlaySound(CHAN_BODY, "player/plyrjmp8.wav", 0.5, ATTN_NORM, 0, PITCH_NORM);
-		}
-		else
-		{
-			PM_PlayStepSound(PM_MapTextureTypeStepType(pmove->chtexturetype), 1.0);
-		}
+#if 0
+		pmove->PM_PlaySound(CHAN_BODY, "player/plyrjmp8.wav", 0.5, ATTN_NORM, 0, PITCH_NORM);
+#else
+		PM_PlayStepSound(PM_MapTextureTypeStepType(pmove->chtexturetype), 1.0);
+#endif
 	}
 
 	// See if user can super long jump?
@@ -2773,28 +2765,12 @@ void PM_CheckFalling()
 		}
 		else if (pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED)
 		{
-			// NOTE:  In the original game dll , there were no breaks after these cases, causing the first one to
-			// cascade into the second
-			//switch ( RandomLong(0,1) )
-			//{
-			//case 0:
-			//pmove->PM_PlaySound( CHAN_VOICE, "player/pl_fallpain2.wav", 1, ATTN_NORM, 0, PITCH_NORM );
-			//break;
-			//case 1:
 			pmove->PM_PlaySound(CHAN_VOICE, "player/pl_fallpain3.wav", 1, ATTN_NORM, 0, PITCH_NORM);
-			//	break;
-			//}
 			fvol = 1.0;
 		}
 		else if (pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED / 2)
 		{
-			const bool tfc = atoi(pmove->PM_Info_ValueForKey(pmove->physinfo, "tfc")) == 1;
-
-			if (tfc)
-			{
-				pmove->PM_PlaySound(CHAN_VOICE, "player/pl_fallpain3.wav", 1, ATTN_NORM, 0, PITCH_NORM);
-			}
-
+			pmove->PM_PlaySound(CHAN_VOICE, "player/pl_jumpland2.wav", 1, ATTN_NORM, 0, PITCH_NORM);
 			fvol = 0.85;
 		}
 		else if (pmove->flFallVelocity < PLAYER_MIN_BOUNCE_SPEED)
