@@ -2544,7 +2544,7 @@ void PM_PreventMegaBunnyJumping()
 	if (spd <= maxscaledspeed)
 		return;
 
-	fraction = (maxscaledspeed / spd) * 0.65; //Returns the modifier for the velocity
+	fraction = (maxscaledspeed / spd); //Returns the modifier for the velocity
 
 	VectorScale(pmove->velocity, fraction, pmove->velocity); //Crop it down!.
 }
