@@ -31,8 +31,6 @@ HUD_AddEntity
 */
 int DLLEXPORT HUD_AddEntity(int type, struct cl_entity_s* ent, const char* modelname)
 {
-	//	RecClAddEntity(type, ent, modelname);
-
 	switch (type)
 	{
 	case ET_NORMAL:
@@ -72,8 +70,6 @@ structure, we need to copy them into the state structure at this point.
 */
 void DLLEXPORT HUD_TxferLocalOverrides(struct entity_state_s* state, const struct clientdata_s* client)
 {
-	//	RecClTxferLocalOverrides(state, client);
-
 	VectorCopy(client->origin, state->origin);
 
 	// Spectator
@@ -99,8 +95,6 @@ playerstate structure
 */
 void DLLEXPORT HUD_ProcessPlayerState(struct entity_state_s* dst, const struct entity_state_s* src)
 {
-	//	RecClProcessPlayerState(dst, src);
-
 	// Copy in network data
 	VectorCopy(src->origin, dst->origin);
 	VectorCopy(src->angles, dst->angles);
@@ -171,8 +165,6 @@ Because we can predict an arbitrary number of frames before the server responds 
 */
 void DLLEXPORT HUD_TxferPredictionData(struct entity_state_s* ps, const struct entity_state_s* pps, struct clientdata_s* pcd, const struct clientdata_s* ppcd, struct weapon_data_s* wd, const struct weapon_data_s* pwd)
 {
-	//	RecClTxferPredictionData(ps, pps, pcd, ppcd, wd, pwd);
-
 	ps->oldbuttons = pps->oldbuttons;
 	ps->flFallVelocity = pps->flFallVelocity;
 	ps->iStepLeft = pps->iStepLeft;
@@ -225,77 +217,6 @@ void DLLEXPORT HUD_TxferPredictionData(struct entity_state_s* ps, const struct e
 	memcpy(wd, pwd, MAX_WEAPONS * sizeof(weapon_data_t));
 }
 
-#if defined(BEAM_TEST)
-// Note can't index beam[ 0 ] in Beam callback, so don't use that index
-// Room for 1 beam ( 0 can't be used )
-static cl_entity_t beams[2];
-
-void BeamEndModel()
-{
-	cl_entity_t *player, *model;
-	int modelindex;
-	struct model_s* mod;
-
-	// Load it up with some bogus data
-	player = gEngfuncs.GetLocalPlayer();
-	if (!player)
-		return;
-
-	mod = gEngfuncs.CL_LoadModel("models/sentry3.mdl", &modelindex);
-	if (!mod)
-		return;
-
-	// Slot 1
-	model = &beams[1];
-
-	*model = *player;
-	model->player = 0;
-	model->model = mod;
-	model->curstate.modelindex = modelindex;
-
-	// Move it out a bit
-	model->origin[0] = player->origin[0] - 100;
-	model->origin[1] = player->origin[1];
-
-	model->attachment[0] = model->origin;
-	model->attachment[1] = model->origin;
-	model->attachment[2] = model->origin;
-	model->attachment[3] = model->origin;
-
-	gEngfuncs.CL_CreateVisibleEntity(ET_NORMAL, model);
-}
-
-void Beams()
-{
-	static float lasttime;
-	float curtime;
-	struct model_s* mod;
-	int index;
-
-	BeamEndModel();
-
-	curtime = gEngfuncs.GetClientTime();
-	float end[3];
-
-	if ((curtime - lasttime) < 10.0)
-		return;
-
-	mod = gEngfuncs.CL_LoadModel("sprites/laserbeam.spr", &index);
-	if (!mod)
-		return;
-
-	lasttime = curtime;
-
-	end[0] = v_origin.x + 100;
-	end[1] = v_origin.y + 100;
-	end[2] = v_origin.z;
-
-	BEAM* p1;
-	p1 = gEngfuncs.pEfxAPI->R_BeamEntPoint(-1, end, index,
-		10.0, 2.0, 0.3, 1.0, 5.0, 0.0, 1.0, 1.0, 1.0, 1.0);
-}
-#endif
-
 /*
 =========================
 HUD_CreateEntities
@@ -328,8 +249,6 @@ fired during this frame, handle the event by it's tag ( e.g., muzzleflash, sound
 */
 void DLLEXPORT HUD_StudioEvent(const struct mstudioevent_s* event, const struct cl_entity_s* entity)
 {
-	//	RecClStudioEvent(event, entity);
-
 	bool iMuzzleFlash = true;
 
 
@@ -379,8 +298,6 @@ void DLLEXPORT HUD_TempEntUpdate(
 	int (*Callback_AddVisibleEntity)(cl_entity_t* pEntity),
 	void (*Callback_TempEntPlaySound)(TEMPENTITY* pTemp, float damp))
 {
-	//	RecClTempEntUpdate(frametime, client_time, cl_gravity, ppTempEntFree, ppTempEntActive, Callback_AddVisibleEntity, Callback_TempEntPlaySound);
-
 	static int gTempEntFrame = 0;
 	int i;
 	TEMPENTITY *pTemp, *pnext, *pprev;
@@ -771,20 +688,5 @@ Indices must start at 1, not zero.
 */
 cl_entity_t DLLEXPORT* HUD_GetUserEntity(int index)
 {
-	//	RecClGetUserEntity(index);
-
-#if defined(BEAM_TEST)
-	// None by default, you would return a valic pointer if you create a client side
-	//  beam and attach it to a client side entity.
-	if (index > 0 && index <= 1)
-	{
-		return &beams[index];
-	}
-	else
-	{
-		return NULL;
-	}
-#else
 	return NULL;
-#endif
 }
