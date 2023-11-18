@@ -2644,19 +2644,14 @@ void PM_Jump()
 #endif
 	}
 
-	// See if user can super long jump?
-	const bool cansuperjump = atoi(pmove->PM_Info_ValueForKey(pmove->physinfo, "slj")) == 1;
-
 	// Acclerate upward
 	// If we are ducking...
-	if ((0 != pmove->bInDuck) || (pmove->flags & FL_DUCKING) != 0)
+	if ((pmove->cmd.buttons & IN_DUCK) != 0 && (pmove->cmd.buttons & IN_FORWARD) != 0)
 	{
+		// See if user can super long jump?
+		const bool cansuperjump = atoi(pmove->PM_Info_ValueForKey(pmove->physinfo, "slj")) == 1;
 		// Adjust for super long jump module
-		// UNDONE -- note this should be based on forward angles, not current velocity.
-		if (cansuperjump &&
-			(pmove->cmd.buttons & IN_DUCK) != 0 &&
-			(pmove->flDuckTime > 0) &&
-			Length(pmove->velocity) > 50)
+		if (cansuperjump)
 		{
 			for (i = 0; i < 2; i++)
 			{
