@@ -235,6 +235,13 @@ void CGameRules::RefreshSkillData()
 }
 
 //=========================================================
+//=========================================================
+bool CGameRules::IsPlayerPrivileged(CBasePlayer* pPlayer)
+{
+	return g_psv_cheats->value != 0;
+}
+
+//=========================================================
 // instantiate the proper game rules object
 //=========================================================
 

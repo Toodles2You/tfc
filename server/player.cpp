@@ -2614,8 +2614,11 @@ void CBasePlayer::ImpulseCommands()
 		break;
 
 	default:
-		// check all of the cheat impulse commands now
-		CheatImpulseCommands(iImpulse);
+		if (g_pGameRules->IsPlayerPrivileged(this))
+		{
+			// check all of the cheat impulse commands now
+			CheatImpulseCommands(iImpulse);
+		}
 		break;
 	}
 
@@ -2626,11 +2629,6 @@ void CBasePlayer::ImpulseCommands()
 //=========================================================
 void CBasePlayer::CheatImpulseCommands(int iImpulse)
 {
-	if (0 == g_psv_cheats->value)
-	{
-		return;
-	}
-
 	CBaseEntity* pEntity;
 	TraceResult tr;
 

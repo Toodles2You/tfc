@@ -467,7 +467,7 @@ void ClientCommand(edict_t* pEntity)
 	}
 	else if (FStrEq(pcmd, "give"))
 	{
-		if (0 != g_psv_cheats->value)
+		if (g_pGameRules->IsPlayerPrivileged(player))
 		{
 			int iszItem = ALLOC_STRING(CMD_ARGV(1)); // Make a copy of the classname
 			player->GiveNamedItem(STRING(iszItem));
@@ -480,7 +480,7 @@ void ClientCommand(edict_t* pEntity)
 	}
 	else if (FStrEq(pcmd, "fov"))
 	{
-		if (0 != g_psv_cheats->value)
+		if (g_pGameRules->IsPlayerPrivileged(player))
 		{
 			if (CMD_ARGC() > 1)
 			{

@@ -190,6 +190,8 @@ public:
 	// Immediately end a multiplayer game
 	virtual void EndMultiplayerGame() {}
 
+	virtual bool IsPlayerPrivileged(CBasePlayer* pPlayer);
+
 protected:
 	CBasePlayerItem* FindNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pCurrentWeapon);
 
@@ -427,6 +429,8 @@ protected:
 	float m_flIntermissionEndTime = 0;
 	bool m_iEndIntermissionButtonHit;
 	void SendMOTDToClient(edict_t* client);
+
+	virtual bool PrivilegedCommand(CBasePlayer* pPlayer, const char* pcmd);
 };
 
 inline DLL_GLOBAL CGameRules* g_pGameRules = nullptr;

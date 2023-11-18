@@ -162,6 +162,54 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	}
 }
 
+bool CHalfLifeMultiplay::PrivilegedCommand(CBasePlayer* pPlayer, const char* pcmd)
+{
+	if (strcmp(pcmd, "nc") == 0)
+	{
+		if (pPlayer->pev->movetype != MOVETYPE_NOCLIP)
+		{
+			pPlayer->pev->movetype = MOVETYPE_NOCLIP;
+			g_engfuncs.pfnClientPrintf(pPlayer->edict(), print_console, "noclip ON\n");
+		}
+		else
+		{
+			pPlayer->pev->movetype = MOVETYPE_WALK;
+			g_engfuncs.pfnClientPrintf(pPlayer->edict(), print_console, "noclip OFF\n");
+		}
+		return true;
+	}
+	else if (strcmp(pcmd, "gaben") == 0)
+	{
+		if ((pPlayer->pev->flags & FL_GODMODE) == 0)
+		{
+			pPlayer->pev->flags |= FL_GODMODE;
+			g_engfuncs.pfnClientPrintf(pPlayer->edict(), print_console, "godmode ON\n");
+		}
+		else
+		{
+			pPlayer->pev->flags &= ~FL_GODMODE;
+			g_engfuncs.pfnClientPrintf(pPlayer->edict(), print_console, "godmode OFF\n");
+		}
+		return true;
+	}
+	else if (strcmp(pcmd, "nt") == 0)
+	{
+		if ((pPlayer->pev->flags & FL_NOTARGET) == 0)
+		{
+			pPlayer->pev->flags |= FL_NOTARGET;
+			g_engfuncs.pfnClientPrintf(pPlayer->edict(), print_console, "notarget ON\n");
+		}
+		else
+		{
+			pPlayer->pev->flags &= ~FL_NOTARGET;
+			g_engfuncs.pfnClientPrintf(pPlayer->edict(), print_console, "notarget OFF\n");
+		}
+		return true;
+	}
+
+	return false;
+}
+
 bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 {
 	if (g_VoiceGameMgr.ClientCommand(pPlayer, pcmd))
@@ -171,6 +219,10 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 	 && !IsValidTeam(pPlayer->TeamID()))
 	{
 		g_pGameRules->SetDefaultPlayerTeam(pPlayer);
+		return true;
+	}
+	else if (IsPlayerPrivileged(pPlayer) && PrivilegedCommand(pPlayer, pcmd))
+	{
 		return true;
 	}
 
