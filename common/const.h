@@ -97,6 +97,7 @@ enum {
 	DEAD_DEAD,	// dead. lying still.
 	DEAD_RESPAWNABLE,
 	DEAD_DISCARDBODY,
+	DEAD_FEIGNING,
 };
 
 enum {
