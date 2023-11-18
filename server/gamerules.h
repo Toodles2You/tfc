@@ -182,7 +182,6 @@ public:
 
 	// Sounds
 	virtual bool PlayTextureSounds() { return true; }
-	virtual bool PlayFootstepSounds(CBasePlayer* pl, float fvol) { return true; }
 
 	// Monsters
 	virtual bool FAllowMonsters() = 0; //are monsters allowed
@@ -405,7 +404,6 @@ public:
 	void ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib) override;
 
 	bool PlayTextureSounds() override;
-	bool PlayFootstepSounds(CBasePlayer* pl, float fvol) override;
 
 	// Monsters
 	bool FAllowMonsters() override;
