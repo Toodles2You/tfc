@@ -36,13 +36,9 @@
 #include "event_api.h"
 #include "event_args.h"
 #include "in_defs.h"
+#include "view.h"
 
 #include <string.h>
-
-#include "r_studioint.h"
-#include "com_model.h"
-
-extern engine_studio_api_t IEngineStudio;
 
 static int tracerCount[MAX_PLAYERS];
 
@@ -52,8 +48,6 @@ extern cvar_t* r_decals;
 extern cvar_t* violence_hblood;
 extern cvar_t* violence_hgibs;
 
-void V_PunchAxis(int axis, float punch);
-void VectorAngles(const float* forward, float* angles);
 
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
 // original traceline endpoints used by the attacker, iBulletType is the type of bullet that hit the texture.
