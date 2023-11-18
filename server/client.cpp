@@ -1200,7 +1200,7 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 
 		// Ignore if not the host and not touching a PVS/PAS leaf
 		// If pSet is NULL, then the test will always succeed and the entity will be added to the update
-		if (!entity->IsPlayer())
+		if ((entity->ObjectCaps() & FCAP_NET_ALWAYS_SEND) == 0)
 		{
 			if (!ENGINE_CHECK_VISIBILITY((const struct edict_s*)ent, pSet))
 			{

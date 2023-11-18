@@ -229,7 +229,7 @@ public:
 	static TYPEDESCRIPTION m_playerSaveData[];
 
 	// Player is moved across the transition by other means
-	int ObjectCaps() override { return CBaseAnimating::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return (CBaseAnimating::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_NET_ALWAYS_SEND; }
 	void Precache() override;
 	bool IsOnLadder();
 

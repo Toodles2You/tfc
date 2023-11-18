@@ -28,8 +28,9 @@
 #define FCAP_DIRECTIONAL_USE 0x00000040	  // Player sends +/- 1 when using (currently only tracktrains)
 #define FCAP_MASTER 0x00000080			  // Can be used to "master" other entities (like multisource)
 
-// UNDONE: This will ignore transition volumes (trigger_transition), but not the PVS!!!
 #define FCAP_FORCE_TRANSITION 0x00000080 // ALWAYS goes across transitions
+
+#define FCAP_NET_ALWAYS_SEND 0x00000100 // Don't perform a PVS check in AddToFullPack
 
 #include "Platform.h"
 #include "saverestore.h"
