@@ -347,7 +347,7 @@ static void EV_BloodTrace(pmtrace_t* tr, Vector dir)
 		traceDir.y += gEngfuncs.pfnRandomFloat(-noise, noise);
 		traceDir.z += gEngfuncs.pfnRandomFloat(-noise, noise);
 
-		gEngfuncs.pEventAPI->EV_PlayerTrace(tr->endpos, tr->endpos + traceDir * -172, PM_STUDIO_BOX | PM_WORLD_ONLY, -1, &tr2);
+		gEngfuncs.pEventAPI->EV_PlayerTrace(tr->endpos, tr->endpos + traceDir * -172, PM_WORLD_ONLY, -1, &tr2);
 
 		if (tr2.fraction != 1.0f)
 		{
@@ -465,7 +465,7 @@ static void EV_FireBullets(int idx, float* forward, float* right, float* up, int
 		gEngfuncs.pEventAPI->EV_SetSolidPlayers(idx - 1);
 
 		gEngfuncs.pEventAPI->EV_SetTraceHull(2);
-		gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_STUDIO_BOX, -1, &tr);
+		gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_NORMAL, -1, &tr);
 
 		EV_CheckTracer(idx, vecSrc, tr.endpos, forward, right, iBulletType, iTracerFreq, tracerCount);
 
@@ -895,7 +895,7 @@ void EV_FireGauss(event_args_t* args)
 		gEngfuncs.pEventAPI->EV_SetSolidPlayers(idx - 1);
 
 		gEngfuncs.pEventAPI->EV_SetTraceHull(2);
-		gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecDest, PM_STUDIO_BOX, -1, &tr);
+		gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecDest, PM_NORMAL, -1, &tr);
 
 		gEngfuncs.pEventAPI->EV_PopPMStates();
 
@@ -1014,7 +1014,7 @@ void EV_FireGauss(event_args_t* args)
 					gEngfuncs.pEventAPI->EV_SetSolidPlayers(idx - 1);
 
 					gEngfuncs.pEventAPI->EV_SetTraceHull(2);
-					gEngfuncs.pEventAPI->EV_PlayerTrace(start, vecDest, PM_STUDIO_BOX, -1, &beam_tr);
+					gEngfuncs.pEventAPI->EV_PlayerTrace(start, vecDest, PM_NORMAL, -1, &beam_tr);
 
 					if (0 == beam_tr.allsolid)
 					{
@@ -1023,7 +1023,7 @@ void EV_FireGauss(event_args_t* args)
 
 						// trace backwards to find exit point
 
-						gEngfuncs.pEventAPI->EV_PlayerTrace(beam_tr.endpos, tr.endpos, PM_STUDIO_BOX, -1, &beam_tr);
+						gEngfuncs.pEventAPI->EV_PlayerTrace(beam_tr.endpos, tr.endpos, PM_NORMAL, -1, &beam_tr);
 
 						VectorSubtract(beam_tr.endpos, tr.endpos, delta);
 
@@ -1187,7 +1187,7 @@ void EV_FireCrossbow2(event_args_t* args)
 	// Now add in all of the players.
 	gEngfuncs.pEventAPI->EV_SetSolidPlayers(idx - 1);
 	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
-	gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_STUDIO_BOX, -1, &tr);
+	gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_NORMAL, -1, &tr);
 
 	//We hit something
 	if (tr.fraction < 1.0)
@@ -1455,23 +1455,15 @@ void EV_EgonFire(event_args_t* args)
 			gEngfuncs.pEventAPI->EV_SetSolidPlayers(idx - 1);
 
 			gEngfuncs.pEventAPI->EV_SetTraceHull(2);
-			gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_STUDIO_BOX, -1, &tr);
+			gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_NORMAL, -1, &tr);
 
 			gEngfuncs.pEventAPI->EV_PopPMStates();
 
 			int iBeamModelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex(EGON_BEAM_SPRITE);
 
-			float r = 50.0f;
-			float g = 50.0f;
-			float b = 125.0f;
-
-			//if ( IEngineStudio.IsHardware() )
-			{
-				r /= 255.0f;
-				g /= 255.0f;
-				b /= 255.0f;
-			}
-
+			float r = 50.0f / 255.0f;
+			float g = 50.0f / 255.0f;
+			float b = 125.0f / 255.0f;
 
 			pBeam = gEngfuncs.pEfxAPI->R_BeamEntPoint(idx | 0x1000, tr.endpos, iBeamModelIndex, 99999, 3.5, 0.2, 0.7, 55, 0, 0, r, g, b);
 
@@ -1735,13 +1727,7 @@ static void EV_GibTouch(struct tempent_s* ent, struct pmtrace_s* ptr)
 {
 	EV_DecalTrace(ptr, EV_DecalName("{blood%i", 6));
 
-	// 1 in 5 chance of squishy sound
-	if (gEngfuncs.pfnRandomLong(0, 4) > 0)
-	{
-		return;
-	}
-
-	switch (gEngfuncs.pfnRandomLong(0, 5))
+	switch (gEngfuncs.pfnRandomLong(0, 25))
 	{
 	case 0: gEngfuncs.pEventAPI->EV_PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
 	case 1: gEngfuncs.pEventAPI->EV_PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
@@ -1749,6 +1735,7 @@ static void EV_GibTouch(struct tempent_s* ent, struct pmtrace_s* ptr)
 	case 3: gEngfuncs.pEventAPI->EV_PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
 	case 4: gEngfuncs.pEventAPI->EV_PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh6.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
 	case 5: gEngfuncs.pEventAPI->EV_PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh7.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	default: break;
 	}
 }
 
