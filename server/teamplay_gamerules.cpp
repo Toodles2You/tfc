@@ -155,7 +155,7 @@ void CHalfLifeTeamplay::SetDefaultPlayerTeam(CBasePlayer* pPlayer)
 	{
 		if (defaultteam.value != 0)
 		{
-			i = 1;
+			i = TEAM_DEFAULT;
 		}
 		else
 		{

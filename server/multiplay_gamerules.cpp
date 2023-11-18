@@ -1306,8 +1306,8 @@ bool CHalfLifeMultiplay::IsValidTeam(const char* pTeamName)
 
 void CHalfLifeMultiplay::SetDefaultPlayerTeam(CBasePlayer* pPlayer)
 {
-	pPlayer->pev->team = 1;
-	m_teams[0].AddPlayer(pPlayer);
+	pPlayer->pev->team = TEAM_DEFAULT;
+	m_teams[TEAM_DEFAULT - 1].AddPlayer(pPlayer);
 
 	pPlayer->Spawn();
 }

@@ -65,7 +65,7 @@ enum
 enum
 {
 	TEAM_UNASSIGNED = 0,
-	TEAM_PLAYERS,
+	TEAM_DEFAULT,
 	TEAM_SPECTATORS = 5,
 };
 
