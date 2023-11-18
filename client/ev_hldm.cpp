@@ -48,6 +48,67 @@ extern cvar_t* r_decals;
 extern cvar_t* violence_hblood;
 extern cvar_t* violence_hgibs;
 
+static float EV_WaterLevel(const Vector& position, float minz, float maxz)
+{
+	Vector midUp = position;
+	midUp.z = minz;
+
+	if (gEngfuncs.PM_PointContents(midUp, nullptr) != CONTENTS_WATER)
+	{
+		return minz;
+	}
+
+	midUp.z = maxz;
+	if (gEngfuncs.PM_PointContents(midUp, nullptr) == CONTENTS_WATER)
+	{
+		return maxz;
+	}
+
+	float diff = maxz - minz;
+	while (diff > 1.0)
+	{
+		midUp.z = minz + diff / 2.0;
+		if (gEngfuncs.PM_PointContents(midUp, nullptr) == CONTENTS_WATER)
+		{
+			minz = midUp.z;
+		}
+		else
+		{
+			maxz = midUp.z;
+		}
+		diff = maxz - minz;
+	}
+
+	return midUp.z;
+}
+
+static void EV_BubbleTrail(Vector from, Vector to, int count)
+{
+	float flHeight = EV_WaterLevel(from, from.z, from.z + 256);
+	flHeight = flHeight - from.z;
+
+	if (flHeight < 8)
+	{
+		flHeight = EV_WaterLevel(to, to.z, to.z + 256);
+		flHeight = flHeight - to.z;
+		if (flHeight < 8)
+		{
+			return;
+		}
+
+		// UNDONE: do a ploink sound
+		flHeight = flHeight + to.z - from.z;
+	}
+
+	gEngfuncs.pEfxAPI->R_BubbleTrail(
+		from,
+		to,
+		flHeight,
+		gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/bubble.spr"),
+		std::min(count, 255),
+		8
+	);
+}
 
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
 // original traceline endpoints used by the attacker, iBulletType is the type of bullet that hit the texture.
@@ -417,6 +478,8 @@ static void EV_FireBullets(int idx, float* forward, float* right, float* up, int
 			}
 			EV_DecalGunshot(&tr, iBulletType, vecDir);
 		}
+		// make bullet trails
+		EV_BubbleTrail(vecSrc, tr.endpos, (flDistance * tr.fraction) / 64.0);
 
 		gEngfuncs.pEventAPI->EV_PopPMStates();
 	}
