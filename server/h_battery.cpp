@@ -184,7 +184,7 @@ void CRecharge::Recharge()
 {
 	m_iJuice = gSkillData.suitchargerCapacity;
 	pev->frame = 0;
-	SetThink(&CRecharge::SUB_DoNothing);
+	SetThink(nullptr);
 }
 
 void CRecharge::Off()
@@ -201,5 +201,5 @@ void CRecharge::Off()
 		SetThink(&CRecharge::Recharge);
 	}
 	else
-		SetThink(&CRecharge::SUB_DoNothing);
+		SetThink(nullptr);
 }

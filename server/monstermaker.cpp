@@ -125,7 +125,7 @@ void CMonsterMaker::Spawn()
 		else
 		{ // wait to be activated.
 			m_fActive = false;
-			SetThink(&CMonsterMaker::SUB_DoNothing);
+			SetThink(nullptr);
 		}
 	}
 	else

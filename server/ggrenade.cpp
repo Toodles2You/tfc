@@ -403,7 +403,7 @@ CGrenade* CGrenade::ShootSatchelCharge(entvars_t* pevOwner, Vector vecStart, Vec
 	pGrenade->pev->owner = ENT(pevOwner);
 
 	// Detonate in "time" seconds
-	pGrenade->SetThink(&CGrenade::SUB_DoNothing);
+	pGrenade->SetThink(nullptr);
 	pGrenade->SetUse(&CGrenade::DetonateUse);
 	pGrenade->SetTouch(&CGrenade::SlideTouch);
 	pGrenade->pev->spawnflags = SF_DETONATE;

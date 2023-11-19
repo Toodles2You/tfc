@@ -119,12 +119,6 @@ void CBaseEntity::SUB_Remove()
 }
 
 
-// Convenient way to explicitly do nothing (passed to functions that require a method)
-void CBaseEntity::SUB_DoNothing()
-{
-}
-
-
 // Global Savedata for Delay
 TYPEDESCRIPTION CBaseDelay::m_SaveData[] =
 	{
