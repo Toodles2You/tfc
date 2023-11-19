@@ -2009,7 +2009,7 @@ void CBasePlayer::SetSuitUpdate(const char* name, bool fgroup, int iNoRepeatTime
 	}
 }
 
-void CBasePlayer::CheckAmmoLevel(CBasePlayerItem* pItem, bool bPrimary)
+void CBasePlayer::CheckAmmoLevel(CBasePlayerWeapon* pItem, bool bPrimary)
 {
 	if (UTIL_IsDeathmatch())
 	{
@@ -2757,7 +2757,7 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 //
 // Add a weapon to the player (Item == Weapon == Selectable Object)
 //
-bool CBasePlayer::AddPlayerItem(CBasePlayerItem* pItem)
+bool CBasePlayer::AddPlayerItem(CBasePlayerWeapon* pItem)
 {
 	if (pItem->m_iId <= WEAPON_NONE || pItem->m_iId >= MAX_WEAPONS)
 	{
@@ -2829,7 +2829,7 @@ bool CBasePlayer::AddPlayerItem(CBasePlayerItem* pItem)
 }
 
 
-bool CBasePlayer::RemovePlayerItem(CBasePlayerItem* pItem)
+bool CBasePlayer::RemovePlayerItem(CBasePlayerWeapon* pItem)
 {
 	if (pItem->m_iId <= WEAPON_NONE || pItem->m_iId >= MAX_WEAPONS)
 	{
@@ -2877,7 +2877,7 @@ int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax)
 	// Toodles FIXME:
 	// If this is an exhaustible weapon make sure the player has it.
 	/*
-	if (const auto& ammoType = CBasePlayerItem::AmmoInfoArray[i]; ammoType.WeaponName != nullptr)
+	if (const auto& ammoType = CBasePlayerWeapon::AmmoInfoArray[i]; ammoType.WeaponName != nullptr)
 	{
 		if (!HasNamedPlayerItem(ammoType.WeaponName))
 		{
@@ -3101,7 +3101,7 @@ void CBasePlayer::UpdateClientData()
 
 		for (i = 0; i < MAX_WEAPONS; i++)
 		{
-			ItemInfo& II = CBasePlayerItem::ItemInfoArray[i];
+			ItemInfo& II = CBasePlayerWeapon::ItemInfoArray[i];
 
 			if (WEAPON_NONE == II.iId)
 				continue;
@@ -3239,7 +3239,7 @@ void CBasePlayer::DropPlayerItem(char* pszItemName)
 		return;
 	}
 
-	CBasePlayerItem *pWeapon = nullptr;
+	CBasePlayerWeapon *pWeapon = nullptr;
 
 	if (pszItemName != nullptr && pszItemName[0] != '\0')
 	{
@@ -3304,7 +3304,7 @@ void CBasePlayer::DropPlayerItem(char* pszItemName)
 //=========================================================
 // HasPlayerItem Does the player already have this item?
 //=========================================================
-bool CBasePlayer::HasPlayerItem(CBasePlayerItem* pCheckItem)
+bool CBasePlayer::HasPlayerItem(CBasePlayerWeapon* pCheckItem)
 {
 	if (pCheckItem->m_iId <= WEAPON_NONE || pCheckItem->m_iId >= MAX_WEAPONS)
 	{
@@ -3331,7 +3331,7 @@ bool CBasePlayer::HasNamedPlayerItem(const char* pszItemName)
 //=========================================================
 //
 //=========================================================
-bool CBasePlayer::SwitchWeapon(CBasePlayerItem* pWeapon)
+bool CBasePlayer::SwitchWeapon(CBasePlayerWeapon* pWeapon)
 {
 	if (pWeapon && !pWeapon->CanDeploy())
 	{

@@ -39,7 +39,7 @@ void CMP5::Spawn()
 	FallInit(); // get ready to fall down.
 }
 
-bool CMP5::AddDuplicate(CBasePlayerItem* pOriginal)
+bool CMP5::AddDuplicate(CBasePlayerWeapon* pOriginal)
 {
 	if (m_iDefaultAmmo == MP5_DEFAULT_GIVE)
 	{

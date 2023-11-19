@@ -92,7 +92,7 @@ void CGameRules::InitHUD(CBasePlayer* pl)
 	UpdateGameMode(pl);
 }
 
-CBasePlayerItem* CGameRules::FindNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pCurrentWeapon)
+CBasePlayerWeapon* CGameRules::FindNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pCurrentWeapon)
 {
 	if (pCurrentWeapon != nullptr && !pCurrentWeapon->CanHolster())
 	{
@@ -102,7 +102,7 @@ CBasePlayerItem* CGameRules::FindNextBestWeapon(CBasePlayer* pPlayer, CBasePlaye
 
 	const int currentWeight = pCurrentWeapon != nullptr ? pCurrentWeapon->iWeight() : -1;
 
-	CBasePlayerItem* pBest = nullptr; // this will be used in the event that we don't find a weapon in the same category.
+	CBasePlayerWeapon* pBest = nullptr; // this will be used in the event that we don't find a weapon in the same category.
 
 	int iBestWeight = -1; // no weapon lower than -1 can be autoswitched to
 
@@ -149,7 +149,7 @@ CBasePlayerItem* CGameRules::FindNextBestWeapon(CBasePlayer* pPlayer, CBasePlaye
 	return pBest;
 }
 
-bool CGameRules::GetNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pCurrentWeapon, bool alwaysSearch)
+bool CGameRules::GetNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pCurrentWeapon, bool alwaysSearch)
 {
 	if (auto pBest = FindNextBestWeapon(pPlayer, pCurrentWeapon); pBest != nullptr)
 	{
@@ -196,7 +196,7 @@ void CGameRules::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 
 //=========================================================
 //=========================================================
-bool CGameRules::CanHavePlayerItem(CBasePlayer* pPlayer, CBasePlayerItem* pWeapon)
+bool CGameRules::CanHavePlayerItem(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon)
 {
 	// only living players can have items
 	if (pPlayer->pev->deadflag != DEAD_NO)

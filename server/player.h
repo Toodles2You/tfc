@@ -161,10 +161,10 @@ public:
 	int m_iClientHideHUD;
 	int m_iFOV;		  // field of view
 	// usable player items
-	CBasePlayerItem* m_rgpPlayerItems[MAX_WEAPONS];
-	std::forward_list<CBasePlayerItem *> m_lpPlayerItems;
-	CBasePlayerItem* m_pActiveItem;
-	CBasePlayerItem* m_pClientActiveItem; // client version of the active item
+	CBasePlayerWeapon* m_rgpPlayerItems[MAX_WEAPONS];
+	std::forward_list<CBasePlayerWeapon *> m_lpPlayerItems;
+	CBasePlayerWeapon* m_pActiveItem;
+	CBasePlayerWeapon* m_pClientActiveItem; // client version of the active item
 
 	std::uint64_t m_WeaponBits;
 
@@ -210,7 +210,7 @@ public:
 	bool Restore(CRestore& restore) override;
 	void PackDeadPlayerItems();
 	void RemoveAllItems(bool removeSuit);
-	bool SwitchWeapon(CBasePlayerItem* pWeapon);
+	bool SwitchWeapon(CBasePlayerWeapon* pWeapon);
 
 	/**
 	*	@brief Equips an appropriate weapon for the player if they don't have one equipped already.
@@ -251,10 +251,10 @@ public:
 
 	void AddPoints(int score, bool bAllowNegativeScore) override;
 	void AddPointsToTeam(int score, bool bAllowNegativeScore) override;
-	bool AddPlayerItem(CBasePlayerItem* pItem) override;
-	bool RemovePlayerItem(CBasePlayerItem* pItem) override;
+	bool AddPlayerItem(CBasePlayerWeapon* pItem) override;
+	bool RemovePlayerItem(CBasePlayerWeapon* pItem) override;
 	void DropPlayerItem(char* pszItemName);
-	bool HasPlayerItem(CBasePlayerItem* pCheckItem);
+	bool HasPlayerItem(CBasePlayerWeapon* pCheckItem);
 	bool HasNamedPlayerItem(const char* pszItemName);
 	bool HasWeapons(); // do I have ANY weapons?
 	void SelectItem(const char* pstr);
@@ -286,7 +286,7 @@ public:
 	void SetSuitUpdate(const char* name, bool fgroup, int iNoRepeat);
 	void UpdateGeigerCounter();
 	void CheckTimeBasedDamage();
-	void CheckAmmoLevel(CBasePlayerItem* pItem, bool bPrimary = true);
+	void CheckAmmoLevel(CBasePlayerWeapon* pItem, bool bPrimary = true);
 
 	int AmmoInventory(int iAmmoIndex);
 

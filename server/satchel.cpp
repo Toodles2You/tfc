@@ -160,7 +160,7 @@ LINK_ENTITY_TO_CLASS(weapon_satchel, CSatchel);
 //=========================================================
 // CALLED THROUGH the newly-touched weapon's instance. The existing player weapon is pOriginal
 //=========================================================
-bool CSatchel::AddDuplicate(CBasePlayerItem* pOriginal)
+bool CSatchel::AddDuplicate(CBasePlayerWeapon* pOriginal)
 {
 	CSatchel* pSatchel;
 

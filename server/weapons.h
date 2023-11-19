@@ -210,8 +210,9 @@ struct AmmoInfo
 	const char* WeaponName = nullptr;
 };
 
-// Items that the player has in their inventory that they can use
-class CBasePlayerItem : public CBaseAnimating
+
+// inventory items that commit war crimes
+class CBasePlayerWeapon : public CBaseAnimating
 {
 public:
 	void SetObjectCollisionBox() override;
@@ -223,81 +224,17 @@ public:
 
 	virtual bool CanAddToPlayer(CBasePlayer* player) { return true; } // return true if the item you want the item added to the player inventory
 
+	// generic weapon versions of CBasePlayerWeapon calls
 	virtual void AddToPlayer(CBasePlayer* pPlayer);
-	virtual bool AddDuplicate(CBasePlayerItem* pItem) { return false; } // return true if you want your duplicate removed from world
+	virtual bool AddDuplicate(CBasePlayerWeapon* pItem);
 	void EXPORT DestroyItem();
 	void EXPORT DefaultTouch(CBaseEntity* pOther); // default weapon touch
-	void EXPORT FallThink();					   // when an item is first spawned, this think is run to determine when the object has hit the ground.
-	void EXPORT Materialize();					   // make a weapon visible and tangible
-	void EXPORT AttemptToMaterialize();			   // the weapon desires to become visible and tangible, if the game rules allow for it
-	CBaseEntity* Respawn() override;			   // copy a weapon
+	void EXPORT FallThink(); // when an item is first spawned, this think is run to determine when the object has hit the ground.
+	void EXPORT Materialize(); // make a weapon visible and tangible
+	void EXPORT AttemptToMaterialize(); // the weapon desires to become visible and tangible, if the game rules allow for it
+	CBaseEntity* Respawn() override; // copy a weapon
 	void FallInit();
 	void CheckRespawn();
-	virtual bool GetItemInfo(ItemInfo* p) { return false; } // returns false if struct not filled out
-	virtual bool CanDeploy() { return true; }
-	virtual bool Deploy() // returns is deploy was successful
-	{
-		return true;
-	}
-
-	virtual bool CanHolster() { return true; } // can this weapon be put away right now?
-	virtual bool Holster();
-	virtual void UpdateItemInfo() {}
-
-	virtual void ItemPreFrame() {}	// called each frame by the player PreThink
-	virtual void ItemPostFrame() {} // called each frame by the player PostThink
-
-	virtual void Drop();
-	virtual void Kill();
-	virtual void AttachToPlayer(CBasePlayer* pPlayer);
-
-	virtual CBasePlayerWeapon* GetWeaponPtr() { return NULL; }
-
-	virtual void GetWeaponData(weapon_data_t& data) {}
-
-	virtual void SetWeaponData(const weapon_data_t& data) {}
-
-	virtual void DecrementTimers(const int msec) {}
-
-	virtual bool IsReloading() { return false; }
-
-	static inline ItemInfo ItemInfoArray[MAX_WEAPONS];
-
-	CBasePlayer* m_pPlayer;
-	int m_iId; // WEAPON_???
-
-	virtual int iItemSlot() { return 0; } // return 0 to MAX_ITEMS_SLOTS, used in hud
-
-	int iItemPosition() { return ItemInfoArray[m_iId].iPosition; }
-	int iAmmo1() { return ItemInfoArray[m_iId].iAmmo1; }
-	int iMaxAmmo1() { return ItemInfoArray[m_iId].iMaxAmmo1; }
-	int iAmmo2() { return ItemInfoArray[m_iId].iAmmo2; }
-	int iMaxAmmo2() { return ItemInfoArray[m_iId].iMaxAmmo2; }
-	const char* pszName() { return ItemInfoArray[m_iId].pszName; }
-	int iMaxClip() { return ItemInfoArray[m_iId].iMaxClip; }
-	int iWeight() { return ItemInfoArray[m_iId].iWeight; }
-	int iFlags() { return ItemInfoArray[m_iId].iFlags; }
-
-	// int		m_iIdPrimary;										// Unique Id for primary ammo
-	// int		m_iIdSecondary;										// Unique Id for secondary ammo
-
-	//Hack so deploy animations work when weapon prediction is enabled.
-	bool m_ForceSendAnimations = false;
-};
-
-
-// inventory items that
-class CBasePlayerWeapon : public CBasePlayerItem
-{
-public:
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-
-	static TYPEDESCRIPTION m_SaveData[];
-
-	// generic weapon versions of CBasePlayerItem calls
-	void AddToPlayer(CBasePlayer* pPlayer) override;
-	bool AddDuplicate(CBasePlayerItem* pItem) override;
 
 	virtual bool ExtractAmmo(CBasePlayerWeapon* pWeapon);	  //{ return true; }			// Return true if you can add ammo to yourself when picked up
 	virtual bool ExtractClipAmmo(CBasePlayerWeapon* pWeapon); // { return true; }			// Return true if you can add ammo to yourself when picked up
@@ -306,20 +243,23 @@ public:
 	bool AddPrimaryAmmo(CBasePlayerWeapon* origin, int iCount, int iType, int iMaxClip, int iMaxCarry);
 	bool AddSecondaryAmmo(int iCount, int iType, int iMaxCarry);
 
-	void UpdateItemInfo() override {} // updates HUD state
+	virtual void UpdateItemInfo() {} // updates HUD state
 
 	virtual void PlayEmptySound();
 
 	virtual void SendWeaponAnim(int iAnim, int body = 0);
 	virtual void PlayWeaponSound(int iChannel, const char* szSound, float flVolume = VOL_NORM, float flAttn = ATTN_IDLE, int iFlags = 0, float flPitch = PITCH_NORM);
 
-	bool CanDeploy() override;
+	virtual bool GetItemInfo(ItemInfo* p) { return false; } // returns false if struct not filled out
+	virtual bool CanDeploy();
+	virtual bool Deploy() { return true; } // returns is deploy was successful
 	virtual bool IsUseable();
 	bool DefaultDeploy(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, int body = 0);
 	bool DefaultHolster(int iAnim, int body = 0);
 	bool DefaultReload(int iClipSize, int iAnim, int fDelay, int body = 0);
 
-	void ItemPostFrame() override; // called each frame by the player PostThink
+	virtual void ItemPreFrame() {} // called each frame by the player PreThink
+	virtual void ItemPostFrame(); // called each frame by the player PostThink
 	// called by CBasePlayerWeapons ItemPostFrame()
 	virtual void PrimaryAttack() {}						  // do "+ATTACK"
 	virtual void SecondaryAttack() {}					  // do "+ATTACK2"
@@ -335,13 +275,44 @@ public:
 
 	virtual void DoRetireWeapon();
 	virtual bool ShouldWeaponIdle() { return false; }
-	bool Holster() override;
+	virtual bool CanHolster() { return true; } // can this weapon be put away right now?
+	virtual bool Holster();
 
 	void PrintState();
 
-	CBasePlayerWeapon* GetWeaponPtr() override { return this; }
+	virtual void Drop();
+	virtual void Kill();
+	virtual void AttachToPlayer(CBasePlayer* pPlayer);
 
-	virtual bool IsReloading() override { return m_fInReload; }
+	CBasePlayerWeapon* GetWeaponPtr() { return this; }
+
+	virtual void GetWeaponData(weapon_data_t& data) {}
+
+	virtual void SetWeaponData(const weapon_data_t& data) {}
+
+	virtual void DecrementTimers(const int msec) {}
+
+	virtual bool IsReloading() { return m_fInReload; }
+
+	static inline ItemInfo ItemInfoArray[MAX_WEAPONS];
+
+	CBasePlayer* m_pPlayer;
+	int m_iId;
+
+	virtual int iItemSlot() { return 0; } // return 0 to MAX_ITEMS_SLOTS, used in hud
+
+	int iItemPosition() { return ItemInfoArray[m_iId].iPosition; }
+	int iAmmo1() { return ItemInfoArray[m_iId].iAmmo1; }
+	int iMaxAmmo1() { return ItemInfoArray[m_iId].iMaxAmmo1; }
+	int iAmmo2() { return ItemInfoArray[m_iId].iAmmo2; }
+	int iMaxAmmo2() { return ItemInfoArray[m_iId].iMaxAmmo2; }
+	const char* pszName() { return ItemInfoArray[m_iId].pszName; }
+	int iMaxClip() { return ItemInfoArray[m_iId].iMaxClip; }
+	int iWeight() { return ItemInfoArray[m_iId].iWeight; }
+	int iFlags() { return ItemInfoArray[m_iId].iFlags; }
+
+	//Hack so deploy animations work when weapon prediction is enabled.
+	bool m_ForceSendAnimations = false;
 
 	float m_flPumpTime;
 	int m_fInSpecialReload;		   // Are we in the middle of a reload for the shotguns
@@ -467,11 +438,11 @@ public:
 	bool Restore(CRestore& restore) override;
 	static TYPEDESCRIPTION m_SaveData[];
 
-	bool HasWeapon(CBasePlayerItem* pCheckItem);
-	bool PackWeapon(CBasePlayerItem* pWeapon);
+	bool HasWeapon(CBasePlayerWeapon* pCheckItem);
+	bool PackWeapon(CBasePlayerWeapon* pWeapon);
 	bool PackAmmo(int iType, int iCount);
 
-	CBasePlayerItem* m_rgpPlayerItems[MAX_WEAPONS]; // one slot for each
+	CBasePlayerWeapon* m_rgpPlayerItems[MAX_WEAPONS]; // one slot for each
 
 	int m_rgAmmo[MAX_AMMO_SLOTS];	 // ammo quantities
 
@@ -600,7 +571,7 @@ public:
 	void Precache() override;
 	int iItemSlot() override { return 3; }
 	bool GetItemInfo(ItemInfo* p) override;
-	bool AddDuplicate(CBasePlayerItem* pOriginal) override;
+	bool AddDuplicate(CBasePlayerWeapon* pOriginal) override;
 
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
@@ -1028,7 +999,7 @@ public:
 	void AddToPlayer(CBasePlayer* pPlayer) override;
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
-	bool AddDuplicate(CBasePlayerItem* pOriginal) override;
+	bool AddDuplicate(CBasePlayerWeapon* pOriginal) override;
 	bool CanDeploy() override;
 	bool Deploy() override;
 	bool IsUseable() override;

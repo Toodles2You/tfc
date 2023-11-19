@@ -103,7 +103,7 @@ extern void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEn
 #define R_NM 3	// (NEMESIS)  A monster Will ALWAYS attack its nemsis, no matter what
 
 class CBaseEntity;
-class CBasePlayerItem;
+class CBasePlayerWeapon;
 
 
 #define SF_NORESPAWN (1 << 30) // !!!set this bit on guns and stuff that should never respawn.
@@ -179,8 +179,8 @@ public:
 	virtual int GetToggleState() { return TS_AT_TOP; }
 	virtual void AddPoints(int score, bool bAllowNegativeScore) {}
 	virtual void AddPointsToTeam(int score, bool bAllowNegativeScore) {}
-	virtual bool AddPlayerItem(CBasePlayerItem* pItem) { return 0; }
-	virtual bool RemovePlayerItem(CBasePlayerItem* pItem) { return 0; }
+	virtual bool AddPlayerItem(CBasePlayerWeapon* pItem) { return 0; }
+	virtual bool RemovePlayerItem(CBasePlayerWeapon* pItem) { return 0; }
 	virtual int GiveAmmo(int iAmount, int iType, int iMax) { return -1; }
 	virtual float GetDelay() { return 0; }
 	virtual bool IsMoving() { return pev->velocity != g_vecZero; }

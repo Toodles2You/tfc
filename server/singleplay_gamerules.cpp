@@ -62,7 +62,7 @@ bool CHalfLifeRules::IsCoOp()
 
 //=========================================================
 //=========================================================
-bool CHalfLifeRules::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pWeapon)
+bool CHalfLifeRules::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon)
 {
 	if (!pPlayer->m_pActiveItem)
 	{
@@ -80,7 +80,7 @@ bool CHalfLifeRules::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerItem* 
 
 //=========================================================
 //=========================================================
-bool CHalfLifeRules::GetNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pCurrentWeapon, bool alwaysSearch)
+bool CHalfLifeRules::GetNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pCurrentWeapon, bool alwaysSearch)
 {
 	//If this is an exhaustible weapon and it's out of ammo, always try to switch even in singleplayer.
 	if (alwaysSearch || ((pCurrentWeapon->iFlags() & ITEM_FLAG_EXHAUSTIBLE) != 0 && pCurrentWeapon->iAmmo1() > AMMO_NONE && pPlayer->m_rgAmmo[pCurrentWeapon->iAmmo1()] == 0))
@@ -186,7 +186,7 @@ void CHalfLifeRules::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, entva
 // PlayerGotWeapon - player has grabbed a weapon that was
 // sitting in the world
 //=========================================================
-void CHalfLifeRules::PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pWeapon)
+void CHalfLifeRules::PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon)
 {
 }
 
@@ -194,7 +194,7 @@ void CHalfLifeRules::PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pWea
 // FlWeaponRespawnTime - what is the time in the future
 // at which this weapon may spawn?
 //=========================================================
-float CHalfLifeRules::FlWeaponRespawnTime(CBasePlayerItem* pWeapon)
+float CHalfLifeRules::FlWeaponRespawnTime(CBasePlayerWeapon* pWeapon)
 {
 	return -1;
 }
@@ -204,7 +204,7 @@ float CHalfLifeRules::FlWeaponRespawnTime(CBasePlayerItem* pWeapon)
 // now,  otherwise it returns the time at which it can try
 // to spawn again.
 //=========================================================
-float CHalfLifeRules::FlWeaponTryRespawn(CBasePlayerItem* pWeapon)
+float CHalfLifeRules::FlWeaponTryRespawn(CBasePlayerWeapon* pWeapon)
 {
 	return 0;
 }
@@ -213,7 +213,7 @@ float CHalfLifeRules::FlWeaponTryRespawn(CBasePlayerItem* pWeapon)
 // VecWeaponRespawnSpot - where should this weapon spawn?
 // Some game variations may choose to randomize spawn locations
 //=========================================================
-Vector CHalfLifeRules::VecWeaponRespawnSpot(CBasePlayerItem* pWeapon)
+Vector CHalfLifeRules::VecWeaponRespawnSpot(CBasePlayerWeapon* pWeapon)
 {
 	return pWeapon->pev->origin;
 }
@@ -222,7 +222,7 @@ Vector CHalfLifeRules::VecWeaponRespawnSpot(CBasePlayerItem* pWeapon)
 // WeaponShouldRespawn - any conditions inhibiting the
 // respawning of this weapon?
 //=========================================================
-int CHalfLifeRules::WeaponShouldRespawn(CBasePlayerItem* pWeapon)
+int CHalfLifeRules::WeaponShouldRespawn(CBasePlayerWeapon* pWeapon)
 {
 	return GR_WEAPON_RESPAWN_NO;
 }

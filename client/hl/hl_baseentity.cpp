@@ -145,7 +145,7 @@ void CBasePlayer::CheckTimeBasedDamage() {}
 void CBasePlayer::UpdateGeigerCounter() {}
 void CBasePlayer::CheckSuitUpdate() {}
 void CBasePlayer::SetSuitUpdate(const char* name, bool fgroup, int iNoRepeatTime) {}
-void CBasePlayer::CheckAmmoLevel(CBasePlayerItem* pItem, bool bPrimary) {}
+void CBasePlayer::CheckAmmoLevel(CBasePlayerWeapon* pItem, bool bPrimary) {}
 void CBasePlayer::PostThink() {}
 void CBasePlayer::Precache() {}
 bool CBasePlayer::Save(CSave& save) { return false; }
@@ -156,8 +156,8 @@ void CBasePlayer::SelectItem(int iId) {}
 void CBasePlayer::ForceClientDllUpdate() {}
 void CBasePlayer::ImpulseCommands() {}
 void CBasePlayer::CheatImpulseCommands(int iImpulse) {}
-bool CBasePlayer::AddPlayerItem(CBasePlayerItem* pItem) { return false; }
-bool CBasePlayer::RemovePlayerItem(CBasePlayerItem* pItem) { return false; }
+bool CBasePlayer::AddPlayerItem(CBasePlayerWeapon* pItem) { return false; }
+bool CBasePlayer::RemovePlayerItem(CBasePlayerWeapon* pItem) { return false; }
 void CBasePlayer::ItemPreFrame() {}
 void CBasePlayer::ItemPostFrame() {}
 int CBasePlayer::AmmoInventory(int iAmmoIndex) { return -1; }
@@ -167,8 +167,8 @@ Vector CBasePlayer::GetAimVector() { return g_vecZero; }
 void CBasePlayer::SetCustomDecalFrames(int nFrames) {}
 int CBasePlayer::GetCustomDecalFrames() { return -1; }
 void CBasePlayer::DropPlayerItem(char* pszItemName) {}
-bool CBasePlayer::HasPlayerItem(CBasePlayerItem* pCheckItem) { return false; }
-bool CBasePlayer::SwitchWeapon(CBasePlayerItem* pWeapon) { return false; }
+bool CBasePlayer::HasPlayerItem(CBasePlayerWeapon* pCheckItem) { return false; }
+bool CBasePlayer::SwitchWeapon(CBasePlayerWeapon* pWeapon) { return false; }
 const char* CBasePlayer::TeamID() { return ""; }
 int CBasePlayer::TeamNumber() { return 0; }
 int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax) { return 0; }
@@ -182,25 +182,21 @@ void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage) {}
 int DamageDecal(CBaseEntity* pEntity, int bitsDamageType) { return 0; }
 void DecalGunshot(TraceResult* pTrace, int iBulletType) {}
 void EjectBrass(const Vector& vecOrigin, const Vector& vecVelocity, float rotation, int model, int soundtype) {}
-bool CBasePlayerItem::Restore(class CRestore&) { return true; }
-bool CBasePlayerItem::Save(class CSave&) { return true; }
 bool CBasePlayerWeapon::Restore(class CRestore&) { return true; }
 bool CBasePlayerWeapon::Save(class CSave&) { return true; }
-void CBasePlayerItem::SetObjectCollisionBox() {}
-void CBasePlayerItem::FallInit() {}
-void CBasePlayerItem::FallThink() {}
-void CBasePlayerItem::Materialize() {}
-void CBasePlayerItem::AttemptToMaterialize() {}
-void CBasePlayerItem::CheckRespawn() {}
-CBaseEntity* CBasePlayerItem::Respawn() { return NULL; }
-void CBasePlayerItem::DefaultTouch(CBaseEntity* pOther) {}
-void CBasePlayerItem::DestroyItem() {}
-void CBasePlayerItem::AddToPlayer(CBasePlayer* pPlayer) {}
-void CBasePlayerItem::Drop() {}
-void CBasePlayerItem::Kill() {}
-bool CBasePlayerItem::Holster() { return true; }
-void CBasePlayerItem::AttachToPlayer(CBasePlayer* pPlayer) {}
-bool CBasePlayerWeapon::AddDuplicate(CBasePlayerItem* pOriginal) { return false; }
+void CBasePlayerWeapon::SetObjectCollisionBox() {}
+void CBasePlayerWeapon::FallInit() {}
+void CBasePlayerWeapon::FallThink() {}
+void CBasePlayerWeapon::Materialize() {}
+void CBasePlayerWeapon::AttemptToMaterialize() {}
+void CBasePlayerWeapon::CheckRespawn() {}
+CBaseEntity* CBasePlayerWeapon::Respawn() { return nullptr; }
+void CBasePlayerWeapon::DefaultTouch(CBaseEntity* pOther) {}
+void CBasePlayerWeapon::DestroyItem() {}
+void CBasePlayerWeapon::Drop() {}
+void CBasePlayerWeapon::Kill() {}
+void CBasePlayerWeapon::AttachToPlayer(CBasePlayer* pPlayer) {}
+bool CBasePlayerWeapon::AddDuplicate(CBasePlayerWeapon* pOriginal) { return false; }
 void CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer) {}
 bool CBasePlayerWeapon::IsUseable() { return true; }
 void CBasePlayerAmmo::Spawn() {}

@@ -26,6 +26,10 @@ LINK_ENTITY_TO_CLASS(weapon_hornetgun, CHgun);
 
 int CHgun::GetChargeInterval()
 {
+	if (UTIL_IsDeathmatch())
+	{
+		return 300;
+	}
 	return 500;
 }
 
