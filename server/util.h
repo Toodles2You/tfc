@@ -454,15 +454,6 @@ void DBG_AssertFunction(bool fExpr, const char* szExpr, const char* szFile, int 
 
 #define SF_LIGHT_START_OFF 1
 
-#define SPAWNFLAG_NOMESSAGE 1
-#define SPAWNFLAG_NOTOUCH 1
-#define SPAWNFLAG_DROIDONLY 4
-
-#define SPAWNFLAG_USEONLY 1 // can't be touched, must be used (buttons)
-
-#define TELE_PLAYER_ONLY 1
-#define TELE_SILENT 2
-
 #define SF_TRIG_PUSH_ONCE 1
 
 

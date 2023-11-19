@@ -34,23 +34,7 @@ extern bool FEntIsVisible(entvars_t* pev, entvars_t* pevTarget);
 void CPointEntity::Spawn()
 {
 	pev->solid = SOLID_NOT;
-	//	UTIL_SetSize(pev, g_vecZero, g_vecZero);
 }
-
-
-class CNullEntity : public CBaseEntity
-{
-public:
-	void Spawn() override;
-};
-
-
-// Null Entity, remove on startup
-void CNullEntity::Spawn()
-{
-	REMOVE_ENTITY(ENT(pev));
-}
-LINK_ENTITY_TO_CLASS(info_null, CNullEntity);
 
 LINK_ENTITY_TO_CLASS(info_landmark, CPointEntity);
 
@@ -268,14 +252,6 @@ void CBaseDelay::SUB_UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float
 		FireTargets(STRING(pev->target), pActivator, this, useType, value);
 	}
 }
-
-
-/*
-void CBaseDelay:: SUB_UseTargetsEntMethod()
-{
-	SUB_UseTargets(pev);
-}
-*/
 
 /*
 QuakeEd only writes a single float for angles (bad idea), so up and down are

@@ -1029,21 +1029,6 @@ void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 }
 
 
-/*QUAKED trigger_multiple (.5 .5 .5) ? notouch
-Variable sized repeatable trigger.  Must be targeted at one or more entities.
-If "health" is set, the trigger must be killed to activate each time.
-If "delay" is set, the trigger waits some time after activating before firing.
-"wait" : Seconds between triggerings. (.2 default)
-If notouch is set, the trigger is only fired by other entities, not by touching.
-NOTOUCH has been obsoleted by trigger_relay!
-sounds
-1)      secret
-2)      beep beep
-3)      large switch
-4)
-NEW
-if a trigger has a NETNAME, that NETNAME will become the TARGET of the triggered object.
-*/
 class CTriggerMultiple : public CBaseTrigger
 {
 public:
@@ -1061,38 +1046,11 @@ void CTriggerMultiple::Spawn()
 	InitTrigger();
 
 	ASSERTSZ(pev->health == 0, "trigger_multiple with health");
-	//	UTIL_SetOrigin(pev, pev->origin);
-	//	SET_MODEL( ENT(pev), STRING(pev->model) );
-	//	if (pev->health > 0)
-	//		{
-	//		if (FBitSet(pev->spawnflags, SPAWNFLAG_NOTOUCH))
-	//			ALERT(at_error, "trigger_multiple spawn: health and notouch don't make sense");
-	//		pev->max_health = pev->health;
-	//UNDONE: where to get pfnDie from?
-	//		pev->pfnDie = multi_killed;
-	//		pev->takedamage = DAMAGE_YES;
-	//		pev->solid = SOLID_BBOX;
-	//		UTIL_SetOrigin(pev, pev->origin);  // make sure it links into the world
-	//		}
-	//	else
-	{
-		SetTouch(&CTriggerMultiple::MultiTouch);
-	}
+
+	SetTouch(&CTriggerMultiple::MultiTouch);
 }
 
 
-/*QUAKED trigger_once (.5 .5 .5) ? notouch
-Variable sized trigger. Triggers once, then removes itself.  You must set the key "target" to the name of another object in the level that has a matching
-"targetname".  If "health" is set, the trigger must be killed to activate.
-If notouch is set, the trigger is only fired by other entities, not by touching.
-if "killtarget" is set, any objects that have a matching "target" will be removed when the trigger is fired.
-if "angle" is set, the trigger will only fire when someone is facing the direction of the angle.  Use "360" for an angle of 0.
-sounds
-1)      secret
-2)      beep beep
-3)      large switch
-4)
-*/
 class CTriggerOnce : public CTriggerMultiple
 {
 public:
@@ -1210,51 +1168,15 @@ void CBaseTrigger::CounterUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE
 	m_cTriggersLeft--;
 	m_hActivator = pActivator;
 
-	if (m_cTriggersLeft < 0)
-		return;
-
-	bool fTellActivator =
-		(m_hActivator != 0) &&
-		FClassnameIs(m_hActivator->pev, "player") &&
-		!FBitSet(pev->spawnflags, SPAWNFLAG_NOMESSAGE);
 	if (m_cTriggersLeft != 0)
 	{
-		if (fTellActivator)
-		{
-			// UNDONE: I don't think we want these Quakesque messages
-			switch (m_cTriggersLeft)
-			{
-			case 1:
-				ALERT(at_console, "Only 1 more to go...");
-				break;
-			case 2:
-				ALERT(at_console, "Only 2 more to go...");
-				break;
-			case 3:
-				ALERT(at_console, "Only 3 more to go...");
-				break;
-			default:
-				ALERT(at_console, "There are more to go...");
-				break;
-			}
-		}
 		return;
 	}
-
-	// !!!UNDONE: I don't think we want these Quakesque messages
-	if (fTellActivator)
-		ALERT(at_console, "Sequence completed!");
 
 	ActivateMultiTrigger(m_hActivator);
 }
 
 
-/*QUAKED trigger_counter (.5 .5 .5) ? nomessage
-Acts as an intermediary for an action that takes multiple inputs.
-If nomessage is not set, it will print "1 more.. " etc when triggered and
-"sequence complete" when finished.  After the counter has been triggered "cTriggersLeft"
-times (default 2), it will fire all of it's targets and remove itself.
-*/
 class CTriggerCounter : public CBaseTrigger
 {
 public:
@@ -1400,10 +1322,6 @@ bool CChangeLevel::KeyValue(KeyValueData* pkvd)
 	return CBaseTrigger::KeyValue(pkvd);
 }
 
-
-/*QUAKED trigger_changelevel (0.5 0.5 0.5) ? NO_INTERMISSION
-When the player touches this, he gets sent to the map listed in the "map" variable.  Unless the NO_INTERMISSION flag is set, the view will go to the info_intermission spot and display stats.
-*/
 
 void CChangeLevel::Spawn()
 {
@@ -1791,9 +1709,6 @@ public:
 };
 LINK_ENTITY_TO_CLASS(trigger_push, CTriggerPush);
 
-/*QUAKED trigger_push (.5 .5 .5) ? TRIG_PUSH_ONCE
-Pushes the player
-*/
 
 void CTriggerPush::Spawn()
 {
