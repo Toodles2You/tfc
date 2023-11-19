@@ -47,7 +47,7 @@ void CHandGrenade::Precache()
 	PRECACHE_MODEL("models/p_grenade.mdl");
 }
 
-bool CHandGrenade::GetItemInfo(ItemInfo* p)
+bool CHandGrenade::GetWeaponInfo(WeaponInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->iAmmo1 = AMMO_HANDGRENADES;
@@ -59,7 +59,7 @@ bool CHandGrenade::GetItemInfo(ItemInfo* p)
 	p->iPosition = 0;
 	p->iId = m_iId = WEAPON_HANDGRENADE;
 	p->iWeight = HANDGRENADE_WEIGHT;
-	p->iFlags = ITEM_FLAG_LIMITINWORLD | ITEM_FLAG_EXHAUSTIBLE;
+	p->iFlags = WEAPON_FLAG_LIMITINWORLD | WEAPON_FLAG_EXHAUSTIBLE;
 
 	return true;
 }
@@ -89,7 +89,7 @@ bool CHandGrenade::Holster()
 		{
 			// no more grenades!
 			m_pPlayer->ClearWeaponBit(m_iId);
-			SetThink(&CHandGrenade::DestroyItem);
+			SetThink(&CHandGrenade::DestroyWeapon);
 			pev->nextthink = gpGlobals->time + 0.1;
 		}
 		return true;

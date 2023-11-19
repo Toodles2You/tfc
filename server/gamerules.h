@@ -22,8 +22,6 @@
 #include <vector>
 #include <string>
 
-//#include "weapons.h"
-//#include "items.h"
 class CBasePlayerWeapon;
 class CBasePlayer;
 class CItem;
@@ -134,7 +132,7 @@ public:
 	virtual void PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pInflictor, int bitsDamageType) = 0; // Called each time a player dies
 	virtual void DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pInflictor, int bitsDamageType) = 0;	// Call this from within a GameRules class to report an obituary.
 																									// Weapon retrieval
-	virtual bool CanHavePlayerItem(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon);					// The player is touching an CBasePlayerWeapon, do I give it to him?
+	virtual bool CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon);					// The player is touching an CBasePlayerWeapon, do I give it to him?
 	virtual void PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) = 0;				// Called each time a player picks up a weapon from the ground
 
 	// Weapon spawn/respawn control
@@ -360,7 +358,7 @@ public:
 
 	// Weapon retrieval
 	void PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) override;
-	bool CanHavePlayerItem(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) override; // The player is touching an CBasePlayerWeapon, do I give it to him?
+	bool CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) override; // The player is touching an CBasePlayerWeapon, do I give it to him?
 
 	// Weapon spawn/respawn control
 	int WeaponShouldRespawn(CBasePlayerWeapon* pWeapon) override;

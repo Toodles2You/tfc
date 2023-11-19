@@ -433,7 +433,7 @@ void CSqueak::Precache()
 }
 
 
-bool CSqueak::GetItemInfo(ItemInfo* p)
+bool CSqueak::GetWeaponInfo(WeaponInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->iAmmo1 = AMMO_SNARKS;
@@ -445,7 +445,7 @@ bool CSqueak::GetItemInfo(ItemInfo* p)
 	p->iPosition = 3;
 	p->iId = m_iId = WEAPON_SNARK;
 	p->iWeight = SNARK_WEIGHT;
-	p->iFlags = ITEM_FLAG_LIMITINWORLD | ITEM_FLAG_EXHAUSTIBLE;
+	p->iFlags = WEAPON_FLAG_LIMITINWORLD | WEAPON_FLAG_EXHAUSTIBLE;
 
 	return true;
 }
@@ -483,7 +483,7 @@ bool CSqueak::Holster()
 		if (!bHasAmmo)
 		{
 			m_pPlayer->ClearWeaponBit(m_iId);
-			SetThink(&CSqueak::DestroyItem);
+			SetThink(&CSqueak::DestroyWeapon);
 			pev->nextthink = gpGlobals->time + 0.1;
 		}
 		return true;

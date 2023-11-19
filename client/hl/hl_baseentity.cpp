@@ -128,8 +128,8 @@ void CBasePlayer::DeathSound() {}
 bool CBasePlayer::TakeHealth(float flHealth, int bitsDamageType) { return false; }
 void CBasePlayer::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) {}
 bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) { return false; }
-void CBasePlayer::PackDeadPlayerItems() {}
-void CBasePlayer::RemoveAllItems(bool removeSuit) {}
+void CBasePlayer::PackDeadPlayerWeapons() {}
+void CBasePlayer::RemoveAllWeapons(bool removeSuit) {}
 void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim) {}
 void CBasePlayer::WaterMove() {}
 bool CBasePlayer::IsOnLadder() { return false; }
@@ -145,29 +145,29 @@ void CBasePlayer::CheckTimeBasedDamage() {}
 void CBasePlayer::UpdateGeigerCounter() {}
 void CBasePlayer::CheckSuitUpdate() {}
 void CBasePlayer::SetSuitUpdate(const char* name, bool fgroup, int iNoRepeatTime) {}
-void CBasePlayer::CheckAmmoLevel(CBasePlayerWeapon* pItem, bool bPrimary) {}
+void CBasePlayer::CheckAmmoLevel(CBasePlayerWeapon* pWeapon, bool bPrimary) {}
 void CBasePlayer::PostThink() {}
 void CBasePlayer::Precache() {}
 bool CBasePlayer::Save(CSave& save) { return false; }
 bool CBasePlayer::Restore(CRestore& restore) { return false; }
 bool CBasePlayer::HasWeapons() { return false; }
-void CBasePlayer::SelectItem(const char* pstr) {}
-void CBasePlayer::SelectItem(int iId) {}
+void CBasePlayer::SelectWeapon(const char* pstr) {}
+void CBasePlayer::SelectWeapon(int iId) {}
 void CBasePlayer::ForceClientDllUpdate() {}
 void CBasePlayer::ImpulseCommands() {}
 void CBasePlayer::CheatImpulseCommands(int iImpulse) {}
-bool CBasePlayer::AddPlayerItem(CBasePlayerWeapon* pItem) { return false; }
-bool CBasePlayer::RemovePlayerItem(CBasePlayerWeapon* pItem) { return false; }
-void CBasePlayer::ItemPreFrame() {}
-void CBasePlayer::ItemPostFrame() {}
+bool CBasePlayer::AddPlayerWeapon(CBasePlayerWeapon* pWeapon) { return false; }
+bool CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* pWeapon) { return false; }
+void CBasePlayer::WeaponPreFrame() {}
+void CBasePlayer::WeaponPostFrame() {}
 int CBasePlayer::AmmoInventory(int iAmmoIndex) { return -1; }
 void CBasePlayer::UpdateClientData() {}
 void CBasePlayer::EnableControl(bool fControl) {}
 Vector CBasePlayer::GetAimVector() { return g_vecZero; }
 void CBasePlayer::SetCustomDecalFrames(int nFrames) {}
 int CBasePlayer::GetCustomDecalFrames() { return -1; }
-void CBasePlayer::DropPlayerItem(char* pszItemName) {}
-bool CBasePlayer::HasPlayerItem(CBasePlayerWeapon* pCheckItem) { return false; }
+void CBasePlayer::DropPlayerWeapon(char* pszWeaponName) {}
+bool CBasePlayer::HasPlayerWeapon(CBasePlayerWeapon* pCheckWeapon) { return false; }
 bool CBasePlayer::SwitchWeapon(CBasePlayerWeapon* pWeapon) { return false; }
 const char* CBasePlayer::TeamID() { return ""; }
 int CBasePlayer::TeamNumber() { return 0; }
@@ -192,7 +192,7 @@ void CBasePlayerWeapon::AttemptToMaterialize() {}
 void CBasePlayerWeapon::CheckRespawn() {}
 CBaseEntity* CBasePlayerWeapon::Respawn() { return nullptr; }
 void CBasePlayerWeapon::DefaultTouch(CBaseEntity* pOther) {}
-void CBasePlayerWeapon::DestroyItem() {}
+void CBasePlayerWeapon::DestroyWeapon() {}
 void CBasePlayerWeapon::Drop() {}
 void CBasePlayerWeapon::Kill() {}
 void CBasePlayerWeapon::AttachToPlayer(CBasePlayer* pPlayer) {}

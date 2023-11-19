@@ -70,7 +70,7 @@ void CGauss::Precache()
 	m_usGaussSpin = PRECACHE_EVENT(1, "events/gaussspin.sc");
 }
 
-bool CGauss::GetItemInfo(ItemInfo* p)
+bool CGauss::GetWeaponInfo(WeaponInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->iAmmo1 = AMMO_URANIUM;

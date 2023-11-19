@@ -64,13 +64,13 @@ bool CHalfLifeRules::IsCoOp()
 //=========================================================
 bool CHalfLifeRules::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon)
 {
-	if (!pPlayer->m_pActiveItem)
+	if (!pPlayer->m_pActiveWeapon)
 	{
-		// player doesn't have an active item!
+		// player doesn't have an active weapon!
 		return true;
 	}
 
-	if (!pPlayer->m_pActiveItem->CanHolster())
+	if (!pPlayer->m_pActiveWeapon->CanHolster())
 	{
 		return false;
 	}
@@ -83,7 +83,7 @@ bool CHalfLifeRules::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon
 bool CHalfLifeRules::GetNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pCurrentWeapon, bool alwaysSearch)
 {
 	//If this is an exhaustible weapon and it's out of ammo, always try to switch even in singleplayer.
-	if (alwaysSearch || ((pCurrentWeapon->iFlags() & ITEM_FLAG_EXHAUSTIBLE) != 0 && pCurrentWeapon->iAmmo1() > AMMO_NONE && pPlayer->m_rgAmmo[pCurrentWeapon->iAmmo1()] == 0))
+	if (alwaysSearch || ((pCurrentWeapon->iFlags() & WEAPON_FLAG_EXHAUSTIBLE) != 0 && pCurrentWeapon->iAmmo1() > AMMO_NONE && pPlayer->m_rgAmmo[pCurrentWeapon->iAmmo1()] == 0))
 	{
 		return CGameRules::GetNextBestWeapon(pPlayer, pCurrentWeapon);
 	}

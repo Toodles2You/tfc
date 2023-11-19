@@ -210,7 +210,7 @@ void CSatchel::Precache()
 }
 
 
-bool CSatchel::GetItemInfo(ItemInfo* p)
+bool CSatchel::GetWeaponInfo(WeaponInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->iAmmo1 = AMMO_SATCHELS;
@@ -220,7 +220,7 @@ bool CSatchel::GetItemInfo(ItemInfo* p)
 	p->iMaxClip = WEAPON_NOCLIP;
 	p->iSlot = 4;
 	p->iPosition = 1;
-	p->iFlags = ITEM_FLAG_SELECTONEMPTY | ITEM_FLAG_LIMITINWORLD | ITEM_FLAG_EXHAUSTIBLE;
+	p->iFlags = WEAPON_FLAG_SELECTONEMPTY | WEAPON_FLAG_LIMITINWORLD | WEAPON_FLAG_EXHAUSTIBLE;
 	p->iId = m_iId = WEAPON_SATCHEL;
 	p->iWeight = SATCHEL_WEIGHT;
 
@@ -291,7 +291,7 @@ bool CSatchel::Holster()
 		if (!bHasAmmo && !bReady)
 		{
 			m_pPlayer->ClearWeaponBit(m_iId);
-			SetThink(&CSatchel::DestroyItem);
+			SetThink(&CSatchel::DestroyWeapon);
 			pev->nextthink = gpGlobals->time + 0.1;
 		}
 		return true;

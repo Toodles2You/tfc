@@ -106,7 +106,7 @@ CBasePlayerWeapon* CGameRules::FindNextBestWeapon(CBasePlayer* pPlayer, CBasePla
 
 	int iBestWeight = -1; // no weapon lower than -1 can be autoswitched to
 
-	for (auto pCheck : pPlayer->m_lpPlayerItems)
+	for (auto pCheck : pPlayer->m_lpPlayerWeapons)
 	{
 		// don't reselect the weapon we're trying to get rid of
 		if (pCheck == pCurrentWeapon)
@@ -196,9 +196,9 @@ void CGameRules::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 
 //=========================================================
 //=========================================================
-bool CGameRules::CanHavePlayerItem(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon)
+bool CGameRules::CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon)
 {
-	// only living players can have items
+	// only living players can have weapons
 	if (pPlayer->pev->deadflag != DEAD_NO)
 		return false;
 
@@ -208,7 +208,7 @@ bool CGameRules::CanHavePlayerItem(CBasePlayer* pPlayer, CBasePlayerWeapon* pWea
 		{
 			// we can't carry anymore ammo for this gun. We can only
 			// have the gun if we aren't already carrying one of this type
-			if (pPlayer->HasPlayerItem(pWeapon))
+			if (pPlayer->HasPlayerWeapon(pWeapon))
 			{
 				return false;
 			}
@@ -217,13 +217,13 @@ bool CGameRules::CanHavePlayerItem(CBasePlayer* pPlayer, CBasePlayerWeapon* pWea
 	else
 	{
 		// weapon doesn't use ammo, don't take another if you already have it.
-		if (pPlayer->HasPlayerItem(pWeapon))
+		if (pPlayer->HasPlayerWeapon(pWeapon))
 		{
 			return false;
 		}
 	}
 
-	// note: will fall through to here if GetItemInfo doesn't fill the struct!
+	// note: will fall through to here if GetWeaponInfo doesn't fill the struct!
 	return true;
 }
 

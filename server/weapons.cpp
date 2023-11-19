@@ -39,10 +39,10 @@ int MaxAmmoCarry(int iType)
 {
 	for (int i = 0; i < MAX_WEAPONS; i++)
 	{
-		if (CBasePlayerWeapon::ItemInfoArray[i].iAmmo1 == iType)
-			return CBasePlayerWeapon::ItemInfoArray[i].iMaxAmmo1;
-		if (CBasePlayerWeapon::ItemInfoArray[i].iAmmo2 == iType)
-			return CBasePlayerWeapon::ItemInfoArray[i].iMaxAmmo2;
+		if (CBasePlayerWeapon::WeaponInfoArray[i].iAmmo1 == iType)
+			return CBasePlayerWeapon::WeaponInfoArray[i].iMaxAmmo1;
+		if (CBasePlayerWeapon::WeaponInfoArray[i].iAmmo2 == iType)
+			return CBasePlayerWeapon::WeaponInfoArray[i].iMaxAmmo2;
 	}
 
 	ALERT(at_console, "MaxAmmoCarry() doesn't recognize '%i'!\n", iType);
@@ -224,12 +224,12 @@ void UTIL_PrecacheOtherWeapon(const char* szClassname)
 
 	if (pEntity)
 	{
-		ItemInfo II;
+		WeaponInfo II;
 		pEntity->Precache();
 		memset(&II, 0, sizeof II);
-		if (((CBasePlayerWeapon*)pEntity)->GetItemInfo(&II))
+		if (((CBasePlayerWeapon*)pEntity)->GetWeaponInfo(&II))
 		{
-			CBasePlayerWeapon::ItemInfoArray[II.iId] = II;
+			CBasePlayerWeapon::WeaponInfoArray[II.iId] = II;
 
 			memset(&II, 0, sizeof II);
 		}
@@ -241,7 +241,7 @@ void UTIL_PrecacheOtherWeapon(const char* szClassname)
 // called by worldspawn
 void W_Precache()
 {
-	memset(CBasePlayerWeapon::ItemInfoArray, 0, sizeof(CBasePlayerWeapon::ItemInfoArray));
+	memset(CBasePlayerWeapon::WeaponInfoArray, 0, sizeof(CBasePlayerWeapon::WeaponInfoArray));
 
 	// custom items...
 
@@ -441,7 +441,7 @@ void CBasePlayerWeapon::Materialize()
 }
 
 //=========================================================
-// AttemptToMaterialize - the item is trying to rematerialize,
+// AttemptToMaterialize - the weapon is trying to rematerialize,
 // should it do so now or wait longer?
 //=========================================================
 void CBasePlayerWeapon::AttemptToMaterialize()
@@ -475,7 +475,7 @@ void CBasePlayerWeapon::CheckRespawn()
 }
 
 //=========================================================
-// Respawn- this item is already in the world, but it is
+// Respawn- this weapon is already in the world, but it is
 // invisible and intangible. Make it visible and tangible.
 //=========================================================
 CBaseEntity* CBasePlayerWeapon::Respawn()
@@ -513,7 +513,7 @@ void CBasePlayerWeapon::DefaultTouch(CBaseEntity* pOther)
 	CBasePlayer* pPlayer = (CBasePlayer*)pOther;
 
 	// can I have this?
-	if (!g_pGameRules->CanHavePlayerItem(pPlayer, this))
+	if (!g_pGameRules->CanHavePlayerWeapon(pPlayer, this))
 	{
 		if (gEvilImpulse101)
 		{
@@ -522,7 +522,7 @@ void CBasePlayerWeapon::DefaultTouch(CBaseEntity* pOther)
 		return;
 	}
 
-	if (pOther->AddPlayerItem(this))
+	if (pOther->AddPlayerWeapon(this))
 	{
 		AttachToPlayer(pPlayer);
 		if (!pPlayer->m_bIsSpawning)
@@ -534,12 +534,12 @@ void CBasePlayerWeapon::DefaultTouch(CBaseEntity* pOther)
 	SUB_UseTargets(pOther, USE_TOGGLE, 0); // UNDONE: when should this happen?
 }
 
-void CBasePlayerWeapon::DestroyItem()
+void CBasePlayerWeapon::DestroyWeapon()
 {
 	if (m_pPlayer)
 	{
 		// if attached to a player, remove.
-		m_pPlayer->RemovePlayerItem(this);
+		m_pPlayer->RemovePlayerWeapon(this);
 	}
 
 	Kill();
@@ -591,10 +591,10 @@ bool CBasePlayerWeapon::AddDuplicate(CBasePlayerWeapon* pOriginal)
 void CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer)
 {
 	/*
-	if ((iFlags() & ITEM_FLAG_EXHAUSTIBLE) != 0 && m_iDefaultAmmo == 0 && m_iClip <= 0)
+	if ((iFlags() & WEAPON_FLAG_EXHAUSTIBLE) != 0 && m_iDefaultAmmo == 0 && m_iClip <= 0)
 	{
 		//This is an exhaustible weapon that has no ammo left. Don't add it, queue it up for destruction instead.
-		SetThink(&CSatchel::DestroyItem);
+		SetThink(&CSatchel::DestroyWeapon);
 		pev->nextthink = gpGlobals->time + 0.1;
 		return false;
 	}
@@ -668,8 +668,6 @@ bool CBasePlayerWeapon::AddSecondaryAmmo(int iCount, int iType, int iMax)
 	int iIdAmmo;
 
 	iIdAmmo = m_pPlayer->GiveAmmo(iCount, iType, iMax);
-
-	//m_pPlayer->m_rgAmmo[iAmmo2()] = iMax; // hack for testing
 
 	if (iIdAmmo > AMMO_NONE)
 	{
@@ -844,7 +842,7 @@ void CBasePlayerAmmo::DefaultTouch(CBaseEntity* pOther)
 }
 
 //=========================================================
-// called by the new item with the existing item as parameter
+// called by the new weapon with the existing weapon as parameter
 //
 // if we call ExtractAmmo(), it's because the player is picking up this type of weapon for
 // the first time. If it is spawned by the world, m_iDefaultAmmo will have a default ammo amount in it.
@@ -872,7 +870,7 @@ bool CBasePlayerWeapon::ExtractAmmo(CBasePlayerWeapon* pWeapon)
 }
 
 //=========================================================
-// called by the new item's class with the existing item as parameter
+// called by the new weapon's class with the existing weapon as parameter
 //=========================================================
 bool CBasePlayerWeapon::ExtractClipAmmo(CBasePlayerWeapon* pWeapon)
 {
@@ -902,7 +900,7 @@ void CBasePlayerWeapon::RetireWeapon()
 
 void CBasePlayerWeapon::DoRetireWeapon()
 {
-	if (!m_pPlayer || m_pPlayer->m_pActiveItem != this)
+	if (!m_pPlayer || m_pPlayer->m_pActiveWeapon != this)
 	{
 		// Already retired?
 		return;
@@ -916,7 +914,7 @@ void CBasePlayerWeapon::DoRetireWeapon()
 	g_pGameRules->GetNextBestWeapon(m_pPlayer, this);
 
 	//If we're still equipped and we couldn't switch to another weapon, dequip this one
-	if (CanHolster() && m_pPlayer->m_pActiveItem == this)
+	if (CanHolster() && m_pPlayer->m_pActiveWeapon == this)
 	{
 		m_pPlayer->SwitchWeapon(nullptr);
 	}
@@ -932,7 +930,7 @@ LINK_ENTITY_TO_CLASS(weaponbox, CWeaponBox);
 TYPEDESCRIPTION CWeaponBox::m_SaveData[] =
 	{
 		DEFINE_ARRAY(CWeaponBox, m_rgAmmo, FIELD_INTEGER, MAX_AMMO_SLOTS),
-		DEFINE_ARRAY(CWeaponBox, m_rgpPlayerItems, FIELD_CLASSPTR, MAX_WEAPONS),
+		DEFINE_ARRAY(CWeaponBox, m_rgpPlayerWeapons, FIELD_CLASSPTR, MAX_WEAPONS),
 		DEFINE_FIELD(CWeaponBox, m_cAmmoTypes, FIELD_INTEGER),
 };
 
@@ -993,7 +991,7 @@ void CWeaponBox::Kill()
 	// destroy the weapons
 	for (i = 0; i < MAX_WEAPONS; i++)
 	{
-		pWeapon = m_rgpPlayerItems[i];
+		pWeapon = m_rgpPlayerWeapons[i];
 		if (!pWeapon)
 		{
 			continue;
@@ -1048,7 +1046,7 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 	// to deploy a better weapon that the player may pick up because he has no ammo for it.
 	for (i = 0; i < MAX_WEAPONS; i++)
 	{
-		pWeapon = m_rgpPlayerItems[i];
+		pWeapon = m_rgpPlayerWeapons[i];
 
 		if (!pWeapon)
 		{
@@ -1057,7 +1055,7 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 
 		//ALERT ( at_console, "trying to give %s\n", STRING( pWeapon[ i ]->pev->classname ) );
 
-		if (pPlayer->AddPlayerItem(pWeapon))
+		if (pPlayer->AddPlayerWeapon(pWeapon))
 		{
 			pWeapon->AttachToPlayer(pPlayer);
 		}
@@ -1081,14 +1079,14 @@ bool CWeaponBox::PackWeapon(CBasePlayerWeapon* pWeapon)
 
 	if (pWeapon->m_pPlayer)
 	{
-		if (!pWeapon->m_pPlayer->RemovePlayerItem(pWeapon))
+		if (!pWeapon->m_pPlayer->RemovePlayerWeapon(pWeapon))
 		{
 			// failed to unhook the weapon from the player!
 			return false;
 		}
 	}
 
-	m_rgpPlayerItems[pWeapon->m_iId] = pWeapon;
+	m_rgpPlayerWeapons[pWeapon->m_iId] = pWeapon;
 
 	pWeapon->pev->spawnflags |= SF_NORESPAWN; // never respawn
 	pWeapon->pev->movetype = MOVETYPE_NONE;
@@ -1149,13 +1147,13 @@ int CWeaponBox::GiveAmmo(int iCount, int iType, int iMax, int* pIndex /* = NULL*
 // CWeaponBox::HasWeapon - is a weapon of this type already
 // packed in this box?
 //=========================================================
-bool CWeaponBox::HasWeapon(CBasePlayerWeapon* pCheckItem)
+bool CWeaponBox::HasWeapon(CBasePlayerWeapon* pCheckWeapon)
 {
-	if (pCheckItem->m_iId <= WEAPON_NONE || pCheckItem->m_iId >= MAX_WEAPONS)
+	if (pCheckWeapon->m_iId <= WEAPON_NONE || pCheckWeapon->m_iId >= MAX_WEAPONS)
 	{
 		return false;
 	}
-	return m_rgpPlayerItems[pCheckItem->m_iId] != nullptr;
+	return m_rgpPlayerWeapons[pCheckWeapon->m_iId] != nullptr;
 }
 
 //=========================================================
@@ -1167,7 +1165,7 @@ bool CWeaponBox::IsEmpty()
 
 	for (i = 0; i < MAX_WEAPONS; i++)
 	{
-		if (m_rgpPlayerItems[i] != nullptr)
+		if (m_rgpPlayerWeapons[i] != nullptr)
 		{
 			return false;
 		}

@@ -273,7 +273,7 @@ void CCrossbow::Precache()
 }
 
 
-bool CCrossbow::GetItemInfo(ItemInfo* p)
+bool CCrossbow::GetWeaponInfo(WeaponInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->iAmmo1 = AMMO_BOLTS;

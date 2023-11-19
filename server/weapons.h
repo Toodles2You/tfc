@@ -175,15 +175,6 @@ typedef enum
 	BULLET_MONSTER_12MM,
 } Bullet;
 
-
-#define ITEM_FLAG_SELECTONEMPTY 1
-#define ITEM_FLAG_NOAUTORELOAD 2
-#define ITEM_FLAG_NOAUTOSWITCHEMPTY 4
-#define ITEM_FLAG_LIMITINWORLD 8
-#define ITEM_FLAG_EXHAUSTIBLE 16 // A player can totally exhaust their ammo supply and lose this weapon
-
-#define WEAPON_IS_ONTARGET 0x40
-
 typedef struct
 {
 	int iSlot;
@@ -197,7 +188,7 @@ typedef struct
 	int iId;
 	int iFlags;
 	int iWeight; // this value used to determine this weapon's importance in autoselection.
-} ItemInfo;
+} WeaponInfo;
 
 struct AmmoInfo
 {
@@ -222,14 +213,14 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
-	virtual bool CanAddToPlayer(CBasePlayer* player) { return true; } // return true if the item you want the item added to the player inventory
+	virtual bool CanAddToPlayer(CBasePlayer* player) { return true; } // return true if the weapon you want the weapon added to the player inventory
 
 	// generic weapon versions of CBasePlayerWeapon calls
 	virtual void AddToPlayer(CBasePlayer* pPlayer);
-	virtual bool AddDuplicate(CBasePlayerWeapon* pItem);
-	void EXPORT DestroyItem();
+	virtual bool AddDuplicate(CBasePlayerWeapon* pOriginal);
+	void EXPORT DestroyWeapon();
 	void EXPORT DefaultTouch(CBaseEntity* pOther); // default weapon touch
-	void EXPORT FallThink(); // when an item is first spawned, this think is run to determine when the object has hit the ground.
+	void EXPORT FallThink(); // when a weapon is first spawned, this think is run to determine when the object has hit the ground.
 	void EXPORT Materialize(); // make a weapon visible and tangible
 	void EXPORT AttemptToMaterialize(); // the weapon desires to become visible and tangible, if the game rules allow for it
 	CBaseEntity* Respawn() override; // copy a weapon
@@ -243,14 +234,12 @@ public:
 	bool AddPrimaryAmmo(CBasePlayerWeapon* origin, int iCount, int iType, int iMaxClip, int iMaxCarry);
 	bool AddSecondaryAmmo(int iCount, int iType, int iMaxCarry);
 
-	virtual void UpdateItemInfo() {} // updates HUD state
-
 	virtual void PlayEmptySound();
 
 	virtual void SendWeaponAnim(int iAnim, int body = 0);
 	virtual void PlayWeaponSound(int iChannel, const char* szSound, float flVolume = VOL_NORM, float flAttn = ATTN_IDLE, int iFlags = 0, float flPitch = PITCH_NORM);
 
-	virtual bool GetItemInfo(ItemInfo* p) { return false; } // returns false if struct not filled out
+	virtual bool GetWeaponInfo(WeaponInfo* p) { return false; } // returns false if struct not filled out
 	virtual bool CanDeploy();
 	virtual bool Deploy() { return true; } // returns is deploy was successful
 	virtual bool IsUseable();
@@ -258,9 +247,9 @@ public:
 	bool DefaultHolster(int iAnim, int body = 0);
 	bool DefaultReload(int iClipSize, int iAnim, int fDelay, int body = 0);
 
-	virtual void ItemPreFrame() {} // called each frame by the player PreThink
-	virtual void ItemPostFrame(); // called each frame by the player PostThink
-	// called by CBasePlayerWeapons ItemPostFrame()
+	virtual void WeaponPreFrame() {} // called each frame by the player PreThink
+	virtual void WeaponPostFrame(); // called each frame by the player PostThink
+	// called by CBasePlayerWeapons WeaponPostFrame()
 	virtual void PrimaryAttack() {}						  // do "+ATTACK"
 	virtual void SecondaryAttack() {}					  // do "+ATTACK2"
 	virtual void Reload() {}							  // do "+RELOAD"
@@ -284,8 +273,6 @@ public:
 	virtual void Kill();
 	virtual void AttachToPlayer(CBasePlayer* pPlayer);
 
-	CBasePlayerWeapon* GetWeaponPtr() { return this; }
-
 	virtual void GetWeaponData(weapon_data_t& data) {}
 
 	virtual void SetWeaponData(const weapon_data_t& data) {}
@@ -294,31 +281,29 @@ public:
 
 	virtual bool IsReloading() { return m_fInReload; }
 
-	static inline ItemInfo ItemInfoArray[MAX_WEAPONS];
+	static inline WeaponInfo WeaponInfoArray[MAX_WEAPONS];
 
 	CBasePlayer* m_pPlayer;
 	int m_iId;
 
-	virtual int iItemSlot() { return 0; } // return 0 to MAX_ITEMS_SLOTS, used in hud
-
-	int iItemPosition() { return ItemInfoArray[m_iId].iPosition; }
-	int iAmmo1() { return ItemInfoArray[m_iId].iAmmo1; }
-	int iMaxAmmo1() { return ItemInfoArray[m_iId].iMaxAmmo1; }
-	int iAmmo2() { return ItemInfoArray[m_iId].iAmmo2; }
-	int iMaxAmmo2() { return ItemInfoArray[m_iId].iMaxAmmo2; }
-	const char* pszName() { return ItemInfoArray[m_iId].pszName; }
-	int iMaxClip() { return ItemInfoArray[m_iId].iMaxClip; }
-	int iWeight() { return ItemInfoArray[m_iId].iWeight; }
-	int iFlags() { return ItemInfoArray[m_iId].iFlags; }
+	int iItemPosition() { return WeaponInfoArray[m_iId].iPosition; }
+	int iAmmo1() { return WeaponInfoArray[m_iId].iAmmo1; }
+	int iMaxAmmo1() { return WeaponInfoArray[m_iId].iMaxAmmo1; }
+	int iAmmo2() { return WeaponInfoArray[m_iId].iAmmo2; }
+	int iMaxAmmo2() { return WeaponInfoArray[m_iId].iMaxAmmo2; }
+	const char* pszName() { return WeaponInfoArray[m_iId].pszName; }
+	int iMaxClip() { return WeaponInfoArray[m_iId].iMaxClip; }
+	int iWeight() { return WeaponInfoArray[m_iId].iWeight; }
+	int iFlags() { return WeaponInfoArray[m_iId].iFlags; }
 
 	//Hack so deploy animations work when weapon prediction is enabled.
 	bool m_ForceSendAnimations = false;
 
 	float m_flPumpTime;
 	int m_fInSpecialReload;		   // Are we in the middle of a reload for the shotguns
-	int m_iNextPrimaryAttack;   // soonest time ItemPostFrame will call PrimaryAttack
-	int m_iNextSecondaryAttack; // soonest time ItemPostFrame will call SecondaryAttack
-	int m_iTimeWeaponIdle;	   // soonest time ItemPostFrame will call WeaponIdle
+	int m_iNextPrimaryAttack;   // soonest time WeaponPostFrame will call PrimaryAttack
+	int m_iNextSecondaryAttack; // soonest time WeaponPostFrame will call SecondaryAttack
+	int m_iTimeWeaponIdle;	   // soonest time WeaponPostFrame will call WeaponIdle
 	int m_iClip;				   // number of shots left in the primary weapon clip, -1 it not used
 	int m_iClientClip;			   // the last version of m_iClip sent to hud dll
 	int m_iClientWeaponState;	   // the last version of the weapon state sent to hud dll (is current weapon, is on target)
@@ -438,11 +423,11 @@ public:
 	bool Restore(CRestore& restore) override;
 	static TYPEDESCRIPTION m_SaveData[];
 
-	bool HasWeapon(CBasePlayerWeapon* pCheckItem);
+	bool HasWeapon(CBasePlayerWeapon* pCheckWeapon);
 	bool PackWeapon(CBasePlayerWeapon* pWeapon);
 	bool PackAmmo(int iType, int iCount);
 
-	CBasePlayerWeapon* m_rgpPlayerItems[MAX_WEAPONS]; // one slot for each
+	CBasePlayerWeapon* m_rgpPlayerWeapons[MAX_WEAPONS]; // one slot for each
 
 	int m_rgAmmo[MAX_AMMO_SLOTS];	 // ammo quantities
 
@@ -472,8 +457,7 @@ class CGlock : public CBasePlayerWeapon
 public:
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 2; }
-	bool GetItemInfo(ItemInfo* p) override;
+	bool GetWeaponInfo(WeaponInfo* p) override;
 
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
@@ -505,10 +489,9 @@ class CCrowbar : public CBasePlayerWeapon
 public:
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 1; }
 	void EXPORT SwingAgain();
 	void EXPORT Smack();
-	bool GetItemInfo(ItemInfo* p) override;
+	bool GetWeaponInfo(WeaponInfo* p) override;
 
 	void PrimaryAttack() override;
 	bool Swing(bool fFirst);
@@ -538,8 +521,7 @@ class CPython : public CBasePlayerWeapon
 public:
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 2; }
-	bool GetItemInfo(ItemInfo* p) override;
+	bool GetWeaponInfo(WeaponInfo* p) override;
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
 	bool Deploy() override;
@@ -569,8 +551,7 @@ class CMP5 : public CBasePlayerWeapon
 public:
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 3; }
-	bool GetItemInfo(ItemInfo* p) override;
+	bool GetWeaponInfo(WeaponInfo* p) override;
 	bool AddDuplicate(CBasePlayerWeapon* pOriginal) override;
 
 	void PrimaryAttack() override;
@@ -606,8 +587,7 @@ class CCrossbow : public CBasePlayerWeapon
 public:
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 3; }
-	bool GetItemInfo(ItemInfo* p) override;
+	bool GetWeaponInfo(WeaponInfo* p) override;
 
 	void FireBolt();
 	void FireSniperBolt();
@@ -649,8 +629,7 @@ public:
 
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 3; }
-	bool GetItemInfo(ItemInfo* p) override;
+	bool GetWeaponInfo(WeaponInfo* p) override;
 
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
@@ -658,7 +637,7 @@ public:
 	bool Holster() override;
 	void Reload() override;
 	void WeaponIdle() override;
-	void ItemPostFrame() override;
+	void WeaponPostFrame() override;
 
 	void GetWeaponData(weapon_data_t& data) override;
 	void SetWeaponData(const weapon_data_t& data) override;
@@ -710,8 +689,7 @@ public:
 	void Spawn() override;
 	void Precache() override;
 	void Reload() override;
-	int iItemSlot() override { return 4; }
-	bool GetItemInfo(ItemInfo* p) override;
+	bool GetWeaponInfo(WeaponInfo* p) override;
 
 	bool Deploy() override;
 	bool CanHolster() override;
@@ -784,8 +762,7 @@ public:
 
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 4; }
-	bool GetItemInfo(ItemInfo* p) override;
+	bool GetWeaponInfo(WeaponInfo* p) override;
 
 	bool Deploy() override;
 	bool Holster() override;
@@ -859,8 +836,7 @@ public:
 
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 4; }
-	bool GetItemInfo(ItemInfo* p) override;
+	bool GetWeaponInfo(WeaponInfo* p) override;
 
 	bool Deploy() override;
 	bool CanHolster() override;
@@ -918,8 +894,7 @@ class CHgun : public CBasePlayerWeapon
 public:
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 4; }
-	bool GetItemInfo(ItemInfo* p) override;
+	bool GetWeaponInfo(WeaponInfo* p) override;
 	void AddToPlayer(CBasePlayer* pPlayer) override;
 
 	void PrimaryAttack() override;
@@ -929,7 +904,7 @@ public:
 	bool Holster() override;
 	void Reload() override;
 	void WeaponIdle() override;
-	void ItemPostFrame() override;
+	void WeaponPostFrame() override;
 
 	int m_iFirePhase; // don't save me.
 
@@ -956,8 +931,7 @@ class CHandGrenade : public CBasePlayerWeapon
 public:
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 5; }
-	bool GetItemInfo(ItemInfo* p) override;
+	bool GetWeaponInfo(WeaponInfo* p) override;
 
 	void PrimaryAttack() override;
 	bool Deploy() override;
@@ -994,8 +968,7 @@ public:
 
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 5; }
-	bool GetItemInfo(ItemInfo* p) override;
+	bool GetWeaponInfo(WeaponInfo* p) override;
 	void AddToPlayer(CBasePlayer* pPlayer) override;
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
@@ -1027,11 +1000,9 @@ class CTripmine : public CBasePlayerWeapon
 public:
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 5; }
-	bool GetItemInfo(ItemInfo* p) override;
+	bool GetWeaponInfo(WeaponInfo* p) override;
 	void SetObjectCollisionBox() override
 	{
-		//!!!BUGBUG - fix the model!
 		pev->absmin = pev->origin + Vector(-16, -16, -5);
 		pev->absmax = pev->origin + Vector(16, 16, 28);
 	}
@@ -1060,8 +1031,7 @@ class CSqueak : public CBasePlayerWeapon
 public:
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 5; }
-	bool GetItemInfo(ItemInfo* p) override;
+	bool GetWeaponInfo(WeaponInfo* p) override;
 
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;

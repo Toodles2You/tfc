@@ -364,9 +364,9 @@ bool CFuncTank::StartControl(CBasePlayer* pController)
 	ALERT(at_console, "using TANK!\n");
 
 	m_pController = pController;
-	if (m_pController->m_pActiveItem)
+	if (m_pController->m_pActiveWeapon)
 	{
-		m_pController->m_pActiveItem->Holster();
+		m_pController->m_pActiveWeapon->Holster();
 		m_pController->pev->weaponmodel = 0;
 		m_pController->pev->viewmodel = 0;
 	}
@@ -398,7 +398,7 @@ void CFuncTank::StopControl()
 		pev->nextthink = pev->ltime + 1.0;
 }
 
-// Called each frame by the player's ItemPostFrame
+// Called each frame by the player's WeaponPostFrame
 void CFuncTank::ControllerPostFrame()
 {
 	ASSERT(m_pController != NULL);

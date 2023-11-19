@@ -67,7 +67,11 @@ bool WeaponsResource::HasAmmo(WEAPON* p)
 	if (p->iMax1 == -1)
 		return true;
 
-	return (p->iAmmoType <= AMMO_NONE) || p->iClip > 0 || 0 != CountAmmo(p->iAmmoType) || 0 != CountAmmo(p->iAmmo2Type) || (p->iFlags & WEAPON_FLAGS_SELECTONEMPTY) != 0;
+	return (p->iAmmoType <= AMMO_NONE)
+		 || (p->iFlags & WEAPON_FLAG_SELECTONEMPTY) != 0
+		 || p->iClip > 0
+		 || 0 != CountAmmo(p->iAmmoType)
+		 || 0 != CountAmmo(p->iAmmo2Type);
 }
 
 
