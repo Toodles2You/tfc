@@ -22,14 +22,12 @@
 #include "gamerules.h"
 #include "UserMessages.h"
 
-enum firemode_e
-{
-	FIREMODE_TRACK = 0,
-	FIREMODE_FAST
-};
-
-
 LINK_ENTITY_TO_CLASS(weapon_hornetgun, CHgun);
+
+int CHgun::GetChargeInterval()
+{
+	return 500;
+}
 
 bool CHgun::IsUseable()
 {
@@ -47,7 +45,6 @@ void CHgun::Spawn()
 
 	FallInit(); // get ready to fall down.
 }
-
 
 void CHgun::Precache()
 {
@@ -88,7 +85,6 @@ bool CHgun::GetItemInfo(ItemInfo* p)
 	return true;
 }
 
-
 bool CHgun::Deploy()
 {
 	if (DefaultDeploy("models/v_hgun.mdl", "models/p_hgun.mdl", HGUN_UP, "hive"))
@@ -105,7 +101,6 @@ bool CHgun::Holster()
 	return DefaultHolster(HGUN_DOWN);
 }
 
-
 void CHgun::PrimaryAttack()
 {
 	Reload();
@@ -118,10 +113,12 @@ void CHgun::PrimaryAttack()
 #ifndef CLIENT_DLL
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle);
 
-	CBaseEntity* pHornet = CBaseEntity::Create("hornet", m_pPlayer->GetGunPosition() + gpGlobals->v_forward * 16 + gpGlobals->v_right * 8 + gpGlobals->v_up * -12, m_pPlayer->pev->v_angle, m_pPlayer->edict());
+	CBaseEntity* pHornet = GetClassPtr((CHornet *)nullptr);
+	pHornet->pev->origin = m_pPlayer->GetGunPosition() + gpGlobals->v_forward * 16 + gpGlobals->v_right * 8 + gpGlobals->v_up * -12;
+	pHornet->pev->angles = m_pPlayer->pev->v_angle;
+	pHornet->pev->owner = m_pPlayer->edict();
 	pHornet->pev->velocity = gpGlobals->v_forward * 300;
-
-	m_flRechargeTime = gpGlobals->time + 0.5;
+	pHornet->Spawn();
 #endif
 
 	m_pPlayer->m_rgAmmo[iAmmo1()]--;
@@ -131,12 +128,11 @@ void CHgun::PrimaryAttack()
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	m_iNextPrimaryAttack = m_iNextSecondaryAttack = 250;
+	m_iNextPrimaryAttack = 250;
+	m_iNextSecondaryAttack = 500;
 
 	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 }
-
-
 
 void CHgun::SecondaryAttack()
 {
@@ -147,6 +143,21 @@ void CHgun::SecondaryAttack()
 		return;
 	}
 
+	auto shots = 0;
+
+	while (m_iNextPrimaryAttack <= 0)
+	{
+		m_iNextPrimaryAttack += 100;
+		shots++;
+	}
+
+	if (shots > m_pPlayer->m_rgAmmo[iAmmo1()])
+	{
+		shots = m_pPlayer->m_rgAmmo[iAmmo1()];
+	}
+
+	m_pPlayer->m_rgAmmo[iAmmo1()] -= shots;
+
 	//Wouldn't be a bad idea to completely predict these, since they fly so fast...
 #ifndef CLIENT_DLL
 	CBaseEntity* pHornet;
@@ -156,80 +167,76 @@ void CHgun::SecondaryAttack()
 
 	vecSrc = m_pPlayer->GetGunPosition() + gpGlobals->v_forward * 16 + gpGlobals->v_right * 8 + gpGlobals->v_up * -12;
 
-	m_iFirePhase++;
-	switch (m_iFirePhase)
+	while (shots > 0)
 	{
-	case 1:
-		vecSrc = vecSrc + gpGlobals->v_up * 8;
-		break;
-	case 2:
-		vecSrc = vecSrc + gpGlobals->v_up * 8;
-		vecSrc = vecSrc + gpGlobals->v_right * 8;
-		break;
-	case 3:
-		vecSrc = vecSrc + gpGlobals->v_right * 8;
-		break;
-	case 4:
-		vecSrc = vecSrc + gpGlobals->v_up * -8;
-		vecSrc = vecSrc + gpGlobals->v_right * 8;
-		break;
-	case 5:
-		vecSrc = vecSrc + gpGlobals->v_up * -8;
-		break;
-	case 6:
-		vecSrc = vecSrc + gpGlobals->v_up * -8;
-		vecSrc = vecSrc + gpGlobals->v_right * -8;
-		break;
-	case 7:
-		vecSrc = vecSrc + gpGlobals->v_right * -8;
-		break;
-	case 8:
-		vecSrc = vecSrc + gpGlobals->v_up * 8;
-		vecSrc = vecSrc + gpGlobals->v_right * -8;
-		m_iFirePhase = 0;
-		break;
+		m_iFirePhase++;
+		switch (m_iFirePhase)
+		{
+		case 1:
+			vecSrc = vecSrc + gpGlobals->v_up * 8;
+			break;
+		case 2:
+			vecSrc = vecSrc + gpGlobals->v_up * 6;
+			vecSrc = vecSrc + gpGlobals->v_right * 6;
+			break;
+		case 3:
+			vecSrc = vecSrc + gpGlobals->v_right * 8;
+			break;
+		case 4:
+			vecSrc = vecSrc + gpGlobals->v_up * -6;
+			vecSrc = vecSrc + gpGlobals->v_right * 6;
+			break;
+		case 5:
+			vecSrc = vecSrc + gpGlobals->v_up * -8;
+			break;
+		case 6:
+			vecSrc = vecSrc + gpGlobals->v_up * -6;
+			vecSrc = vecSrc + gpGlobals->v_right * -6;
+			break;
+		case 7:
+			vecSrc = vecSrc + gpGlobals->v_right * -8;
+			break;
+		case 8:
+			vecSrc = vecSrc + gpGlobals->v_up * 6;
+			vecSrc = vecSrc + gpGlobals->v_right * -6;
+			m_iFirePhase = 0;
+			break;
+		}
+
+		pHornet = GetClassPtr((CHornet *)nullptr);
+		pHornet->pev->origin = vecSrc;
+		pHornet->pev->angles = m_pPlayer->pev->v_angle;
+		pHornet->pev->owner = m_pPlayer->edict();
+		pHornet->pev->velocity = gpGlobals->v_forward * 1200;
+		pHornet->pev->angles = UTIL_VecToAngles(pHornet->pev->velocity);
+		pHornet->SetThink(&CHornet::StartDart);
+		pHornet->Spawn();
+
+		shots--;
 	}
-
-	pHornet = CBaseEntity::Create("hornet", vecSrc, m_pPlayer->pev->v_angle, m_pPlayer->edict());
-	pHornet->pev->velocity = gpGlobals->v_forward * 1200;
-	pHornet->pev->angles = UTIL_VecToAngles(pHornet->pev->velocity);
-
-	pHornet->SetThink(&CHornet::StartDart);
-
-	m_flRechargeTime = gpGlobals->time + 0.5;
 #endif
 
 	m_pPlayer->PlaybackEvent(m_usHornetFire);
 
-	m_pPlayer->m_rgAmmo[iAmmo1()]--;
-
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	m_iNextPrimaryAttack = m_iNextSecondaryAttack = 100;
+	m_iNextSecondaryAttack = 500;
+
 	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 }
 
-
 void CHgun::Reload()
 {
-#ifndef CLIENT_DLL
-	if (m_pPlayer->m_rgAmmo[iAmmo1()] >= HORNET_MAX_CARRY)
-		return;
-
-	while (m_pPlayer->m_rgAmmo[iAmmo1()] < HORNET_MAX_CARRY && m_flRechargeTime < gpGlobals->time)
+	while (m_pPlayer->m_rgAmmo[iAmmo1()] < HORNET_MAX_CARRY && m_iNextSecondaryAttack <= 0)
 	{
 		m_pPlayer->m_rgAmmo[iAmmo1()]++;
-		m_flRechargeTime += 0.5;
+		m_iNextSecondaryAttack += GetChargeInterval();
 	}
-#endif
 }
-
 
 void CHgun::WeaponIdle()
 {
-	Reload();
-
 	if (m_iTimeWeaponIdle > 0)
 		return;
 
@@ -251,4 +258,27 @@ void CHgun::WeaponIdle()
 		m_iTimeWeaponIdle = 2188;
 	}
 	SendWeaponAnim(iAnim);
+}
+
+void CHgun::ItemPostFrame()
+{
+	Reload();
+
+	if (m_iNextPrimaryAttack <= 0)
+	{
+		if ((m_pPlayer->pev->button & IN_ATTACK2) != 0)
+		{
+			SecondaryAttack();
+		}
+		else if ((m_pPlayer->pev->button & IN_ATTACK) != 0)
+		{
+			PrimaryAttack();
+		}
+		else
+		{
+			m_iNextPrimaryAttack = 0;
+		}
+	}
+
+	WeaponIdle();
 }

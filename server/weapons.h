@@ -91,7 +91,7 @@ public:
 #define RPG_WEIGHT 20
 #define GAUSS_WEIGHT 20
 #define EGON_WEIGHT 20
-#define HORNETGUN_WEIGHT 10
+#define HORNETGUN_WEIGHT 15
 #define HANDGRENADE_WEIGHT 5
 #define SNARK_WEIGHT 5
 #define SATCHEL_WEIGHT -10
@@ -945,12 +945,6 @@ enum hgun_e
 class CHgun : public CBasePlayerWeapon
 {
 public:
-#ifndef CLIENT_DLL
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
-#endif
-
 	void Spawn() override;
 	void Precache() override;
 	int iItemSlot() override { return 4; }
@@ -964,12 +958,13 @@ public:
 	bool Holster() override;
 	void Reload() override;
 	void WeaponIdle() override;
-
-	float m_flRechargeTime;
+	void ItemPostFrame() override;
 
 	int m_iFirePhase; // don't save me.
 
 private:
+	int GetChargeInterval();
+
 	unsigned short m_usHornetFire;
 };
 
