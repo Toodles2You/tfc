@@ -1249,11 +1249,11 @@ void CStudioModelRenderer::StudioEstimateGait(entity_state_t* pplayer)
 		return;
 	}
 
-	// VectorAdd( pplayer->velocity, pplayer->prediction_error, est_velocity );
 	if (m_fGaitEstimation)
 	{
 		VectorSubtract(m_pCurrentEntity->origin, m_pPlayerInfo->prevgaitorigin, est_velocity);
 		VectorCopy(m_pCurrentEntity->origin, m_pPlayerInfo->prevgaitorigin);
+		est_velocity[2] = 0.0F;
 		m_flGaitMovement = Length(est_velocity);
 		if (dt <= 0 || m_flGaitMovement / dt < 5)
 		{
@@ -1265,6 +1265,7 @@ void CStudioModelRenderer::StudioEstimateGait(entity_state_t* pplayer)
 	else
 	{
 		VectorCopy(pplayer->velocity, est_velocity);
+		est_velocity[2] = 0.0F;
 		m_flGaitMovement = Length(est_velocity) * dt;
 	}
 
