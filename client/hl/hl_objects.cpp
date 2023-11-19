@@ -41,8 +41,6 @@ static void GetCrosshairTarget(pmtrace_t* tr, float distance)
 {
 	Vector forward, vecSrc, vecEnd, origin, angles, right, up;
 	Vector view_ofs;
-	cl_entity_t* pthisplayer = gEngfuncs.GetLocalPlayer();
-	int idx = pthisplayer->index;
 
 	// Get our exact viewangles from engine
 	gEngfuncs.GetViewAngles((float*)angles);
@@ -57,18 +55,7 @@ static void GetCrosshairTarget(pmtrace_t* tr, float distance)
 
 	VectorMA(vecSrc, distance, forward, vecEnd);
 
-	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(0, 1);
-
-	// Store off the old count
-	gEngfuncs.pEventAPI->EV_PushPMStates();
-
-	// Now add in all of the players.
-	gEngfuncs.pEventAPI->EV_SetSolidPlayers(idx - 1);
-
-	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
 	gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_STUDIO_BOX, -1, tr);
-
-	gEngfuncs.pEventAPI->EV_PopPMStates();
 }
 
 static void UpdateBeams(const float time, const pmtrace_t *tr)
@@ -114,12 +101,14 @@ static void UpdateBeams(const float time, const pmtrace_t *tr)
 		{
 			pFlare->flags |= FTENT_NOMODEL;
 
-			if (!(0 != tr->allsolid || tr->ent <= 0 || tr->fraction == 1.0f)) // Beam hit some non-world entity
+			if (tr->fraction != 1.0F) // Beam hit some non-world entity
 			{
 				physent_t* pEntity = gEngfuncs.pEventAPI->EV_GetPhysent(tr->ent);
 
 				// Not the world, let's assume that we hit something organic ( dog, cat, uncle joe, etc )
-				if (pEntity && !(pEntity->solid == SOLID_BSP || pEntity->movetype == MOVETYPE_PUSHSTEP))
+				if (pEntity
+				 && pEntity->solid != SOLID_BSP
+				 && pEntity->movetype != MOVETYPE_PUSHSTEP)
 				{
 					pFlare->flags &= ~FTENT_NOMODEL;
 				}
@@ -165,6 +154,13 @@ void Game_AddObjects()
 	pmtrace_t trShort;
 	pmtrace_t trLong;
 
+	cl_entity_t* pthisplayer = gEngfuncs.GetLocalPlayer();
+	int idx = pthisplayer->index;
+	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(0, 1);
+	gEngfuncs.pEventAPI->EV_PushPMStates();
+	gEngfuncs.pEventAPI->EV_SetSolidPlayers(idx - 1);
+	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+
 	GetCrosshairTarget(&trShort, 2048);
 
 	if (trShort.fraction == 1.0f)
@@ -202,4 +198,6 @@ void Game_AddObjects()
 			light->radius = 64 * (1.0f - trShort.fraction);
 		}
 	}
+
+	gEngfuncs.pEventAPI->EV_PopPMStates();
 }
