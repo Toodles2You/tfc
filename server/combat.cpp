@@ -30,43 +30,6 @@
 #include "player.h"
 #include "UserMessages.h"
 
-extern Vector VecBModelOrigin(entvars_t* pevBModel);
-
-//
-// fade out - slowly fades a entity out, then removes it.
-//
-// DON'T USE ME FOR GIBS AND STUFF IN MULTIPLAYER!
-// SET A FUTURE THINK AND A RENDERMODE!!
-void CBaseEntity::SUB_StartFadeOut()
-{
-	if (pev->rendermode == kRenderNormal)
-	{
-		pev->renderamt = 255;
-		pev->rendermode = kRenderTransTexture;
-	}
-
-	pev->solid = SOLID_NOT;
-	pev->avelocity = g_vecZero;
-
-	pev->nextthink = gpGlobals->time + 0.1;
-	SetThink(&CBaseEntity::SUB_FadeOut);
-}
-
-void CBaseEntity::SUB_FadeOut()
-{
-	if (pev->renderamt > 7)
-	{
-		pev->renderamt -= 7;
-		pev->nextthink = gpGlobals->time + 0.1;
-	}
-	else
-	{
-		pev->renderamt = 0;
-		pev->nextthink = gpGlobals->time + 0.2;
-		SetThink(&CBaseEntity::SUB_Remove);
-	}
-}
-
 //
 // RadiusDamage - this entity is exploding, or otherwise needs to inflict damage upon entities within a certain range.
 //

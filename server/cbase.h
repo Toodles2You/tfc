@@ -249,8 +249,6 @@ public:
 
 	// common member functions
 	void EXPORT SUB_Remove();
-	void EXPORT SUB_StartFadeOut();
-	void EXPORT SUB_FadeOut();
 	void EXPORT SUB_CallUseToggle() { this->Use(this, this, USE_TOGGLE, 0); }
 	bool ShouldToggle(USE_TYPE useType, bool currentState);
 
