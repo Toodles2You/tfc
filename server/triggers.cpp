@@ -1766,7 +1766,9 @@ void CLadder::Precache()
 	// Do all of this in here because we need to 'convert' old saved games
 	pev->solid = SOLID_NOT;
 	pev->skin = CONTENTS_LADDER;
-	pev->effects = EF_NODRAW;
+	pev->rendermode = kRenderTransTexture;
+	pev->renderamt = 0;
+	pev->effects &= ~EF_NODRAW;
 }
 
 
