@@ -37,6 +37,7 @@
 #include "event_args.h"
 #include "in_defs.h"
 #include "view.h"
+#include "parsemsg.h"
 
 #include <string.h>
 
@@ -129,18 +130,9 @@ static float EV_PlayTextureSound(int idx, pmtrace_t* ptr, float* vecSrc, float* 
 
 	entity = gEngfuncs.pEventAPI->EV_IndexFromTrace(ptr);
 
-	// FIXME check if playtexture sounds movevar is set
-	//
-
 	chTextureType = 0;
 
-	// Player
-	if (entity >= 1 && entity <= gEngfuncs.GetMaxClients())
-	{
-		// hit body
-		chTextureType = CHAR_TEX_FLESH;
-	}
-	else if (entity == 0)
+	if (entity == 0)
 	{
 		// get texture from entity or world (world is ent(0))
 		pTextureName = (char*)gEngfuncs.pEventAPI->EV_TraceTexture(ptr->ent, vecSrc, vecEnd);
@@ -322,23 +314,12 @@ static void EV_GunshotDecalTrace(pmtrace_t* pTrace, char* decalName)
 	EV_DecalTrace(pTrace, decalName);
 }
 
-static void EV_BloodTrace(pmtrace_t* tr, Vector dir)
+static void EV_BloodTrace(Vector pos, Vector dir, int damage)
 {
-	if (violence_hblood->value <= 0.0f)
-	{
-		return;
-	}
-
-	int spray = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/bloodspray.spr");
-	int drip = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/blood.spr");
-
-	gEngfuncs.pEfxAPI->R_BloodSprite(tr->endpos, BLOOD_COLOR_RED, spray, drip, 4.0);
-
-	float damage = 4.0f;
 	float noise = damage / 100.0f;
 	int count = V_max(floorf(noise * 10), 1);
 	Vector traceDir;
-	pmtrace_t tr2;
+	pmtrace_t tr;
 
 	for (int i = 0; i < count; i++)
 	{
@@ -347,11 +328,11 @@ static void EV_BloodTrace(pmtrace_t* tr, Vector dir)
 		traceDir.y += gEngfuncs.pfnRandomFloat(-noise, noise);
 		traceDir.z += gEngfuncs.pfnRandomFloat(-noise, noise);
 
-		gEngfuncs.pEventAPI->EV_PlayerTrace(tr->endpos, tr->endpos + traceDir * -172, PM_WORLD_ONLY, -1, &tr2);
+		gEngfuncs.pEventAPI->EV_PlayerTrace(pos, pos + traceDir * -172, PM_WORLD_ONLY, -1, &tr);
 
-		if (tr2.fraction != 1.0f)
+		if (tr.fraction != 1.0f)
 		{
-			EV_DecalTrace(&tr2, EV_DecalName("{blood%i", 6));
+			EV_DecalTrace(&tr, EV_DecalName("{blood%i", 6));
 		}
 	}
 }
@@ -365,13 +346,7 @@ static void EV_DecalGunshot(pmtrace_t* pTrace, int iBulletType, Vector vecDir)
 		return;
 	}
 
-	int entity = gEngfuncs.pEventAPI->EV_IndexFromTrace(pTrace);
-
-	if (entity >= 1 && entity <= gEngfuncs.GetMaxClients())
-	{
-		EV_BloodTrace(pTrace, vecDir);
-	}
-	else if (pe->solid == SOLID_BSP)
+	if (pe->solid == SOLID_BSP)
 	{
 		EV_GunshotDecalTrace(pTrace, EV_DamageDecal(pe));
 	}
@@ -422,11 +397,35 @@ FireBullets
 Go to the trouble of combining multiple pellets into a single damage call.
 ================
 */
-static void EV_FireBullets(int idx, float* forward, float* right, float* up, int cShots, float* vecSrc, float* vecDirShooting, float flDistance, int iBulletType, int iTracerFreq, int* tracerCount, float flSpreadX, float flSpreadY, int iRandomSeed = -1)
+static void EV_FireBullets(
+	int idx,
+	float* forward,
+	float* right,
+	float* up,
+	int cShots,
+	float* vecSrc,
+	float* vecDirShooting,
+	float flDistance,
+	int iBulletType,
+	int iTracerFreq,
+	int* tracerCount,
+	float flSpreadX,
+	float flSpreadY,
+	int iRandomSeed = -1)
 {
 	int i;
 	pmtrace_t tr;
 	int iShot;
+
+	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(0, 1);
+
+	// Store off the old count
+	gEngfuncs.pEventAPI->EV_PushPMStates();
+
+	// Now add in all of the players.
+	gEngfuncs.pEventAPI->EV_SetSolidPlayers(idx - 1);
+
+	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
 
 	for (iShot = 1; iShot <= cShots; iShot++)
 	{
@@ -456,15 +455,6 @@ static void EV_FireBullets(int idx, float* forward, float* right, float* up, int
 			}
 		}
 
-		gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(0, 1);
-
-		// Store off the old count
-		gEngfuncs.pEventAPI->EV_PushPMStates();
-
-		// Now add in all of the players.
-		gEngfuncs.pEventAPI->EV_SetSolidPlayers(idx - 1);
-
-		gEngfuncs.pEventAPI->EV_SetTraceHull(2);
 		gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_NORMAL, -1, &tr);
 
 		EV_CheckTracer(idx, vecSrc, tr.endpos, forward, right, iBulletType, iTracerFreq, tracerCount);
@@ -480,9 +470,9 @@ static void EV_FireBullets(int idx, float* forward, float* right, float* up, int
 		}
 		// make bullet trails
 		EV_BubbleTrail(vecSrc, tr.endpos, (flDistance * tr.fraction) / 64.0);
-
-		gEngfuncs.pEventAPI->EV_PopPMStates();
 	}
+
+	gEngfuncs.pEventAPI->EV_PopPMStates();
 }
 
 //======================
@@ -1821,5 +1811,63 @@ void EV_Teleport(event_args_t* args)
 {
 	gEngfuncs.pEventAPI->EV_PlaySound(0, args->origin, CHAN_STATIC, "misc/r_tele1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
 	gEngfuncs.pEfxAPI->R_TeleportSplash(args->origin);
+}
+
+int MSG_Blood(const char* name, int size, void* buf)
+{
+	BEGIN_READ(buf, size);
+
+	const auto spray = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/bloodspray.spr");
+	const auto drip = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/blood.spr");
+
+	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(0, 0);
+	gEngfuncs.pEventAPI->EV_PushPMStates();
+	gEngfuncs.pEventAPI->EV_SetSolidPlayers(0);
+	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+
+	Vector traceDir;
+	traceDir.x = READ_FLOAT();
+	traceDir.y = READ_FLOAT();
+	traceDir.z = READ_FLOAT();
+
+	const auto traceHits = READ_BYTE() + 1;
+	const auto traceFlags = READ_BYTE();
+
+	for (auto i = 0; i < traceHits; i++)
+	{
+		Vector traceEndPos;
+		traceEndPos.x = READ_COORD();
+		traceEndPos.y = READ_COORD();
+		traceEndPos.z = READ_COORD();
+
+		if (violence_hblood->value <= 0.0f)
+		{
+			continue;
+		}
+
+		if ((traceFlags & (1 << i)) != 0)
+		{
+			gEngfuncs.pEfxAPI->R_BloodStream(
+				traceEndPos,
+				-traceDir,
+				70,
+				100);
+		}
+		else
+		{
+			gEngfuncs.pEfxAPI->R_BloodSprite(
+				traceEndPos,
+				BLOOD_COLOR_RED,
+				spray,
+				drip,
+				8);
+		}
+
+		EV_BloodTrace(traceEndPos, traceDir, 4);
+	}
+
+	gEngfuncs.pEventAPI->EV_PopPMStates();
+
+	return true;
 }
 

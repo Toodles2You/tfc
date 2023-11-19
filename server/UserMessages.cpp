@@ -67,4 +67,5 @@ void LinkUserMessages()
 	gmsgWeapons = REG_USER_MSG("Weapons", 8);
 
 	gmsgHitFeedback = REG_USER_MSG("HitFeedback", 4);
+	gmsgBlood = REG_USER_MSG("Blood", -1);
 }

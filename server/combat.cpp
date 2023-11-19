@@ -27,6 +27,8 @@
 #include "animation.h"
 #include "weapons.h"
 #include "func_break.h"
+#include "player.h"
+#include "UserMessages.h"
 
 extern Vector VecBModelOrigin(entvars_t* pevBModel);
 
@@ -435,6 +437,10 @@ void CBaseEntity::FireBulletsPlayer(unsigned int cShots, Vector vecSrc, Vector v
 	ClearMultiDamage();
 	gMultiDamage.type = DMG_BULLET | DMG_AIMED | DMG_NEVERGIB;
 
+	auto traceHits = 0;
+	auto traceFlags = 0;
+	auto traceEndPos = static_cast<Vector *>(alloca(cShots * sizeof(Vector)));
+
 	for (unsigned int iShot = 1; iShot <= cShots; iShot++)
 	{
 		//Use player's random seed.
@@ -456,48 +462,59 @@ void CBaseEntity::FireBulletsPlayer(unsigned int cShots, Vector vecSrc, Vector v
 		{
 			CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
 
-			if (0 != iDamage)
+			switch (iBulletType)
 			{
-				pEntity->TraceAttack(pevAttacker, iDamage, vecDir, &tr, DMG_BULLET | DMG_AIMED | ((iDamage > 16) ? DMG_ALWAYSGIB : DMG_NEVERGIB));
+			default:
+			case BULLET_PLAYER_9MM:
+				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmg9MM, vecDir, &tr, DMG_BULLET | DMG_AIMED);
+				break;
 
-				TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
-				DecalGunshot(&tr, iBulletType);
+			case BULLET_PLAYER_MP5:
+				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgMP5, vecDir, &tr, DMG_BULLET | DMG_AIMED);
+				break;
+
+			case BULLET_PLAYER_BUCKSHOT:
+				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgBuckshot, vecDir, &tr, DMG_BULLET | DMG_AIMED);
+				break;
+
+			case BULLET_PLAYER_357:
+				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmg357, vecDir, &tr, DMG_BULLET | DMG_AIMED);
+				break;
+
+			case BULLET_NONE:
+				pEntity->TraceAttack(pevAttacker, 50, vecDir, &tr, DMG_CLUB | DMG_AIMED);
+				break;
 			}
-			else
-				switch (iBulletType)
+
+			if ((pEntity->pev->flags & FL_CLIENT) != 0)
+			{
+				traceEndPos[traceHits] = tr.vecEndPos;
+				traceHits++;
+				if (((CBasePlayer *)pEntity)->m_LastHitGroup == HITGROUP_HEAD)
 				{
-				default:
-				case BULLET_PLAYER_9MM:
-					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmg9MM, vecDir, &tr, DMG_BULLET | DMG_AIMED);
-					break;
-
-				case BULLET_PLAYER_MP5:
-					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgMP5, vecDir, &tr, DMG_BULLET | DMG_AIMED);
-					break;
-
-				case BULLET_PLAYER_BUCKSHOT:
-					// make distance based!
-					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgBuckshot, vecDir, &tr, DMG_BULLET | DMG_AIMED);
-					break;
-
-				case BULLET_PLAYER_357:
-					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmg357, vecDir, &tr, DMG_BULLET | DMG_AIMED);
-					break;
-
-				case BULLET_NONE: // FIX
-					pEntity->TraceAttack(pevAttacker, 50, vecDir, &tr, DMG_CLUB | DMG_AIMED);
-					TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
-					// only decal glass
-					if (!FNullEnt(tr.pHit) && VARS(tr.pHit)->rendermode != 0)
-					{
-						UTIL_DecalTrace(&tr, DECAL_GLASSBREAK1 + RANDOM_LONG(0, 2));
-					}
-
-					break;
+					traceFlags |= 1 << (iShot - 1);
 				}
+			}
 		}
 	}
 	ApplyMultiDamage(pev, pevAttacker);
+
+	if (traceHits != 0)
+	{
+		MESSAGE_BEGIN(MSG_PVS, gmsgBlood, pevAttacker->origin);
+		WRITE_FLOAT(vecDirShooting.x);
+		WRITE_FLOAT(vecDirShooting.y);
+		WRITE_FLOAT(vecDirShooting.z);
+		WRITE_BYTE(traceHits - 1);
+		WRITE_BYTE(traceFlags);
+		for (auto i = 0; i < traceHits; i++)
+		{
+			WRITE_COORD(traceEndPos[i].x);
+			WRITE_COORD(traceEndPos[i].y);
+			WRITE_COORD(traceEndPos[i].z);
+		}
+		MESSAGE_END();
+	}
 }
 
 void CBaseEntity::TraceBleed(float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
