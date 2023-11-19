@@ -127,17 +127,11 @@ void CPython::PrimaryAttack()
 
 	m_iClip--;
 
-
-	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
-
-	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecAiming = m_pPlayer->GetAimVector();
-
-	m_pPlayer->FireBulletsPlayer(1, vecSrc, vecAiming, VECTOR_CONE_1DEGREES, 8192, BULLET_PLAYER_357, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed);
+#ifndef CLIENT_DLL
+	m_pPlayer->FireBullets(gSkillData.plrDmg357, Vector2D(1, 1));
+#endif
 
 	m_pPlayer->PlaybackEvent(m_usFirePython, 0.0, 0.0, m_pPlayer->random_seed);
 

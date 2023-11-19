@@ -328,6 +328,8 @@ public:
 	Activity m_IdealActivity; // monster should switch to this activity
 
 	int m_LastHitGroup; // the last body region that took damage
+
+	void FireBullets(const float damage, const Vector2D& spread, const unsigned int count = 1, const float distance = 8192);
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

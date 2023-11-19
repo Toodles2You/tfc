@@ -131,23 +131,18 @@ void CMP5::PrimaryAttack()
 
 	m_iClip -= shots;
 
-
-	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecAiming = m_pPlayer->GetAimVector();
-
+#ifndef CLIENT_DLL
 	if (UTIL_IsDeathmatch())
 	{
-		// optimized multiplayer. Widened to make it easier to hit a moving player
-		m_pPlayer->FireBulletsPlayer(shots, vecSrc, vecAiming, VECTOR_CONE_6DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed);
+		m_pPlayer->FireBullets(gSkillData.plrDmgMP5, Vector2D(6, 6), shots);
 	}
 	else
 	{
-		// single player spread
-		m_pPlayer->FireBulletsPlayer(shots, vecSrc, vecAiming, VECTOR_CONE_3DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed);
+		m_pPlayer->FireBullets(gSkillData.plrDmgMP5, Vector2D(3, 3), shots);
 	}
+#endif
 
 	m_pPlayer->PlaybackEvent(m_usMP5, 0.0, 0.0, m_pPlayer->random_seed, shots);
 

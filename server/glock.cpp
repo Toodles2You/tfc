@@ -78,12 +78,12 @@ bool CGlock::Holster()
 
 void CGlock::SecondaryAttack()
 {
-	GlockFire(0.1, 200, false);
+	GlockFire(9, 200, false);
 }
 
 void CGlock::PrimaryAttack()
 {
-	GlockFire(0.01, 300, true);
+	GlockFire(1, 300, true);
 }
 
 void CGlock::GlockFire(float flSpread, int fCycleTime, bool fUseAutoAim)
@@ -112,13 +112,11 @@ void CGlock::GlockFire(float flSpread, int fCycleTime, bool fUseAutoAim)
 
 	m_iClip -= shots;
 
-	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecAiming = m_pPlayer->GetAimVector();
-
-	m_pPlayer->FireBulletsPlayer(shots, vecSrc, vecAiming, Vector(flSpread, flSpread, flSpread), 8192, BULLET_PLAYER_9MM, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed);
+#ifndef CLIENT_DLL
+	m_pPlayer->FireBullets(gSkillData.plrDmg9MM, Vector2D(flSpread, flSpread));
+#endif
 
 	m_pPlayer->PlaybackEvent(m_usFireGlock, flSpread, flSpread, m_pPlayer->random_seed, shots, m_iClip == 0, fUseAutoAim);
 

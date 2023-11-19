@@ -245,12 +245,16 @@ void CBasePlayerWeapon::PlayWeaponSound(int iChannel, const char* szSound, float
 
 /*
 =====================
-CBaseEntity::FireBulletsPlayer
+CBasePlayer::FireBullets
 
 Only produces random numbers to match the server ones.
 =====================
 */
-void CBaseEntity::FireBulletsPlayer(unsigned int cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t* pevAttacker, int shared_rand)
+void CBasePlayer::FireBullets(
+	const float damage,
+	const Vector2D& spread,
+	const unsigned int count,
+	const float distance)
 {
 }
 

@@ -352,40 +352,33 @@ static void EV_DecalGunshot(pmtrace_t* pTrace, int iBulletType, Vector vecDir)
 	}
 }
 
-static void EV_CheckTracer(int idx, float* vecSrc, float* end, float* forward, float* right, int iBulletType, int iTracerFreq, int* tracerCount)
+static void EV_CheckTracer(
+	int entindex,
+	Vector& start,
+	Vector& end,
+	const Vector& forward,
+	const Vector& right,
+	float distance,
+	int frequency)
 {
-	int i;
-	bool player = idx >= 1 && idx <= gEngfuncs.GetMaxClients();
+	Vector muzzle;
 
-	if (iTracerFreq != 0 && ((*tracerCount)++ % iTracerFreq) == 0)
+#if 0
+	if (EV_IsLocal(entindex) && CL_IsThirdPerson() == 0)
 	{
-		Vector vecTracerSrc;
+		muzzle = gEngfuncs.GetViewModel()->attachment[0];
+	}
+	else
+#endif
+	{
+		muzzle = start + Vector(0, 0, -4) + right * 2 + forward * 16;
+	}
 
-		if (player)
-		{
-			Vector offset(0, 0, -4);
+	EV_BubbleTrail(muzzle, end, distance / 64.0F);
 
-			// adjust tracer position for player
-			for (i = 0; i < 3; i++)
-			{
-				vecTracerSrc[i] = vecSrc[i] + offset[i] + right[i] * 2 + forward[i] * 16;
-			}
-		}
-		else
-		{
-			VectorCopy(vecSrc, vecTracerSrc);
-		}
-
-		switch (iBulletType)
-		{
-		case BULLET_PLAYER_MP5:
-		case BULLET_MONSTER_MP5:
-		case BULLET_MONSTER_9MM:
-		case BULLET_MONSTER_12MM:
-		default:
-			EV_CreateTracer(vecTracerSrc, end);
-			break;
-		}
+	if (frequency != 0 && ((tracerCount[entindex - 1])++ % frequency) == 0)
+	{
+		EV_CreateTracer(muzzle, end);
 	}
 }
 
@@ -398,78 +391,64 @@ Go to the trouble of combining multiple pellets into a single damage call.
 ================
 */
 static void EV_FireBullets(
-	int idx,
-	float* forward,
-	float* right,
-	float* up,
-	int cShots,
-	float* vecSrc,
-	float* vecDirShooting,
-	float flDistance,
-	int iBulletType,
-	int iTracerFreq,
-	int* tracerCount,
-	float flSpreadX,
-	float flSpreadY,
-	int iRandomSeed = -1)
+	event_args_t* args,
+	const int random_seed,
+	const Vector2D& spread,
+	const unsigned int count = 1,
+	const float distance = 8192,
+	const bool playTextureSounds = true,
+	const int tracerFrequency = 0)
 {
-	int i;
-	pmtrace_t tr;
-	int iShot;
+	Vector gun;
+	Vector aim = args->angles;
 
+	EV_GetGunPosition(args, gun, args->origin);
+	
 	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(0, 1);
-
-	// Store off the old count
 	gEngfuncs.pEventAPI->EV_PushPMStates();
-
-	// Now add in all of the players.
-	gEngfuncs.pEventAPI->EV_SetSolidPlayers(idx - 1);
-
+	gEngfuncs.pEventAPI->EV_SetSolidPlayers(args->entindex - 1);
 	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
 
-	for (iShot = 1; iShot <= cShots; iShot++)
+	for (auto i = 0; i < count; i++)
 	{
-		Vector vecDir, vecEnd;
-
-		float x, y, z;
-		//We randomize for the Shotgun.
-		if (iRandomSeed != -1)
+		const Vector2D spreadScale
 		{
-			x = UTIL_SharedRandomFloat(iRandomSeed + iShot, -0.5, 0.5) + UTIL_SharedRandomFloat(iRandomSeed + (1 + iShot), -0.5, 0.5);
-			y = UTIL_SharedRandomFloat(iRandomSeed + (2 + iShot), -0.5, 0.5) + UTIL_SharedRandomFloat(iRandomSeed + (3 + iShot), -0.5, 0.5);
-			z = x * x + y * y;
+			UTIL_SharedRandomFloat(random_seed + i * 4, -0.5, 0.5)
+				+ UTIL_SharedRandomFloat(random_seed + 1 + i * 4, -0.5, 0.5),
+			UTIL_SharedRandomFloat(random_seed + 2 + i * 4, -0.5, 0.5)
+				+ UTIL_SharedRandomFloat(random_seed + 3 + i * 4, -0.5, 0.5)
+		};
 
-			for (i = 0; i < 3; i++)
-			{
-				vecDir[i] = vecDirShooting[i] + x * flSpreadX * right[i] + y * flSpreadY * up[i];
-				vecEnd[i] = vecSrc[i] + flDistance * vecDir[i];
-			}
-		} //But other guns already have their spread randomized in the synched spread.
-		else
+		const Vector angles
 		{
+			aim.x + spread.y * spreadScale.x,
+			aim.y + spread.x * spreadScale.y,
+			aim.z,
+		};
 
-			for (i = 0; i < 3; i++)
+		Vector forward, right, up;
+		AngleVectors(angles, forward, right, up);
+
+		pmtrace_t tr;
+		gEngfuncs.pEventAPI->EV_PlayerTrace(gun, gun + forward * distance, PM_NORMAL, -1, &tr);
+
+		EV_CheckTracer(
+			args->entindex,
+			gun,
+			tr.endpos,
+			forward,
+			right,
+			distance * tr.fraction,
+			tracerFrequency);
+		
+		if (tr.fraction != 1.0F)
+		{
+			if (playTextureSounds)
 			{
-				vecDir[i] = vecDirShooting[i] + flSpreadX * right[i] + flSpreadY * up[i];
-				vecEnd[i] = vecSrc[i] + flDistance * vecDir[i];
+				EV_PlayTextureSound(args->entindex, &tr, gun, tr.endpos, BULLET_PLAYER_9MM);
 			}
+			EV_DecalGunshot(&tr, BULLET_PLAYER_9MM, forward);
 		}
-
-		gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_NORMAL, -1, &tr);
-
-		EV_CheckTracer(idx, vecSrc, tr.endpos, forward, right, iBulletType, iTracerFreq, tracerCount);
-
-		// do damage, paint decals
-		if (tr.fraction != 1.0)
-		{
-			if (iBulletType != BULLET_PLAYER_MP5 && iBulletType != BULLET_PLAYER_BUCKSHOT)
-			{
-				EV_PlayTextureSound(idx, &tr, vecSrc, vecEnd, iBulletType);
-			}
-			EV_DecalGunshot(&tr, iBulletType, vecDir);
-		}
-		// make bullet trails
-		EV_BubbleTrail(vecSrc, tr.endpos, (flDistance * tr.fraction) / 64.0);
 	}
 
 	gEngfuncs.pEventAPI->EV_PopPMStates();
@@ -489,7 +468,6 @@ void EV_FireGlock(event_args_t* args)
 	Vector ShellVelocity;
 	Vector ShellOrigin;
 	int shell;
-	Vector vecSrc, vecAiming;
 	Vector up, right, forward;
 
 	idx = args->entindex;
@@ -511,16 +489,11 @@ void EV_FireGlock(event_args_t* args)
 	}
 
 	EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20, -12, 4);
-
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[YAW], shell, TE_BOUNCE_SHELL);
 
 	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/pl_gun3.wav", gEngfuncs.pfnRandomFloat(0.92, 1.0), ATTN_NORM, 0, 98 + gEngfuncs.pfnRandomLong(0, 3));
 
-	EV_GetGunPosition(args, vecSrc, origin);
-
-	VectorCopy(forward, vecAiming);
-
-	EV_FireBullets(idx, forward, right, up, args->iparam2, vecSrc, vecAiming, 8192, BULLET_PLAYER_9MM, 0, &tracerCount[idx - 1], args->fparam1, args->fparam2, args->iparam1);
+	EV_FireBullets(args, args->iparam1, Vector2D(args->fparam1, args->fparam2), args->iparam2);
 }
 //======================
 //	   GLOCK END
@@ -536,11 +509,9 @@ void EV_FireShotGunDouble(event_args_t* args)
 	Vector angles;
 	Vector velocity;
 
-	int j;
 	Vector ShellVelocity;
 	Vector ShellOrigin;
 	int shell;
-	Vector vecSrc, vecAiming;
 	Vector up, right, forward;
 
 	idx = args->entindex;
@@ -560,25 +531,21 @@ void EV_FireShotGunDouble(event_args_t* args)
 		V_PunchAxis(0, -10.0);
 	}
 
-	for (j = 0; j < 2; j++)
-	{
-		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 32, -12, 6);
+	EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 32, -12, 6);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[YAW], shell, TE_BOUNCE_SHOTSHELL);
 
-		EV_EjectBrass(ShellOrigin, ShellVelocity, angles[YAW], shell, TE_BOUNCE_SHOTSHELL);
-	}
+	EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 32, -12, 6);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[YAW], shell, TE_BOUNCE_SHOTSHELL);
 
 	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/dbarrel1.wav", gEngfuncs.pfnRandomFloat(0.98, 1.0), ATTN_NORM, 0, 85 + gEngfuncs.pfnRandomLong(0, 0x1f));
 
-	EV_GetGunPosition(args, vecSrc, origin);
-	VectorCopy(forward, vecAiming);
-
 	if (UTIL_IsDeathmatch())
 	{
-		EV_FireBullets(idx, forward, right, up, 8, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.17365, 0.04362, args->iparam1);
+		EV_FireBullets(args, args->iparam1, Vector2D(20, 5), 8, 2048, false);
 	}
 	else
 	{
-		EV_FireBullets(idx, forward, right, up, 12, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.08716, 0.08716, args->iparam1);
+		EV_FireBullets(args, args->iparam1, Vector2D(10, 10), 12, 2048, false);
 	}
 }
 
@@ -592,7 +559,6 @@ void EV_FireShotGunSingle(event_args_t* args)
 	Vector ShellVelocity;
 	Vector ShellOrigin;
 	int shell;
-	Vector vecSrc, vecAiming;
 	Vector up, right, forward;
 
 	idx = args->entindex;
@@ -614,21 +580,17 @@ void EV_FireShotGunSingle(event_args_t* args)
 	}
 
 	EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 32, -12, 6);
-
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[YAW], shell, TE_BOUNCE_SHOTSHELL);
 
 	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/sbarrel1.wav", gEngfuncs.pfnRandomFloat(0.95, 1.0), ATTN_NORM, 0, 93 + gEngfuncs.pfnRandomLong(0, 0x1f));
 
-	EV_GetGunPosition(args, vecSrc, origin);
-	VectorCopy(forward, vecAiming);
-
 	if (UTIL_IsDeathmatch())
 	{
-		EV_FireBullets(idx, forward, right, up, 4, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.08716, 0.04362, args->iparam1);
+		EV_FireBullets(args, args->iparam1, Vector2D(10, 5), 4, 2048, false);
 	}
 	else
 	{
-		EV_FireBullets(idx, forward, right, up, 6, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx - 1], 0.08716, 0.08716, args->iparam1);
+		EV_FireBullets(args, args->iparam1, Vector2D(10, 10), 6, 2048, false);
 	}
 }
 //======================
@@ -648,7 +610,6 @@ void EV_FireMP5(event_args_t* args)
 	Vector ShellVelocity;
 	Vector ShellOrigin;
 	int shell;
-	Vector vecSrc, vecAiming;
 	Vector up, right, forward;
 
 	idx = args->entindex;
@@ -670,7 +631,6 @@ void EV_FireMP5(event_args_t* args)
 	}
 
 	EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20, -12, 4);
-
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[YAW], shell, TE_BOUNCE_SHELL);
 
 	switch (gEngfuncs.pfnRandomLong(0, 1))
@@ -683,16 +643,13 @@ void EV_FireMP5(event_args_t* args)
 		break;
 	}
 
-	EV_GetGunPosition(args, vecSrc, origin);
-	VectorCopy(forward, vecAiming);
-
 	if (UTIL_IsDeathmatch())
 	{
-		EV_FireBullets(idx, forward, right, up, args->iparam2, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 2, &tracerCount[idx - 1], 0.05234, 0.05234, args->iparam1);
+		EV_FireBullets(args, args->iparam1, Vector2D(6, 6), args->iparam2, 8192, false, 2);
 	}
 	else
 	{
-		EV_FireBullets(idx, forward, right, up, args->iparam2, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 2, &tracerCount[idx - 1], 0.02618, 0.02618, args->iparam1);
+		EV_FireBullets(args, args->iparam1, Vector2D(3, 3), args->iparam2, 8192, false, 2);
 	}
 }
 
@@ -737,7 +694,6 @@ void EV_FirePython(event_args_t* args)
 	Vector angles;
 	Vector velocity;
 
-	Vector vecSrc, vecAiming;
 	Vector up, right, forward;
 
 	idx = args->entindex;
@@ -768,11 +724,7 @@ void EV_FirePython(event_args_t* args)
 		break;
 	}
 
-	EV_GetGunPosition(args, vecSrc, origin);
-
-	VectorCopy(forward, vecAiming);
-
-	EV_FireBullets(idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_357, 0, &tracerCount[idx - 1], 0.00873, 0.00873, args->iparam1);
+	EV_FireBullets(args, args->iparam1, Vector2D(1, 1));
 }
 //======================
 //	    PYTHON END

@@ -21,10 +21,6 @@
 #include "gamerules.h"
 #include "UserMessages.h"
 
-// special deathmatch shotgun spreads
-#define VECTOR_CONE_DM_SHOTGUN Vector(0.08716, 0.04362, 0.00)		// 10 degrees by 5 degrees
-#define VECTOR_CONE_DM_DOUBLESHOTGUN Vector(0.17365, 0.04362, 0.00) // 20 degrees by 5 degrees
-
 LINK_ENTITY_TO_CLASS(weapon_shotgun, CShotgun);
 
 void CShotgun::Spawn()
@@ -110,19 +106,18 @@ void CShotgun::PrimaryAttack()
 
 	m_iClip--;
 
+	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecAiming = m_pPlayer->GetAimVector();
-
+#ifndef CLIENT_DLL
 	if (UTIL_IsDeathmatch())
 	{
-		m_pPlayer->FireBulletsPlayer(4, vecSrc, vecAiming, VECTOR_CONE_DM_SHOTGUN, 2048, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed);
+		m_pPlayer->FireBullets(gSkillData.plrDmgBuckshot, Vector2D(10, 5), 4, 2048);
 	}
 	else
 	{
-		// regular old, untouched spread.
-		m_pPlayer->FireBulletsPlayer(6, vecSrc, vecAiming, VECTOR_CONE_10DEGREES, 2048, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed);
+		m_pPlayer->FireBullets(gSkillData.plrDmgBuckshot, Vector2D(10, 10), 6, 2048);
 	}
+#endif
 
 	m_pPlayer->PlaybackEvent(m_usSingleFire, 0.0, 0.0, m_pPlayer->random_seed);
 
@@ -157,23 +152,18 @@ void CShotgun::SecondaryAttack()
 
 	m_iClip -= 2;
 
-
-	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecAiming = m_pPlayer->GetAimVector();
-
+#ifndef CLIENT_DLL
 	if (UTIL_IsDeathmatch())
 	{
-		// tuned for deathmatch
-		m_pPlayer->FireBulletsPlayer(8, vecSrc, vecAiming, VECTOR_CONE_DM_DOUBLESHOTGUN, 2048, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed);
+		m_pPlayer->FireBullets(gSkillData.plrDmgBuckshot, Vector2D(20, 5), 8, 2048);
 	}
 	else
 	{
-		// untouched default single player
-		m_pPlayer->FireBulletsPlayer(12, vecSrc, vecAiming, VECTOR_CONE_10DEGREES, 2048, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed);
+		m_pPlayer->FireBullets(gSkillData.plrDmgBuckshot, Vector2D(10, 10), 12, 2048);
 	}
+#endif
 
 	m_pPlayer->PlaybackEvent(m_usDoubleFire, 0.0, 0.0, m_pPlayer->random_seed);
 

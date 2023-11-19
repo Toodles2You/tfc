@@ -689,13 +689,10 @@ void CFuncTank::Fire(const Vector& barrelEnd, const Vector& forward, entvars_t* 
 void CFuncTank::TankTrace(const Vector& vecStart, const Vector& vecForward, const Vector& vecSpread, TraceResult& tr)
 {
 	// get circular gaussian spread
-	float x, y, z;
-	do
-	{
-		x = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
-		y = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
-		z = x * x + y * y;
-	} while (z > 1);
+	float x, y;
+	x = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
+	y = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
+
 	Vector vecDir = vecForward +
 					x * vecSpread.x * gpGlobals->v_right +
 					y * vecSpread.y * gpGlobals->v_up;
@@ -743,23 +740,17 @@ void CFuncTankGun::Fire(const Vector& barrelEnd, const Vector& forward, entvars_
 		{
 			for (i = 0; i < bulletCount; i++)
 			{
-				switch (m_bulletType)
+				TraceResult tr;
+				TankTrace(barrelEnd, forward, gTankSpread[m_spread], tr);
+				if (tr.flFraction != 1.0F)
 				{
-				case TANK_BULLET_9MM:
-					FireBullets(1, barrelEnd, forward, gTankSpread[m_spread], 4096, BULLET_MONSTER_9MM, 1, m_iBulletDamage, pevAttacker);
-					break;
-
-				case TANK_BULLET_MP5:
-					FireBullets(1, barrelEnd, forward, gTankSpread[m_spread], 4096, BULLET_MONSTER_MP5, 1, m_iBulletDamage, pevAttacker);
-					break;
-
-				case TANK_BULLET_12MM:
-					FireBullets(1, barrelEnd, forward, gTankSpread[m_spread], 4096, BULLET_MONSTER_12MM, 1, m_iBulletDamage, pevAttacker);
-					break;
-
-				default:
-				case TANK_BULLET_NONE:
-					break;
+					CBaseEntity::Instance(tr.pHit)->TraceAttack(
+						pevAttacker,
+						m_iBulletDamage,
+						forward,
+						&tr,
+						DMG_BULLET
+					);
 				}
 			}
 			CFuncTank::Fire(barrelEnd, forward, pevAttacker);
