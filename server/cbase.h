@@ -200,8 +200,6 @@ public:
 	virtual const char* TeamID() { return ""; }
 	virtual int TeamNumber() { return 0; }
 
-
-	//	virtual void	SetActivator( CBaseEntity *pActivator ) {}
 	virtual CBaseEntity* GetNextTarget();
 
 	// fundamental callbacks
@@ -528,13 +526,10 @@ class CBaseButton : public CBaseToggle
 public:
 	void Spawn() override;
 	void Precache() override;
-	void RotSpawn();
 	bool KeyValue(KeyValueData* pkvd) override;
 
 	void ButtonActivate();
-	void SparkSoundCache();
 
-	void EXPORT ButtonShot();
 	void EXPORT ButtonTouch(CBaseEntity* pOther);
 	void EXPORT ButtonSpark();
 	void EXPORT TriggerAndWait();

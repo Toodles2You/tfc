@@ -155,8 +155,8 @@ bool CBasePlayerWeapon::DefaultDeploy(const char* szViewModel, const char* szWea
 
 	g_irunninggausspred = false;
 	m_pPlayer->m_iNextAttack = 500;
-	m_iNextPrimaryAttack = V_max(m_iNextPrimaryAttack, 500);
-	m_iNextSecondaryAttack = V_max(m_iNextSecondaryAttack, 500);
+	m_iNextPrimaryAttack = std::max(m_iNextPrimaryAttack, 500);
+	m_iNextSecondaryAttack = std::max(m_iNextSecondaryAttack, 500);
 	m_iTimeWeaponIdle = 1000;
 	m_bPlayEmptySound = true;
 	return true;
@@ -171,8 +171,8 @@ bool CBasePlayerWeapon::DefaultHolster(int iAnim, int body)
 		SendWeaponAnim(iAnim, body);
 
 	m_pPlayer->m_iNextAttack = 500;
-	m_iNextPrimaryAttack = V_max(m_iNextPrimaryAttack, 500);
-	m_iNextSecondaryAttack = V_max(m_iNextSecondaryAttack, 500);
+	m_iNextPrimaryAttack = std::max(m_iNextPrimaryAttack, 500);
+	m_iNextSecondaryAttack = std::max(m_iNextSecondaryAttack, 500);
 	m_iTimeWeaponIdle = 1000;
 	m_fInReload = false; // Cancel any reload in progress.
 	m_fInSpecialReload = 0;
@@ -793,7 +793,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 	float len = VectorNormalize(to->client.punchangle);
 	len -= (10.0 + len * 0.5) * cmd->msec / 1000.0;
-	len = V_max(len, 0.0);
+	len = std::max(len, 0.0F);
 	VectorScale(to->client.punchangle, len, to->client.punchangle);
 
 	static bool bAmmoUpdated[MAX_AMMO_SLOTS];

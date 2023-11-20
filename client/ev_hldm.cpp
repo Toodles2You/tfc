@@ -317,7 +317,7 @@ static void EV_GunshotDecalTrace(pmtrace_t* pTrace, char* decalName)
 static void EV_BloodTrace(Vector pos, Vector dir, int damage)
 {
 	float noise = damage / 100.0f;
-	int count = V_max(floorf(noise * 10), 1);
+	int count = std::max(floorf(noise * 10), 1.0F);
 	Vector traceDir;
 	pmtrace_t tr;
 

@@ -60,7 +60,7 @@ bool CHudAmmoSecondary::Draw(float flTime)
 
 	// draw secondary ammo icons above normal ammo readout
 	int a, x, y, AmmoWidth;
-	a = (int)V_max(MIN_ALPHA, m_fFade);
+	a = (int)std::max(MIN_ALPHA, m_fFade);
 	if (m_fFade > 0)
 		m_fFade -= (gHUD.m_flTimeDelta * 20); // slowly lower alpha to fade out icons
 
@@ -138,7 +138,7 @@ bool CHudAmmoSecondary::MsgFunc_SecAmmoVal(const char* pszName, int iSize, void*
 	int count = 0;
 	for (int i = 0; i < MAX_SEC_AMMO_VALUES; i++)
 	{
-		count += V_max(0, m_iAmmoAmounts[i]);
+		count += std::max(0, m_iAmmoAmounts[i]);
 	}
 
 	if (count == 0)

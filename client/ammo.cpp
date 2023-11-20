@@ -155,7 +155,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 		pWeapon->hInactive = SPR_Load(sz);
 		pWeapon->rcInactive = p->rc;
 
-		gHR.iHistoryGap = V_max(gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top);
+		gHR.iHistoryGap = std::max(gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top);
 	}
 	else
 		pWeapon->hInactive = 0;
@@ -177,7 +177,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 		pWeapon->hAmmo = SPR_Load(sz);
 		pWeapon->rcAmmo = p->rc;
 
-		gHR.iHistoryGap = V_max(gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top);
+		gHR.iHistoryGap = std::max(gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top);
 	}
 	else
 		pWeapon->hAmmo = 0;
@@ -189,7 +189,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 		pWeapon->hAmmo2 = SPR_Load(sz);
 		pWeapon->rcAmmo2 = p->rc;
 
-		gHR.iHistoryGap = V_max(gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top);
+		gHR.iHistoryGap = std::max(gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top);
 	}
 	else
 		pWeapon->hAmmo2 = 0;
@@ -324,7 +324,7 @@ bool CHudAmmo::VidInit()
 	giBucketWidth = gHUD.GetSpriteRect(m_HUD_bucket0).right - gHUD.GetSpriteRect(m_HUD_bucket0).left;
 	giBucketHeight = gHUD.GetSpriteRect(m_HUD_bucket0).bottom - gHUD.GetSpriteRect(m_HUD_bucket0).top;
 
-	gHR.iHistoryGap = V_max(gHR.iHistoryGap, gHUD.GetSpriteRect(m_HUD_bucket0).bottom - gHUD.GetSpriteRect(m_HUD_bucket0).top);
+	gHR.iHistoryGap = std::max(gHR.iHistoryGap, gHUD.GetSpriteRect(m_HUD_bucket0).bottom - gHUD.GetSpriteRect(m_HUD_bucket0).top);
 
 	// If we've already loaded weapons, let's get new sprites
 	gWR.LoadAllWeaponSprites();
@@ -975,7 +975,7 @@ bool CHudAmmo::Draw(float flTime)
 	if (!m_pWeapon)
 		return false;
 
-	a = (int)V_max(MIN_ALPHA, m_fFade);
+	a = (int)std::max(MIN_ALPHA, m_fFade);
 
 	if (m_fFade > 0)
 		m_fFade -= (gHUD.m_flTimeDelta * 20);

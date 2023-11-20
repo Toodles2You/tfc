@@ -113,7 +113,7 @@ bool CHudSayText::Draw(float flTime)
 		return true;
 
 	// make sure the scrolltime is within reasonable bounds,  to guard against the clock being reset
-	flScrollTime = V_min(flScrollTime, flTime + m_HUD_saytext_time->value);
+	flScrollTime = std::min(flScrollTime, flTime + m_HUD_saytext_time->value);
 
 	if (flScrollTime <= flTime)
 	{
@@ -161,7 +161,7 @@ bool CHudSayText::Draw(float flTime)
 			}
 
 			// draw the first x characters in the player color
-			const std::size_t playerNameEndIndex = V_min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH + 31);
+			const std::size_t playerNameEndIndex = std::min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH + 31);
 
 			//Cut off the actual text so we can print player name
 			line[playerNameEndIndex] = '\0';

@@ -28,8 +28,6 @@
 #include "doors.h"
 #include "gamerules.h"
 
-extern bool FEntIsVisible(entvars_t* pev, entvars_t* pevTarget);
-
 // Landmark class
 void CPointEntity::Spawn()
 {

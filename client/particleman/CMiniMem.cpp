@@ -13,8 +13,6 @@
 *
 ****/
 
-#undef clamp
-
 #include <algorithm>
 
 #include "hud.h"

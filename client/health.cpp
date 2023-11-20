@@ -271,25 +271,25 @@ void CHudHealth::CalcDamageDirection(Vector vecFrom)
 		if (side > 0)
 		{
 			if (side > 0.3)
-				m_fAttackFront = V_max(m_fAttackFront, side);
+				m_fAttackFront = std::max(m_fAttackFront, side);
 		}
 		else
 		{
 			float f = fabs(side);
 			if (f > 0.3)
-				m_fAttackRear = V_max(m_fAttackRear, f);
+				m_fAttackRear = std::max(m_fAttackRear, f);
 		}
 
 		if (front > 0)
 		{
 			if (front > 0.3)
-				m_fAttackRight = V_max(m_fAttackRight, front);
+				m_fAttackRight = std::max(m_fAttackRight, front);
 		}
 		else
 		{
 			float f = fabs(front);
 			if (f > 0.3)
-				m_fAttackLeft = V_max(m_fAttackLeft, f);
+				m_fAttackLeft = std::max(m_fAttackLeft, f);
 		}
 	}
 }
@@ -306,49 +306,49 @@ bool CHudHealth::DrawPain(float flTime)
 	// SPR_Draw top
 	if (m_fAttackFront > 0.4)
 	{
-		shade = 255 * V_max(m_fAttackFront, 0.5);
+		shade = 255 * std::max(m_fAttackFront, 0.5F);
 
 		x = gHUD.GetWidth() / 2 - SPR_Width(m_hSprite, 0) / 2;
 		y = gHUD.GetHeight() / 2 - SPR_Height(m_hSprite, 0) * 3;
 		gHUD.DrawHudSprite(m_hSprite, 0, NULL, x, y, CHud::COLOR_DEFAULT, shade);
-		m_fAttackFront = V_max(0, m_fAttackFront - fFade);
+		m_fAttackFront = std::max(m_fAttackFront - fFade, 0.0F);
 	}
 	else
 		m_fAttackFront = 0;
 
 	if (m_fAttackRight > 0.4)
 	{
-		shade = 255 * V_max(m_fAttackRight, 0.5);
+		shade = 255 * std::max(m_fAttackRight, 0.5F);
 
 		x = gHUD.GetWidth() / 2 + SPR_Width(m_hSprite, 1) * 2;
 		y = gHUD.GetHeight() / 2 - SPR_Height(m_hSprite, 1) / 2;
 		gHUD.DrawHudSprite(m_hSprite, 1, NULL, x, y, CHud::COLOR_DEFAULT, shade);
-		m_fAttackRight = V_max(0, m_fAttackRight - fFade);
+		m_fAttackRight = std::max(m_fAttackRight - fFade, 0.0F);
 	}
 	else
 		m_fAttackRight = 0;
 
 	if (m_fAttackRear > 0.4)
 	{
-		shade = 255 * V_max(m_fAttackRear, 0.5);
+		shade = 255 * std::max(m_fAttackRear, 0.5F);
 
 		x = gHUD.GetWidth() / 2 - SPR_Width(m_hSprite, 2) / 2;
 		y = gHUD.GetHeight() / 2 + SPR_Height(m_hSprite, 2) * 2;
 		gHUD.DrawHudSprite(m_hSprite, 2, NULL, x, y, CHud::COLOR_DEFAULT, shade);
-		m_fAttackRear = V_max(0, m_fAttackRear - fFade);
+		m_fAttackRear = std::max(m_fAttackRear - fFade, 0.0F);
 	}
 	else
 		m_fAttackRear = 0;
 
 	if (m_fAttackLeft > 0.4)
 	{
-		shade = 255 * V_max(m_fAttackLeft, 0.5);
+		shade = 255 * std::max(m_fAttackLeft, 0.5F);
 
 		x = gHUD.GetWidth() / 2 - SPR_Width(m_hSprite, 3) * 3;
 		y = gHUD.GetHeight() / 2 - SPR_Height(m_hSprite, 3) / 2;
 		gHUD.DrawHudSprite(m_hSprite, 3, NULL, x, y, CHud::COLOR_DEFAULT, shade);
 
-		m_fAttackLeft = V_max(0, m_fAttackLeft - fFade);
+		m_fAttackLeft = std::max(m_fAttackLeft - fFade, 0.0F);
 	}
 	else
 		m_fAttackLeft = 0;
@@ -385,7 +385,7 @@ bool CHudHealth::DrawDamage(float flTime)
 
 		if ((m_bitsDamage & giDmgFlags[i]) != 0)
 		{
-			pdmg->fExpire = V_min(flTime + DMG_IMAGE_LIFE, pdmg->fExpire);
+			pdmg->fExpire = std::min(flTime + DMG_IMAGE_LIFE, pdmg->fExpire);
 
 			if (pdmg->fExpire <= flTime // when the time has expired
 				&& a < 40)				// and the flash is at the low point of the cycle

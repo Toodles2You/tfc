@@ -300,7 +300,7 @@ void CShotgun::DecrementTimers(const int msec)
 {
 	if (m_flPumpTime > 0)
 	{
-		m_flPumpTime = V_max(m_flPumpTime - msec, -1);
+		m_flPumpTime = std::max(m_flPumpTime - msec, -1.0F);
 	}
 }
 

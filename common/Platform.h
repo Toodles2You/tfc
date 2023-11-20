@@ -73,9 +73,3 @@ using qboolean = int;
 #define DLLEXPORT __attribute__((visibility("default")))
 #define DLLHIDDEN __attribute__((visibility("hidden")))
 #endif //WIN32
-
-#define V_min(a, b) (((a) < (b)) ? (a) : (b))
-#define V_max(a, b) (((a) > (b)) ? (a) : (b))
-
-// Clamp macro is deprecated. Use std::clamp instead.
-// #define clamp(val, min, max) (((val) > (max)) ? (max) : (((val) < (min)) ? (min) : (val)))

@@ -237,7 +237,7 @@ void PM_InitTextureTypes()
 			continue;
 
 		// null-terminate name and save in sentences array
-		j = V_min(j, CBTEXTURENAMEMAX - 1 + i);
+		j = std::min(j, CBTEXTURENAMEMAX - 1 + i);
 		buffer[j] = 0;
 		strcpy(&(grgszTextureName[gcTextures++][0]), &(buffer[i]));
 	}
@@ -2097,7 +2097,7 @@ static void PM_Duck()
 		pmove->flDuckTime = 1000;
 	}
 
-	float time = V_max(0.0, (1.0 - pmove->flDuckTime / 1000));
+	float time = std::max(0.0, (1.0 - pmove->flDuckTime / 1000));
 	bool doneDucking = (pmove->onground == -1) || (pmove->flDuckTime / 1000 <= (1.0 - TIME_TO_DUCK));
 
 	if (doneDucking)
@@ -2840,7 +2840,7 @@ void PM_CheckParamters()
 	maxspeed = pmove->clientmaxspeed; //atof( pmove->PM_Info_ValueForKey( pmove->physinfo, "maxspd" ) );
 	if (maxspeed != 0.0)
 	{
-		pmove->maxspeed = V_min(maxspeed, pmove->maxspeed);
+		pmove->maxspeed = std::min(maxspeed, pmove->maxspeed);
 	}
 
 	if ((spd != 0.0) &&

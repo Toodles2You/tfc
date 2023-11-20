@@ -85,7 +85,7 @@ bool CBasePlayerWeapon::DefaultReload(int iClipSize, int iAnim, int fDelay, int 
 	if (m_pPlayer->m_rgAmmo[iAmmo1()] <= 0)
 		return false;
 
-	int j = V_min(iClipSize - m_iClip, m_pPlayer->m_rgAmmo[iAmmo1()]);
+	int j = std::min(iClipSize - m_iClip, m_pPlayer->m_rgAmmo[iAmmo1()]);
 
 	if (j == 0)
 		return false;
@@ -111,7 +111,7 @@ void CBasePlayerWeapon::ItemPostFrame()
 	if ((m_fInReload) && (m_pPlayer->m_iNextAttack <= 0))
 	{
 		// complete the reload.
-		int j = V_min(iMaxClip() - m_iClip, m_pPlayer->m_rgAmmo[iAmmo1()]);
+		int j = std::min(iMaxClip() - m_iClip, m_pPlayer->m_rgAmmo[iAmmo1()]);
 
 		// Add them to the clip
 		m_iClip += j;

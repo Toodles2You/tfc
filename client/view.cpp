@@ -145,8 +145,7 @@ float V_CalcBob(struct ref_params_s* pparams)
 
 	bob = sqrt(vel[0] * vel[0] + vel[1] * vel[1]) * cl_bob->value;
 	bob = bob * 0.3 + bob * 0.7 * sin(cycle);
-	bob = V_min(bob, 4);
-	bob = V_max(bob, -7);
+	bob = std::clamp(bob, -7.0F, 4.0F);
 	return bob;
 }
 
@@ -1509,7 +1508,7 @@ void V_DropPunchAngle(float frametime)
 		float len;
 		len = VectorNormalize(ev_punchangle);
 		len -= (10.0 + len * 0.5) * frametime;
-		len = V_max(len, 0.0);
+		len = std::max(len, 0.0F);
 		VectorScale(ev_punchangle, len, ev_punchangle);
 		return;
 	}

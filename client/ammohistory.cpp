@@ -113,10 +113,10 @@ bool HistoryResource::DrawAmmoHistory(float flTime)
 	{
 		if (HISTSLOT_EMPTY != rgAmmoHistory[i].type)
 		{
-			rgAmmoHistory[i].DisplayTime = V_min(rgAmmoHistory[i].DisplayTime, gHUD.m_flTime + HISTORY_DRAW_TIME);
+			rgAmmoHistory[i].DisplayTime = std::min(rgAmmoHistory[i].DisplayTime, gHUD.m_flTime + HISTORY_DRAW_TIME);
 
 			scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
-			scale = V_min(scale, 255);
+			scale = std::min(scale, 255.0F);
 
 			if (rgAmmoHistory[i].DisplayTime <= flTime)
 			{ // pic drawing time has expired

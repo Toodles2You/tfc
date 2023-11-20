@@ -1757,7 +1757,7 @@ void CBasePlayer::CheckTimeBasedDamage()
 				// after the player has been drowning and finally takes a breath
 				if (m_idrowndmg > m_idrownrestored)
 				{
-					int idif = V_min(m_idrowndmg - m_idrownrestored, 10);
+					int idif = std::min(m_idrowndmg - m_idrownrestored, 10);
 
 					TakeHealth(idif, DMG_GENERIC);
 					m_idrownrestored += idif;
@@ -2121,7 +2121,7 @@ pt_end:
 
 	float len = VectorNormalize(pev->punchangle);
 	len -= (10.0 + len * 0.5) * gpGlobals->frametime;
-	len = V_max(len, 0.0);
+	len = std::max(len, 0.0F);
 	VectorScale(pev->punchangle, len, pev->punchangle);
 
 	CBasePlayerWeapon* gun;
@@ -2135,11 +2135,11 @@ pt_end:
 			continue;
 		}
 
-		gun->m_iNextPrimaryAttack = V_max(gun->m_iNextPrimaryAttack - msec, -1100);
-		gun->m_iNextSecondaryAttack = V_max(gun->m_iNextSecondaryAttack - msec, -1);
-		gun->m_iTimeWeaponIdle = V_max(gun->m_iTimeWeaponIdle - msec, -1);
+		gun->m_iNextPrimaryAttack = std::max(gun->m_iNextPrimaryAttack - msec, -1100);
+		gun->m_iNextSecondaryAttack = std::max(gun->m_iNextSecondaryAttack - msec, -1);
+		gun->m_iTimeWeaponIdle = std::max(gun->m_iTimeWeaponIdle - msec, -1);
 
-		gun->pev->fuser1 = V_max(gun->pev->fuser1 - gpGlobals->frametime, -0.001);
+		gun->pev->fuser1 = std::max(gun->pev->fuser1 - gpGlobals->frametime, -0.001F);
 
 		gun->DecrementTimers(msec);
 	}
@@ -2870,7 +2870,7 @@ int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax)
 	if (iType <= AMMO_NONE || iType >= MAX_AMMO_SLOTS)
 		return -1;
 
-	int iAdd = V_min(iCount, iMax - m_rgAmmo[iType]);
+	int iAdd = std::min(iCount, iMax - m_rgAmmo[iType]);
 	if (iAdd < 1)
 		return iType;
 

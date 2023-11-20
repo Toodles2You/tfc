@@ -458,7 +458,7 @@ int CHud::GetHudNumberWidth(int number, int width, int flags)
 		totalDigits = 1;
 	}
 
-	totalDigits = V_max(totalDigits, width);
+	totalDigits = std::max(totalDigits, width);
 
 	return totalDigits * digitWidth;
 }

@@ -36,7 +36,6 @@
 #define SF_TRIGGER_HURT_CLIENTONLYTOUCH 32 // only clients may touch this trigger.
 
 extern void SetMovedir(entvars_t* pev);
-extern Vector VecBModelOrigin(entvars_t* pevBModel);
 
 class CFrictionModifier : public CBaseEntity
 {

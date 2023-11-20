@@ -658,7 +658,7 @@ bool CBasePlayerWeapon::AddPrimaryAmmo(CBasePlayerWeapon* origin, int iCount, in
 	else if (m_iClip == 0 && this == origin)
 	{
 		int i;
-		i = V_min(m_iClip + iCount, iMaxClip) - m_iClip;
+		i = std::min(m_iClip + iCount, iMaxClip) - m_iClip;
 		m_iClip += i;
 		iIdAmmo = m_pPlayer->GiveAmmo(iCount - i, iType, iMaxCarry);
 	}
@@ -751,8 +751,8 @@ bool CBasePlayerWeapon::DefaultDeploy(const char* szViewModel, const char* szWea
 	SendWeaponAnim(iAnim, body);
 
 	m_pPlayer->m_iNextAttack = 500;
-	m_iNextPrimaryAttack = V_max(m_iNextPrimaryAttack, 500);
-	m_iNextSecondaryAttack = V_max(m_iNextSecondaryAttack, 500);
+	m_iNextPrimaryAttack = std::max(m_iNextPrimaryAttack, 500);
+	m_iNextSecondaryAttack = std::max(m_iNextSecondaryAttack, 500);
 	m_iTimeWeaponIdle = 1000;
 	m_bPlayEmptySound = true;
 
@@ -768,8 +768,8 @@ bool CBasePlayerWeapon::DefaultHolster(int iAnim, int body)
 		SendWeaponAnim(iAnim, body);
 
 	m_pPlayer->m_iNextAttack = 500;
-	m_iNextPrimaryAttack = V_max(m_iNextPrimaryAttack, 500);
-	m_iNextSecondaryAttack = V_max(m_iNextSecondaryAttack, 500);
+	m_iNextPrimaryAttack = std::max(m_iNextPrimaryAttack, 500);
+	m_iNextSecondaryAttack = std::max(m_iNextSecondaryAttack, 500);
 	m_iTimeWeaponIdle = 1000;
 	m_fInReload = false; // Cancel any reload in progress.
 	m_fInSpecialReload = 0;
@@ -1155,7 +1155,7 @@ bool CWeaponBox::PackAmmo(int iType, int iCount)
 //=========================================================
 int CWeaponBox::GiveAmmo(int iCount, int iType, int iMax, int* pIndex /* = NULL*/)
 {
-	int iAdd = V_min(iCount, iMax - m_rgAmmo[iType]);
+	int iAdd = std::min(iCount, iMax - m_rgAmmo[iType]);
 	if (iCount == 0 || iAdd > 0)
 	{
 		m_rgAmmo[iType] += iAdd;

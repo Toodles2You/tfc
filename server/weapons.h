@@ -78,7 +78,7 @@ public:
 #define ITEM_SECURITY 3
 #define ITEM_BATTERY 4
 
-#define MAX_NORMAL_BATTERY 100
+#define MAX_NORMAL_BATTERY 100.0F
 
 
 // weapon weight factors (for auto-switching)   (-1 = noswitch)
