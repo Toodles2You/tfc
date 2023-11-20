@@ -876,7 +876,7 @@ bool FEnvSoundInRange(CEnvSound* pSound, entvars_t* pevTarget, float& flRange)
 	const Vector vecSpot2 = pevTarget->origin + pevTarget->view_ofs;
 	TraceResult tr;
 
-	UTIL_TraceLine(vecSpot1, vecSpot2, ignore_monsters, pSound->edict(), &tr);
+	UTIL_TraceLine(vecSpot1, vecSpot2, ignore_monsters, pSound, &tr);
 
 	// check if line of sight crosses water boundary, or is blocked
 

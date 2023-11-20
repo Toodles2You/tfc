@@ -25,7 +25,7 @@ class CAirtank : public CGrenade
 	void EXPORT TankThink();
 	void EXPORT TankTouch(CBaseEntity* pOther);
 	int BloodColor() override { return DONT_BLEED; }
-	void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType) override;
+	void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType) override;
 
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
@@ -48,7 +48,6 @@ IMPLEMENT_SAVERESTORE(CAirtank, CGrenade);
 bool CAirtank::Spawn()
 {
 	Precache();
-	// motor
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
@@ -75,9 +74,9 @@ void CAirtank::Precache()
 }
 
 
-void CAirtank::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
+void CAirtank::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType)
 {
-	pev->owner = ENT(pevAttacker);
+	pev->owner = attacker->edict();
 
 	Explode(pev->origin, Vector(0, 0, -1));
 }

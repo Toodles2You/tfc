@@ -719,7 +719,7 @@ void CLightning::StrikeThink()
 		if (pev->dmg > 0)
 		{
 			TraceResult tr;
-			UTIL_TraceLine(pStart->pev->origin, pEnd->pev->origin, dont_ignore_monsters, NULL, &tr);
+			UTIL_TraceLine(pStart->pev->origin, pEnd->pev->origin, dont_ignore_monsters, nullptr, &tr);
 			BeamDamageInstant(&tr, pev->dmg);
 		}
 	}
@@ -735,8 +735,8 @@ void CBeam::BeamDamage(TraceResult* ptr)
 		if (pHit)
 		{
 			ClearMultiDamage();
-			pHit->TraceAttack(pev, pev->dmg * (gpGlobals->time - pev->dmgtime), (ptr->vecEndPos - pev->origin).Normalize(), ptr, DMG_ENERGYBEAM);
-			ApplyMultiDamage(pev, pev);
+			pHit->TraceAttack(this, pev->dmg * (gpGlobals->time - pev->dmgtime), (ptr->vecEndPos - pev->origin).Normalize(), ptr, DMG_ENERGYBEAM);
+			ApplyMultiDamage(this, this);
 			if ((pev->spawnflags & SF_BEAM_DECALS) != 0)
 			{
 				if (pHit->IsBSPModel())
@@ -752,7 +752,7 @@ void CLightning::DamageThink()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
 	TraceResult tr;
-	UTIL_TraceLine(GetStartPos(), GetEndPos(), dont_ignore_monsters, NULL, &tr);
+	UTIL_TraceLine(GetStartPos(), GetEndPos(), dont_ignore_monsters, nullptr, &tr);
 	BeamDamage(&tr);
 }
 
@@ -810,7 +810,7 @@ void CLightning::RandomArea()
 		Vector vecDir1 = Vector(RANDOM_FLOAT(-1.0, 1.0), RANDOM_FLOAT(-1.0, 1.0), RANDOM_FLOAT(-1.0, 1.0));
 		vecDir1 = vecDir1.Normalize();
 		TraceResult tr1;
-		UTIL_TraceLine(vecSrc, vecSrc + vecDir1 * m_radius, ignore_monsters, ENT(pev), &tr1);
+		UTIL_TraceLine(vecSrc, vecSrc + vecDir1 * m_radius, ignore_monsters, this, &tr1);
 
 		if (tr1.flFraction == 1.0)
 			continue;
@@ -822,7 +822,7 @@ void CLightning::RandomArea()
 		} while (DotProduct(vecDir1, vecDir2) > 0);
 		vecDir2 = vecDir2.Normalize();
 		TraceResult tr2;
-		UTIL_TraceLine(vecSrc, vecSrc + vecDir2 * m_radius, ignore_monsters, ENT(pev), &tr2);
+		UTIL_TraceLine(vecSrc, vecSrc + vecDir2 * m_radius, ignore_monsters, this, &tr2);
 
 		if (tr2.flFraction == 1.0)
 			continue;
@@ -830,7 +830,7 @@ void CLightning::RandomArea()
 		if ((tr1.vecEndPos - tr2.vecEndPos).Length() < m_radius * 0.1)
 			continue;
 
-		UTIL_TraceLine(tr1.vecEndPos, tr2.vecEndPos, ignore_monsters, ENT(pev), &tr2);
+		UTIL_TraceLine(tr1.vecEndPos, tr2.vecEndPos, ignore_monsters, this, &tr2);
 
 		if (tr2.flFraction != 1.0)
 			continue;
@@ -851,7 +851,7 @@ void CLightning::RandomPoint(Vector& vecSrc)
 		Vector vecDir1 = Vector(RANDOM_FLOAT(-1.0, 1.0), RANDOM_FLOAT(-1.0, 1.0), RANDOM_FLOAT(-1.0, 1.0));
 		vecDir1 = vecDir1.Normalize();
 		TraceResult tr1;
-		UTIL_TraceLine(vecSrc, vecSrc + vecDir1 * m_radius, ignore_monsters, ENT(pev), &tr1);
+		UTIL_TraceLine(vecSrc, vecSrc + vecDir1 * m_radius, ignore_monsters, this, &tr1);
 
 		if ((tr1.vecEndPos - vecSrc).Length() < m_radius * 0.1)
 			continue;
@@ -1090,7 +1090,7 @@ void CLaser::StrikeThink()
 
 	TraceResult tr;
 
-	UTIL_TraceLine(pev->origin, m_firePosition, dont_ignore_monsters, NULL, &tr);
+	UTIL_TraceLine(pev->origin, m_firePosition, dont_ignore_monsters, nullptr, &tr);
 	FireAtPoint(tr);
 	pev->nextthink = gpGlobals->time + 0.1;
 }
@@ -1634,7 +1634,7 @@ void CTestEffect::TestThink()
 		Vector vecSrc = pev->origin;
 		Vector vecDir = Vector(RANDOM_FLOAT(-1.0, 1.0), RANDOM_FLOAT(-1.0, 1.0), RANDOM_FLOAT(-1.0, 1.0));
 		vecDir = vecDir.Normalize();
-		UTIL_TraceLine(vecSrc, vecSrc + vecDir * 128, ignore_monsters, ENT(pev), &tr);
+		UTIL_TraceLine(vecSrc, vecSrc + vecDir * 128, ignore_monsters, this, &tr);
 
 		pbeam->PointsInit(vecSrc, tr.vecEndPos);
 		// pbeam->SetColor( 80, 100, 255 );
@@ -1805,7 +1805,7 @@ void CBlood::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType
 		Vector start = BloodPosition(pActivator);
 		TraceResult tr;
 
-		UTIL_TraceLine(start, start + forward * BloodAmount() * 2, ignore_monsters, NULL, &tr);
+		UTIL_TraceLine(start, start + forward * BloodAmount() * 2, ignore_monsters, nullptr, &tr);
 		if (tr.flFraction != 1.0)
 			UTIL_BloodDecalTrace(&tr, Color());
 	}

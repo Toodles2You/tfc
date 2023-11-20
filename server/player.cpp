@@ -195,7 +195,7 @@ bool CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
 //=========================================================
 // TraceAttack
 //=========================================================
-void CBasePlayer::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
+void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
 {
 	if (pev->takedamage == DAMAGE_NO)
 	{
@@ -232,7 +232,7 @@ void CBasePlayer::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vec
 		}
 	}
 
-	AddMultiDamage(pevAttacker, this, flDamage, bitsDamageType);
+	AddMultiDamage(attacker, attacker, this, flDamage, bitsDamageType);
 }
 
 static inline float DamageForce(entvars_t* pev, int damage)
@@ -262,14 +262,14 @@ static float ArmourBonus(float &damage, float armour, float ratio, float bonus)
 #define kArmourRatio 0.2f // Armor Takes 80% of the damage
 #define kArmourBonus 0.5f // Each Point of Armor is work 1/x points of health
 
-bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
+bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType)
 {
 	if (pev->takedamage == DAMAGE_NO || !IsAlive())
 	{
 		return false;
 	}
-	CBaseEntity* pAttacker = CBaseEntity::Instance(pevAttacker);
-	if (!g_pGameRules->FPlayerCanTakeDamage(this, pAttacker))
+
+	if (!g_pGameRules->FPlayerCanTakeDamage(this, attacker))
 	{
 		return false;
 	}
@@ -290,21 +290,14 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	}
 
 	// Grab the vector of the incoming attack. (Pretend that the inflictor is a little lower than it really is, so the body will tend to fly upward a bit.)
-	if (!FNullEnt(pevInflictor))
+	if (attacker->pev->solid != SOLID_TRIGGER)
 	{
-		if (FNullEnt(pevAttacker) || pevAttacker->solid != SOLID_TRIGGER)
-		{
-			CBaseEntity* pInflictor = CBaseEntity::Instance(pevInflictor);
-			if (pInflictor)
-			{
-				// Move them around!
-				g_vecAttackDir = (pInflictor->Center() - Vector(0, 0, 10) - Center()).Normalize();
+		// Move them around!
+		g_vecAttackDir = (inflictor->Center() - Vector(0, 0, 10) - Center()).Normalize();
 
-				pev->velocity = pev->velocity + g_vecAttackDir * -DamageForce(pev, flDamage);
-			}
-		}
-		pev->dmg_inflictor = ENT(pevInflictor);
+		pev->velocity = pev->velocity + g_vecAttackDir * -DamageForce(pev, flDamage);
 	}
+	pev->dmg_inflictor = inflictor->edict();
 
 	// Check for godmode or invincibility.
 	if ((pev->flags & FL_GODMODE) != 0)
@@ -317,7 +310,7 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	pev->health -= flDamage;
 	pev->armorvalue -= flArmour;
 
-	if (!FNullEnt(pevAttacker) && (pevAttacker->flags & FL_CLIENT) != 0)
+	if ((attacker->pev->flags & FL_CLIENT) != 0)
 	{
 		int flags = 0;
 
@@ -325,17 +318,19 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 		{
 			flags |= kDamageFlagDead;
 		}
+
 		if ((bitsDamageType & DMG_AIMED) != 0
 		 && m_LastHitGroup == HITGROUP_HEAD)
 		{
 			flags |= kDamageFlagHeadshot;
 		}
-		if (pevAttacker == pev)
+
+		if (attacker == this)
 		{
 			flags |= kDamageFlagSelf;
 		}
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgHitFeedback, nullptr, pevAttacker);
+		MESSAGE_BEGIN(MSG_ONE, gmsgHitFeedback, nullptr, attacker->pev);
 		WRITE_BYTE(entindex());
 		WRITE_BYTE(flags);
 		WRITE_SHORT(flDamage);
@@ -344,7 +339,7 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 
 	if (pev->health <= 0)
 	{
-		Killed(pevInflictor, pevAttacker, bitsDamageType);
+		Killed(inflictor, attacker, bitsDamageType);
 		return false;
 	}
 
@@ -360,8 +355,8 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	MESSAGE_BEGIN(MSG_SPEC, SVC_DIRECTOR);
 		WRITE_BYTE(9);							  // command length in bytes
 		WRITE_BYTE(DRC_CMD_EVENT);				  // take damage event
-		WRITE_SHORT(ENTINDEX(this->edict()));	  // index number of primary entity
-		WRITE_SHORT(ENTINDEX(ENT(pevInflictor))); // index number of secondary entity
+		WRITE_SHORT(entindex());	  // index number of primary entity
+		WRITE_SHORT(inflictor->entindex()); // index number of secondary entity
 		WRITE_LONG(5);							  // eventflags (priority and flags)
 	MESSAGE_END();
 
@@ -528,7 +523,7 @@ void CBasePlayer::RemoveAllWeapons(bool removeSuit)
 }
 
 
-void CBasePlayer::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
+void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType)
 {
 	// Holster weapon immediately, to allow it to cleanup
 	if (m_pActiveWeapon)
@@ -536,7 +531,7 @@ void CBasePlayer::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bi
 		m_pActiveWeapon->Holster();
 	}
 
-	g_pGameRules->PlayerKilled(this, pevAttacker, pevInflictor, bitsDamageType);
+	g_pGameRules->PlayerKilled(this, attacker, inflictor, bitsDamageType);
 
 	if (m_pTank != NULL)
 	{
@@ -999,7 +994,7 @@ void CBasePlayer::WaterMove()
 
 				const float oldHealth = pev->health;
 
-				TakeDamage(CWorld::World->pev, CWorld::World->pev, pev->dmg, DMG_DROWN);
+				TakeDamage(CWorld::World, CWorld::World, pev->dmg, DMG_DROWN);
 				pev->pain_finished = gpGlobals->time + 1;
 
 				// track drowning damage, give it back when
@@ -1055,12 +1050,12 @@ void CBasePlayer::WaterMove()
 	if (pev->watertype == CONTENT_LAVA) // do damage
 	{
 		if (pev->dmgtime < gpGlobals->time)
-			TakeDamage(CWorld::World->pev, CWorld::World->pev, 10 * pev->waterlevel, DMG_BURN);
+			TakeDamage(CWorld::World, CWorld::World, 10 * pev->waterlevel, DMG_BURN);
 	}
 	else if (pev->watertype == CONTENT_SLIME) // do damage
 	{
 		pev->dmgtime = gpGlobals->time + 1;
-		TakeDamage(CWorld::World->pev, CWorld::World->pev, 4 * pev->waterlevel, DMG_ACID);
+		TakeDamage(CWorld::World, CWorld::World, 4 * pev->waterlevel, DMG_ACID);
 	}
 
 	if (!FBitSet(pev->flags, FL_INWATER))
@@ -1163,7 +1158,7 @@ void CBasePlayer::StartDeathCam()
 	{
 		// no intermission spot. Push them up in the air, looking down at their corpse
 		TraceResult tr;
-		UTIL_TraceLine(pev->origin, pev->origin + Vector(0, 0, 128), ignore_monsters, edict(), &tr);
+		UTIL_TraceLine(pev->origin, pev->origin + Vector(0, 0, 128), ignore_monsters, this, &tr);
 
 		UTIL_SetOrigin(pev, tr.vecEndPos);
 		pev->angles = pev->v_angle = UTIL_VecToAngles(tr.vecEndPos - pev->origin);
@@ -1498,7 +1493,7 @@ void CBasePlayer::UpdateStatusBar()
 	UTIL_MakeVectors(pev->v_angle + pev->punchangle);
 	Vector vecSrc = EyePosition();
 	Vector vecEnd = vecSrc + (gpGlobals->v_forward * MAX_ID_RANGE);
-	UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, edict(), &tr);
+	UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, this, &tr);
 
 	if (tr.flFraction != 1.0)
 	{
@@ -1644,7 +1639,7 @@ void CBasePlayer::PreThink()
 		{
 			TraceResult trainTrace;
 			// Maybe this is on the other side of a level transition
-			UTIL_TraceLine(pev->origin, pev->origin + Vector(0, 0, -38), ignore_monsters, ENT(pev), &trainTrace);
+			UTIL_TraceLine(pev->origin, pev->origin + Vector(0, 0, -38), ignore_monsters, this, &trainTrace);
 
 			// HACKHACK - Just look for the func_tracktrain classname
 			if (trainTrace.flFraction != 1.0 && trainTrace.pHit)
@@ -1743,7 +1738,7 @@ void CBasePlayer::CheckTimeBasedDamage()
 				bDuration = NERVEGAS_DURATION;
 				break;
 			case itbd_Poison:
-				TakeDamage(pev, pev, POISON_DAMAGE, DMG_GENERIC);
+				TakeDamage(CWorld::World, CWorld::World, POISON_DAMAGE, DMG_GENERIC);
 				bDuration = POISON_DURATION;
 				break;
 			case itbd_Radiation:
@@ -2080,7 +2075,7 @@ void CBasePlayer::PostThink()
 
 			if (flFallDamage > 0)
 			{
-				TakeDamage(CWorld::World->pev, CWorld::World->pev, flFallDamage, DMG_FALL);
+				TakeDamage(CWorld::World, CWorld::World, flFallDamage, DMG_FALL);
 
 				if (pev->health <= 0)
 				{
@@ -2419,17 +2414,17 @@ int CBasePlayer::TeamNumber()
 class CSprayCan : public CBaseEntity
 {
 public:
-	bool Spawn(entvars_t* pevOwner);
+	bool Spawn(CBaseEntity* owner);
 	void Think() override;
 
 	int ObjectCaps() override { return FCAP_DONT_SAVE; }
 };
 
-bool CSprayCan::Spawn(entvars_t* pevOwner)
+bool CSprayCan::Spawn(CBaseEntity* owner)
 {
-	pev->origin = pevOwner->origin + Vector(0, 0, 32);
-	pev->angles = pevOwner->v_angle;
-	pev->owner = ENT(pevOwner);
+	pev->origin = owner->pev->origin + Vector(0, 0, 32);
+	pev->angles = owner->pev->v_angle;
+	pev->owner = owner->edict();
 	pev->frame = 0;
 
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -2457,7 +2452,7 @@ void CSprayCan::Think()
 	// ALERT(at_console, "Spray by player %i, %i of %i\n", playernum, (int)(pev->frame + 1), nFrames);
 
 	UTIL_MakeVectors(pev->angles);
-	UTIL_TraceLine(pev->origin, pev->origin + gpGlobals->v_forward * 128, ignore_monsters, pev->owner, &tr);
+	UTIL_TraceLine(pev->origin, pev->origin + gpGlobals->v_forward * 128, ignore_monsters, pPlayer, &tr);
 
 	// No customization present.
 	if (nFrames == -1)
@@ -2593,13 +2588,13 @@ void CBasePlayer::ImpulseCommands()
 		}
 
 		UTIL_MakeVectors(pev->v_angle);
-		UTIL_TraceLine(pev->origin + pev->view_ofs, pev->origin + pev->view_ofs + gpGlobals->v_forward * 128, ignore_monsters, ENT(pev), &tr);
+		UTIL_TraceLine(pev->origin + pev->view_ofs, pev->origin + pev->view_ofs + gpGlobals->v_forward * 128, ignore_monsters, this, &tr);
 
 		if (tr.flFraction != 1.0)
 		{ // line hit something, so paint a decal
 			m_flNextDecalTime = gpGlobals->time + decalfrequency.value;
-			CSprayCan* pCan = GetClassPtr((CSprayCan*)NULL);
-			pCan->Spawn(pev);
+			CSprayCan* pCan = GetClassPtr((CSprayCan*)nullptr);
+			pCan->Spawn(this);
 		}
 
 		break;
@@ -2691,7 +2686,7 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 
 		Vector start = pev->origin + pev->view_ofs;
 		Vector end = start + gpGlobals->v_forward * 1024;
-		UTIL_TraceLine(start, end, ignore_monsters, edict(), &tr);
+		UTIL_TraceLine(start, end, ignore_monsters, this, &tr);
 		if (tr.pHit)
 			pWorld = tr.pHit;
 		const char* pTextureName = TRACE_TEXTURE(pWorld, start, end);

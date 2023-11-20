@@ -129,15 +129,15 @@ public:
 	//
 
 	/// invoked when injured by something (EXTEND)
-	virtual bool TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType )
+	virtual bool TakeDamage( CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType )
 	{
-		return CBasePlayer::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+		return CBasePlayer::TakeDamage( inflictor, attacker, flDamage, bitsDamageType );
 	}
 
 	/// invoked when killed (EXTEND)
-	virtual void Killed( entvars_t* pevInflictor, entvars_t *pevAttacker, int bitsDamageType )
+	virtual void Killed( CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType )
 	{ 
-		CBasePlayer::Killed( pevInflictor, pevAttacker, bitsDamageType );
+		CBasePlayer::Killed( inflictor, attacker, bitsDamageType );
 	}
 
 	virtual void OnTouchingWeapon( CWeaponBox *box ) { }	///< invoked when in contact with a CWeaponBox

@@ -193,9 +193,9 @@ public:
 	virtual void PostThink();
 	inline Vector GetGunPosition() { return pev->origin + pev->view_ofs; }
 	bool TakeHealth(float flHealth, int bitsDamageType) override;
-	void TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) override;
-	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
-	void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType) override;
+	void TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) override;
+	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
+	void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType) override;
 	Vector BodyTarget(const Vector& posSrc) override { return Center() + pev->view_ofs * 0.8; } // position to shoot at
 	bool IsAlive() override { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
 	bool IsPlayer() override { return true; } // Spectators should return false for this, they aren't "players" as far as game logic is concerned

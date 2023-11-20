@@ -42,16 +42,8 @@ class CGrenade : public CBaseAnimating
 public:
 	bool Spawn() override;
 
-	typedef enum
-	{
-		SATCHEL_DETONATE = 0,
-		SATCHEL_RELEASE
-	} SATCHELCODE;
-
-	static CGrenade* ShootTimed(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time);
-	static CGrenade* ShootContact(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity);
-	static CGrenade* ShootSatchelCharge(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity);
-	static void UseSatchelCharges(entvars_t* pevOwner, SATCHELCODE code);
+	static CGrenade* ShootTimed(CBaseEntity* owner, Vector vecStart, Vector vecVelocity, float time);
+	static CGrenade* ShootContact(CBaseEntity* owner, Vector vecStart, Vector vecVelocity);
 
 	void Explode(Vector vecSrc, Vector vecAim);
 	void Explode(TraceResult* pTrace, int bitsDamageType);
@@ -66,7 +58,7 @@ public:
 
 	virtual void BounceSound();
 	int BloodColor() override { return DONT_BLEED; }
-	void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType) override;
+	void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType) override;
 
 	float m_flNextAttack;
 };
@@ -358,13 +350,13 @@ inline DLL_GLOBAL short g_sModelIndexBloodDrop;	 // holds the sprite index for b
 inline DLL_GLOBAL short g_sModelIndexBloodSpray; // holds the sprite index for blood spray (bigger)
 
 extern void ClearMultiDamage();
-extern void ApplyMultiDamage(entvars_t* pevInflictor, entvars_t* pevAttacker);
-extern void AddMultiDamage(entvars_t* pevInflictor, CBaseEntity* pEntity, float flDamage, int bitsDamageType);
+extern void ApplyMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker);
+extern void AddMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker, CBaseEntity* pEntity, float flDamage, int bitsDamageType);
 
 extern void DecalGunshot(TraceResult* pTrace, int iBulletType);
 extern void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage);
 extern int DamageDecal(CBaseEntity* pEntity, int bitsDamageType);
-extern void RadiusDamage(Vector vecSrc, entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType);
+extern void RadiusDamage(Vector vecSrc, CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType);
 
 typedef struct
 {

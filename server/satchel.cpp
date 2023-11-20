@@ -48,7 +48,6 @@ void CSatchelCharge::Deactivate()
 bool CSatchelCharge::Spawn()
 {
 	Precache();
-	// motor
 	pev->movetype = MOVETYPE_BOUNCE;
 	pev->solid = SOLID_BBOX;
 
@@ -84,7 +83,7 @@ void CSatchelCharge::SatchelSlide(CBaseEntity* pOther)
 
 	// HACKHACK - On ground isn't always set, so look for ground underneath
 	TraceResult tr;
-	UTIL_TraceLine(pev->origin, pev->origin - Vector(0, 0, 10), ignore_monsters, edict(), &tr);
+	UTIL_TraceLine(pev->origin, pev->origin - Vector(0, 0, 10), ignore_monsters, this, &tr);
 
 	if (tr.flFraction < 1.0)
 	{

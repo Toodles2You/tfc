@@ -131,7 +131,7 @@ void CDecal::TriggerDecal(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 	TraceResult trace;
 	int entityIndex;
 
-	UTIL_TraceLine(pev->origin - Vector(5, 5, 5), pev->origin + Vector(5, 5, 5), ignore_monsters, ENT(pev), &trace);
+	UTIL_TraceLine(pev->origin - Vector(5, 5, 5), pev->origin + Vector(5, 5, 5), ignore_monsters, this, &trace);
 
 	MESSAGE_BEGIN(MSG_BROADCAST, SVC_TEMPENTITY);
 	WRITE_BYTE(TE_BSPDECAL);
@@ -154,7 +154,7 @@ void CDecal::StaticDecal()
 	TraceResult trace;
 	int entityIndex, modelIndex;
 
-	UTIL_TraceLine(pev->origin - Vector(5, 5, 5), pev->origin + Vector(5, 5, 5), ignore_monsters, ENT(pev), &trace);
+	UTIL_TraceLine(pev->origin - Vector(5, 5, 5), pev->origin + Vector(5, 5, 5), ignore_monsters, this, &trace);
 
 	entityIndex = (short)ENTINDEX(trace.pHit);
 	if (0 != entityIndex)

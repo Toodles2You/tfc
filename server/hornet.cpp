@@ -44,13 +44,13 @@ IMPLEMENT_SAVERESTORE(CHornet, CBaseAnimating);
 //=========================================================
 // don't let hornets gib, ever.
 //=========================================================
-bool CHornet::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
+bool CHornet::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType)
 {
 	// filter these bits a little.
 	bitsDamageType &= ~(DMG_ALWAYSGIB);
 	bitsDamageType |= DMG_NEVERGIB;
 
-	return CBaseAnimating::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
+	return CBaseAnimating::TakeDamage(inflictor, attacker, flDamage, bitsDamageType);
 }
 
 //=========================================================
@@ -431,7 +431,7 @@ void CHornet::DieTouch(CBaseEntity* pOther)
 			break;
 		}
 
-		pOther->TakeDamage(pev, VARS(pev->owner), pev->dmg, DMG_BULLET);
+		pOther->TakeDamage(this, CBaseEntity::Instance(pev->owner), pev->dmg, DMG_BULLET);
 	}
 
 	pev->modelindex = 0; // so will disappear for the 0.1 secs we wait until NEXTTHINK gets rid

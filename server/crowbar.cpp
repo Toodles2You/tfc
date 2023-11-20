@@ -94,7 +94,7 @@ void FindHullIntersection(const Vector& vecSrc, TraceResult& tr, const Vector& m
 	distance = 1e6f;
 
 	vecHullEnd = vecSrc + ((vecHullEnd - vecSrc) * 2);
-	UTIL_TraceLine(vecSrc, vecHullEnd, dont_ignore_monsters, pEntity, &tmpTrace);
+	UTIL_TraceLine(vecSrc, vecHullEnd, dont_ignore_monsters, CBaseEntity::Instance(pEntity), &tmpTrace);
 	if (tmpTrace.flFraction < 1.0)
 	{
 		tr = tmpTrace;
@@ -111,7 +111,7 @@ void FindHullIntersection(const Vector& vecSrc, TraceResult& tr, const Vector& m
 				vecEnd.y = vecHullEnd.y + minmaxs[j]->y;
 				vecEnd.z = vecHullEnd.z + minmaxs[k]->z;
 
-				UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, pEntity, &tmpTrace);
+				UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, CBaseEntity::Instance(pEntity), &tmpTrace);
 				if (tmpTrace.flFraction < 1.0)
 				{
 					float thisDistance = (tmpTrace.vecEndPos - vecSrc).Length();
@@ -159,7 +159,7 @@ bool CCrowbar::Swing(bool fFirst)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecEnd = vecSrc + gpGlobals->v_forward * 32;
 
-	UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr);
+	UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, m_pPlayer, &tr);
 
 #ifndef CLIENT_DLL
 	if (tr.flFraction >= 1.0)
@@ -223,14 +223,14 @@ bool CCrowbar::Swing(bool fFirst)
 		if ((m_iNextPrimaryAttack + 1000 < 0) || UTIL_IsDeathmatch())
 		{
 			// first swing does full damage
-			pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgCrowbar, gpGlobals->v_forward, &tr, DMG_CLUB);
+			pEntity->TraceAttack(m_pPlayer, gSkillData.plrDmgCrowbar, gpGlobals->v_forward, &tr, DMG_CLUB);
 		}
 		else
 		{
 			// subsequent swings do half
-			pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgCrowbar / 2, gpGlobals->v_forward, &tr, DMG_CLUB);
+			pEntity->TraceAttack(m_pPlayer, gSkillData.plrDmgCrowbar / 2, gpGlobals->v_forward, &tr, DMG_CLUB);
 		}
-		ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+		ApplyMultiDamage(m_pPlayer, m_pPlayer);
 
 #endif
 

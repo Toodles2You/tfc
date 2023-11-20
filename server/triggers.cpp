@@ -991,7 +991,7 @@ void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 	if (fldmg < 0)
 		pOther->TakeHealth(-fldmg, m_bitsDamageInflict);
 	else
-		pOther->TakeDamage(pev, pev, fldmg, m_bitsDamageInflict);
+		pOther->TakeDamage(this, this, fldmg, m_bitsDamageInflict);
 
 	// Store pain time so we can get all of the other entities on this frame
 	pev->pain_finished = gpGlobals->time;

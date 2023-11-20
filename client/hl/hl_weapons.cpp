@@ -133,7 +133,7 @@ CBaseEntity:: Killed
 If weapons code "kills" an entity, just set its effects to EF_NODRAW
 =====================
 */
-void CBaseEntity::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
+void CBaseEntity::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType)
 {
 	pev->effects |= EF_NODRAW;
 }
@@ -264,7 +264,7 @@ CBasePlayer::Killed
 
 =====================
 */
-void CBasePlayer::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
+void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType)
 {
 	// Holster weapon immediately, to allow it to cleanup
 	if (m_pActiveWeapon)
@@ -296,7 +296,7 @@ UTIL_TraceLine
 Don't actually trace, but act like the trace didn't hit anything.
 =====================
 */
-void UTIL_TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, edict_t* pentIgnore, TraceResult* ptr)
+void UTIL_TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, CBaseEntity* ignore, TraceResult* ptr)
 {
 	memset(ptr, 0, sizeof(*ptr));
 	ptr->flFraction = 1.0;

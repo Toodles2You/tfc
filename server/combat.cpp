@@ -36,7 +36,7 @@
 // only damage ents that can clearly be seen by the explosion!
 
 
-void RadiusDamage(Vector vecSrc, entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType)
+void RadiusDamage(Vector vecSrc, CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType)
 {
 	CBaseEntity* pEntity = NULL;
 	TraceResult tr;
@@ -51,9 +51,6 @@ void RadiusDamage(Vector vecSrc, entvars_t* pevInflictor, entvars_t* pevAttacker
 	const bool bInWater = (UTIL_PointContents(vecSrc) == CONTENTS_WATER);
 
 	vecSrc.z += 1; // in case grenade is lying on the ground
-
-	if (!pevAttacker)
-		pevAttacker = pevInflictor;
 
 	// iterate on all entities in the vicinity.
 	while ((pEntity = UTIL_FindEntityInSphere(pEntity, vecSrc, flRadius)) != NULL)
@@ -73,7 +70,7 @@ void RadiusDamage(Vector vecSrc, entvars_t* pevInflictor, entvars_t* pevAttacker
 
 			vecSpot = pEntity->BodyTarget(vecSrc);
 
-			UTIL_TraceLine(vecSrc, vecSpot, dont_ignore_monsters, ENT(pevInflictor), &tr);
+			UTIL_TraceLine(vecSrc, vecSpot, dont_ignore_monsters, inflictor, &tr);
 
 			if (tr.flFraction == 1.0 || tr.pHit == pEntity->edict())
 			{ // the explosion can 'see' this entity, so hurt them!
@@ -97,12 +94,12 @@ void RadiusDamage(Vector vecSrc, entvars_t* pevInflictor, entvars_t* pevAttacker
 				if (tr.flFraction != 1.0)
 				{
 					ClearMultiDamage();
-					pEntity->TraceAttack(pevInflictor, flAdjustedDamage, (tr.vecEndPos - vecSrc).Normalize(), &tr, bitsDamageType);
-					ApplyMultiDamage(pevInflictor, pevAttacker);
+					pEntity->TraceAttack(inflictor, flAdjustedDamage, (tr.vecEndPos - vecSrc).Normalize(), &tr, bitsDamageType);
+					ApplyMultiDamage(inflictor, attacker);
 				}
 				else
 				{
-					pEntity->TakeDamage(pevInflictor, pevAttacker, flAdjustedDamage, bitsDamageType);
+					pEntity->TakeDamage(inflictor, attacker, flAdjustedDamage, bitsDamageType);
 				}
 			}
 		}
@@ -183,7 +180,7 @@ bool CBaseEntity::FVisible(CBaseEntity* pEntity)
 	vecLookerOrigin = pev->origin + pev->view_ofs; //look through the caller's 'eyes'
 	vecTargetOrigin = pEntity->EyePosition();
 
-	UTIL_TraceLine(vecLookerOrigin, vecTargetOrigin, ignore_monsters, ignore_glass, ENT(pev) /*pentIgnore*/, &tr);
+	UTIL_TraceLine(vecLookerOrigin, vecTargetOrigin, ignore_monsters, ignore_glass, this, &tr);
 
 	if (tr.flFraction != 1.0)
 	{
@@ -206,7 +203,7 @@ bool CBaseEntity::FVisible(const Vector& vecOrigin)
 
 	vecLookerOrigin = EyePosition(); //look through the caller's 'eyes'
 
-	UTIL_TraceLine(vecLookerOrigin, vecOrigin, ignore_monsters, ignore_glass, ENT(pev) /*pentIgnore*/, &tr);
+	UTIL_TraceLine(vecLookerOrigin, vecOrigin, ignore_monsters, ignore_glass, this, &tr);
 
 	if (tr.flFraction != 1.0)
 	{
@@ -223,13 +220,13 @@ bool CBaseEntity::FVisible(const Vector& vecOrigin)
 TraceAttack
 ================
 */
-void CBaseEntity::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
+void CBaseEntity::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
 {
 	Vector vecOrigin = ptr->vecEndPos - vecDir * 4;
 
 	if (pev->takedamage != DAMAGE_NO)
 	{
-		AddMultiDamage(pevAttacker, this, flDamage, bitsDamageType);
+		AddMultiDamage(attacker, attacker, this, flDamage, bitsDamageType);
 
 		int blood = BloodColor();
 
@@ -278,7 +275,7 @@ void CBasePlayer::FireBullets(
 		AngleVectors(angles, &dir, nullptr, nullptr);
 
 		TraceResult tr;
-		UTIL_TraceLine(gun, gun + dir * distance, dont_ignore_monsters, edict(), &tr);
+		UTIL_TraceLine(gun, gun + dir * distance, dont_ignore_monsters, this, &tr);
 		
 		if (tr.flFraction != 1.0F)
 		{
@@ -286,7 +283,7 @@ void CBasePlayer::FireBullets(
 				reinterpret_cast<CBasePlayer *>(CBaseEntity::Instance(tr.pHit));
 			
 			hit->TraceAttack(
-				pev,
+				this,
 				damage,
 				dir,
 				&tr,
@@ -304,7 +301,7 @@ void CBasePlayer::FireBullets(
 		}
 	}
 	
-	ApplyMultiDamage(pev, pev);
+	ApplyMultiDamage(this, this);
 
 	Vector dir;
 	AngleVectors(aim, &dir, nullptr, nullptr);
@@ -385,7 +382,7 @@ void CBaseEntity::TraceBleed(float flDamage, Vector vecDir, TraceResult* ptr, in
 		vecTraceDir.y += RANDOM_FLOAT(-flNoise, flNoise);
 		vecTraceDir.z += RANDOM_FLOAT(-flNoise, flNoise);
 
-		UTIL_TraceLine(ptr->vecEndPos, ptr->vecEndPos + vecTraceDir * -172, ignore_monsters, ENT(pev), &Bloodtr);
+		UTIL_TraceLine(ptr->vecEndPos, ptr->vecEndPos + vecTraceDir * -172, ignore_monsters, this, &Bloodtr);
 
 		if (Bloodtr.flFraction != 1.0)
 		{

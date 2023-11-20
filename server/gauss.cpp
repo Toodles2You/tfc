@@ -252,7 +252,7 @@ void CGauss::SecondaryAttack()
 			SendStopEvent(false);
 
 #ifndef CLIENT_DLL
-			m_pPlayer->TakeDamage(CWorld::World->pev, CWorld::World->pev, 50, DMG_SHOCK);
+			m_pPlayer->TakeDamage(CWorld::World, CWorld::World, 50, DMG_SHOCK);
 			UTIL_ScreenFade(m_pPlayer, Vector(255, 128, 0), 2, 0.5, 128, FFADE_IN);
 #endif
 			SendWeaponAnim(GAUSS_IDLE);
@@ -325,7 +325,7 @@ void CGauss::Fire(Vector vecOrigSrc, Vector vecDir, float flDamage)
 {
 	Vector vecSrc = vecOrigSrc;
 	Vector vecDest = vecSrc + vecDir * 8192;
-	edict_t* pentIgnore;
+	CBaseEntity *ignore;
 	TraceResult tr, beam_tr;
 	float flMaxFrac = 1.0;
 	int nTotal = 0;
@@ -333,7 +333,7 @@ void CGauss::Fire(Vector vecOrigSrc, Vector vecDir, float flDamage)
 	bool fFirstBeam = true;
 	int nMaxHits = 10;
 
-	pentIgnore = ENT(m_pPlayer->pev);
+	ignore = m_pPlayer;
 
 #ifdef CLIENT_DLL
 	if (m_fPrimaryFire == false)
@@ -359,7 +359,7 @@ void CGauss::Fire(Vector vecOrigSrc, Vector vecDir, float flDamage)
 		nMaxHits--;
 
 		// ALERT( at_console, "." );
-		UTIL_TraceLine(vecSrc, vecDest, dont_ignore_monsters, pentIgnore, &tr);
+		UTIL_TraceLine(vecSrc, vecDest, dont_ignore_monsters, ignore, &tr);
 
 		if (0 != tr.fAllSolid)
 			break;
@@ -379,8 +379,8 @@ void CGauss::Fire(Vector vecOrigSrc, Vector vecDir, float flDamage)
 		if (0 != pEntity->pev->takedamage)
 		{
 			ClearMultiDamage();
-			pEntity->TraceAttack(m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET);
-			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+			pEntity->TraceAttack(m_pPlayer, flDamage, vecDir, &tr, DMG_BULLET);
+			ApplyMultiDamage(m_pPlayer, m_pPlayer);
 
 			MESSAGE_BEGIN(MSG_PVS, gmsgBlood, pEntity->pev->origin);
 			WRITE_FLOAT(vecDir.x);
@@ -398,7 +398,7 @@ void CGauss::Fire(Vector vecOrigSrc, Vector vecDir, float flDamage)
 		{
 			float n;
 
-			pentIgnore = NULL;
+			ignore = nullptr;
 
 			n = -DotProduct(tr.vecPlaneNormal, vecDir);
 
@@ -415,7 +415,7 @@ void CGauss::Fire(Vector vecOrigSrc, Vector vecDir, float flDamage)
 				vecDest = vecSrc + vecDir * 8192;
 
 				// explode a bit
-				RadiusDamage(tr.vecEndPos, pev, m_pPlayer->pev, flDamage * n, flDamage * n * 2.5, CLASS_NONE, DMG_BLAST);
+				RadiusDamage(tr.vecEndPos, this, m_pPlayer, flDamage * n, flDamage * n * 2.5, CLASS_NONE, DMG_BLAST);
 
 				nTotal += 34;
 
@@ -436,11 +436,11 @@ void CGauss::Fire(Vector vecOrigSrc, Vector vecDir, float flDamage)
 				// try punching through wall if secondary attack (primary is incapable of breaking through)
 				if (!m_fPrimaryFire)
 				{
-					UTIL_TraceLine(tr.vecEndPos + vecDir * 8, vecDest, dont_ignore_monsters, pentIgnore, &beam_tr);
+					UTIL_TraceLine(tr.vecEndPos + vecDir * 8, vecDest, dont_ignore_monsters, ignore, &beam_tr);
 					if (0 == beam_tr.fAllSolid)
 					{
 						// trace backwards to find exit point
-						UTIL_TraceLine(beam_tr.vecEndPos, tr.vecEndPos, dont_ignore_monsters, pentIgnore, &beam_tr);
+						UTIL_TraceLine(beam_tr.vecEndPos, tr.vecEndPos, dont_ignore_monsters, ignore, &beam_tr);
 
 						float n = (beam_tr.vecEndPos - tr.vecEndPos).Length();
 
@@ -454,7 +454,6 @@ void CGauss::Fire(Vector vecOrigSrc, Vector vecDir, float flDamage)
 							nTotal += 21;
 
 							// exit blast damage
-							//m_pPlayer->RadiusDamage( beam_tr.vecEndPos + vecDir * 8, pev, m_pPlayer->pev, flDamage, CLASS_NONE, DMG_BLAST );
 							float damage_radius;
 
 
@@ -467,7 +466,7 @@ void CGauss::Fire(Vector vecOrigSrc, Vector vecDir, float flDamage)
 								damage_radius = flDamage * 2.5;
 							}
 
-							::RadiusDamage(beam_tr.vecEndPos + vecDir * 8, pev, m_pPlayer->pev, flDamage, damage_radius, CLASS_NONE, DMG_BLAST);
+							RadiusDamage(beam_tr.vecEndPos + vecDir * 8, this, m_pPlayer, flDamage, damage_radius, CLASS_NONE, DMG_BLAST);
 
 							nTotal += 53;
 
@@ -491,7 +490,7 @@ void CGauss::Fire(Vector vecOrigSrc, Vector vecDir, float flDamage)
 		else
 		{
 			vecSrc = tr.vecEndPos + vecDir;
-			pentIgnore = ENT(pEntity->pev);
+			ignore = pEntity;
 		}
 	}
 #endif

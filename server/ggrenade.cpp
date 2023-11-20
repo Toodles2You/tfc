@@ -24,14 +24,7 @@
 #include "weapons.h"
 #include "decals.h"
 
-
-//===================grenade
-
-
 LINK_ENTITY_TO_CLASS(grenade, CGrenade);
-
-// Grenades flagged with this will be triggered when the owner calls detonateSatchelCharges
-#define SF_DETONATE 0x0001
 
 //
 // Grenade Explode
@@ -39,7 +32,7 @@ LINK_ENTITY_TO_CLASS(grenade, CGrenade);
 void CGrenade::Explode(Vector vecSrc, Vector vecAim)
 {
 	TraceResult tr;
-	UTIL_TraceLine(pev->origin, pev->origin + Vector(0, 0, -32), ignore_monsters, ENT(pev), &tr);
+	UTIL_TraceLine(pev->origin, pev->origin + Vector(0, 0, -32), ignore_monsters, this, &tr);
 
 	Explode(&tr, DMG_BLAST);
 }
@@ -79,19 +72,19 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 	WRITE_BYTE(TE_EXPLFLAG_NONE);
 	MESSAGE_END();
 
-	entvars_t* pevOwner;
+	CBaseEntity* owner;
 	if (pev->owner)
-		pevOwner = VARS(pev->owner);
+		owner = CBaseEntity::Instance(pev->owner);
 	else
-		pevOwner = NULL;
+		owner = this;
 
-	pev->owner = NULL; // can't traceline attack owner if this is set
+	pev->owner = nullptr; // can't traceline attack owner if this is set
 
 	// Counteract the + 1 in RadiusDamage.
 	Vector origin = pev->origin;
 	origin.z -= 1;
 
-	RadiusDamage(origin, pev, pevOwner, pev->dmg, pev->dmg * 2.5, CLASS_NONE, bitsDamageType);
+	RadiusDamage(origin, this, owner, pev->dmg, pev->dmg * 2.5, CLASS_NONE, bitsDamageType);
 
 	if (RANDOM_FLOAT(0, 1) < 0.5)
 	{
@@ -152,7 +145,7 @@ void CGrenade::Smoke()
 	Remove();
 }
 
-void CGrenade::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
+void CGrenade::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType)
 {
 	Detonate();
 }
@@ -172,7 +165,7 @@ void CGrenade::Detonate()
 	Vector vecSpot; // trace starts here!
 
 	vecSpot = pev->origin + Vector(0, 0, 8);
-	UTIL_TraceLine(vecSpot, vecSpot + Vector(0, 0, -40), ignore_monsters, ENT(pev), &tr);
+	UTIL_TraceLine(vecSpot, vecSpot + Vector(0, 0, -40), ignore_monsters, this, &tr);
 
 	Explode(&tr, DMG_BLAST);
 }
@@ -189,7 +182,7 @@ void CGrenade::ExplodeTouch(CBaseEntity* pOther)
 	pev->enemy = pOther->edict();
 
 	vecSpot = pev->origin - pev->velocity.Normalize() * 32;
-	UTIL_TraceLine(vecSpot, vecSpot + pev->velocity.Normalize() * 64, ignore_monsters, ENT(pev), &tr);
+	UTIL_TraceLine(vecSpot, vecSpot + pev->velocity.Normalize() * 64, ignore_monsters, this, &tr);
 
 	Explode(&tr, DMG_BLAST);
 }
@@ -204,13 +197,13 @@ void CGrenade::BounceTouch(CBaseEntity* pOther)
 	// only do damage if we're moving fairly fast
 	if (m_flNextAttack < gpGlobals->time && pev->velocity.Length() > 100)
 	{
-		entvars_t* pevOwner = VARS(pev->owner);
-		if (pevOwner)
+		if (pev->owner)
 		{
+			CBaseEntity* owner = CBaseEntity::Instance(pev->owner);
 			TraceResult tr = UTIL_GetGlobalTrace();
 			ClearMultiDamage();
-			pOther->TraceAttack(pevOwner, 1, gpGlobals->v_forward, &tr, DMG_CLUB);
-			ApplyMultiDamage(pev, pevOwner);
+			pOther->TraceAttack(owner, 1, gpGlobals->v_forward, &tr, DMG_CLUB);
+			ApplyMultiDamage(this, owner);
 		}
 		m_flNextAttack = gpGlobals->time + 1.0; // debounce
 	}
@@ -325,7 +318,7 @@ bool CGrenade::Spawn()
 }
 
 
-CGrenade* CGrenade::ShootContact(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity)
+CGrenade* CGrenade::ShootContact(CBaseEntity* owner, Vector vecStart, Vector vecVelocity)
 {
 	CGrenade* pGrenade = GetClassPtr((CGrenade*)NULL);
 	pGrenade->Spawn();
@@ -334,7 +327,7 @@ CGrenade* CGrenade::ShootContact(entvars_t* pevOwner, Vector vecStart, Vector ve
 	UTIL_SetOrigin(pGrenade->pev, vecStart);
 	pGrenade->pev->velocity = vecVelocity;
 	pGrenade->pev->angles = UTIL_VecToAngles(pGrenade->pev->velocity);
-	pGrenade->pev->owner = ENT(pevOwner);
+	pGrenade->pev->owner = owner->edict();
 
 	// Tumble in air
 	pGrenade->pev->avelocity.x = RANDOM_FLOAT(-100, -500);
@@ -348,14 +341,14 @@ CGrenade* CGrenade::ShootContact(entvars_t* pevOwner, Vector vecStart, Vector ve
 }
 
 
-CGrenade* CGrenade::ShootTimed(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time)
+CGrenade* CGrenade::ShootTimed(CBaseEntity* owner, Vector vecStart, Vector vecVelocity, float time)
 {
 	CGrenade* pGrenade = GetClassPtr((CGrenade*)NULL);
 	pGrenade->Spawn();
 	UTIL_SetOrigin(pGrenade->pev, vecStart);
 	pGrenade->pev->velocity = vecVelocity;
 	pGrenade->pev->angles = UTIL_VecToAngles(pGrenade->pev->velocity);
-	pGrenade->pev->owner = ENT(pevOwner);
+	pGrenade->pev->owner = owner->edict();
 
 	pGrenade->SetTouch(&CGrenade::BounceTouch); // Bounce if touched
 
@@ -383,67 +376,3 @@ CGrenade* CGrenade::ShootTimed(entvars_t* pevOwner, Vector vecStart, Vector vecV
 
 	return pGrenade;
 }
-
-
-CGrenade* CGrenade::ShootSatchelCharge(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity)
-{
-	CGrenade* pGrenade = GetClassPtr((CGrenade*)NULL);
-	pGrenade->pev->movetype = MOVETYPE_BOUNCE;
-	pGrenade->pev->classname = MAKE_STRING("grenade");
-
-	pGrenade->pev->solid = SOLID_BBOX;
-
-	SET_MODEL(ENT(pGrenade->pev), "models/grenade.mdl"); // Change this to satchel charge model
-
-	UTIL_SetSize(pGrenade->pev, Vector(0, 0, 0), Vector(0, 0, 0));
-
-	pGrenade->pev->dmg = 200;
-	UTIL_SetOrigin(pGrenade->pev, vecStart);
-	pGrenade->pev->velocity = vecVelocity;
-	pGrenade->pev->angles = g_vecZero;
-	pGrenade->pev->owner = ENT(pevOwner);
-
-	// Detonate in "time" seconds
-	pGrenade->SetThink(nullptr);
-	pGrenade->SetUse(&CGrenade::DetonateUse);
-	pGrenade->SetTouch(&CGrenade::SlideTouch);
-	pGrenade->pev->spawnflags = SF_DETONATE;
-
-	pGrenade->pev->friction = 0.9;
-
-	return pGrenade;
-}
-
-
-
-void CGrenade::UseSatchelCharges(entvars_t* pevOwner, SATCHELCODE code)
-{
-	edict_t* pentFind;
-	edict_t* pentOwner;
-
-	if (!pevOwner)
-		return;
-
-	CBaseEntity* pOwner = CBaseEntity::Instance(pevOwner);
-
-	pentOwner = pOwner->edict();
-
-	pentFind = FIND_ENTITY_BY_CLASSNAME(NULL, "grenade");
-	while (!FNullEnt(pentFind))
-	{
-		CBaseEntity* pEnt = Instance(pentFind);
-		if (pEnt)
-		{
-			if (FBitSet(pEnt->pev->spawnflags, SF_DETONATE) && pEnt->pev->owner == pentOwner)
-			{
-				if (code == SATCHEL_DETONATE)
-					pEnt->Use(pOwner, pOwner, USE_ON, 0);
-				else // SATCHEL_RELEASE
-					pEnt->pev->owner = NULL;
-			}
-		}
-		pentFind = FIND_ENTITY_BY_CLASSNAME(pentFind, "grenade");
-	}
-}
-
-//======================end grenade

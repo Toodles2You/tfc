@@ -151,7 +151,7 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 
 	vecSpot = pev->origin + Vector(0, 0, 8);
 
-	UTIL_TraceLine(vecSpot, vecSpot + Vector(0, 0, -40), ignore_monsters, ENT(pev), &tr);
+	UTIL_TraceLine(vecSpot, vecSpot + Vector(0, 0, -40), ignore_monsters, this, &tr);
 
 	// Pull out of the wall a bit
 	if (tr.flFraction != 1.0)
@@ -207,7 +207,7 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	// do damage
 	if ((pev->spawnflags & SF_ENVEXPLOSION_NODAMAGE) == 0)
 	{
-		RadiusDamage(pev->origin, pev, pev, m_iMagnitude, m_iMagnitude * 2.5, CLASS_NONE, DMG_BLAST);
+		RadiusDamage(pev->origin, this, this, m_iMagnitude, m_iMagnitude * 2.5, CLASS_NONE, DMG_BLAST);
 	}
 
 	SetThink(&CEnvExplosion::Smoke);

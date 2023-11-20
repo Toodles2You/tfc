@@ -105,7 +105,7 @@ bool CHLBot::IsVisible(CBasePlayer* player, bool testFOV = false, unsigned char*
     TraceResult tr;
     auto start = GetGunPosition();
     auto end = player->BodyTarget(start);
-    UTIL_TraceLine(start, end, ignore_monsters, edict(), &tr);
+    UTIL_TraceLine(start, end, ignore_monsters, this, &tr);
     if (tr.flFraction != 1.0f && tr.pHit != player->edict())
     {
         return false;

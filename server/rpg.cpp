@@ -118,7 +118,6 @@ CRpgRocket* CRpgRocket::CreateRpgRocket(Vector vecOrigin, Vector vecAngles, CBas
 bool CRpgRocket::Spawn()
 {
 	Precache();
-	// motor
 	pev->movetype = MOVETYPE_BOUNCE;
 	pev->solid = SOLID_BBOX;
 
@@ -212,7 +211,7 @@ void CRpgRocket::FollowThink()
 	// Examine all entities within a reasonable radius
 	while ((pOther = UTIL_FindEntityByClassname(pOther, "laser_spot")) != NULL)
 	{
-		UTIL_TraceLine(pev->origin, pOther->pev->origin, dont_ignore_monsters, ENT(pev), &tr);
+		UTIL_TraceLine(pev->origin, pOther->pev->origin, dont_ignore_monsters, this, &tr);
 		// ALERT( at_console, "%f\n", tr.flFraction );
 		if (tr.flFraction >= 0.90)
 		{
@@ -505,7 +504,7 @@ void CRpg::UpdateSpot()
 		Vector vecAiming = gpGlobals->v_forward;
 
 		TraceResult tr;
-		UTIL_TraceLine(vecSrc, vecSrc + vecAiming * 8192, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr);
+		UTIL_TraceLine(vecSrc, vecSrc + vecAiming * 8192, dont_ignore_monsters, m_pPlayer, &tr);
 
 		UTIL_SetOrigin(m_pSpot->pev, tr.vecEndPos);
 #endif

@@ -36,13 +36,13 @@ class CTripmineGrenade : public CGrenade
 
 	static TYPEDESCRIPTION m_SaveData[];
 
-	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
+	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
 
 	void EXPORT WarningThink();
 	void EXPORT PowerupThink();
 	void EXPORT BeamBreakThink();
 	void EXPORT DelayDeathThink();
-	void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType) override;
+	void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType) override;
 
 	void MakeBeam();
 	void KillBeam();
@@ -81,7 +81,6 @@ IMPLEMENT_SAVERESTORE(CTripmineGrenade, CGrenade);
 bool CTripmineGrenade::Spawn()
 {
 	Precache();
-	// motor
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_NOT;
 
@@ -160,7 +159,7 @@ void CTripmineGrenade::PowerupThink()
 		// find an owner
 		edict_t* oldowner = pev->owner;
 		pev->owner = NULL;
-		UTIL_TraceLine(pev->origin + m_vecDir * 8, pev->origin - m_vecDir * 32, dont_ignore_monsters, ENT(pev), &tr);
+		UTIL_TraceLine(pev->origin + m_vecDir * 8, pev->origin - m_vecDir * 32, dont_ignore_monsters, this, &tr);
 		if (0 != tr.fStartSolid || (oldowner && tr.pHit == oldowner))
 		{
 			pev->owner = oldowner;
@@ -229,7 +228,7 @@ void CTripmineGrenade::MakeBeam()
 
 	// ALERT( at_console, "serverflags %f\n", gpGlobals->serverflags );
 
-	UTIL_TraceLine(pev->origin, m_vecEnd, dont_ignore_monsters, ENT(pev), &tr);
+	UTIL_TraceLine(pev->origin, m_vecEnd, dont_ignore_monsters, this, &tr);
 
 	m_flBeamLength = tr.flFraction;
 
@@ -259,7 +258,7 @@ void CTripmineGrenade::BeamBreakThink()
 
 	// HACKHACK Set simple box using this really nice global!
 	gpGlobals->trace_flags = FTRACE_SIMPLEBOX;
-	UTIL_TraceLine(pev->origin, m_vecEnd, dont_ignore_monsters, ENT(pev), &tr);
+	UTIL_TraceLine(pev->origin, m_vecEnd, dont_ignore_monsters, this, &tr);
 
 	// ALERT( at_console, "%f : %f\n", tr.flFraction, m_flBeamLength );
 
@@ -270,7 +269,7 @@ void CTripmineGrenade::BeamBreakThink()
 		TraceResult tr2;
 		// Clear out old owner so it can be hit by traces.
 		pev->owner = nullptr;
-		UTIL_TraceLine(pev->origin + m_vecDir * 8, pev->origin - m_vecDir * 32, dont_ignore_monsters, ENT(pev), &tr2);
+		UTIL_TraceLine(pev->origin + m_vecDir * 8, pev->origin - m_vecDir * 32, dont_ignore_monsters, this, &tr2);
 		MakeBeam();
 		if (tr2.pHit)
 		{
@@ -302,14 +301,19 @@ void CTripmineGrenade::BeamBreakThink()
 		// CGrenade code knows who the explosive really belongs to.
 		pev->owner = m_pRealOwner;
 		pev->health = 0;
-		Killed(VARS(pev->owner), VARS(pev->owner), DMG_GENERIC);
+		CBaseEntity* owner;
+		if (pev->owner)
+			owner = CBaseEntity::Instance(pev->owner);
+		else
+			owner = this;
+		Killed(owner, owner, DMG_GENERIC);
 		return;
 	}
 
 	pev->nextthink = gpGlobals->time + 0.1;
 }
 
-bool CTripmineGrenade::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
+bool CTripmineGrenade::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType)
 {
 	if (gpGlobals->time < m_flPowerUp && flDamage < pev->health)
 	{
@@ -318,17 +322,17 @@ bool CTripmineGrenade::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacke
 		Remove();
 		return false;
 	}
-	return CGrenade::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
+	return CGrenade::TakeDamage(inflictor, attacker, flDamage, bitsDamageType);
 }
 
-void CTripmineGrenade::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
+void CTripmineGrenade::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType)
 {
 	pev->takedamage = DAMAGE_NO;
 
-	if (pevAttacker && (pevAttacker->flags & FL_CLIENT) != 0)
+	if (attacker && (attacker->pev->flags & FL_CLIENT) != 0)
 	{
-		// some client has destroyed this mine, he'll get credit for any kills
-		pev->owner = ENT(pevAttacker);
+		// some client has destroyed this mine, they'll get credit for any kills
+		pev->owner = attacker->edict();
 	}
 
 	SetThink(&CTripmineGrenade::DelayDeathThink);
@@ -342,7 +346,7 @@ void CTripmineGrenade::DelayDeathThink()
 {
 	KillBeam();
 	TraceResult tr;
-	UTIL_TraceLine(pev->origin + m_vecDir * 8, pev->origin - m_vecDir * 64, dont_ignore_monsters, ENT(pev), &tr);
+	UTIL_TraceLine(pev->origin + m_vecDir * 8, pev->origin - m_vecDir * 64, dont_ignore_monsters, this, &tr);
 
 	Explode(&tr, DMG_BLAST);
 }
@@ -440,7 +444,7 @@ void CTripmine::PrimaryAttack()
 
 	TraceResult tr;
 
-	UTIL_TraceLine(vecSrc, vecSrc + vecAiming * 128, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr);
+	UTIL_TraceLine(vecSrc, vecSrc + vecAiming * 128, dont_ignore_monsters, m_pPlayer, &tr);
 
 	m_pPlayer->PlaybackEvent(m_usTripFire);
 

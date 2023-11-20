@@ -123,8 +123,8 @@ void ClientKill(edict_t* pEntity)
 
 	pev->health = 0;
 	pl->Killed(
-		CWorld::World->pev,
-		CWorld::World->pev,
+		CWorld::World,
+		CWorld::World,
 		DMG_GENERIC);
 }
 

@@ -208,15 +208,11 @@ void CEgon::PrimaryAttack()
 void CEgon::Fire(const Vector& vecOrigSrc, const Vector& vecDir)
 {
 	Vector vecDest = vecOrigSrc + vecDir * 2048;
-	edict_t* pentIgnore;
 	TraceResult tr;
 
-	pentIgnore = m_pPlayer->edict();
 	Vector tmpSrc = vecOrigSrc + gpGlobals->v_up * -8 + gpGlobals->v_right * 3;
 
-	// ALERT( at_console, "." );
-
-	UTIL_TraceLine(vecOrigSrc, vecDest, dont_ignore_monsters, pentIgnore, &tr);
+	UTIL_TraceLine(vecOrigSrc, vecDest, dont_ignore_monsters, m_pPlayer, &tr);
 
 	if (0 != tr.fAllSolid)
 		return;
@@ -255,9 +251,9 @@ void CEgon::Fire(const Vector& vecOrigSrc, const Vector& vecDir)
 			ClearMultiDamage();
 			if (0 != pEntity->pev->takedamage)
 			{
-				pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgEgonNarrow, vecDir, &tr, DMG_ENERGYBEAM);
+				pEntity->TraceAttack(m_pPlayer, gSkillData.plrDmgEgonNarrow, vecDir, &tr, DMG_ENERGYBEAM);
 			}
-			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+			ApplyMultiDamage(m_pPlayer, m_pPlayer);
 
 			if (UTIL_IsDeathmatch())
 			{
@@ -292,14 +288,14 @@ void CEgon::Fire(const Vector& vecOrigSrc, const Vector& vecDir)
 			ClearMultiDamage();
 			if (0 != pEntity->pev->takedamage)
 			{
-				pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgEgonWide, vecDir, &tr, DMG_ENERGYBEAM | DMG_ALWAYSGIB);
+				pEntity->TraceAttack(m_pPlayer, gSkillData.plrDmgEgonWide, vecDir, &tr, DMG_ENERGYBEAM | DMG_ALWAYSGIB);
 			}
-			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+			ApplyMultiDamage(m_pPlayer, m_pPlayer);
 
 			if (UTIL_IsDeathmatch())
 			{
 				// radius damage a little more potent in multiplayer.
-				::RadiusDamage(tr.vecEndPos, pev, m_pPlayer->pev, gSkillData.plrDmgEgonWide / 4, 128, CLASS_NONE, DMG_ENERGYBEAM | DMG_BLAST | DMG_ALWAYSGIB);
+				RadiusDamage(tr.vecEndPos, this, m_pPlayer, gSkillData.plrDmgEgonWide / 4, 128, CLASS_NONE, DMG_ENERGYBEAM | DMG_BLAST | DMG_ALWAYSGIB);
 			}
 
 			if (!m_pPlayer->IsAlive())

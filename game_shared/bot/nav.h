@@ -335,7 +335,7 @@ inline bool IsWalkableTraceLineClear( Vector &from, Vector &to, unsigned int fla
 
 	while(true)
 	{
-		UTIL_TraceLine( useFrom, to, ignore_monsters, ignore, &result );
+		UTIL_TraceLine( useFrom, to, ignore_monsters, CBaseEntity::Instance(ignore), &result );
 
 		// if we hit a walkable entity, try again
 		if (result.flFraction != 1.0f && IsEntityWalkable( VARS( result.pHit ), flags ))

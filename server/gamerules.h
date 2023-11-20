@@ -129,8 +129,8 @@ public:
 
 	// Client kills/scoring
 	virtual int IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled) = 0;					// how many points do I award whoever kills this player?
-	virtual void PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pInflictor, int bitsDamageType) = 0; // Called each time a player dies
-	virtual void DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pInflictor, int bitsDamageType) = 0;	// Call this from within a GameRules class to report an obituary.
+	virtual void PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, int bitsDamageType) = 0; // Called each time a player dies
+	virtual void DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, int bitsDamageType) = 0;	// Call this from within a GameRules class to report an obituary.
 																									// Weapon retrieval
 	virtual bool CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon);					// The player is touching an CBasePlayerWeapon, do I give it to him?
 	virtual void PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) = 0;				// Called each time a player picks up a weapon from the ground
@@ -239,8 +239,8 @@ public:
 
 	// Client kills/scoring
 	int IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled) override;
-	void PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pInflictor, int bitsDamageType) override;
-	void DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pInflictor, int bitsDamageType) override;
+	void PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, int bitsDamageType) override;
+	void DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, int bitsDamageType) override;
 
 	// Weapon retrieval
 	void PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) override;
@@ -353,8 +353,8 @@ public:
 
 	// Client kills/scoring
 	int IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled) override;
-	void PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pInflictor, int bitsDamageType) override;
-	void DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pInflictor, int bitsDamageType) override;
+	void PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, int bitsDamageType) override;
+	void DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, int bitsDamageType) override;
 
 	// Weapon retrieval
 	void PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) override;

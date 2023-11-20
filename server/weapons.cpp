@@ -77,7 +77,7 @@ void ClearMultiDamage()
 // GLOBALS USED:
 //		gMultiDamage
 
-void ApplyMultiDamage(entvars_t* pevInflictor, entvars_t* pevAttacker)
+void ApplyMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker)
 {
 	Vector vecSpot1; //where blood comes from
 	Vector vecDir;	 //direction blood should go
@@ -86,14 +86,14 @@ void ApplyMultiDamage(entvars_t* pevInflictor, entvars_t* pevAttacker)
 	if (!gMultiDamage.pEntity)
 		return;
 
-	gMultiDamage.pEntity->TakeDamage(pevInflictor, pevAttacker, gMultiDamage.amount, gMultiDamage.type);
+	gMultiDamage.pEntity->TakeDamage(inflictor, attacker, gMultiDamage.amount, gMultiDamage.type);
 }
 
 
 // GLOBALS USED:
 //		gMultiDamage
 
-void AddMultiDamage(entvars_t* pevInflictor, CBaseEntity* pEntity, float flDamage, int bitsDamageType)
+void AddMultiDamage(CBaseEntity *inflictor, CBaseEntity *attacker, CBaseEntity* pEntity, float flDamage, int bitsDamageType)
 {
 	if (!pEntity)
 		return;
@@ -102,7 +102,7 @@ void AddMultiDamage(entvars_t* pevInflictor, CBaseEntity* pEntity, float flDamag
 
 	if (pEntity != gMultiDamage.pEntity)
 	{
-		ApplyMultiDamage(pevInflictor, pevInflictor); // UNDONE: wrong attacker!
+		ApplyMultiDamage(inflictor, attacker); // UNDONE: wrong attacker!
 		gMultiDamage.pEntity = pEntity;
 		gMultiDamage.amount = 0;
 	}

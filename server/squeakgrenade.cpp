@@ -39,7 +39,7 @@ class CSqueakGrenade : public CGrenade
 	void EXPORT SuperBounceTouch(CBaseEntity* pOther);
 	void EXPORT HuntThink();
 	int BloodColor() override { return BLOOD_COLOR_YELLOW; }
-	void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType) override;
+	void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType) override;
 	void GibMonster();
 
 	bool Save(CSave& save) override;
@@ -110,7 +110,6 @@ int CSqueakGrenade::Classify()
 bool CSqueakGrenade::Spawn()
 {
 	Precache();
-	// motor
 	pev->movetype = MOVETYPE_BOUNCE;
 	pev->solid = SOLID_BBOX;
 
@@ -159,7 +158,7 @@ void CSqueakGrenade::Precache()
 }
 
 
-void CSqueakGrenade::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
+void CSqueakGrenade::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType)
 {
 	pev->model = iStringNull; // make invisible
 	SetTouch(NULL);
@@ -175,15 +174,15 @@ void CSqueakGrenade::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int
 	UTIL_BloodDrips(pev->origin, g_vecZero, BloodColor(), 80);
 
 	if (m_hOwner != NULL)
-		RadiusDamage(pev->origin, pev, m_hOwner->pev, pev->dmg, pev->dmg * 2.5, CLASS_NONE, DMG_BLAST);
+		RadiusDamage(pev->origin, this, m_hOwner, pev->dmg, pev->dmg * 2.5, CLASS_NONE, DMG_BLAST);
 	else
-		RadiusDamage(pev->origin, pev, pev, pev->dmg, pev->dmg * 2.5, CLASS_NONE, DMG_BLAST);
+		RadiusDamage(pev->origin, this, this, pev->dmg, pev->dmg * 2.5, CLASS_NONE, DMG_BLAST);
 
 	// reset owner so death message happens
 	if (m_hOwner != NULL)
 		pev->owner = m_hOwner->edict();
 
-	CBaseEntity::Killed(pevInflictor, pevAttacker, bitsDamageType | DMG_ALWAYSGIB);
+	CBaseEntity::Killed(inflictor, attacker, bitsDamageType | DMG_ALWAYSGIB);
 	
 	if (pev->owner && (pev->owner->v.flags & FL_CLIENT) == 0)
 		CBaseEntity::Instance(pev->owner)->DeathNotice(pev);
@@ -217,7 +216,7 @@ void CSqueakGrenade::HuntThink()
 	{
 		g_vecAttackDir = pev->velocity.Normalize();
 		pev->health = -1;
-		Killed(pev, pev, DMG_ALWAYSGIB);
+		Killed(this, this, DMG_ALWAYSGIB);
 		return;
 	}
 
@@ -352,11 +351,11 @@ void CSqueakGrenade::SuperBounceTouch(CBaseEntity* pOther)
 			{
 				// ALERT( at_console, "hit enemy\n");
 				ClearMultiDamage();
-				pOther->TraceAttack(pev, gSkillData.snarkDmgBite, gpGlobals->v_forward, &tr, DMG_SLASH);
+				pOther->TraceAttack(this, gSkillData.snarkDmgBite, gpGlobals->v_forward, &tr, DMG_SLASH);
 				if (m_hOwner != NULL)
-					ApplyMultiDamage(pev, m_hOwner->pev);
+					ApplyMultiDamage(this, m_hOwner);
 				else
-					ApplyMultiDamage(pev, pev);
+					ApplyMultiDamage(this, this);
 
 				pev->dmg += gSkillData.snarkDmgPop; // add more explosion damage
 				// m_flDie += 2.0; // add more life
@@ -514,7 +513,7 @@ void CSqueak::PrimaryAttack()
 		}
 
 		// find place to toss monster
-		UTIL_TraceLine(trace_origin + gpGlobals->v_forward * 20, trace_origin + gpGlobals->v_forward * 64, dont_ignore_monsters, NULL, &tr);
+		UTIL_TraceLine(trace_origin + gpGlobals->v_forward * 20, trace_origin + gpGlobals->v_forward * 64, dont_ignore_monsters, nullptr, &tr);
 
 		m_pPlayer->PlaybackEvent(m_usSnarkFire);
 

@@ -169,10 +169,10 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
-	virtual void TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType);
-	virtual bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
+	virtual void TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType);
+	virtual bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType);
 	virtual bool TakeHealth(float flHealth, int bitsDamageType);
-	virtual void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType);
+	virtual void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType);
 	virtual int BloodColor() { return DONT_BLEED; }
 	virtual void TraceBleed(float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType);
 	virtual bool IsTriggered(CBaseEntity* pActivator) { return true; }
@@ -268,8 +268,8 @@ public:
 
 	static CBaseEntity* Create(const char* szName, const Vector& vecOrigin, const Vector& vecAngles, edict_t* pentOwner = NULL);
 
-	edict_t* edict() { return ENT(pev); }
-	int entindex() { return ENTINDEX(edict()); }
+	edict_t* edict() { return pev->pContainingEntity; }
+	int entindex() { return g_engfuncs.pfnIndexOfEdict(pev->pContainingEntity); }
 
 	virtual Vector Center() { return (pev->absmax + pev->absmin) * 0.5; } // center point of entity
 	virtual Vector EyePosition() { return pev->origin + pev->view_ofs; }  // position of eyes
@@ -536,7 +536,7 @@ public:
 	void EXPORT ButtonReturn();
 	void EXPORT ButtonBackHome();
 	void EXPORT ButtonUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
-	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
+	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
 

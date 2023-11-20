@@ -521,7 +521,7 @@ bool FEntIsVisible(
 	Vector vecSpot2 = pevTarget->origin + pevTarget->view_ofs;
 	TraceResult tr;
 
-	UTIL_TraceLine(vecSpot1, vecSpot2, ignore_monsters, ENT(pev), &tr);
+	UTIL_TraceLine(vecSpot1, vecSpot2, ignore_monsters, CBaseEntity::Instance(pev), &tr);
 
 	if (0 != tr.fInOpen && 0 != tr.fInWater)
 		return false; // sight line crossed contents

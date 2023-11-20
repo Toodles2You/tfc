@@ -729,27 +729,22 @@ int CHalfLifeMultiplay::IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKil
 //=========================================================
 // PlayerKilled - someone/something killed this player
 //=========================================================
-void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pInflictor, int bitsDamageType)
+void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, int bitsDamageType)
 {
-	DeathNotice(pVictim, pKiller, pInflictor, bitsDamageType);
+	DeathNotice(pVictim, killer, inflictor, bitsDamageType);
 
 	pVictim->m_iDeaths += 1;
 
-
 	FireTargets("game_playerdie", pVictim, pVictim, USE_TOGGLE, 0);
-	CBasePlayer* peKiller = NULL;
-	CBaseEntity* ktmp = CBaseEntity::Instance(pKiller);
-	if (ktmp && (ktmp->Classify() == CLASS_PLAYER))
-		peKiller = (CBasePlayer*)ktmp;
 
-	if (ktmp && ktmp->IsPlayer())
+	if (killer->IsPlayer())
 	{
 		// if a player dies in a deathmatch game and the killer is a client, award the killer some points
-		peKiller->AddPoints(IPointsForKill(peKiller, pVictim), false);
+		killer->AddPoints(IPointsForKill((CBasePlayer *)killer, pVictim), false);
 
-		if (pVictim->pev != pKiller)
+		if (pVictim != killer)
 		{
-			FireTargets("game_playerkill", ktmp, ktmp, USE_TOGGLE, 0);
+			FireTargets("game_playerkill", killer, killer, USE_TOGGLE, 0);
 		}
 	}
 
@@ -764,21 +759,18 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, 
 	MESSAGE_END();
 
 	// killers score, if it's a player
-	CBaseEntity* ep = CBaseEntity::Instance(pKiller);
-	if (ep && ep->Classify() == CLASS_PLAYER)
+	if (killer->IsPlayer())
 	{
-		CBasePlayer* PK = (CBasePlayer*)ep;
-
 		MESSAGE_BEGIN(MSG_ALL, gmsgScoreInfo);
-		WRITE_BYTE(ENTINDEX(PK->edict()));
-		WRITE_SHORT(PK->pev->frags);
-		WRITE_SHORT(PK->m_iDeaths);
+		WRITE_BYTE(killer->entindex());
+		WRITE_SHORT(killer->pev->frags);
+		WRITE_SHORT(((CBasePlayer *)killer)->m_iDeaths);
 		WRITE_SHORT(0);
-		WRITE_SHORT(PK->TeamNumber());
+		WRITE_SHORT(killer->TeamNumber());
 		MESSAGE_END();
 
-		// let the killer paint another decal as soon as he'd like.
-		PK->m_flNextDecalTime = gpGlobals->time;
+		// let the killer paint another decal as soon as they'd like.
+		((CBasePlayer *)killer)->m_flNextDecalTime = gpGlobals->time;
 	}
 
 	if (pVictim->HasNamedPlayerWeapon("weapon_satchel"))
@@ -790,10 +782,9 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, 
 //=========================================================
 // Deathnotice.
 //=========================================================
-void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pevInflictor, int bitsDamageType)
+void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, int bitsDamageType)
 {
 	// Work out what killed the player, and send a message to all clients about it
-	CBaseEntity* Killer = CBaseEntity::Instance(pKiller);
 
 	const char* killer_weapon_name = "world"; // by default, the player is killed by the world
 	int killer_index = 0;
@@ -802,40 +793,38 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 	const char* tau = "tau_cannon";
 	const char* gluon = "gluon gun";
 
-	if ((pKiller->flags & FL_CLIENT) != 0)
+	if ((killer->pev->flags & FL_CLIENT) != 0)
 	{
-		killer_index = ENTINDEX(ENT(pKiller));
+		killer_index = killer->entindex();
 
-		if (pevInflictor)
+		if (inflictor)
 		{
-			if (pevInflictor == pKiller)
+			if (inflictor == killer)
 			{
-				// If the inflictor is the killer,  then it must be their current weapon doing the damage
-				CBasePlayer* pPlayer = (CBasePlayer*)CBaseEntity::Instance(pKiller);
+				// If the inflictor is the killer, then it must be their current weapon doing the damage
 
-				if (pPlayer->m_pActiveWeapon)
+				if (((CBasePlayer *)killer)->m_pActiveWeapon)
 				{
-					killer_weapon_name = pPlayer->m_pActiveWeapon->pszName();
+					killer_weapon_name = ((CBasePlayer *)killer)->m_pActiveWeapon->pszName();
 				}
 			}
 			else
 			{
-				killer_weapon_name = STRING(pevInflictor->classname); // it's just that easy
+				killer_weapon_name = STRING(inflictor->pev->classname); // it's just that easy
 			}
 		}
 	}
 	else
 	{
-		killer_weapon_name = STRING(pevInflictor->classname);
+		killer_weapon_name = STRING(inflictor->pev->classname);
 	}
 
 	// strip the monster_* or weapon_* from the inflictor's classname
-	if (strncmp(killer_weapon_name, "weapon_", 7) == 0)
-		killer_weapon_name += 7;
-	else if (strncmp(killer_weapon_name, "monster_", 8) == 0)
-		killer_weapon_name += 8;
-	else if (strncmp(killer_weapon_name, "func_", 5) == 0)
-		killer_weapon_name += 5;
+	auto c = strrchr(killer_weapon_name, '_');
+	if (c)
+	{
+		killer_weapon_name = c + 1;
+	}
 
 	int flags = kDamageFlagDead;
 
@@ -844,11 +833,12 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 	{
 		flags |= kDamageFlagHeadshot;
 	}
-	if (pVictim->pev == pKiller)
+
+	if (pVictim == killer)
 	{
 		flags |= kDamageFlagSelf;
 	}
-	else if (PlayerRelationship(pVictim, Killer) == GR_TEAMMATE)
+	else if (PlayerRelationship(pVictim, killer) == GR_TEAMMATE)
 	{
 		flags |= kDamageFlagFriendlyFire;
 	}
@@ -866,7 +856,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 	else if (0 == strcmp(killer_weapon_name, "gauss"))
 		killer_weapon_name = tau;
 
-	if (pVictim->pev == pKiller)
+	if (pVictim == killer)
 	{
 		// killed self
 
@@ -890,17 +880,17 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 				killer_weapon_name);
 		}
 	}
-	else if ((pKiller->flags & FL_CLIENT) != 0)
+	else if ((killer->pev->flags & FL_CLIENT) != 0)
 	{
 		// team match?
 		if (IsTeamplay())
 		{
 			UTIL_LogPrintf("\"%s<%i><%s><%s>\" killed \"%s<%i><%s><%s>\" with \"%s\"\n",
-				STRING(pKiller->netname),
-				GETPLAYERUSERID(ENT(pKiller)),
-				GETPLAYERAUTHID(ENT(pKiller)),
-				g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(ENT(pKiller)), "model"),
-				STRING(pVictim->pev->netname),
+				STRING(killer->pev->netname),
+				GETPLAYERUSERID(killer->edict()),
+				GETPLAYERAUTHID(killer->edict()),
+				g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(killer->edict()), "model"),
+				STRING(killer->pev->netname),
 				GETPLAYERUSERID(pVictim->edict()),
 				GETPLAYERAUTHID(pVictim->edict()),
 				g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pVictim->edict()), "model"),
@@ -909,10 +899,10 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 		else
 		{
 			UTIL_LogPrintf("\"%s<%i><%s><%i>\" killed \"%s<%i><%s><%i>\" with \"%s\"\n",
-				STRING(pKiller->netname),
-				GETPLAYERUSERID(ENT(pKiller)),
-				GETPLAYERAUTHID(ENT(pKiller)),
-				GETPLAYERUSERID(ENT(pKiller)),
+				STRING(killer->pev->netname),
+				GETPLAYERUSERID(killer->edict()),
+				GETPLAYERAUTHID(killer->edict()),
+				GETPLAYERUSERID(killer->edict()),
 				STRING(pVictim->pev->netname),
 				GETPLAYERUSERID(pVictim->edict()),
 				GETPLAYERAUTHID(pVictim->edict()),
@@ -948,11 +938,8 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 	MESSAGE_BEGIN(MSG_SPEC, SVC_DIRECTOR);
 	WRITE_BYTE(9);							 // command length in bytes
 	WRITE_BYTE(DRC_CMD_EVENT);				 // player killed
-	WRITE_SHORT(ENTINDEX(pVictim->edict())); // index number of primary entity
-	if (pevInflictor)
-		WRITE_SHORT(ENTINDEX(ENT(pevInflictor))); // index number of secondary entity
-	else
-		WRITE_SHORT(ENTINDEX(ENT(pKiller))); // index number of secondary entity
+	WRITE_SHORT(pVictim->entindex()); // index number of primary entity
+	WRITE_SHORT(inflictor->entindex()); // index number of secondary entity
 	WRITE_LONG(7 | DRC_FLAG_DRAMATIC);		 // eventflags (priority and flags)
 	MESSAGE_END();
 }
@@ -1231,7 +1218,7 @@ CSpawnPoint *CHalfLifeMultiplay::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
 		{
 			if (g_pGameRules->FPlayerCanTakeDamage((CBasePlayer *)entity, pPlayer))
 			{
-				entity->TakeDamage(pPlayer->pev, pPlayer->pev, 300.0F, DMG_ALWAYSGIB);
+				entity->TakeDamage(pPlayer, pPlayer, 300.0F, DMG_ALWAYSGIB);
 			}
 		}
 	}
@@ -1322,8 +1309,8 @@ void CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTea
 	if (bKill)
 	{
 		pPlayer->Killed(
-			CWorld::World->pev,
-			CWorld::World->pev,
+			CWorld::World,
+			CWorld::World,
 			bGib ? DMG_ALWAYSGIB : DMG_GENERIC);
 	}
 
