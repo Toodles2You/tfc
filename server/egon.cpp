@@ -428,12 +428,12 @@ void CEgon::DestroyEffect()
 #ifndef CLIENT_DLL
 	if (m_pBeam)
 	{
-		UTIL_Remove(m_pBeam);
+		m_pBeam->Remove();
 		m_pBeam = NULL;
 	}
 	if (m_pNoise)
 	{
-		UTIL_Remove(m_pNoise);
+		m_pNoise->Remove();
 		m_pNoise = NULL;
 	}
 	if (m_pSprite)
@@ -441,7 +441,7 @@ void CEgon::DestroyEffect()
 		if (m_fireMode == FIRE_WIDE)
 			m_pSprite->Expand(10, 500);
 		else
-			UTIL_Remove(m_pSprite);
+			m_pSprite->Remove();
 		m_pSprite = NULL;
 	}
 #endif

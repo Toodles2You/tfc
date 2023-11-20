@@ -150,7 +150,7 @@ void CGrenade::Smoke()
 		WRITE_BYTE(12);						// framerate
 		MESSAGE_END();
 	}
-	UTIL_Remove(this);
+	Remove();
 }
 
 void CGrenade::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
@@ -291,7 +291,7 @@ void CGrenade::TumbleThink()
 {
 	if (!IsInWorld())
 	{
-		UTIL_Remove(this);
+		Remove();
 		return;
 	}
 

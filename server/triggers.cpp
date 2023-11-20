@@ -178,7 +178,7 @@ void CAutoTrigger::Think()
 	{
 		SUB_UseTargets(this, triggerType, 0);
 		if ((pev->spawnflags & SF_AUTO_FIREONCE) != 0)
-			UTIL_Remove(this);
+			Remove();
 	}
 }
 
@@ -247,7 +247,7 @@ void CTriggerRelay::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 {
 	SUB_UseTargets(this, triggerType, 0);
 	if ((pev->spawnflags & SF_RELAY_FIREONCE) != 0)
-		UTIL_Remove(this);
+		Remove();
 }
 
 
@@ -404,7 +404,7 @@ void CMultiManager::ManagerThink()
 		SetThink(NULL);
 		if (IsClone())
 		{
-			UTIL_Remove(this);
+			Remove();
 			return;
 		}
 		SetUse(&CMultiManager::ManagerUse); // allow manager re-use
@@ -735,7 +735,7 @@ void CTriggerCDAudio::PlayTrack()
 	PlayCDTrack((int)pev->health);
 
 	SetTouch(NULL);
-	UTIL_Remove(this);
+	Remove();
 }
 
 
@@ -799,7 +799,7 @@ void CTargetCDAudio::Think()
 void CTargetCDAudio::Play()
 {
 	PlayCDTrack((int)pev->health);
-	UTIL_Remove(this);
+	Remove();
 }
 
 //=====================================
@@ -1151,8 +1151,7 @@ void CBaseTrigger::ActivateMultiTrigger(CBaseEntity* pActivator)
 		// we can't just remove (self) here, because this is a touch function
 		// called while C code is looping through area links...
 		SetTouch(NULL);
-		pev->nextthink = gpGlobals->time + 0.1;
-		SetThink(&CBaseTrigger::SUB_Remove);
+		Remove();
 	}
 }
 
@@ -1254,7 +1253,7 @@ void CFireAndDie::Precache()
 void CFireAndDie::Think()
 {
 	SUB_UseTargets(this, USE_TOGGLE, 0);
-	UTIL_Remove(this);
+	Remove();
 }
 
 
@@ -1773,7 +1772,7 @@ void CTriggerPush::Touch(CBaseEntity* pOther)
 			pevToucher->velocity = pevToucher->velocity + (pev->speed * pev->movedir);
 			if (pevToucher->velocity.z > 0)
 				pevToucher->flags &= ~FL_ONGROUND;
-			UTIL_Remove(this);
+			Remove();
 		}
 		else
 		{ // Push field, transfer to base velocity
@@ -1904,7 +1903,7 @@ void CTriggerSave::SaveTouch(CBaseEntity* pOther)
 		return;
 
 	SetTouch(NULL);
-	UTIL_Remove(this);
+	Remove();
 	SERVER_COMMAND("autosave\n");
 }
 
@@ -1933,7 +1932,7 @@ void CTriggerEndSection::EndSectionUse(CBaseEntity* pActivator, CBaseEntity* pCa
 	{
 		g_engfuncs.pfnEndSection(STRING(pev->message));
 	}
-	UTIL_Remove(this);
+	Remove();
 }
 
 bool CTriggerEndSection::Spawn()
@@ -1965,7 +1964,7 @@ void CTriggerEndSection::EndSectionTouch(CBaseEntity* pOther)
 	{
 		g_engfuncs.pfnEndSection(STRING(pev->message));
 	}
-	UTIL_Remove(this);
+	Remove();
 }
 
 bool CTriggerEndSection::KeyValue(KeyValueData* pkvd)

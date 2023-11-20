@@ -179,10 +179,9 @@ void CTripmineGrenade::PowerupThink()
 		{
 			STOP_SOUND(ENT(pev), CHAN_VOICE, "weapons/mine_deploy.wav");
 			STOP_SOUND(ENT(pev), CHAN_BODY, "weapons/mine_charge.wav");
-			SetThink(&CTripmineGrenade::SUB_Remove);
-			pev->nextthink = gpGlobals->time + 0.1;
 			ALERT(at_console, "WARNING:Tripmine at %.0f, %.0f, %.0f removed\n", pev->origin.x, pev->origin.y, pev->origin.z);
 			KillBeam();
+			Remove();
 			return;
 		}
 	}
@@ -194,12 +193,10 @@ void CTripmineGrenade::PowerupThink()
 		CBaseEntity* pMine = Create("weapon_tripmine", pev->origin + m_vecDir * 24, pev->angles);
 		pMine->pev->spawnflags |= SF_NORESPAWN;
 
-		SetThink(&CTripmineGrenade::SUB_Remove);
 		KillBeam();
-		pev->nextthink = gpGlobals->time + 0.1;
+		Remove();
 		return;
 	}
-	// ALERT( at_console, "%d %.0f %.0f %0.f\n", pev->owner, m_pOwner->pev->origin.x, m_pOwner->pev->origin.y, m_pOwner->pev->origin.z );
 
 	if (gpGlobals->time > m_flPowerUp)
 	{
@@ -220,7 +217,7 @@ void CTripmineGrenade::KillBeam()
 {
 	if (m_pBeam)
 	{
-		UTIL_Remove(m_pBeam);
+		m_pBeam->Remove();
 		m_pBeam = NULL;
 	}
 }
@@ -317,10 +314,8 @@ bool CTripmineGrenade::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacke
 	if (gpGlobals->time < m_flPowerUp && flDamage < pev->health)
 	{
 		// disable
-		// Create( "weapon_tripmine", pev->origin + m_vecDir * 24, pev->angles );
-		SetThink(&CTripmineGrenade::SUB_Remove);
-		pev->nextthink = gpGlobals->time + 0.1;
 		KillBeam();
+		Remove();
 		return false;
 	}
 	return CGrenade::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);

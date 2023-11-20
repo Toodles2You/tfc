@@ -69,7 +69,7 @@ void CShower::Think()
 	if (pev->speed > 0)
 		pev->nextthink = gpGlobals->time + 0.1;
 	else
-		UTIL_Remove(this);
+		Remove();
 	pev->flags &= ~FL_ONGROUND;
 }
 
@@ -242,7 +242,7 @@ void CEnvExplosion::Smoke()
 
 	if ((pev->spawnflags & SF_ENVEXPLOSION_REPEATABLE) == 0)
 	{
-		UTIL_Remove(this);
+		Remove();
 	}
 }
 

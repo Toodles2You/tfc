@@ -1242,7 +1242,7 @@ void CSprite::AnimateThink()
 void CSprite::AnimateUntilDead()
 {
 	if (gpGlobals->time > pev->dmgtime)
-		UTIL_Remove(this);
+		Remove();
 	else
 	{
 		AnimateThink();
@@ -1269,7 +1269,7 @@ void CSprite::ExpandThink()
 	if (pev->renderamt <= 0)
 	{
 		pev->renderamt = 0;
-		UTIL_Remove(this);
+		Remove();
 	}
 	else
 	{
@@ -1496,8 +1496,7 @@ void CGibShooter::ShootThink()
 		}
 		else
 		{
-			SetThink(&CGibShooter::SUB_Remove);
-			pev->nextthink = gpGlobals->time;
+			Remove();
 		}
 	}
 }
@@ -1678,7 +1677,7 @@ void CTestEffect::TestThink()
 	{
 		for (i = 0; i < m_iBeam; i++)
 		{
-			UTIL_Remove(m_pBeam[i]);
+			m_pBeam[i]->Remove();
 		}
 		m_flStartTime = gpGlobals->time;
 		m_iBeam = 0;
@@ -2072,7 +2071,7 @@ void CMessage::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useTy
 		EMIT_SOUND(edict(), CHAN_BODY, STRING(pev->noise), pev->scale, pev->speed);
 	}
 	if ((pev->spawnflags & SF_MESSAGE_ONCE) != 0)
-		UTIL_Remove(this);
+		Remove();
 
 	SUB_UseTargets(this, USE_TOGGLE, 0);
 }
@@ -2120,8 +2119,7 @@ void CEnvFunnel::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE use
 
 	MESSAGE_END();
 
-	SetThink(&CEnvFunnel::SUB_Remove);
-	pev->nextthink = gpGlobals->time;
+	Remove();
 }
 
 bool CEnvFunnel::Spawn()
@@ -2175,9 +2173,6 @@ void CEnvBeverage::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE u
 
 	pev->frags = 1;
 	pev->health--;
-
-	//SetThink (SUB_Remove);
-	//pev->nextthink = gpGlobals->time;
 }
 
 bool CEnvBeverage::Spawn()
@@ -2259,6 +2254,5 @@ void CItemSoda::CanTouch(CBaseEntity* pOther)
 	pev->movetype = MOVETYPE_NONE;
 	pev->effects = EF_NODRAW;
 	SetTouch(NULL);
-	SetThink(&CItemSoda::SUB_Remove);
-	pev->nextthink = gpGlobals->time;
+	Remove();
 }

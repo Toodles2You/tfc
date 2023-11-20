@@ -41,7 +41,7 @@ LINK_ENTITY_TO_CLASS(monster_satchel, CSatchelCharge);
 void CSatchelCharge::Deactivate()
 {
 	pev->solid = SOLID_NOT;
-	UTIL_Remove(this);
+	Remove();
 }
 
 
@@ -108,7 +108,7 @@ void CSatchelCharge::SatchelThink()
 
 	if (!IsInWorld())
 	{
-		UTIL_Remove(this);
+		Remove();
 		return;
 	}
 

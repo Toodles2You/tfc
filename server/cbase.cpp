@@ -602,7 +602,7 @@ void CBaseEntity::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bi
 {
 	pev->takedamage = DAMAGE_NO;
 	pev->deadflag = DEAD_DEAD;
-	UTIL_Remove(this);
+	Remove();
 }
 
 

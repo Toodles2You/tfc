@@ -162,9 +162,7 @@ void CSqueakGrenade::Precache()
 void CSqueakGrenade::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
 {
 	pev->model = iStringNull; // make invisible
-	SetThink(&CSqueakGrenade::SUB_Remove);
 	SetTouch(NULL);
-	pev->nextthink = gpGlobals->time + 0.1;
 
 	// since squeak grenades never leave a body behind, clear out their takedamage now.
 	// Squeaks do a bit of radius damage when they pop, and that radius damage will
@@ -189,6 +187,8 @@ void CSqueakGrenade::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int
 	
 	if (pev->owner && (pev->owner->v.flags & FL_CLIENT) == 0)
 		CBaseEntity::Instance(pev->owner)->DeathNotice(pev);
+
+	Remove();
 }
 
 void CSqueakGrenade::GibMonster()
@@ -205,7 +205,7 @@ void CSqueakGrenade::HuntThink()
 	if (!IsInWorld())
 	{
 		SetTouch(NULL);
-		UTIL_Remove(this);
+		Remove();
 		return;
 	}
 

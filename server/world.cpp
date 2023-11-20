@@ -145,8 +145,7 @@ void CDecal::TriggerDecal(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 		WRITE_SHORT((int)VARS(trace.pHit)->modelindex);
 	MESSAGE_END();
 
-	SetThink(&CDecal::SUB_Remove);
-	pev->nextthink = gpGlobals->time + 0.1;
+	Remove();
 }
 
 
@@ -165,7 +164,7 @@ void CDecal::StaticDecal()
 
 	g_engfuncs.pfnStaticDecal(pev->origin, (int)pev->skin, entityIndex, modelIndex);
 
-	SUB_Remove();
+	Remove();
 }
 
 
@@ -435,7 +434,7 @@ void CWorld::Precache()
 	// Flag this entity for removal if it's not the actual world entity.
 	if (World != this)
 	{
-		UTIL_Remove(this);
+		Remove();
 		return;
 	}
 

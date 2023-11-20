@@ -132,7 +132,6 @@ void CCrossbowBolt::BoltTouch(CBaseEntity* pOther)
 
 		pevOwner = VARS(pev->owner);
 
-		// UNDONE: this needs to call TraceAttack instead
 		ClearMultiDamage();
 
 		if (pOther->IsPlayer())
@@ -157,30 +156,10 @@ void CCrossbowBolt::BoltTouch(CBaseEntity* pOther)
 			EMIT_SOUND(ENT(pev), CHAN_BODY, "weapons/xbow_hitbod2.wav", 1, ATTN_NORM);
 			break;
 		}
-
-		if (!UTIL_IsDeathmatch())
-		{
-			Killed(pev, pev, DMG_NEVERGIB);
-		}
 	}
 	else
 	{
 		EMIT_SOUND_DYN(ENT(pev), CHAN_BODY, "weapons/xbow_hit1.wav", RANDOM_FLOAT(0.95, 1.0), ATTN_NORM, 0, 98 + RANDOM_LONG(0, 7));
-
-		SetThink(&CCrossbowBolt::SUB_Remove);
-		pev->nextthink = gpGlobals->time; // this will get changed below if the bolt is allowed to stick in what it hit.
-
-		if (FClassnameIs(pOther->pev, "worldspawn") || FClassnameIs(pOther->pev, "func_wall"))
-		{
-			// if what we hit is static architecture, can stay around for a while.
-			pev->avelocity.z = 0;
-			pev->angles.z = RANDOM_LONG(0, 360);
-			pev->nextthink = gpGlobals->time + 10.0;
-		}
-		else if (!UTIL_IsDeathmatch())
-		{
-			Killed(pev, pev, DMG_NEVERGIB);
-		}
 
 		if (UTIL_PointContents(pev->origin) != CONTENTS_WATER)
 		{
@@ -192,7 +171,10 @@ void CCrossbowBolt::BoltTouch(CBaseEntity* pOther)
 	{
 		SetThink(&CCrossbowBolt::ExplodeThink);
 		pev->nextthink = gpGlobals->time + 0.1;
+		return;
 	}
+
+	Remove();
 }
 
 void CCrossbowBolt::BubbleThink()
@@ -242,7 +224,7 @@ void CCrossbowBolt::ExplodeThink()
 
 	::RadiusDamage(pev->origin, pev, pevOwner, pev->dmg, 128, CLASS_NONE, DMG_BLAST | DMG_ALWAYSGIB);
 
-	UTIL_Remove(this);
+	Remove();
 }
 #endif
 

@@ -430,7 +430,7 @@ void CWreckage::Think()
 	{
 		if (pev->dmgtime < gpGlobals->time)
 		{
-			UTIL_Remove(this);
+			Remove();
 			return;
 		}
 		else if (RANDOM_FLOAT(0, pev->dmgtime - m_flStartTime) > pev->dmgtime - gpGlobals->time)

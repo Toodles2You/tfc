@@ -235,7 +235,7 @@ void UTIL_PrecacheOtherWeapon(const char* szClassname)
 		}
 	}
 
-	REMOVE_ENTITY(pent);
+	g_engfuncs.pfnRemoveEntity(pent);
 }
 
 // called by worldspawn
@@ -525,7 +525,7 @@ void CBasePlayerItem::DefaultTouch(CBaseEntity* pOther)
 	{
 		if (gEvilImpulse101)
 		{
-			UTIL_Remove(this);
+			Remove();
 		}
 		return;
 	}
@@ -561,15 +561,13 @@ void CBasePlayerItem::AddToPlayer(CBasePlayer* pPlayer)
 void CBasePlayerItem::Drop()
 {
 	SetTouch(NULL);
-	SetThink(&CBasePlayerItem::SUB_Remove);
-	pev->nextthink = gpGlobals->time + .1;
+	Remove();
 }
 
 void CBasePlayerItem::Kill()
 {
 	SetTouch(NULL);
-	SetThink(&CBasePlayerItem::SUB_Remove);
-	pev->nextthink = gpGlobals->time + .1;
+	Remove();
 }
 
 bool CBasePlayerItem::Holster()
@@ -852,16 +850,14 @@ void CBasePlayerAmmo::DefaultTouch(CBaseEntity* pOther)
 		else
 		{
 			SetTouch(NULL);
-			SetThink(&CBasePlayerAmmo::SUB_Remove);
-			pev->nextthink = gpGlobals->time + .1;
+			Remove();
 		}
 	}
 	else if (gEvilImpulse101)
 	{
 		// evil impulse 101 hack, kill always
 		SetTouch(NULL);
-		SetThink(&CBasePlayerAmmo::SUB_Remove);
-		pev->nextthink = gpGlobals->time + .1;
+		Remove();
 	}
 }
 
@@ -1022,12 +1018,11 @@ void CWeaponBox::Kill()
 		{
 			continue;
 		}
-		pWeapon->SetThink(&CBasePlayerItem::SUB_Remove);
-		pWeapon->pev->nextthink = gpGlobals->time + 0.1;
+		pWeapon->Remove();
 	}
 
 	// remove the box
-	UTIL_Remove(this);
+	Remove();
 }
 
 //=========================================================
@@ -1089,7 +1084,7 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 
 	EMIT_SOUND(pOther->edict(), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM);
 	SetTouch(NULL);
-	UTIL_Remove(this);
+	Remove();
 }
 
 //=========================================================

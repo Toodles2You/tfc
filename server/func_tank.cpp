@@ -795,7 +795,7 @@ void CFuncTankLaser::Activate()
 {
 	if (!GetLaser())
 	{
-		UTIL_Remove(this);
+		Remove();
 		ALERT(at_error, "Laser tank with no env_laser!\n");
 	}
 	else

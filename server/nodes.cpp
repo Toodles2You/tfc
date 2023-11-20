@@ -1674,8 +1674,8 @@ void CTestHull::BuildNodeGraph()
 	float flDist;
 	int step;
 
-	SetThink(&CTestHull::SUB_Remove); // no matter what happens, the hull gets rid of itself.
-	pev->nextthink = gpGlobals->time;
+	SetThink(&CTestHull::Remove);
+	pev->nextthink = gpGlobals->time + 0.1;
 
 	// 	malloc a swollen temporary connection pool that we trim down after we know exactly how many connections there are.
 	pTempPool = (CLink*)calloc(sizeof(CLink), (WorldGraph.m_cNodes * MAX_NODE_INITIAL_LINKS));
@@ -3613,7 +3613,7 @@ void CNodeViewer::DrawThink()
 	{
 		if (m_iDraw == m_nVisited)
 		{
-			UTIL_Remove(this);
+			Remove();
 			return;
 		}
 

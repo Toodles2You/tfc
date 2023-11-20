@@ -133,12 +133,12 @@ void CItem::ItemTouch(CBaseEntity* pOther)
 		}
 		else
 		{
-			UTIL_Remove(this);
+			Remove();
 		}
 	}
 	else if (gEvilImpulse101)
 	{
-		UTIL_Remove(this);
+		Remove();
 	}
 }
 

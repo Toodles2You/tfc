@@ -88,17 +88,28 @@ void CBaseEntity::UpdateOnRemove()
 }
 
 // Convenient way to delay removing oneself
-void CBaseEntity::SUB_Remove()
+void CBaseEntity::Remove()
 {
-	UpdateOnRemove();
-	if (pev->health > 0)
+	if ((pev->flags & FL_KILLME) != 0)
 	{
-		// this situation can screw up monsters who can't tell their entity pointers are invalid.
-		pev->health = 0;
-		ALERT(at_aiconsole, "SUB_Remove called on entity with health > 0\n");
+		return;
 	}
 
-	REMOVE_ENTITY(ENT(pev));
+	UpdateOnRemove();
+
+	pev->flags |= FL_KILLME;
+	pev->targetname = iStringNull;
+	pev->globalname = iStringNull;
+	pev->netname = iStringNull;
+	pev->target = iStringNull;
+	pev->model = iStringNull;
+	pev->modelindex = 0;
+	pev->solid = SOLID_NOT;
+	pev->movetype = MOVETYPE_NONE;
+	SetThink(nullptr);
+	SetTouch(nullptr);
+	SetUse(nullptr);
+	SetBlocked(nullptr);
 }
 
 
@@ -236,7 +247,7 @@ void CBaseDelay::SUB_UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float
 		pentKillTarget = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(m_iszKillTarget));
 		while (!FNullEnt(pentKillTarget))
 		{
-			UTIL_Remove(CBaseEntity::Instance(pentKillTarget));
+			CBaseEntity::Instance(pentKillTarget)->Remove();
 
 			ALERT(at_aiconsole, "killing %s\n", STRING(pentKillTarget->v.classname));
 			pentKillTarget = FIND_ENTITY_BY_TARGETNAME(pentKillTarget, STRING(m_iszKillTarget));
@@ -288,7 +299,7 @@ void CBaseDelay::DelayThink()
 	}
 	// The use type is cached (and stashed) in pev->button
 	SUB_UseTargets(pActivator, (USE_TYPE)pev->button, 0);
-	REMOVE_ENTITY(ENT(pev));
+	Remove();
 }
 
 

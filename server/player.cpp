@@ -2476,14 +2476,14 @@ void CSprayCan::Think()
 	if (nFrames == -1)
 	{
 		UTIL_DecalTrace(&tr, DECAL_LAMBDA6);
-		UTIL_Remove(this);
+		Remove();
 	}
 	else
 	{
 		UTIL_PlayerDecalTrace(&tr, playernum, pev->frame, true);
 		// Just painted last custom frame.
 		if (pev->frame++ >= (nFrames - 1))
-			UTIL_Remove(this);
+			Remove();
 	}
 
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -2752,7 +2752,9 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 		if (pEntity)
 		{
 			if (0 != pEntity->pev->takedamage)
-				pEntity->SetThink(&CBaseEntity::SUB_Remove);
+			{
+				pEntity->Remove();
+			}
 		}
 		break;
 	}

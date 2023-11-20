@@ -367,7 +367,7 @@ void CPlatTrigger::Touch(CBaseEntity* pOther)
 	//Platform was removed, remove trigger
 	if (!m_hPlatform || !m_hPlatform->pev)
 	{
-		UTIL_Remove(this);
+		Remove();
 		return;
 	}
 
@@ -1575,7 +1575,7 @@ void CFuncTrainControls::Find()
 
 	CFuncTrackTrain* ptrain = CFuncTrackTrain::Instance(pTarget);
 	ptrain->SetControls(pev);
-	UTIL_Remove(this);
+	Remove();
 }
 
 

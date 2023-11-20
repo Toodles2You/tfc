@@ -422,7 +422,7 @@ void CGameTeamMaster::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 	{
 		SUB_UseTargets(pActivator, triggerType, value);
 		if (RemoveOnFire())
-			UTIL_Remove(this);
+			Remove();
 	}
 }
 
@@ -491,7 +491,7 @@ void CGameTeamSet::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE u
 
 	if (RemoveOnFire())
 	{
-		UTIL_Remove(this);
+		Remove();
 	}
 }
 
@@ -646,7 +646,7 @@ void CGamePlayerHurt::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 
 	if (RemoveOnFire())
 	{
-		UTIL_Remove(this);
+		Remove();
 	}
 }
 
@@ -717,7 +717,7 @@ void CGameCounter::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE u
 		SUB_UseTargets(pActivator, USE_TOGGLE, 0);
 		if (RemoveOnFire())
 		{
-			UTIL_Remove(this);
+			Remove();
 		}
 
 		if (ResetOnFire())
@@ -756,7 +756,7 @@ void CGameCounterSet::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 
 	if (RemoveOnFire())
 	{
-		UTIL_Remove(this);
+		Remove();
 	}
 }
 
@@ -921,6 +921,6 @@ void CGamePlayerTeam::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 
 	if (RemoveOnFire())
 	{
-		UTIL_Remove(this);
+		Remove();
 	}
 }

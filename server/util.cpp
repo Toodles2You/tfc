@@ -1550,17 +1550,6 @@ void UTIL_BubbleTrail(Vector from, Vector to, int count)
 }
 
 
-void UTIL_Remove(CBaseEntity* pEntity)
-{
-	if (!pEntity)
-		return;
-
-	pEntity->UpdateOnRemove();
-	pEntity->pev->flags |= FL_KILLME;
-	pEntity->pev->targetname = 0;
-}
-
-
 bool UTIL_IsValidEntity(edict_t* pent)
 {
 	if (!pent || 0 != pent->free || (pent->v.flags & FL_KILLME) != 0)
@@ -1583,7 +1572,7 @@ void UTIL_PrecacheOther(const char* szClassname)
 	CBaseEntity* pEntity = CBaseEntity::Instance(VARS(pent));
 	if (pEntity)
 		pEntity->Precache();
-	REMOVE_ENTITY(pent);
+	g_engfuncs.pfnRemoveEntity(pent);
 }
 
 //=========================================================

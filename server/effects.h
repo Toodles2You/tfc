@@ -179,7 +179,7 @@ public:
 
 	inline void LiveForTime(float time)
 	{
-		SetThink(&CBeam::SUB_Remove);
+		SetThink(&CBeam::Remove);
 		pev->nextthink = gpGlobals->time + time;
 	}
 	inline void BeamDamageInstant(TraceResult* ptr, float damage)
