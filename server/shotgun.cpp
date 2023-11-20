@@ -55,7 +55,7 @@ void CShotgun::Precache()
 	m_usDoubleFire = PRECACHE_EVENT(1, "events/shotgun2.sc");
 }
 
-bool CShotgun::GetItemInfo(ItemInfo* p)
+bool CShotgun::GetWeaponInfo(WeaponInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->iAmmo1 = AMMO_BUCKSHOT;
@@ -257,7 +257,7 @@ void CShotgun::WeaponIdle()
 	SendWeaponAnim(iAnim);
 }
 
-void CShotgun::ItemPostFrame()
+void CShotgun::WeaponPostFrame()
 {
 	if (m_flPumpTime != -1000 && m_flPumpTime <= 0)
 	{
@@ -284,7 +284,7 @@ void CShotgun::ItemPostFrame()
 		}
 	}
 
-	CBasePlayerWeapon::ItemPostFrame();
+	CBasePlayerWeapon::WeaponPostFrame();
 }
 
 

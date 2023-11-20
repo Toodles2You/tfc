@@ -348,7 +348,7 @@ void CRpg::Precache()
 }
 
 
-bool CRpg::GetItemInfo(ItemInfo* p)
+bool CRpg::GetWeaponInfo(WeaponInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->iAmmo1 = AMMO_ROCKETS;

@@ -74,7 +74,7 @@ void CHLBot::Update()
         g_pGameRules->SetDefaultPlayerTeam(this);
         return;
     }
-    if (!m_pActiveItem || m_pActiveItem->GetWeaponPtr()->m_iClip == 0)
+    if (!m_pActiveWeapon || m_pActiveWeapon->m_iClip == 0)
     {
         ClearPrimaryAttack();
         return;

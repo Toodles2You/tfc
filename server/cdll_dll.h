@@ -77,6 +77,14 @@ enum AmmoId
 	AMMO_SNARKS
 };
 
+enum
+{
+	WEAPON_FLAG_SELECTONEMPTY		= 1,
+	WEAPON_FLAG_NOAUTORELOAD		= 2,
+	WEAPON_FLAG_NOAUTOSWITCHEMPTY	= 4,
+	WEAPON_FLAG_LIMITINWORLD		= 8,
+	WEAPON_FLAG_EXHAUSTIBLE			= 16, // A player can totally exhaust their ammo supply and lose this weapon
+};
 
 // used by suit voice to indicate damage sustained and repaired type to player
 

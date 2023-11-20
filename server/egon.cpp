@@ -90,7 +90,7 @@ bool CEgon::Holster()
 	return false;
 }
 
-bool CEgon::GetItemInfo(ItemInfo* p)
+bool CEgon::GetWeaponInfo(WeaponInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->iAmmo1 = AMMO_URANIUM;

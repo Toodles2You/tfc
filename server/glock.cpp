@@ -50,7 +50,7 @@ void CGlock::Precache()
 	m_usFireGlock = PRECACHE_EVENT(1, "events/glock1.sc");
 }
 
-bool CGlock::GetItemInfo(ItemInfo* p)
+bool CGlock::GetWeaponInfo(WeaponInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->iAmmo1 = AMMO_9MM;

@@ -431,7 +431,7 @@ bool CHalfLifeMultiplay::IsCoOp()
 
 //=========================================================
 //=========================================================
-bool CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pWeapon)
+bool CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon)
 {
 	if (!pWeapon->CanDeploy())
 	{
@@ -439,13 +439,13 @@ bool CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerIt
 		return false;
 	}
 
-	if (!pPlayer->m_pActiveItem)
+	if (!pPlayer->m_pActiveWeapon)
 	{
 		// player doesn't have an active item!
 		return true;
 	}
 
-	if (!pPlayer->m_pActiveItem->CanHolster())
+	if (!pPlayer->m_pActiveWeapon->CanHolster())
 	{
 		// can't put away the active item.
 		return false;
@@ -458,12 +458,12 @@ bool CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerIt
 	}
 
 	//Only switch if not attacking
-	if (pPlayer->m_iAutoWepSwitch == 2 && ((pPlayer->m_afButtonLast & (IN_ATTACK | IN_ATTACK2)) != 0 || pPlayer->m_pActiveItem->IsReloading()))
+	if (pPlayer->m_iAutoWepSwitch == 2 && ((pPlayer->m_afButtonLast & (IN_ATTACK | IN_ATTACK2)) != 0 || pPlayer->m_pActiveWeapon->IsReloading()))
 	{
 		return false;
 	}
 
-	if (pWeapon->iWeight() > pPlayer->m_pActiveItem->iWeight())
+	if (pWeapon->iWeight() > pPlayer->m_pActiveWeapon->iWeight())
 	{
 		return true;
 	}
@@ -593,7 +593,7 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 					GETPLAYERUSERID(pPlayer->edict()));
 			}
 
-			pPlayer->RemoveAllItems(true); // destroy all of the players weapons and items
+			pPlayer->RemoveAllWeapons(true); // destroy all of the players weapons and items
 		}
 	}
 }
@@ -781,7 +781,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, 
 		PK->m_flNextDecalTime = gpGlobals->time;
 	}
 
-	if (pVictim->HasNamedPlayerItem("weapon_satchel"))
+	if (pVictim->HasNamedPlayerWeapon("weapon_satchel"))
 	{
 		DeactivateSatchels(pVictim);
 	}
@@ -813,9 +813,9 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 				// If the inflictor is the killer,  then it must be their current weapon doing the damage
 				CBasePlayer* pPlayer = (CBasePlayer*)CBaseEntity::Instance(pKiller);
 
-				if (pPlayer->m_pActiveItem)
+				if (pPlayer->m_pActiveWeapon)
 				{
-					killer_weapon_name = pPlayer->m_pActiveItem->pszName();
+					killer_weapon_name = pPlayer->m_pActiveWeapon->pszName();
 				}
 			}
 			else
@@ -961,7 +961,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 // PlayerGotWeapon - player has grabbed a weapon that was
 // sitting in the world
 //=========================================================
-void CHalfLifeMultiplay::PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pWeapon)
+void CHalfLifeMultiplay::PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon)
 {
 }
 
@@ -969,12 +969,12 @@ void CHalfLifeMultiplay::PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerItem* 
 // FlWeaponRespawnTime - what is the time in the future
 // at which this weapon may spawn?
 //=========================================================
-float CHalfLifeMultiplay::FlWeaponRespawnTime(CBasePlayerItem* pWeapon)
+float CHalfLifeMultiplay::FlWeaponRespawnTime(CBasePlayerWeapon* pWeapon)
 {
 	if (weaponstay.value > 0)
 	{
 		// make sure it's only certain weapons
-		if ((pWeapon->iFlags() & ITEM_FLAG_LIMITINWORLD) == 0)
+		if ((pWeapon->iFlags() & WEAPON_FLAG_LIMITINWORLD) == 0)
 		{
 			return gpGlobals->time + 0; // weapon respawns almost instantly
 		}
@@ -984,7 +984,7 @@ float CHalfLifeMultiplay::FlWeaponRespawnTime(CBasePlayerItem* pWeapon)
 }
 
 // when we are within this close to running out of entities,  items
-// marked with the ITEM_FLAG_LIMITINWORLD will delay their respawn
+// marked with the WEAPON_FLAG_LIMITINWORLD will delay their respawn
 #define ENTITY_INTOLERANCE 100
 
 //=========================================================
@@ -992,9 +992,9 @@ float CHalfLifeMultiplay::FlWeaponRespawnTime(CBasePlayerItem* pWeapon)
 // now,  otherwise it returns the time at which it can try
 // to spawn again.
 //=========================================================
-float CHalfLifeMultiplay::FlWeaponTryRespawn(CBasePlayerItem* pWeapon)
+float CHalfLifeMultiplay::FlWeaponTryRespawn(CBasePlayerWeapon* pWeapon)
 {
-	if (pWeapon && WEAPON_NONE != pWeapon->m_iId && (pWeapon->iFlags() & ITEM_FLAG_LIMITINWORLD) != 0)
+	if (pWeapon && WEAPON_NONE != pWeapon->m_iId && (pWeapon->iFlags() & WEAPON_FLAG_LIMITINWORLD) != 0)
 	{
 		if (NUMBER_OF_ENTITIES() < (gpGlobals->maxEntities - ENTITY_INTOLERANCE))
 			return 0;
@@ -1010,7 +1010,7 @@ float CHalfLifeMultiplay::FlWeaponTryRespawn(CBasePlayerItem* pWeapon)
 // VecWeaponRespawnSpot - where should this weapon spawn?
 // Some game variations may choose to randomize spawn locations
 //=========================================================
-Vector CHalfLifeMultiplay::VecWeaponRespawnSpot(CBasePlayerItem* pWeapon)
+Vector CHalfLifeMultiplay::VecWeaponRespawnSpot(CBasePlayerWeapon* pWeapon)
 {
 	return pWeapon->pev->origin;
 }
@@ -1019,7 +1019,7 @@ Vector CHalfLifeMultiplay::VecWeaponRespawnSpot(CBasePlayerItem* pWeapon)
 // WeaponShouldRespawn - any conditions inhibiting the
 // respawning of this weapon?
 //=========================================================
-int CHalfLifeMultiplay::WeaponShouldRespawn(CBasePlayerItem* pWeapon)
+int CHalfLifeMultiplay::WeaponShouldRespawn(CBasePlayerWeapon* pWeapon)
 {
 	if ((pWeapon->pev->spawnflags & SF_NORESPAWN) != 0)
 	{
@@ -1033,22 +1033,22 @@ int CHalfLifeMultiplay::WeaponShouldRespawn(CBasePlayerItem* pWeapon)
 // CanHaveWeapon - returns false if the player is not allowed
 // to pick up this weapon
 //=========================================================
-bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, CBasePlayerItem* pItem)
+bool CHalfLifeMultiplay::CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon)
 {
 	if (weaponstay.value > 0)
 	{
-		if ((pItem->iFlags() & ITEM_FLAG_LIMITINWORLD) != 0)
+		if ((pWeapon->iFlags() & WEAPON_FLAG_LIMITINWORLD) != 0)
 		{
-			return CGameRules::CanHavePlayerItem(pPlayer, pItem);
+			return CGameRules::CanHavePlayerWeapon(pPlayer, pWeapon);
 		}
 
-		if (pPlayer->HasPlayerItem(pItem))
+		if (pPlayer->HasPlayerWeapon(pWeapon))
 		{
 			return false;
 		}
 	}
 
-	return CGameRules::CanHavePlayerItem(pPlayer, pItem);
+	return CGameRules::CanHavePlayerWeapon(pPlayer, pWeapon);
 }
 
 //=========================================================

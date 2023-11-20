@@ -114,7 +114,7 @@ public:
 	float m_flFallVelocity;
 
 	int m_rgItems[MAX_ITEMS];
-	bool m_fKnownItem; // True when a new item needs to be added
+	bool m_fKnownItem; // True when a new weapon needs to be added
 	int m_fNewAmmo;	   // True when a new item has been added
 
 	unsigned int m_afPhysicsFlags; // physics flags - set when 'normal' physics should be revisited or overriden
@@ -160,11 +160,10 @@ public:
 	int m_iHideHUD;		  // the players hud weapon info is to be hidden
 	int m_iClientHideHUD;
 	int m_iFOV;		  // field of view
-	// usable player items
-	CBasePlayerItem* m_rgpPlayerItems[MAX_WEAPONS];
-	std::forward_list<CBasePlayerItem *> m_lpPlayerItems;
-	CBasePlayerItem* m_pActiveItem;
-	CBasePlayerItem* m_pClientActiveItem; // client version of the active item
+	// usable player weapons
+	CBasePlayerWeapon* m_rgpPlayerWeapons[MAX_WEAPONS];
+	std::forward_list<CBasePlayerWeapon *> m_lpPlayerWeapons;
+	CBasePlayerWeapon* m_pActiveWeapon;
 
 	std::uint64_t m_WeaponBits;
 
@@ -208,9 +207,9 @@ public:
 
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
-	void PackDeadPlayerItems();
-	void RemoveAllItems(bool removeSuit);
-	bool SwitchWeapon(CBasePlayerItem* pWeapon);
+	void PackDeadPlayerWeapons();
+	void RemoveAllWeapons(bool removeSuit);
+	bool SwitchWeapon(CBasePlayerWeapon* pWeapon);
 
 	/**
 	*	@brief Equips an appropriate weapon for the player if they don't have one equipped already.
@@ -251,16 +250,16 @@ public:
 
 	void AddPoints(int score, bool bAllowNegativeScore) override;
 	void AddPointsToTeam(int score, bool bAllowNegativeScore) override;
-	bool AddPlayerItem(CBasePlayerItem* pItem) override;
-	bool RemovePlayerItem(CBasePlayerItem* pItem) override;
-	void DropPlayerItem(char* pszItemName);
-	bool HasPlayerItem(CBasePlayerItem* pCheckItem);
-	bool HasNamedPlayerItem(const char* pszItemName);
+	bool AddPlayerWeapon(CBasePlayerWeapon* pWeapon) override;
+	bool RemovePlayerWeapon(CBasePlayerWeapon* pWeapon) override;
+	void DropPlayerWeapon(char* pszWeaponName);
+	bool HasPlayerWeapon(CBasePlayerWeapon* pCheckWeapon);
+	bool HasNamedPlayerWeapon(const char* pszWeaponName);
 	bool HasWeapons(); // do I have ANY weapons?
-	void SelectItem(const char* pstr);
-	void SelectItem(int iId);
-	void ItemPreFrame();
-	void ItemPostFrame();
+	void SelectWeapon(const char* pstr);
+	void SelectWeapon(int iId);
+	void WeaponPreFrame();
+	void WeaponPostFrame();
 	void GiveNamedItem(const char* szName);
 	void GiveNamedItem(const char* szName, int defaultAmmo);
 	void EnableControl(bool fControl);
@@ -286,7 +285,7 @@ public:
 	void SetSuitUpdate(const char* name, bool fgroup, int iNoRepeat);
 	void UpdateGeigerCounter();
 	void CheckTimeBasedDamage();
-	void CheckAmmoLevel(CBasePlayerItem* pItem, bool bPrimary = true);
+	void CheckAmmoLevel(CBasePlayerWeapon* pWeapon, bool bPrimary = true);
 
 	int AmmoInventory(int iAmmoIndex);
 

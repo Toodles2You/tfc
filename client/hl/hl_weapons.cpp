@@ -112,15 +112,15 @@ void HUD_PrepEntity(CBaseEntity* pEntity, CBasePlayer* pWeaponOwner)
 
 	if (pWeaponOwner)
 	{
-		ItemInfo info;
+		WeaponInfo info;
 
 		memset(&info, 0, sizeof(info));
 
 		((CBasePlayerWeapon*)pEntity)->m_pPlayer = pWeaponOwner;
 
-		((CBasePlayerWeapon*)pEntity)->GetItemInfo(&info);
+		((CBasePlayerWeapon*)pEntity)->GetWeaponInfo(&info);
 
-		CBasePlayerItem::ItemInfoArray[info.iId] = info;
+		CBasePlayerWeapon::WeaponInfoArray[info.iId] = info;
 
 		g_pWpns[info.iId] = (CBasePlayerWeapon*)pEntity;
 	}
@@ -267,8 +267,8 @@ CBasePlayer::Killed
 void CBasePlayer::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
 {
 	// Holster weapon immediately, to allow it to cleanup
-	if (m_pActiveItem)
-		m_pActiveItem->Holster();
+	if (m_pActiveWeapon)
+		m_pActiveWeapon->Holster();
 
 	g_irunninggausspred = false;
 }
@@ -281,8 +281,8 @@ CBasePlayer::Spawn
 */
 bool CBasePlayer::Spawn()
 {
-	if (m_pActiveItem)
-		m_pActiveItem->Deploy();
+	if (m_pActiveWeapon)
+		m_pActiveWeapon->Deploy();
 
 	g_irunninggausspred = false;
 
@@ -608,7 +608,10 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 	// We are not predicting the current weapon, just bow out here.
 	if (!pWeapon)
+	{
+		gHUD.m_Ammo.Update_CurWeapon(0, -1, -1);
 		return;
+	}
 
 	for (i = 0; i < MAX_WEAPONS; i++)
 	{
@@ -696,13 +699,13 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	// Point to current weapon object
 	if (WEAPON_NONE != from->client.m_iId)
 	{
-		player.m_pActiveItem = g_pWpns[from->client.m_iId];
+		player.m_pActiveWeapon = g_pWpns[from->client.m_iId];
 	}
 
-	if (player.m_pActiveItem->m_iId == WEAPON_RPG)
+	if (player.m_pActiveWeapon->m_iId == WEAPON_RPG)
 	{
-		((CRpg*)player.m_pActiveItem)->m_fSpotActive = static_cast<bool>(from->client.vuser2[1]);
-		((CRpg*)player.m_pActiveItem)->m_cActiveRockets = (int)from->client.vuser2[2];
+		((CRpg*)player.m_pActiveWeapon)->m_fSpotActive = static_cast<bool>(from->client.vuser2[1]);
+		((CRpg*)player.m_pActiveWeapon)->m_cActiveRockets = (int)from->client.vuser2[2];
 	}
 
 	// Don't go firing anything if we have died or are spectating
@@ -712,7 +715,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	{
 		if (player.m_iNextAttack <= 0)
 		{
-			pWeapon->ItemPostFrame();
+			pWeapon->WeaponPostFrame();
 		}
 	}
 
@@ -730,9 +733,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 			{
 				// Put away old weapon
 				// Deploy new weapon
-				if ((!player.m_pActiveItem || player.m_pActiveItem->Holster()) && pNew->Deploy())
+				if ((!player.m_pActiveWeapon || player.m_pActiveWeapon->Holster()) && pNew->Deploy())
 				{
-					player.m_pActiveItem = pNew;
+					player.m_pActiveWeapon = pNew;
 					// Update weapon id so we can predict things correctly.
 					to->client.m_iId = cmd->weaponselect;
 				}
@@ -771,10 +774,10 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	ammo_cells[2] = player.m_rgAmmo[AMMO_TRIPMINES];
 	ammo_cells[3] = player.m_rgAmmo[AMMO_SNARKS];
 
-	if (player.m_pActiveItem->m_iId == WEAPON_RPG)
+	if (player.m_pActiveWeapon->m_iId == WEAPON_RPG)
 	{
-		to->client.vuser2[1] = static_cast<float>(((CRpg*)player.m_pActiveItem)->m_fSpotActive);
-		to->client.vuser2[2] = ((CRpg*)player.m_pActiveItem)->m_cActiveRockets;
+		to->client.vuser2[1] = static_cast<float>(((CRpg*)player.m_pActiveWeapon)->m_fSpotActive);
+		to->client.vuser2[2] = ((CRpg*)player.m_pActiveWeapon)->m_cActiveRockets;
 	}
 
 	// Make sure that weapon animation matches what the game .dll is telling us

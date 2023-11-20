@@ -274,7 +274,7 @@ inline void CBot::Walk( void )
 //-----------------------------------------------------------------------------------------------------------
 inline CBasePlayerWeapon *CBot::GetActiveWeapon( void ) const
 {
-	return static_cast<CBasePlayerWeapon *>( m_pActiveItem );
+	return m_pActiveWeapon;
 }
 
 //-----------------------------------------------------------------------------------------------------------

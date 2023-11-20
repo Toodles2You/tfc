@@ -476,7 +476,7 @@ void ClientCommand(edict_t* pEntity)
 	else if (FStrEq(pcmd, "drop"))
 	{
 		// player is dropping an item.
-		player->DropPlayerItem((char*)CMD_ARGV(1));
+		player->DropPlayerWeapon((char*)CMD_ARGV(1));
 	}
 	else if (FStrEq(pcmd, "fov"))
 	{
@@ -494,11 +494,11 @@ void ClientCommand(edict_t* pEntity)
 	}
 	else if (FStrEq(pcmd, "use"))
 	{
-		player->SelectItem((char*)CMD_ARGV(1));
+		player->SelectWeapon((char*)CMD_ARGV(1));
 	}
 	else if (((pstr = strstr(pcmd, "weapon_")) != NULL) && (pstr == pcmd))
 	{
-		player->SelectItem(pcmd);
+		player->SelectWeapon(pcmd);
 	}
 	else if (FStrEq(pcmd, "spectate")) // clients wants to become a spectator
 	{
@@ -1686,49 +1686,41 @@ int GetWeaponData(struct edict_s* player, struct weapon_data_s* info)
 	memset(info, 0, MAX_WEAPONS * sizeof(weapon_data_t));
 
 	int i;
-	weapon_data_t* item;
+	weapon_data_t* data;
 	entvars_t* pev = &player->v;
 	CBasePlayer* pl = dynamic_cast<CBasePlayer*>(CBasePlayer::Instance(pev));
-	CBasePlayerWeapon* gun;
 
-	ItemInfo II;
+	WeaponInfo II;
 
 	if (!pl)
 	{
 		return 1;
 	}
 
-	for (auto it : pl->m_lpPlayerItems)
+	for (auto gun : pl->m_lpPlayerWeapons)
 	{
-		gun = it->GetWeaponPtr();
-
-		if (!gun)
-		{
-			continue;
-		}
-
 		// Get The ID.
 		memset(&II, 0, sizeof(II));
-		gun->GetItemInfo(&II);
+		gun->GetWeaponInfo(&II);
 
-		item = &info[II.iId];
+		data = &info[II.iId];
 
-		item->m_iId = II.iId;
-		item->m_iClip = gun->m_iClip;
+		data->m_iId = II.iId;
+		data->m_iClip = gun->m_iClip;
 
-		*(int*)&item->m_flTimeWeaponIdle = std::max(gun->m_iTimeWeaponIdle, -1);
-		*(int*)&item->m_flNextPrimaryAttack = std::max(gun->m_iNextPrimaryAttack, -1);
-		*(int*)&item->m_flNextSecondaryAttack = std::max(gun->m_iNextSecondaryAttack, -1);
-		item->m_fInReload = static_cast<int>(gun->m_fInReload);
-		item->m_fInSpecialReload = gun->m_fInSpecialReload;
-		item->fuser1 = std::max(gun->pev->fuser1, -0.001F);
-		item->fuser2 = gun->m_flStartThrow;
-		item->fuser3 = gun->m_flReleaseThrow;
-		item->iuser1 = gun->m_chargeReady;
-		item->iuser2 = gun->m_fInAttack;
-		item->iuser3 = gun->m_fireState;
+		*(int*)&data->m_flTimeWeaponIdle = std::max(gun->m_iTimeWeaponIdle, -1);
+		*(int*)&data->m_flNextPrimaryAttack = std::max(gun->m_iNextPrimaryAttack, -1);
+		*(int*)&data->m_flNextSecondaryAttack = std::max(gun->m_iNextSecondaryAttack, -1);
+		data->m_fInReload = static_cast<int>(gun->m_fInReload);
+		data->m_fInSpecialReload = gun->m_fInSpecialReload;
+		data->fuser1 = std::max(gun->pev->fuser1, -0.001F);
+		data->fuser2 = gun->m_flStartThrow;
+		data->fuser3 = gun->m_flReleaseThrow;
+		data->iuser1 = gun->m_chargeReady;
+		data->iuser2 = gun->m_fInAttack;
+		data->iuser3 = gun->m_fireState;
 
-		gun->GetWeaponData(*item);
+		gun->GetWeaponData(*data);
 	}
 	return 1;
 }
@@ -1834,22 +1826,20 @@ void UpdateClientData(const edict_t* ent, int sendweapons, struct clientdata_s* 
 			ammo_cells[3] = pl->m_rgAmmo[AMMO_SNARKS];
 
 
-			if (pl->m_pActiveItem)
+			if (pl->m_pActiveWeapon)
 			{
-				CBasePlayerWeapon* gun = pl->m_pActiveItem->GetWeaponPtr();
-				if (gun)
+				CBasePlayerWeapon* gun = pl->m_pActiveWeapon;
+
+				WeaponInfo II;
+				memset(&II, 0, sizeof(II));
+				gun->GetWeaponInfo(&II);
+
+				cd->m_iId = II.iId;
+
+				if (pl->m_pActiveWeapon->m_iId == WEAPON_RPG)
 				{
-					ItemInfo II;
-					memset(&II, 0, sizeof(II));
-					gun->GetItemInfo(&II);
-
-					cd->m_iId = II.iId;
-
-					if (pl->m_pActiveItem->m_iId == WEAPON_RPG)
-					{
-						cd->vuser2.y = static_cast<vec_t>(((CRpg*)pl->m_pActiveItem)->m_fSpotActive);
-						cd->vuser2.z = ((CRpg*)pl->m_pActiveItem)->m_cActiveRockets;
-					}
+					cd->vuser2.y = static_cast<vec_t>(((CRpg*)pl->m_pActiveWeapon)->m_fSpotActive);
+					cd->vuser2.z = ((CRpg*)pl->m_pActiveWeapon)->m_cActiveRockets;
 				}
 			}
 		}
@@ -1874,7 +1864,7 @@ void CmdStart(const edict_t* player, const struct usercmd_s* cmd, unsigned int r
 
 	if (cmd->weaponselect != 0)
 	{
-		pl->SelectItem(cmd->weaponselect);
+		pl->SelectWeapon(cmd->weaponselect);
 		((usercmd_t*)cmd)->weaponselect = 0;
 	}
 

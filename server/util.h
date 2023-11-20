@@ -326,7 +326,7 @@ inline void UTIL_CenterPrintAll(const char* msg_name, const char* param1 = NULL,
 	UTIL_ClientPrintAll(HUD_PRINTCENTER, msg_name, param1, param2, param3, param4);
 }
 
-class CBasePlayerItem;
+class CBasePlayerWeapon;
 class CBasePlayer;
 
 // prints messages through the HUD

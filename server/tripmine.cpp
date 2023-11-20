@@ -387,7 +387,7 @@ void CTripmine::Precache()
 	m_usTripFire = PRECACHE_EVENT(1, "events/tripfire.sc");
 }
 
-bool CTripmine::GetItemInfo(ItemInfo* p)
+bool CTripmine::GetWeaponInfo(WeaponInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->iAmmo1 = AMMO_TRIPMINES;
@@ -399,7 +399,7 @@ bool CTripmine::GetItemInfo(ItemInfo* p)
 	p->iPosition = 2;
 	p->iId = m_iId = WEAPON_TRIPMINE;
 	p->iWeight = TRIPMINE_WEIGHT;
-	p->iFlags = ITEM_FLAG_LIMITINWORLD | ITEM_FLAG_EXHAUSTIBLE;
+	p->iFlags = WEAPON_FLAG_LIMITINWORLD | WEAPON_FLAG_EXHAUSTIBLE;
 
 	return true;
 }
@@ -420,7 +420,7 @@ bool CTripmine::Holster()
 		if (!bHasAmmo)
 		{
 			m_pPlayer->ClearWeaponBit(m_iId);
-			SetThink(&CTripmine::DestroyItem);
+			SetThink(&CTripmine::DestroyWeapon);
 			pev->nextthink = gpGlobals->time + 0.1;
 		}
 		return true;

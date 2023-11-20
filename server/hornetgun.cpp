@@ -26,6 +26,10 @@ LINK_ENTITY_TO_CLASS(weapon_hornetgun, CHgun);
 
 int CHgun::GetChargeInterval()
 {
+	if (UTIL_IsDeathmatch())
+	{
+		return 300;
+	}
 	return 500;
 }
 
@@ -70,7 +74,7 @@ void CHgun::AddToPlayer(CBasePlayer* pPlayer)
 	CBasePlayerWeapon::AddToPlayer(pPlayer);
 }
 
-bool CHgun::GetItemInfo(ItemInfo* p)
+bool CHgun::GetWeaponInfo(WeaponInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->iAmmo1 = AMMO_HORNETS;
@@ -81,7 +85,7 @@ bool CHgun::GetItemInfo(ItemInfo* p)
 	p->iSlot = 3;
 	p->iPosition = 3;
 	p->iId = m_iId = WEAPON_HORNETGUN;
-	p->iFlags = ITEM_FLAG_SELECTONEMPTY | ITEM_FLAG_NOAUTOSWITCHEMPTY | ITEM_FLAG_NOAUTORELOAD;
+	p->iFlags = WEAPON_FLAG_SELECTONEMPTY | WEAPON_FLAG_NOAUTOSWITCHEMPTY | WEAPON_FLAG_NOAUTORELOAD;
 	p->iWeight = HORNETGUN_WEIGHT;
 
 	return true;
@@ -91,7 +95,7 @@ bool CHgun::Deploy()
 {
 	if (DefaultDeploy("models/v_hgun.mdl", "models/p_hgun.mdl", HGUN_UP, "hive"))
 	{
-		// Let ItemPostFrame run so the hornets start recharging.
+		// Let WeaponPostFrame run so the hornets start recharging.
 		m_pPlayer->m_iNextAttack = 0;
 		return true;
 	}
@@ -262,7 +266,7 @@ void CHgun::WeaponIdle()
 	SendWeaponAnim(iAnim);
 }
 
-void CHgun::ItemPostFrame()
+void CHgun::WeaponPostFrame()
 {
 	Reload();
 

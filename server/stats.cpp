@@ -97,16 +97,16 @@ void UpdateStats( CBasePlayer *pPlayer )
 	gStats.gameTime += gpGlobals->time - gStats.lastGameTime;
 	gStats.lastGameTime = gpGlobals->time;
 
-	for (auto p : pPlayer->m_lpPlayerItems)
+	for (auto p : pPlayer->m_lpPlayerWeapons)
 	{
-		ItemInfo II;
+		WeaponInfo II;
 		
 		memset(&II, 0, sizeof(II));
-		p->GetItemInfo(&II);
+		p->GetWeaponInfo(&II);
 
 		int index = II.iAmmo1;
 		if ( index > AMMO_NONE )
-			ammoCount[ index ] += ((CBasePlayerWeapon *)p)->m_iClip;
+			ammoCount[ index ] += p->m_iClip;
 	}
 
 	float ammo = 0;

@@ -55,7 +55,7 @@ bool CBasePlayerWeapon::CanDeploy()
 		return true;
 	}
 
-	if ((iFlags() & ITEM_FLAG_SELECTONEMPTY) != 0)
+	if ((iFlags() & WEAPON_FLAG_SELECTONEMPTY) != 0)
 	{
 		return true;
 	}
@@ -105,7 +105,7 @@ bool CanAttack(int attack_time)
 	return attack_time <= 0 ? true : false;
 }
 
-void CBasePlayerWeapon::ItemPostFrame()
+void CBasePlayerWeapon::WeaponPostFrame()
 {
 	if ((m_fInReload) && (m_pPlayer->m_iNextAttack <= 0))
 	{
@@ -158,7 +158,7 @@ void CBasePlayerWeapon::ItemPostFrame()
 		{
 #ifndef CLIENT_DLL
 			// weapon isn't useable, switch.
-			if ((iFlags() & ITEM_FLAG_NOAUTOSWITCHEMPTY) == 0 && g_pGameRules->GetNextBestWeapon(m_pPlayer, this))
+			if ((iFlags() & WEAPON_FLAG_NOAUTOSWITCHEMPTY) == 0 && g_pGameRules->GetNextBestWeapon(m_pPlayer, this))
 			{
 				m_iNextPrimaryAttack = 300;
 				return;
@@ -168,7 +168,7 @@ void CBasePlayerWeapon::ItemPostFrame()
 		else
 		{
 			// weapon is useable. Reload if empty and weapon has waited as long as it has to after firing
-			if (m_iClip == 0 && (iFlags() & ITEM_FLAG_NOAUTORELOAD) == 0 && bCanPrimaryAttack)
+			if (m_iClip == 0 && (iFlags() & WEAPON_FLAG_NOAUTORELOAD) == 0 && bCanPrimaryAttack)
 			{
 				Reload();
 				return;

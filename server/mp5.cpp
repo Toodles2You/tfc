@@ -41,7 +41,7 @@ bool CMP5::Spawn()
 	return true;
 }
 
-bool CMP5::AddDuplicate(CBasePlayerItem* pOriginal)
+bool CMP5::AddDuplicate(CBasePlayerWeapon* pOriginal)
 {
 	if (m_iDefaultAmmo == MP5_DEFAULT_GIVE)
 	{
@@ -73,7 +73,7 @@ void CMP5::Precache()
 	m_usMP52 = PRECACHE_EVENT(1, "events/mp52.sc");
 }
 
-bool CMP5::GetItemInfo(ItemInfo* p)
+bool CMP5::GetWeaponInfo(WeaponInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->iAmmo1 = AMMO_9MM;
