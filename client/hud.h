@@ -135,7 +135,7 @@ public:
 
 	friend class WeaponsResource;
 
-private:
+protected:
 	float m_fFade;
 	RGBA m_rgba;
 	WEAPON* m_pWeapon;

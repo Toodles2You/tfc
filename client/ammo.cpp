@@ -440,58 +440,64 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 	if (!gHUD.HasAnyWeapons())
 		return;
 
-	WEAPON* p = NULL;
-	bool fastSwitch = gHUD.m_Ammo.hud_fastswitch->value != 0;
-	bool newSlot = (gpActiveSel == NULL) || (gpActiveSel == (WEAPON*)1) || (iSlot != gpActiveSel->iSlot);
+	const auto fastSwitch = gHUD.m_Ammo.hud_fastswitch->value;
 
-	if (newSlot)
+	WEAPON *weapon = nullptr;
+	WEAPON *checkWeapon = gpActiveSel;
+
+	if (fastSwitch != 0)
 	{
-		p = GetFirstPos(iSlot);
+		checkWeapon = gHUD.m_Ammo.m_pWeapon;
+	}
 
-		if (p && fastSwitch) // check for fast weapon switch mode
+	const auto newSlot =
+		(checkWeapon == nullptr) || (checkWeapon == (WEAPON*)1) || (iSlot != checkWeapon->iSlot);
+
+	if (!newSlot)
+	{
+		weapon = GetNextActivePos(checkWeapon->iSlot, checkWeapon->iSlotPos);
+	}
+
+	if (!weapon)
+	{
+		weapon = GetFirstPos(iSlot);
+	}
+
+	if (!weapon)
+	{
+		if (fastSwitch != 0)
 		{
-			// if fast weapon switch is on, then weapons can be selected in a single keypress
-			// but only if there is only one item in the bucket
-			WEAPON* p2 = GetNextActivePos(p->iSlot, p->iSlotPos);
-			if (!p2)
-			{ // only one active item in bucket, so change directly to weapon
-				// ServerCmd(p->szName);
-				g_weaponselect = p->iId;
-
-				gpLastSel = gpActiveSel;
-				gpActiveSel = nullptr;
-				gHUD.m_iKeyBits &= ~IN_ATTACK;
-				return;
-			}
+			gpActiveSel = nullptr;
 		}
-	}
-	else
-	{
-		if (gpActiveSel)
-			p = GetNextActivePos(gpActiveSel->iSlot, gpActiveSel->iSlotPos);
-		if (!p)
-			p = GetFirstPos(iSlot);
-	}
-
-
-	if (!p) // no selection found
-	{
-		// just display the weapon list, unless fastswitch is on just ignore it
-		if (!fastSwitch)
-			gpActiveSel = (WEAPON*)1;
 		else
-			gpActiveSel = NULL;
+		{
+			gpActiveSel = (WEAPON*)1;
+		}
 
 		PlaySound("common/wpn_denyselect.wav", 1);
 	}
 	else
 	{
-		gpActiveSel = p;
-
-		if (newSlot)
-			PlaySound("common/wpn_hudon.wav", 1);
+		if (fastSwitch != 0)
+		{
+			g_weaponselect = weapon->iId;
+			gpLastSel = weapon;
+			gpActiveSel = nullptr;
+			gHUD.m_iKeyBits &= ~IN_ATTACK;
+		}
 		else
-			PlaySound("common/wpn_moveselect.wav", 1);
+		{
+			gpActiveSel = weapon;
+
+			if (newSlot)
+			{
+				PlaySound("common/wpn_hudon.wav", 1);
+			}
+			else
+			{
+				PlaySound("common/wpn_moveselect.wav", 1);
+			}
+		}
 	}
 }
 
@@ -832,6 +838,14 @@ void CHudAmmo::UserCmd_NextWeapon()
 
 				if (wsp && gWR.HasAmmo(wsp))
 				{
+					if (hud_fastswitch->value != 0)
+					{
+						g_weaponselect = wsp->iId;
+						gpLastSel = wsp;
+						gpActiveSel = nullptr;
+						gHUD.m_iKeyBits &= ~IN_ATTACK;
+						return;
+					}
 					if (open || gpActiveSel->iSlot != wsp->iSlot)
 					{
 						PlaySound("common/wpn_hudon.wav", 1);
@@ -887,6 +901,14 @@ void CHudAmmo::UserCmd_PrevWeapon()
 
 				if (wsp && gWR.HasAmmo(wsp))
 				{
+					if (hud_fastswitch->value != 0)
+					{
+						g_weaponselect = wsp->iId;
+						gpLastSel = wsp;
+						gpActiveSel = nullptr;
+						gHUD.m_iKeyBits &= ~IN_ATTACK;
+						return;
+					}
 					if (open || gpActiveSel->iSlot != wsp->iSlot)
 					{
 						PlaySound("common/wpn_hudon.wav", 1);
