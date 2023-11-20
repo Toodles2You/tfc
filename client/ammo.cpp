@@ -806,8 +806,13 @@ void CHudAmmo::UserCmd_NextWeapon()
 	if (gHUD.m_fPlayerDead || (gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
 		return;
 
+	bool open = false;
+
 	if (!gpActiveSel || gpActiveSel == (WEAPON*)1)
+	{
 		gpActiveSel = m_pWeapon;
+		open = true;
+	}
 
 	int pos = 0;
 	int slot = 0;
@@ -827,6 +832,14 @@ void CHudAmmo::UserCmd_NextWeapon()
 
 				if (wsp && gWR.HasAmmo(wsp))
 				{
+					if (open || gpActiveSel->iSlot != wsp->iSlot)
+					{
+						PlaySound("common/wpn_hudon.wav", 1);
+					}
+					else
+					{
+						PlaySound("common/wpn_moveselect.wav", 1);
+					}
 					gpActiveSel = wsp;
 					return;
 				}
@@ -838,6 +851,7 @@ void CHudAmmo::UserCmd_NextWeapon()
 		slot = 0; // start looking from the first slot again
 	}
 
+	PlaySound("common/wpn_denyselect.wav", 1);
 	gpActiveSel = NULL;
 }
 
@@ -847,8 +861,13 @@ void CHudAmmo::UserCmd_PrevWeapon()
 	if (gHUD.m_fPlayerDead || (gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
 		return;
 
+	bool open = false;
+
 	if (!gpActiveSel || gpActiveSel == (WEAPON*)1)
+	{
 		gpActiveSel = m_pWeapon;
+		open = true;
+	}
 
 	int pos = MAX_WEAPON_POSITIONS - 1;
 	int slot = MAX_WEAPON_SLOTS - 1;
@@ -868,6 +887,14 @@ void CHudAmmo::UserCmd_PrevWeapon()
 
 				if (wsp && gWR.HasAmmo(wsp))
 				{
+					if (open || gpActiveSel->iSlot != wsp->iSlot)
+					{
+						PlaySound("common/wpn_hudon.wav", 1);
+					}
+					else
+					{
+						PlaySound("common/wpn_moveselect.wav", 1);
+					}
 					gpActiveSel = wsp;
 					return;
 				}
@@ -879,6 +906,7 @@ void CHudAmmo::UserCmd_PrevWeapon()
 		slot = MAX_WEAPON_SLOTS - 1;
 	}
 
+	PlaySound("common/wpn_denyselect.wav", 1);
 	gpActiveSel = NULL;
 }
 
