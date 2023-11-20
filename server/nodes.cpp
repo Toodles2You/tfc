@@ -158,10 +158,6 @@ entvars_t* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
 
 	if (FClassnameIs(pevLinkEnt, "func_door") || FClassnameIs(pevLinkEnt, "func_door_rotating"))
 	{
-
-		///!!!UNDONE - check for TOGGLE or STAY open doors here. If a door is in the way, and is
-		// TOGGLE or STAY OPEN, even monsters that can't open doors can go that way.
-
 		if ((pevLinkEnt->spawnflags & SF_DOOR_USE_ONLY) != 0)
 		{ // door is use only, so the door is all the monster has to worry about
 			return pevLinkEnt;
@@ -2088,7 +2084,7 @@ void CTestHull::PathFind()
 		return;
 	}
 
-	iPathSize = WorldGraph.FindShortestPath(iPath, 0, 19, 0, 0); // UNDONE use hull constant
+	iPathSize = WorldGraph.FindShortestPath(iPath, 0, 19, 0, 0);
 
 	if (0 == iPathSize)
 	{

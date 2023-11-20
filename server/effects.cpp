@@ -1844,7 +1844,6 @@ LINK_ENTITY_TO_CLASS(env_shake, CShake);
 // NOTE: UTIL_ScreenShake() will only shake players who are on the ground
 
 #define SF_SHAKE_EVERYONE 0x0001 // Don't check radius
-// UNDONE: These don't work yet
 #define SF_SHAKE_DISRUPT 0x0002 // Disrupt controls
 #define SF_SHAKE_INAIR 0x0004	// Shake players in air
 

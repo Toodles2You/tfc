@@ -554,8 +554,6 @@ bool CBaseEntity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 		return false;
 	}
 
-	// UNDONE: some entity types may be immune or resistant to some bitsDamageType
-
 	// if Attacker == Inflictor, the attack was a melee or other instant-hit attack.
 	// (that is, no actual entity projectile was involved in the attack so use the shooter's origin).
 	if (pevAttacker == pevInflictor)

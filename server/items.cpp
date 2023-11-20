@@ -330,7 +330,7 @@ class CItemLongJump : public CItem
 			WRITE_STRING(STRING(pev->classname));
 			MESSAGE_END();
 
-			pPlayer->SetSuitUpdate("!HEV_A1", false, SUIT_REPEAT_OK); // Play the longjump sound UNDONE: Kelly? correct sound?
+			pPlayer->SetSuitUpdate("!HEV_A1", false, SUIT_REPEAT_OK);
 			return true;
 		}
 		return false;

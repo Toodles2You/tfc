@@ -60,7 +60,6 @@ void RadiusDamage(Vector vecSrc, entvars_t* pevInflictor, entvars_t* pevAttacker
 	{
 		if (pEntity->pev->takedamage != DAMAGE_NO)
 		{
-			// UNDONE: this should check a damage mask, not an ignore
 			if (iClassIgnore != CLASS_NONE && pEntity->Classify() == iClassIgnore)
 			{ // houndeyes don't hurt other houndeyes with their attack
 				continue;
@@ -448,9 +447,6 @@ void CBaseEntity::Look(int iDistance)
 // list whose head is the caller's m_pLink field, and returns
 // a pointer to the enemy entity in that list that is nearest the
 // caller.
-//
-// !!!UNDONE - currently, this only returns the closest enemy.
-// we'll want to consider distance, relationship, attack types, back turned, etc.
 //=========================================================
 CBaseEntity* CBaseEntity::BestVisibleEnemy()
 {

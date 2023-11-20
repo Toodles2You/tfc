@@ -1737,11 +1737,9 @@ void CBasePlayer::CheckTimeBasedDamage()
 			switch (i)
 			{
 			case itbd_Paralyze:
-				// UNDONE - flag movement as half-speed
 				bDuration = PARALYZE_DURATION;
 				break;
 			case itbd_NerveGas:
-				//				TakeDamage(pev, pev, NERVEGAS_DAMAGE, DMG_GENERIC);
 				bDuration = NERVEGAS_DURATION;
 				break;
 			case itbd_Poison:
@@ -1749,7 +1747,6 @@ void CBasePlayer::CheckTimeBasedDamage()
 				bDuration = POISON_DURATION;
 				break;
 			case itbd_Radiation:
-				//				TakeDamage(pev, pev, RADIATION_DAMAGE, DMG_GENERIC);
 				bDuration = RADIATION_DURATION;
 				break;
 			case itbd_DrownRecover:
@@ -1765,15 +1762,12 @@ void CBasePlayer::CheckTimeBasedDamage()
 				bDuration = 4; // get up to 5*10 = 50 points back
 				break;
 			case itbd_Acid:
-				//				TakeDamage(pev, pev, ACID_DAMAGE, DMG_GENERIC);
 				bDuration = ACID_DURATION;
 				break;
 			case itbd_SlowBurn:
-				//				TakeDamage(pev, pev, SLOWBURN_DAMAGE, DMG_GENERIC);
 				bDuration = SLOWBURN_DURATION;
 				break;
 			case itbd_SlowFreeze:
-				//				TakeDamage(pev, pev, SLOWFREEZE_DAMAGE, DMG_GENERIC);
 				bDuration = SLOWFREEZE_DURATION;
 				break;
 			default:
@@ -2426,7 +2420,7 @@ int CBasePlayer::TeamNumber()
 
 
 //==============================================
-// !!!UNDONE:ultra temporary SprayCan entity to apply
+// SprayCan entity to apply
 // decal frame at a time. For PreAlpha CD
 //==============================================
 class CSprayCan : public CBaseEntity
@@ -2583,7 +2577,7 @@ ImpulseCommands
 */
 void CBasePlayer::ImpulseCommands()
 {
-	TraceResult tr; // UNDONE: kill me! This is temporary for PreAlpha CDs
+	TraceResult tr;
 
 	// Handle use events
 	PlayerUse();
@@ -3207,7 +3201,6 @@ Vector CBasePlayer::GetAimVector()
 =============
 SetCustomDecalFrames
 
-  UNDONE:  Determine real frame limit, 8 is a placeholder.
   Note:  -1 means no custom frames present.
 =============
 */

@@ -60,7 +60,6 @@ const char* CBreakable::pSpawnObjects[] =
 
 bool CBreakable::KeyValue(KeyValueData* pkvd)
 {
-	// UNDONE_WC: explicitly ignoring these fields, but they shouldn't be in the map file!
 	if (FStrEq(pkvd->szKeyName, "explosion"))
 	{
 		if (!stricmp(pkvd->szValue, "directed"))
@@ -430,7 +429,6 @@ void CBreakable::DamageSound()
 		break;
 
 	case matCeilingTile:
-		// UNDONE: no ceiling tile shard sound yet
 		i = 0;
 		break;
 	}
@@ -904,7 +902,7 @@ bool CPushable::KeyValue(KeyValueData* pkvd)
 			UTIL_SetSize(pev, Vector(-8, -8, -8), Vector(8, 8, 8));
 			break;
 
-		case 2: // Big Hull!?!?	!!!BUGBUG Figure out what this hull really is
+		case 2: // Stupid Hull
 			UTIL_SetSize(pev, VEC_DUCK_HULL_MIN * 2, VEC_DUCK_HULL_MAX * 2);
 			break;
 

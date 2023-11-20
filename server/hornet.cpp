@@ -267,7 +267,6 @@ void CHornet::TrackTarget()
 		return;
 	}
 
-	// UNDONE: The player pointer should come back after returning from another level
 	if (m_hEnemy == NULL)
 	{ // enemy is dead.
 		Look(512);

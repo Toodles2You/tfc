@@ -244,7 +244,6 @@ public:
 LINK_ENTITY_TO_CLASS(func_plat, CFuncPlat);
 
 
-// UNDONE: Need to save this!!! It needs class & linkage
 class CPlatTrigger : public CBaseEntity
 {
 public:
@@ -1722,7 +1721,6 @@ void CFuncTrackChange::Precache()
 }
 
 
-// UNDONE: Filter touches before re-evaluating the train.
 void CFuncTrackChange::Touch(CBaseEntity* pOther)
 {
 #if 0

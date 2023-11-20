@@ -191,23 +191,6 @@ void EjectBrass(const Vector& vecOrigin, const Vector& vecVelocity, float rotati
 }
 
 
-#if 0
-// UNDONE: This is no longer used?
-void ExplodeModel( const Vector &vecOrigin, float speed, int model, int count )
-{
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecOrigin );
-		WRITE_BYTE ( TE_EXPLODEMODEL );
-		WRITE_COORD( vecOrigin.x );
-		WRITE_COORD( vecOrigin.y );
-		WRITE_COORD( vecOrigin.z );
-		WRITE_COORD( speed );
-		WRITE_SHORT( model );
-		WRITE_SHORT( count );
-		WRITE_BYTE ( 15 );// 1.5 seconds
-	MESSAGE_END();
-}
-#endif
-
 // Precaches the weapon and queues the weapon info for sending to clients
 void UTIL_PrecacheOtherWeapon(const char* szClassname)
 {

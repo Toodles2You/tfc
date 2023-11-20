@@ -1060,7 +1060,6 @@ public:
 	bool GetItemInfo(ItemInfo* p) override;
 	void SetObjectCollisionBox() override
 	{
-		//!!!BUGBUG - fix the model!
 		pev->absmin = pev->origin + Vector(-16, -16, -5);
 		pev->absmax = pev->origin + Vector(16, 16, 28);
 	}

@@ -97,7 +97,6 @@ static void EV_BubbleTrail(Vector from, Vector to, int count)
 			return;
 		}
 
-		// UNDONE: do a ploink sound
 		flHeight = flHeight + to.z - from.z;
 	}
 

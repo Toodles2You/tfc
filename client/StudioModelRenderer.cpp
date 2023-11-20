@@ -22,17 +22,7 @@
 #include "StudioModelRenderer.h"
 #include "GameStudioModelRenderer.h"
 
-extern cvar_t* tfc_newmodels;
-
 extern extra_player_info_t g_PlayerExtraInfo[MAX_PLAYERS_HUD + 1];
-
-// team colors for old TFC models
-#define TEAM1_COLOR 150
-#define TEAM2_COLOR 250
-#define TEAM3_COLOR 45
-#define TEAM4_COLOR 100
-
-int m_nPlayerGaitSequences[MAX_PLAYERS];
 
 // Global engine <-> studio model rendering code interface
 engine_studio_api_t IEngineStudio;
@@ -380,7 +370,7 @@ mstudioanim_t* CStudioModelRenderer::StudioGetAnim(model_t* m_pSubModel, mstudio
 
 	if (paSequences == NULL)
 	{
-		paSequences = (cache_user_t*)IEngineStudio.Mem_Calloc(16, sizeof(cache_user_t)); // UNDONE: leak!
+		paSequences = (cache_user_t*)IEngineStudio.Mem_Calloc(16, sizeof(cache_user_t));
 		m_pSubModel->submodels = (dmodel_t*)paSequences;
 	}
 
@@ -805,28 +795,7 @@ void CStudioModelRenderer::StudioSetupBones()
 
 	pseqdesc = (mstudioseqdesc_t*)((byte*)m_pStudioHeader + m_pStudioHeader->seqindex) + m_pCurrentEntity->curstate.sequence;
 
-	// always want new gait sequences to start on frame zero
-	/*	if ( m_pPlayerInfo )
-	{
-		int playerNum = m_pCurrentEntity->index - 1;
-
-		// new jump gaitsequence?  start from frame zero
-		if ( m_nPlayerGaitSequences[ playerNum ] != m_pPlayerInfo->gaitsequence )
-		{
-	//		m_pPlayerInfo->gaitframe = 0.0;
-			gEngfuncs.Con_Printf( "Setting gaitframe to 0\n" );
-		}
-
-		m_nPlayerGaitSequences[ playerNum ] = m_pPlayerInfo->gaitsequence;
-//		gEngfuncs.Con_Printf( "index: %d     gaitsequence: %d\n",playerNum, m_pPlayerInfo->gaitsequence);
-	}
-*/
 	f = StudioEstimateFrame(pseqdesc);
-
-	if (m_pCurrentEntity->latched.prevframe > f)
-	{
-		//Con_DPrintf("%f %f\n", m_pCurrentEntity->prevframe, f );
-	}
 
 	panim = StudioGetAnim(m_pRenderModel, pseqdesc);
 	StudioCalcRotations(pos, q, pseqdesc, panim, f);

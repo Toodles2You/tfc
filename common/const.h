@@ -39,7 +39,6 @@
 #define FL_FLOAT (1 << 15)		   // Apply floating force to this entity when in water
 #define FL_GRAPHED (1 << 16)	   // worldgraph has this ent listed as something that blocks a connection
 
-// UNDONE: Do we need these?
 #define FL_IMMUNE_WATER (1 << 17)
 #define FL_IMMUNE_SLIME (1 << 18)
 #define FL_IMMUNE_LAVA (1 << 19)

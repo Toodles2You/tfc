@@ -687,9 +687,6 @@ static short FixedSigned16(float value, float scale)
 
 // Shake the screen of all clients within radius
 // radius == 0, shake all clients
-// UNDONE: Allow caller to shake clients not ONGROUND?
-// UNDONE: Fix falloff model (disabled)?
-// UNDONE: Affect user controls?
 void UTIL_ScreenShake(const Vector& center, float amplitude, float frequency, float duration, float radius)
 {
 	int i;
@@ -1527,7 +1524,6 @@ void UTIL_BubbleTrail(Vector from, Vector to, int count)
 		if (flHeight < 8)
 			return;
 
-		// UNDONE: do a ploink sound
 		flHeight = flHeight + to.z - from.z;
 	}
 

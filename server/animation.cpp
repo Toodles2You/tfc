@@ -175,8 +175,6 @@ void SequencePrecache(void* pmodel, const char* pSequenceName)
 			if (pevent[i].event >= EVENT_CLIENT)
 				continue;
 
-			// UNDONE: Add a callback to check to see if a sound is precached yet and don't allocate a copy
-			// of it's name if it is.
 			if (IsSoundEvent(pevent[i].event))
 			{
 				if (0 == strlen(pevent[i].options))

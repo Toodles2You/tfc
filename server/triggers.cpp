@@ -314,11 +314,6 @@ IMPLEMENT_SAVERESTORE(CMultiManager, CBaseToggle);
 
 bool CMultiManager::KeyValue(KeyValueData* pkvd)
 {
-	// UNDONE: Maybe this should do something like this:
-	//CBaseToggle::KeyValue( pkvd );
-	// if ( !pkvd->fHandled )
-	// ... etc.
-
 	if (FStrEq(pkvd->szKeyName, "wait"))
 	{
 		m_flWait = atof(pkvd->szValue);
@@ -631,7 +626,7 @@ bool CTriggerMonsterJump::Spawn()
 
 void CTriggerMonsterJump::Think()
 {
-	pev->solid = SOLID_NOT;			  // kill the trigger for now !!!UNDONE
+	pev->solid = SOLID_NOT;
 	UTIL_SetOrigin(pev, pev->origin); // Unlink from trigger list
 	SetThink(NULL);
 }
@@ -992,22 +987,6 @@ void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 	// leaving the trigger
 
 	fldmg = pev->dmg * 0.5; // 0.5 seconds worth of damage, pev->dmg is damage/second
-
-
-	// JAY: Cut this because it wasn't fully realized.  Damage is simpler now.
-#if 0
-	switch (m_bitsDamageInflict)
-	{
-	default: break;
-	case DMG_POISON:		fldmg = POISON_DAMAGE/4; break;
-	case DMG_NERVEGAS:		fldmg = NERVEGAS_DAMAGE/4; break;
-	case DMG_RADIATION:		fldmg = RADIATION_DAMAGE/4; break;
-	case DMG_PARALYZE:		fldmg = PARALYZE_DAMAGE/4; break; // UNDONE: cut this? should slow movement to 50%
-	case DMG_ACID:			fldmg = ACID_DAMAGE/4; break;
-	case DMG_SLOWBURN:		fldmg = SLOWBURN_DAMAGE/4; break;
-	case DMG_SLOWFREEZE:	fldmg = SLOWFREEZE_DAMAGE/4; break;
-	}
-#endif
 
 	if (fldmg < 0)
 		pOther->TakeHealth(-fldmg, m_bitsDamageInflict);
@@ -1754,7 +1733,6 @@ void CTriggerPush::Touch(CBaseEntity* pOther)
 {
 	entvars_t* pevToucher = pOther->pev;
 
-	// UNDONE: Is there a better way than health to detect things that have physics? (clients/monsters)
 	switch (pevToucher->movetype)
 	{
 	case MOVETYPE_NONE:
@@ -1783,7 +1761,6 @@ void CTriggerPush::Touch(CBaseEntity* pOther)
 			pevToucher->basevelocity = vecPush;
 
 			pevToucher->flags |= FL_BASEVELOCITY;
-			//			ALERT( at_console, "Vel %f, base %f\n", pevToucher->velocity.z, pevToucher->basevelocity.z );
 		}
 	}
 }

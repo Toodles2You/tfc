@@ -79,8 +79,6 @@ void CAirtank::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsD
 {
 	pev->owner = ENT(pevAttacker);
 
-	// UNDONE: this should make a big bubble cloud, not an explosion
-
 	Explode(pev->origin, Vector(0, 0, -1));
 }
 

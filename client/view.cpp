@@ -390,7 +390,7 @@ void V_CalcIntermissionRefdef(struct ref_params_s* pparams)
 
 	view->model = NULL;
 
-	// allways idle in intermission
+	// always idle in intermission
 	old = v_idlescale;
 	v_idlescale = 1;
 

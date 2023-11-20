@@ -1017,8 +1017,6 @@ void Sys_Error(const char* error_string)
 PlayerCustomization
 
 A new player customization has been registered on the server
-UNDONE:  This only sets the # of frames of the spray can logo
-animation right now.
 ================
 */
 void PlayerCustomization(edict_t* pEntity, customization_t* pCust)

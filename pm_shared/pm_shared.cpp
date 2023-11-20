@@ -593,11 +593,10 @@ void PM_UpdateStepSound()
 	// determine if we are on a ladder
 	const bool fLadder = (pmove->movetype == MOVETYPE_FLY); // IsOnLadder();
 
-	// UNDONE: need defined numbers for run, walk, crouch, crouch run velocities!!!!
 	if ((pmove->flags & FL_DUCKING) != 0 || fLadder)
 	{
 		velwalk = 60; // These constants should be based on cl_movespeedkey * cl_forwardspeed somehow
-		velrun = 80;  // UNDONE: Move walking to server
+		velrun = 80;
 		flduck = 100;
 	}
 	else

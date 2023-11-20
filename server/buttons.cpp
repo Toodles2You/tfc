@@ -138,7 +138,6 @@ void CEnvGlobal::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE use
 
 TYPEDESCRIPTION CMultiSource::m_SaveData[] =
 	{
-		//!!!BUGBUG FIX
 		DEFINE_ARRAY(CMultiSource, m_rgEntities, FIELD_EHANDLE, MS_MAX_TARGETS),
 		DEFINE_ARRAY(CMultiSource, m_rgTriggered, FIELD_INTEGER, MS_MAX_TARGETS),
 		DEFINE_FIELD(CMultiSource, m_iTotal, FIELD_INTEGER),
