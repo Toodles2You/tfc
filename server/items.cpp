@@ -34,7 +34,7 @@ class CWorldItem : public CBaseEntity
 {
 public:
 	bool KeyValue(KeyValueData* pkvd) override;
-	void Spawn() override;
+	bool Spawn() override;
 	int m_iType;
 };
 
@@ -51,7 +51,7 @@ bool CWorldItem::KeyValue(KeyValueData* pkvd)
 	return CBaseEntity::KeyValue(pkvd);
 }
 
-void CWorldItem::Spawn()
+bool CWorldItem::Spawn()
 {
 	CBaseEntity* pEntity = NULL;
 
@@ -82,11 +82,11 @@ void CWorldItem::Spawn()
 		pEntity->pev->spawnflags = pev->spawnflags;
 	}
 
-	REMOVE_ENTITY(edict());
+	return false;
 }
 
 
-void CItem::Spawn()
+bool CItem::Spawn()
 {
 	pev->movetype = MOVETYPE_TOSS;
 	pev->solid = SOLID_TRIGGER;
@@ -97,9 +97,10 @@ void CItem::Spawn()
 	if (DROP_TO_FLOOR(ENT(pev)) == 0)
 	{
 		ALERT(at_error, "Item %s fell out of level at %f,%f,%f", STRING(pev->classname), pev->origin.x, pev->origin.y, pev->origin.z);
-		UTIL_Remove(this);
-		return;
+		return false;
 	}
+
+	return true;
 }
 
 void CItem::ItemTouch(CBaseEntity* pOther)
@@ -170,11 +171,11 @@ void CItem::Materialize()
 
 class CItemSuit : public CItem
 {
-	void Spawn() override
+	bool Spawn() override
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_suit.mdl");
-		CItem::Spawn();
+		return CItem::Spawn();
 	}
 	void Precache() override
 	{
@@ -202,11 +203,11 @@ LINK_ENTITY_TO_CLASS(item_suit, CItemSuit);
 
 class CItemBattery : public CItem
 {
-	void Spawn() override
+	bool Spawn() override
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_battery.mdl");
-		CItem::Spawn();
+		return CItem::Spawn();
 	}
 	void Precache() override
 	{
@@ -257,11 +258,11 @@ LINK_ENTITY_TO_CLASS(item_battery, CItemBattery);
 
 class CItemAntidote : public CItem
 {
-	void Spawn() override
+	bool Spawn() override
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_antidote.mdl");
-		CItem::Spawn();
+		return CItem::Spawn();
 	}
 	void Precache() override
 	{
@@ -281,11 +282,11 @@ LINK_ENTITY_TO_CLASS(item_antidote, CItemAntidote);
 
 class CItemSecurity : public CItem
 {
-	void Spawn() override
+	bool Spawn() override
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_security.mdl");
-		CItem::Spawn();
+		return CItem::Spawn();
 	}
 	void Precache() override
 	{
@@ -302,11 +303,11 @@ LINK_ENTITY_TO_CLASS(item_security, CItemSecurity);
 
 class CItemLongJump : public CItem
 {
-	void Spawn() override
+	bool Spawn() override
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_longjump.mdl");
-		CItem::Spawn();
+		return CItem::Spawn();
 	}
 	void Precache() override
 	{

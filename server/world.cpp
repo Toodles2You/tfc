@@ -92,7 +92,7 @@ DLL_DECALLIST gDecals[] = {
 class CDecal : public CBaseEntity
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 	void EXPORT StaticDecal();
 	void EXPORT TriggerDecal(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
@@ -101,12 +101,11 @@ public:
 LINK_ENTITY_TO_CLASS(infodecal, CDecal);
 
 // UNDONE:  These won't get sent to joining players in multi-player
-void CDecal::Spawn()
+bool CDecal::Spawn()
 {
 	if (pev->skin < 0 || (g_pGameRules->IsDeathmatch() && FBitSet(pev->spawnflags, SF_DECAL_NOTINDEATHMATCH)))
 	{
-		REMOVE_ENTITY(ENT(pev));
-		return;
+		return false;
 	}
 
 	if (FStringNull(pev->targetname))
@@ -121,6 +120,8 @@ void CDecal::Spawn()
 		SetThink(nullptr);
 		SetUse(&CDecal::TriggerDecal);
 	}
+
+	return true;
 }
 
 void CDecal::TriggerDecal(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
@@ -422,10 +423,11 @@ CWorld::~CWorld()
 	World = nullptr;
 }
 
-void CWorld::Spawn()
+bool CWorld::Spawn()
 {
 	g_fGameOver = false;
 	Precache();
+	return true;
 }
 
 void CWorld::Precache()

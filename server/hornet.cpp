@@ -55,7 +55,7 @@ bool CHornet::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float 
 
 //=========================================================
 //=========================================================
-void CHornet::Spawn()
+bool CHornet::Spawn()
 {
 	Precache();
 
@@ -106,6 +106,8 @@ void CHornet::Spawn()
 
 	pev->nextthink = gpGlobals->time + 0.1;
 	ResetSequenceInfo();
+
+	return true;
 }
 
 

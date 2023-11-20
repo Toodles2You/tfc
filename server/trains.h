@@ -37,7 +37,7 @@
 class CPathTrack : public CPointEntity
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Activate() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 
@@ -75,7 +75,7 @@ public:
 class CFuncTrackTrain : public CBaseEntity
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 
 	void Blocked(CBaseEntity* pOther) override;

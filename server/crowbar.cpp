@@ -26,7 +26,7 @@
 
 LINK_ENTITY_TO_CLASS(weapon_crowbar, CCrowbar);
 
-void CCrowbar::Spawn()
+bool CCrowbar::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_CROWBAR;
@@ -34,6 +34,8 @@ void CCrowbar::Spawn()
 	m_iClip = -1;
 
 	FallInit(); // get ready to fall down.
+
+	return true;
 }
 
 

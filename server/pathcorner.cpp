@@ -25,7 +25,7 @@
 class CPathCorner : public CPointEntity
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 	float GetDelay() override { return m_flWait; }
 	//	void Touch( CBaseEntity *pOther ) override;
@@ -63,9 +63,14 @@ bool CPathCorner::KeyValue(KeyValueData* pkvd)
 }
 
 
-void CPathCorner::Spawn()
+bool CPathCorner::Spawn()
 {
-	ASSERTSZ(!FStringNull(pev->targetname), "path_corner without a targetname");
+	if (FStringNull(pev->targetname))
+	{
+		ALERT(at_console, "path_corner without a targetname\n");
+		return false;
+	}
+	return true;
 }
 
 #if 0
@@ -212,7 +217,7 @@ void CPathTrack::Link()
 }
 
 
-void CPathTrack::Spawn()
+bool CPathTrack::Spawn()
 {
 	pev->solid = SOLID_TRIGGER;
 	UTIL_SetSize(pev, Vector(-8, -8, -8), Vector(8, 8, 8));
@@ -224,6 +229,8 @@ void CPathTrack::Spawn()
 	SetThink(Sparkle);
 	pev->nextthink = gpGlobals->time + 0.5;
 #endif
+
+	return true;
 }
 
 

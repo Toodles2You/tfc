@@ -82,7 +82,7 @@ void CGrenade::BounceSound() {}
 void CGrenade::Explode(Vector, Vector) {}
 void CGrenade::Explode(TraceResult*, int) {}
 void CGrenade::Killed(entvars_t*, entvars_t*, int) {}
-void CGrenade::Spawn() {}
+bool CGrenade::Spawn() { return false; }
 CGrenade* CGrenade::ShootTimed(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time) { return 0; }
 CGrenade* CGrenade::ShootContact(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity) { return 0; }
 void CGrenade::DetonateUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) {}
@@ -203,7 +203,7 @@ void CBasePlayerItem::AttachToPlayer(CBasePlayer* pPlayer) {}
 bool CBasePlayerWeapon::AddDuplicate(CBasePlayerItem* pOriginal) { return false; }
 void CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer) {}
 bool CBasePlayerWeapon::IsUseable() { return true; }
-void CBasePlayerAmmo::Spawn() {}
+bool CBasePlayerAmmo::Spawn() { return false; }
 CBaseEntity* CBasePlayerAmmo::Respawn() { return this; }
 void CBasePlayerAmmo::Materialize() {}
 void CBasePlayerAmmo::DefaultTouch(CBaseEntity* pOther) {}

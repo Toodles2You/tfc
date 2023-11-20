@@ -32,7 +32,7 @@
 // speed - the ideal magnitude of my velocity
 class CCrossbowBolt : public CBaseEntity
 {
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	int Classify() override;
 	void EXPORT BubbleThink();
@@ -70,7 +70,7 @@ CCrossbowBolt* CCrossbowBolt::BoltCreate(
 	return pBolt;
 }
 
-void CCrossbowBolt::Spawn()
+bool CCrossbowBolt::Spawn()
 {
 	Precache();
 	pev->movetype = MOVETYPE_FLY;
@@ -86,6 +86,8 @@ void CCrossbowBolt::Spawn()
 	SetTouch(&CCrossbowBolt::BoltTouch);
 	SetThink(&CCrossbowBolt::BubbleThink);
 	pev->nextthink = gpGlobals->time + 0.2;
+
+	return true;
 }
 
 
@@ -246,7 +248,7 @@ void CCrossbowBolt::ExplodeThink()
 
 LINK_ENTITY_TO_CLASS(weapon_crossbow, CCrossbow);
 
-void CCrossbow::Spawn()
+bool CCrossbow::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_CROSSBOW;
@@ -255,6 +257,8 @@ void CCrossbow::Spawn()
 	m_iDefaultAmmo = CROSSBOW_DEFAULT_GIVE;
 
 	FallInit(); // get ready to fall down.
+
+	return true;
 }
 
 void CCrossbow::Precache()

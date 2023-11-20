@@ -34,7 +34,7 @@ bool CHgun::IsUseable()
 	return true;
 }
 
-void CHgun::Spawn()
+bool CHgun::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_HORNETGUN;
@@ -44,6 +44,8 @@ void CHgun::Spawn()
 	m_iFirePhase = 0;
 
 	FallInit(); // get ready to fall down.
+
+	return true;
 }
 
 void CHgun::Precache()

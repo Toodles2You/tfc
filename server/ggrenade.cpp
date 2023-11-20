@@ -310,7 +310,7 @@ void CGrenade::TumbleThink()
 }
 
 
-void CGrenade::Spawn()
+bool CGrenade::Spawn()
 {
 	pev->movetype = MOVETYPE_BOUNCE;
 	pev->classname = MAKE_STRING("grenade");
@@ -321,6 +321,8 @@ void CGrenade::Spawn()
 	UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
 
 	pev->dmg = 100;
+
+	return true;
 }
 
 

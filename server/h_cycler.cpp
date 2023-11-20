@@ -30,10 +30,10 @@
 class CCycler : public CBaseAnimating
 {
 public:
-	void GenericCyclerSpawn(const char* szModel, Vector vecMin, Vector vecMax);
+	bool GenericCyclerSpawn(const char* szModel, Vector vecMin, Vector vecMax);
 	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE); }
 	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
-	void Spawn() override;
+	bool Spawn() override;
 	void Think() override;
 	//void Pain( float flDamage );
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
@@ -62,33 +62,37 @@ IMPLEMENT_SAVERESTORE(CCycler, CBaseAnimating);
 class CGenericCycler : public CCycler
 {
 public:
-	void Spawn() override { GenericCyclerSpawn(STRING(pev->model), Vector(-16, -16, 0), Vector(16, 16, 72)); }
+	bool Spawn() override { return GenericCyclerSpawn(STRING(pev->model), Vector(-16, -16, 0), Vector(16, 16, 72)); }
 };
 LINK_ENTITY_TO_CLASS(cycler, CGenericCycler);
 
 
 // Cycler member functions
 
-void CCycler::GenericCyclerSpawn(const char* szModel, Vector vecMin, Vector vecMax)
+bool CCycler::GenericCyclerSpawn(const char* szModel, Vector vecMin, Vector vecMax)
 {
 	if (!szModel || '\0' == *szModel)
 	{
 		ALERT(at_error, "cycler at %.0f %.0f %0.f missing modelname", pev->origin.x, pev->origin.y, pev->origin.z);
-		REMOVE_ENTITY(ENT(pev));
-		return;
+		return false;
 	}
 
 	pev->classname = MAKE_STRING("cycler");
 	PRECACHE_MODEL(szModel);
 	SET_MODEL(ENT(pev), szModel);
 
-	CCycler::Spawn();
+	if (!CCycler::Spawn())
+	{
+		return false;
+	}
 
 	UTIL_SetSize(pev, vecMin, vecMax);
+
+	return true;
 }
 
 
-void CCycler::Spawn()
+bool CCycler::Spawn()
 {
 	InitBoneControllers();
 	pev->solid = SOLID_SLIDEBOX;
@@ -116,6 +120,8 @@ void CCycler::Spawn()
 	{
 		m_animate = true;
 	}
+
+	return true;
 }
 
 
@@ -191,7 +197,7 @@ bool CCycler::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float 
 class CCyclerSprite : public CBaseEntity
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Think() override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE); }
@@ -220,7 +226,7 @@ TYPEDESCRIPTION CCyclerSprite::m_SaveData[] =
 IMPLEMENT_SAVERESTORE(CCyclerSprite, CBaseEntity);
 
 
-void CCyclerSprite::Spawn()
+bool CCyclerSprite::Spawn()
 {
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_NONE;
@@ -236,6 +242,8 @@ void CCyclerSprite::Spawn()
 	SET_MODEL(ENT(pev), STRING(pev->model));
 
 	m_maxFrame = (float)MODEL_FRAMES(pev->modelindex) - 1;
+
+	return true;
 }
 
 
@@ -281,7 +289,7 @@ void CCyclerSprite::Animate(float frames)
 class CWeaponCycler : public CBasePlayerWeapon
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	int iItemSlot() override { return 1; }
 	bool GetItemInfo(ItemInfo* p) override { return false; }
 
@@ -295,7 +303,7 @@ public:
 LINK_ENTITY_TO_CLASS(cycler_weapon, CWeaponCycler);
 
 
-void CWeaponCycler::Spawn()
+bool CWeaponCycler::Spawn()
 {
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_NONE;
@@ -308,6 +316,8 @@ void CWeaponCycler::Spawn()
 	UTIL_SetOrigin(pev, pev->origin);
 	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 16));
 	SetTouch(&CWeaponCycler::DefaultTouch);
+
+	return true;
 }
 
 
@@ -368,7 +378,7 @@ class CWreckage : public CBaseAnimating
 	bool Restore(CRestore& restore) override;
 	static TYPEDESCRIPTION m_SaveData[];
 
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	void Think() override;
 
@@ -383,7 +393,7 @@ IMPLEMENT_SAVERESTORE(CWreckage, CBaseAnimating);
 
 LINK_ENTITY_TO_CLASS(cycler_wreckage, CWreckage);
 
-void CWreckage::Spawn()
+bool CWreckage::Spawn()
 {
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_NONE;
@@ -401,6 +411,8 @@ void CWreckage::Spawn()
 	// pev->scale = 5.0;
 
 	m_flStartTime = gpGlobals->time;
+
+	return true;
 }
 
 void CWreckage::Precache()

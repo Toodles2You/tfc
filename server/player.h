@@ -184,7 +184,7 @@ public:
 
 	CTeam *m_team = nullptr;
 
-	void Spawn() override;
+	bool Spawn() override;
 	void Pain();
 
 	//	void Think() override;

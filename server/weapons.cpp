@@ -796,7 +796,7 @@ bool CBasePlayerWeapon::Holster()
 	return true;
 }
 
-void CBasePlayerAmmo::Spawn()
+bool CBasePlayerAmmo::Spawn()
 {
 	pev->movetype = MOVETYPE_TOSS;
 	pev->solid = SOLID_TRIGGER;
@@ -804,6 +804,8 @@ void CBasePlayerAmmo::Spawn()
 	UTIL_SetOrigin(pev, pev->origin);
 
 	SetTouch(&CBasePlayerAmmo::DefaultTouch);
+
+	return true;
 }
 
 CBaseEntity* CBasePlayerAmmo::Respawn()
@@ -989,7 +991,7 @@ bool CWeaponBox::KeyValue(KeyValueData* pkvd)
 //=========================================================
 // CWeaponBox - Spawn
 //=========================================================
-void CWeaponBox::Spawn()
+bool CWeaponBox::Spawn()
 {
 	Precache();
 
@@ -999,6 +1001,8 @@ void CWeaponBox::Spawn()
 	UTIL_SetSize(pev, g_vecZero, g_vecZero);
 
 	SET_MODEL(ENT(pev), "models/w_weaponbox.mdl");
+
+	return true;
 }
 
 //=========================================================

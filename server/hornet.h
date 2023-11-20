@@ -35,7 +35,7 @@ extern int iHornetPuff;
 class CHornet : public CBaseAnimating
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	int Classify() override;
 	int IRelationship(CBaseEntity* pTarget) override;

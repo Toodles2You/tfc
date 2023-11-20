@@ -33,7 +33,7 @@
 
 LINK_ENTITY_TO_CLASS(weapon_egon, CEgon);
 
-void CEgon::Spawn()
+bool CEgon::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_EGON;
@@ -42,6 +42,8 @@ void CEgon::Spawn()
 	m_iDefaultAmmo = EGON_DEFAULT_GIVE;
 
 	FallInit(); // get ready to fall down.
+
+	return true;
 }
 
 

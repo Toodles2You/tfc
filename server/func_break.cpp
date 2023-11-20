@@ -148,7 +148,7 @@ TYPEDESCRIPTION CBreakable::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CBreakable, CBaseEntity);
 
-void CBreakable::Spawn()
+bool CBreakable::Spawn()
 {
 	Precache();
 
@@ -178,6 +178,8 @@ void CBreakable::Spawn()
 	// Flag unbreakable glass as "worldbrush" so it will block ALL tracelines
 	if (!IsBreakable() && pev->rendermode != kRenderNormal)
 		pev->flags |= FL_WORLDBRUSH;
+
+	return true;
 }
 
 
@@ -805,7 +807,7 @@ int CBreakable::DamageDecal(int bitsDamageType)
 class CPushable : public CBreakable
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	void Touch(CBaseEntity* pOther) override;
 	void Move(CBaseEntity* pMover, bool push);
@@ -844,12 +846,19 @@ LINK_ENTITY_TO_CLASS(func_pushable, CPushable);
 const char* CPushable::m_soundNames[3] = {"debris/pushbox1.wav", "debris/pushbox2.wav", "debris/pushbox3.wav"};
 
 
-void CPushable::Spawn()
+bool CPushable::Spawn()
 {
 	if ((pev->spawnflags & SF_PUSH_BREAKABLE) != 0)
-		CBreakable::Spawn();
+	{
+		if (!CBreakable::Spawn())
+		{
+			return false;
+		}
+	}
 	else
+	{
 		Precache();
+	}
 
 	pev->movetype = MOVETYPE_PUSHSTEP;
 	pev->solid = SOLID_BBOX;
@@ -868,6 +877,8 @@ void CPushable::Spawn()
 	// Multiply by area of the box's cross-section (assume 1000 units^3 standard volume)
 	pev->skin = (pev->skin * (pev->maxs.x - pev->mins.x) * (pev->maxs.y - pev->mins.y)) * 0.0005;
 	m_soundTime = 0;
+
+	return true;
 }
 
 

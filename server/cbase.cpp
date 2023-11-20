@@ -150,11 +150,12 @@ int DispatchSpawn(edict_t* pent)
 		pEntity->pev->absmin = pEntity->pev->origin - Vector(1, 1, 1);
 		pEntity->pev->absmax = pEntity->pev->origin + Vector(1, 1, 1);
 
-		pEntity->Spawn();
+		if (!pEntity->Spawn())
+		{
+			return -1;
+		}
 
 		// Try to get the pointer again, in case the spawn function deleted the entity.
-		// UNDONE: Spawn() should really return a code to ask that the entity be deleted, but
-		// that would touch too much code for me to do that right now.
 		pEntity = (CBaseEntity*)GET_PRIVATE(pent);
 
 		if (pEntity)

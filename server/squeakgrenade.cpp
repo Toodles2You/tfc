@@ -32,7 +32,7 @@ enum w_squeak_e
 
 class CSqueakGrenade : public CGrenade
 {
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	int IRelationship(CBaseEntity* pTarget) override;
 	int Classify() override;
@@ -107,7 +107,7 @@ int CSqueakGrenade::Classify()
 	return CLASS_ALIEN_BIOWEAPON;
 }
 
-void CSqueakGrenade::Spawn()
+bool CSqueakGrenade::Spawn()
 {
 	Precache();
 	// motor
@@ -142,6 +142,8 @@ void CSqueakGrenade::Spawn()
 
 	pev->sequence = WSQUEAK_RUN;
 	ResetSequenceInfo();
+
+	return true;
 }
 
 void CSqueakGrenade::Precache()
@@ -404,7 +406,7 @@ void CSqueakGrenade::SuperBounceTouch(CBaseEntity* pOther)
 LINK_ENTITY_TO_CLASS(weapon_snark, CSqueak);
 
 
-void CSqueak::Spawn()
+bool CSqueak::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_SNARK;
@@ -417,6 +419,8 @@ void CSqueak::Spawn()
 	pev->sequence = 1;
 	pev->animtime = gpGlobals->time;
 	pev->framerate = 1.0;
+	
+	return true;
 }
 
 

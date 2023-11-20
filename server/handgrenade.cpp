@@ -24,7 +24,7 @@
 LINK_ENTITY_TO_CLASS(weapon_handgrenade, CHandGrenade);
 
 
-void CHandGrenade::Spawn()
+bool CHandGrenade::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_HANDGRENADE;
@@ -37,6 +37,8 @@ void CHandGrenade::Spawn()
 	m_iDefaultAmmo = HANDGRENADE_DEFAULT_GIVE;
 
 	FallInit(); // get ready to fall down.
+
+	return true;
 }
 
 

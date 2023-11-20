@@ -186,7 +186,7 @@ public:
 	virtual void SetModel( const char *modelName );
 	virtual Vector GetAimVector( void );
 
-	void Spawn( void );
+	bool Spawn( void );
 	void BotThink( void );
 	bool IsNetClient( void ) const			{ return false; }
 	int Save( CSave &save )	const			{ return 0; }

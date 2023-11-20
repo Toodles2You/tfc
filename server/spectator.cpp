@@ -138,11 +138,13 @@ Spawn
   UNDONE:  Is this actually being called because spectators are not allocated in normal fashion?
 ============
 */
-void CBaseSpectator::Spawn()
+bool CBaseSpectator::Spawn()
 {
 	pev->flags = FL_SPECTATOR;
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_NOCLIP;
 
 	m_pGoalEnt = NULL;
+
+	return true;
 }

@@ -1475,7 +1475,7 @@ class CTestHull : public CBaseEntity
 {
 
 public:
-	void Spawn(entvars_t* pevMasterNode);
+	bool Spawn(entvars_t* pevMasterNode);
 	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	void EXPORT CallBuildNodeGraph();
 	void BuildNodeGraph();
@@ -1491,7 +1491,7 @@ LINK_ENTITY_TO_CLASS(testhull, CTestHull);
 //=========================================================
 // CTestHull::Spawn
 //=========================================================
-void CTestHull::Spawn(entvars_t* pevMasterNode)
+bool CTestHull::Spawn(entvars_t* pevMasterNode)
 {
 	SET_MODEL(ENT(pev), "models/player.mdl");
 	UTIL_SetSize(pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX);
@@ -1504,19 +1504,16 @@ void CTestHull::Spawn(entvars_t* pevMasterNode)
 
 	if (0 != WorldGraph.m_fGraphPresent)
 	{ // graph loaded from disk, so we don't need the test hull
-		SetThink(&CTestHull::SUB_Remove);
-		pev->nextthink = gpGlobals->time;
-	}
-	else
-	{
-		SetThink(&CTestHull::DropDelay);
-		pev->nextthink = gpGlobals->time + 1;
+		return false;
 	}
 
+	SetThink(&CTestHull::DropDelay);
+	pev->nextthink = gpGlobals->time + 1;
+
 	// Make this invisible
-	// UNDONE: Shouldn't we just use EF_NODRAW?  This doesn't need to go to the client.
-	pev->rendermode = kRenderTransTexture;
-	pev->renderamt = 0;
+	pev->effects |= EF_NODRAW;
+
+	return true;
 }
 
 //=========================================================
@@ -1557,21 +1554,19 @@ bool CNodeEnt::KeyValue(KeyValueData* pkvd)
 
 //=========================================================
 //=========================================================
-void CNodeEnt::Spawn()
+bool CNodeEnt::Spawn()
 {
 	pev->movetype = MOVETYPE_NONE;
 	pev->solid = SOLID_NOT; // always solid_not
 
 	if (!g_pGameRules->FAllowMonsters())
 	{
-		REMOVE_ENTITY(edict());
-		return;
+		return false;
 	}
 
 	if (0 != WorldGraph.m_fGraphPresent)
 	{ // graph loaded from disk, so discard all these node ents as soon as they spawn
-		REMOVE_ENTITY(edict());
-		return;
+		return false;
 	}
 
 	if (WorldGraph.m_cNodes == 0)
@@ -1599,7 +1594,7 @@ void CNodeEnt::Spawn()
 
 	WorldGraph.m_cNodes++;
 
-	REMOVE_ENTITY(edict());
+	return false;
 }
 
 //=========================================================
@@ -3479,7 +3474,7 @@ EnoughSaid:
 class CNodeViewer : public CBaseEntity
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 
 	int m_iBaseNode;
 	int m_iDraw;
@@ -3499,15 +3494,13 @@ LINK_ENTITY_TO_CLASS(node_viewer_human, CNodeViewer);
 LINK_ENTITY_TO_CLASS(node_viewer_fly, CNodeViewer);
 LINK_ENTITY_TO_CLASS(node_viewer_large, CNodeViewer);
 
-void CNodeViewer::Spawn()
+bool CNodeViewer::Spawn()
 {
 	if (0 == WorldGraph.m_fGraphPresent || 0 == WorldGraph.m_fGraphPointersSet)
 	{ // protect us in the case that the node graph isn't available or built
 		ALERT(at_console, "Graph not ready!\n");
-		UTIL_Remove(this);
-		return;
+		return false;
 	}
-
 
 	if (FClassnameIs(pev, "node_viewer_fly"))
 	{
@@ -3572,6 +3565,8 @@ void CNodeViewer::Spawn()
 	m_iDraw = 0;
 	SetThink(&CNodeViewer::DrawThink);
 	pev->nextthink = gpGlobals->time;
+
+	return true;
 }
 
 

@@ -22,7 +22,7 @@
 LINK_ENTITY_TO_CLASS(weapon_glock, CGlock);
 LINK_ENTITY_TO_CLASS(weapon_9mmhandgun, CGlock);
 
-void CGlock::Spawn()
+bool CGlock::Spawn()
 {
 	pev->classname = MAKE_STRING("weapon_9mmhandgun"); // hack to allow for old names
 	Precache();
@@ -32,6 +32,8 @@ void CGlock::Spawn()
 	m_iDefaultAmmo = GLOCK_DEFAULT_GIVE;
 
 	FallInit(); // get ready to fall down.
+
+	return true;
 }
 
 

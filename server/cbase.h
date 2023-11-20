@@ -150,7 +150,7 @@ public:
 	virtual ~CBaseEntity() {}
 
 	// initialization functions
-	virtual void Spawn() {}
+	virtual bool Spawn() { return false; }
 	virtual void Precache() {}
 	virtual bool KeyValue(KeyValueData* pkvd) { return false; }
 	virtual bool Save(CSave& save);
@@ -308,7 +308,7 @@ inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->e
 class CPointEntity : public CBaseEntity
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 
 private:
@@ -343,7 +343,7 @@ void PlayLockSounds(entvars_t* pev, locksound_t* pls, bool flocked, bool fbutton
 class CMultiSource : public CPointEntity
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 	int ObjectCaps() override { return (CPointEntity::ObjectCaps() | FCAP_MASTER); }
@@ -524,7 +524,7 @@ const char* ButtonSound(int sound); // get string of button sound number
 class CBaseButton : public CBaseToggle
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 
@@ -611,7 +611,7 @@ public:
 	CWorld();
 	~CWorld();
 
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 

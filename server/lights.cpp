@@ -30,7 +30,7 @@ class CLight : public CPointEntity
 {
 public:
 	bool KeyValue(KeyValueData* pkvd) override;
-	void Spawn() override;
+	bool Spawn() override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 
 	bool Save(CSave& save) override;
@@ -78,12 +78,11 @@ bool CLight::KeyValue(KeyValueData* pkvd)
 }
 
 
-void CLight::Spawn()
+bool CLight::Spawn()
 {
 	if (FStringNull(pev->targetname))
-	{ // inert light
-		REMOVE_ENTITY(ENT(pev));
-		return;
+	{
+		return false;
 	}
 
 	if (m_iStyle >= 32)
@@ -96,6 +95,8 @@ void CLight::Spawn()
 		else
 			LIGHT_STYLE(m_iStyle, "m");
 	}
+
+	return true;
 }
 
 
@@ -132,7 +133,7 @@ class CEnvLight : public CLight
 {
 public:
 	bool KeyValue(KeyValueData* pkvd) override;
-	void Spawn() override;
+	bool Spawn() override;
 };
 
 LINK_ENTITY_TO_CLASS(light_environment, CEnvLight);
@@ -174,7 +175,7 @@ bool CEnvLight::KeyValue(KeyValueData* pkvd)
 }
 
 
-void CEnvLight::Spawn()
+bool CEnvLight::Spawn()
 {
 	char szVector[64];
 	UTIL_MakeAimVectors(pev->angles);
@@ -186,5 +187,5 @@ void CEnvLight::Spawn()
 	sprintf(szVector, "%f", gpGlobals->v_forward.z);
 	CVAR_SET_STRING("sv_skyvec_z", szVector);
 
-	CLight::Spawn();
+	return CLight::Spawn();
 }

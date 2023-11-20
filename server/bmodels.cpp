@@ -48,7 +48,7 @@ Vector VecBModelOrigin(entvars_t* pevBModel)
 class CFuncWall : public CBaseEntity
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 
 	// Bmodels don't go across transitions
@@ -57,7 +57,7 @@ public:
 
 LINK_ENTITY_TO_CLASS(func_wall, CFuncWall);
 
-void CFuncWall::Spawn()
+bool CFuncWall::Spawn()
 {
 	pev->angles = g_vecZero;
 	pev->movetype = MOVETYPE_PUSH; // so it doesn't get pushed by anything
@@ -66,6 +66,8 @@ void CFuncWall::Spawn()
 
 	// If it can't move/go away, it's really part of the world
 	pev->flags |= FL_WORLDBRUSH;
+
+	return true;
 }
 
 
@@ -81,7 +83,7 @@ void CFuncWall::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 class CFuncWallToggle : public CFuncWall
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 	void TurnOff();
 	void TurnOn();
@@ -90,11 +92,17 @@ public:
 
 LINK_ENTITY_TO_CLASS(func_wall_toggle, CFuncWallToggle);
 
-void CFuncWallToggle::Spawn()
+bool CFuncWallToggle::Spawn()
 {
-	CFuncWall::Spawn();
+	if (!CFuncWall::Spawn())
+	{
+		return false;
+	}
+
 	if ((pev->spawnflags & SF_WALL_START_OFF) != 0)
 		TurnOff();
+
+	return true;
 }
 
 
@@ -142,16 +150,20 @@ void CFuncWallToggle::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 class CFuncConveyor : public CFuncWall
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 	void UpdateSpeed(float speed);
 };
 
 LINK_ENTITY_TO_CLASS(func_conveyor, CFuncConveyor);
-void CFuncConveyor::Spawn()
+bool CFuncConveyor::Spawn()
 {
 	SetMovedir(pev);
-	CFuncWall::Spawn();
+
+	if (!CFuncWall::Spawn())
+	{
+		return false;
+	}
 
 	if ((pev->spawnflags & SF_CONVEYOR_VISUAL) == 0)
 		SetBits(pev->flags, FL_CONVEYOR);
@@ -167,6 +179,8 @@ void CFuncConveyor::Spawn()
 		pev->speed = 100;
 
 	UpdateSpeed(pev->speed);
+
+	return true;
 }
 
 
@@ -200,7 +214,7 @@ void CFuncConveyor::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 class CFuncIllusionary : public CBaseToggle
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void EXPORT SloshTouch(CBaseEntity* pOther);
 	bool KeyValue(KeyValueData* pkvd) override;
 	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
@@ -219,7 +233,7 @@ bool CFuncIllusionary::KeyValue(KeyValueData* pkvd)
 	return CBaseToggle::KeyValue(pkvd);
 }
 
-void CFuncIllusionary::Spawn()
+bool CFuncIllusionary::Spawn()
 {
 	pev->angles = g_vecZero;
 	pev->movetype = MOVETYPE_NONE;
@@ -230,6 +244,7 @@ void CFuncIllusionary::Spawn()
 	// these entities after they have been moved to the client, or respawn them ala Quake
 	// Perhaps we can do this in deathmatch only.
 	//	MAKE_STATIC(ENT(pev));
+	return true;
 }
 
 
@@ -247,17 +262,23 @@ void CFuncIllusionary::Spawn()
 class CFuncMonsterClip : public CFuncWall
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override {} // Clear out func_wall's use function
 };
 
 LINK_ENTITY_TO_CLASS(func_monsterclip, CFuncMonsterClip);
 
-void CFuncMonsterClip::Spawn()
+bool CFuncMonsterClip::Spawn()
 {
-	CFuncWall::Spawn();
+	if (!CFuncWall::Spawn())
+	{
+		return false;
+	}
+
 	pev->effects = EF_NODRAW;
 	pev->flags |= FL_MONSTERCLIP;
+
+	return true;
 }
 
 
@@ -266,7 +287,7 @@ class CFuncRotating : public CBaseEntity
 {
 public:
 	// basic functions
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	void EXPORT SpinUp();
 	void EXPORT SpinDown();
@@ -337,7 +358,7 @@ bool CFuncRotating::KeyValue(KeyValueData* pkvd)
 }
 
 
-void CFuncRotating::Spawn()
+bool CFuncRotating::Spawn()
 {
 	// set final pitch.  Must not be PITCH_NORM, since we
 	// plan on pitch shifting later.
@@ -402,10 +423,6 @@ void CFuncRotating::Spawn()
 	if (pev->speed <= 0)
 		pev->speed = 0;
 
-	// Removed this per level designers request.  -- JAY
-	//	if (pev->dmg == 0)
-	//		pev->dmg = 2;
-
 	// instant-use brush?
 	if (FBitSet(pev->spawnflags, SF_BRUSH_ROTATE_INSTANT))
 	{
@@ -419,6 +436,8 @@ void CFuncRotating::Spawn()
 	}
 
 	Precache();
+
+	return true;
 }
 
 
@@ -706,7 +725,7 @@ void CFuncRotating::Blocked(CBaseEntity* pOther)
 class CPendulum : public CBaseEntity
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 	void EXPORT Swing();
 	void EXPORT PendulumUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
@@ -765,7 +784,7 @@ bool CPendulum::KeyValue(KeyValueData* pkvd)
 }
 
 
-void CPendulum::Spawn()
+bool CPendulum::Spawn()
 {
 	// set the axis of rotation
 	CBaseToggle::AxisDir(pev);
@@ -801,6 +820,8 @@ void CPendulum::Spawn()
 	{
 		SetTouch(&CPendulum::RopeTouch);
 	}
+
+	return true;
 }
 
 

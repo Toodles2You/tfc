@@ -33,7 +33,7 @@
 class CSprite : public CPointEntity
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 
 	int ObjectCaps() override
@@ -106,7 +106,7 @@ private:
 class CBeam : public CBaseEntity
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	int ObjectCaps() override
 	{
@@ -198,7 +198,7 @@ public:
 class CLaser : public CBeam
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 

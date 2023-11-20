@@ -27,7 +27,7 @@ LINK_ENTITY_TO_CLASS(weapon_9mmAR, CMP5);
 
 //=========================================================
 //=========================================================
-void CMP5::Spawn()
+bool CMP5::Spawn()
 {
 	pev->classname = MAKE_STRING("weapon_9mmAR"); // hack to allow for old names
 	Precache();
@@ -37,6 +37,8 @@ void CMP5::Spawn()
 	m_iDefaultAmmo = MP5_DEFAULT_GIVE;
 
 	FallInit(); // get ready to fall down.
+
+	return true;
 }
 
 bool CMP5::AddDuplicate(CBasePlayerItem* pOriginal)

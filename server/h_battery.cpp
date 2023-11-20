@@ -31,7 +31,7 @@
 class CRecharge : public CBaseToggle
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	void EXPORT Off();
 	void EXPORT Recharge();
@@ -83,7 +83,7 @@ bool CRecharge::KeyValue(KeyValueData* pkvd)
 	return CBaseToggle::KeyValue(pkvd);
 }
 
-void CRecharge::Spawn()
+bool CRecharge::Spawn()
 {
 	Precache();
 
@@ -95,6 +95,8 @@ void CRecharge::Spawn()
 	SET_MODEL(ENT(pev), STRING(pev->model));
 	m_iJuice = gSkillData.suitchargerCapacity;
 	pev->frame = 0;
+
+	return true;
 }
 
 void CRecharge::Precache()

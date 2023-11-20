@@ -53,10 +53,13 @@ bool CBot::Initialize( const BotProfile *profile )
 }
 
 //--------------------------------------------------------------------------------------------------------------
-void CBot::Spawn( void )
+bool CBot::Spawn( void )
 {
 	// Let CBasePlayer set some things up
-	CBasePlayer::Spawn();
+	if (!CBasePlayer::Spawn())
+	{
+		return false;
+	}
 
 	// Make sure everyone knows we are a bot
 	pev->flags |= ( FL_CLIENT | FL_FAKECLIENT );
@@ -80,6 +83,8 @@ void CBot::Spawn( void )
 
 	// Allow derived classes to setup at spawn time
 	SpawnBot();
+
+	return true;
 }
 
 

@@ -2169,7 +2169,7 @@ pt_end:
 }
 
 
-void CBasePlayer::Spawn()
+bool CBasePlayer::Spawn()
 {
 	m_bIsSpawning = true;
 
@@ -2253,6 +2253,8 @@ void CBasePlayer::Spawn()
 	m_flNextChatTime = gpGlobals->time;
 
 	g_pGameRules->PlayerSpawn(this);
+
+	return true;
 }
 
 
@@ -2430,13 +2432,13 @@ int CBasePlayer::TeamNumber()
 class CSprayCan : public CBaseEntity
 {
 public:
-	void Spawn(entvars_t* pevOwner);
+	bool Spawn(entvars_t* pevOwner);
 	void Think() override;
 
 	int ObjectCaps() override { return FCAP_DONT_SAVE; }
 };
 
-void CSprayCan::Spawn(entvars_t* pevOwner)
+bool CSprayCan::Spawn(entvars_t* pevOwner)
 {
 	pev->origin = pevOwner->origin + Vector(0, 0, 32);
 	pev->angles = pevOwner->v_angle;
@@ -2445,6 +2447,8 @@ void CSprayCan::Spawn(entvars_t* pevOwner)
 
 	pev->nextthink = gpGlobals->time + 0.1;
 	EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/sprayer.wav", 1, ATTN_NORM);
+
+	return true;
 }
 
 void CSprayCan::Think()
@@ -3518,11 +3522,11 @@ void CRevertSaved::LoadThink()
 //=========================================================
 class CInfoIntermission : public CPointEntity
 {
-	void Spawn() override;
+	bool Spawn() override;
 	void Think() override;
 };
 
-void CInfoIntermission::Spawn()
+bool CInfoIntermission::Spawn()
 {
 	UTIL_SetOrigin(pev, pev->origin);
 	pev->solid = SOLID_NOT;
@@ -3530,6 +3534,8 @@ void CInfoIntermission::Spawn()
 	pev->v_angle = g_vecZero;
 
 	pev->nextthink = gpGlobals->time + 2; // let targets spawn!
+
+	return true;
 }
 
 void CInfoIntermission::Think()

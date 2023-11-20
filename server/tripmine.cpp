@@ -24,9 +24,11 @@
 
 #ifndef CLIENT_DLL
 
+#define SF_TRIPMINE_INSTANT_ON 1
+
 class CTripmineGrenade : public CGrenade
 {
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 
 	bool Save(CSave& save) override;
@@ -76,7 +78,7 @@ TYPEDESCRIPTION CTripmineGrenade::m_SaveData[] =
 IMPLEMENT_SAVERESTORE(CTripmineGrenade, CGrenade);
 
 
-void CTripmineGrenade::Spawn()
+bool CTripmineGrenade::Spawn()
 {
 	Precache();
 	// motor
@@ -93,8 +95,7 @@ void CTripmineGrenade::Spawn()
 	UTIL_SetSize(pev, Vector(-8, -8, -8), Vector(8, 8, 8));
 	UTIL_SetOrigin(pev, pev->origin);
 
-	//TODO: define constant
-	if ((pev->spawnflags & 1) != 0)
+	if ((pev->spawnflags & SF_TRIPMINE_INSTANT_ON) != 0)
 	{
 		// power up quickly
 		m_flPowerUp = gpGlobals->time + 1.0;
@@ -125,6 +126,8 @@ void CTripmineGrenade::Spawn()
 
 	m_vecDir = gpGlobals->v_forward;
 	m_vecEnd = pev->origin + m_vecDir * 2048;
+
+	return true;
 }
 
 
@@ -352,7 +355,7 @@ void CTripmineGrenade::DelayDeathThink()
 
 LINK_ENTITY_TO_CLASS(weapon_tripmine, CTripmine);
 
-void CTripmine::Spawn()
+bool CTripmine::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_TRIPMINE;
@@ -376,6 +379,8 @@ void CTripmine::Spawn()
 	{
 		UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 28));
 	}
+
+	return true;
 }
 
 void CTripmine::Precache()

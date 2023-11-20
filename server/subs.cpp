@@ -29,9 +29,10 @@
 #include "gamerules.h"
 
 // Landmark class
-void CPointEntity::Spawn()
+bool CPointEntity::Spawn()
 {
 	pev->solid = SOLID_NOT;
+	return true;
 }
 
 LINK_ENTITY_TO_CLASS(info_landmark, CPointEntity);
@@ -40,7 +41,7 @@ class CBaseDMStart : public CPointEntity
 {
 public:
 	bool KeyValue(KeyValueData* pkvd) override;
-	void Spawn() override;
+	bool Spawn() override;
 };
 
 // These are the new entry points to entities.
@@ -58,10 +59,10 @@ bool CBaseDMStart::KeyValue(KeyValueData* pkvd)
 	return CPointEntity::KeyValue(pkvd);
 }
 
-void CBaseDMStart::Spawn()
+bool CBaseDMStart::Spawn()
 {
 	g_pGameRules->AddPlayerSpawnSpot(this);
-	UTIL_Remove(this);
+	return false;
 }
 
 // This updates global tables that need to know about entities being removed

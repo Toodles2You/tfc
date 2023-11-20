@@ -279,12 +279,14 @@ CBasePlayer::Spawn
 
 =====================
 */
-void CBasePlayer::Spawn()
+bool CBasePlayer::Spawn()
 {
 	if (m_pActiveItem)
 		m_pActiveItem->Deploy();
 
 	g_irunninggausspred = false;
+
+	return true;
 }
 
 /*

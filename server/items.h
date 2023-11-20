@@ -18,7 +18,7 @@
 class CItem : public CBaseEntity
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	CBaseEntity* Respawn() override;
 	void EXPORT ItemTouch(CBaseEntity* pOther);
 	void EXPORT Materialize();

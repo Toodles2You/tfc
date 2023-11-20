@@ -43,7 +43,7 @@ CLaserSpot* CLaserSpot::CreateSpot(CBaseEntity* pOwner)
 
 //=========================================================
 //=========================================================
-void CLaserSpot::Spawn()
+bool CLaserSpot::Spawn()
 {
 	Precache();
 	pev->movetype = MOVETYPE_NONE;
@@ -55,7 +55,9 @@ void CLaserSpot::Spawn()
 
 	SET_MODEL(ENT(pev), "sprites/laserdot.spr");
 	UTIL_SetOrigin(pev, pev->origin);
-};
+
+	return true;
+}
 
 //=========================================================
 // Suspend- make the laser sight invisible.
@@ -113,7 +115,7 @@ CRpgRocket* CRpgRocket::CreateRpgRocket(Vector vecOrigin, Vector vecAngles, CBas
 
 //=========================================================
 //=========================================================
-void CRpgRocket::Spawn()
+bool CRpgRocket::Spawn()
 {
 	Precache();
 	// motor
@@ -139,6 +141,8 @@ void CRpgRocket::Spawn()
 	pev->nextthink = gpGlobals->time + 0.4;
 
 	pev->dmg = gSkillData.plrDmgRPG;
+	
+	return true;
 }
 
 //=========================================================
@@ -302,7 +306,7 @@ void CRpg::Reload()
 	}
 }
 
-void CRpg::Spawn()
+bool CRpg::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_RPG;
@@ -321,6 +325,8 @@ void CRpg::Spawn()
 	}
 
 	FallInit(); // get ready to fall down.
+
+	return true;
 }
 
 

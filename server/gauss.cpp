@@ -38,7 +38,7 @@ float CGauss::GetFullChargeTime()
 extern bool g_irunninggausspred;
 #endif
 
-void CGauss::Spawn()
+bool CGauss::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_GAUSS;
@@ -47,6 +47,8 @@ void CGauss::Spawn()
 	m_iDefaultAmmo = GAUSS_DEFAULT_GIVE;
 
 	FallInit(); // get ready to fall down.
+
+	return true;
 }
 
 

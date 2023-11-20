@@ -33,7 +33,7 @@
 class CMonsterMaker : public CBaseToggle
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 	void EXPORT ToggleUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
@@ -100,7 +100,7 @@ bool CMonsterMaker::KeyValue(KeyValueData* pkvd)
 }
 
 
-void CMonsterMaker::Spawn()
+bool CMonsterMaker::Spawn()
 {
 	pev->solid = SOLID_NOT;
 
@@ -145,6 +145,8 @@ void CMonsterMaker::Spawn()
 	}
 
 	m_flGround = 0;
+
+	return true;
 }
 
 void CMonsterMaker::Precache()

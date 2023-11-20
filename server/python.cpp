@@ -41,7 +41,7 @@ bool CPython::GetItemInfo(ItemInfo* p)
 	return true;
 }
 
-void CPython::Spawn()
+bool CPython::Spawn()
 {
 	pev->classname = MAKE_STRING("weapon_357"); // hack to allow for old names
 	Precache();
@@ -51,6 +51,8 @@ void CPython::Spawn()
 	m_iDefaultAmmo = PYTHON_DEFAULT_GIVE;
 
 	FallInit(); // get ready to fall down.
+
+	return true;
 }
 
 

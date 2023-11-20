@@ -40,7 +40,7 @@ void DeactivateSatchels(CBasePlayer* pOwner);
 class CGrenade : public CBaseAnimating
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 
 	typedef enum
 	{
@@ -362,7 +362,7 @@ public:
 class CBasePlayerAmmo : public CBaseEntity
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void EXPORT DefaultTouch(CBaseEntity* pOther); // default weapon touch
 	virtual bool AddAmmo(CBaseEntity* pOther) { return true; }
 
@@ -373,11 +373,11 @@ public:
 #define IMPLEMENT_AMMO_CLASS(mapClassName, DLLClassName, modelName, give, ammoType, maxCarry) \
 class DLLClassName : public CBasePlayerAmmo \
 { \
-	void Spawn() override \
+	bool Spawn() override \
 	{ \
 		Precache(); \
 		SET_MODEL(ENT(pev), modelName); \
-		CBasePlayerAmmo::Spawn(); \
+		return CBasePlayerAmmo::Spawn(); \
 	} \
 	void Precache() override \
 	{ \
@@ -454,7 +454,7 @@ inline MULTIDAMAGE gMultiDamage;
 class CWeaponBox : public CBaseEntity
 {
 	void Precache() override;
-	void Spawn() override;
+	bool Spawn() override;
 	void Touch(CBaseEntity* pOther) override;
 	bool KeyValue(KeyValueData* pkvd) override;
 	bool IsEmpty();
@@ -499,7 +499,7 @@ enum glock_e
 class CGlock : public CBasePlayerWeapon
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	int iItemSlot() override { return 2; }
 	bool GetItemInfo(ItemInfo* p) override;
@@ -532,7 +532,7 @@ enum crowbar_e
 class CCrowbar : public CBasePlayerWeapon
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	int iItemSlot() override { return 1; }
 	void EXPORT SwingAgain();
@@ -565,7 +565,7 @@ enum python_e
 class CPython : public CBasePlayerWeapon
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	int iItemSlot() override { return 2; }
 	bool GetItemInfo(ItemInfo* p) override;
@@ -596,7 +596,7 @@ enum mp5_e
 class CMP5 : public CBasePlayerWeapon
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	int iItemSlot() override { return 3; }
 	bool GetItemInfo(ItemInfo* p) override;
@@ -633,7 +633,7 @@ enum crossbow_e
 class CCrossbow : public CBasePlayerWeapon
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	int iItemSlot() override { return 3; }
 	bool GetItemInfo(ItemInfo* p) override;
@@ -676,7 +676,7 @@ public:
 #endif
 
 
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	int iItemSlot() override { return 3; }
 	bool GetItemInfo(ItemInfo* p) override;
@@ -701,7 +701,7 @@ private:
 
 class CLaserSpot : public CBaseEntity
 {
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 
 	int ObjectCaps() override { return FCAP_DONT_SAVE; }
@@ -736,7 +736,7 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 #endif
 
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	void Reload() override;
 	int iItemSlot() override { return 4; }
@@ -774,7 +774,7 @@ public:
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
 	static TYPEDESCRIPTION m_SaveData[];
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	void EXPORT FollowThink();
 	void EXPORT IgniteThink();
@@ -811,7 +811,7 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 #endif
 
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	int iItemSlot() override { return 4; }
 	bool GetItemInfo(ItemInfo* p) override;
@@ -886,7 +886,7 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 #endif
 
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	int iItemSlot() override { return 4; }
 	bool GetItemInfo(ItemInfo* p) override;
@@ -945,7 +945,7 @@ enum hgun_e
 class CHgun : public CBasePlayerWeapon
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	int iItemSlot() override { return 4; }
 	bool GetItemInfo(ItemInfo* p) override;
@@ -983,7 +983,7 @@ enum handgrenade_e
 class CHandGrenade : public CBasePlayerWeapon
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	int iItemSlot() override { return 5; }
 	bool GetItemInfo(ItemInfo* p) override;
@@ -1021,7 +1021,7 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 #endif
 
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	int iItemSlot() override { return 5; }
 	bool GetItemInfo(ItemInfo* p) override;
@@ -1054,7 +1054,7 @@ enum tripmine_e
 class CTripmine : public CBasePlayerWeapon
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	int iItemSlot() override { return 5; }
 	bool GetItemInfo(ItemInfo* p) override;
@@ -1087,7 +1087,7 @@ enum squeak_e
 class CSqueak : public CBasePlayerWeapon
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	int iItemSlot() override { return 5; }
 	bool GetItemInfo(ItemInfo* p) override;

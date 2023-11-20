@@ -20,7 +20,7 @@
 
 class CAirtank : public CGrenade
 {
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	void EXPORT TankThink();
 	void EXPORT TankTouch(CBaseEntity* pOther);
@@ -45,7 +45,7 @@ TYPEDESCRIPTION CAirtank::m_SaveData[] =
 IMPLEMENT_SAVERESTORE(CAirtank, CGrenade);
 
 
-void CAirtank::Spawn()
+bool CAirtank::Spawn()
 {
 	Precache();
 	// motor
@@ -64,6 +64,8 @@ void CAirtank::Spawn()
 	pev->health = 20;
 	pev->dmg = 50;
 	m_state = true;
+
+	return true;
 }
 
 void CAirtank::Precache()

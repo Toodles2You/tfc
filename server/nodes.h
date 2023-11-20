@@ -269,7 +269,7 @@ public:
 //=========================================================
 class CNodeEnt : public CBaseEntity
 {
-	void Spawn() override;
+	bool Spawn() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 

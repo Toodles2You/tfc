@@ -22,7 +22,7 @@
 
 class CSatchelCharge : public CGrenade
 {
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	void BounceSound() override;
 
@@ -45,7 +45,7 @@ void CSatchelCharge::Deactivate()
 }
 
 
-void CSatchelCharge::Spawn()
+bool CSatchelCharge::Spawn()
 {
 	Precache();
 	// motor
@@ -53,7 +53,6 @@ void CSatchelCharge::Spawn()
 	pev->solid = SOLID_BBOX;
 
 	SET_MODEL(ENT(pev), "models/w_satchel.mdl");
-	//UTIL_SetSize(pev, Vector( -16, -16, -4), Vector(16, 16, 32));	// Old box -- size of headcrab monsters/players get blocked by this
 	UTIL_SetSize(pev, Vector(-4, -4, -4), Vector(4, 4, 4)); // Uses point-sized, and can be stepped over
 	UTIL_SetOrigin(pev, pev->origin);
 
@@ -66,8 +65,9 @@ void CSatchelCharge::Spawn()
 	pev->friction = 0.8;
 
 	pev->dmg = gSkillData.plrDmgSatchel;
-	// ResetSequenceInfo( );
 	pev->sequence = 1;
+
+	return true;	
 }
 
 
@@ -186,7 +186,7 @@ void CSatchel::AddToPlayer(CBasePlayer* pPlayer)
 	CBasePlayerWeapon::AddToPlayer(pPlayer);
 }
 
-void CSatchel::Spawn()
+bool CSatchel::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_SATCHEL;
@@ -195,6 +195,8 @@ void CSatchel::Spawn()
 	m_iDefaultAmmo = SATCHEL_DEFAULT_GIVE;
 
 	FallInit(); // get ready to fall down.
+
+	return true;
 }
 
 

@@ -118,7 +118,7 @@ class CAmbientGeneric : public CBaseEntity
 {
 public:
 	bool KeyValue(KeyValueData* pkvd) override;
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	void EXPORT ToggleUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
 	void EXPORT RampThink();
@@ -156,16 +156,8 @@ IMPLEMENT_SAVERESTORE(CAmbientGeneric, CBaseEntity);
 //
 // ambient_generic - general-purpose user-defined static sound
 //
-void CAmbientGeneric::Spawn()
+bool CAmbientGeneric::Spawn()
 {
-	/*
-		-1 : "Default"
-		0  : "Everywhere"
-		200 : "Small Radius"
-		125 : "Medium Radius"
-		80  : "Large Radius"
-*/
-
 	if (FBitSet(pev->spawnflags, AMBIENT_SOUND_EVERYWHERE))
 	{
 		m_flAttenuation = ATTN_NONE;
@@ -192,9 +184,7 @@ void CAmbientGeneric::Spawn()
 	if (FStringNull(pev->message) || strlen(szSoundFile) < 1)
 	{
 		ALERT(at_error, "EMPTY AMBIENT AT: %f, %f, %f\n", pev->origin.x, pev->origin.y, pev->origin.z);
-		pev->nextthink = gpGlobals->time + 0.1;
-		SetThink(&CAmbientGeneric::SUB_Remove);
-		return;
+		return false;
 	}
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_NONE;
@@ -217,6 +207,8 @@ void CAmbientGeneric::Spawn()
 	else
 		m_fLooping = true;
 	Precache();
+
+	return true;
 }
 
 
@@ -836,7 +828,7 @@ class CEnvSound : public CPointEntity
 {
 public:
 	bool KeyValue(KeyValueData* pkvd) override;
-	void Spawn() override;
+	bool Spawn() override;
 
 	void Think() override;
 
@@ -986,10 +978,11 @@ void CEnvSound::Think()
 // when player moves in range and sight.
 //
 //
-void CEnvSound::Spawn()
+bool CEnvSound::Spawn()
 {
 	// spread think times
 	pev->nextthink = gpGlobals->time + RANDOM_FLOAT(0.0, 0.5);
+	return true;
 }
 
 // ==================== SENTENCE GROUPS, UTILITY FUNCTIONS  ======================================
@@ -1829,7 +1822,7 @@ class CSpeaker : public CBaseEntity
 {
 public:
 	bool KeyValue(KeyValueData* pkvd) override;
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	void EXPORT ToggleUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
 	void EXPORT SpeakerThink();
@@ -1854,16 +1847,14 @@ IMPLEMENT_SAVERESTORE(CSpeaker, CBaseEntity);
 //
 // ambient_generic - general-purpose user-defined static sound
 //
-void CSpeaker::Spawn()
+bool CSpeaker::Spawn()
 {
 	char* szSoundFile = (char*)STRING(pev->message);
 
 	if (0 == m_preset && (FStringNull(pev->message) || strlen(szSoundFile) < 1))
 	{
 		ALERT(at_error, "SPEAKER with no Level/Sentence! at: %f, %f, %f\n", pev->origin.x, pev->origin.y, pev->origin.z);
-		pev->nextthink = gpGlobals->time + 0.1;
-		SetThink(&CSpeaker::SUB_Remove);
-		return;
+		return false;
 	}
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_NONE;
@@ -1877,6 +1868,8 @@ void CSpeaker::Spawn()
 	SetUse(&CSpeaker::ToggleUse);
 
 	Precache();
+
+	return true;
 }
 
 #define ANNOUNCE_MINUTES_MIN 0.25

@@ -23,7 +23,7 @@
 
 class CHealthKit : public CItem
 {
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	bool MyTouch(CBasePlayer* pPlayer) override;
 
@@ -48,12 +48,12 @@ TYPEDESCRIPTION	CHealthKit::m_SaveData[] =
 IMPLEMENT_SAVERESTORE( CHealthKit, CItem);
 */
 
-void CHealthKit::Spawn()
+bool CHealthKit::Spawn()
 {
 	Precache();
 	SET_MODEL(ENT(pev), "models/w_medkit.mdl");
 
-	CItem::Spawn();
+	return CItem::Spawn();
 }
 
 void CHealthKit::Precache()
@@ -90,7 +90,7 @@ bool CHealthKit::MyTouch(CBasePlayer* pPlayer)
 class CWallHealth : public CBaseToggle
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void Precache() override;
 	void EXPORT Off();
 	void EXPORT Recharge();
@@ -142,7 +142,7 @@ bool CWallHealth::KeyValue(KeyValueData* pkvd)
 	return CBaseToggle::KeyValue(pkvd);
 }
 
-void CWallHealth::Spawn()
+bool CWallHealth::Spawn()
 {
 	Precache();
 
@@ -154,6 +154,8 @@ void CWallHealth::Spawn()
 	SET_MODEL(ENT(pev), STRING(pev->model));
 	m_iJuice = gSkillData.healthchargerCapacity;
 	pev->frame = 0;
+
+	return true;
 }
 
 void CWallHealth::Precache()

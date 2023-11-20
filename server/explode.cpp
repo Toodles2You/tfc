@@ -29,7 +29,7 @@
 // Spark Shower
 class CShower : public CBaseEntity
 {
-	void Spawn() override;
+	bool Spawn() override;
 	void Think() override;
 	void Touch(CBaseEntity* pOther) override;
 	int ObjectCaps() override { return FCAP_DONT_SAVE; }
@@ -37,7 +37,7 @@ class CShower : public CBaseEntity
 
 LINK_ENTITY_TO_CLASS(spark_shower, CShower);
 
-void CShower::Spawn()
+bool CShower::Spawn()
 {
 	pev->velocity = RANDOM_FLOAT(200, 300) * pev->angles;
 	pev->velocity.x += RANDOM_FLOAT(-100.f, 100.f);
@@ -56,6 +56,8 @@ void CShower::Spawn()
 	pev->speed = RANDOM_FLOAT(0.5, 1.5);
 
 	pev->angles = g_vecZero;
+
+	return true;
 }
 
 
@@ -85,7 +87,7 @@ void CShower::Touch(CBaseEntity* pOther)
 class CEnvExplosion : public CBaseEntity
 {
 public:
-	void Spawn() override;
+	bool Spawn() override;
 	void EXPORT Smoke();
 	bool KeyValue(KeyValueData* pkvd) override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
@@ -118,34 +120,24 @@ bool CEnvExplosion::KeyValue(KeyValueData* pkvd)
 	return CBaseEntity::KeyValue(pkvd);
 }
 
-void CEnvExplosion::Spawn()
+bool CEnvExplosion::Spawn()
 {
 	pev->solid = SOLID_NOT;
 	pev->effects = EF_NODRAW;
 
 	pev->movetype = MOVETYPE_NONE;
-	/*
-	if ( m_iMagnitude > 250 )
-	{
-		m_iMagnitude = 250;
-	}
-	*/
 
 	float flSpriteScale;
 	flSpriteScale = (m_iMagnitude - 50) * 0.6;
 
-	/*
-	if ( flSpriteScale > 50 )
-	{
-		flSpriteScale = 50;
-	}
-	*/
 	if (flSpriteScale < 10)
 	{
 		flSpriteScale = 10;
 	}
 
 	m_spriteScale = (int)flSpriteScale;
+
+	return true;
 }
 
 void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
