@@ -137,9 +137,12 @@ bool HistoryResource::DrawAmmoHistory(float flTime)
 					gHUD.DrawHudSprite(*spr, 0, &rcPic, xpos, ypos, CHud::COLOR_PRIMARY, scale);
 				}
 
+				int r, g, b;
+				gHUD.GetColor(r, g, b, CHud::COLOR_PRIMARY);
+				ScaleColors(r, g, b, scale);
+
 				// Draw the number
-				/* Toodles FIXME: */
-				/* gHUD.DrawHudNumberString(xpos - 10, ypos, xpos - 100, rgAmmoHistory[i].iCount, r, g, b); */
+				gHUD.DrawHudNumberString(xpos - 10, ypos, xpos - 100, rgAmmoHistory[i].iCount, r, g, b);
 			}
 			else if (rgAmmoHistory[i].type == HISTSLOT_WEAP)
 			{

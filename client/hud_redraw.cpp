@@ -346,7 +346,9 @@ int CHud::DrawHudNumberString(int xpos, int ypos, int iMinX, int iNumber, int r,
 // draws a string from right to left (right-aligned)
 int CHud::DrawHudStringReverse(int xpos, int ypos, int iMinX, const char* szString, int r, int g, int b)
 {
-	return xpos - gEngfuncs.pfnDrawStringReverse(xpos, ypos, szString, r, g, b);
+	auto x1 = roundf (m_flOffsetX + xpos * m_flScaleX);
+	auto y1 = roundf (m_flOffsetY + ypos * m_flScaleY);
+	return (gEngfuncs.pfnDrawStringReverse(x1, y1, szString, r, g, b) - m_flOffsetX) / m_flScaleX;
 }
 
 int CHud::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b, int a, hudalign_e alignment)
