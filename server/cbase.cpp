@@ -653,7 +653,7 @@ bool CBaseEntity::Restore(CRestore& restore)
 
 		PRECACHE_MODEL((char*)STRING(pev->model));
 		SET_MODEL(ENT(pev), STRING(pev->model));
-		UTIL_SetSize(pev, mins, maxs); // Reset them
+		SetSize(mins, maxs); // Reset them
 	}
 
 	return status;
@@ -710,6 +710,12 @@ void CBaseEntity::SetOrigin(const Vector& org)
 {
 	pev->origin = org;
 	g_engfuncs.pfnSetOrigin(pev->pContainingEntity, org);
+}
+
+
+void CBaseEntity::SetSize(const Vector& mins, const Vector& maxs)
+{
+	g_engfuncs.pfnSetSize(pev->pContainingEntity, mins, maxs);
 }
 
 

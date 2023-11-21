@@ -1033,7 +1033,7 @@ bool CFuncTankControls::Spawn()
 	pev->effects |= EF_NODRAW;
 	SET_MODEL(ENT(pev), STRING(pev->model));
 
-	UTIL_SetSize(pev, pev->mins, pev->maxs);
+	SetSize(pev->mins, pev->maxs);
 	SetOrigin(pev->origin);
 
 	pev->nextthink = gpGlobals->time + 0.3; // After all the func_tank's have spawned

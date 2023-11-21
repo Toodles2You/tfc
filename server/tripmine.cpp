@@ -91,7 +91,7 @@ bool CTripmineGrenade::Spawn()
 	ResetSequenceInfo();
 	pev->framerate = 0;
 
-	UTIL_SetSize(pev, Vector(-8, -8, -8), Vector(8, 8, 8));
+	SetSize(Vector(-8, -8, -8), Vector(8, 8, 8));
 	SetOrigin(pev->origin);
 
 	if ((pev->spawnflags & SF_TRIPMINE_INSTANT_ON) != 0)
@@ -376,7 +376,7 @@ bool CTripmine::Spawn()
 
 	if (!UTIL_IsDeathmatch())
 	{
-		UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 28));
+		SetSize(Vector(-16, -16, 0), Vector(16, 16, 28));
 	}
 
 	return true;

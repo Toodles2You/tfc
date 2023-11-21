@@ -52,7 +52,7 @@ bool CSatchelCharge::Spawn()
 	pev->solid = SOLID_BBOX;
 
 	SET_MODEL(ENT(pev), "models/w_satchel.mdl");
-	UTIL_SetSize(pev, Vector(-4, -4, -4), Vector(4, 4, 4)); // Uses point-sized, and can be stepped over
+	SetSize(Vector(-4, -4, -4), Vector(4, 4, 4)); // Uses point-sized, and can be stepped over
 	SetOrigin(pev->origin);
 
 	SetTouch(&CSatchelCharge::SatchelSlide);

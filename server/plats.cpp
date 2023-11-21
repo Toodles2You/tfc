@@ -270,7 +270,7 @@ void CFuncPlat::Setup()
 	pev->movetype = MOVETYPE_PUSH;
 
 	SetOrigin(pev->origin); // set size and link into world
-	UTIL_SetSize(pev, pev->mins, pev->maxs);
+	SetSize(pev->mins, pev->maxs);
 	SET_MODEL(ENT(pev), STRING(pev->model));
 
 	// vecPosition1 is the top position, vecPosition2 is the bottom
@@ -354,7 +354,7 @@ void CPlatTrigger::SpawnInsideTrigger(CFuncPlat* pPlatform)
 		vecTMin.y = (pPlatform->pev->mins.y + pPlatform->pev->maxs.y) / 2;
 		vecTMax.y = vecTMin.y + 1;
 	}
-	UTIL_SetSize(pev, vecTMin, vecTMax);
+	SetSize(vecTMin, vecTMax);
 }
 
 
@@ -849,7 +849,7 @@ bool CFuncTrain::Spawn()
 		pev->solid = SOLID_BSP;
 
 	SET_MODEL(ENT(pev), STRING(pev->model));
-	UTIL_SetSize(pev, pev->mins, pev->maxs);
+	SetSize(pev->mins, pev->maxs);
 	SetOrigin(pev->origin);
 
 	m_activated = false;
@@ -1485,7 +1485,7 @@ bool CFuncTrackTrain::Spawn()
 
 	SET_MODEL(ENT(pev), STRING(pev->model));
 
-	UTIL_SetSize(pev, pev->mins, pev->maxs);
+	SetSize(pev->mins, pev->maxs);
 	SetOrigin(pev->origin);
 
 	// Cache off placed origin for train controls
@@ -1584,7 +1584,7 @@ bool CFuncTrainControls::Spawn()
 	pev->movetype = MOVETYPE_NONE;
 	SET_MODEL(ENT(pev), STRING(pev->model));
 
-	UTIL_SetSize(pev, pev->mins, pev->maxs);
+	SetSize(pev->mins, pev->maxs);
 	SetOrigin(pev->origin);
 
 	SetThink(&CFuncTrainControls::Find);

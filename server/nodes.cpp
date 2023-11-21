@@ -1490,7 +1490,7 @@ LINK_ENTITY_TO_CLASS(testhull, CTestHull);
 bool CTestHull::Spawn(entvars_t* pevMasterNode)
 {
 	SET_MODEL(ENT(pev), "models/player.mdl");
-	UTIL_SetSize(pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX);
+	SetSize(VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX);
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
@@ -1818,17 +1818,16 @@ void CTestHull::BuildNodeGraph()
 				switch (hull)
 				{
 				case NODE_SMALL_HULL:
-					UTIL_SetSize(pev, Vector(-12, -12, 0), Vector(12, 12, 24));
+					SetSize(Vector(-12, -12, 0), Vector(12, 12, 24));
 					break;
 				case NODE_HUMAN_HULL:
-					UTIL_SetSize(pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX);
+					SetSize(VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX);
 					break;
 				case NODE_LARGE_HULL:
-					UTIL_SetSize(pev, Vector(-32, -32, 0), Vector(32, 32, 64));
+					SetSize(Vector(-32, -32, 0), Vector(32, 32, 64));
 					break;
 				case NODE_FLY_HULL:
-					UTIL_SetSize(pev, Vector(-32, -32, 0), Vector(32, 32, 64));
-					// UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
+					SetSize(Vector(-32, -32, 0), Vector(32, 32, 64));
 					break;
 				}
 

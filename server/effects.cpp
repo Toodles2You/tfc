@@ -306,7 +306,7 @@ void CBeam::RelinkBeam()
 	pev->mins = pev->mins - pev->origin;
 	pev->maxs = pev->maxs - pev->origin;
 
-	UTIL_SetSize(pev, pev->mins, pev->maxs);
+	SetSize(pev->mins, pev->maxs);
 	SetOrigin(pev->origin);
 }
 
@@ -2214,7 +2214,7 @@ bool CItemSoda::Spawn()
 	pev->movetype = MOVETYPE_TOSS;
 
 	SET_MODEL(ENT(pev), "models/can.mdl");
-	UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
+	SetSize(g_vecZero, g_vecZero);
 
 	SetThink(&CItemSoda::CanThink);
 	pev->nextthink = gpGlobals->time + 0.5;
@@ -2227,7 +2227,7 @@ void CItemSoda::CanThink()
 	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/g_bounce3.wav", 1, ATTN_NORM);
 
 	pev->solid = SOLID_TRIGGER;
-	UTIL_SetSize(pev, Vector(-8, -8, 0), Vector(8, 8, 8));
+	SetSize(Vector(-8, -8, 0), Vector(8, 8, 8));
 	SetThink(NULL);
 	SetTouch(&CItemSoda::CanTouch);
 }

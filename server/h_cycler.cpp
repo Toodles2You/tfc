@@ -86,7 +86,7 @@ bool CCycler::GenericCyclerSpawn(const char* szModel, Vector vecMin, Vector vecM
 		return false;
 	}
 
-	UTIL_SetSize(pev, vecMin, vecMax);
+	SetSize(vecMin, vecMax);
 
 	return true;
 }
@@ -311,7 +311,7 @@ bool CWeaponCycler::Spawn()
 	m_iszModel = pev->model;
 	m_iModel = pev->modelindex;
 
-	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 16));
+	SetSize(Vector(-16, -16, 0), Vector(16, 16, 16));
 	SetOrigin(pev->origin);
 	SetTouch(&CWeaponCycler::DefaultTouch);
 

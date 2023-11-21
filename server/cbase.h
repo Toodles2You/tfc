@@ -162,6 +162,7 @@ public:
 	virtual void SetObjectCollisionBox();
 
 	void SetOrigin(const Vector& org);
+	void SetSize(const Vector& mins, const Vector& maxs);
 
 	// Classify - returns the type of group (i.e, "houndeye", or "human military" so that monsters with different classnames
 	// still realize that they are teammates. (overridden for monsters that form groups)

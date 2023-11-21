@@ -75,7 +75,7 @@ bool CCrossbowBolt::Spawn()
 
 	SET_MODEL(ENT(pev), "models/crossbow_bolt.mdl");
 
-	UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
+	SetSize(g_vecZero, g_vecZero);
 	SetOrigin(pev->origin);
 
 	SetTouch(&CCrossbowBolt::BoltTouch);

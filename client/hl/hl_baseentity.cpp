@@ -39,6 +39,7 @@ bool CBaseEntity::Save(CSave& save) { return true; }
 bool CBaseEntity::Restore(CRestore& restore) { return true; }
 void CBaseEntity::SetObjectCollisionBox() {}
 void CBaseEntity::SetOrigin(const Vector& org) {}
+void CBaseEntity::SetSize(const Vector& mins, const Vector& maxs) {}
 bool CBaseEntity::Intersects(CBaseEntity* pOther) { return false; }
 void CBaseEntity::MakeDormant() {}
 bool CBaseEntity::IsDormant() { return false; }
@@ -87,7 +88,6 @@ CGrenade* CGrenade::ShootTimed(CBaseEntity* owner, Vector vecStart, Vector vecVe
 CGrenade* CGrenade::ShootContact(CBaseEntity* owner, Vector vecStart, Vector vecVelocity) { return 0; }
 void CGrenade::DetonateUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) {}
 
-void UTIL_SetSize(entvars_t* pev, const Vector& vecMin, const Vector& vecMax) {}
 CBaseEntity* UTIL_FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius) { return 0; }
 
 Vector UTIL_VecToAngles(const Vector& vec) { return 0; }

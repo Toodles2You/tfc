@@ -310,7 +310,7 @@ bool CGrenade::Spawn()
 	pev->solid = SOLID_BBOX;
 
 	SET_MODEL(ENT(pev), "models/grenade.mdl");
-	UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
+	SetSize(g_vecZero, g_vecZero);
 
 	pev->dmg = 100;
 

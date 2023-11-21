@@ -984,12 +984,6 @@ TraceResult UTIL_GetGlobalTrace()
 }
 
 
-void UTIL_SetSize(entvars_t* pev, const Vector& vecMin, const Vector& vecMax)
-{
-	SET_SIZE(ENT(pev), vecMin, vecMax);
-}
-
-
 float UTIL_VecToYaw(const Vector& vec)
 {
 	return VEC_TO_YAW(vec);
