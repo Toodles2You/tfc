@@ -284,7 +284,6 @@ char PM_FindTextureType(const char* name)
 
 void PM_PlayStepSound(int step, float fvol)
 {
-	static int iSkipStep = 0;
 	int irand;
 	Vector hvel;
 
@@ -453,17 +452,6 @@ void PM_PlayStepSound(int step, float fvol)
 		}
 		break;
 	case STEP_WADE:
-		if (iSkipStep == 0)
-		{
-			iSkipStep++;
-			break;
-		}
-
-		if (iSkipStep++ == 3)
-		{
-			iSkipStep = 0;
-		}
-
 		switch (irand)
 		{
 		// right foot
