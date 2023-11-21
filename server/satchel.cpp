@@ -53,7 +53,7 @@ bool CSatchelCharge::Spawn()
 
 	SET_MODEL(ENT(pev), "models/w_satchel.mdl");
 	UTIL_SetSize(pev, Vector(-4, -4, -4), Vector(4, 4, 4)); // Uses point-sized, and can be stepped over
-	UTIL_SetOrigin(pev, pev->origin);
+	SetOrigin(pev->origin);
 
 	SetTouch(&CSatchelCharge::SatchelSlide);
 	SetUse(&CSatchelCharge::DetonateUse);

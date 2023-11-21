@@ -271,7 +271,7 @@ bool CBaseDoor::Spawn()
 	}
 
 	pev->movetype = MOVETYPE_PUSH;
-	UTIL_SetOrigin(pev, pev->origin);
+	SetOrigin(pev->origin);
 	SET_MODEL(ENT(pev), STRING(pev->model));
 
 	if (pev->speed == 0)
@@ -283,7 +283,7 @@ bool CBaseDoor::Spawn()
 	ASSERTSZ(m_vecPosition1 != m_vecPosition2, "door start/end positions are equal");
 	if (FBitSet(pev->spawnflags, SF_DOOR_START_OPEN))
 	{ // swap pos1 and pos2, put door at pos2
-		UTIL_SetOrigin(pev, m_vecPosition2);
+		SetOrigin(m_vecPosition2);
 		m_vecPosition2 = m_vecPosition1;
 		m_vecPosition1 = pev->origin;
 	}
@@ -305,9 +305,9 @@ bool CBaseDoor::Spawn()
 void CBaseDoor::SetToggleState(int state)
 {
 	if (state == TS_AT_TOP)
-		UTIL_SetOrigin(pev, m_vecPosition2);
+		SetOrigin(m_vecPosition2);
 	else
-		UTIL_SetOrigin(pev, m_vecPosition1);
+		SetOrigin(m_vecPosition1);
 }
 
 
@@ -822,7 +822,7 @@ bool CRotDoor::Spawn()
 		pev->solid = SOLID_BSP;
 
 	pev->movetype = MOVETYPE_PUSH;
-	UTIL_SetOrigin(pev, pev->origin);
+	SetOrigin(pev->origin);
 	SET_MODEL(ENT(pev), STRING(pev->model));
 
 	if (pev->speed == 0)
@@ -859,7 +859,7 @@ void CRotDoor::SetToggleState(int state)
 	else
 		pev->angles = m_vecAngle1;
 
-	UTIL_SetOrigin(pev, pev->origin);
+	SetOrigin(pev->origin);
 }
 
 
@@ -899,7 +899,7 @@ bool CMomentaryDoor::Spawn()
 	pev->solid = SOLID_BSP;
 	pev->movetype = MOVETYPE_PUSH;
 
-	UTIL_SetOrigin(pev, pev->origin);
+	SetOrigin(pev->origin);
 	SET_MODEL(ENT(pev), STRING(pev->model));
 
 	if (pev->speed == 0)
@@ -914,7 +914,7 @@ bool CMomentaryDoor::Spawn()
 
 	if (FBitSet(pev->spawnflags, SF_DOOR_START_OPEN))
 	{ // swap pos1 and pos2, put door at pos2
-		UTIL_SetOrigin(pev, m_vecPosition2);
+		SetOrigin(m_vecPosition2);
 		m_vecPosition2 = m_vecPosition1;
 		m_vecPosition1 = pev->origin;
 	}

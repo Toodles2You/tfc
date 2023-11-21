@@ -1520,7 +1520,7 @@ void CTestHull::DropDelay()
 {
 	//	UTIL_CenterPrintAll( "Node Graph out of Date. Rebuilding..." );
 
-	UTIL_SetOrigin(pev, WorldGraph.m_pNodes[0].m_vecOrigin);
+	SetOrigin(WorldGraph.m_pNodes[0].m_vecOrigin);
 
 	SetThink(&CTestHull::CallBuildNodeGraph);
 
@@ -1832,7 +1832,7 @@ void CTestHull::BuildNodeGraph()
 					break;
 				}
 
-				UTIL_SetOrigin(pev, pSrcNode->m_vecOrigin); // place the hull on the node
+				SetOrigin(pSrcNode->m_vecOrigin); // place the hull on the node
 
 				if (!FBitSet(pev->flags, FL_ONGROUND))
 				{

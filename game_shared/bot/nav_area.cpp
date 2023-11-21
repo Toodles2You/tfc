@@ -4448,7 +4448,7 @@ void EditNavAreas( NavEditCmdType cmd )
 							if ( pLocalPlayer && /*pLocalPlayer->TeamNumber() == SPECTATOR &&*/ pLocalPlayer->pev->iuser1 == OBS_ROAMING )
 							{
 								Vector origin = *markedArea->GetCenter() + Vector( 0, 0, 0.75f * HumanHeight );
-								UTIL_SetOrigin( pLocalPlayer->pev, origin );
+								pLocalPlayer->SetOrigin( origin );
 							}
 						}
 						else

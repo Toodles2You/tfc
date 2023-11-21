@@ -90,7 +90,7 @@ bool CItem::Spawn()
 {
 	pev->movetype = MOVETYPE_TOSS;
 	pev->solid = SOLID_TRIGGER;
-	UTIL_SetOrigin(pev, pev->origin);
+	SetOrigin(pev->origin);
 	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 16));
 	SetTouch(&CItem::ItemTouch);
 
@@ -147,7 +147,7 @@ CBaseEntity* CItem::Respawn()
 	SetTouch(NULL);
 	pev->effects |= EF_NODRAW;
 
-	UTIL_SetOrigin(pev, g_pGameRules->VecItemRespawnSpot(this)); // blip to whereever you should respawn.
+	SetOrigin(g_pGameRules->VecItemRespawnSpot(this)); // blip to whereever you should respawn.
 
 	SetThink(&CItem::Materialize);
 	pev->nextthink = g_pGameRules->FlItemRespawnTime(this);

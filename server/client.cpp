@@ -79,10 +79,12 @@ void ClientDisconnect(edict_t* pEntity)
 	if (g_fGameOver)
 		return;
 
+	auto entity = CBaseEntity::Instance(pEntity);
+
 	// since the edict doesn't get deleted, fix it so it doesn't interfere.
-	pEntity->v.takedamage = DAMAGE_NO; // don't attract autoaim
-	pEntity->v.solid = SOLID_NOT;	   // nonsolid
-	UTIL_SetOrigin(&pEntity->v, pEntity->v.origin);
+	entity->pev->takedamage = DAMAGE_NO; // don't attract autoaim
+	entity->pev->solid = SOLID_NOT;	   // nonsolid
+	entity->SetOrigin(entity->pev->origin);
 
 	auto pPlayer = reinterpret_cast<CBasePlayer*>(GET_PRIVATE(pEntity));
 

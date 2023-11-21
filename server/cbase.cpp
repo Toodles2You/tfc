@@ -405,7 +405,7 @@ int DispatchRestore(edict_t* pent, SAVERESTOREDATA* pSaveData, int globalEntity)
 			pSaveData->vecLandmarkOffset = oldOffset;
 			if (pEntity)
 			{
-				UTIL_SetOrigin(pEntity->pev, pEntity->pev->origin);
+				pEntity->SetOrigin(pEntity->pev->origin);
 				pEntity->OverrideReset();
 			}
 		}
@@ -706,6 +706,13 @@ void CBaseEntity::SetObjectCollisionBox()
 }
 
 
+void CBaseEntity::SetOrigin(const Vector& org)
+{
+	pev->origin = org;
+	g_engfuncs.pfnSetOrigin(pev->pContainingEntity, org);
+}
+
+
 bool CBaseEntity::Intersects(CBaseEntity* pOther)
 {
 	if (pOther->pev->absmin.x > pev->absmax.x ||
@@ -731,7 +738,7 @@ void CBaseEntity::MakeDormant()
 	// Don't think
 	pev->nextthink = 0;
 	// Relink
-	UTIL_SetOrigin(pev, pev->origin);
+	SetOrigin(pev->origin);
 }
 
 bool CBaseEntity::IsDormant()

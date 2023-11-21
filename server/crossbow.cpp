@@ -75,8 +75,8 @@ bool CCrossbowBolt::Spawn()
 
 	SET_MODEL(ENT(pev), "models/crossbow_bolt.mdl");
 
-	UTIL_SetOrigin(pev, pev->origin);
 	UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
+	SetOrigin(pev->origin);
 
 	SetTouch(&CCrossbowBolt::BoltTouch);
 	SetThink(&CCrossbowBolt::BubbleThink);
@@ -112,7 +112,7 @@ void CCrossbowBolt::BoltTouch(CBaseEntity* pOther)
 	
 	if (pOther->IsBSPModel())
 	{
-		UTIL_SetOrigin(pev, pev->origin - vecDir * 12);
+		SetOrigin(pev->origin - vecDir * 12);
 	}
 
 	pev->angles = UTIL_VecToAngles(vecDir);

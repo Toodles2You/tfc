@@ -1151,7 +1151,7 @@ void CBasePlayer::StartDeathCam()
 			iRand--;
 		}
 
-		UTIL_SetOrigin(pev, pSpot->v.origin);
+		SetOrigin(pSpot->v.origin);
 		pev->angles = pev->v_angle = pSpot->v.v_angle;
 	}
 	else
@@ -1160,7 +1160,7 @@ void CBasePlayer::StartDeathCam()
 		TraceResult tr;
 		UTIL_TraceLine(pev->origin, pev->origin + Vector(0, 0, 128), ignore_monsters, this, &tr);
 
-		UTIL_SetOrigin(pev, tr.vecEndPos);
+		SetOrigin(tr.vecEndPos);
 		pev->angles = pev->v_angle = UTIL_VecToAngles(tr.vecEndPos - pev->origin);
 	}
 
@@ -1227,7 +1227,7 @@ void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle)
 	RemoveAllWeapons(false);
 
 	// Move them to the new position
-	UTIL_SetOrigin(pev, vecPosition);
+	SetOrigin(vecPosition);
 
 	// Find a player to watch
 	m_flNextObserverInput = 0;
@@ -3485,7 +3485,7 @@ class CInfoIntermission : public CPointEntity
 
 bool CInfoIntermission::Spawn()
 {
-	UTIL_SetOrigin(pev, pev->origin);
+	SetOrigin(pev->origin);
 	pev->solid = SOLID_NOT;
 	pev->effects = EF_NODRAW;
 	pev->v_angle = g_vecZero;

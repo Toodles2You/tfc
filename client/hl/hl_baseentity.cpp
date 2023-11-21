@@ -38,6 +38,7 @@ CBaseEntity* CBaseEntity::GetNextTarget() { return NULL; }
 bool CBaseEntity::Save(CSave& save) { return true; }
 bool CBaseEntity::Restore(CRestore& restore) { return true; }
 void CBaseEntity::SetObjectCollisionBox() {}
+void CBaseEntity::SetOrigin(const Vector& org) {}
 bool CBaseEntity::Intersects(CBaseEntity* pOther) { return false; }
 void CBaseEntity::MakeDormant() {}
 bool CBaseEntity::IsDormant() { return false; }
@@ -67,7 +68,6 @@ void UTIL_DecalTrace(TraceResult* pTrace, int decalNumber) {}
 void UTIL_GunshotDecalTrace(TraceResult* pTrace, int decalNumber) {}
 void UTIL_MakeVectors(const Vector& vecAngles) {}
 bool UTIL_IsValidEntity(edict_t* pent) { return true; }
-void UTIL_SetOrigin(entvars_t*, const Vector& org) {}
 void UTIL_LogPrintf(char*, ...) {}
 void UTIL_ClientPrintAll(int, char const*, char const*, char const*, char const*, char const*) {}
 void ClientPrint(entvars_t* client, int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4) {}

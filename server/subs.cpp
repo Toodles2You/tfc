@@ -407,7 +407,7 @@ void CBaseToggle::LinearMoveDone()
 		return;
 	}
 
-	UTIL_SetOrigin(pev, m_vecFinalDest);
+	SetOrigin(m_vecFinalDest);
 	pev->velocity = g_vecZero;
 	pev->nextthink = -1;
 	if (m_pfnCallWhenMoveDone)

@@ -1034,7 +1034,7 @@ bool CFuncTankControls::Spawn()
 	SET_MODEL(ENT(pev), STRING(pev->model));
 
 	UTIL_SetSize(pev, pev->mins, pev->maxs);
-	UTIL_SetOrigin(pev, pev->origin);
+	SetOrigin(pev->origin);
 
 	pev->nextthink = gpGlobals->time + 0.3; // After all the func_tank's have spawned
 
