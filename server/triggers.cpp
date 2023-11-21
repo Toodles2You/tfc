@@ -28,6 +28,12 @@
 #include "trains.h" // trigger_camera has train functionality
 #include "gamerules.h"
 
+#define SF_TRIGGER_ALLOWMONSTERS 1 // monsters allowed to fire this trigger
+#define SF_TRIGGER_NOCLIENTS 2	   // players not allowed to fire this trigger
+#define SF_TRIGGER_PUSHABLES 4	   // only pushables can fire this trigger
+
+#define SF_TRIG_PUSH_ONCE 1
+
 #define SF_TRIGGER_PUSH_START_OFF 2		   //spawnflag that makes trigger_push spawn turned OFF
 #define SF_TRIGGER_HURT_TARGETONCE 1	   // Only fire hurt target once
 #define SF_TRIGGER_HURT_START_OFF 2		   //spawnflag that makes trigger_push spawn turned OFF
@@ -1236,6 +1242,12 @@ void CFireAndDie::Think()
 
 
 #define SF_CHANGELEVEL_USEONLY 0x0002
+
+static constexpr int kMapNameMost = 32;
+
+static char st_szNextMap[kMapNameMost];
+static char st_szNextSpot[kMapNameMost];
+
 class CChangeLevel : public CBaseTrigger
 {
 public:
@@ -1257,8 +1269,8 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
-	char m_szMapName[cchMapNameMost];	   // trigger_changelevel only:  next map
-	char m_szLandmarkName[cchMapNameMost]; // trigger_changelevel only:  landmark on next map
+	char m_szMapName[kMapNameMost];	   // trigger_changelevel only:  next map
+	char m_szLandmarkName[kMapNameMost]; // trigger_changelevel only:  landmark on next map
 	int m_changeTarget;
 	float m_changeTargetDelay;
 };
@@ -1267,8 +1279,8 @@ LINK_ENTITY_TO_CLASS(trigger_changelevel, CChangeLevel);
 // Global Savedata for changelevel trigger
 TYPEDESCRIPTION CChangeLevel::m_SaveData[] =
 	{
-		DEFINE_ARRAY(CChangeLevel, m_szMapName, FIELD_CHARACTER, cchMapNameMost),
-		DEFINE_ARRAY(CChangeLevel, m_szLandmarkName, FIELD_CHARACTER, cchMapNameMost),
+		DEFINE_ARRAY(CChangeLevel, m_szMapName, FIELD_CHARACTER, kMapNameMost),
+		DEFINE_ARRAY(CChangeLevel, m_szLandmarkName, FIELD_CHARACTER, kMapNameMost),
 		DEFINE_FIELD(CChangeLevel, m_changeTarget, FIELD_STRING),
 		DEFINE_FIELD(CChangeLevel, m_changeTargetDelay, FIELD_FLOAT),
 };
@@ -1283,14 +1295,14 @@ bool CChangeLevel::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "map"))
 	{
-		if (strlen(pkvd->szValue) >= cchMapNameMost)
+		if (strlen(pkvd->szValue) >= kMapNameMost)
 			ALERT(at_error, "Map name '%s' too long (32 chars)\n", pkvd->szValue);
 		strcpy(m_szMapName, pkvd->szValue);
 		return true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "landmark"))
 	{
-		if (strlen(pkvd->szValue) >= cchMapNameMost)
+		if (strlen(pkvd->szValue) >= kMapNameMost)
 			ALERT(at_error, "Landmark name '%s' too long (32 chars)\n", pkvd->szValue);
 		strcpy(m_szLandmarkName, pkvd->szValue);
 		return true;
@@ -1354,9 +1366,6 @@ void CChangeLevel::ExecuteChangeLevel()
 	MessageEnd();
 }
 
-
-FILE_GLOBAL char st_szNextMap[cchMapNameMost];
-FILE_GLOBAL char st_szNextSpot[cchMapNameMost];
 
 edict_t* CChangeLevel::FindLandmark(const char* pLandmarkName)
 {
@@ -1627,38 +1636,6 @@ int CChangeLevel::ChangeList(LEVELLIST* pLevelList, int maxList)
 	}
 
 	return count;
-}
-
-/*
-go to the next level for deathmatch
-only called if a time or frag limit has expired
-*/
-void NextLevel()
-{
-	edict_t* pent;
-	CChangeLevel* pChange;
-
-	// find a trigger_changelevel
-	pent = FIND_ENTITY_BY_CLASSNAME(NULL, "trigger_changelevel");
-
-	// go back to start if no trigger_changelevel
-	if (FNullEnt(pent))
-	{
-		gpGlobals->mapname = ALLOC_STRING("start");
-		pChange = GetClassPtr((CChangeLevel*)NULL);
-		strcpy(pChange->m_szMapName, "start");
-	}
-	else
-		pChange = GetClassPtr((CChangeLevel*)VARS(pent));
-
-	strcpy(st_szNextMap, pChange->m_szMapName);
-	g_fGameOver = true;
-
-	if (pChange->pev->nextthink < gpGlobals->time)
-	{
-		pChange->SetThink(&CChangeLevel::ExecuteChangeLevel);
-		pChange->pev->nextthink = gpGlobals->time + 0.1;
-	}
 }
 
 

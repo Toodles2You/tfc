@@ -50,7 +50,7 @@ extern "C" DLLEXPORT int GetNewDLLFunctions(NEW_DLL_FUNCTIONS* pFunctionTable, i
 */
 inline bool gTouchDisabled = false;
 
-inline DLL_GLOBAL Vector g_vecAttackDir;
+inline Vector g_vecAttackDir;
 
 extern int DispatchSpawn(edict_t* pent);
 extern void DispatchKeyValue(edict_t* pentKeyvalue, KeyValueData* pkvd);

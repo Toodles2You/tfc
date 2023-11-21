@@ -47,37 +47,16 @@ inline edict_t* FIND_ENTITY_BY_TARGET(edict_t* entStart, const char* pszName)
 	return FIND_ENTITY_BY_STRING(entStart, "target", pszName);
 }
 
-// Keeps clutter down a bit, when writing key-value pairs
-#define WRITEKEY_INT(pf, szKeyName, iKeyValue) ENGINE_FPRINTF(pf, "\"%s\" \"%d\"\n", szKeyName, iKeyValue)
-#define WRITEKEY_FLOAT(pf, szKeyName, flKeyValue) \
-	ENGINE_FPRINTF(pf, "\"%s\" \"%f\"\n", szKeyName, flKeyValue)
-#define WRITEKEY_STRING(pf, szKeyName, szKeyValue) \
-	ENGINE_FPRINTF(pf, "\"%s\" \"%s\"\n", szKeyName, szKeyValue)
-#define WRITEKEY_VECTOR(pf, szKeyName, flX, flY, flZ) \
-	ENGINE_FPRINTF(pf, "\"%s\" \"%f %f %f\"\n", szKeyName, flX, flY, flZ)
-
 // Keeps clutter down a bit, when using a float as a bit-vector
 #define SetBits(flBitVector, bits) ((flBitVector) = (int)(flBitVector) | (bits))
 #define ClearBits(flBitVector, bits) ((flBitVector) = (int)(flBitVector) & ~(bits))
 #define FBitSet(flBitVector, bit) (((int)(flBitVector) & (bit)) != 0)
-
-// Makes these more explicit, and easier to find
-#define FILE_GLOBAL static
-#define DLL_GLOBAL
-
-// Until we figure out why "const" gives the compiler problems, we'll just have to use
-// this bogus "empty" define to mark things as constant.
-#define CONSTANT
 
 // More explicit than "int"
 typedef int EOFFSET;
 
 // In case this ever changes
 #define M_PI 3.14159265358979323846
-
-// Keeps clutter down a bit, when declaring external entity/global method prototypes
-#define DECLARE_GLOBAL_METHOD(MethodName) extern void DLLEXPORT MethodName()
-#define GLOBAL_METHOD(funcname) void DLLEXPORT funcname()
 
 // This is the glue that hooks .MAP entity class names to our CPP classes
 // The _declspec forces them to be exported by name so we can do a lookup with GetProcAddress()
@@ -101,7 +80,7 @@ CBaseEntity* UTIL_GetLocalPlayer();
 // Conversion among the three types of "entity", including identity-conversions.
 //
 #ifdef DEBUG
-extern edict_t* DBG_EntOfVars(const entvars_t* pev);
+edict_t* DBG_EntOfVars(const entvars_t* pev);
 inline edict_t* ENT(const entvars_t* pev) { return DBG_EntOfVars(pev); }
 #else
 inline edict_t* ENT(const entvars_t* pev)
@@ -210,7 +189,6 @@ inline void WriteFloat(float value)
 }
 
 // Testing the three types of "entity" for nullity
-#define eoNullEntity 0
 inline bool FNullEnt(EOFFSET eoffset)
 {
 	return eoffset == 0;
@@ -224,8 +202,6 @@ inline bool FStringNull(int iString)
 {
 	return iString == iStringNull;
 }
-
-#define cchMapNameMost 32
 
 // Dot products for view cone checking
 #define VIEW_FIELD_FULL (float)-1.0		   // +-180 degrees
@@ -280,44 +256,44 @@ inline bool FClassnameIs(entvars_t* pev, const char* szClassname)
 }
 
 // Misc. Prototypes
-extern float UTIL_VecToYaw(const Vector& vec);
-extern Vector UTIL_VecToAngles(const Vector& vec);
-extern float UTIL_AngleMod(float a);
-extern float UTIL_AngleDiff(float destAngle, float srcAngle);
+float UTIL_VecToYaw(const Vector& vec);
+Vector UTIL_VecToAngles(const Vector& vec);
+float UTIL_AngleMod(float a);
+float UTIL_AngleDiff(float destAngle, float srcAngle);
 
-extern CBaseEntity* UTIL_FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius);
-extern CBaseEntity* UTIL_FindEntityByString(CBaseEntity* pStartEntity, const char* szKeyword, const char* szValue);
-extern CBaseEntity* UTIL_FindEntityByClassname(CBaseEntity* pStartEntity, const char* szName);
-extern CBaseEntity* UTIL_FindEntityByTargetname(CBaseEntity* pStartEntity, const char* szName);
-extern CBaseEntity* UTIL_FindEntityGeneric(const char* szName, Vector& vecSrc, float flRadius);
+CBaseEntity* UTIL_FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius);
+CBaseEntity* UTIL_FindEntityByString(CBaseEntity* pStartEntity, const char* szKeyword, const char* szValue);
+CBaseEntity* UTIL_FindEntityByClassname(CBaseEntity* pStartEntity, const char* szName);
+CBaseEntity* UTIL_FindEntityByTargetname(CBaseEntity* pStartEntity, const char* szName);
+CBaseEntity* UTIL_FindEntityGeneric(const char* szName, Vector& vecSrc, float flRadius);
 
 // returns a CBaseEntity pointer to a player by index.  Only returns if the player is spawned and connected
 // otherwise returns NULL
 // Index is 1 based
-extern CBaseEntity* UTIL_PlayerByIndex(int playerIndex);
+CBaseEntity* UTIL_PlayerByIndex(int playerIndex);
 
 #define UTIL_EntitiesInPVS(pent) (*g_engfuncs.pfnEntitiesInPVS)(pent)
-extern void UTIL_MakeVectors(const Vector& vecAngles);
+void UTIL_MakeVectors(const Vector& vecAngles);
 
 // Pass in an array of pointers and an array size, it fills the array and returns the number inserted
-extern int UTIL_MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& center, float radius);
-extern int UTIL_EntitiesInBox(CBaseEntity** pList, int listMax, const Vector& mins, const Vector& maxs, int flagMask, bool checkSolid = false);
+int UTIL_MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& center, float radius);
+int UTIL_EntitiesInBox(CBaseEntity** pList, int listMax, const Vector& mins, const Vector& maxs, int flagMask, bool checkSolid = false);
 
 inline void UTIL_MakeVectorsPrivate(const Vector& vecAngles, float* p_vForward, float* p_vRight, float* p_vUp)
 {
 	g_engfuncs.pfnAngleVectors(vecAngles, p_vForward, p_vRight, p_vUp);
 }
 
-extern void UTIL_MakeAimVectors(const Vector& vecAngles); // like MakeVectors, but assumes pitch isn't inverted
-extern void UTIL_MakeInvVectors(const Vector& vec, globalvars_t* pgv);
+void UTIL_MakeAimVectors(const Vector& vecAngles); // like MakeVectors, but assumes pitch isn't inverted
+void UTIL_MakeInvVectors(const Vector& vec, globalvars_t* pgv);
 
-extern void UTIL_ParticleEffect(const Vector& vecOrigin, const Vector& vecDirection, unsigned int ulColor, unsigned int ulCount);
-extern void UTIL_ScreenShake(const Vector& center, float amplitude, float frequency, float duration, float radius);
-extern void UTIL_ScreenShakeAll(const Vector& center, float amplitude, float frequency, float duration);
-extern void UTIL_ShowMessage(const char* pString, CBaseEntity* pPlayer);
-extern void UTIL_ShowMessageAll(const char* pString);
-extern void UTIL_ScreenFadeAll(const Vector& color, float fadeTime, float holdTime, int alpha, int flags);
-extern void UTIL_ScreenFade(CBaseEntity* pEntity, const Vector& color, float fadeTime, float fadeHold, int alpha, int flags);
+void UTIL_ParticleEffect(const Vector& vecOrigin, const Vector& vecDirection, unsigned int ulColor, unsigned int ulCount);
+void UTIL_ScreenShake(const Vector& center, float amplitude, float frequency, float duration, float radius);
+void UTIL_ScreenShakeAll(const Vector& center, float amplitude, float frequency, float duration);
+void UTIL_ShowMessage(const char* pString, CBaseEntity* pPlayer);
+void UTIL_ShowMessageAll(const char* pString);
+void UTIL_ScreenFadeAll(const Vector& color, float fadeTime, float holdTime, int alpha, int flags);
+void UTIL_ScreenFade(CBaseEntity* pEntity, const Vector& color, float fadeTime, float fadeHold, int alpha, int flags);
 
 typedef enum
 {
@@ -339,60 +315,57 @@ enum
 	large_hull = 2,
 	head_hull = 3
 };
-extern void UTIL_TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t* pentIgnore, TraceResult* ptr);
-extern TraceResult UTIL_GetGlobalTrace();
-extern void UTIL_TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, edict_t* pentModel, TraceResult* ptr);
-extern Vector UTIL_GetAimVector(edict_t* pent, float flSpeed);
-extern int UTIL_PointContents(const Vector& vec);
+void UTIL_TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t* pentIgnore, TraceResult* ptr);
+TraceResult UTIL_GetGlobalTrace();
+void UTIL_TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, edict_t* pentModel, TraceResult* ptr);
+Vector UTIL_GetAimVector(edict_t* pent, float flSpeed);
+int UTIL_PointContents(const Vector& vec);
 
-extern bool UTIL_IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator);
-extern void UTIL_BloodStream(const Vector& origin, const Vector& direction, int color, int amount);
-extern void UTIL_BloodDrips(const Vector& origin, const Vector& direction, int color, int amount);
-extern Vector UTIL_RandomBloodVector();
-extern void UTIL_BloodDecalTrace(TraceResult* pTrace, int bloodColor);
-extern void UTIL_DecalTrace(TraceResult* pTrace, int decalNumber);
-extern void UTIL_PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber, bool bIsCustom);
-extern void UTIL_GunshotDecalTrace(TraceResult* pTrace, int decalNumber);
-extern void UTIL_Sparks(const Vector& position);
-extern void UTIL_Ricochet(const Vector& position, float scale);
-extern void UTIL_StringToVector(float* pVector, const char* pString);
-extern void UTIL_StringToIntArray(int* pVector, int count, const char* pString);
-extern Vector UTIL_ClampVectorToBox(const Vector& input, const Vector& clampSize);
-extern float UTIL_Approach(float target, float value, float speed);
-extern float UTIL_ApproachAngle(float target, float value, float speed);
-extern float UTIL_AngleDistance(float next, float cur);
+bool UTIL_IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator);
+void UTIL_BloodStream(const Vector& origin, const Vector& direction, int color, int amount);
+void UTIL_BloodDrips(const Vector& origin, const Vector& direction, int color, int amount);
+Vector UTIL_RandomBloodVector();
+void UTIL_BloodDecalTrace(TraceResult* pTrace, int bloodColor);
+void UTIL_DecalTrace(TraceResult* pTrace, int decalNumber);
+void UTIL_PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber, bool bIsCustom);
+void UTIL_GunshotDecalTrace(TraceResult* pTrace, int decalNumber);
+void UTIL_Sparks(const Vector& position);
+void UTIL_Ricochet(const Vector& position, float scale);
+void UTIL_StringToVector(float* pVector, const char* pString);
+void UTIL_StringToIntArray(int* pVector, int count, const char* pString);
+Vector UTIL_ClampVectorToBox(const Vector& input, const Vector& clampSize);
+float UTIL_Approach(float target, float value, float speed);
+float UTIL_ApproachAngle(float target, float value, float speed);
+float UTIL_AngleDistance(float next, float cur);
 
-extern char* UTIL_VarArgs(const char* format, ...);
-extern bool UTIL_IsValidEntity(edict_t* pent);
-extern bool UTIL_TeamsMatch(const char* pTeamName1, const char* pTeamName2);
+char* UTIL_VarArgs(const char* format, ...);
+bool UTIL_IsValidEntity(edict_t* pent);
+bool UTIL_TeamsMatch(const char* pTeamName1, const char* pTeamName2);
 
 // Use for ease-in, ease-out style interpolation (accel/decel)
-extern float UTIL_SplineFraction(float value, float scale);
+float UTIL_SplineFraction(float value, float scale);
 
 // Search for water transition along a vertical line
-extern float UTIL_WaterLevel(const Vector& position, float minz, float maxz);
-extern void UTIL_Bubbles(Vector mins, Vector maxs, int count);
-extern void UTIL_BubbleTrail(Vector from, Vector to, int count);
+float UTIL_WaterLevel(const Vector& position, float minz, float maxz);
+void UTIL_Bubbles(Vector mins, Vector maxs, int count);
+void UTIL_BubbleTrail(Vector from, Vector to, int count);
 
 // allows precacheing of other entities
-extern void UTIL_PrecacheOther(const char* szClassname);
+void UTIL_PrecacheOther(const char* szClassname);
 
 // prints a message to each client
-extern void UTIL_ClientPrintAll(int msg_dest, const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL);
+void UTIL_ClientPrintAll(int msg_dest, const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL);
 inline void UTIL_CenterPrintAll(const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL)
 {
 	UTIL_ClientPrintAll(HUD_PRINTCENTER, msg_name, param1, param2, param3, param4);
 }
 
-class CBasePlayerWeapon;
-class CBasePlayer;
-
 // prints messages through the HUD
 void ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL);
 
 // prints a message to the HUD say (chat)
-extern void UTIL_SayText(const char* pText, CBaseEntity* pEntity);
-extern void UTIL_SayTextAll(const char* pText, CBaseEntity* pEntity);
+void UTIL_SayText(const char* pText, CBaseEntity* pEntity);
+void UTIL_SayTextAll(const char* pText, CBaseEntity* pEntity);
 
 
 typedef struct hudtextparms_s
@@ -410,27 +383,27 @@ typedef struct hudtextparms_s
 } hudtextparms_t;
 
 // prints as transparent 'title' to the HUD
-extern void UTIL_HudMessageAll(const hudtextparms_t& textparms, const char* pMessage);
-extern void UTIL_HudMessage(CBaseEntity* pEntity, const hudtextparms_t& textparms, const char* pMessage);
+void UTIL_HudMessageAll(const hudtextparms_t& textparms, const char* pMessage);
+void UTIL_HudMessage(CBaseEntity* pEntity, const hudtextparms_t& textparms, const char* pMessage);
 
 // for handy use with ClientPrint params
-extern char* UTIL_dtos1(int d);
-extern char* UTIL_dtos2(int d);
-extern char* UTIL_dtos3(int d);
-extern char* UTIL_dtos4(int d);
+char* UTIL_dtos1(int d);
+char* UTIL_dtos2(int d);
+char* UTIL_dtos3(int d);
+char* UTIL_dtos4(int d);
 
 // Writes message to console with timestamp and FragLog header.
-extern void UTIL_LogPrintf(const char* fmt, ...);
+void UTIL_LogPrintf(const char* fmt, ...);
 
 // Sorta like FInViewCone, but for nonmonsters.
-extern float UTIL_DotPoints(const Vector& vecSrc, const Vector& vecCheck, const Vector& vecDir);
+float UTIL_DotPoints(const Vector& vecSrc, const Vector& vecCheck, const Vector& vecDir);
 
-extern void UTIL_StripToken(const char* pKey, char* pDest); // for redundant keynames
+void UTIL_StripToken(const char* pKey, char* pDest); // for redundant keynames
 
 // Misc functions
-extern void SetMovedir(entvars_t* pev);
-extern Vector VecBModelOrigin(entvars_t* pevBModel);
-extern int BuildChangeList(LEVELLIST* pLevelList, int maxList);
+void SetMovedir(entvars_t* pev);
+Vector VecBModelOrigin(entvars_t* pevBModel);
+int BuildChangeList(LEVELLIST* pLevelList, int maxList);
 
 //
 // How did I ever live without ASSERT?
@@ -450,24 +423,10 @@ void DBG_AssertFunction(bool fExpr, const char* szExpr, const char* szFile, int 
 // Un-comment only as needed
 //
 
-#define AMBIENT_SOUND_STATIC 0 // medium radius attenuation
-#define AMBIENT_SOUND_EVERYWHERE 1
-#define AMBIENT_SOUND_SMALLRADIUS 2
-#define AMBIENT_SOUND_MEDIUMRADIUS 4
-#define AMBIENT_SOUND_LARGERADIUS 8
-#define AMBIENT_SOUND_START_SILENT 16
-#define AMBIENT_SOUND_NOT_LOOPING 32
-
-#define SPEAKER_START_SILENT 1 // wait for trigger 'on' to start announcements
-
 #define SND_SPAWNING (1 << 8)	  // duplicated in protocol.h we're spawing, used in some cases for ambients
 #define SND_STOP (1 << 5)		  // duplicated in protocol.h stop sound
 #define SND_CHANGE_VOL (1 << 6)	  // duplicated in protocol.h change sound vol
 #define SND_CHANGE_PITCH (1 << 7) // duplicated in protocol.h change sound pitch
-
-#define LFO_SQUARE 1
-#define LFO_TRIANGLE 2
-#define LFO_RANDOM 3
 
 // func_rotating
 #define SF_BRUSH_ROTATE_Y_AXIS 0
@@ -478,40 +437,12 @@ void DBG_AssertFunction(bool fExpr, const char* szExpr, const char* szFile, int 
 #define SF_PENDULUM_AUTO_RETURN 16
 #define SF_PENDULUM_PASSABLE 32
 
-
-#define SF_BRUSH_ROTATE_SMALLRADIUS 128
-#define SF_BRUSH_ROTATE_MEDIUMRADIUS 256
-#define SF_BRUSH_ROTATE_LARGERADIUS 512
-
-#define PUSH_BLOCK_ONLY_X 1
-#define PUSH_BLOCK_ONLY_Y 2
-
 #define SVC_TEMPENTITY 23
 #define SVC_INTERMISSION 30
 #define SVC_CDTRACK 32
 #define SVC_WEAPONANIM 35
 #define SVC_ROOMTYPE 37
 #define SVC_DIRECTOR 51
-
-
-
-// triggers
-#define SF_TRIGGER_ALLOWMONSTERS 1 // monsters allowed to fire this trigger
-#define SF_TRIGGER_NOCLIENTS 2	   // players not allowed to fire this trigger
-#define SF_TRIGGER_PUSHABLES 4	   // only pushables can fire this trigger
-
-// func breakable
-#define SF_BREAK_TRIGGER_ONLY 1 // may only be broken by trigger
-#define SF_BREAK_TOUCH 2		// can be 'crashed through' by running player (plate glass)
-#define SF_BREAK_PRESSURE 4		// can be broken by a player standing on it
-#define SF_BREAK_CROWBAR 256	// instant break if hit with crowbar
-
-// func_pushable (it's also func_breakable, so don't collide with those flags)
-#define SF_PUSH_BREAKABLE 128
-
-#define SF_LIGHT_START_OFF 1
-
-#define SF_TRIG_PUSH_ONCE 1
 
 
 // Sound Utilities

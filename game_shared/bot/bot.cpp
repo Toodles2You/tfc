@@ -19,8 +19,8 @@
 #include "bot.h"
 #include "bot_util.h"
 
-DLL_GLOBAL float g_flBotCommandInterval		= 1.0 / 30.0;	// 30 times per second, just like human clients
-DLL_GLOBAL float g_flBotFullThinkInterval	= 1.0 / 10.0;	// full AI only 10 times per second
+float g_flBotCommandInterval		= 1.0 / 30.0;	// 30 times per second, just like human clients
+float g_flBotFullThinkInterval	= 1.0 / 10.0;	// full AI only 10 times per second
 
 
 //--------------------------------------------------------------------------------------------------------------

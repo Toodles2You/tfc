@@ -24,6 +24,7 @@
 #include "util.h"
 #include "cbase.h"
 
+#define SF_LIGHT_START_OFF 1
 
 
 class CLight : public CPointEntity

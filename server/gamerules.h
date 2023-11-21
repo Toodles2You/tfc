@@ -429,5 +429,5 @@ protected:
 	virtual bool PrivilegedCommand(CBasePlayer* pPlayer, const char* pcmd);
 };
 
-inline DLL_GLOBAL CGameRules* g_pGameRules = nullptr;
-inline DLL_GLOBAL bool g_fGameOver;
+inline CGameRules* g_pGameRules = nullptr;
+inline bool g_fGameOver;

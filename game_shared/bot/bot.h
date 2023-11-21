@@ -18,10 +18,10 @@
 #include "bot_util.h"
 #include "bot_constants.h"
 
-extern DLL_GLOBAL float g_flBotCommandInterval;
-extern DLL_GLOBAL float g_flBotFullThinkInterval;
+extern float g_flBotCommandInterval;
+extern float g_flBotFullThinkInterval;
 
-extern DLL_GLOBAL CBotManager *g_pBotMan;
+extern CBotManager *g_pBotMan;
 
 class BotProfile;
 

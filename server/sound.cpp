@@ -26,6 +26,19 @@
 #include "pm_materials.h"
 #include "pm_shared.h"
 
+#define AMBIENT_SOUND_EVERYWHERE 1
+#define AMBIENT_SOUND_SMALLRADIUS 2
+#define AMBIENT_SOUND_MEDIUMRADIUS 4
+#define AMBIENT_SOUND_LARGERADIUS 8
+#define AMBIENT_SOUND_START_SILENT 16
+#define AMBIENT_SOUND_NOT_LOOPING 32
+
+#define SPEAKER_START_SILENT 1 // wait for trigger 'on' to start announcements
+
+#define LFO_SQUARE 1
+#define LFO_TRIANGLE 2
+#define LFO_RANDOM 3
+
 static char* memfgets(byte* pMemFile, int fileSize, int& filePos, char* pBuffer, int bufferSize);
 
 static void EmitAmbientSound(
