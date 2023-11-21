@@ -314,6 +314,8 @@ void CHudAmmo::Reset()
 	gpActiveSel = NULL;
 	gHUD.m_iHideHUDDisplay = 0;
 
+	m_flHitFeedbackTime = -1000.0F;
+
 	gWR.Reset();
 	gHR.Reset();
 }
