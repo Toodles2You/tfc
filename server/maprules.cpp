@@ -120,7 +120,7 @@ private:
 
 bool CRuleBrushEntity::Spawn()
 {
-	SET_MODEL(edict(), STRING(pev->model));
+	SetModel(STRING(pev->model));
 	return CRuleEntity::Spawn();
 }
 

@@ -92,7 +92,7 @@ bool CRecharge::Spawn()
 
 	SetSize(pev->mins, pev->maxs);
 	SetOrigin(pev->origin); // set size and link into world
-	SET_MODEL(ENT(pev), STRING(pev->model));
+	SetModel(STRING(pev->model));
 	m_iJuice = gSkillData.suitchargerCapacity;
 	pev->frame = 0;
 

@@ -39,6 +39,7 @@ bool CBaseEntity::Save(CSave& save) { return true; }
 bool CBaseEntity::Restore(CRestore& restore) { return true; }
 void CBaseEntity::SetObjectCollisionBox() {}
 void CBaseEntity::SetOrigin(const Vector& org) {}
+void CBaseEntity::SetModel(const char* name) {}
 void CBaseEntity::SetSize(const Vector& mins, const Vector& maxs) {}
 bool CBaseEntity::Intersects(CBaseEntity* pOther) { return false; }
 void CBaseEntity::MakeDormant() {}

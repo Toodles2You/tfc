@@ -957,7 +957,7 @@ bool CWeaponBox::Spawn()
 
 	SetSize(g_vecZero, g_vecZero);
 
-	SET_MODEL(ENT(pev), "models/w_weaponbox.mdl");
+	SetModel("models/w_weaponbox.mdl");
 
 	return true;
 }

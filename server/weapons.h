@@ -324,7 +324,7 @@ class DLLClassName : public CBasePlayerAmmo \
 	bool Spawn() override \
 	{ \
 		Precache(); \
-		SET_MODEL(ENT(pev), modelName); \
+		SetModel(modelName); \
 		return CBasePlayerAmmo::Spawn(); \
 	} \
 	void Precache() override \

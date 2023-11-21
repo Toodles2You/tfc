@@ -2212,7 +2212,7 @@ bool CBasePlayer::Spawn()
 	pev->punchangle = g_vecZero;
 	pev->fixangle = 1;
 
-	SET_MODEL(ENT(pev), "models/player.mdl");
+	SetModel("models/player.mdl");
 	pev->sequence = LookupActivity(ACT_IDLE);
 
 	if (FBitSet(pev->flags, FL_DUCKING))

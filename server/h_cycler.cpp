@@ -79,7 +79,7 @@ bool CCycler::GenericCyclerSpawn(const char* szModel, Vector vecMin, Vector vecM
 
 	pev->classname = MAKE_STRING("cycler");
 	PRECACHE_MODEL(szModel);
-	SET_MODEL(ENT(pev), szModel);
+	SetModel(szModel);
 
 	if (!CCycler::Spawn())
 	{
@@ -238,7 +238,7 @@ bool CCyclerSprite::Spawn()
 	m_lastTime = gpGlobals->time;
 
 	PRECACHE_MODEL((char*)STRING(pev->model));
-	SET_MODEL(ENT(pev), STRING(pev->model));
+	SetModel(STRING(pev->model));
 
 	m_maxFrame = (float)MODEL_FRAMES(pev->modelindex) - 1;
 
@@ -307,7 +307,7 @@ bool CWeaponCycler::Spawn()
 	pev->movetype = MOVETYPE_NONE;
 
 	PRECACHE_MODEL((char*)STRING(pev->model));
-	SET_MODEL(ENT(pev), STRING(pev->model));
+	SetModel(STRING(pev->model));
 	m_iszModel = pev->model;
 	m_iModel = pev->modelindex;
 
@@ -404,7 +404,7 @@ bool CWreckage::Spawn()
 	if (!FStringNull(pev->model))
 	{
 		PRECACHE_MODEL((char*)STRING(pev->model));
-		SET_MODEL(ENT(pev), STRING(pev->model));
+		SetModel(STRING(pev->model));
 	}
 	// pev->scale = 5.0;
 

@@ -271,7 +271,7 @@ void CFuncPlat::Setup()
 
 	SetOrigin(pev->origin); // set size and link into world
 	SetSize(pev->mins, pev->maxs);
-	SET_MODEL(ENT(pev), STRING(pev->model));
+	SetModel(STRING(pev->model));
 
 	// vecPosition1 is the top position, vecPosition2 is the bottom
 	m_vecPosition1 = pev->origin;
@@ -848,7 +848,7 @@ bool CFuncTrain::Spawn()
 	else
 		pev->solid = SOLID_BSP;
 
-	SET_MODEL(ENT(pev), STRING(pev->model));
+	SetModel(STRING(pev->model));
 	SetSize(pev->mins, pev->maxs);
 	SetOrigin(pev->origin);
 
@@ -1483,7 +1483,7 @@ bool CFuncTrackTrain::Spawn()
 		pev->solid = SOLID_BSP;
 	pev->movetype = MOVETYPE_PUSH;
 
-	SET_MODEL(ENT(pev), STRING(pev->model));
+	SetModel(STRING(pev->model));
 
 	SetSize(pev->mins, pev->maxs);
 	SetOrigin(pev->origin);
@@ -1582,7 +1582,7 @@ bool CFuncTrainControls::Spawn()
 {
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_NONE;
-	SET_MODEL(ENT(pev), STRING(pev->model));
+	SetModel(STRING(pev->model));
 
 	SetSize(pev->mins, pev->maxs);
 	SetOrigin(pev->origin);
@@ -2150,7 +2150,7 @@ bool CGunTarget::Spawn()
 	pev->movetype = MOVETYPE_PUSH;
 
 	SetOrigin(pev->origin);
-	SET_MODEL(ENT(pev), STRING(pev->model));
+	SetModel(STRING(pev->model));
 
 	if (pev->speed == 0)
 		pev->speed = 100;

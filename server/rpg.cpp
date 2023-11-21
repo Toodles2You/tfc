@@ -53,7 +53,7 @@ bool CLaserSpot::Spawn()
 	pev->renderfx = kRenderFxNoDissipation;
 	pev->renderamt = 255;
 
-	SET_MODEL(ENT(pev), "sprites/laserdot.spr");
+	SetModel("sprites/laserdot.spr");
 	SetOrigin(pev->origin);
 
 	return true;
@@ -121,7 +121,7 @@ bool CRpgRocket::Spawn()
 	pev->movetype = MOVETYPE_BOUNCE;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL(ENT(pev), "models/rpgrocket.mdl");
+	SetModel("models/rpgrocket.mdl");
 	SetSize(g_vecZero, g_vecZero);
 	SetOrigin(pev->origin);
 
@@ -310,7 +310,7 @@ bool CRpg::Spawn()
 	Precache();
 	m_iId = WEAPON_RPG;
 
-	SET_MODEL(ENT(pev), "models/w_rpg.mdl");
+	SetModel("models/w_rpg.mdl");
 	m_fSpotActive = true;
 
 	if (UTIL_IsDeathmatch())

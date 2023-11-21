@@ -73,7 +73,7 @@ bool CCrossbowBolt::Spawn()
 
 	pev->gravity = 0.5;
 
-	SET_MODEL(ENT(pev), "models/crossbow_bolt.mdl");
+	SetModel("models/crossbow_bolt.mdl");
 
 	SetSize(g_vecZero, g_vecZero);
 	SetOrigin(pev->origin);
@@ -227,7 +227,7 @@ bool CCrossbow::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_CROSSBOW;
-	SET_MODEL(ENT(pev), "models/w_crossbow.mdl");
+	SetModel("models/w_crossbow.mdl");
 
 	m_iDefaultAmmo = CROSSBOW_DEFAULT_GIVE;
 

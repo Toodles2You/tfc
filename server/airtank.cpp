@@ -51,7 +51,7 @@ bool CAirtank::Spawn()
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL(ENT(pev), "models/w_oxygen.mdl");
+	SetModel("models/w_oxygen.mdl");
 	SetSize(Vector(-16, -16, 0), Vector(16, 16, 36));
 	SetOrigin(pev->origin);
 

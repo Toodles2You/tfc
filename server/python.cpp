@@ -46,7 +46,7 @@ bool CPython::Spawn()
 	pev->classname = MAKE_STRING("weapon_357"); // hack to allow for old names
 	Precache();
 	m_iId = WEAPON_PYTHON;
-	SET_MODEL(ENT(pev), "models/w_357.mdl");
+	SetModel("models/w_357.mdl");
 
 	m_iDefaultAmmo = PYTHON_DEFAULT_GIVE;
 
