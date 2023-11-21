@@ -165,7 +165,7 @@ void CBasePlayer::DeathSound()
 	}
 
 	// play one of the suit death alarms
-	if (!UTIL_IsDeathmatch())
+	if (!util::IsDeathmatch())
 	{
 		EmitSuitSound("HEV_DEAD");
 	}
@@ -276,7 +276,7 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	if ((bitsDamageType & DMG_ARMOR_PIERCING) == 0)
 	{
 		float armourBonus = kArmourBonus;
-		if ((bitsDamageType & DMG_BLAST) != 0 && UTIL_IsDeathmatch())
+		if ((bitsDamageType & DMG_BLAST) != 0 && util::IsDeathmatch())
 		{
 			armourBonus *= 2;
 		}
@@ -565,7 +565,7 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 		g_usGibbed,
 		0.0f,
 		pev->origin,
-		UTIL_VecToAngles(g_vecAttackDir),
+		util::VecToAngles(g_vecAttackDir),
 		0.0,
 		pev->health,
 		pev->sequence,
@@ -770,7 +770,7 @@ Activity CBasePlayer::GetDeathActivity()
 	fTriedDirection = false;
 	deathActivity = ACT_DIESIMPLE; // in case we can't find any special deaths to do.
 
-	UTIL_MakeVectors(pev->angles);
+	util::MakeVectors(pev->angles);
 	flDot = DotProduct(gpGlobals->v_forward, g_vecAttackDir * -1);
 
 	switch (m_LastHitGroup)
@@ -846,7 +846,7 @@ Activity CBasePlayer::GetDeathActivity()
 	if (deathActivity == ACT_DIEFORWARD)
 	{
 		// make sure there's room to fall forward
-		UTIL_TraceHull(vecSrc, vecSrc + gpGlobals->v_forward * 64, dont_ignore_monsters, head_hull, edict(), &tr);
+		util::TraceHull(vecSrc, vecSrc + gpGlobals->v_forward * 64, util::dont_ignore_monsters, util::head_hull, edict(), &tr);
 
 		if (tr.flFraction != 1.0)
 		{
@@ -857,7 +857,7 @@ Activity CBasePlayer::GetDeathActivity()
 	if (deathActivity == ACT_DIEBACKWARD)
 	{
 		// make sure there's room to fall backward
-		UTIL_TraceHull(vecSrc, vecSrc - gpGlobals->v_forward * 64, dont_ignore_monsters, head_hull, edict(), &tr);
+		util::TraceHull(vecSrc, vecSrc - gpGlobals->v_forward * 64, util::dont_ignore_monsters, util::head_hull, edict(), &tr);
 
 		if (tr.flFraction != 1.0)
 		{
@@ -879,7 +879,7 @@ Activity CBasePlayer::GetSmallFlinchActivity()
 	float flDot;
 
 	fTriedDirection = false;
-	UTIL_MakeVectors(pev->angles);
+	util::MakeVectors(pev->angles);
 	flDot = DotProduct(gpGlobals->v_forward, g_vecAttackDir * -1);
 
 	switch (m_LastHitGroup)
@@ -1068,7 +1068,7 @@ bool CBasePlayer::IsOnLadder()
 
 void CBasePlayer::PlayerDeathFrame()
 {
-	const auto bIsMultiplayer = UTIL_IsMultiplayer();
+	const auto bIsMultiplayer = util::IsMultiplayer();
 
 	if (HasWeapons())
 	{
@@ -1152,10 +1152,10 @@ void CBasePlayer::StartDeathCam()
 	{
 		// no intermission spot. Push them up in the air, looking down at their corpse
 		TraceResult tr;
-		UTIL_TraceLine(pev->origin, pev->origin + Vector(0, 0, 128), ignore_monsters, this, &tr);
+		util::TraceLine(pev->origin, pev->origin + Vector(0, 0, 128), util::ignore_monsters, this, &tr);
 
 		SetOrigin(tr.vecEndPos);
-		pev->angles = pev->v_angle = UTIL_VecToAngles(tr.vecEndPos - pev->origin);
+		pev->angles = pev->v_angle = util::VecToAngles(tr.vecEndPos - pev->origin);
 	}
 
 	// start death cam
@@ -1283,9 +1283,9 @@ void CBasePlayer::PlayerUse()
 	float flMaxDot = VIEW_FIELD_NARROW;
 	float flDot;
 
-	UTIL_MakeVectors(pev->v_angle); // so we know which way we are facing
+	util::MakeVectors(pev->v_angle); // so we know which way we are facing
 
-	while ((pObject = UTIL_FindEntityInSphere(pObject, pev->origin, PLAYER_SEARCH_RADIUS)) != NULL)
+	while ((pObject = util::FindEntityInSphere(pObject, pev->origin, PLAYER_SEARCH_RADIUS)) != NULL)
 	{
 
 		if ((pObject->ObjectCaps() & (FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE)) != 0)
@@ -1297,7 +1297,7 @@ void CBasePlayer::PlayerUse()
 
 			// This essentially moves the origin of the target to the corner nearest the player to test to see
 			// if it's "hull" is in the view cone
-			vecLOS = UTIL_ClampVectorToBox(vecLOS, pObject->pev->size * 0.5);
+			vecLOS = util::ClampVectorToBox(vecLOS, pObject->pev->size * 0.5);
 
 			flDot = DotProduct(vecLOS, gpGlobals->v_forward);
 			if (flDot > flMaxDot)
@@ -1370,7 +1370,7 @@ void CBasePlayer::Jump()
 	}
 
 	// many features in this function use v_forward, so makevectors now.
-	UTIL_MakeVectors(pev->angles);
+	util::MakeVectors(pev->angles);
 
 	// ClearBits(pev->flags, FL_ONGROUND);		// don't stairwalk
 
@@ -1453,7 +1453,7 @@ void CBasePlayer::AddPointsToTeam(int score, bool bAllowNegativeScore)
 
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		CBaseEntity* pPlayer = UTIL_PlayerByIndex(i);
+		CBaseEntity* pPlayer = util::PlayerByIndex(i);
 
 		if (pPlayer && i != index)
 		{
@@ -1484,10 +1484,10 @@ void CBasePlayer::UpdateStatusBar()
 
 	// Find an ID Target
 	TraceResult tr;
-	UTIL_MakeVectors(pev->v_angle + pev->punchangle);
+	util::MakeVectors(pev->v_angle + pev->punchangle);
 	Vector vecSrc = EyePosition();
 	Vector vecEnd = vecSrc + (gpGlobals->v_forward * MAX_ID_RANGE);
-	UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, this, &tr);
+	util::TraceLine(vecSrc, vecEnd, util::dont_ignore_monsters, this, &tr);
 
 	if (tr.flFraction != 1.0)
 	{
@@ -1576,7 +1576,7 @@ void CBasePlayer::PreThink()
 	if (g_fGameOver)
 		return; // intermission or finale
 
-	UTIL_MakeVectors(pev->v_angle); // is this still used?
+	util::MakeVectors(pev->v_angle); // is this still used?
 
 	WeaponPreFrame();
 	WaterMove();
@@ -1633,7 +1633,7 @@ void CBasePlayer::PreThink()
 		{
 			TraceResult trainTrace;
 			// Maybe this is on the other side of a level transition
-			UTIL_TraceLine(pev->origin, pev->origin + Vector(0, 0, -38), ignore_monsters, this, &trainTrace);
+			util::TraceLine(pev->origin, pev->origin + Vector(0, 0, -38), util::ignore_monsters, this, &trainTrace);
 
 			// HACKHACK - Just look for the func_tracktrain classname
 			if (trainTrace.flFraction != 1.0 && trainTrace.pHit)
@@ -1850,7 +1850,7 @@ void CBasePlayer::CheckSuitUpdate()
 	// if in range of radiation source, ping geiger counter
 	UpdateGeigerCounter();
 
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		// don't bother updating HEV voice in multiplayer.
 		return;
@@ -1911,7 +1911,7 @@ void CBasePlayer::SetSuitUpdate(const char* name, bool fgroup, int iNoRepeatTime
 	if (!HasSuit())
 		return;
 
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		// due to static channel design, etc. We don't play HEV sounds in multiplayer right now.
 		return;
@@ -1994,7 +1994,7 @@ void CBasePlayer::SetSuitUpdate(const char* name, bool fgroup, int iNoRepeatTime
 
 void CBasePlayer::CheckAmmoLevel(CBasePlayerWeapon* pWeapon, bool bPrimary)
 {
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		return;
 	}
@@ -2182,7 +2182,7 @@ bool CBasePlayer::Spawn()
 
 	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "slj", "0");
 	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "hl", "1");
-	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "bj", UTIL_dtos1(sv_allowbunnyhopping.value != 0 ? 1 : 0));
+	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "bj", util::dtos1(sv_allowbunnyhopping.value != 0 ? 1 : 0));
 
 	m_iFOV = 0;		   // init field of view.
 	m_ClientSndRoomtype = -1;
@@ -2445,18 +2445,18 @@ void CSprayCan::Think()
 
 	// ALERT(at_console, "Spray by player %i, %i of %i\n", playernum, (int)(pev->frame + 1), nFrames);
 
-	UTIL_MakeVectors(pev->angles);
-	UTIL_TraceLine(pev->origin, pev->origin + gpGlobals->v_forward * 128, ignore_monsters, pPlayer, &tr);
+	util::MakeVectors(pev->angles);
+	util::TraceLine(pev->origin, pev->origin + gpGlobals->v_forward * 128, util::ignore_monsters, pPlayer, &tr);
 
 	// No customization present.
 	if (nFrames == -1)
 	{
-		UTIL_DecalTrace(&tr, DECAL_LAMBDA6);
+		util::DecalTrace(&tr, DECAL_LAMBDA6);
 		Remove();
 	}
 	else
 	{
-		UTIL_PlayerDecalTrace(&tr, playernum, pev->frame, true);
+		util::PlayerDecalTrace(&tr, playernum, pev->frame, true);
 		// Just painted last custom frame.
 		if (pev->frame++ >= (nFrames - 1))
 			Remove();
@@ -2581,8 +2581,8 @@ void CBasePlayer::ImpulseCommands()
 			break;
 		}
 
-		UTIL_MakeVectors(pev->v_angle);
-		UTIL_TraceLine(pev->origin + pev->view_ofs, pev->origin + pev->view_ofs + gpGlobals->v_forward * 128, ignore_monsters, this, &tr);
+		util::MakeVectors(pev->v_angle);
+		util::TraceLine(pev->origin + pev->view_ofs, pev->origin + pev->view_ofs + gpGlobals->v_forward * 128, util::ignore_monsters, this, &tr);
 
 		if (tr.flFraction != 1.0)
 		{ // line hit something, so paint a decal
@@ -2652,7 +2652,7 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 
 	case 106:
 		// Give me the classname and targetname of this entity.
-		pEntity = UTIL_FindEntityForward(this);
+		pEntity = util::FindEntityForward(this);
 		if (pEntity)
 		{
 			ALERT(at_console, "Classname: %s", STRING(pEntity->pev->classname));
@@ -2680,7 +2680,7 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 
 		Vector start = pev->origin + pev->view_ofs;
 		Vector end = start + gpGlobals->v_forward * 1024;
-		UTIL_TraceLine(start, end, ignore_monsters, this, &tr);
+		util::TraceLine(start, end, util::ignore_monsters, this, &tr);
 		if (tr.pHit)
 			pWorld = tr.pHit;
 		const char* pTextureName = TRACE_TEXTURE(pWorld, start, end);
@@ -2724,7 +2724,7 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 	case 202: // Random blood splatter
 		break;
 	case 203: // remove creature.
-		pEntity = UTIL_FindEntityForward(this);
+		pEntity = util::FindEntityForward(this);
 		if (pEntity)
 		{
 			if (0 != pEntity->pev->takedamage)
@@ -2968,7 +2968,7 @@ void CBasePlayer::UpdateClientData()
 
 			m_iObserverLastMode = OBS_ROAMING;
 
-			if (UTIL_IsMultiplayer())
+			if (util::IsMultiplayer())
 			{
 				FireTargets("game_playerjoin", this, this, USE_TOGGLE, 0);
 			}
@@ -3148,7 +3148,7 @@ void CBasePlayer::EnableControl(bool fControl)
 //=========================================================
 Vector CBasePlayer::GetAimVector()
 {
-	UTIL_MakeVectors(pev->v_angle + pev->punchangle);
+	util::MakeVectors(pev->v_angle + pev->punchangle);
 	return gpGlobals->v_forward;
 }
 
@@ -3188,7 +3188,7 @@ int CBasePlayer::GetCustomDecalFrames()
 //=========================================================
 void CBasePlayer::DropPlayerWeapon(char* pszWeaponName)
 {
-	if (!UTIL_IsMultiplayer() || (weaponstay.value > 0))
+	if (!util::IsMultiplayer() || (weaponstay.value > 0))
 	{
 		// no dropping in single player.
 		return;
@@ -3227,7 +3227,7 @@ void CBasePlayer::DropPlayerWeapon(char* pszWeaponName)
 
 	ClearWeaponBit(pWeapon->m_iId); // take weapon off hud
 
-	UTIL_MakeVectors(pev->angles);
+	util::MakeVectors(pev->angles);
 
 	CWeaponBox* pWeaponBox = (CWeaponBox*)CBaseEntity::Create("weaponbox", pev->origin + gpGlobals->v_forward * 10, pev->angles, edict());
 	pWeaponBox->pev->angles.x = 0;
@@ -3364,9 +3364,9 @@ void CStripWeapons::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	{
 		pPlayer = (CBasePlayer*)pActivator;
 	}
-	else if (!UTIL_IsDeathmatch())
+	else if (!util::IsDeathmatch())
 	{
-		pPlayer = (CBasePlayer*)UTIL_GetLocalPlayer();
+		pPlayer = (CBasePlayer*)util::GetLocalPlayer();
 	}
 
 	if (pPlayer)
@@ -3439,7 +3439,7 @@ bool CRevertSaved::KeyValue(KeyValueData* pkvd)
 
 void CRevertSaved::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
-	UTIL_ScreenFadeAll(pev->rendercolor, Duration(), HoldTime(), pev->renderamt, FFADE_OUT);
+	util::ScreenFadeAll(pev->rendercolor, Duration(), HoldTime(), pev->renderamt, FFADE_OUT);
 	pev->nextthink = gpGlobals->time + MessageTime();
 	SetThink(&CRevertSaved::MessageThink);
 }
@@ -3447,7 +3447,7 @@ void CRevertSaved::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE u
 
 void CRevertSaved::MessageThink()
 {
-	UTIL_ShowMessageAll(STRING(pev->message));
+	util::ShowMessageAll(STRING(pev->message));
 	float nextThink = LoadTime() - MessageTime();
 	if (nextThink > 0)
 	{
@@ -3461,7 +3461,7 @@ void CRevertSaved::MessageThink()
 
 void CRevertSaved::LoadThink()
 {
-	if (!UTIL_IsMultiplayer())
+	if (!util::IsMultiplayer())
 	{
 		SERVER_COMMAND("reload\n");
 	}
@@ -3498,7 +3498,7 @@ void CInfoIntermission::Think()
 
 	if (!FNullEnt(pTarget))
 	{
-		pev->v_angle = UTIL_VecToAngles((pTarget->v.origin - pev->origin).Normalize());
+		pev->v_angle = util::VecToAngles((pTarget->v.origin - pev->origin).Normalize());
 		pev->v_angle.x = -pev->v_angle.x;
 	}
 }

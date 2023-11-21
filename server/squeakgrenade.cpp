@@ -171,7 +171,7 @@ void CSqueakGrenade::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int b
 	// play squeek blast
 	EmitSound("squeek/sqk_blast1.wav", CHAN_ITEM, VOL_NORM, 0.5);
 
-	UTIL_BloodDrips(pev->origin, g_vecZero, BloodColor(), 80);
+	util::BloodDrips(pev->origin, g_vecZero, BloodColor(), 80);
 
 	if (m_hOwner != NULL)
 		RadiusDamage(pev->origin, this, m_hOwner, pev->dmg, pev->dmg * 2.5, CLASS_NONE, DMG_BLAST);
@@ -249,7 +249,7 @@ void CSqueakGrenade::HuntThink()
 	vecFlat.z = 0;
 	vecFlat = vecFlat.Normalize();
 
-	UTIL_MakeVectors(pev->angles);
+	util::MakeVectors(pev->angles);
 
 	if (m_hEnemy == NULL || !m_hEnemy->IsAlive())
 	{
@@ -310,7 +310,7 @@ void CSqueakGrenade::HuntThink()
 	}
 	m_posPrev = pev->origin;
 
-	pev->angles = UTIL_VecToAngles(pev->velocity);
+	pev->angles = util::VecToAngles(pev->velocity);
 	pev->angles.z = 0;
 	pev->angles.x = 0;
 }
@@ -320,7 +320,7 @@ void CSqueakGrenade::SuperBounceTouch(CBaseEntity* pOther)
 {
 	float flpitch;
 
-	TraceResult tr = UTIL_GetGlobalTrace();
+	TraceResult tr = util::GetGlobalTrace();
 
 	// don't hit the guy that launched this grenade
 	if (pev->owner && pOther->edict() == pev->owner)
@@ -374,7 +374,7 @@ void CSqueakGrenade::SuperBounceTouch(CBaseEntity* pOther)
 	m_flNextHit = gpGlobals->time + 0.1;
 	m_flNextHunt = gpGlobals->time;
 
-	if (UTIL_IsMultiplayer())
+	if (util::IsMultiplayer())
 	{
 		// in multiplayer, we limit how often snarks can make their bounce sounds to prevent overflows.
 		if (gpGlobals->time < m_flNextBounceSoundTime)
@@ -430,7 +430,7 @@ void CSqueak::Precache()
 	PRECACHE_MODEL("models/p_squeak.mdl");
 	PRECACHE_SOUND("squeek/sqk_hunt2.wav");
 	PRECACHE_SOUND("squeek/sqk_hunt3.wav");
-	UTIL_PrecacheOther("monster_snark");
+	util::PrecacheOther("monster_snark");
 
 	m_usSnarkFire = PRECACHE_EVENT(1, "events/snarkfire.sc");
 }
@@ -500,7 +500,7 @@ void CSqueak::PrimaryAttack()
 {
 	if (0 != m_pPlayer->m_rgAmmo[iAmmo1()])
 	{
-		UTIL_MakeVectors(m_pPlayer->pev->v_angle);
+		util::MakeVectors(m_pPlayer->pev->v_angle);
 		TraceResult tr;
 		Vector trace_origin;
 
@@ -513,7 +513,7 @@ void CSqueak::PrimaryAttack()
 		}
 
 		// find place to toss monster
-		UTIL_TraceLine(trace_origin + gpGlobals->v_forward * 20, trace_origin + gpGlobals->v_forward * 64, dont_ignore_monsters, nullptr, &tr);
+		util::TraceLine(trace_origin + gpGlobals->v_forward * 20, trace_origin + gpGlobals->v_forward * 64, util::dont_ignore_monsters, nullptr, &tr);
 
 		m_pPlayer->PlaybackEvent(m_usSnarkFire);
 
@@ -567,12 +567,12 @@ void CSqueak::WeaponIdle()
 		}
 
 		SendWeaponAnim(SQUEAK_UP);
-		m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
+		m_iTimeWeaponIdle = util::SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 		return;
 	}
 
 	int iAnim;
-	float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
+	float flRand = util::SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
 	if (flRand <= 0.75)
 	{
 		iAnim = SQUEAK_IDLE1;

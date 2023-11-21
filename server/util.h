@@ -65,17 +65,6 @@ typedef int EOFFSET;
 	extern "C" DLLEXPORT void mapClassName(entvars_t* pev); \
 	void mapClassName(entvars_t* pev) { GetClassPtr((DLLClassName*)pev); }
 
-/**
-*	@brief Gets the list of entities.
-*	Will return @c nullptr if there is no map loaded.
-*/
-edict_t* UTIL_GetEntityList();
-
-/**
-*	@brief Gets the local player in singleplayer, or @c nullptr in multiplayer.
-*/
-CBaseEntity* UTIL_GetLocalPlayer();
-
 //
 // Conversion among the three types of "entity", including identity-conversions.
 //
@@ -255,151 +244,6 @@ inline bool FClassnameIs(entvars_t* pev, const char* szClassname)
 	return FStrEq(STRING(pev->classname), szClassname);
 }
 
-// Misc. Prototypes
-float UTIL_VecToYaw(const Vector& vec);
-Vector UTIL_VecToAngles(const Vector& vec);
-float UTIL_AngleMod(float a);
-float UTIL_AngleDiff(float destAngle, float srcAngle);
-
-CBaseEntity* UTIL_FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius);
-CBaseEntity* UTIL_FindEntityByString(CBaseEntity* pStartEntity, const char* szKeyword, const char* szValue);
-CBaseEntity* UTIL_FindEntityByClassname(CBaseEntity* pStartEntity, const char* szName);
-CBaseEntity* UTIL_FindEntityByTargetname(CBaseEntity* pStartEntity, const char* szName);
-CBaseEntity* UTIL_FindEntityGeneric(const char* szName, Vector& vecSrc, float flRadius);
-
-// returns a CBaseEntity pointer to a player by index.  Only returns if the player is spawned and connected
-// otherwise returns NULL
-// Index is 1 based
-CBaseEntity* UTIL_PlayerByIndex(int playerIndex);
-
-#define UTIL_EntitiesInPVS(pent) (*g_engfuncs.pfnEntitiesInPVS)(pent)
-void UTIL_MakeVectors(const Vector& vecAngles);
-
-// Pass in an array of pointers and an array size, it fills the array and returns the number inserted
-int UTIL_MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& center, float radius);
-int UTIL_EntitiesInBox(CBaseEntity** pList, int listMax, const Vector& mins, const Vector& maxs, int flagMask, bool checkSolid = false);
-
-inline void UTIL_MakeVectorsPrivate(const Vector& vecAngles, float* p_vForward, float* p_vRight, float* p_vUp)
-{
-	g_engfuncs.pfnAngleVectors(vecAngles, p_vForward, p_vRight, p_vUp);
-}
-
-void UTIL_MakeAimVectors(const Vector& vecAngles); // like MakeVectors, but assumes pitch isn't inverted
-void UTIL_MakeInvVectors(const Vector& vec, globalvars_t* pgv);
-
-void UTIL_ParticleEffect(const Vector& vecOrigin, const Vector& vecDirection, unsigned int ulColor, unsigned int ulCount);
-void UTIL_ScreenShake(const Vector& center, float amplitude, float frequency, float duration, float radius);
-void UTIL_ScreenShakeAll(const Vector& center, float amplitude, float frequency, float duration);
-void UTIL_ShowMessage(const char* pString, CBaseEntity* pPlayer);
-void UTIL_ShowMessageAll(const char* pString);
-void UTIL_ScreenFadeAll(const Vector& color, float fadeTime, float holdTime, int alpha, int flags);
-void UTIL_ScreenFade(CBaseEntity* pEntity, const Vector& color, float fadeTime, float fadeHold, int alpha, int flags);
-
-typedef enum
-{
-	ignore_monsters = 1,
-	dont_ignore_monsters = 0,
-	missile = 2
-} IGNORE_MONSTERS;
-typedef enum
-{
-	ignore_glass = 1,
-	dont_ignore_glass = 0
-} IGNORE_GLASS;
-void UTIL_TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, CBaseEntity* ignore, TraceResult* ptr);
-void UTIL_TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, CBaseEntity* ignore, TraceResult* ptr);
-enum
-{
-	point_hull = 0,
-	human_hull = 1,
-	large_hull = 2,
-	head_hull = 3
-};
-void UTIL_TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t* pentIgnore, TraceResult* ptr);
-TraceResult UTIL_GetGlobalTrace();
-void UTIL_TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, edict_t* pentModel, TraceResult* ptr);
-Vector UTIL_GetAimVector(edict_t* pent, float flSpeed);
-int UTIL_PointContents(const Vector& vec);
-
-bool UTIL_IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator);
-void UTIL_BloodStream(const Vector& origin, const Vector& direction, int color, int amount);
-void UTIL_BloodDrips(const Vector& origin, const Vector& direction, int color, int amount);
-Vector UTIL_RandomBloodVector();
-void UTIL_BloodDecalTrace(TraceResult* pTrace, int bloodColor);
-void UTIL_DecalTrace(TraceResult* pTrace, int decalNumber);
-void UTIL_PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber, bool bIsCustom);
-void UTIL_GunshotDecalTrace(TraceResult* pTrace, int decalNumber);
-void UTIL_Sparks(const Vector& position);
-void UTIL_Ricochet(const Vector& position, float scale);
-void UTIL_StringToVector(float* pVector, const char* pString);
-void UTIL_StringToIntArray(int* pVector, int count, const char* pString);
-Vector UTIL_ClampVectorToBox(const Vector& input, const Vector& clampSize);
-float UTIL_Approach(float target, float value, float speed);
-float UTIL_ApproachAngle(float target, float value, float speed);
-float UTIL_AngleDistance(float next, float cur);
-
-char* UTIL_VarArgs(const char* format, ...);
-bool UTIL_IsValidEntity(edict_t* pent);
-bool UTIL_TeamsMatch(const char* pTeamName1, const char* pTeamName2);
-
-// Use for ease-in, ease-out style interpolation (accel/decel)
-float UTIL_SplineFraction(float value, float scale);
-
-// Search for water transition along a vertical line
-float UTIL_WaterLevel(const Vector& position, float minz, float maxz);
-void UTIL_Bubbles(Vector mins, Vector maxs, int count);
-void UTIL_BubbleTrail(Vector from, Vector to, int count);
-
-// allows precacheing of other entities
-void UTIL_PrecacheOther(const char* szClassname);
-
-// prints a message to each client
-void UTIL_ClientPrintAll(int msg_dest, const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL);
-inline void UTIL_CenterPrintAll(const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL)
-{
-	UTIL_ClientPrintAll(HUD_PRINTCENTER, msg_name, param1, param2, param3, param4);
-}
-
-// prints messages through the HUD
-void ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL);
-
-// prints a message to the HUD say (chat)
-void UTIL_SayText(const char* pText, CBaseEntity* pEntity);
-void UTIL_SayTextAll(const char* pText, CBaseEntity* pEntity);
-
-
-typedef struct hudtextparms_s
-{
-	float x;
-	float y;
-	int effect;
-	byte r1, g1, b1, a1;
-	byte r2, g2, b2, a2;
-	float fadeinTime;
-	float fadeoutTime;
-	float holdTime;
-	float fxTime;
-	int channel;
-} hudtextparms_t;
-
-// prints as transparent 'title' to the HUD
-void UTIL_HudMessageAll(const hudtextparms_t& textparms, const char* pMessage);
-void UTIL_HudMessage(CBaseEntity* pEntity, const hudtextparms_t& textparms, const char* pMessage);
-
-// for handy use with ClientPrint params
-char* UTIL_dtos1(int d);
-char* UTIL_dtos2(int d);
-char* UTIL_dtos3(int d);
-char* UTIL_dtos4(int d);
-
-// Writes message to console with timestamp and FragLog header.
-void UTIL_LogPrintf(const char* fmt, ...);
-
-// Sorta like FInViewCone, but for nonmonsters.
-float UTIL_DotPoints(const Vector& vecSrc, const Vector& vecCheck, const Vector& vecDir);
-
-void UTIL_StripToken(const char* pKey, char* pDest); // for redundant keynames
-
 // Misc functions
 void SetMovedir(entvars_t* pev);
 Vector VecBModelOrigin(entvars_t* pevBModel);
@@ -474,41 +318,6 @@ float TEXTURETYPE_PlaySound(TraceResult* ptr, Vector vecSrc, Vector vecEnd, int 
 #define PLAYBACK_EVENT(flags, who, index) PLAYBACK_EVENT_FULL(flags, who, index, 0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 #define PLAYBACK_EVENT_DELAY(flags, who, index, delay) PLAYBACK_EVENT_FULL(flags, who, index, delay, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 
-#define GROUP_OP_AND 0
-#define GROUP_OP_NAND 1
-
-inline int g_groupmask = 0;
-inline int g_groupop = 0;
-
-class UTIL_GroupTrace
-{
-public:
-	UTIL_GroupTrace(int groupmask, int op);
-	~UTIL_GroupTrace();
-
-private:
-	int m_oldgroupmask, m_oldgroupop;
-};
-
-void UTIL_SetGroupTrace(int groupmask, int op);
-void UTIL_UnsetGroupTrace();
-
-int UTIL_SharedRandomLong(unsigned int seed, int low, int high);
-float UTIL_SharedRandomFloat(unsigned int seed, float low, float high);
-
-float UTIL_WeaponTimeBase();
-
-CBaseEntity* UTIL_FindEntityForward(CBaseEntity* pMe);
-
-constexpr bool UTIL_IsServer()
-{
-#ifdef CLIENT_DLL
-	return false;
-#else
-	return true;
-#endif
-}
-
 /**
 *	@brief Helper type to run a function when the helper is destroyed.
 *	Useful for running cleanup on scope exit and function return.
@@ -529,6 +338,205 @@ struct CallOnDestroy
 	}
 };
 
-gamemode_e UTIL_GetGameMode();
-bool UTIL_IsMultiplayer();
-bool UTIL_IsDeathmatch();
+namespace util
+{
+/**
+*	@brief Gets the list of entities.
+*	Will return @c nullptr if there is no map loaded.
+*/
+edict_t* GetEntityList();
+
+/**
+*	@brief Gets the local player in singleplayer, or @c nullptr in multiplayer.
+*/
+CBaseEntity* GetLocalPlayer();
+
+float VecToYaw(const Vector& vec);
+Vector VecToAngles(const Vector& vec);
+float AngleMod(float a);
+float AngleDiff(float destAngle, float srcAngle);
+
+CBaseEntity* FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius);
+CBaseEntity* FindEntityByString(CBaseEntity* pStartEntity, const char* szKeyword, const char* szValue);
+CBaseEntity* FindEntityByClassname(CBaseEntity* pStartEntity, const char* szName);
+CBaseEntity* FindEntityByTargetname(CBaseEntity* pStartEntity, const char* szName);
+CBaseEntity* FindEntityGeneric(const char* szName, Vector& vecSrc, float flRadius);
+
+// returns a CBaseEntity pointer to a player by index.  Only returns if the player is spawned and connected
+// otherwise returns NULL
+// Index is 1 based
+CBaseEntity* PlayerByIndex(int playerIndex);
+
+inline edict_t* EntitiesInPVS(edict_t* pent)
+{
+	return g_engfuncs.pfnEntitiesInPVS(pent);
+}
+
+void MakeVectors(const Vector& vecAngles);
+
+// Pass in an array of pointers and an array size, it fills the array and returns the number inserted
+int MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& center, float radius);
+int EntitiesInBox(CBaseEntity** pList, int listMax, const Vector& mins, const Vector& maxs, int flagMask, bool checkSolid = false);
+
+inline void MakeVectorsPrivate(const Vector& vecAngles, float* p_vForward, float* p_vRight, float* p_vUp)
+{
+	g_engfuncs.pfnAngleVectors(vecAngles, p_vForward, p_vRight, p_vUp);
+}
+
+void MakeAimVectors(const Vector& vecAngles); // like MakeVectors, but assumes pitch isn't inverted
+void MakeInvVectors(const Vector& vec, globalvars_t* pgv);
+
+void ParticleEffect(const Vector& vecOrigin, const Vector& vecDirection, unsigned int ulColor, unsigned int ulCount);
+void ScreenShake(const Vector& center, float amplitude, float frequency, float duration, float radius);
+void ScreenShakeAll(const Vector& center, float amplitude, float frequency, float duration);
+void ShowMessage(const char* pString, CBaseEntity* pPlayer);
+void ShowMessageAll(const char* pString);
+void ScreenFadeAll(const Vector& color, float fadeTime, float holdTime, int alpha, int flags);
+void ScreenFade(CBaseEntity* pEntity, const Vector& color, float fadeTime, float fadeHold, int alpha, int flags);
+
+typedef enum
+{
+	ignore_monsters = 1,
+	dont_ignore_monsters = 0,
+	missile = 2
+} IGNORE_MONSTERS;
+typedef enum
+{
+	ignore_glass = 1,
+	dont_ignore_glass = 0
+} IGNORE_GLASS;
+void TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, CBaseEntity* ignore, TraceResult* ptr);
+void TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, CBaseEntity* ignore, TraceResult* ptr);
+enum
+{
+	point_hull = 0,
+	human_hull = 1,
+	large_hull = 2,
+	head_hull = 3
+};
+void TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t* pentIgnore, TraceResult* ptr);
+TraceResult GetGlobalTrace();
+void TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, edict_t* pentModel, TraceResult* ptr);
+Vector GetAimVector(edict_t* pent, float flSpeed);
+int PointContents(const Vector& vec);
+
+bool IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator);
+void BloodStream(const Vector& origin, const Vector& direction, int color, int amount);
+void BloodDrips(const Vector& origin, const Vector& direction, int color, int amount);
+Vector RandomBloodVector();
+void BloodDecalTrace(TraceResult* pTrace, int bloodColor);
+void DecalTrace(TraceResult* pTrace, int decalNumber);
+void PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber, bool bIsCustom);
+void GunshotDecalTrace(TraceResult* pTrace, int decalNumber);
+void Sparks(const Vector& position);
+void Ricochet(const Vector& position, float scale);
+void StringToVector(float* pVector, const char* pString);
+void StringToIntArray(int* pVector, int count, const char* pString);
+Vector ClampVectorToBox(const Vector& input, const Vector& clampSize);
+float Approach(float target, float value, float speed);
+float ApproachAngle(float target, float value, float speed);
+float AngleDistance(float next, float cur);
+
+char* VarArgs(const char* format, ...);
+bool IsValidEntity(edict_t* pent);
+bool TeamsMatch(const char* pTeamName1, const char* pTeamName2);
+
+// Use for ease-in, ease-out style interpolation (accel/decel)
+float SplineFraction(float value, float scale);
+
+// Search for water transition along a vertical line
+float WaterLevel(const Vector& position, float minz, float maxz);
+void Bubbles(Vector mins, Vector maxs, int count);
+void BubbleTrail(Vector from, Vector to, int count);
+
+// allows precacheing of other entities
+void PrecacheOther(const char* szClassname);
+void PrecacheWeapon(const char* szClassname);
+
+// prints a message to each client
+void ClientPrintAll(int msg_dest, const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL);
+inline void CenterPrintAll(const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL)
+{
+	ClientPrintAll(HUD_PRINTCENTER, msg_name, param1, param2, param3, param4);
+}
+
+// prints messages through the HUD
+void ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL);
+
+// prints a message to the HUD say (chat)
+void SayText(const char* pText, CBaseEntity* pEntity);
+void SayTextAll(const char* pText, CBaseEntity* pEntity);
+
+
+typedef struct hudtextparms_s
+{
+	float x;
+	float y;
+	int effect;
+	byte r1, g1, b1, a1;
+	byte r2, g2, b2, a2;
+	float fadeinTime;
+	float fadeoutTime;
+	float holdTime;
+	float fxTime;
+	int channel;
+} hudtextparms_t;
+
+// prints as transparent 'title' to the HUD
+void HudMessageAll(const hudtextparms_t& textparms, const char* pMessage);
+void HudMessage(CBaseEntity* pEntity, const hudtextparms_t& textparms, const char* pMessage);
+
+// for handy use with ClientPrint params
+char* dtos1(int d);
+char* dtos2(int d);
+char* dtos3(int d);
+char* dtos4(int d);
+
+// Writes message to console with timestamp and FragLog header.
+void LogPrintf(const char* fmt, ...);
+
+// Sorta like FInViewCone, but for nonmonsters.
+float DotPoints(const Vector& vecSrc, const Vector& vecCheck, const Vector& vecDir);
+
+void StripToken(const char* pKey, char* pDest); // for redundant keynames
+
+enum
+{
+	GROUP_OP_AND,
+	GROUP_OP_NAND,
+};
+
+inline int g_groupmask = 0;
+inline int g_groupop = 0;
+
+class GroupTrace
+{
+public:
+	GroupTrace(int groupmask, int op);
+	~GroupTrace();
+
+private:
+	int m_oldgroupmask, m_oldgroupop;
+};
+
+void SetGroupTrace(int groupmask, int op);
+void UnsetGroupTrace();
+
+int SharedRandomLong(unsigned int seed, int low, int high);
+float SharedRandomFloat(unsigned int seed, float low, float high);
+
+CBaseEntity* FindEntityForward(CBaseEntity* pMe);
+
+constexpr bool IsServer()
+{
+#ifdef CLIENT_DLL
+	return false;
+#else
+	return true;
+#endif
+}
+
+gamemode_e GetGameMode();
+bool IsMultiplayer();
+bool IsDeathmatch();
+} /* namespace util */

@@ -91,7 +91,7 @@ bool CBot::Spawn( void )
 //--------------------------------------------------------------------------------------------------------------
 Vector CBot::GetAimVector( void )
 {
-	UTIL_MakeVectors( pev->v_angle + pev->punchangle );
+	util::MakeVectors( pev->v_angle + pev->punchangle );
 
 	return gpGlobals->v_forward;
 }
@@ -454,7 +454,7 @@ int CBot::GetEnemiesRemaining( void ) const
 
 	for ( int i = 1; i <= gpGlobals->maxClients; ++i )
 	{
-		CBaseEntity *player = UTIL_PlayerByIndex( i );
+		CBaseEntity *player = util::PlayerByIndex( i );
 
 		if (player == NULL)
 			continue;
@@ -487,7 +487,7 @@ int CBot::GetFriendsRemaining( void ) const
 
 	for ( int i = 1; i <= gpGlobals->maxClients; ++i )
 	{
-		CBaseEntity *player = UTIL_PlayerByIndex( i );
+		CBaseEntity *player = util::PlayerByIndex( i );
 
 		if (player == NULL)
 			continue;
@@ -525,7 +525,7 @@ bool CBot::IsLocalPlayerWatchingMe( void ) const
 
 	int myIndex = const_cast<CBot *>(this)->entindex();
 
-	CBasePlayer *player = static_cast<CBasePlayer *>(UTIL_GetLocalPlayer());
+	CBasePlayer *player = static_cast<CBasePlayer *>(util::GetLocalPlayer());
 	if (player == NULL)
 		return false;
 

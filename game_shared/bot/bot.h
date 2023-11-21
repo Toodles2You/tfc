@@ -340,7 +340,7 @@ inline bool CBot::IsPlayerFacingMe( CBasePlayer *other ) const
 	Vector toOther = other->pev->origin - pev->origin;
 
 	// compute the unit vector along our other player's
-	UTIL_MakeVectors( other->pev->v_angle + other->pev->punchangle );
+	util::MakeVectors( other->pev->v_angle + other->pev->punchangle );
 	Vector otherDir = gpGlobals->v_forward;
 
 	if (otherDir.x * toOther.x + otherDir.y * toOther.y < 0.0f)
@@ -356,7 +356,7 @@ inline bool CBot::IsPlayerLookingAtMe( CBasePlayer *other ) const
 	toOther.NormalizeInPlace();
 
 	// compute the unit vector along our other player's
-	UTIL_MakeVectors( other->pev->v_angle + other->pev->punchangle );
+	util::MakeVectors( other->pev->v_angle + other->pev->punchangle );
 	Vector otherDir = gpGlobals->v_forward;
 
 	// other player must be pointing nearly right at us to be "looking at" us

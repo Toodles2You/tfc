@@ -65,7 +65,7 @@ bool CHornet::Spawn()
 	pev->flags |= FL_MONSTER;
 	pev->health = 1; // weak!
 
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		// hornets don't live as long in multiplayer
 		m_flStopAttack = gpGlobals->time + 3.5;
@@ -336,13 +336,13 @@ void CHornet::TrackTarget()
 		break;
 	}
 
-	pev->angles = UTIL_VecToAngles(pev->velocity);
+	pev->angles = util::VecToAngles(pev->velocity);
 
 	pev->solid = SOLID_BBOX;
 
 	// if hornet is close to the enemy, jet in a straight line for a half second.
 	// (only in the single player game)
-	if (m_hEnemy != NULL && !UTIL_IsDeathmatch())
+	if (m_hEnemy != NULL && !util::IsDeathmatch())
 	{
 		if (flDelta >= 0.4 && (pev->origin - m_vecEnemyLKP).Length() <= 300)
 		{

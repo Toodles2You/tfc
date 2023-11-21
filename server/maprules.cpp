@@ -80,7 +80,7 @@ bool CRuleEntity::CanFireForActivator(CBaseEntity* pActivator)
 {
 	if (!FStringNull(m_iszMaster))
 	{
-		return UTIL_IsMasterTriggered(m_iszMaster, pActivator);
+		return util::IsMasterTriggered(m_iszMaster, pActivator);
 	}
 
 	return true;
@@ -237,7 +237,7 @@ public:
 	inline const char* MessageGet() { return STRING(pev->message); }
 
 private:
-	hudtextparms_t m_textParms;
+	util::hudtextparms_t m_textParms;
 };
 
 LINK_ENTITY_TO_CLASS(game_text, CGameText);
@@ -246,7 +246,7 @@ LINK_ENTITY_TO_CLASS(game_text, CGameText);
 // it can't impact saved Half-Life games.
 TYPEDESCRIPTION CGameText::m_SaveData[] =
 	{
-		DEFINE_ARRAY(CGameText, m_textParms, FIELD_CHARACTER, sizeof(hudtextparms_t)),
+		DEFINE_ARRAY(CGameText, m_textParms, FIELD_CHARACTER, sizeof(util::hudtextparms_t)),
 };
 
 IMPLEMENT_SAVERESTORE(CGameText, CRulePointEntity);
@@ -277,7 +277,7 @@ bool CGameText::KeyValue(KeyValueData* pkvd)
 	else if (FStrEq(pkvd->szKeyName, "color"))
 	{
 		int color[4];
-		UTIL_StringToIntArray(color, 4, pkvd->szValue);
+		util::StringToIntArray(color, 4, pkvd->szValue);
 		m_textParms.r1 = color[0];
 		m_textParms.g1 = color[1];
 		m_textParms.b1 = color[2];
@@ -287,7 +287,7 @@ bool CGameText::KeyValue(KeyValueData* pkvd)
 	else if (FStrEq(pkvd->szKeyName, "color2"))
 	{
 		int color[4];
-		UTIL_StringToIntArray(color, 4, pkvd->szValue);
+		util::StringToIntArray(color, 4, pkvd->szValue);
 		m_textParms.r2 = color[0];
 		m_textParms.g2 = color[1];
 		m_textParms.b2 = color[2];
@@ -326,13 +326,13 @@ void CGameText::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 
 	if (MessageToAll())
 	{
-		UTIL_HudMessageAll(m_textParms, MessageGet());
+		util::HudMessageAll(m_textParms, MessageGet());
 	}
 	else
 	{
 		if (pActivator->IsNetClient())
 		{
-			UTIL_HudMessage(pActivator, m_textParms, MessageGet());
+			util::HudMessage(pActivator, m_textParms, MessageGet());
 		}
 	}
 }
@@ -450,7 +450,7 @@ bool CGameTeamMaster::TeamMatch(CBaseEntity* pActivator)
 	if (!pActivator)
 		return false;
 
-	return UTIL_TeamsMatch(pActivator->TeamID(), TeamID());
+	return util::TeamsMatch(pActivator->TeamID(), TeamID());
 }
 
 
@@ -566,19 +566,19 @@ void CGamePlayerZone::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		pPlayer = UTIL_PlayerByIndex(i);
+		pPlayer = util::PlayerByIndex(i);
 		if (pPlayer)
 		{
 			TraceResult trace;
 			int hullNumber;
 
-			hullNumber = human_hull;
+			hullNumber = util::human_hull;
 			if ((pPlayer->pev->flags & FL_DUCKING) != 0)
 			{
-				hullNumber = head_hull;
+				hullNumber = util::head_hull;
 			}
 
-			UTIL_TraceModel(pPlayer->pev->origin, pPlayer->pev->origin, hullNumber, edict(), &trace);
+			util::TraceModel(pPlayer->pev->origin, pPlayer->pev->origin, hullNumber, edict(), &trace);
 
 			if (0 != trace.fStartSolid)
 			{
@@ -813,7 +813,7 @@ bool CGamePlayerEquip::KeyValue(KeyValueData* pkvd)
 		{
 			char tmp[128];
 
-			UTIL_StripToken(pkvd->szKeyName, tmp);
+			util::StripToken(pkvd->szKeyName, tmp);
 
 			m_weaponNames[i] = ALLOC_STRING(tmp);
 			m_weaponCount[i] = atoi(pkvd->szValue);
@@ -894,7 +894,7 @@ const char* CGamePlayerTeam::TargetTeamName(const char* pszTargetName)
 {
 	CBaseEntity* pTeamEntity = NULL;
 
-	while ((pTeamEntity = UTIL_FindEntityByTargetname(pTeamEntity, pszTargetName)) != NULL)
+	while ((pTeamEntity = util::FindEntityByTargetname(pTeamEntity, pszTargetName)) != NULL)
 	{
 		if (FClassnameIs(pTeamEntity->pev, "game_team_master"))
 			return pTeamEntity->TeamID();

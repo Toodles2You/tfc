@@ -168,7 +168,7 @@ void CBotManager::StartFrame( void )
 
 	for( int i = 1; i <= gpGlobals->maxClients; ++i )
 	{
-		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
+		CBasePlayer *pPlayer = (CBasePlayer *)util::PlayerByIndex( i );
 
 		if (!pPlayer)
 			continue;
@@ -221,7 +221,7 @@ void CBotManager::OnEvent( GameEventType event, CBaseEntity *entity, CBaseEntity
 	// propogate event to all bots
 	for ( int i=1; i <= gpGlobals->maxClients; ++i )
 	{
-		CBasePlayer *player = static_cast<CBasePlayer *>( UTIL_PlayerByIndex( i ) );
+		CBasePlayer *player = static_cast<CBasePlayer *>( util::PlayerByIndex( i ) );
 
 		if (player == NULL)
 			continue;

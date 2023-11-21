@@ -97,7 +97,7 @@ static void UpdateBeams(const float time, const pmtrace_t *tr)
 		pFlare->entity.origin = tr->endpos;
 		pFlare->die = time + 0.1f; // We keep it alive just a little bit forward in the future, just in case.
 
-		if (UTIL_IsDeathmatch()) // Singleplayer always draws the egon's energy beam flare
+		if (util::IsDeathmatch()) // Singleplayer always draws the egon's energy beam flare
 		{
 			pFlare->flags |= FTENT_NOMODEL;
 

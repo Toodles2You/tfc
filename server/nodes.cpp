@@ -184,7 +184,7 @@ entvars_t* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
 
 				// trace from the node to the trigger, make sure it's one we can see from the node.
 				// !!!HACKHACK Use bodyqueue here cause there are no ents we really wish to ignore!
-				UTIL_TraceLine(pNode->m_vecOrigin, VecBModelOrigin(pevTrigger), ignore_monsters, nullptr, &tr);
+				util::TraceLine(pNode->m_vecOrigin, VecBModelOrigin(pevTrigger), util::ignore_monsters, nullptr, &tr);
 
 
 				if (VARS(tr.pHit) == pevTrigger)
@@ -389,12 +389,12 @@ int	CGraph:: FindNearestLink ( const Vector &vecTestPoint, int *piNearestLink, b
 			if ( flDistToLine < flMinDist )
 			{// just found a line nearer than any other so far
 				
-				UTIL_TraceLine ( vecTestPoint, SourceNode( i, j ).m_vecOrigin, ignore_monsters, nullptr, &tr );
+				util::TraceLine ( vecTestPoint, SourceNode( i, j ).m_vecOrigin, util::ignore_monsters, nullptr, &tr );
 
 				if ( tr.flFraction != 1.0 )
 				{// crap. can't see the first node of this link, try to see the other
 					
-					UTIL_TraceLine ( vecTestPoint, DestNode( i, j ).m_vecOrigin, ignore_monsters, nullptr, &tr );
+					util::TraceLine ( vecTestPoint, DestNode( i, j ).m_vecOrigin, util::ignore_monsters, nullptr, &tr );
 					if ( tr.flFraction != 1.0 )
 					{// can't use this link, cause can't see either node!
 						continue;
@@ -831,7 +831,7 @@ void CGraph::CheckNode(Vector vecOrigin, int iNode)
 		TraceResult tr;
 
 		// make sure that vecOrigin can trace to this node!
-		UTIL_TraceLine(vecOrigin, m_pNodes[iNode].m_vecOriginPeek, ignore_monsters, nullptr, &tr);
+		util::TraceLine(vecOrigin, m_pNodes[iNode].m_vecOriginPeek, util::ignore_monsters, nullptr, &tr);
 
 		if (tr.flFraction == 1.0)
 		{
@@ -1079,7 +1079,7 @@ int CGraph::FindNearestNode(const Vector& vecOrigin, int afNodeTypes)
 		if ( flDist < m_flShortest )
 		{
 			// make sure that vecOrigin can trace to this node!
-			UTIL_TraceLine ( vecOrigin, m_pNodes[ i ].m_vecOriginPeek, ignore_monsters, nullptr, &tr );
+			util::TraceLine ( vecOrigin, m_pNodes[ i ].m_vecOriginPeek, util::ignore_monsters, nullptr, &tr );
 
 			if ( tr.flFraction == 1.0 )
 			{
@@ -1136,7 +1136,7 @@ void CGraph::ShowNodeConnections(int iNode)
 
 	pNode = &m_pNodes[iNode];
 
-	UTIL_ParticleEffect(pNode->m_vecOrigin, g_vecZero, 255, 20); // show node position
+	util::ParticleEffect(pNode->m_vecOrigin, g_vecZero, 255, 20); // show node position
 
 	if (pNode->m_cNumLinks <= 0)
 	{ // no connections!
@@ -1258,9 +1258,9 @@ int CGraph::LinkVisibleNodes(CLink* pLinkPool, FSFile& file, int* piBadNode)
 			tr.pHit = NULL; // clear every time so we don't get stuck with last trace's hit ent
 			pTraceEnt = 0;
 
-			UTIL_TraceLine(m_pNodes[i].m_vecOrigin,
+			util::TraceLine(m_pNodes[i].m_vecOrigin,
 				m_pNodes[j].m_vecOrigin,
-				ignore_monsters,
+				util::ignore_monsters,
 				nullptr,
 				&tr);
 
@@ -1273,9 +1273,9 @@ int CGraph::LinkVisibleNodes(CLink* pLinkPool, FSFile& file, int* piBadNode)
 
 				pTraceEnt = tr.pHit; // store the ent that the trace hit, for comparison
 
-				UTIL_TraceLine(m_pNodes[j].m_vecOrigin,
+				util::TraceLine(m_pNodes[j].m_vecOrigin,
 					m_pNodes[i].m_vecOrigin,
-					ignore_monsters,
+					util::ignore_monsters,
 					nullptr,
 					&tr);
 
@@ -1518,7 +1518,7 @@ bool CTestHull::Spawn(entvars_t* pevMasterNode)
 //=========================================================
 void CTestHull::DropDelay()
 {
-	//	UTIL_CenterPrintAll( "Node Graph out of Date. Rebuilding..." );
+	//	util::CenterPrintAll( "Node Graph out of Date. Rebuilding..." );
 
 	SetOrigin(WorldGraph.m_pNodes[0].m_vecOrigin);
 
@@ -1604,13 +1604,13 @@ void CTestHull::ShowBadNode()
 	pev->movetype = MOVETYPE_FLY;
 	pev->angles.y = pev->angles.y + 4;
 
-	UTIL_MakeVectors(pev->angles);
+	util::MakeVectors(pev->angles);
 
-	UTIL_ParticleEffect(pev->origin, g_vecZero, 255, 25);
-	UTIL_ParticleEffect(pev->origin + gpGlobals->v_forward * 64, g_vecZero, 255, 25);
-	UTIL_ParticleEffect(pev->origin - gpGlobals->v_forward * 64, g_vecZero, 255, 25);
-	UTIL_ParticleEffect(pev->origin + gpGlobals->v_right * 64, g_vecZero, 255, 25);
-	UTIL_ParticleEffect(pev->origin - gpGlobals->v_right * 64, g_vecZero, 255, 25);
+	util::ParticleEffect(pev->origin, g_vecZero, 255, 25);
+	util::ParticleEffect(pev->origin + gpGlobals->v_forward * 64, g_vecZero, 255, 25);
+	util::ParticleEffect(pev->origin - gpGlobals->v_forward * 64, g_vecZero, 255, 25);
+	util::ParticleEffect(pev->origin + gpGlobals->v_right * 64, g_vecZero, 255, 25);
+	util::ParticleEffect(pev->origin - gpGlobals->v_right * 64, g_vecZero, 255, 25);
 
 	pev->nextthink = gpGlobals->time + 0.1;
 }
@@ -1727,7 +1727,7 @@ void CTestHull::BuildNodeGraph()
 		{
 			// do nothing
 		}
-		else if (UTIL_PointContents(WorldGraph.m_pNodes[i].m_vecOrigin) == CONTENTS_WATER)
+		else if (util::PointContents(WorldGraph.m_pNodes[i].m_vecOrigin) == CONTENTS_WATER)
 		{
 			WorldGraph.m_pNodes[i].m_afNodeInfo |= bits_NODE_WATER;
 		}
@@ -1741,17 +1741,17 @@ void CTestHull::BuildNodeGraph()
 			//
 			TraceResult tr;
 
-			UTIL_TraceLine(WorldGraph.m_pNodes[i].m_vecOrigin,
+			util::TraceLine(WorldGraph.m_pNodes[i].m_vecOrigin,
 				WorldGraph.m_pNodes[i].m_vecOrigin - Vector(0, 0, 384),
-				ignore_monsters,
+				util::ignore_monsters,
 				nullptr,
 				&tr);
 
 			// This trace is ONLY used if we hit an entity flagged with FL_WORLDBRUSH
 			TraceResult trEnt;
-			UTIL_TraceLine(WorldGraph.m_pNodes[i].m_vecOrigin,
+			util::TraceLine(WorldGraph.m_pNodes[i].m_vecOrigin,
 				WorldGraph.m_pNodes[i].m_vecOrigin - Vector(0, 0, 384),
-				dont_ignore_monsters,
+				util::dont_ignore_monsters,
 				nullptr,
 				&trEnt);
 
@@ -1865,7 +1865,7 @@ void CTestHull::BuildNodeGraph()
 						MoveMode = WALKMOVE_NORMAL;
 					}
 
-					flYaw = UTIL_VecToYaw(pDestNode->m_vecOrigin - pev->origin);
+					flYaw = util::VecToYaw(pDestNode->m_vecOrigin - pev->origin);
 
 					flDist = (vecSpot - pev->origin).Length2D();
 
@@ -1925,7 +1925,7 @@ void CTestHull::BuildNodeGraph()
 				{
 					TraceResult tr;
 
-					UTIL_TraceHull(pSrcNode->m_vecOrigin + Vector(0, 0, 32), pDestNode->m_vecOriginPeek + Vector(0, 0, 32), ignore_monsters, large_hull, ENT(pev), &tr);
+					util::TraceHull(pSrcNode->m_vecOrigin + Vector(0, 0, 32), pDestNode->m_vecOriginPeek + Vector(0, 0, 32), util::ignore_monsters, util::large_hull, ENT(pev), &tr);
 					if (0 != tr.fStartSolid || tr.flFraction < 1.0)
 					{
 						pTempPool[pSrcNode->m_iFirstLink + j].m_afLinkInfo &= ~bits_LINK_FLY_HULL;

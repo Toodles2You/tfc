@@ -1046,7 +1046,7 @@ void TeamFortressViewport::ShowScoreBoard()
 	if (m_pScoreBoard)
 	{
 		// No Scoreboard in single-player
-		if (UTIL_IsMultiplayer())
+		if (util::IsMultiplayer())
 		{
 			m_pScoreBoard->Open();
 			UpdateCursorState();

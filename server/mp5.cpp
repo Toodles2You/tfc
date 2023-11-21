@@ -136,7 +136,7 @@ void CMP5::PrimaryAttack()
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
 #ifndef CLIENT_DLL
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		m_pPlayer->FireBullets(gSkillData.plrDmgMP5, Vector2D(6, 6), shots);
 	}
@@ -150,7 +150,7 @@ void CMP5::PrimaryAttack()
 
 	m_pPlayer->CheckAmmoLevel(this);
 
-	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
+	m_iTimeWeaponIdle = util::SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 }
 
 
@@ -176,7 +176,7 @@ void CMP5::SecondaryAttack()
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+	util::MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
 	CGrenade::ShootContact(m_pPlayer,
 		m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_forward * 16,
@@ -216,7 +216,7 @@ void CMP5::WeaponIdle()
 
 	SendWeaponAnim(iAnim);
 
-	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000); // how long till we do this again.
+	m_iTimeWeaponIdle = util::SharedRandomLong(m_pPlayer->random_seed, 10000, 15000); // how long till we do this again.
 }
 
 

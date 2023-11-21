@@ -32,7 +32,7 @@ LINK_ENTITY_TO_CLASS(grenade, CGrenade);
 void CGrenade::Explode(Vector vecSrc, Vector vecAim)
 {
 	TraceResult tr;
-	UTIL_TraceLine(pev->origin, pev->origin + Vector(0, 0, -32), ignore_monsters, this, &tr);
+	util::TraceLine(pev->origin, pev->origin + Vector(0, 0, -32), util::ignore_monsters, this, &tr);
 
 	Explode(&tr, DMG_BLAST);
 }
@@ -52,7 +52,7 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 		pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
 	}
 
-	int iContents = UTIL_PointContents(pev->origin);
+	int iContents = util::PointContents(pev->origin);
 
 	MessageBegin(MSG_PAS, SVC_TEMPENTITY, pev->origin);
 	WriteByte(TE_EXPLOSION);	// This makes a dynamic light and the explosion sprites/sound
@@ -88,11 +88,11 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 
 	if (RANDOM_FLOAT(0, 1) < 0.5)
 	{
-		UTIL_DecalTrace(pTrace, DECAL_SCORCH1);
+		util::DecalTrace(pTrace, DECAL_SCORCH1);
 	}
 	else
 	{
-		UTIL_DecalTrace(pTrace, DECAL_SCORCH2);
+		util::DecalTrace(pTrace, DECAL_SCORCH2);
 	}
 
 	flRndSound = RANDOM_FLOAT(0, 1);
@@ -120,9 +120,9 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 
 void CGrenade::Smoke()
 {
-	if (UTIL_PointContents(pev->origin) == CONTENTS_WATER)
+	if (util::PointContents(pev->origin) == CONTENTS_WATER)
 	{
-		UTIL_Bubbles(pev->origin - Vector(64, 64, 64), pev->origin + Vector(64, 64, 64), 100);
+		util::Bubbles(pev->origin - Vector(64, 64, 64), pev->origin + Vector(64, 64, 64), 100);
 	}
 	else
 	{
@@ -159,7 +159,7 @@ void CGrenade::Detonate()
 	Vector vecSpot; // trace starts here!
 
 	vecSpot = pev->origin + Vector(0, 0, 8);
-	UTIL_TraceLine(vecSpot, vecSpot + Vector(0, 0, -40), ignore_monsters, this, &tr);
+	util::TraceLine(vecSpot, vecSpot + Vector(0, 0, -40), util::ignore_monsters, this, &tr);
 
 	Explode(&tr, DMG_BLAST);
 }
@@ -176,7 +176,7 @@ void CGrenade::ExplodeTouch(CBaseEntity* pOther)
 	pev->enemy = pOther->edict();
 
 	vecSpot = pev->origin - pev->velocity.Normalize() * 32;
-	UTIL_TraceLine(vecSpot, vecSpot + pev->velocity.Normalize() * 64, ignore_monsters, this, &tr);
+	util::TraceLine(vecSpot, vecSpot + pev->velocity.Normalize() * 64, util::ignore_monsters, this, &tr);
 
 	Explode(&tr, DMG_BLAST);
 }
@@ -194,7 +194,7 @@ void CGrenade::BounceTouch(CBaseEntity* pOther)
 		if (pev->owner)
 		{
 			CBaseEntity* owner = CBaseEntity::Instance(pev->owner);
-			TraceResult tr = UTIL_GetGlobalTrace();
+			TraceResult tr = util::GetGlobalTrace();
 			ClearMultiDamage();
 			pOther->TraceAttack(owner, 1, gpGlobals->v_forward, &tr, DMG_CLUB);
 			ApplyMultiDamage(this, owner);
@@ -314,7 +314,7 @@ CGrenade* CGrenade::ShootContact(CBaseEntity* owner, Vector vecStart, Vector vec
 	pGrenade->pev->gravity = 0.5; // lower gravity since grenade is aerodynamic and engine doesn't know it.
 	pGrenade->SetOrigin(vecStart);
 	pGrenade->pev->velocity = vecVelocity;
-	pGrenade->pev->angles = UTIL_VecToAngles(pGrenade->pev->velocity);
+	pGrenade->pev->angles = util::VecToAngles(pGrenade->pev->velocity);
 	pGrenade->pev->owner = owner->edict();
 
 	// Tumble in air
@@ -335,7 +335,7 @@ CGrenade* CGrenade::ShootTimed(CBaseEntity* owner, Vector vecStart, Vector vecVe
 	pGrenade->Spawn();
 	pGrenade->SetOrigin(vecStart);
 	pGrenade->pev->velocity = vecVelocity;
-	pGrenade->pev->angles = UTIL_VecToAngles(pGrenade->pev->velocity);
+	pGrenade->pev->angles = util::VecToAngles(pGrenade->pev->velocity);
 	pGrenade->pev->owner = owner->edict();
 
 	pGrenade->SetTouch(&CGrenade::BounceTouch); // Bounce if touched

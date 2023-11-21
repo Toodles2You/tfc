@@ -146,7 +146,7 @@ void CFuncMortarField::FieldUse(CBaseEntity* pActivator, CBaseEntity* pCaller, U
 
 		if (!FStringNull(m_iszXController))
 		{
-			pController = UTIL_FindEntityByTargetname(NULL, STRING(m_iszXController));
+			pController = util::FindEntityByTargetname(NULL, STRING(m_iszXController));
 			if (pController != NULL)
 			{
 				vecStart.x = pev->mins.x + pController->pev->ideal_yaw * (pev->size.x);
@@ -154,7 +154,7 @@ void CFuncMortarField::FieldUse(CBaseEntity* pActivator, CBaseEntity* pCaller, U
 		}
 		if (!FStringNull(m_iszYController))
 		{
-			pController = UTIL_FindEntityByTargetname(NULL, STRING(m_iszYController));
+			pController = util::FindEntityByTargetname(NULL, STRING(m_iszYController));
 			if (pController != NULL)
 			{
 				vecStart.y = pev->mins.y + pController->pev->ideal_yaw * (pev->size.y);
@@ -174,7 +174,7 @@ void CFuncMortarField::FieldUse(CBaseEntity* pActivator, CBaseEntity* pCaller, U
 		vecSpot.y += RANDOM_FLOAT(-m_flSpread, m_flSpread);
 
 		TraceResult tr;
-		UTIL_TraceLine(vecSpot, vecSpot + Vector(0, 0, -1) * 4096, ignore_monsters, this, &tr);
+		util::TraceLine(vecSpot, vecSpot + Vector(0, 0, -1) * 4096, util::ignore_monsters, this, &tr);
 
 		edict_t* pentOwner = NULL;
 		if (pActivator)
@@ -246,8 +246,8 @@ void CMortar::MortarExplode()
 	MessageEnd();
 
 	TraceResult tr;
-	UTIL_TraceLine(pev->origin + Vector(0, 0, 1024), pev->origin - Vector(0, 0, 1024), dont_ignore_monsters, this, &tr);
+	util::TraceLine(pev->origin + Vector(0, 0, 1024), pev->origin - Vector(0, 0, 1024), util::dont_ignore_monsters, this, &tr);
 
 	Explode(&tr, DMG_BLAST | DMG_MORTAR);
-	UTIL_ScreenShake(tr.vecEndPos, 25.0, 150.0, 1.0, 750);
+	util::ScreenShake(tr.vecEndPos, 25.0, 150.0, 1.0, 750);
 }

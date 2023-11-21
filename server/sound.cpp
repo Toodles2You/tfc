@@ -929,7 +929,7 @@ bool FEnvSoundInRange(CEnvSound* pSound, entvars_t* pevTarget, float& flRange)
 	const Vector vecSpot2 = pevTarget->origin + pevTarget->view_ofs;
 	TraceResult tr;
 
-	UTIL_TraceLine(vecSpot1, vecSpot2, ignore_monsters, pSound, &tr);
+	util::TraceLine(vecSpot1, vecSpot2, util::ignore_monsters, pSound, &tr);
 
 	// check if line of sight crosses water boundary, or is blocked
 
@@ -1838,7 +1838,7 @@ float TEXTURETYPE_PlaySound(TraceResult* ptr, Vector vecSrc, Vector vecEnd, int 
 
 		if (ptr->flFraction != 1.0 && RANDOM_LONG(0, 1))
 		{
-			UTIL_Sparks(ptr->vecEndPos);
+			util::Sparks(ptr->vecEndPos);
 
 			float flVolume = RANDOM_FLOAT(0.7, 1.0); //random volume range
 			switch (RANDOM_LONG(0, 1))

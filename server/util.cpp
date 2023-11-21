@@ -50,17 +50,12 @@ inline void MessageBegin(int dest, int type, CBaseEntity* entity)
 		entity ? entity->pev->pContainingEntity : nullptr);
 }
 
-float UTIL_WeaponTimeBase()
-{
-	return 0.0;
-}
-
-CBaseEntity* UTIL_FindEntityForward(CBaseEntity* pMe)
+CBaseEntity* util::FindEntityForward(CBaseEntity* pMe)
 {
 	TraceResult tr;
 
-	UTIL_MakeVectors(pMe->pev->v_angle);
-	UTIL_TraceLine(pMe->pev->origin + pMe->pev->view_ofs, pMe->pev->origin + pMe->pev->view_ofs + gpGlobals->v_forward * 8192, dont_ignore_monsters, pMe, &tr);
+	util::MakeVectors(pMe->pev->v_angle);
+	util::TraceLine(pMe->pev->origin + pMe->pev->view_ofs, pMe->pev->origin + pMe->pev->view_ofs + gpGlobals->v_forward * 8192, dont_ignore_monsters, pMe, &tr);
 	if (tr.flFraction != 1.0 && !FNullEnt(tr.pHit))
 	{
 		CBaseEntity* pHit = CBaseEntity::Instance(tr.pHit);
@@ -105,10 +100,10 @@ void U_Srand(unsigned int seed)
 
 /*
 =====================
-UTIL_SharedRandomLong
+util::SharedRandomLong
 =====================
 */
-int UTIL_SharedRandomLong(unsigned int seed, int low, int high)
+int util::SharedRandomLong(unsigned int seed, int low, int high)
 {
 	unsigned int range;
 
@@ -134,10 +129,10 @@ int UTIL_SharedRandomLong(unsigned int seed, int low, int high)
 
 /*
 =====================
-UTIL_SharedRandomFloat
+util::SharedRandomFloat
 =====================
 */
-float UTIL_SharedRandomFloat(unsigned int seed, float low, float high)
+float util::SharedRandomFloat(unsigned int seed, float low, float high)
 {
 	//
 	unsigned int range;
@@ -166,7 +161,7 @@ float UTIL_SharedRandomFloat(unsigned int seed, float low, float high)
 }
 
 // Normal overrides
-void UTIL_SetGroupTrace(int groupmask, int op)
+void util::SetGroupTrace(int groupmask, int op)
 {
 	g_groupmask = groupmask;
 	g_groupop = op;
@@ -174,7 +169,7 @@ void UTIL_SetGroupTrace(int groupmask, int op)
 	ENGINE_SETGROUPMASK(g_groupmask, g_groupop);
 }
 
-void UTIL_UnsetGroupTrace()
+void util::UnsetGroupTrace()
 {
 	g_groupmask = 0;
 	g_groupop = 0;
@@ -183,7 +178,7 @@ void UTIL_UnsetGroupTrace()
 }
 
 // Smart version, it'll clean itself up when it pops off stack
-UTIL_GroupTrace::UTIL_GroupTrace(int groupmask, int op)
+util::GroupTrace::GroupTrace(int groupmask, int op)
 {
 	m_oldgroupmask = g_groupmask;
 	m_oldgroupop = g_groupop;
@@ -194,7 +189,7 @@ UTIL_GroupTrace::UTIL_GroupTrace(int groupmask, int op)
 	ENGINE_SETGROUPMASK(g_groupmask, g_groupop);
 }
 
-UTIL_GroupTrace::~UTIL_GroupTrace()
+util::GroupTrace::~GroupTrace()
 {
 	g_groupmask = m_oldgroupmask;
 	g_groupop = m_oldgroupop;
@@ -315,14 +310,14 @@ TYPEDESCRIPTION gEntvarsDescription[] =
 
 #define ENTVARS_COUNT (sizeof(gEntvarsDescription) / sizeof(gEntvarsDescription[0]))
 
-edict_t* UTIL_GetEntityList()
+edict_t* util::GetEntityList()
 {
 	return g_engfuncs.pfnPEntityOfEntOffset(0);
 }
 
-CBaseEntity* UTIL_GetLocalPlayer()
+CBaseEntity* util::GetLocalPlayer()
 {
-	return UTIL_PlayerByIndex(1);
+	return util::PlayerByIndex(1);
 }
 
 #ifdef DEBUG
@@ -360,7 +355,7 @@ void DBG_AssertFunction(
 #endif // DEBUG
 
 // ripped this out of the engine
-float UTIL_AngleMod(float a)
+float util::AngleMod(float a)
 {
 	if (a < 0)
 	{
@@ -374,7 +369,7 @@ float UTIL_AngleMod(float a)
 	return a;
 }
 
-float UTIL_AngleDiff(float destAngle, float srcAngle)
+float util::AngleDiff(float destAngle, float srcAngle)
 {
 	float delta;
 
@@ -392,26 +387,17 @@ float UTIL_AngleDiff(float destAngle, float srcAngle)
 	return delta;
 }
 
-Vector UTIL_VecToAngles(const Vector& vec)
+Vector util::VecToAngles(const Vector& vec)
 {
 	float rgflVecOut[3];
 	VEC_TO_ANGLES(vec, rgflVecOut);
 	return Vector(rgflVecOut);
 }
 
-//	float UTIL_MoveToOrigin( edict_t *pent, const Vector vecGoal, float flDist, int iMoveType )
-void UTIL_MoveToOrigin(edict_t* pent, const Vector& vecGoal, float flDist, int iMoveType)
-{
-	float rgfl[3];
-	vecGoal.CopyToArray(rgfl);
-	//		return MOVE_TO_ORIGIN ( pent, rgfl, flDist, iMoveType );
-	MOVE_TO_ORIGIN(pent, rgfl, flDist, iMoveType);
-}
 
-
-int UTIL_EntitiesInBox(CBaseEntity** pList, int listMax, const Vector& mins, const Vector& maxs, int flagMask, bool checkSolid)
+int util::EntitiesInBox(CBaseEntity** pList, int listMax, const Vector& mins, const Vector& maxs, int flagMask, bool checkSolid)
 {
-	edict_t* pEdict = UTIL_GetEntityList();
+	edict_t* pEdict = util::GetEntityList();
 	CBaseEntity* pEntity;
 	int count;
 
@@ -457,9 +443,9 @@ int UTIL_EntitiesInBox(CBaseEntity** pList, int listMax, const Vector& mins, con
 }
 
 
-int UTIL_MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& center, float radius)
+int util::MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& center, float radius)
 {
-	edict_t* pEdict = UTIL_GetEntityList();
+	edict_t* pEdict = util::GetEntityList();
 	CBaseEntity* pEntity;
 	int count;
 	float distance, delta;
@@ -522,7 +508,7 @@ int UTIL_MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& center
 }
 
 
-CBaseEntity* UTIL_FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius)
+CBaseEntity* util::FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius)
 {
 	edict_t* pentEntity;
 
@@ -539,7 +525,7 @@ CBaseEntity* UTIL_FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& ve
 }
 
 
-CBaseEntity* UTIL_FindEntityByString(CBaseEntity* pStartEntity, const char* szKeyword, const char* szValue)
+CBaseEntity* util::FindEntityByString(CBaseEntity* pStartEntity, const char* szKeyword, const char* szValue)
 {
 	edict_t* pentEntity;
 
@@ -555,28 +541,28 @@ CBaseEntity* UTIL_FindEntityByString(CBaseEntity* pStartEntity, const char* szKe
 	return NULL;
 }
 
-CBaseEntity* UTIL_FindEntityByClassname(CBaseEntity* pStartEntity, const char* szName)
+CBaseEntity* util::FindEntityByClassname(CBaseEntity* pStartEntity, const char* szName)
 {
-	return UTIL_FindEntityByString(pStartEntity, "classname", szName);
+	return util::FindEntityByString(pStartEntity, "classname", szName);
 }
 
-CBaseEntity* UTIL_FindEntityByTargetname(CBaseEntity* pStartEntity, const char* szName)
+CBaseEntity* util::FindEntityByTargetname(CBaseEntity* pStartEntity, const char* szName)
 {
-	return UTIL_FindEntityByString(pStartEntity, "targetname", szName);
+	return util::FindEntityByString(pStartEntity, "targetname", szName);
 }
 
 
-CBaseEntity* UTIL_FindEntityGeneric(const char* szWhatever, Vector& vecSrc, float flRadius)
+CBaseEntity* util::FindEntityGeneric(const char* szWhatever, Vector& vecSrc, float flRadius)
 {
 	CBaseEntity* pEntity = NULL;
 
-	pEntity = UTIL_FindEntityByTargetname(NULL, szWhatever);
+	pEntity = util::FindEntityByTargetname(NULL, szWhatever);
 	if (pEntity)
 		return pEntity;
 
 	CBaseEntity* pSearch = NULL;
 	float flMaxDist2 = flRadius * flRadius;
-	while ((pSearch = UTIL_FindEntityByClassname(pSearch, szWhatever)) != NULL)
+	while ((pSearch = util::FindEntityByClassname(pSearch, szWhatever)) != NULL)
 	{
 		float flDist2 = (pSearch->pev->origin - vecSrc).Length();
 		flDist2 = flDist2 * flDist2;
@@ -593,7 +579,7 @@ CBaseEntity* UTIL_FindEntityGeneric(const char* szWhatever, Vector& vecSrc, floa
 // returns a CBaseEntity pointer to a player by index.  Only returns if the player is spawned and connected
 // otherwise returns NULL
 // Index is 1 based
-CBaseEntity* UTIL_PlayerByIndex(int playerIndex)
+CBaseEntity* util::PlayerByIndex(int playerIndex)
 {
 	CBaseEntity* pPlayer = NULL;
 
@@ -610,13 +596,13 @@ CBaseEntity* UTIL_PlayerByIndex(int playerIndex)
 }
 
 
-void UTIL_MakeVectors(const Vector& vecAngles)
+void util::MakeVectors(const Vector& vecAngles)
 {
 	MAKE_VECTORS(vecAngles);
 }
 
 
-void UTIL_MakeAimVectors(const Vector& vecAngles)
+void util::MakeAimVectors(const Vector& vecAngles)
 {
 	float rgflVec[3];
 	vecAngles.CopyToArray(rgflVec);
@@ -624,7 +610,7 @@ void UTIL_MakeAimVectors(const Vector& vecAngles)
 	MAKE_VECTORS(rgflVec);
 }
 
-void UTIL_MakeInvVectors(const Vector& vec, globalvars_t* pgv)
+void util::MakeInvVectors(const Vector& vec, globalvars_t* pgv)
 {
 	MAKE_VECTORS(vec);
 
@@ -665,18 +651,18 @@ static short FixedSigned16(float value, float scale)
 
 // Shake the screen of all clients within radius
 // radius == 0, shake all clients
-void UTIL_ScreenShake(const Vector& center, float amplitude, float frequency, float duration, float radius)
+void util::ScreenShake(const Vector& center, float amplitude, float frequency, float duration, float radius)
 {
 	int i;
 	float localAmplitude;
-	ScreenShake shake;
+	::ScreenShake shake;
 
 	shake.duration = FixedUnsigned16(duration, 1 << 12);  // 4.12 fixed
 	shake.frequency = FixedUnsigned16(frequency, 1 << 8); // 8.8 fixed
 
 	for (i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		CBaseEntity* pPlayer = UTIL_PlayerByIndex(i);
+		CBaseEntity* pPlayer = util::PlayerByIndex(i);
 
 		if (!pPlayer || (pPlayer->pev->flags & FL_ONGROUND) == 0) // Don't shake if not onground
 			continue;
@@ -711,13 +697,13 @@ void UTIL_ScreenShake(const Vector& center, float amplitude, float frequency, fl
 
 
 
-void UTIL_ScreenShakeAll(const Vector& center, float amplitude, float frequency, float duration)
+void util::ScreenShakeAll(const Vector& center, float amplitude, float frequency, float duration)
 {
-	UTIL_ScreenShake(center, amplitude, frequency, duration, 0);
+	util::ScreenShake(center, amplitude, frequency, duration, 0);
 }
 
 
-void UTIL_ScreenFadeBuild(ScreenFade& fade, const Vector& color, float fadeTime, float fadeHold, int alpha, int flags)
+static void ScreenFadeBuild(ScreenFade& fade, const Vector& color, float fadeTime, float fadeHold, int alpha, int flags)
 {
 	fade.duration = FixedUnsigned16(fadeTime, 1 << 12); // 4.12 fixed
 	fade.holdTime = FixedUnsigned16(fadeHold, 1 << 12); // 4.12 fixed
@@ -729,7 +715,7 @@ void UTIL_ScreenFadeBuild(ScreenFade& fade, const Vector& color, float fadeTime,
 }
 
 
-void UTIL_ScreenFadeWrite(const ScreenFade& fade, CBaseEntity* pEntity)
+static void ScreenFadeWrite(const ScreenFade& fade, CBaseEntity* pEntity)
 {
 	if (!pEntity || !pEntity->IsNetClient())
 		return;
@@ -748,33 +734,33 @@ void UTIL_ScreenFadeWrite(const ScreenFade& fade, CBaseEntity* pEntity)
 }
 
 
-void UTIL_ScreenFadeAll(const Vector& color, float fadeTime, float fadeHold, int alpha, int flags)
+void util::ScreenFadeAll(const Vector& color, float fadeTime, float fadeHold, int alpha, int flags)
 {
 	int i;
-	ScreenFade fade;
+	::ScreenFade fade;
 
 
-	UTIL_ScreenFadeBuild(fade, color, fadeTime, fadeHold, alpha, flags);
+	ScreenFadeBuild(fade, color, fadeTime, fadeHold, alpha, flags);
 
 	for (i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		CBaseEntity* pPlayer = UTIL_PlayerByIndex(i);
+		CBaseEntity* pPlayer = util::PlayerByIndex(i);
 
-		UTIL_ScreenFadeWrite(fade, pPlayer);
+		ScreenFadeWrite(fade, pPlayer);
 	}
 }
 
 
-void UTIL_ScreenFade(CBaseEntity* pEntity, const Vector& color, float fadeTime, float fadeHold, int alpha, int flags)
+void util::ScreenFade(CBaseEntity* pEntity, const Vector& color, float fadeTime, float fadeHold, int alpha, int flags)
 {
-	ScreenFade fade;
+	::ScreenFade fade;
 
-	UTIL_ScreenFadeBuild(fade, color, fadeTime, fadeHold, alpha, flags);
-	UTIL_ScreenFadeWrite(fade, pEntity);
+	ScreenFadeBuild(fade, color, fadeTime, fadeHold, alpha, flags);
+	ScreenFadeWrite(fade, pEntity);
 }
 
 
-void UTIL_HudMessage(CBaseEntity* pEntity, const hudtextparms_t& textparms, const char* pMessage)
+void util::HudMessage(CBaseEntity* pEntity, const hudtextparms_t& textparms, const char* pMessage)
 {
 	if (!pEntity || !pEntity->IsNetClient())
 		return;
@@ -818,19 +804,19 @@ void UTIL_HudMessage(CBaseEntity* pEntity, const hudtextparms_t& textparms, cons
 	MessageEnd();
 }
 
-void UTIL_HudMessageAll(const hudtextparms_t& textparms, const char* pMessage)
+void util::HudMessageAll(const hudtextparms_t& textparms, const char* pMessage)
 {
 	int i;
 
 	for (i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		CBaseEntity* pPlayer = UTIL_PlayerByIndex(i);
+		CBaseEntity* pPlayer = util::PlayerByIndex(i);
 		if (pPlayer)
-			UTIL_HudMessage(pPlayer, textparms, pMessage);
+			util::HudMessage(pPlayer, textparms, pMessage);
 	}
 }
 
-void UTIL_ClientPrintAll(int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4)
+void util::ClientPrintAll(int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4)
 {
 	MessageBegin(MSG_ALL, gmsgTextMsg);
 	WriteByte(msg_dest);
@@ -848,7 +834,7 @@ void UTIL_ClientPrintAll(int msg_dest, const char* msg_name, const char* param1,
 	MessageEnd();
 }
 
-void ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4)
+void util::ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4)
 {
 	if (!entity->IsNetClient())
 		return;
@@ -869,7 +855,7 @@ void ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const 
 	MessageEnd();
 }
 
-void UTIL_SayText(const char* pText, CBaseEntity* pEntity)
+void util::SayText(const char* pText, CBaseEntity* pEntity)
 {
 	if (!pEntity->IsNetClient())
 		return;
@@ -880,7 +866,7 @@ void UTIL_SayText(const char* pText, CBaseEntity* pEntity)
 	MessageEnd();
 }
 
-void UTIL_SayTextAll(const char* pText, CBaseEntity* pEntity)
+void util::SayTextAll(const char* pText, CBaseEntity* pEntity)
 {
 	MessageBegin(MSG_ALL, gmsgSayText);
 	WriteByte(pEntity->entindex());
@@ -889,35 +875,35 @@ void UTIL_SayTextAll(const char* pText, CBaseEntity* pEntity)
 }
 
 
-char* UTIL_dtos1(int d)
+char* util::dtos1(int d)
 {
 	static char buf[8];
 	sprintf(buf, "%d", d);
 	return buf;
 }
 
-char* UTIL_dtos2(int d)
+char* util::dtos2(int d)
 {
 	static char buf[8];
 	sprintf(buf, "%d", d);
 	return buf;
 }
 
-char* UTIL_dtos3(int d)
+char* util::dtos3(int d)
 {
 	static char buf[8];
 	sprintf(buf, "%d", d);
 	return buf;
 }
 
-char* UTIL_dtos4(int d)
+char* util::dtos4(int d)
 {
 	static char buf[8];
 	sprintf(buf, "%d", d);
 	return buf;
 }
 
-void UTIL_ShowMessage(const char* pString, CBaseEntity* pEntity)
+void util::ShowMessage(const char* pString, CBaseEntity* pEntity)
 {
 	if (!pEntity || !pEntity->IsNetClient())
 		return;
@@ -928,7 +914,7 @@ void UTIL_ShowMessage(const char* pString, CBaseEntity* pEntity)
 }
 
 
-void UTIL_ShowMessageAll(const char* pString)
+void util::ShowMessageAll(const char* pString)
 {
 	int i;
 
@@ -936,38 +922,38 @@ void UTIL_ShowMessageAll(const char* pString)
 
 	for (i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		CBaseEntity* pPlayer = UTIL_PlayerByIndex(i);
+		CBaseEntity* pPlayer = util::PlayerByIndex(i);
 		if (pPlayer)
-			UTIL_ShowMessage(pString, pPlayer);
+			util::ShowMessage(pString, pPlayer);
 	}
 }
 
 // Overloaded to add IGNORE_GLASS
-void UTIL_TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, CBaseEntity* ignore, TraceResult* ptr)
+void util::TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, CBaseEntity* ignore, TraceResult* ptr)
 {
 	//TODO: define constants
 	TRACE_LINE(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0) | (ignore_glass == ignoreGlass ? 0x100 : 0), ignore ? ignore->edict() : nullptr, ptr);
 }
 
 
-void UTIL_TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, CBaseEntity* ignore, TraceResult* ptr)
+void util::TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, CBaseEntity* ignore, TraceResult* ptr)
 {
 	TRACE_LINE(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), ignore ? ignore->edict() : nullptr, ptr);
 }
 
 
-void UTIL_TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t* pentIgnore, TraceResult* ptr)
+void util::TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t* pentIgnore, TraceResult* ptr)
 {
 	TRACE_HULL(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), hullNumber, pentIgnore, ptr);
 }
 
-void UTIL_TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, edict_t* pentModel, TraceResult* ptr)
+void util::TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, edict_t* pentModel, TraceResult* ptr)
 {
 	g_engfuncs.pfnTraceModel(vecStart, vecEnd, hullNumber, pentModel, ptr);
 }
 
 
-TraceResult UTIL_GetGlobalTrace()
+TraceResult util::GetGlobalTrace()
 {
 	TraceResult tr;
 
@@ -985,19 +971,19 @@ TraceResult UTIL_GetGlobalTrace()
 }
 
 
-float UTIL_VecToYaw(const Vector& vec)
+float util::VecToYaw(const Vector& vec)
 {
 	return VEC_TO_YAW(vec);
 }
 
 
-void UTIL_ParticleEffect(const Vector& vecOrigin, const Vector& vecDirection, unsigned int ulColor, unsigned int ulCount)
+void util::ParticleEffect(const Vector& vecOrigin, const Vector& vecDirection, unsigned int ulColor, unsigned int ulCount)
 {
 	PARTICLE_EFFECT(vecOrigin, vecDirection, (float)ulColor, (float)ulCount);
 }
 
 
-float UTIL_Approach(float target, float value, float speed)
+float util::Approach(float target, float value, float speed)
 {
 	float delta = target - value;
 
@@ -1012,10 +998,10 @@ float UTIL_Approach(float target, float value, float speed)
 }
 
 
-float UTIL_ApproachAngle(float target, float value, float speed)
+float util::ApproachAngle(float target, float value, float speed)
 {
-	target = UTIL_AngleMod(target);
-	value = UTIL_AngleMod(target);
+	target = util::AngleMod(target);
+	value = util::AngleMod(target);
 
 	float delta = target - value;
 
@@ -1039,7 +1025,7 @@ float UTIL_ApproachAngle(float target, float value, float speed)
 }
 
 
-float UTIL_AngleDistance(float next, float cur)
+float util::AngleDistance(float next, float cur)
 {
 	float delta = next - cur;
 
@@ -1052,7 +1038,7 @@ float UTIL_AngleDistance(float next, float cur)
 }
 
 
-float UTIL_SplineFraction(float value, float scale)
+float util::SplineFraction(float value, float scale)
 {
 	value = scale * value;
 	float valueSquared = value * value;
@@ -1062,7 +1048,7 @@ float UTIL_SplineFraction(float value, float scale)
 }
 
 
-char* UTIL_VarArgs(const char* format, ...)
+char* util::VarArgs(const char* format, ...)
 {
 	va_list argptr;
 	static char string[1024];
@@ -1074,14 +1060,14 @@ char* UTIL_VarArgs(const char* format, ...)
 	return string;
 }
 
-Vector UTIL_GetAimVector(edict_t* pent, float flSpeed)
+Vector util::GetAimVector(edict_t* pent, float flSpeed)
 {
 	Vector tmp;
 	GET_AIM_VECTOR(pent, flSpeed, tmp);
 	return tmp;
 }
 
-bool UTIL_IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator)
+bool util::IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator)
 {
 	if (!FStringNull(sMaster))
 	{
@@ -1101,12 +1087,12 @@ bool UTIL_IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator)
 	return true;
 }
 
-int UTIL_PointContents(const Vector& vec)
+int util::PointContents(const Vector& vec)
 {
 	return POINT_CONTENTS(vec);
 }
 
-void UTIL_BloodStream(const Vector& origin, const Vector& direction, int color, int amount)
+void util::BloodStream(const Vector& origin, const Vector& direction, int color, int amount)
 {
 	if (color == DONT_BLEED || amount == 0)
 	{
@@ -1126,14 +1112,14 @@ void UTIL_BloodStream(const Vector& origin, const Vector& direction, int color, 
 	MessageEnd();
 }
 
-void UTIL_BloodDrips(const Vector& origin, const Vector& direction, int color, int amount)
+void util::BloodDrips(const Vector& origin, const Vector& direction, int color, int amount)
 {
 	if (color == DONT_BLEED || amount == 0)
 	{
 		return;
 	}
 
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		// scale up blood effect in multiplayer for better visibility
 		amount *= 2;
@@ -1153,7 +1139,7 @@ void UTIL_BloodDrips(const Vector& origin, const Vector& direction, int color, i
 	MessageEnd();
 }
 
-Vector UTIL_RandomBloodVector()
+Vector util::RandomBloodVector()
 {
 	Vector direction;
 
@@ -1165,7 +1151,7 @@ Vector UTIL_RandomBloodVector()
 }
 
 
-void UTIL_BloodDecalTrace(TraceResult* pTrace, int bloodColor)
+void util::BloodDecalTrace(TraceResult* pTrace, int bloodColor)
 {
 	if (bloodColor == DONT_BLEED)
 	{
@@ -1173,16 +1159,16 @@ void UTIL_BloodDecalTrace(TraceResult* pTrace, int bloodColor)
 	}
 	if (bloodColor == BLOOD_COLOR_RED)
 	{
-		UTIL_DecalTrace(pTrace, DECAL_BLOOD1 + RANDOM_LONG(0, 5));
+		util::DecalTrace(pTrace, DECAL_BLOOD1 + RANDOM_LONG(0, 5));
 	}
 	else
 	{
-		UTIL_DecalTrace(pTrace, DECAL_YBLOOD1 + RANDOM_LONG(0, 5));
+		util::DecalTrace(pTrace, DECAL_YBLOOD1 + RANDOM_LONG(0, 5));
 	}
 }
 
 
-void UTIL_DecalTrace(TraceResult* pTrace, int decalNumber)
+void util::DecalTrace(TraceResult* pTrace, int decalNumber)
 {
 	short entityIndex;
 	int index;
@@ -1242,14 +1228,14 @@ void UTIL_DecalTrace(TraceResult* pTrace, int decalNumber)
 
 /*
 ==============
-UTIL_PlayerDecalTrace
+util::PlayerDecalTrace
 
 A player is trying to apply his custom decal for the spray can.
 Tell connected clients to display it, or use the default spray can decal
 if the custom can't be loaded.
 ==============
 */
-void UTIL_PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber, bool bIsCustom)
+void util::PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber, bool bIsCustom)
 {
 	int index;
 
@@ -1279,7 +1265,7 @@ void UTIL_PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber, 
 	MessageEnd();
 }
 
-void UTIL_GunshotDecalTrace(TraceResult* pTrace, int decalNumber)
+void util::GunshotDecalTrace(TraceResult* pTrace, int decalNumber)
 {
 	if (decalNumber < 0)
 		return;
@@ -1302,7 +1288,7 @@ void UTIL_GunshotDecalTrace(TraceResult* pTrace, int decalNumber)
 }
 
 
-void UTIL_Sparks(const Vector& position)
+void util::Sparks(const Vector& position)
 {
 	MessageBegin(MSG_PVS, SVC_TEMPENTITY, position);
 	WriteByte(TE_SPARKS);
@@ -1313,7 +1299,7 @@ void UTIL_Sparks(const Vector& position)
 }
 
 
-void UTIL_Ricochet(const Vector& position, float scale)
+void util::Ricochet(const Vector& position, float scale)
 {
 	MessageBegin(MSG_PVS, SVC_TEMPENTITY, position);
 	WriteByte(TE_ARMOR_RICOCHET);
@@ -1325,7 +1311,7 @@ void UTIL_Ricochet(const Vector& position, float scale)
 }
 
 
-bool UTIL_TeamsMatch(const char* pTeamName1, const char* pTeamName2)
+bool util::TeamsMatch(const char* pTeamName1, const char* pTeamName2)
 {
 	// Everyone matches unless it's teamplay
 	if (!g_pGameRules->IsTeamplay())
@@ -1342,7 +1328,7 @@ bool UTIL_TeamsMatch(const char* pTeamName1, const char* pTeamName2)
 }
 
 
-void UTIL_StringToVector(float* pVector, const char* pString)
+void util::StringToVector(float* pVector, const char* pString)
 {
 	char *pstr, *pfront, tempString[128];
 	int j;
@@ -1373,7 +1359,7 @@ void UTIL_StringToVector(float* pVector, const char* pString)
 }
 
 
-void UTIL_StringToIntArray(int* pVector, int count, const char* pString)
+void util::StringToIntArray(int* pVector, int count, const char* pString)
 {
 	char *pstr, *pfront, tempString[128];
 	int j;
@@ -1399,7 +1385,7 @@ void UTIL_StringToIntArray(int* pVector, int count, const char* pString)
 	}
 }
 
-Vector UTIL_ClampVectorToBox(const Vector& input, const Vector& clampSize)
+Vector util::ClampVectorToBox(const Vector& input, const Vector& clampSize)
 {
 	Vector sourceVector = input;
 
@@ -1428,23 +1414,23 @@ Vector UTIL_ClampVectorToBox(const Vector& input, const Vector& clampSize)
 }
 
 
-float UTIL_WaterLevel(const Vector& position, float minz, float maxz)
+float util::WaterLevel(const Vector& position, float minz, float maxz)
 {
 	Vector midUp = position;
 	midUp.z = minz;
 
-	if (UTIL_PointContents(midUp) != CONTENTS_WATER)
+	if (util::PointContents(midUp) != CONTENTS_WATER)
 		return minz;
 
 	midUp.z = maxz;
-	if (UTIL_PointContents(midUp) == CONTENTS_WATER)
+	if (util::PointContents(midUp) == CONTENTS_WATER)
 		return maxz;
 
 	float diff = maxz - minz;
 	while (diff > 1.0)
 	{
 		midUp.z = minz + diff / 2.0;
-		if (UTIL_PointContents(midUp) == CONTENTS_WATER)
+		if (util::PointContents(midUp) == CONTENTS_WATER)
 		{
 			minz = midUp.z;
 		}
@@ -1458,11 +1444,11 @@ float UTIL_WaterLevel(const Vector& position, float minz, float maxz)
 	return midUp.z;
 }
 
-void UTIL_Bubbles(Vector mins, Vector maxs, int count)
+void util::Bubbles(Vector mins, Vector maxs, int count)
 {
 	Vector mid = (mins + maxs) * 0.5;
 
-	float flHeight = UTIL_WaterLevel(mid, mid.z, mid.z + 1024);
+	float flHeight = util::WaterLevel(mid, mid.z, mid.z + 1024);
 	flHeight = flHeight - mins.z;
 
 	MessageBegin(MSG_PAS, SVC_TEMPENTITY, mid);
@@ -1480,14 +1466,14 @@ void UTIL_Bubbles(Vector mins, Vector maxs, int count)
 	MessageEnd();
 }
 
-void UTIL_BubbleTrail(Vector from, Vector to, int count)
+void util::BubbleTrail(Vector from, Vector to, int count)
 {
-	float flHeight = UTIL_WaterLevel(from, from.z, from.z + 256);
+	float flHeight = util::WaterLevel(from, from.z, from.z + 256);
 	flHeight = flHeight - from.z;
 
 	if (flHeight < 8)
 	{
-		flHeight = UTIL_WaterLevel(to, to.z, to.z + 256);
+		flHeight = util::WaterLevel(to, to.z, to.z + 256);
 		flHeight = flHeight - to.z;
 		if (flHeight < 8)
 			return;
@@ -1514,7 +1500,7 @@ void UTIL_BubbleTrail(Vector from, Vector to, int count)
 }
 
 
-bool UTIL_IsValidEntity(edict_t* pent)
+bool util::IsValidEntity(edict_t* pent)
 {
 	if (!pent || 0 != pent->free || (pent->v.flags & FL_KILLME) != 0)
 		return false;
@@ -1522,14 +1508,14 @@ bool UTIL_IsValidEntity(edict_t* pent)
 }
 
 
-void UTIL_PrecacheOther(const char* szClassname)
+void util::PrecacheOther(const char* szClassname)
 {
 	edict_t* pent;
 
 	pent = CREATE_NAMED_ENTITY(MAKE_STRING(szClassname));
 	if (FNullEnt(pent))
 	{
-		ALERT(at_console, "NULL Ent in UTIL_PrecacheOther\n");
+		ALERT(at_console, "NULL Ent in util::PrecacheOther\n");
 		return;
 	}
 
@@ -1540,10 +1526,10 @@ void UTIL_PrecacheOther(const char* szClassname)
 }
 
 //=========================================================
-// UTIL_LogPrintf - Prints a logged message to console.
+// util::LogPrintf - Prints a logged message to console.
 // Preceded by LOG: ( timestamp ) < message >
 //=========================================================
-void UTIL_LogPrintf(const char* fmt, ...)
+void util::LogPrintf(const char* fmt, ...)
 {
 	va_list argptr;
 	static char string[1024];
@@ -1557,10 +1543,10 @@ void UTIL_LogPrintf(const char* fmt, ...)
 }
 
 //=========================================================
-// UTIL_DotPoints - returns the dot product of a line from
+// util::DotPoints - returns the dot product of a line from
 // src to check and vecdir.
 //=========================================================
-float UTIL_DotPoints(const Vector& vecSrc, const Vector& vecCheck, const Vector& vecDir)
+float util::DotPoints(const Vector& vecSrc, const Vector& vecCheck, const Vector& vecDir)
 {
 	Vector2D vec2LOS;
 
@@ -1572,9 +1558,9 @@ float UTIL_DotPoints(const Vector& vecSrc, const Vector& vecCheck, const Vector&
 
 
 //=========================================================
-// UTIL_StripToken - for redundant keynames
+// util::StripToken - for redundant keynames
 //=========================================================
-void UTIL_StripToken(const char* pKey, char* pDest)
+void util::StripToken(const char* pKey, char* pDest)
 {
 	int i = 0;
 
@@ -1586,19 +1572,19 @@ void UTIL_StripToken(const char* pKey, char* pDest)
 	pDest[i] = 0;
 }
 
-gamemode_e UTIL_GetGameMode()
+gamemode_e util::GetGameMode()
 {
 	return g_pGameRules->GetGameMode();
 }
 
-bool UTIL_IsMultiplayer()
+bool util::IsMultiplayer()
 {
-	return UTIL_GetGameMode() > kGamemodeSingleplayer;
+	return util::GetGameMode() > kGamemodeSingleplayer;
 }
 
-bool UTIL_IsDeathmatch()
+bool util::IsDeathmatch()
 {
-	return UTIL_GetGameMode() > kGamemodeCooperative;
+	return util::GetGameMode() > kGamemodeCooperative;
 }
 
 // --------------------------------------------------------------
@@ -1968,7 +1954,7 @@ void EntvarsKeyvalue(entvars_t* pev, KeyValueData* pkvd)
 
 			case FIELD_POSITION_VECTOR:
 			case FIELD_VECTOR:
-				UTIL_StringToVector((float*)((char*)pev + pField->fieldOffset), pkvd->szValue);
+				util::StringToVector((float*)((char*)pev + pField->fieldOffset), pkvd->szValue);
 				break;
 
 			default:

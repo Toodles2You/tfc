@@ -265,7 +265,7 @@ void ScorePanel::Update()
 	}
 
 	// If it's not teamplay, sort all the players. Otherwise, sort the teams.
-	if (UTIL_GetGameMode() < kGamemodeTeamplay)
+	if (util::GetGameMode() < kGamemodeTeamplay)
 		SortPlayers(0, NULL);
 	else
 		SortTeams();

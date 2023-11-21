@@ -378,8 +378,8 @@ void CPathTrack::Sparkle()
 
 	pev->nextthink = gpGlobals->time + 0.2;
 	if (FBitSet(pev->spawnflags, SF_PATH_DISABLED))
-		UTIL_ParticleEffect(pev->origin, Vector(0, 0, 100), 210, 10);
+		util::ParticleEffect(pev->origin, Vector(0, 0, 100), 210, 10);
 	else
-		UTIL_ParticleEffect(pev->origin, Vector(0, 0, 100), 84, 10);
+		util::ParticleEffect(pev->origin, Vector(0, 0, 100), 84, 10);
 }
 #endif

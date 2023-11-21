@@ -61,16 +61,16 @@ bool CBaseAnimating::Save(class CSave&) { return true; }
 edict_t* DBG_EntOfVars(const entvars_t* pev) { return NULL; }
 void DBG_AssertFunction(bool fExpr, const char* szExpr, const char* szFile, int szLine, const char* szMessage) {}
 
-// UTIL_* Stubs
-void UTIL_PrecacheOther(const char* szClassname) {}
-void UTIL_BloodDrips(const Vector& origin, const Vector& direction, int color, int amount) {}
-void UTIL_DecalTrace(TraceResult* pTrace, int decalNumber) {}
-void UTIL_GunshotDecalTrace(TraceResult* pTrace, int decalNumber) {}
-void UTIL_MakeVectors(const Vector& vecAngles) {}
-bool UTIL_IsValidEntity(edict_t* pent) { return true; }
-void UTIL_LogPrintf(char*, ...) {}
-void UTIL_ClientPrintAll(int, char const*, char const*, char const*, char const*, char const*) {}
-void ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4) {}
+// util Stubs
+void util::PrecacheOther(const char* szClassname) {}
+void util::BloodDrips(const Vector& origin, const Vector& direction, int color, int amount) {}
+void util::DecalTrace(TraceResult* pTrace, int decalNumber) {}
+void util::GunshotDecalTrace(TraceResult* pTrace, int decalNumber) {}
+void util::MakeVectors(const Vector& vecAngles) {}
+bool util::IsValidEntity(edict_t* pent) { return true; }
+void util::LogPrintf(const char*, ...) {}
+void util::ClientPrintAll(int, char const*, char const*, char const*, char const*, char const*) {}
+void util::ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4) {}
 
 // CBaseToggle Stubs
 bool CBaseToggle::Restore(class CRestore&) { return true; }
@@ -87,9 +87,9 @@ CGrenade* CGrenade::ShootTimed(CBaseEntity* owner, Vector vecStart, Vector vecVe
 CGrenade* CGrenade::ShootContact(CBaseEntity* owner, Vector vecStart, Vector vecVelocity) { return 0; }
 void CGrenade::DetonateUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) {}
 
-CBaseEntity* UTIL_FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius) { return 0; }
+CBaseEntity* util::FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius) { return 0; }
 
-Vector UTIL_VecToAngles(const Vector& vec) { return 0; }
+Vector util::VecToAngles(const Vector& vec) { return 0; }
 CSprite* CSprite::SpriteCreate(const char* pSpriteName, const Vector& origin, bool animate) { return 0; }
 void CBeam::PointEntInit(const Vector& start, int endIndex) {}
 CBeam* CBeam::BeamCreate(const char* pSpriteName, int width) { return NULL; }

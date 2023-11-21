@@ -354,7 +354,7 @@ void CBreakable::Precache()
 
 	// Precache the spawn item's data
 	if (!FStringNull(m_iszSpawnObject))
-		UTIL_PrecacheOther((char*)STRING(m_iszSpawnObject));
+		util::PrecacheOther(STRING(m_iszSpawnObject));
 }
 
 // play shard sound when func_breakable takes damage.
@@ -488,7 +488,7 @@ void CBreakable::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE use
 	if (IsBreakable())
 	{
 		pev->angles.y = m_angle;
-		UTIL_MakeVectors(pev->angles);
+		util::MakeVectors(pev->angles);
 		g_vecAttackDir = gpGlobals->v_forward;
 
 		Die();
@@ -505,7 +505,7 @@ void CBreakable::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDi
 		{
 		case matComputer:
 		{
-			UTIL_Sparks(ptr->vecEndPos);
+			util::Sparks(ptr->vecEndPos);
 
 			float flVolume = RANDOM_FLOAT(0.7, 1.0); //random volume range
 			switch (RANDOM_LONG(0, 1))
@@ -517,7 +517,7 @@ void CBreakable::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDi
 		break;
 
 		case matUnbreakableGlass:
-			UTIL_Ricochet(ptr->vecEndPos, RANDOM_FLOAT(0.5, 1.5));
+			util::Ricochet(ptr->vecEndPos, RANDOM_FLOAT(0.5, 1.5));
 			break;
 		}
 	}
@@ -730,7 +730,7 @@ void CBreakable::Die()
 
 	// BUGBUG -- can only find 256 entities on a breakable -- should be enough
 	CBaseEntity* pList[256];
-	int count = UTIL_EntitiesInBox(pList, 256, mins, maxs, FL_ONGROUND);
+	int count = util::EntitiesInBox(pList, 256, mins, maxs, FL_ONGROUND);
 	if (0 != count)
 	{
 		for (int i = 0; i < count; i++)

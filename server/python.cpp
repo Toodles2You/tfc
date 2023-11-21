@@ -72,7 +72,7 @@ void CPython::Precache()
 
 bool CPython::Deploy()
 {
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		// enable laser sight geometry.
 		pev->body = 1;
@@ -93,7 +93,7 @@ bool CPython::Holster()
 
 void CPython::SecondaryAttack()
 {
-	if (!UTIL_IsDeathmatch())
+	if (!util::IsDeathmatch())
 	{
 		return;
 	}
@@ -140,13 +140,13 @@ void CPython::PrimaryAttack()
 	m_pPlayer->CheckAmmoLevel(this);
 
 	m_iNextPrimaryAttack = 750;
-	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
+	m_iTimeWeaponIdle = util::SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 }
 
 
 void CPython::Reload()
 {
-	if (DefaultReload(PYTHON_MAX_CLIP, PYTHON_RELOAD, 2000, UTIL_IsDeathmatch() ? 1 : 0))
+	if (DefaultReload(PYTHON_MAX_CLIP, PYTHON_RELOAD, 2000, util::IsDeathmatch() ? 1 : 0))
 	{
 		m_pPlayer->m_iFOV = 0; // 0 means reset to default fov
 	}
@@ -159,7 +159,7 @@ void CPython::WeaponIdle()
 		return;
 
 	int iAnim;
-	float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
+	float flRand = util::SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
 	if (flRand <= 0.5)
 	{
 		iAnim = PYTHON_IDLE1;
@@ -181,7 +181,7 @@ void CPython::WeaponIdle()
 		m_iTimeWeaponIdle = 5667;
 	}
 
-	SendWeaponAnim(iAnim, UTIL_IsDeathmatch() ? 1 : 0);
+	SendWeaponAnim(iAnim, util::IsDeathmatch() ? 1 : 0);
 }
 
 IMPLEMENT_AMMO_CLASS(ammo_357, CPythonAmmo, "models/w_357ammobox.mdl", AMMO_357BOX_GIVE, AMMO_357, _357_MAX_CARRY);

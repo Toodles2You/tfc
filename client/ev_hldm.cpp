@@ -412,10 +412,10 @@ static void EV_FireBullets(
 	{
 		const Vector2D spreadScale
 		{
-			UTIL_SharedRandomFloat(random_seed + i * 4, -0.5, 0.5)
-				+ UTIL_SharedRandomFloat(random_seed + 1 + i * 4, -0.5, 0.5),
-			UTIL_SharedRandomFloat(random_seed + 2 + i * 4, -0.5, 0.5)
-				+ UTIL_SharedRandomFloat(random_seed + 3 + i * 4, -0.5, 0.5)
+			util::SharedRandomFloat(random_seed + i * 4, -0.5, 0.5)
+				+ util::SharedRandomFloat(random_seed + 1 + i * 4, -0.5, 0.5),
+			util::SharedRandomFloat(random_seed + 2 + i * 4, -0.5, 0.5)
+				+ util::SharedRandomFloat(random_seed + 3 + i * 4, -0.5, 0.5)
 		};
 
 		const Vector angles
@@ -538,7 +538,7 @@ void EV_FireShotGunDouble(event_args_t* args)
 
 	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/dbarrel1.wav", gEngfuncs.pfnRandomFloat(0.98, 1.0), ATTN_NORM, 0, 85 + gEngfuncs.pfnRandomLong(0, 0x1f));
 
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		EV_FireBullets(args, args->iparam1, Vector2D(20, 5), 8, 2048, false);
 	}
@@ -583,7 +583,7 @@ void EV_FireShotGunSingle(event_args_t* args)
 
 	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/sbarrel1.wav", gEngfuncs.pfnRandomFloat(0.95, 1.0), ATTN_NORM, 0, 93 + gEngfuncs.pfnRandomLong(0, 0x1f));
 
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		EV_FireBullets(args, args->iparam1, Vector2D(10, 5), 4, 2048, false);
 	}
@@ -642,7 +642,7 @@ void EV_FireMP5(event_args_t* args)
 		break;
 	}
 
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		EV_FireBullets(args, args->iparam1, Vector2D(6, 6), args->iparam2, 8192, false, 2);
 	}
@@ -708,7 +708,7 @@ void EV_FirePython(event_args_t* args)
 
 		// Add muzzle flash to current weapon model
 		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(PYTHON_FIRE1, UTIL_IsDeathmatch() ? 1 : 0);
+		gEngfuncs.pEventAPI->EV_WeaponAnimation(PYTHON_FIRE1, util::IsDeathmatch() ? 1 : 0);
 
 		V_PunchAxis(0, -10.0);
 	}
@@ -1461,7 +1461,7 @@ void EV_EgonStop(event_args_t* args)
 		{
 			pFlare->die = gEngfuncs.GetClientTime();
 
-			if (!UTIL_IsDeathmatch() || (pFlare->flags & FTENT_NOMODEL) == 0)
+			if (!util::IsDeathmatch() || (pFlare->flags & FTENT_NOMODEL) == 0)
 			{
 				if (pFlare->tentOffset.x != 0.0f) // true for iFireMode == FIRE_WIDE
 				{

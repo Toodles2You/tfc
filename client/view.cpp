@@ -530,7 +530,7 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 	AngleVectors(angles, pparams->forward, pparams->right, pparams->up);
 
 	// don't allow cheats in multiplayer
-	if (!UTIL_IsMultiplayer())
+	if (!util::IsMultiplayer())
 	{
 		for (i = 0; i < 3; i++)
 		{

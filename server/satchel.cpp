@@ -83,7 +83,7 @@ void CSatchelCharge::SatchelSlide(CBaseEntity* pOther)
 
 	// HACKHACK - On ground isn't always set, so look for ground underneath
 	TraceResult tr;
-	UTIL_TraceLine(pev->origin, pev->origin - Vector(0, 0, 10), ignore_monsters, this, &tr);
+	util::TraceLine(pev->origin, pev->origin - Vector(0, 0, 10), util::ignore_monsters, this, &tr);
 
 	if (tr.flFraction < 1.0)
 	{
@@ -157,7 +157,7 @@ bool CSatchel::AddDuplicate(CBasePlayerWeapon* pOriginal)
 {
 	CSatchel* pSatchel;
 
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		pSatchel = (CSatchel*)pOriginal;
 
@@ -201,7 +201,7 @@ void CSatchel::Precache()
 	PRECACHE_MODEL("models/p_satchel.mdl");
 	PRECACHE_MODEL("models/p_satchel_radio.mdl");
 
-	UTIL_PrecacheOther("monster_satchel");
+	util::PrecacheOther("monster_satchel");
 }
 
 
@@ -314,7 +314,7 @@ void CSatchel::PrimaryAttack()
 
 		CBaseEntity* pSatchel = NULL;
 
-		while ((pSatchel = UTIL_FindEntityInSphere(pSatchel, m_pPlayer->pev->origin, 4096)) != NULL)
+		while ((pSatchel = util::FindEntityInSphere(pSatchel, m_pPlayer->pev->origin, 4096)) != NULL)
 		{
 			if (FClassnameIs(pSatchel->pev, "monster_satchel"))
 			{
@@ -425,7 +425,7 @@ void CSatchel::WeaponIdle()
 		m_chargeReady = 0;
 		break;
 	}
-	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000); // how long till we do this again.
+	m_iTimeWeaponIdle = util::SharedRandomLong(m_pPlayer->random_seed, 10000, 15000); // how long till we do this again.
 }
 
 //=========================================================

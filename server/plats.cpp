@@ -1180,7 +1180,7 @@ void CFuncTrackTrain::Next()
 	nextFront.z += m_height;
 
 	Vector delta = nextFront - pev->origin;
-	Vector angles = UTIL_VecToAngles(delta);
+	Vector angles = util::VecToAngles(delta);
 	// The train actually points west
 	angles.y += 180;
 
@@ -1193,10 +1193,10 @@ void CFuncTrackTrain::Next()
 
 	float vy, vx;
 	if ((pev->spawnflags & SF_TRACKTRAIN_NOPITCH) == 0)
-		vx = UTIL_AngleDistance(angles.x, pev->angles.x);
+		vx = util::AngleDistance(angles.x, pev->angles.x);
 	else
 		vx = 0;
-	vy = UTIL_AngleDistance(angles.y, pev->angles.y);
+	vy = util::AngleDistance(angles.y, pev->angles.y);
 
 	pev->avelocity.y = vy * 10;
 	pev->avelocity.x = vx * 10;
@@ -1204,11 +1204,11 @@ void CFuncTrackTrain::Next()
 	if (m_flBank != 0)
 	{
 		if (pev->avelocity.y < -5)
-			pev->avelocity.z = UTIL_AngleDistance(UTIL_ApproachAngle(-m_flBank, pev->angles.z, m_flBank * 2), pev->angles.z);
+			pev->avelocity.z = util::AngleDistance(util::ApproachAngle(-m_flBank, pev->angles.z, m_flBank * 2), pev->angles.z);
 		else if (pev->avelocity.y > 5)
-			pev->avelocity.z = UTIL_AngleDistance(UTIL_ApproachAngle(m_flBank, pev->angles.z, m_flBank * 2), pev->angles.z);
+			pev->avelocity.z = util::AngleDistance(util::ApproachAngle(m_flBank, pev->angles.z, m_flBank * 2), pev->angles.z);
 		else
-			pev->avelocity.z = UTIL_AngleDistance(UTIL_ApproachAngle(0, pev->angles.z, m_flBank * 4), pev->angles.z) * 4;
+			pev->avelocity.z = util::AngleDistance(util::ApproachAngle(0, pev->angles.z, m_flBank * 4), pev->angles.z) * 4;
 	}
 
 	if (pnext)
@@ -1339,7 +1339,7 @@ bool CFuncTrackTrain::OnControls(entvars_t* pevTest)
 		return false;
 
 	// Transform offset into local coordinates
-	UTIL_MakeVectors(pev->angles);
+	util::MakeVectors(pev->angles);
 	Vector local;
 	local.x = DotProduct(offset, gpGlobals->v_forward);
 	local.y = -DotProduct(offset, gpGlobals->v_right);
@@ -1375,7 +1375,7 @@ void CFuncTrackTrain::Find()
 	m_ppath->LookAhead(&look, m_length, false);
 	look.z += m_height;
 
-	pev->angles = UTIL_VecToAngles(look - nextPos);
+	pev->angles = util::VecToAngles(look - nextPos);
 	// The train actually points west
 	pev->angles.y += 180;
 
@@ -1398,7 +1398,7 @@ void CFuncTrackTrain::NearestPath()
 
 	closest = 1024;
 
-	while ((pTrack = UTIL_FindEntityInSphere(pTrack, pev->origin, 1024)) != NULL)
+	while ((pTrack = util::FindEntityInSphere(pTrack, pev->origin, 1024)) != NULL)
 	{
 		// filter out non-tracks
 		if ((pTrack->pev->flags & (FL_CLIENT | FL_MONSTER)) == 0 && FClassnameIs(pTrack->pev, "path_track"))
@@ -1837,7 +1837,7 @@ void CFuncTrackChange::UpdateTrain(Vector& dest)
 	Vector offset = m_train->pev->origin - pev->origin;
 	Vector delta = dest - pev->angles;
 	// Transform offset into local coordinates
-	UTIL_MakeInvVectors(delta, gpGlobals);
+	util::MakeInvVectors(delta, gpGlobals);
 	Vector local;
 	local.x = DotProduct(offset, gpGlobals->v_forward);
 	local.y = DotProduct(offset, gpGlobals->v_right);

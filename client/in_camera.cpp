@@ -429,7 +429,7 @@ void CAM_ToThirdPerson()
 	Vector viewangles;
 
 #if !defined(_DEBUG)
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		// no thirdperson in multiplayer.
 		return;

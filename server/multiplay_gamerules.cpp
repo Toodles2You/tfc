@@ -348,7 +348,7 @@ void CHalfLifeMultiplay::Think()
 		if (time < 1)
 			CVAR_SET_STRING("mp_chattime", "1");
 		else if (time > MAX_INTERMISSION_TIME)
-			CVAR_SET_STRING("mp_chattime", UTIL_dtos1(MAX_INTERMISSION_TIME));
+			CVAR_SET_STRING("mp_chattime", util::dtos1(MAX_INTERMISSION_TIME));
 
 		m_flIntermissionEndTime = m_flIntermissionStartTime + mp_chattime.value;
 
@@ -382,7 +382,7 @@ void CHalfLifeMultiplay::Think()
 		// check if any player is over the frag limit
 		for (int i = 1; i <= gpGlobals->maxClients; i++)
 		{
-			CBaseEntity* pPlayer = UTIL_PlayerByIndex(i);
+			CBaseEntity* pPlayer = util::PlayerByIndex(i);
 
 			if (pPlayer && pPlayer->pev->frags >= flFragLimit)
 			{
@@ -495,12 +495,12 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 	}
 
 	// notify other clients of player joining the game
-	UTIL_ClientPrintAll(HUD_PRINTTALK, UTIL_VarArgs("- %s has joined the game\n", name));
+	util::ClientPrintAll(HUD_PRINTTALK, util::VarArgs("- %s has joined the game\n", name));
 
 	// team match?
 	if (IsTeamplay())
 	{
-		UTIL_LogPrintf("\"%s<%i><%s><%s>\" entered the game\n",
+		util::LogPrintf("\"%s<%i><%s><%s>\" entered the game\n",
 			name,
 			GETPLAYERUSERID(pl->edict()),
 			GETPLAYERAUTHID(pl->edict()),
@@ -508,7 +508,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 	}
 	else
 	{
-		UTIL_LogPrintf("\"%s<%i><%s><%i>\" entered the game\n",
+		util::LogPrintf("\"%s<%i><%s><%i>\" entered the game\n",
 			name,
 			GETPLAYERUSERID(pl->edict()),
 			GETPLAYERAUTHID(pl->edict()),
@@ -533,7 +533,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		// FIXME:  Probably don't need to cast this just to read m_iDeaths
-		CBasePlayer* plr = (CBasePlayer*)UTIL_PlayerByIndex(i);
+		CBasePlayer* plr = (CBasePlayer*)util::PlayerByIndex(i);
 
 		if (plr)
 		{
@@ -567,7 +567,7 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 			name = STRING(pClient->v.netname);
 		}
 		
-		UTIL_ClientPrintAll(HUD_PRINTTALK, UTIL_VarArgs("- %s has left the game\n", name));
+		util::ClientPrintAll(HUD_PRINTTALK, util::VarArgs("- %s has left the game\n", name));
 
 		CBasePlayer* pPlayer = (CBasePlayer*)CBaseEntity::Instance(pClient);
 
@@ -578,7 +578,7 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 			// team match?
 			if (IsTeamplay())
 			{
-				UTIL_LogPrintf("\"%s<%i><%s><%s>\" disconnected\n",
+				util::LogPrintf("\"%s<%i><%s><%s>\" disconnected\n",
 					STRING(pPlayer->pev->netname),
 					GETPLAYERUSERID(pPlayer->edict()),
 					GETPLAYERAUTHID(pPlayer->edict()),
@@ -586,7 +586,7 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 			}
 			else
 			{
-				UTIL_LogPrintf("\"%s<%i><%s><%i>\" disconnected\n",
+				util::LogPrintf("\"%s<%i><%s><%i>\" disconnected\n",
 					STRING(pPlayer->pev->netname),
 					GETPLAYERUSERID(pPlayer->edict()),
 					GETPLAYERAUTHID(pPlayer->edict()),
@@ -668,7 +668,7 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 
 	addDefault = true;
 
-	while (pWeaponEntity = UTIL_FindEntityByClassname(pWeaponEntity, "game_player_equip"))
+	while (pWeaponEntity = util::FindEntityByClassname(pWeaponEntity, "game_player_equip"))
 	{
 		pWeaponEntity->Touch(pPlayer);
 		addDefault = false;
@@ -863,7 +863,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 		// team match?
 		if (IsTeamplay())
 		{
-			UTIL_LogPrintf("\"%s<%i><%s><%s>\" committed suicide with \"%s\"\n",
+			util::LogPrintf("\"%s<%i><%s><%s>\" committed suicide with \"%s\"\n",
 				STRING(pVictim->pev->netname),
 				GETPLAYERUSERID(pVictim->edict()),
 				GETPLAYERAUTHID(pVictim->edict()),
@@ -872,7 +872,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 		}
 		else
 		{
-			UTIL_LogPrintf("\"%s<%i><%s><%i>\" committed suicide with \"%s\"\n",
+			util::LogPrintf("\"%s<%i><%s><%i>\" committed suicide with \"%s\"\n",
 				STRING(pVictim->pev->netname),
 				GETPLAYERUSERID(pVictim->edict()),
 				GETPLAYERAUTHID(pVictim->edict()),
@@ -885,7 +885,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 		// team match?
 		if (IsTeamplay())
 		{
-			UTIL_LogPrintf("\"%s<%i><%s><%s>\" killed \"%s<%i><%s><%s>\" with \"%s\"\n",
+			util::LogPrintf("\"%s<%i><%s><%s>\" killed \"%s<%i><%s><%s>\" with \"%s\"\n",
 				STRING(killer->pev->netname),
 				GETPLAYERUSERID(killer->edict()),
 				GETPLAYERAUTHID(killer->edict()),
@@ -898,7 +898,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 		}
 		else
 		{
-			UTIL_LogPrintf("\"%s<%i><%s><%i>\" killed \"%s<%i><%s><%i>\" with \"%s\"\n",
+			util::LogPrintf("\"%s<%i><%s><%i>\" killed \"%s<%i><%s><%i>\" with \"%s\"\n",
 				STRING(killer->pev->netname),
 				GETPLAYERUSERID(killer->edict()),
 				GETPLAYERAUTHID(killer->edict()),
@@ -917,7 +917,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 		// team match?
 		if (IsTeamplay())
 		{
-			UTIL_LogPrintf("\"%s<%i><%s><%s>\" committed suicide with \"%s\" (world)\n",
+			util::LogPrintf("\"%s<%i><%s><%s>\" committed suicide with \"%s\" (world)\n",
 				STRING(pVictim->pev->netname),
 				GETPLAYERUSERID(pVictim->edict()),
 				GETPLAYERAUTHID(pVictim->edict()),
@@ -926,7 +926,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 		}
 		else
 		{
-			UTIL_LogPrintf("\"%s<%i><%s><%i>\" committed suicide with \"%s\" (world)\n",
+			util::LogPrintf("\"%s<%i><%s><%i>\" committed suicide with \"%s\" (world)\n",
 				STRING(pVictim->pev->netname),
 				GETPLAYERUSERID(pVictim->edict()),
 				GETPLAYERAUTHID(pVictim->edict()),
@@ -1212,7 +1212,7 @@ CSpawnPoint *CHalfLifeMultiplay::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
 
 	/* Telefrag! */
 	CBaseEntity *entity = nullptr;
-	while ((entity = UTIL_FindEntityInSphere(entity, spawn->m_origin, 128.0F)) != nullptr)
+	while ((entity = util::FindEntityInSphere(entity, spawn->m_origin, 128.0F)) != nullptr)
 	{
 		if (entity->IsPlayer() && entity != pPlayer)
 		{
@@ -1357,7 +1357,7 @@ void CHalfLifeMultiplay::GoToIntermission()
 	if (time < 1)
 		CVAR_SET_STRING("mp_chattime", "1");
 	else if (time > MAX_INTERMISSION_TIME)
-		CVAR_SET_STRING("mp_chattime", UTIL_dtos1(MAX_INTERMISSION_TIME));
+		CVAR_SET_STRING("mp_chattime", util::dtos1(MAX_INTERMISSION_TIME));
 
 	m_flIntermissionEndTime = gpGlobals->time + ((int)mp_chattime.value);
 	m_flIntermissionStartTime = gpGlobals->time;
@@ -1654,7 +1654,7 @@ int CountPlayers()
 
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		CBaseEntity* pEnt = UTIL_PlayerByIndex(i);
+		CBaseEntity* pEnt = util::PlayerByIndex(i);
 
 		if (pEnt)
 		{

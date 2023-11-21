@@ -624,7 +624,7 @@ const char* ButtonSound(int sound)
 static void DoSpark(CBaseEntity *entity, const Vector& location)
 {
 	Vector tmp = location + entity->pev->size * 0.5;
-	UTIL_Sparks(tmp);
+	util::Sparks(tmp);
 
 	float flVolume = RANDOM_FLOAT(0.25, 0.75) * 0.4; //random volume range
 	const char *sample;
@@ -712,7 +712,7 @@ void CBaseButton::ButtonTouch(CBaseEntity* pOther)
 	if (code == BUTTON_NOTHING)
 		return;
 
-	if (!UTIL_IsMasterTriggered(m_sMaster, pOther))
+	if (!util::IsMasterTriggered(m_sMaster, pOther))
 	{
 		// play button locked sound
 		PlayLockSounds(this, &m_ls, true, true);
@@ -739,7 +739,7 @@ void CBaseButton::ButtonActivate()
 {
 	EmitSound(STRING(pev->noise), CHAN_VOICE);
 
-	if (!UTIL_IsMasterTriggered(m_sMaster, m_hActivator))
+	if (!util::IsMasterTriggered(m_sMaster, m_hActivator))
 	{
 		// button is locked, play locked sound
 		PlayLockSounds(this, &m_ls, true, true);
@@ -768,7 +768,7 @@ void CBaseButton::TriggerAndWait()
 {
 	ASSERT(m_toggle_state == TS_GOING_UP);
 
-	if (!UTIL_IsMasterTriggered(m_sMaster, m_hActivator))
+	if (!util::IsMasterTriggered(m_sMaster, m_hActivator))
 		return;
 
 	m_toggle_state = TS_AT_TOP;

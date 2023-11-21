@@ -124,7 +124,7 @@ void CGlock::GlockFire(float flSpread, int fCycleTime, bool fUseAutoAim)
 
 	m_pPlayer->CheckAmmoLevel(this);
 
-	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
+	m_iTimeWeaponIdle = util::SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 }
 
 
@@ -144,7 +144,7 @@ void CGlock::WeaponIdle()
 	if (m_iClip != 0)
 	{
 		int iAnim;
-		float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0.0, 1.0);
+		float flRand = util::SharedRandomFloat(m_pPlayer->random_seed, 0.0, 1.0);
 
 		if (flRand <= 0.3 + 0 * 0.75)
 		{

@@ -55,7 +55,7 @@ CCrossbowBolt* CCrossbowBolt::BoltCreate(
 	CCrossbowBolt* pBolt = GetClassPtr((CCrossbowBolt*)NULL);
 	pBolt->pev->classname = MAKE_STRING("bolt");
 	pBolt->pev->origin = origin;
-	pBolt->pev->angles = UTIL_VecToAngles(dir);
+	pBolt->pev->angles = util::VecToAngles(dir);
 	pBolt->pev->speed = speed;
 	pBolt->pev->velocity = dir * pBolt->pev->speed;
 	pBolt->pev->avelocity.z = 10;
@@ -115,14 +115,14 @@ void CCrossbowBolt::BoltTouch(CBaseEntity* pOther)
 		SetOrigin(pev->origin - vecDir * 12);
 	}
 
-	pev->angles = UTIL_VecToAngles(vecDir);
+	pev->angles = util::VecToAngles(vecDir);
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_FLY;
 	pev->velocity = Vector(0, 0, 0);
 
 	if (0 != pOther->pev->takedamage)
 	{
-		TraceResult tr = UTIL_GetGlobalTrace();
+		TraceResult tr = util::GetGlobalTrace();
 		CBaseEntity* owner = CBaseEntity::Instance(pev->owner);
 
 		ClearMultiDamage();
@@ -155,13 +155,13 @@ void CCrossbowBolt::BoltTouch(CBaseEntity* pOther)
 			ATTN_NORM,
 			98 + RANDOM_LONG(0, 7));
 
-		if (UTIL_PointContents(pev->origin) != CONTENTS_WATER)
+		if (util::PointContents(pev->origin) != CONTENTS_WATER)
 		{
-			UTIL_Sparks(pev->origin);
+			util::Sparks(pev->origin);
 		}
 	}
 
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		SetThink(&CCrossbowBolt::ExplodeThink);
 		pev->nextthink = gpGlobals->time + 0.1;
@@ -178,12 +178,12 @@ void CCrossbowBolt::BubbleThink()
 	if (pev->waterlevel == 0)
 		return;
 
-	UTIL_BubbleTrail(pev->origin - pev->velocity * 0.1, pev->origin, 1);
+	util::BubbleTrail(pev->origin - pev->velocity * 0.1, pev->origin, 1);
 }
 
 void CCrossbowBolt::ExplodeThink()
 {
-	int iContents = UTIL_PointContents(pev->origin);
+	int iContents = util::PointContents(pev->origin);
 	int iScale;
 
 	pev->dmg = 40;
@@ -246,7 +246,7 @@ void CCrossbow::Precache()
 	PRECACHE_SOUND("weapons/xbow_fire1.wav");
 	PRECACHE_SOUND("weapons/xbow_reload1.wav");
 
-	UTIL_PrecacheOther("crossbow_bolt");
+	util::PrecacheOther("crossbow_bolt");
 
 	m_usCrossbow = PRECACHE_EVENT(1, "events/crossbow1.sc");
 	m_usCrossbow2 = PRECACHE_EVENT(1, "events/crossbow2.sc");
@@ -284,7 +284,7 @@ bool CCrossbow::Holster()
 
 void CCrossbow::PrimaryAttack()
 {
-	if (m_pPlayer->m_iFOV != 0 && UTIL_IsDeathmatch())
+	if (m_pPlayer->m_iFOV != 0 && util::IsDeathmatch())
 	{
 		FireSniperBolt();
 		return;
@@ -314,11 +314,11 @@ void CCrossbow::FireSniperBolt()
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
 	Vector anglesAim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
-	UTIL_MakeVectors(anglesAim);
+	util::MakeVectors(anglesAim);
 	Vector vecSrc = m_pPlayer->GetGunPosition() - gpGlobals->v_up * 2;
 	Vector vecDir = gpGlobals->v_forward;
 
-	UTIL_TraceLine(vecSrc, vecSrc + vecDir * 8192, dont_ignore_monsters, m_pPlayer, &tr);
+	util::TraceLine(vecSrc, vecSrc + vecDir * 8192, util::dont_ignore_monsters, m_pPlayer, &tr);
 
 #ifndef CLIENT_DLL
 	if (0 != tr.pHit->v.takedamage)
@@ -348,7 +348,7 @@ void CCrossbow::FireBolt()
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
 	Vector anglesAim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
-	UTIL_MakeVectors(anglesAim);
+	util::MakeVectors(anglesAim);
 	Vector vecSrc = m_pPlayer->GetGunPosition() - gpGlobals->v_up * 2;
 	Vector vecDir = gpGlobals->v_forward;
 
@@ -403,7 +403,7 @@ void CCrossbow::WeaponIdle()
 {
 	if (m_iTimeWeaponIdle <= 0)
 	{
-		float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
+		float flRand = util::SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
 		if (flRand <= 0.75)
 		{
 			if (0 != m_iClip)
@@ -414,7 +414,7 @@ void CCrossbow::WeaponIdle()
 			{
 				SendWeaponAnim(CROSSBOW_IDLE2);
 			}
-			m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
+			m_iTimeWeaponIdle = util::SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 		}
 		else
 		{

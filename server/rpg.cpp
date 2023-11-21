@@ -131,7 +131,7 @@ bool CRpgRocket::Spawn()
 	SetTouch(&CRpgRocket::ExplodeTouch);
 
 	pev->angles.x -= 30;
-	UTIL_MakeVectors(pev->angles);
+	util::MakeVectors(pev->angles);
 	pev->angles.x = -(pev->angles.x + 30);
 
 	pev->velocity = gpGlobals->v_forward * 250;
@@ -203,15 +203,15 @@ void CRpgRocket::FollowThink()
 	float flDist, flMax, flDot;
 	TraceResult tr;
 
-	UTIL_MakeAimVectors(pev->angles);
+	util::MakeAimVectors(pev->angles);
 
 	vecTarget = gpGlobals->v_forward;
 	flMax = 4096;
 
 	// Examine all entities within a reasonable radius
-	while ((pOther = UTIL_FindEntityByClassname(pOther, "laser_spot")) != NULL)
+	while ((pOther = util::FindEntityByClassname(pOther, "laser_spot")) != NULL)
 	{
-		UTIL_TraceLine(pev->origin, pOther->pev->origin, dont_ignore_monsters, this, &tr);
+		util::TraceLine(pev->origin, pOther->pev->origin, util::dont_ignore_monsters, this, &tr);
 		// ALERT( at_console, "%f\n", tr.flFraction );
 		if (tr.flFraction >= 0.90)
 		{
@@ -227,7 +227,7 @@ void CRpgRocket::FollowThink()
 		}
 	}
 
-	pev->angles = UTIL_VecToAngles(vecTarget);
+	pev->angles = util::VecToAngles(vecTarget);
 
 	// this acceleration and turning math is totally wrong, but it seems to respond well so don't change it.
 	float flSpeed = pev->velocity.Length();
@@ -241,7 +241,7 @@ void CRpgRocket::FollowThink()
 			{
 				pev->velocity = pev->velocity.Normalize() * 300;
 			}
-			UTIL_BubbleTrail(pev->origin - pev->velocity * 0.1, pev->origin, 4);
+			util::BubbleTrail(pev->origin - pev->velocity * 0.1, pev->origin, 4);
 		}
 		else
 		{
@@ -301,7 +301,7 @@ void CRpg::Reload()
 			m_iNextSecondaryAttack = 2100;
 		}
 
-		m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
+		m_iTimeWeaponIdle = util::SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 	}
 }
 
@@ -313,7 +313,7 @@ bool CRpg::Spawn()
 	SetModel("models/w_rpg.mdl");
 	m_fSpotActive = true;
 
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		// more default ammo in multiplay.
 		m_iDefaultAmmo = RPG_DEFAULT_GIVE * 2;
@@ -335,8 +335,8 @@ void CRpg::Precache()
 	PRECACHE_MODEL("models/v_rpg.mdl");
 	PRECACHE_MODEL("models/p_rpg.mdl");
 
-	UTIL_PrecacheOther("laser_spot");
-	UTIL_PrecacheOther("rpg_rocket");
+	util::PrecacheOther("laser_spot");
+	util::PrecacheOther("rpg_rocket");
 
 	PRECACHE_SOUND("weapons/rocketfire1.wav");
 	PRECACHE_SOUND("weapons/glauncher.wav"); // alternative fire sound
@@ -406,12 +406,12 @@ void CRpg::PrimaryAttack()
 		// player "shoot" animation
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-		UTIL_MakeVectors(m_pPlayer->pev->v_angle);
+		util::MakeVectors(m_pPlayer->pev->v_angle);
 		Vector vecSrc = m_pPlayer->GetGunPosition() + gpGlobals->v_forward * 16 + gpGlobals->v_right * 8 + gpGlobals->v_up * -8;
 
 		CRpgRocket* pRocket = CRpgRocket::CreateRpgRocket(vecSrc, m_pPlayer->pev->v_angle, m_pPlayer, this);
 
-		UTIL_MakeVectors(m_pPlayer->pev->v_angle); // RpgRocket::Create stomps on globals, so remake.
+		util::MakeVectors(m_pPlayer->pev->v_angle); // RpgRocket::Create stomps on globals, so remake.
 		pRocket->pev->velocity = pRocket->pev->velocity + gpGlobals->v_forward * DotProduct(m_pPlayer->pev->velocity, gpGlobals->v_forward);
 #endif
 
@@ -453,7 +453,7 @@ void CRpg::WeaponIdle()
 	if (0 != m_pPlayer->m_rgAmmo[iAmmo1()])
 	{
 		int iAnim;
-		float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
+		float flRand = util::SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
 		if (flRand <= 0.75 || m_fSpotActive)
 		{
 			if (m_iClip == 0)
@@ -499,12 +499,12 @@ void CRpg::UpdateSpot()
 		}
 
 #ifndef CLIENT_DLL
-		UTIL_MakeVectors(m_pPlayer->pev->v_angle);
+		util::MakeVectors(m_pPlayer->pev->v_angle);
 		Vector vecSrc = m_pPlayer->GetGunPosition();
 		Vector vecAiming = gpGlobals->v_forward;
 
 		TraceResult tr;
-		UTIL_TraceLine(vecSrc, vecSrc + vecAiming * 8192, dont_ignore_monsters, m_pPlayer, &tr);
+		util::TraceLine(vecSrc, vecSrc + vecAiming * 8192, util::dont_ignore_monsters, m_pPlayer, &tr);
 
 		m_pSpot->SetOrigin(tr.vecEndPos);
 #endif
@@ -562,4 +562,4 @@ void CRpg::SuspendLaserDot(float flSuspendTime)
 		FEV_GLOBAL | FEV_RELIABLE | FEV_UPDATE);
 }
 
-IMPLEMENT_AMMO_CLASS(ammo_rpgclip, CRpgAmmo, "models/w_rpgammo.mdl", (UTIL_IsDeathmatch() ? AMMO_RPGCLIP_GIVE * 2 : AMMO_RPGCLIP_GIVE), AMMO_ROCKETS, ROCKET_MAX_CARRY);
+IMPLEMENT_AMMO_CLASS(ammo_rpgclip, CRpgAmmo, "models/w_rpgammo.mdl", (util::IsDeathmatch() ? AMMO_RPGCLIP_GIVE * 2 : AMMO_RPGCLIP_GIVE), AMMO_ROCKETS, ROCKET_MAX_CARRY);

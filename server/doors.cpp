@@ -509,7 +509,7 @@ void CBaseDoor::DoorTouch(CBaseEntity* pOther)
 	// If door has master, and it's not ready to trigger,
 	// play 'locked' sound
 
-	if (!FStringNull(m_sMaster) && !UTIL_IsMasterTriggered(m_sMaster, pOther))
+	if (!FStringNull(m_sMaster) && !util::IsMasterTriggered(m_sMaster, pOther))
 		PlayLockSounds(this, &m_ls, true, false);
 
 	// If door is somebody's target, then touching does nothing.
@@ -545,7 +545,7 @@ void CBaseDoor::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 //
 bool CBaseDoor::DoorActivate()
 {
-	if (!UTIL_IsMasterTriggered(m_sMaster, m_hActivator))
+	if (!util::IsMasterTriggered(m_sMaster, m_hActivator))
 		return false;
 
 	if (FBitSet(pev->spawnflags, SF_DOOR_NO_AUTO_RETURN) && m_toggle_state == TS_AT_TOP)
@@ -608,9 +608,9 @@ void CBaseDoor::DoorGoUp()
 				Vector angles = pevActivator->angles;
 				angles.x = 0;
 				angles.z = 0;
-				UTIL_MakeVectors(angles);
+				util::MakeVectors(angles);
 				//			Vector vnext = (pevToucher->origin + (pevToucher->velocity * 10)) - pev->origin;
-				UTIL_MakeVectors(pevActivator->angles);
+				util::MakeVectors(pevActivator->angles);
 				Vector vnext = (pevActivator->origin + (gpGlobals->v_forward * 10)) - pev->origin;
 				if ((vec.x * vnext.y - vec.y * vnext.x) < 0)
 					sign = -1.0;

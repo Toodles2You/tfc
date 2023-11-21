@@ -121,7 +121,7 @@ bool CTripmineGrenade::Spawn()
 		m_pRealOwner = pev->owner; // see CTripmineGrenade for why.
 	}
 
-	UTIL_MakeAimVectors(pev->angles);
+	util::MakeAimVectors(pev->angles);
 
 	m_vecDir = gpGlobals->v_forward;
 	m_vecEnd = pev->origin + m_vecDir * 2048;
@@ -156,7 +156,7 @@ void CTripmineGrenade::PowerupThink()
 		// find an owner
 		edict_t* oldowner = pev->owner;
 		pev->owner = NULL;
-		UTIL_TraceLine(pev->origin + m_vecDir * 8, pev->origin - m_vecDir * 32, dont_ignore_monsters, this, &tr);
+		util::TraceLine(pev->origin + m_vecDir * 8, pev->origin - m_vecDir * 32, util::dont_ignore_monsters, this, &tr);
 		if (0 != tr.fStartSolid || (oldowner && tr.pHit == oldowner))
 		{
 			pev->owner = oldowner;
@@ -225,7 +225,7 @@ void CTripmineGrenade::MakeBeam()
 
 	// ALERT( at_console, "serverflags %f\n", gpGlobals->serverflags );
 
-	UTIL_TraceLine(pev->origin, m_vecEnd, dont_ignore_monsters, this, &tr);
+	util::TraceLine(pev->origin, m_vecEnd, util::dont_ignore_monsters, this, &tr);
 
 	m_flBeamLength = tr.flFraction;
 
@@ -255,7 +255,7 @@ void CTripmineGrenade::BeamBreakThink()
 
 	// HACKHACK Set simple box using this really nice global!
 	gpGlobals->trace_flags = FTRACE_SIMPLEBOX;
-	UTIL_TraceLine(pev->origin, m_vecEnd, dont_ignore_monsters, this, &tr);
+	util::TraceLine(pev->origin, m_vecEnd, util::dont_ignore_monsters, this, &tr);
 
 	// ALERT( at_console, "%f : %f\n", tr.flFraction, m_flBeamLength );
 
@@ -266,7 +266,7 @@ void CTripmineGrenade::BeamBreakThink()
 		TraceResult tr2;
 		// Clear out old owner so it can be hit by traces.
 		pev->owner = nullptr;
-		UTIL_TraceLine(pev->origin + m_vecDir * 8, pev->origin - m_vecDir * 32, dont_ignore_monsters, this, &tr2);
+		util::TraceLine(pev->origin + m_vecDir * 8, pev->origin - m_vecDir * 32, util::dont_ignore_monsters, this, &tr2);
 		MakeBeam();
 		if (tr2.pHit)
 		{
@@ -343,7 +343,7 @@ void CTripmineGrenade::DelayDeathThink()
 {
 	KillBeam();
 	TraceResult tr;
-	UTIL_TraceLine(pev->origin + m_vecDir * 8, pev->origin - m_vecDir * 64, dont_ignore_monsters, this, &tr);
+	util::TraceLine(pev->origin + m_vecDir * 8, pev->origin - m_vecDir * 64, util::dont_ignore_monsters, this, &tr);
 
 	Explode(&tr, DMG_BLAST);
 }
@@ -371,7 +371,7 @@ bool CTripmine::Spawn()
 	pev->body = 0;
 #endif
 
-	if (!UTIL_IsDeathmatch())
+	if (!util::IsDeathmatch())
 	{
 		SetSize(Vector(-16, -16, 0), Vector(16, 16, 28));
 	}
@@ -383,7 +383,7 @@ void CTripmine::Precache()
 {
 	PRECACHE_MODEL("models/v_tripmine.mdl");
 	PRECACHE_MODEL("models/p_tripmine.mdl");
-	UTIL_PrecacheOther("monster_tripmine");
+	util::PrecacheOther("monster_tripmine");
 
 	m_usTripFire = PRECACHE_EVENT(1, "events/tripfire.sc");
 }
@@ -435,13 +435,13 @@ void CTripmine::PrimaryAttack()
 	if (m_pPlayer->m_rgAmmo[iAmmo1()] <= 0)
 		return;
 
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+	util::MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
 	TraceResult tr;
 
-	UTIL_TraceLine(vecSrc, vecSrc + vecAiming * 128, dont_ignore_monsters, m_pPlayer, &tr);
+	util::TraceLine(vecSrc, vecSrc + vecAiming * 128, util::dont_ignore_monsters, m_pPlayer, &tr);
 
 	m_pPlayer->PlaybackEvent(m_usTripFire);
 
@@ -450,7 +450,7 @@ void CTripmine::PrimaryAttack()
 		CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
 		if (pEntity && (pEntity->pev->flags & FL_CONVEYOR) == 0)
 		{
-			Vector angles = UTIL_VecToAngles(tr.vecPlaneNormal);
+			Vector angles = util::VecToAngles(tr.vecPlaneNormal);
 
 			CBaseEntity* pEnt = CBaseEntity::Create("monster_tripmine", tr.vecEndPos + tr.vecPlaneNormal * 8, angles, m_pPlayer->edict());
 
@@ -476,7 +476,7 @@ void CTripmine::PrimaryAttack()
 	}
 
 	m_iNextPrimaryAttack = 300;
-	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
+	m_iTimeWeaponIdle = util::SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 }
 
 void CTripmine::WeaponIdle()
@@ -498,7 +498,7 @@ void CTripmine::WeaponIdle()
 	}
 
 	int iAnim;
-	float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
+	float flRand = util::SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
 	if (flRand <= 0.25)
 	{
 		iAnim = TRIPMINE_IDLE1;

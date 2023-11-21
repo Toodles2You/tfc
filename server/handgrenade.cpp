@@ -134,7 +134,7 @@ void CHandGrenade::WeaponIdle()
 		if (flVel > 500)
 			flVel = 500;
 
-		UTIL_MakeVectors(angThrow);
+		util::MakeVectors(angThrow);
 
 		Vector vecSrc = m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_forward * 16;
 
@@ -195,7 +195,7 @@ void CHandGrenade::WeaponIdle()
 			return;
 		}
 
-		m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
+		m_iTimeWeaponIdle = util::SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 		m_flReleaseThrow = -1;
 		return;
 	}
@@ -203,11 +203,11 @@ void CHandGrenade::WeaponIdle()
 	if (0 != m_pPlayer->m_rgAmmo[iAmmo1()])
 	{
 		int iAnim;
-		float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
+		float flRand = util::SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
 		if (flRand <= 0.75)
 		{
 			iAnim = HANDGRENADE_IDLE;
-			m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000); // how long till we do this again.
+			m_iTimeWeaponIdle = util::SharedRandomLong(m_pPlayer->random_seed, 10000, 15000); // how long till we do this again.
 		}
 		else
 		{

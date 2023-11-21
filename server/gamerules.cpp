@@ -48,7 +48,7 @@ CSpawnPoint::CSpawnPoint(CBaseEntity *pEntity) :
 bool CSpawnPoint::IsValid(CBasePlayer *pPlayer, int attempt)
 {
 	if (!FStringNull(m_master)
-	 && !UTIL_IsMasterTriggered(m_master, pPlayer))
+	 && !util::IsMasterTriggered(m_master, pPlayer))
 	{
 		return false;
 	}
@@ -68,7 +68,7 @@ bool CSpawnPoint::IsValid(CBasePlayer *pPlayer, int attempt)
 		}
 		
 		CBaseEntity *entity = nullptr;
-		while ((entity = UTIL_FindEntityInSphere(entity, m_origin, 128.0F)) != nullptr)
+		while ((entity = util::FindEntityInSphere(entity, m_origin, 128.0F)) != nullptr)
 		{
 			if (entity->IsPlayer() && entity != pPlayer)
 			{

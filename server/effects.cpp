@@ -345,7 +345,7 @@ CBaseEntity* CBeam::RandomTargetname(const char* szName)
 
 	CBaseEntity* pEntity = NULL;
 	CBaseEntity* pNewEntity = NULL;
-	while ((pNewEntity = UTIL_FindEntityByTargetname(pNewEntity, szName)) != NULL)
+	while ((pNewEntity = util::FindEntityByTargetname(pNewEntity, szName)) != NULL)
 	{
 		total++;
 		if (RANDOM_LONG(0, total - 1) < 1)
@@ -361,11 +361,11 @@ void CBeam::DoSparks(const Vector& start, const Vector& end)
 	{
 		if ((pev->spawnflags & SF_BEAM_SPARKSTART) != 0)
 		{
-			UTIL_Sparks(start);
+			util::Sparks(start);
 		}
 		if ((pev->spawnflags & SF_BEAM_SPARKEND) != 0)
 		{
-			UTIL_Sparks(end);
+			util::Sparks(end);
 		}
 	}
 }
@@ -719,7 +719,7 @@ void CLightning::StrikeThink()
 		if (pev->dmg > 0)
 		{
 			TraceResult tr;
-			UTIL_TraceLine(pStart->pev->origin, pEnd->pev->origin, dont_ignore_monsters, nullptr, &tr);
+			util::TraceLine(pStart->pev->origin, pEnd->pev->origin, util::dont_ignore_monsters, nullptr, &tr);
 			BeamDamageInstant(&tr, pev->dmg);
 		}
 	}
@@ -740,7 +740,7 @@ void CBeam::BeamDamage(TraceResult* ptr)
 			if ((pev->spawnflags & SF_BEAM_DECALS) != 0)
 			{
 				if (pHit->IsBSPModel())
-					UTIL_DecalTrace(ptr, DECAL_BIGSHOT1 + RANDOM_LONG(0, 4));
+					util::DecalTrace(ptr, DECAL_BIGSHOT1 + RANDOM_LONG(0, 4));
 			}
 		}
 	}
@@ -752,7 +752,7 @@ void CLightning::DamageThink()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
 	TraceResult tr;
-	UTIL_TraceLine(GetStartPos(), GetEndPos(), dont_ignore_monsters, nullptr, &tr);
+	util::TraceLine(GetStartPos(), GetEndPos(), util::dont_ignore_monsters, nullptr, &tr);
 	BeamDamage(&tr);
 }
 
@@ -810,7 +810,7 @@ void CLightning::RandomArea()
 		Vector vecDir1 = Vector(RANDOM_FLOAT(-1.0, 1.0), RANDOM_FLOAT(-1.0, 1.0), RANDOM_FLOAT(-1.0, 1.0));
 		vecDir1 = vecDir1.Normalize();
 		TraceResult tr1;
-		UTIL_TraceLine(vecSrc, vecSrc + vecDir1 * m_radius, ignore_monsters, this, &tr1);
+		util::TraceLine(vecSrc, vecSrc + vecDir1 * m_radius, util::ignore_monsters, this, &tr1);
 
 		if (tr1.flFraction == 1.0)
 			continue;
@@ -822,7 +822,7 @@ void CLightning::RandomArea()
 		} while (DotProduct(vecDir1, vecDir2) > 0);
 		vecDir2 = vecDir2.Normalize();
 		TraceResult tr2;
-		UTIL_TraceLine(vecSrc, vecSrc + vecDir2 * m_radius, ignore_monsters, this, &tr2);
+		util::TraceLine(vecSrc, vecSrc + vecDir2 * m_radius, util::ignore_monsters, this, &tr2);
 
 		if (tr2.flFraction == 1.0)
 			continue;
@@ -830,7 +830,7 @@ void CLightning::RandomArea()
 		if ((tr1.vecEndPos - tr2.vecEndPos).Length() < m_radius * 0.1)
 			continue;
 
-		UTIL_TraceLine(tr1.vecEndPos, tr2.vecEndPos, ignore_monsters, this, &tr2);
+		util::TraceLine(tr1.vecEndPos, tr2.vecEndPos, util::ignore_monsters, this, &tr2);
 
 		if (tr2.flFraction != 1.0)
 			continue;
@@ -851,7 +851,7 @@ void CLightning::RandomPoint(Vector& vecSrc)
 		Vector vecDir1 = Vector(RANDOM_FLOAT(-1.0, 1.0), RANDOM_FLOAT(-1.0, 1.0), RANDOM_FLOAT(-1.0, 1.0));
 		vecDir1 = vecDir1.Normalize();
 		TraceResult tr1;
-		UTIL_TraceLine(vecSrc, vecSrc + vecDir1 * m_radius, ignore_monsters, this, &tr1);
+		util::TraceLine(vecSrc, vecSrc + vecDir1 * m_radius, util::ignore_monsters, this, &tr1);
 
 		if ((tr1.vecEndPos - vecSrc).Length() < m_radius * 0.1)
 			continue;
@@ -1090,7 +1090,7 @@ void CLaser::StrikeThink()
 
 	TraceResult tr;
 
-	UTIL_TraceLine(pev->origin, m_firePosition, dont_ignore_monsters, nullptr, &tr);
+	util::TraceLine(pev->origin, m_firePosition, util::dont_ignore_monsters, nullptr, &tr);
 	FireAtPoint(tr);
 	pev->nextthink = gpGlobals->time + 0.1;
 }
@@ -1634,7 +1634,7 @@ void CTestEffect::TestThink()
 		Vector vecSrc = pev->origin;
 		Vector vecDir = Vector(RANDOM_FLOAT(-1.0, 1.0), RANDOM_FLOAT(-1.0, 1.0), RANDOM_FLOAT(-1.0, 1.0));
 		vecDir = vecDir.Normalize();
-		UTIL_TraceLine(vecSrc, vecSrc + vecDir * 128, ignore_monsters, this, &tr);
+		util::TraceLine(vecSrc, vecSrc + vecDir * 128, util::ignore_monsters, this, &tr);
 
 		pbeam->PointsInit(vecSrc, tr.vecEndPos);
 		// pbeam->SetColor( 80, 100, 255 );
@@ -1766,7 +1766,7 @@ bool CBlood::KeyValue(KeyValueData* pkvd)
 Vector CBlood::Direction()
 {
 	if ((pev->spawnflags & SF_BLOOD_RANDOM) != 0)
-		return UTIL_RandomBloodVector();
+		return util::RandomBloodVector();
 
 	return pev->movedir;
 }
@@ -1783,7 +1783,7 @@ Vector CBlood::BloodPosition(CBaseEntity* pActivator)
 			pPlayer = pActivator;
 		}
 		else
-			pPlayer = UTIL_GetLocalPlayer();
+			pPlayer = util::GetLocalPlayer();
 		if (pPlayer)
 			return (pPlayer->pev->origin + pPlayer->pev->view_ofs) + Vector(RANDOM_FLOAT(-10, 10), RANDOM_FLOAT(-10, 10), RANDOM_FLOAT(-10, 10));
 	}
@@ -1795,9 +1795,9 @@ Vector CBlood::BloodPosition(CBaseEntity* pActivator)
 void CBlood::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	if ((pev->spawnflags & SF_BLOOD_STREAM) != 0)
-		UTIL_BloodStream(BloodPosition(pActivator), Direction(), (Color() == BLOOD_COLOR_RED) ? 70 : Color(), BloodAmount());
+		util::BloodStream(BloodPosition(pActivator), Direction(), (Color() == BLOOD_COLOR_RED) ? 70 : Color(), BloodAmount());
 	else
-		UTIL_BloodDrips(BloodPosition(pActivator), Direction(), Color(), BloodAmount());
+		util::BloodDrips(BloodPosition(pActivator), Direction(), Color(), BloodAmount());
 
 	if ((pev->spawnflags & SF_BLOOD_DECAL) != 0)
 	{
@@ -1805,9 +1805,9 @@ void CBlood::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType
 		Vector start = BloodPosition(pActivator);
 		TraceResult tr;
 
-		UTIL_TraceLine(start, start + forward * BloodAmount() * 2, ignore_monsters, nullptr, &tr);
+		util::TraceLine(start, start + forward * BloodAmount() * 2, util::ignore_monsters, nullptr, &tr);
 		if (tr.flFraction != 1.0)
-			UTIL_BloodDecalTrace(&tr, Color());
+			util::BloodDecalTrace(&tr, Color());
 	}
 }
 
@@ -1841,7 +1841,7 @@ LINK_ENTITY_TO_CLASS(env_shake, CShake);
 // pev->dmg_take is duration
 // pev->dmg is radius
 // radius of 0 means all players
-// NOTE: UTIL_ScreenShake() will only shake players who are on the ground
+// NOTE: util::ScreenShake() will only shake players who are on the ground
 
 #define SF_SHAKE_EVERYONE 0x0001 // Don't check radius
 #define SF_SHAKE_DISRUPT 0x0002 // Disrupt controls
@@ -1890,7 +1890,7 @@ bool CShake::KeyValue(KeyValueData* pkvd)
 
 void CShake::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
-	UTIL_ScreenShake(pev->origin, Amplitude(), Frequency(), Duration(), Radius());
+	util::ScreenShake(pev->origin, Amplitude(), Frequency(), Duration(), Radius());
 }
 
 
@@ -1959,12 +1959,12 @@ void CFade::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType,
 	{
 		if (pActivator->IsNetClient())
 		{
-			UTIL_ScreenFade(pActivator, pev->rendercolor, Duration(), HoldTime(), pev->renderamt, fadeFlags);
+			util::ScreenFade(pActivator, pev->rendercolor, Duration(), HoldTime(), pev->renderamt, fadeFlags);
 		}
 	}
 	else
 	{
-		UTIL_ScreenFadeAll(pev->rendercolor, Duration(), HoldTime(), pev->renderamt, fadeFlags);
+		util::ScreenFadeAll(pev->rendercolor, Duration(), HoldTime(), pev->renderamt, fadeFlags);
 	}
 	SUB_UseTargets(this, USE_TOGGLE, 0);
 }
@@ -2053,17 +2053,17 @@ void CMessage::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useTy
 	CBaseEntity* pPlayer = NULL;
 
 	if ((pev->spawnflags & SF_MESSAGE_ALL) != 0)
-		UTIL_ShowMessageAll(STRING(pev->message));
+		util::ShowMessageAll(STRING(pev->message));
 	else
 	{
 		if (pActivator && pActivator->IsPlayer())
 			pPlayer = pActivator;
 		else
 		{
-			pPlayer = UTIL_GetLocalPlayer();
+			pPlayer = util::GetLocalPlayer();
 		}
 		if (pPlayer)
-			UTIL_ShowMessage(STRING(pev->message), pPlayer);
+			util::ShowMessage(STRING(pev->message), pPlayer);
 	}
 	if (!FStringNull(pev->noise))
 	{

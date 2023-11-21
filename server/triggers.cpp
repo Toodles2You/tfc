@@ -332,7 +332,7 @@ bool CMultiManager::KeyValue(KeyValueData* pkvd)
 		{
 			char tmp[128];
 
-			UTIL_StripToken(pkvd->szKeyName, tmp);
+			util::StripToken(pkvd->szKeyName, tmp);
 			m_iTargetName[m_cTargets] = ALLOC_STRING(tmp);
 			m_flTargetDelay[m_cTargets] = atof(pkvd->szValue);
 			m_cTargets++;
@@ -704,7 +704,7 @@ void CTriggerCDAudio::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 void PlayCDTrack(int iTrack)
 {
 	// manually find the single player.
-	CBaseEntity* pClient = UTIL_GetLocalPlayer();
+	CBaseEntity* pClient = util::GetLocalPlayer();
 
 	// Can't play if the client is not connected!
 	if (!pClient)
@@ -785,7 +785,7 @@ void CTargetCDAudio::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE
 void CTargetCDAudio::Think()
 {
 	// manually find the single player.
-	CBaseEntity* pClient = UTIL_GetLocalPlayer();
+	CBaseEntity* pClient = util::GetLocalPlayer();
 
 	// Can't play if the client is not connected!
 	if (!pClient)
@@ -939,7 +939,7 @@ void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 	// HACKHACK -- In multiplayer, players touch this based on packet receipt.
 	// So the players who send packets later aren't always hurt.  Keep track of
 	// how much time has passed and whether or not you've touched that player
-	if (UTIL_IsMultiplayer())
+	if (util::IsMultiplayer())
 	{
 		if (pev->dmgtime > gpGlobals->time)
 		{
@@ -1080,7 +1080,7 @@ void CBaseTrigger::MultiTouch(CBaseEntity* pOther)
 		// if the trigger has an angles field, check player's facing direction
 		if (pev->movedir != g_vecZero)
 		{
-			UTIL_MakeVectors( pevToucher->angles );
+			util::MakeVectors( pevToucher->angles );
 			if ( DotProduct( gpGlobals->v_forward, pev->movedir ) < 0 )
 				return;         // not facing the right way
 		}
@@ -1101,7 +1101,7 @@ void CBaseTrigger::ActivateMultiTrigger(CBaseEntity* pActivator)
 	if (pev->nextthink > gpGlobals->time)
 		return; // still waiting for reset time
 
-	if (!UTIL_IsMasterTriggered(m_sMaster, pActivator))
+	if (!util::IsMasterTriggered(m_sMaster, pActivator))
 		return;
 
 	if (FClassnameIs(pev, "trigger_secret"))
@@ -1121,7 +1121,7 @@ void CBaseTrigger::ActivateMultiTrigger(CBaseEntity* pActivator)
 
 	if (!FStringNull(pev->message) && pActivator->IsPlayer())
 	{
-		UTIL_ShowMessage(STRING(pev->message), pActivator);
+		util::ShowMessage(STRING(pev->message), pActivator);
 		//		CLIENT_PRINTF( ENT( pActivator->pev ), print_center, STRING(pev->message) );
 	}
 
@@ -1403,7 +1403,7 @@ void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 	ASSERT(!FStrEq(m_szMapName, ""));
 
 	// Don't work in deathmatch
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 		return;
 
 	// Some people are firing these multiple times in a frame, disable
@@ -1413,7 +1413,7 @@ void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 	pev->dmgtime = gpGlobals->time;
 
 
-	CBaseEntity* pPlayer = UTIL_GetLocalPlayer();
+	CBaseEntity* pPlayer = util::GetLocalPlayer();
 	if (!InTransitionVolume(pPlayer, m_szLandmarkName))
 	{
 		ALERT(at_aiconsole, "Player isn't in the transition volume %s, aborting\n", m_szLandmarkName);
@@ -1583,7 +1583,7 @@ int CChangeLevel::ChangeList(LEVELLIST* pLevelList, int maxList)
 			int entityFlags[MAX_ENTITY];
 
 			// Follow the linked list of entities in the PVS of the transition landmark
-			edict_t* pent = UTIL_EntitiesInPVS(pLevelList[i].pentLandmark);
+			edict_t* pent = util::EntitiesInPVS(pLevelList[i].pentLandmark);
 
 			// Build a list of valid entities in this linked list (we're going to use pent->v.chain again)
 			while (!FNullEnt(pent))
@@ -1756,7 +1756,7 @@ void CBaseTrigger::TeleportTouch(CBaseEntity* pOther)
 	if (!FBitSet(pevToucher->flags, FL_CLIENT | FL_MONSTER))
 		return;
 
-	if (!UTIL_IsMasterTriggered(m_sMaster, pOther))
+	if (!util::IsMasterTriggered(m_sMaster, pOther))
 		return;
 
 	if ((pev->spawnflags & SF_TRIGGER_ALLOWMONSTERS) == 0)
@@ -1835,7 +1835,7 @@ LINK_ENTITY_TO_CLASS(trigger_autosave, CTriggerSave);
 
 bool CTriggerSave::Spawn()
 {
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		return false;
 	}
@@ -1848,7 +1848,7 @@ bool CTriggerSave::Spawn()
 
 void CTriggerSave::SaveTouch(CBaseEntity* pOther)
 {
-	if (!UTIL_IsMasterTriggered(m_sMaster, pOther))
+	if (!util::IsMasterTriggered(m_sMaster, pOther))
 		return;
 
 	// Only save on clients
@@ -1890,7 +1890,7 @@ void CTriggerEndSection::EndSectionUse(CBaseEntity* pActivator, CBaseEntity* pCa
 
 bool CTriggerEndSection::Spawn()
 {
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		return false;
 	}
@@ -2009,7 +2009,7 @@ bool CTriggerChangeTarget::Spawn()
 
 void CTriggerChangeTarget::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
-	CBaseEntity* pTarget = UTIL_FindEntityByString(NULL, "targetname", STRING(pev->target));
+	CBaseEntity* pTarget = util::FindEntityByString(NULL, "targetname", STRING(pev->target));
 
 	if (pTarget)
 	{
@@ -2133,7 +2133,7 @@ void CTriggerCamera::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE
 	}
 	if (!pActivator || !pActivator->IsPlayer())
 	{
-		pActivator = UTIL_GetLocalPlayer();
+		pActivator = util::GetLocalPlayer();
 
 		if (!pActivator)
 		{
@@ -2241,7 +2241,7 @@ void CTriggerCamera::FollowTarget()
 		return;
 	}
 
-	Vector vecGoal = UTIL_VecToAngles(m_hTarget->pev->origin - pev->origin);
+	Vector vecGoal = util::VecToAngles(m_hTarget->pev->origin - pev->origin);
 	vecGoal.x = -vecGoal.x;
 
 	if (pev->angles.y > 360)
@@ -2319,9 +2319,9 @@ void CTriggerCamera::Move()
 	}
 
 	if (m_flStopTime > gpGlobals->time)
-		pev->speed = UTIL_Approach(0, pev->speed, m_deceleration * gpGlobals->frametime);
+		pev->speed = util::Approach(0, pev->speed, m_deceleration * gpGlobals->frametime);
 	else
-		pev->speed = UTIL_Approach(m_targetSpeed, pev->speed, m_acceleration * gpGlobals->frametime);
+		pev->speed = util::Approach(m_targetSpeed, pev->speed, m_acceleration * gpGlobals->frametime);
 
 	float fraction = 2 * gpGlobals->frametime;
 	pev->velocity = ((pev->movedir * pev->speed) * fraction) + (pev->velocity * (1 - fraction));

@@ -48,12 +48,12 @@ void RadiusDamage(Vector vecSrc, CBaseEntity* inflictor, CBaseEntity* attacker, 
 	else
 		falloff = 1.0;
 
-	const bool bInWater = (UTIL_PointContents(vecSrc) == CONTENTS_WATER);
+	const bool bInWater = (util::PointContents(vecSrc) == CONTENTS_WATER);
 
 	vecSrc.z += 1; // in case grenade is lying on the ground
 
 	// iterate on all entities in the vicinity.
-	while ((pEntity = UTIL_FindEntityInSphere(pEntity, vecSrc, flRadius)) != NULL)
+	while ((pEntity = util::FindEntityInSphere(pEntity, vecSrc, flRadius)) != NULL)
 	{
 		if (pEntity->pev->takedamage != DAMAGE_NO)
 		{
@@ -70,7 +70,7 @@ void RadiusDamage(Vector vecSrc, CBaseEntity* inflictor, CBaseEntity* attacker, 
 
 			vecSpot = pEntity->BodyTarget(vecSrc);
 
-			UTIL_TraceLine(vecSrc, vecSpot, dont_ignore_monsters, inflictor, &tr);
+			util::TraceLine(vecSrc, vecSpot, util::dont_ignore_monsters, inflictor, &tr);
 
 			if (tr.flFraction == 1.0 || tr.pHit == pEntity->edict())
 			{ // the explosion can 'see' this entity, so hurt them!
@@ -116,7 +116,7 @@ bool CBaseEntity::FInViewCone(CBaseEntity* pEntity)
 	Vector2D vec2LOS;
 	float flDot;
 
-	UTIL_MakeVectors(pev->angles);
+	util::MakeVectors(pev->angles);
 
 	vec2LOS = (pEntity->pev->origin - pev->origin).Make2D();
 	vec2LOS = vec2LOS.Normalize();
@@ -143,7 +143,7 @@ bool CBaseEntity::FInViewCone(const Vector& vecOrigin)
 	Vector2D vec2LOS;
 	float flDot;
 
-	UTIL_MakeVectors(pev->angles);
+	util::MakeVectors(pev->angles);
 
 	vec2LOS = (vecOrigin - pev->origin).Make2D();
 	vec2LOS = vec2LOS.Normalize();
@@ -180,7 +180,7 @@ bool CBaseEntity::FVisible(CBaseEntity* pEntity)
 	vecLookerOrigin = pev->origin + pev->view_ofs; //look through the caller's 'eyes'
 	vecTargetOrigin = pEntity->EyePosition();
 
-	UTIL_TraceLine(vecLookerOrigin, vecTargetOrigin, ignore_monsters, ignore_glass, this, &tr);
+	util::TraceLine(vecLookerOrigin, vecTargetOrigin, util::ignore_monsters, util::ignore_glass, this, &tr);
 
 	if (tr.flFraction != 1.0)
 	{
@@ -203,7 +203,7 @@ bool CBaseEntity::FVisible(const Vector& vecOrigin)
 
 	vecLookerOrigin = EyePosition(); //look through the caller's 'eyes'
 
-	UTIL_TraceLine(vecLookerOrigin, vecOrigin, ignore_monsters, ignore_glass, this, &tr);
+	util::TraceLine(vecLookerOrigin, vecOrigin, util::ignore_monsters, util::ignore_glass, this, &tr);
 
 	if (tr.flFraction != 1.0)
 	{
@@ -258,10 +258,10 @@ void CBasePlayer::FireBullets(
 	{
 		const Vector2D spreadScale
 		{
-			UTIL_SharedRandomFloat(random_seed + i * 4, -0.5, 0.5)
-				+ UTIL_SharedRandomFloat(random_seed + 1 + i * 4, -0.5, 0.5),
-			UTIL_SharedRandomFloat(random_seed + 2 + i * 4, -0.5, 0.5)
-				+ UTIL_SharedRandomFloat(random_seed + 3 + i * 4, -0.5, 0.5)
+			util::SharedRandomFloat(random_seed + i * 4, -0.5, 0.5)
+				+ util::SharedRandomFloat(random_seed + 1 + i * 4, -0.5, 0.5),
+			util::SharedRandomFloat(random_seed + 2 + i * 4, -0.5, 0.5)
+				+ util::SharedRandomFloat(random_seed + 3 + i * 4, -0.5, 0.5)
 		};
 
 		const Vector angles
@@ -275,7 +275,7 @@ void CBasePlayer::FireBullets(
 		AngleVectors(angles, &dir, nullptr, nullptr);
 
 		TraceResult tr;
-		UTIL_TraceLine(gun, gun + dir * distance, dont_ignore_monsters, this, &tr);
+		util::TraceLine(gun, gun + dir * distance, util::dont_ignore_monsters, this, &tr);
 		
 		if (tr.flFraction != 1.0F)
 		{
@@ -382,11 +382,11 @@ void CBaseEntity::TraceBleed(float flDamage, Vector vecDir, TraceResult* ptr, in
 		vecTraceDir.y += RANDOM_FLOAT(-flNoise, flNoise);
 		vecTraceDir.z += RANDOM_FLOAT(-flNoise, flNoise);
 
-		UTIL_TraceLine(ptr->vecEndPos, ptr->vecEndPos + vecTraceDir * -172, ignore_monsters, this, &Bloodtr);
+		util::TraceLine(ptr->vecEndPos, ptr->vecEndPos + vecTraceDir * -172, util::ignore_monsters, this, &Bloodtr);
 
 		if (Bloodtr.flFraction != 1.0)
 		{
-			UTIL_BloodDecalTrace(&Bloodtr, BloodColor());
+			util::BloodDecalTrace(&Bloodtr, BloodColor());
 		}
 	}
 }
@@ -420,7 +420,7 @@ void CBaseEntity::Look(int iDistance)
 	Vector delta = Vector(iDistance, iDistance, iDistance);
 
 	// Find only monsters/clients in box, NOT limited to PVS
-	int count = UTIL_EntitiesInBox(pList, 100, pev->origin - delta, pev->origin + delta, FL_CLIENT | FL_MONSTER);
+	int count = util::EntitiesInBox(pList, 100, pev->origin - delta, pev->origin + delta, FL_CLIENT | FL_MONSTER);
 	for (int i = 0; i < count; i++)
 	{
 		pSightEnt = pList[i];

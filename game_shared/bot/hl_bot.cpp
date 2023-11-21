@@ -40,8 +40,8 @@ bool CHLBot::Initialize(const BotProfile* profile)
         g_engfuncs.pfnSetClientKeyValue(clientIndex, g_engfuncs.pfnGetInfoKeyBuffer(edict()), "model", model);
     }
     auto color = g_engfuncs.pfnRandomLong(0, 255);
-    auto topColor = UTIL_dtos1(color);
-    auto bottomColor = UTIL_dtos2((color + 32) % 256);
+    auto topColor = util::dtos1(color);
+    auto bottomColor = util::dtos2((color + 32) % 256);
     g_engfuncs.pfnSetClientKeyValue(clientIndex, g_engfuncs.pfnGetInfoKeyBuffer(edict()), "topcolor", topColor);
     g_engfuncs.pfnSetClientKeyValue(clientIndex, g_engfuncs.pfnGetInfoKeyBuffer(edict()), "bottomcolor", bottomColor);
     return true;
@@ -62,7 +62,7 @@ void CHLBot::Upkeep()
     }
     auto start = GetGunPosition();
     auto end = m_pEnemy->BodyTarget(start);
-    pev->v_angle = UTIL_VecToAngles(end - start);
+    pev->v_angle = util::VecToAngles(end - start);
     pev->v_angle.x = -pev->v_angle.x;
 }
 
@@ -105,7 +105,7 @@ bool CHLBot::IsVisible(CBasePlayer* player, bool testFOV = false, unsigned char*
     TraceResult tr;
     auto start = GetGunPosition();
     auto end = player->BodyTarget(start);
-    UTIL_TraceLine(start, end, ignore_monsters, this, &tr);
+    util::TraceLine(start, end, util::ignore_monsters, this, &tr);
     if (tr.flFraction != 1.0f && tr.pHit != player->edict())
     {
         return false;

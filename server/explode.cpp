@@ -63,7 +63,7 @@ bool CShower::Spawn()
 
 void CShower::Think()
 {
-	UTIL_Sparks(pev->origin);
+	util::Sparks(pev->origin);
 
 	pev->speed -= 0.1;
 	if (pev->speed > 0)
@@ -151,7 +151,7 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 
 	vecSpot = pev->origin + Vector(0, 0, 8);
 
-	UTIL_TraceLine(vecSpot, vecSpot + Vector(0, 0, -40), ignore_monsters, this, &tr);
+	util::TraceLine(vecSpot, vecSpot + Vector(0, 0, -40), util::ignore_monsters, this, &tr);
 
 	// Pull out of the wall a bit
 	if (tr.flFraction != 1.0)
@@ -168,11 +168,11 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	{
 		if (RANDOM_FLOAT(0, 1) < 0.5)
 		{
-			UTIL_DecalTrace(&tr, DECAL_SCORCH1);
+			util::DecalTrace(&tr, DECAL_SCORCH1);
 		}
 		else
 		{
-			UTIL_DecalTrace(&tr, DECAL_SCORCH2);
+			util::DecalTrace(&tr, DECAL_SCORCH2);
 		}
 	}
 

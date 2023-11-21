@@ -279,7 +279,7 @@ void SetMovedir(entvars_t* pev)
 	}
 	else
 	{
-		UTIL_MakeVectors(pev->angles);
+		util::MakeVectors(pev->angles);
 		pev->movedir = gpGlobals->v_forward;
 	}
 
@@ -416,7 +416,7 @@ void CBaseToggle::LinearMoveDone()
 
 bool CBaseToggle::IsLockedByMaster()
 {
-	return !FStringNull(m_sMaster) && !UTIL_IsMasterTriggered(m_sMaster, m_hActivator);
+	return !FStringNull(m_sMaster) && !util::IsMasterTriggered(m_sMaster, m_hActivator);
 }
 
 /*
@@ -521,7 +521,7 @@ bool FEntIsVisible(
 	Vector vecSpot2 = pevTarget->origin + pevTarget->view_ofs;
 	TraceResult tr;
 
-	UTIL_TraceLine(vecSpot1, vecSpot2, ignore_monsters, CBaseEntity::Instance(pev), &tr);
+	util::TraceLine(vecSpot1, vecSpot2, util::ignore_monsters, CBaseEntity::Instance(pev), &tr);
 
 	if (0 != tr.fInOpen && 0 != tr.fInWater)
 		return false; // sight line crossed contents

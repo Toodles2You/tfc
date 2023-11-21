@@ -117,7 +117,7 @@ SpawnBlood
 */
 void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage)
 {
-	UTIL_BloodDrips(vecSpot, g_vecAttackDir, bloodColor, (int)flDamage);
+	util::BloodDrips(vecSpot, g_vecAttackDir, bloodColor, (int)flDamage);
 }
 
 
@@ -132,7 +132,7 @@ int DamageDecal(CBaseEntity* pEntity, int bitsDamageType)
 void DecalGunshot(TraceResult* pTrace, int iBulletType)
 {
 	// Is the entity valid
-	if (!UTIL_IsValidEntity(pTrace->pHit))
+	if (!util::IsValidEntity(pTrace->pHit))
 		return;
 
 	if (VARS(pTrace->pHit)->solid == SOLID_BSP || VARS(pTrace->pHit)->movetype == MOVETYPE_PUSHSTEP)
@@ -152,15 +152,15 @@ void DecalGunshot(TraceResult* pTrace, int iBulletType)
 		case BULLET_PLAYER_357:
 		default:
 			// smoke and decal
-			UTIL_GunshotDecalTrace(pTrace, DamageDecal(pEntity, DMG_BULLET));
+			util::GunshotDecalTrace(pTrace, DamageDecal(pEntity, DMG_BULLET));
 			break;
 		case BULLET_MONSTER_12MM:
 			// smoke and decal
-			UTIL_GunshotDecalTrace(pTrace, DamageDecal(pEntity, DMG_BULLET));
+			util::GunshotDecalTrace(pTrace, DamageDecal(pEntity, DMG_BULLET));
 			break;
 		case BULLET_PLAYER_CROWBAR:
 			// wall decal
-			UTIL_DecalTrace(pTrace, DamageDecal(pEntity, DMG_CLUB));
+			util::DecalTrace(pTrace, DamageDecal(pEntity, DMG_CLUB));
 			break;
 		}
 	}
@@ -192,7 +192,7 @@ void EjectBrass(const Vector& vecOrigin, const Vector& vecVelocity, float rotati
 
 
 // Precaches the weapon and queues the weapon info for sending to clients
-void UTIL_PrecacheOtherWeapon(const char* szClassname)
+void util::PrecacheWeapon(const char* szClassname)
 {
 	edict_t* pent;
 
@@ -229,65 +229,65 @@ void W_Precache()
 	// custom items...
 
 	// common world objects
-	UTIL_PrecacheOther("item_battery");
-	UTIL_PrecacheOther("item_healthkit");
-	UTIL_PrecacheOther("item_antidote");
-	UTIL_PrecacheOther("item_security");
-	UTIL_PrecacheOther("item_longjump");
+	util::PrecacheOther("item_battery");
+	util::PrecacheOther("item_healthkit");
+	util::PrecacheOther("item_antidote");
+	util::PrecacheOther("item_security");
+	util::PrecacheOther("item_longjump");
 
 	// shotgun
-	UTIL_PrecacheOtherWeapon("weapon_shotgun");
-	UTIL_PrecacheOther("ammo_buckshot");
+	util::PrecacheWeapon("weapon_shotgun");
+	util::PrecacheOther("ammo_buckshot");
 
 	// crowbar
-	UTIL_PrecacheOtherWeapon("weapon_crowbar");
+	util::PrecacheWeapon("weapon_crowbar");
 
 	// glock
-	UTIL_PrecacheOtherWeapon("weapon_9mmhandgun");
-	UTIL_PrecacheOther("ammo_9mmclip");
+	util::PrecacheWeapon("weapon_9mmhandgun");
+	util::PrecacheOther("ammo_9mmclip");
 
 	// mp5
-	UTIL_PrecacheOtherWeapon("weapon_9mmAR");
-	UTIL_PrecacheOther("ammo_9mmAR");
-	UTIL_PrecacheOther("ammo_ARgrenades");
+	util::PrecacheWeapon("weapon_9mmAR");
+	util::PrecacheOther("ammo_9mmAR");
+	util::PrecacheOther("ammo_ARgrenades");
 
 	// python
-	UTIL_PrecacheOtherWeapon("weapon_357");
-	UTIL_PrecacheOther("ammo_357");
+	util::PrecacheWeapon("weapon_357");
+	util::PrecacheOther("ammo_357");
 
 	// gauss
-	UTIL_PrecacheOtherWeapon("weapon_gauss");
-	UTIL_PrecacheOther("ammo_gaussclip");
+	util::PrecacheWeapon("weapon_gauss");
+	util::PrecacheOther("ammo_gaussclip");
 
 	// rpg
-	UTIL_PrecacheOtherWeapon("weapon_rpg");
-	UTIL_PrecacheOther("ammo_rpgclip");
+	util::PrecacheWeapon("weapon_rpg");
+	util::PrecacheOther("ammo_rpgclip");
 
 	// crossbow
-	UTIL_PrecacheOtherWeapon("weapon_crossbow");
-	UTIL_PrecacheOther("ammo_crossbow");
+	util::PrecacheWeapon("weapon_crossbow");
+	util::PrecacheOther("ammo_crossbow");
 
 	// egon
-	UTIL_PrecacheOtherWeapon("weapon_egon");
+	util::PrecacheWeapon("weapon_egon");
 
 	// tripmine
-	UTIL_PrecacheOtherWeapon("weapon_tripmine");
+	util::PrecacheWeapon("weapon_tripmine");
 
 	// satchel charge
-	UTIL_PrecacheOtherWeapon("weapon_satchel");
+	util::PrecacheWeapon("weapon_satchel");
 
 	// hand grenade
-	UTIL_PrecacheOtherWeapon("weapon_handgrenade");
+	util::PrecacheWeapon("weapon_handgrenade");
 
 	// squeak grenade
-	UTIL_PrecacheOtherWeapon("weapon_snark");
+	util::PrecacheWeapon("weapon_snark");
 
 	// hornetgun
-	UTIL_PrecacheOtherWeapon("weapon_hornetgun");
+	util::PrecacheWeapon("weapon_hornetgun");
 
-	if (UTIL_IsMultiplayer())
+	if (util::IsMultiplayer())
 	{
-		UTIL_PrecacheOther("weaponbox"); // container for dropped deathmatch weapons
+		util::PrecacheOther("weaponbox"); // container for dropped deathmatch weapons
 	}
 
 	g_sModelIndexFireball = PRECACHE_MODEL("sprites/zerogxplode.spr");	// fireball
