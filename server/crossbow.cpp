@@ -216,7 +216,7 @@ void CCrossbowBolt::ExplodeThink()
 
 	pev->owner = nullptr; // can't traceline attack owner if this is set
 
-	RadiusDamage(pev->origin, this, owner, 128, 128 * 2.5, CLASS_NONE, DMG_BLAST | DMG_ALWAYSGIB);
+	RadiusDamage(pev->origin, this, owner, pev->dmg, 128, CLASS_NONE, DMG_BLAST | DMG_ALWAYSGIB);
 
 	Remove();
 }
