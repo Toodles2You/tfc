@@ -41,8 +41,6 @@
 #define SF_TRIGGER_HURT_CLIENTONLYFIRE 16  // trigger hurt will only fire its target if it is hurting a client
 #define SF_TRIGGER_HURT_CLIENTONLYTOUCH 32 // only clients may touch this trigger.
 
-extern void SetMovedir(entvars_t* pev);
-
 class CFrictionModifier : public CBaseEntity
 {
 public:
@@ -182,7 +180,7 @@ void CAutoTrigger::Think()
 {
 	if (FStringNull(m_globalstate) || gGlobalState.EntityGetState(m_globalstate) == GLOBAL_ON)
 	{
-		SUB_UseTargets(this, triggerType, 0);
+		UseTargets(this, triggerType, 0);
 		if ((pev->spawnflags & SF_AUTO_FIREONCE) != 0)
 			Remove();
 	}
@@ -251,7 +249,7 @@ bool CTriggerRelay::Spawn()
 
 void CTriggerRelay::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
-	SUB_UseTargets(this, triggerType, 0);
+	UseTargets(this, triggerType, 0);
 	if ((pev->spawnflags & SF_RELAY_FIREONCE) != 0)
 		Remove();
 }
@@ -396,7 +394,7 @@ void CMultiManager::ManagerThink()
 	time = gpGlobals->time - m_startTime;
 	while (m_index < m_cTargets && m_flTargetDelay[m_index] <= time)
 	{
-		FireTargets(STRING(m_iTargetName[m_index]), m_hActivator, this, USE_TOGGLE, 0);
+		util::FireTargets(STRING(m_iTargetName[m_index]), m_hActivator, this, USE_TOGGLE, 0);
 		m_index++;
 	}
 
@@ -553,7 +551,7 @@ void CBaseTrigger::InitTrigger()
 	// trigger angles are used for one-way touches.  An angle of 0 is assumed
 	// to mean no restrictions, so use a yaw of 360 instead.
 	if (pev->angles != g_vecZero)
-		SetMovedir(pev);
+		pev->movedir = util::SetMovedir(pev->angles);
 	pev->solid = SOLID_TRIGGER;
 	pev->movetype = MOVETYPE_NONE;
 	SetModel(STRING(pev->model)); // set size and link into world
@@ -611,7 +609,7 @@ LINK_ENTITY_TO_CLASS(trigger_monsterjump, CTriggerMonsterJump);
 
 bool CTriggerMonsterJump::Spawn()
 {
-	SetMovedir(pev);
+	pev->movedir = util::SetMovedir(pev->angles);
 
 	InitTrigger();
 
@@ -1019,7 +1017,7 @@ void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 			}
 		}
 
-		SUB_UseTargets(pOther, USE_TOGGLE, 0);
+		UseTargets(pOther, USE_TOGGLE, 0);
 		if ((pev->spawnflags & SF_TRIGGER_HURT_TARGETONCE) != 0)
 			pev->target = 0;
 	}
@@ -1117,7 +1115,7 @@ void CBaseTrigger::ActivateMultiTrigger(CBaseEntity* pActivator)
 	// don't trigger again until reset
 
 	m_hActivator = pActivator;
-	SUB_UseTargets(m_hActivator, USE_TOGGLE, 0);
+	UseTargets(m_hActivator, USE_TOGGLE, 0);
 
 	if (!FStringNull(pev->message) && pActivator->IsPlayer())
 	{
@@ -1236,7 +1234,7 @@ void CFireAndDie::Precache()
 
 void CFireAndDie::Think()
 {
-	SUB_UseTargets(this, USE_TOGGLE, 0);
+	UseTargets(this, USE_TOGGLE, 0);
 	Remove();
 }
 
@@ -1438,7 +1436,7 @@ void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 	strcpy(st_szNextMap, m_szMapName);
 
 	m_hActivator = pActivator;
-	SUB_UseTargets(pActivator, USE_TOGGLE, 0);
+	UseTargets(pActivator, USE_TOGGLE, 0);
 	st_szNextSpot[0] = 0; // Init landmark to NULL
 
 	// look for a landmark entity
@@ -1487,7 +1485,7 @@ bool CChangeLevel::AddTransitionToList(LEVELLIST* pLevelList, int listCount, con
 	return true;
 }
 
-int BuildChangeList(LEVELLIST* pLevelList, int maxList)
+int util::BuildChangeList(LEVELLIST* pLevelList, int maxList)
 {
 	return CChangeLevel::ChangeList(pLevelList, maxList);
 }
@@ -2235,7 +2233,7 @@ void CTriggerCamera::FollowTarget()
 		player->m_hViewEntity = nullptr;
 		player->m_bResetViewEntity = false;
 
-		SUB_UseTargets(this, USE_TOGGLE, 0);
+		UseTargets(this, USE_TOGGLE, 0);
 		pev->avelocity = Vector(0, 0, 0);
 		m_state = false;
 		return;
@@ -2294,7 +2292,7 @@ void CTriggerCamera::Move()
 		// Fire the passtarget if there is one
 		if (!FStringNull(m_pentPath->pev->message))
 		{
-			FireTargets(STRING(m_pentPath->pev->message), this, this, USE_TOGGLE, 0);
+			util::FireTargets(STRING(m_pentPath->pev->message), this, this, USE_TOGGLE, 0);
 			if (FBitSet(m_pentPath->pev->spawnflags, SF_CORNER_FIREONCE))
 				m_pentPath->pev->message = 0;
 		}

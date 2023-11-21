@@ -513,7 +513,7 @@ void CBasePlayerWeapon::DefaultTouch(CBaseEntity* pOther)
 		}
 	}
 
-	SUB_UseTargets(pOther, USE_TOGGLE, 0); // UNDONE: when should this happen?
+	UseTargets(pOther, USE_TOGGLE, 0); // UNDONE: when should this happen?
 }
 
 void CBasePlayerWeapon::DestroyWeapon()

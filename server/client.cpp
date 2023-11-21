@@ -731,7 +731,7 @@ void ParmsChangeLevel()
 	SAVERESTOREDATA* pSaveData = (SAVERESTOREDATA*)gpGlobals->pSaveData;
 
 	if (pSaveData)
-		pSaveData->connectionCount = BuildChangeList(pSaveData->levelList, MAX_LEVEL_CONNECTIONS);
+		pSaveData->connectionCount = util::BuildChangeList(pSaveData->levelList, MAX_LEVEL_CONNECTIONS);
 }
 
 static std::vector<std::string> g_MapsToLoad;

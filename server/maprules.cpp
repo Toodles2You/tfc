@@ -420,7 +420,7 @@ void CGameTeamMaster::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 
 	if (TeamMatch(pActivator))
 	{
-		SUB_UseTargets(pActivator, triggerType, value);
+		UseTargets(pActivator, triggerType, value);
 		if (RemoveOnFire())
 			Remove();
 	}
@@ -482,11 +482,11 @@ void CGameTeamSet::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE u
 
 	if (ShouldClearTeam())
 	{
-		SUB_UseTargets(pActivator, USE_SET, -1);
+		UseTargets(pActivator, USE_SET, -1);
 	}
 	else
 	{
-		SUB_UseTargets(pActivator, USE_SET, 0);
+		UseTargets(pActivator, USE_SET, 0);
 	}
 
 	if (RemoveOnFire())
@@ -585,7 +585,7 @@ void CGamePlayerZone::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 				playersInCount++;
 				if (!FStringNull(m_iszInTarget))
 				{
-					FireTargets(STRING(m_iszInTarget), pPlayer, pActivator, useType, value);
+					util::FireTargets(STRING(m_iszInTarget), pPlayer, pActivator, useType, value);
 				}
 			}
 			else
@@ -593,7 +593,7 @@ void CGamePlayerZone::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 				playersOutCount++;
 				if (!FStringNull(m_iszOutTarget))
 				{
-					FireTargets(STRING(m_iszOutTarget), pPlayer, pActivator, useType, value);
+					util::FireTargets(STRING(m_iszOutTarget), pPlayer, pActivator, useType, value);
 				}
 			}
 		}
@@ -601,12 +601,12 @@ void CGamePlayerZone::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 
 	if (!FStringNull(m_iszInCount))
 	{
-		FireTargets(STRING(m_iszInCount), pActivator, this, USE_SET, playersInCount);
+		util::FireTargets(STRING(m_iszInCount), pActivator, this, USE_SET, playersInCount);
 	}
 
 	if (!FStringNull(m_iszOutCount))
 	{
-		FireTargets(STRING(m_iszOutCount), pActivator, this, USE_SET, playersOutCount);
+		util::FireTargets(STRING(m_iszOutCount), pActivator, this, USE_SET, playersOutCount);
 	}
 }
 
@@ -642,7 +642,7 @@ void CGamePlayerHurt::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 			pActivator->TakeDamage(this, this, pev->dmg, DMG_GENERIC);
 	}
 
-	SUB_UseTargets(pActivator, useType, value);
+	UseTargets(pActivator, useType, value);
 
 	if (RemoveOnFire())
 	{
@@ -714,7 +714,7 @@ void CGameCounter::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE u
 
 	if (HitLimit())
 	{
-		SUB_UseTargets(pActivator, USE_TOGGLE, 0);
+		UseTargets(pActivator, USE_TOGGLE, 0);
 		if (RemoveOnFire())
 		{
 			Remove();
@@ -752,7 +752,7 @@ void CGameCounterSet::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 	if (!CanFireForActivator(pActivator))
 		return;
 
-	SUB_UseTargets(pActivator, USE_SET, pev->frags);
+	UseTargets(pActivator, USE_SET, pev->frags);
 
 	if (RemoveOnFire())
 	{

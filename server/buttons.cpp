@@ -211,7 +211,7 @@ void CMultiSource::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE u
 		USE_TYPE useType = USE_TOGGLE;
 		if (!FStringNull(m_globalstate))
 			useType = USE_ON;
-		SUB_UseTargets(NULL, useType, 0);
+		UseTargets(NULL, useType, 0);
 	}
 }
 
@@ -456,7 +456,7 @@ bool CBaseButton::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 
 		// Toggle buttons fire when they get back to their "home" position
 		if ((pev->spawnflags & SF_BUTTON_TOGGLE) == 0)
-			SUB_UseTargets(m_hActivator, USE_TOGGLE, 0);
+			UseTargets(m_hActivator, USE_TOGGLE, 0);
 		ButtonReturn();
 	}
 	else // code == BUTTON_ACTIVATE
@@ -488,7 +488,7 @@ bool CBaseButton::Spawn()
 		pev->nextthink = gpGlobals->time + 0.5; // no hurry, make sure everything else spawns
 	}
 
-	SetMovedir(pev);
+	pev->movedir = util::SetMovedir(pev->angles);
 
 	pev->movetype = MOVETYPE_PUSH;
 	pev->solid = SOLID_BSP;
@@ -725,7 +725,7 @@ void CBaseButton::ButtonTouch(CBaseEntity* pOther)
 	if (code == BUTTON_RETURN)
 	{
 		EmitSound(STRING(pev->noise), CHAN_VOICE);
-		SUB_UseTargets(m_hActivator, USE_TOGGLE, 0);
+		UseTargets(m_hActivator, USE_TOGGLE, 0);
 		ButtonReturn();
 	}
 	else // code == BUTTON_ACTIVATE
@@ -794,7 +794,7 @@ void CBaseButton::TriggerAndWait()
 	pev->frame = 1; // use alternate textures
 
 
-	SUB_UseTargets(m_hActivator, USE_TOGGLE, 0);
+	UseTargets(m_hActivator, USE_TOGGLE, 0);
 }
 
 
@@ -826,7 +826,7 @@ void CBaseButton::ButtonBackHome()
 
 	if (FBitSet(pev->spawnflags, SF_BUTTON_TOGGLE))
 	{
-		SUB_UseTargets(m_hActivator, USE_TOGGLE, 0);
+		UseTargets(m_hActivator, USE_TOGGLE, 0);
 	}
 
 
@@ -1333,9 +1333,9 @@ void CButtonTarget::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 		return;
 	pev->frame = 0 != pev->frame ? 0 : 1;
 	if (0 != pev->frame)
-		SUB_UseTargets(pActivator, USE_ON, 0);
+		UseTargets(pActivator, USE_ON, 0);
 	else
-		SUB_UseTargets(pActivator, USE_OFF, 0);
+		UseTargets(pActivator, USE_OFF, 0);
 }
 
 

@@ -39,13 +39,6 @@
 #define noiseRunning noise3
 
 #define SF_PENDULUM_SWING 2 // spawnflag that makes a pendulum a rope swing.
-//
-// BModelOrigin - calculates origin of a bmodel from absmin/size because all bmodel origins are 0 0 0
-//
-Vector VecBModelOrigin(entvars_t* pevBModel)
-{
-	return pevBModel->absmin + (pevBModel->size * 0.5);
-}
 
 // =================== FUNC_WALL ==============================================
 
@@ -162,7 +155,7 @@ public:
 LINK_ENTITY_TO_CLASS(func_conveyor, CFuncConveyor);
 bool CFuncConveyor::Spawn()
 {
-	SetMovedir(pev);
+	pev->movedir = util::SetMovedir(pev->angles);
 
 	if (!CFuncWall::Spawn())
 	{
@@ -530,7 +523,7 @@ void CFuncRotating::HurtTouch(CBaseEntity* pOther)
 
 	pOther->TakeDamage(this, this, pev->dmg, DMG_CRUSH);
 
-	pevOther->velocity = (pevOther->origin - VecBModelOrigin(pev)).Normalize() * pev->dmg;
+	pevOther->velocity = (pevOther->origin - Center()).Normalize() * pev->dmg;
 }
 
 //
@@ -956,7 +949,7 @@ void CPendulum::Touch(CBaseEntity* pOther)
 
 	pOther->TakeDamage(this, this, damage, DMG_CRUSH);
 
-	pevOther->velocity = (pevOther->origin - VecBModelOrigin(pev)).Normalize() * damage;
+	pevOther->velocity = (pevOther->origin - Center()).Normalize() * damage;
 }
 
 void CPendulum::RopeTouch(CBaseEntity* pOther)

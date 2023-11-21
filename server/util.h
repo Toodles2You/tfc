@@ -244,11 +244,6 @@ inline bool FClassnameIs(entvars_t* pev, const char* szClassname)
 	return FStrEq(STRING(pev->classname), szClassname);
 }
 
-// Misc functions
-void SetMovedir(entvars_t* pev);
-Vector VecBModelOrigin(entvars_t* pevBModel);
-int BuildChangeList(LEVELLIST* pLevelList, int maxList);
-
 //
 // How did I ever live without ASSERT?
 //
@@ -350,6 +345,11 @@ edict_t* GetEntityList();
 *	@brief Gets the local player in singleplayer, or @c nullptr in multiplayer.
 */
 CBaseEntity* GetLocalPlayer();
+
+// Misc functions
+Vector SetMovedir(Vector& angles);
+void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
+int BuildChangeList(LEVELLIST* pLevelList, int maxList);
 
 float VecToYaw(const Vector& vec);
 Vector VecToAngles(const Vector& vec);

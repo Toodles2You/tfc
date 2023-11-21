@@ -390,7 +390,7 @@ void CPlatTrigger::Touch(CBaseEntity* pOther)
 
 
 //
-// Used by SUB_UseTargets, when a platform is the target of a button.
+// Used by UseTargets, when a platform is the target of a button.
 // Start bringing platform down.
 //
 void CFuncPlat::PlatUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
@@ -708,7 +708,7 @@ void CFuncTrain::Wait()
 	// Fire the pass target if there is one
 	if (!FStringNull(m_pevCurrentTarget->message))
 	{
-		FireTargets(STRING(m_pevCurrentTarget->message), this, this, USE_TOGGLE, 0);
+		util::FireTargets(STRING(m_pevCurrentTarget->message), this, this, USE_TOGGLE, 0);
 		if (FBitSet(m_pevCurrentTarget->spawnflags, SF_CORNER_FIREONCE))
 			m_pevCurrentTarget->message = 0;
 	}
@@ -1225,7 +1225,7 @@ void CFuncTrackTrain::Next()
 			// Fire the pass target if there is one
 			if (!FStringNull(pFire->pev->message))
 			{
-				FireTargets(STRING(pFire->pev->message), this, this, USE_TOGGLE, 0);
+				util::FireTargets(STRING(pFire->pev->message), this, this, USE_TOGGLE, 0);
 				if (FBitSet(pFire->pev->spawnflags, SF_PATH_FIREONCE))
 					pFire->pev->message = 0;
 			}
@@ -1315,7 +1315,7 @@ void CFuncTrackTrain::DeadEnd()
 	{
 		ALERT(at_aiconsole, "at %s\n", STRING(pTrack->pev->targetname));
 		if (!FStringNull(pTrack->pev->netname))
-			FireTargets(STRING(pTrack->pev->netname), this, this, USE_TOGGLE, 0);
+			util::FireTargets(STRING(pTrack->pev->netname), this, this, USE_TOGGLE, 0);
 	}
 	else
 		ALERT(at_aiconsole, "\n");
@@ -2215,7 +2215,7 @@ void CGunTarget::Wait()
 	// Fire the pass target if there is one
 	if (!FStringNull(pTarget->pev->message))
 	{
-		FireTargets(STRING(pTarget->pev->message), this, this, USE_TOGGLE, 0);
+		util::FireTargets(STRING(pTarget->pev->message), this, this, USE_TOGGLE, 0);
 		if (FBitSet(pTarget->pev->spawnflags, SF_CORNER_FIREONCE))
 			pTarget->pev->message = 0;
 	}
@@ -2253,7 +2253,7 @@ bool CGunTarget::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float
 			pev->health = 0;
 			Stop();
 			if (!FStringNull(pev->message))
-				FireTargets(STRING(pev->message), this, this, USE_TOGGLE, 0);
+				util::FireTargets(STRING(pev->message), this, this, USE_TOGGLE, 0);
 		}
 	}
 	return false;

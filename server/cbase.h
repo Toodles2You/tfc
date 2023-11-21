@@ -67,16 +67,6 @@ extern void SaveGlobalState(SAVERESTOREDATA* pSaveData);
 extern void RestoreGlobalState(SAVERESTOREDATA* pSaveData);
 extern void ResetGlobalState();
 
-typedef enum
-{
-	USE_OFF = 0,
-	USE_ON = 1,
-	USE_SET = 2,
-	USE_TOGGLE = 3
-} USE_TYPE;
-
-extern void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
-
 // For CLASSIFY
 #define CLASS_NONE 0
 #define CLASS_MACHINE 1
@@ -256,7 +246,7 @@ public:
 
 	virtual CBaseEntity* Respawn() { return NULL; }
 
-	void SUB_UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value);
+	void UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value);
 	// Do the bounding boxes of these two intersect?
 	bool Intersects(CBaseEntity* pOther);
 	void MakeDormant();
@@ -403,7 +393,7 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 	// common member functions
-	void SUB_UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value);
+	void UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value);
 	void EXPORT DelayThink();
 };
 

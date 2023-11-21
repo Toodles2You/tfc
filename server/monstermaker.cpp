@@ -202,8 +202,8 @@ void CMonsterMaker::MakeMonster()
 	// If I have a target, fire!
 	if (!FStringNull(pev->target))
 	{
-		// delay already overloaded for this entity, so can't call SUB_UseTargets()
-		FireTargets(STRING(pev->target), this, this, USE_TOGGLE, 0);
+		// delay already overloaded for this entity, so can't call UseTargets()
+		util::FireTargets(STRING(pev->target), this, this, USE_TOGGLE, 0);
 	}
 
 	pevCreate = VARS(pent);

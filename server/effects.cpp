@@ -144,7 +144,7 @@ bool CBubbling::KeyValue(KeyValueData* pkvd)
 
 void CBubbling::FizzThink()
 {
-	MessageBegin(MSG_PAS, SVC_TEMPENTITY, VecBModelOrigin(pev));
+	MessageBegin(MSG_PAS, SVC_TEMPENTITY, Center());
 	WriteByte(TE_FIZZ);
 	WriteShort((short)ENTINDEX(edict()));
 	WriteShort((short)m_bubbleModel);
@@ -1429,7 +1429,7 @@ bool CGibShooter::Spawn()
 		m_flGibLife = 25;
 	}
 
-	SetMovedir(pev);
+	pev->movedir = util::SetMovedir(pev->angles);
 	pev->body = MODEL_FRAMES(m_iGibModelIndex);
 
 	return true;
@@ -1731,7 +1731,7 @@ bool CBlood::Spawn()
 	pev->movetype = MOVETYPE_NONE;
 	pev->effects = 0;
 	pev->frame = 0;
-	SetMovedir(pev);
+	pev->movedir = util::SetMovedir(pev->angles);
 	return true;
 }
 
@@ -1966,7 +1966,7 @@ void CFade::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType,
 	{
 		util::ScreenFadeAll(pev->rendercolor, Duration(), HoldTime(), pev->renderamt, fadeFlags);
 	}
-	SUB_UseTargets(this, USE_TOGGLE, 0);
+	UseTargets(this, USE_TOGGLE, 0);
 }
 
 
@@ -2072,7 +2072,7 @@ void CMessage::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useTy
 	if ((pev->spawnflags & SF_MESSAGE_ONCE) != 0)
 		Remove();
 
-	SUB_UseTargets(this, USE_TOGGLE, 0);
+	UseTargets(this, USE_TOGGLE, 0);
 }
 
 

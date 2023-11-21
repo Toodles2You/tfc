@@ -23,9 +23,6 @@
 #include "cbase.h"
 #include "doors.h"
 
-
-extern void SetMovedir(entvars_t* ev);
-
 #define noiseMoving noise1
 #define noiseArrived noise2
 
@@ -255,7 +252,7 @@ LINK_ENTITY_TO_CLASS(func_water, CBaseDoor);
 bool CBaseDoor::Spawn()
 {
 	Precache();
-	SetMovedir(pev);
+	pev->movedir = util::SetMovedir(pev->angles);
 
 	if (pev->skin == 0)
 	{ //normal door
@@ -530,7 +527,7 @@ void CBaseDoor::DoorTouch(CBaseEntity* pOther)
 
 
 //
-// Used by SUB_UseTargets, when a door is the target of a button.
+// Used by UseTargets, when a door is the target of a button.
 //
 void CBaseDoor::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
@@ -570,8 +567,6 @@ bool CBaseDoor::DoorActivate()
 
 	return true;
 }
-
-extern Vector VecBModelOrigin(entvars_t* pevBModel);
 
 //
 // Starts the door going to its "up" position (simply ToggleData->vecPosition2).
@@ -658,9 +653,9 @@ void CBaseDoor::DoorHitTop()
 
 	// Fire the close target (if startopen is set, then "top" is closed) - netname is the close target
 	if (!FStringNull(pev->netname) && (pev->spawnflags & SF_DOOR_START_OPEN) != 0)
-		FireTargets(STRING(pev->netname), m_hActivator, this, USE_TOGGLE, 0);
+		util::FireTargets(STRING(pev->netname), m_hActivator, this, USE_TOGGLE, 0);
 
-	SUB_UseTargets(m_hActivator, USE_TOGGLE, 0); // this isn't finished
+	UseTargets(m_hActivator, USE_TOGGLE, 0); // this isn't finished
 }
 
 
@@ -709,11 +704,11 @@ void CBaseDoor::DoorHitBottom()
 	else // touchable door
 		SetTouch(&CBaseDoor::DoorTouch);
 
-	SUB_UseTargets(m_hActivator, USE_TOGGLE, 0); // this isn't finished
+	UseTargets(m_hActivator, USE_TOGGLE, 0); // this isn't finished
 
 	// Fire the close target (if startopen is set, then "top" is closed) - netname is the close target
 	if (!FStringNull(pev->netname) && (pev->spawnflags & SF_DOOR_START_OPEN) == 0)
-		FireTargets(STRING(pev->netname), m_hActivator, this, USE_TOGGLE, 0);
+		util::FireTargets(STRING(pev->netname), m_hActivator, this, USE_TOGGLE, 0);
 }
 
 void CBaseDoor::Blocked(CBaseEntity* pOther)
@@ -894,7 +889,7 @@ IMPLEMENT_SAVERESTORE(CMomentaryDoor, CBaseToggle);
 
 bool CMomentaryDoor::Spawn()
 {
-	SetMovedir(pev);
+	pev->movedir = util::SetMovedir(pev->angles);
 
 	pev->solid = SOLID_BSP;
 	pev->movetype = MOVETYPE_PUSH;

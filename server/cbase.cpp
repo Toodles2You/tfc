@@ -26,8 +26,6 @@ void EntvarsKeyvalue(entvars_t* pev, KeyValueData* pkvd);
 
 void OnFreeEntPrivateData(edict_s* pEdict);
 
-extern Vector VecBModelOrigin(entvars_t* pevBModel);
-
 static DLL_FUNCTIONS gFunctionTable =
 	{
 		GameDLLInit,			   //pfnGameInit
@@ -558,12 +556,12 @@ bool CBaseEntity::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	// (that is, no actual entity projectile was involved in the attack so use the shooter's origin).
 	if (attacker == inflictor)
 	{
-		vecTemp = inflictor->pev->origin - (VecBModelOrigin(pev));
+		vecTemp = inflictor->pev->origin - Center();
 	}
 	else
 	// an actual missile was involved.
 	{
-		vecTemp = inflictor->pev->origin - (VecBModelOrigin(pev));
+		vecTemp = inflictor->pev->origin - Center();
 	}
 
 	// this global is still used for glass and other non-monster killables, along with decals.

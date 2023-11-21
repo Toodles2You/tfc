@@ -573,7 +573,7 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 
 		if (pPlayer)
 		{
-			FireTargets("game_playerleave", pPlayer, pPlayer, USE_TOGGLE, 0);
+			util::FireTargets("game_playerleave", pPlayer, pPlayer, USE_TOGGLE, 0);
 
 			// team match?
 			if (IsTeamplay())
@@ -735,7 +735,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer,
 
 	pVictim->m_iDeaths += 1;
 
-	FireTargets("game_playerdie", pVictim, pVictim, USE_TOGGLE, 0);
+	util::FireTargets("game_playerdie", pVictim, pVictim, USE_TOGGLE, 0);
 
 	if (killer->IsPlayer())
 	{
@@ -744,7 +744,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer,
 
 		if (pVictim != killer)
 		{
-			FireTargets("game_playerkill", killer, killer, USE_TOGGLE, 0);
+			util::FireTargets("game_playerkill", killer, killer, USE_TOGGLE, 0);
 		}
 	}
 
@@ -1207,7 +1207,7 @@ CSpawnPoint *CHalfLifeMultiplay::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
 	/* Fire targets, if any. */
 	if (!FStringNull(spawn->m_target))
 	{
-		FireTargets(STRING(spawn->m_target), pPlayer, pPlayer, USE_TOGGLE, 0);
+		util::FireTargets(STRING(spawn->m_target), pPlayer, pPlayer, USE_TOGGLE, 0);
 	}
 
 	/* Telefrag! */

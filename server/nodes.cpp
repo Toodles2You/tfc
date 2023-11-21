@@ -37,8 +37,6 @@
 #define MAX_NODE_INITIAL_LINKS 128
 #define MAX_NODES 1024
 
-Vector VecBModelOrigin(entvars_t* pevBModel);
-
 CGraph WorldGraph;
 
 LINK_ENTITY_TO_CLASS(info_node, CNodeEnt);
@@ -183,9 +181,7 @@ entvars_t* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
 			{ // only buttons are handled right now.
 
 				// trace from the node to the trigger, make sure it's one we can see from the node.
-				// !!!HACKHACK Use bodyqueue here cause there are no ents we really wish to ignore!
-				util::TraceLine(pNode->m_vecOrigin, VecBModelOrigin(pevTrigger), util::ignore_monsters, nullptr, &tr);
-
+				util::TraceLine(pNode->m_vecOrigin, CBaseEntity::Instance(pevTrigger)->Center(), util::ignore_monsters, nullptr, &tr);
 
 				if (VARS(tr.pHit) == pevTrigger)
 				{ // good to go!

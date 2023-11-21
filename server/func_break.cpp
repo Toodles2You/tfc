@@ -745,10 +745,12 @@ void CBreakable::Die()
 
 	pev->solid = SOLID_NOT;
 	// Fire targets on break
-	SUB_UseTargets(NULL, USE_TOGGLE, 0);
+	UseTargets(NULL, USE_TOGGLE, 0);
 
 	if (!FStringNull(m_iszSpawnObject))
-		CBaseEntity::Create((char*)STRING(m_iszSpawnObject), VecBModelOrigin(pev), pev->angles, edict());
+	{
+		CBaseEntity::Create((char*)STRING(m_iszSpawnObject), Center(), pev->angles, edict());
+	}
 
 
 	if (Explodable())

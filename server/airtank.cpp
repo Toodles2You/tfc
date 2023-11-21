@@ -86,7 +86,7 @@ void CAirtank::TankThink()
 {
 	// Fire trigger
 	m_state = true;
-	SUB_UseTargets(this, USE_TOGGLE, 0);
+	UseTargets(this, USE_TOGGLE, 0);
 }
 
 
@@ -111,5 +111,5 @@ void CAirtank::TankTouch(CBaseEntity* pOther)
 	// recharge airtank in 30 seconds
 	pev->nextthink = gpGlobals->time + 30;
 	m_state = false;
-	SUB_UseTargets(this, USE_TOGGLE, 1);
+	UseTargets(this, USE_TOGGLE, 1);
 }
