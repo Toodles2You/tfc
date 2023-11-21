@@ -297,13 +297,13 @@ void CHornet::TrackTarget()
 		switch (RANDOM_LONG(0, 2))
 		{
 		case 0:
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "hornet/ag_buzz1.wav", HORNET_BUZZ_VOLUME, ATTN_NORM);
+			EmitSound("hornet/ag_buzz1.wav", CHAN_VOICE, HORNET_BUZZ_VOLUME);
 			break;
 		case 1:
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "hornet/ag_buzz2.wav", HORNET_BUZZ_VOLUME, ATTN_NORM);
+			EmitSound("hornet/ag_buzz2.wav", CHAN_VOICE, HORNET_BUZZ_VOLUME);
 			break;
 		case 2:
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "hornet/ag_buzz3.wav", HORNET_BUZZ_VOLUME, ATTN_NORM);
+			EmitSound("hornet/ag_buzz3.wav", CHAN_VOICE, HORNET_BUZZ_VOLUME);
 			break;
 		}
 	}
@@ -359,15 +359,9 @@ void CHornet::TrackTarget()
 
 			switch (RANDOM_LONG(0, 2))
 			{
-			case 0:
-				EMIT_SOUND(ENT(pev), CHAN_VOICE, "hornet/ag_buzz1.wav", HORNET_BUZZ_VOLUME, ATTN_NORM);
-				break;
-			case 1:
-				EMIT_SOUND(ENT(pev), CHAN_VOICE, "hornet/ag_buzz2.wav", HORNET_BUZZ_VOLUME, ATTN_NORM);
-				break;
-			case 2:
-				EMIT_SOUND(ENT(pev), CHAN_VOICE, "hornet/ag_buzz3.wav", HORNET_BUZZ_VOLUME, ATTN_NORM);
-				break;
+			case 0: EmitSound("hornet/ag_buzz1.wav", CHAN_VOICE, HORNET_BUZZ_VOLUME); break;
+			case 1: EmitSound("hornet/ag_buzz2.wav", CHAN_VOICE, HORNET_BUZZ_VOLUME); break;
+			case 2: EmitSound("hornet/ag_buzz3.wav", CHAN_VOICE, HORNET_BUZZ_VOLUME); break;
 			}
 			pev->velocity = pev->velocity * 2;
 			pev->nextthink = gpGlobals->time + 1.0;
@@ -420,15 +414,9 @@ void CHornet::DieTouch(CBaseEntity* pOther)
 
 		switch (RANDOM_LONG(0, 2))
 		{ // buzz when you plug someone
-		case 0:
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "hornet/ag_hornethit1.wav", 1, ATTN_NORM);
-			break;
-		case 1:
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "hornet/ag_hornethit2.wav", 1, ATTN_NORM);
-			break;
-		case 2:
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "hornet/ag_hornethit3.wav", 1, ATTN_NORM);
-			break;
+		case 0: EmitSound("hornet/ag_hornethit1.wav", CHAN_VOICE); break;
+		case 1: EmitSound("hornet/ag_hornethit2.wav", CHAN_VOICE); break;
+		case 2: EmitSound("hornet/ag_hornethit3.wav", CHAN_VOICE); break;
 		}
 
 		pOther->TakeDamage(this, CBaseEntity::Instance(pev->owner), pev->dmg, DMG_BULLET);

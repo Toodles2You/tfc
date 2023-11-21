@@ -54,7 +54,6 @@ public:
 	void TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) override;
 
 	bool IsBreakable();
-	bool SparkWhenHit();
 
 	int DamageDecal(int bitsDamageType) override;
 
@@ -68,7 +67,6 @@ public:
 	inline void ExplosionSetMagnitude(int magnitude) { pev->impulse = magnitude; }
 
 	static void MaterialSoundPrecache(Materials precacheMaterial);
-	static void MaterialSoundRandom(edict_t* pEdict, Materials soundMaterial, float volume);
 	static const char** MaterialSoundList(Materials precacheMaterial, int& soundCount);
 
 	static const char* pSoundsWood[];

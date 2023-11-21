@@ -115,8 +115,8 @@ bool CTripmineGrenade::Spawn()
 	if (pev->owner != NULL)
 	{
 		// play deploy sound
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/mine_deploy.wav", 1.0, ATTN_NORM);
-		EMIT_SOUND(ENT(pev), CHAN_BODY, "weapons/mine_charge.wav", 0.2, ATTN_NORM); // chargeup
+		EmitSound("weapons/mine_deploy.wav", CHAN_VOICE);
+		EmitSound("weapons/mine_charge.wav", CHAN_BODY, 0.2F);
 
 		m_pRealOwner = pev->owner; // see CTripmineGrenade for why.
 	}
@@ -141,9 +141,6 @@ void CTripmineGrenade::Precache()
 
 void CTripmineGrenade::WarningThink()
 {
-	// play warning sound
-	// EMIT_SOUND( ENT(pev), CHAN_VOICE, "buttons/Blip2.wav", 1.0, ATTN_NORM );
-
 	// set to power up
 	SetThink(&CTripmineGrenade::PowerupThink);
 	pev->nextthink = gpGlobals->time + 1.0;
@@ -176,9 +173,9 @@ void CTripmineGrenade::PowerupThink()
 		}
 		else
 		{
-			STOP_SOUND(ENT(pev), CHAN_VOICE, "weapons/mine_deploy.wav");
-			STOP_SOUND(ENT(pev), CHAN_BODY, "weapons/mine_charge.wav");
-			ALERT(at_console, "WARNING:Tripmine at %.0f, %.0f, %.0f removed\n", pev->origin.x, pev->origin.y, pev->origin.z);
+			StopSound("weapons/mine_deploy.wav", CHAN_VOICE);
+			StopSound("weapons/mine_charge.wav", CHAN_BODY);
+			ALERT(at_console, "WARNING: Tripmine at %.0f, %.0f, %.0f removed\n", pev->origin.x, pev->origin.y, pev->origin.z);
 			KillBeam();
 			Remove();
 			return;
@@ -187,8 +184,8 @@ void CTripmineGrenade::PowerupThink()
 	else if (m_posOwner != m_hOwner->pev->origin || m_angleOwner != m_hOwner->pev->angles)
 	{
 		// disable
-		STOP_SOUND(ENT(pev), CHAN_VOICE, "weapons/mine_deploy.wav");
-		STOP_SOUND(ENT(pev), CHAN_BODY, "weapons/mine_charge.wav");
+		StopSound("weapons/mine_deploy.wav", CHAN_VOICE);
+		StopSound("weapons/mine_charge.wav", CHAN_BODY);
 		CBaseEntity* pMine = Create("weapon_tripmine", pev->origin + m_vecDir * 24, pev->angles);
 		pMine->pev->spawnflags |= SF_NORESPAWN;
 
@@ -206,7 +203,7 @@ void CTripmineGrenade::PowerupThink()
 		MakeBeam();
 
 		// play enabled sound
-		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "weapons/mine_activate.wav", 0.5, ATTN_NORM, 1.0, 75);
+		EmitSound("weapons/mine_activate.wav", CHAN_VOICE, 0.5F, ATTN_NORM, 75);
 	}
 	pev->nextthink = gpGlobals->time + 0.1;
 }
@@ -338,7 +335,7 @@ void CTripmineGrenade::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int
 	SetThink(&CTripmineGrenade::DelayDeathThink);
 	pev->nextthink = gpGlobals->time + RANDOM_FLOAT(0.1, 0.3);
 
-	EMIT_SOUND(ENT(pev), CHAN_BODY, "common/null.wav", 0.5, ATTN_NORM); // shut off chargeup
+	EmitSound("common/null.wav", CHAN_BODY); // shut off chargeup
 }
 
 

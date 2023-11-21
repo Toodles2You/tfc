@@ -142,17 +142,18 @@ void CCrossbowBolt::BoltTouch(CBaseEntity* pOther)
 		// play body "thwack" sound
 		switch (RANDOM_LONG(0, 1))
 		{
-		case 0:
-			EMIT_SOUND(ENT(pev), CHAN_BODY, "weapons/xbow_hitbod1.wav", 1, ATTN_NORM);
-			break;
-		case 1:
-			EMIT_SOUND(ENT(pev), CHAN_BODY, "weapons/xbow_hitbod2.wav", 1, ATTN_NORM);
-			break;
+		case 0: EmitSound("weapons/xbow_hitbod1.wav", CHAN_BODY); break;
+		case 1: EmitSound("weapons/xbow_hitbod2.wav", CHAN_BODY); break;
 		}
 	}
 	else
 	{
-		EMIT_SOUND_DYN(ENT(pev), CHAN_BODY, "weapons/xbow_hit1.wav", RANDOM_FLOAT(0.95, 1.0), ATTN_NORM, 0, 98 + RANDOM_LONG(0, 7));
+		EmitSound(
+			"weapons/xbow_hit1.wav",
+			CHAN_BODY,
+			RANDOM_FLOAT(0.95, 1.0),
+			ATTN_NORM,
+			98 + RANDOM_LONG(0, 7));
 
 		if (UTIL_PointContents(pev->origin) != CONTENTS_WATER)
 		{

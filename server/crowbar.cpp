@@ -248,15 +248,9 @@ bool CCrowbar::Swing(bool fFirst)
 				// play thwack or smack sound
 				switch (RANDOM_LONG(0, 2))
 				{
-				case 0:
-					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hitbod1.wav", 1, ATTN_NORM);
-					break;
-				case 1:
-					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hitbod2.wav", 1, ATTN_NORM);
-					break;
-				case 2:
-					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hitbod3.wav", 1, ATTN_NORM);
-					break;
+				case 0: m_pPlayer->EmitSound("weapons/cbar_hitbod1.wav", CHAN_ITEM); break;
+				case 1: m_pPlayer->EmitSound("weapons/cbar_hitbod2.wav", CHAN_ITEM); break;
+				case 2: m_pPlayer->EmitSound("weapons/cbar_hitbod3.wav", CHAN_ITEM); break;
 				}
 				if (!pEntity->IsAlive())
 					return true;
@@ -281,12 +275,8 @@ bool CCrowbar::Swing(bool fFirst)
 			// also play crowbar strike
 			switch (RANDOM_LONG(0, 1))
 			{
-			case 0:
-				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hit1.wav", fvolbar, ATTN_NORM, 0, 98 + RANDOM_LONG(0, 3));
-				break;
-			case 1:
-				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hit2.wav", fvolbar, ATTN_NORM, 0, 98 + RANDOM_LONG(0, 3));
-				break;
+			case 0: m_pPlayer->EmitSound("weapons/cbar_hit1.wav", CHAN_ITEM, fvolbar, ATTN_NORM, 98 + RANDOM_LONG(0, 3)); break;
+			case 1: m_pPlayer->EmitSound("weapons/cbar_hit2.wav", CHAN_ITEM, fvolbar, ATTN_NORM, 98 + RANDOM_LONG(0, 3)); break;
 			}
 
 			// delay the decal a bit

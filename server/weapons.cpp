@@ -391,8 +391,7 @@ void CBasePlayerWeapon::FallThink()
 		// don't clatter if the gun is waiting to respawn (if it's waiting, it is invisible!)
 		if (!FNullEnt(pev->owner))
 		{
-			int pitch = 95 + RANDOM_LONG(0, 29);
-			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "items/weapondrop1.wav", 1, ATTN_NORM, 0, pitch);
+			EmitSound("items/weapondrop1.wav", CHAN_VOICE, VOL_NORM, ATTN_NORM, 95 + RANDOM_LONG(0, 29));
 		}
 
 		// lie flat
@@ -411,7 +410,7 @@ void CBasePlayerWeapon::Materialize()
 	if ((pev->effects & EF_NODRAW) != 0)
 	{
 		// changing from invisible state to visible.
-		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "items/itembk2.wav", 1, ATTN_NORM, 0, PITCH_NORM);
+		EmitSound("items/itembk2.wav", CHAN_WEAPON);
 		pev->effects &= ~EF_NODRAW;
 		pev->effects |= EF_MUZZLEFLASH;
 	}
@@ -510,7 +509,7 @@ void CBasePlayerWeapon::DefaultTouch(CBaseEntity* pOther)
 		AttachToPlayer(pPlayer);
 		if (!pPlayer->m_bIsSpawning)
 		{
-			EMIT_SOUND(ENT(pPlayer->pev), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM);
+			pPlayer->EmitSound("items/gunpickup2.wav", CHAN_ITEM);
 		}
 	}
 
@@ -604,7 +603,7 @@ void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int body)
 
 void CBasePlayerWeapon::PlayWeaponSound(int iChannel, const char* szSound, float flVolume, float flAttn, int iFlags, float flPitch)
 {
-	EMIT_SOUND_PREDICTED(m_pPlayer->edict(), iChannel, szSound, flVolume, flAttn, iFlags, flPitch);
+	m_pPlayer->EmitSoundPredicted(szSound, iChannel, flVolume, flAttn, flPitch, iFlags);
 }
 
 bool CBasePlayerWeapon::AddPrimaryAmmo(CBasePlayerWeapon* origin, int iCount, int iType, int iMaxClip, int iMaxCarry)
@@ -636,7 +635,7 @@ bool CBasePlayerWeapon::AddPrimaryAmmo(CBasePlayerWeapon* origin, int iCount, in
 		{
 			// play the "got ammo" sound only if we gave some ammo to a player that already had this gun.
 			// if the player is just getting this gun for the first time, DefaultTouch will play the "picked up gun" sound for us.
-			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
+			EmitSound("items/9mmclip1.wav", CHAN_ITEM);
 		}
 	}
 
@@ -652,7 +651,7 @@ bool CBasePlayerWeapon::AddSecondaryAmmo(int iCount, int iType, int iMax)
 
 	if (iIdAmmo > AMMO_NONE)
 	{
-		EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
+		EmitSound("items/9mmclip1.wav", CHAN_ITEM);
 	}
 	return iIdAmmo > 0 ? true : false;
 }
@@ -785,7 +784,7 @@ void CBasePlayerAmmo::Materialize()
 	if ((pev->effects & EF_NODRAW) != 0)
 	{
 		// changing from invisible state to visible.
-		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "items/itembk2.wav", 1, ATTN_NORM, 0, PITCH_NORM);
+		EmitSound("items/itembk2.wav", CHAN_WEAPON);
 		pev->effects &= ~EF_NODRAW;
 		pev->effects |= EF_MUZZLEFLASH;
 	}
@@ -802,7 +801,7 @@ void CBasePlayerAmmo::DefaultTouch(CBaseEntity* pOther)
 
 	if (AddAmmo(pOther))
 	{
-		EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
+		EmitSound("items/9mmclip1.wav", CHAN_ITEM);
 
 		if (g_pGameRules->AmmoShouldRespawn(this) == GR_AMMO_RESPAWN_YES)
 		{
@@ -1043,7 +1042,7 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 		}
 	}
 
-	EMIT_SOUND(pOther->edict(), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM);
+	pOther->EmitSound("items/gunpickup2.wav", CHAN_ITEM);
 	SetTouch(NULL);
 	Remove();
 }

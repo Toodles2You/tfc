@@ -140,15 +140,9 @@ void CSatchelCharge::BounceSound()
 {
 	switch (RANDOM_LONG(0, 2))
 	{
-	case 0:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/g_bounce1.wav", 1, ATTN_NORM);
-		break;
-	case 1:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/g_bounce2.wav", 1, ATTN_NORM);
-		break;
-	case 2:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/g_bounce3.wav", 1, ATTN_NORM);
-		break;
+	case 0: EmitSound("weapons/g_bounce1.wav", CHAN_VOICE); break;
+	case 1: EmitSound("weapons/g_bounce2.wav", CHAN_VOICE); break;
+	case 2: EmitSound("weapons/g_bounce3.wav", CHAN_VOICE); break;
 	}
 }
 

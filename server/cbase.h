@@ -300,6 +300,28 @@ public:
 	int m_fireState;
 
 	float m_flFieldOfView;
+
+	void EmitSound(
+		const char* sample,
+		int channel = CHAN_AUTO,
+		float volume = VOL_NORM,
+		float attenuation = ATTN_NORM,
+		int pitch = PITCH_NORM,
+		int flags = 0);
+
+	/**
+	*	@brief Just like @see EmitSound, but will skip the current host player if they have cl_lw turned on.
+	*	@details entity must be the current host entity for this to work, and must be called only inside a player's PostThink method.
+	*/
+	void EmitSoundPredicted(
+		const char* sample,
+		int channel = CHAN_AUTO,
+		float volume = VOL_NORM,
+		float attenuation = ATTN_NORM,
+		int pitch = PITCH_NORM,
+		int flags = 0);
+
+	void StopSound(const char* sample, int channel = CHAN_AUTO);
 };
 
 inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->edict()); }
@@ -335,7 +357,7 @@ typedef struct locksounds // sounds that doors and buttons make when locked/unlo
 	byte bEOFUnlocked;	  // true if hit end of list of unlocked sentences
 } locksound_t;
 
-void PlayLockSounds(entvars_t* pev, locksound_t* pls, bool flocked, bool fbutton);
+void PlayLockSounds(CBaseEntity* entity, locksound_t* pls, bool flocked, bool fbutton);
 
 //
 // MultiSouce

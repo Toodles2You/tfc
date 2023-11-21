@@ -329,6 +329,12 @@ public:
 	int m_LastHitGroup; // the last body region that took damage
 
 	void FireBullets(const float damage, const Vector2D& spread, const unsigned int count = 1, const float distance = 8192);
+
+protected:
+	/** @brief Just a stub for now */
+	void EmitSuitSound(const char* sample) {}
+	/** @brief Just a stub for now */
+	void EmitSuitSound(int group) {}
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

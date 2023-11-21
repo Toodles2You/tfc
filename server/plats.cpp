@@ -424,7 +424,7 @@ void CFuncPlat::PlatUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 void CFuncPlat::GoDown()
 {
 	if (!FStringNull(pev->noiseMovement))
-		EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMovement), m_volume, ATTN_NORM);
+		EmitSound(STRING(pev->noiseMovement), CHAN_STATIC, m_volume);
 
 	ASSERT(m_toggle_state == TS_AT_TOP || m_toggle_state == TS_GOING_UP);
 	m_toggle_state = TS_GOING_DOWN;
@@ -439,10 +439,10 @@ void CFuncPlat::GoDown()
 void CFuncPlat::HitBottom()
 {
 	if (!FStringNull(pev->noiseMovement))
-		STOP_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMovement));
+		StopSound(STRING(pev->noiseMovement),  CHAN_STATIC);
 
 	if (!FStringNull(pev->noiseStopMoving))
-		EMIT_SOUND(ENT(pev), CHAN_WEAPON, (char*)STRING(pev->noiseStopMoving), m_volume, ATTN_NORM);
+		EmitSound(STRING(pev->noiseStopMoving), CHAN_WEAPON, m_volume);
 
 	ASSERT(m_toggle_state == TS_GOING_DOWN);
 	m_toggle_state = TS_AT_BOTTOM;
@@ -455,7 +455,7 @@ void CFuncPlat::HitBottom()
 void CFuncPlat::GoUp()
 {
 	if (!FStringNull(pev->noiseMovement))
-		EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMovement), m_volume, ATTN_NORM);
+		EmitSound(STRING(pev->noiseMovement), CHAN_STATIC, m_volume);
 
 	ASSERT(m_toggle_state == TS_AT_BOTTOM || m_toggle_state == TS_GOING_DOWN);
 	m_toggle_state = TS_GOING_UP;
@@ -470,10 +470,10 @@ void CFuncPlat::GoUp()
 void CFuncPlat::HitTop()
 {
 	if (!FStringNull(pev->noiseMovement))
-		STOP_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMovement));
+		StopSound(STRING(pev->noiseMovement), CHAN_STATIC);
 
 	if (!FStringNull(pev->noiseStopMoving))
-		EMIT_SOUND(ENT(pev), CHAN_WEAPON, (char*)STRING(pev->noiseStopMoving), m_volume, ATTN_NORM);
+		EmitSound(STRING(pev->noiseStopMoving), CHAN_WEAPON, m_volume);
 
 	ASSERT(m_toggle_state == TS_GOING_UP);
 	m_toggle_state = TS_AT_TOP;
@@ -494,7 +494,7 @@ void CFuncPlat::Blocked(CBaseEntity* pOther)
 	pOther->TakeDamage(this, this, 1, DMG_CRUSH);
 
 	if (!FStringNull(pev->noiseMovement))
-		STOP_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMovement));
+		StopSound(STRING(pev->noiseMovement), CHAN_STATIC);
 
 	// Send the platform back where it came from
 	ASSERT(m_toggle_state == TS_GOING_UP || m_toggle_state == TS_GOING_DOWN);
@@ -698,7 +698,7 @@ void CFuncTrain::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE use
 		pev->nextthink = 0;
 		pev->velocity = g_vecZero;
 		if (!FStringNull(pev->noiseStopMoving))
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, (char*)STRING(pev->noiseStopMoving), m_volume, ATTN_NORM);
+			EmitSound(STRING(pev->noiseStopMoving), CHAN_VOICE, m_volume);
 	}
 }
 
@@ -719,9 +719,9 @@ void CFuncTrain::Wait()
 		pev->spawnflags |= SF_TRAIN_WAIT_RETRIGGER;
 		// clear the sound channel.
 		if (!FStringNull(pev->noiseMovement))
-			STOP_SOUND(edict(), CHAN_STATIC, (char*)STRING(pev->noiseMovement));
+			StopSound(STRING(pev->noiseMovement), CHAN_STATIC);
 		if (!FStringNull(pev->noiseStopMoving))
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, (char*)STRING(pev->noiseStopMoving), m_volume, ATTN_NORM);
+			EmitSound(STRING(pev->noiseStopMoving), CHAN_VOICE, m_volume);
 		pev->nextthink = 0;
 		return;
 	}
@@ -732,9 +732,9 @@ void CFuncTrain::Wait()
 	{ // -1 wait will wait forever!
 		pev->nextthink = pev->ltime + m_flWait;
 		if (!FStringNull(pev->noiseMovement))
-			STOP_SOUND(edict(), CHAN_STATIC, (char*)STRING(pev->noiseMovement));
+			StopSound(STRING(pev->noiseMovement), CHAN_STATIC);
 		if (!FStringNull(pev->noiseStopMoving))
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, (char*)STRING(pev->noiseStopMoving), m_volume, ATTN_NORM);
+			EmitSound(STRING(pev->noiseStopMoving), CHAN_VOICE, m_volume);
 		SetThink(&CFuncTrain::Next);
 	}
 	else
@@ -758,10 +758,10 @@ void CFuncTrain::Next()
 	if (!pTarg)
 	{
 		if (!FStringNull(pev->noiseMovement))
-			STOP_SOUND(edict(), CHAN_STATIC, (char*)STRING(pev->noiseMovement));
+			StopSound(STRING(pev->noiseMovement), CHAN_STATIC);
 		// Play stop sound
 		if (!FStringNull(pev->noiseStopMoving))
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, (char*)STRING(pev->noiseStopMoving), m_volume, ATTN_NORM);
+			EmitSound(STRING(pev->noiseStopMoving), CHAN_VOICE, m_volume);
 		return;
 	}
 
@@ -795,9 +795,9 @@ void CFuncTrain::Next()
 		// use CHAN_STATIC for their movement sounds to prevent sound field problems.
 		// this is not a hack or temporary fix, this is how things should be. (sjb).
 		if (!FStringNull(pev->noiseMovement))
-			STOP_SOUND(edict(), CHAN_STATIC, (char*)STRING(pev->noiseMovement));
+			StopSound(STRING(pev->noiseMovement), CHAN_STATIC);
 		if (!FStringNull(pev->noiseMovement))
-			EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMovement), m_volume, ATTN_NORM);
+			EmitSound(STRING(pev->noiseMovement), CHAN_STATIC, m_volume);
 		ClearBits(pev->effects, EF_NOINTERP);
 		SetMoveDone(&CFuncTrain::Wait);
 		LinearMove(pTarg->pev->origin - (pev->mins + pev->maxs) * 0.5, pev->speed);
@@ -1095,10 +1095,7 @@ void CFuncTrackTrain::StopSound()
 		PLAYBACK_EVENT_FULL(FEV_RELIABLE | FEV_UPDATE, edict(), m_usAdjustPitch, 0.0,
 			g_vecZero, g_vecZero, 0.0, 0.0, us_encode, 0, 1, 0);
 
-		/*
-		STOP_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noise));
-		*/
-		EMIT_SOUND_DYN(ENT(pev), CHAN_ITEM, "plats/ttrain_brake1.wav", m_flVolume, ATTN_NORM, 0, 100);
+		EmitSound("plats/ttrain_brake1.wav", CHAN_ITEM, m_flVolume);
 	}
 
 	m_soundPlaying = false;
@@ -1120,16 +1117,12 @@ void CFuncTrackTrain::UpdateSound()
 	if (!m_soundPlaying)
 	{
 		// play startup sound for train
-		EMIT_SOUND_DYN(ENT(pev), CHAN_ITEM, "plats/ttrain_start1.wav", m_flVolume, ATTN_NORM, 0, 100);
-		EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noise), m_flVolume, ATTN_NORM, 0, (int)flpitch);
+		EmitSound("plats/ttrain_start1.wav", CHAN_ITEM, m_flVolume);
+		EmitSound(STRING(pev->noise), CHAN_STATIC, m_flVolume, ATTN_NORM, flpitch);
 		m_soundPlaying = true;
 	}
 	else
 	{
-		/*
-		// update pitch
-		EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noise), m_flVolume, ATTN_NORM, SND_CHANGE_PITCH, (int) flpitch);
-*/
 		// volume 0.0 - 1.0 - 6 bits
 		// m_sounds 3 bits
 		// flpitch = 6 bits
@@ -1957,7 +1950,7 @@ void CFuncTrackChange::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TY
 	if (m_code == TRAIN_BLOCKING)
 	{
 		// Play alarm and return
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "buttons/button11.wav", 1, ATTN_NORM);
+		EmitSound("buttons/button11.wav", CHAN_VOICE);
 		return;
 	}
 

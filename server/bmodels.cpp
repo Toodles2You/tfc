@@ -573,8 +573,13 @@ void CFuncRotating::RampPitchVol(bool fUp)
 
 	// change the fan's vol and pitch
 
-	EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseRunning),
-		fvol, m_flAttenuation, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch);
+	EmitSound(
+		STRING(pev->noiseRunning),
+		CHAN_STATIC,
+		fvol,
+		m_flAttenuation,
+		pitch,
+		SND_CHANGE_PITCH | SND_CHANGE_VOL);
 }
 
 //
@@ -595,8 +600,14 @@ void CFuncRotating::SpinUp()
 		fabs(vecAVel.z) >= fabs(pev->movedir.z * pev->speed))
 	{
 		pev->avelocity = pev->movedir * pev->speed; // set speed in case we overshot
-		EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseRunning),
-			m_flVolume, m_flAttenuation, SND_CHANGE_PITCH | SND_CHANGE_VOL, FANPITCHMAX);
+
+		EmitSound(
+			STRING(pev->noiseRunning),
+			CHAN_STATIC,
+			m_flVolume,
+			m_flAttenuation,
+			FANPITCHMAX,
+			SND_CHANGE_PITCH | SND_CHANGE_VOL);
 
 		SetThink(&CFuncRotating::Rotate);
 		Rotate();
@@ -636,8 +647,14 @@ void CFuncRotating::SpinDown()
 		pev->avelocity = g_vecZero; // set speed in case we overshot
 
 		// stop sound, we're done
-		EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseRunning /* Stop */),
-			0, 0, SND_STOP, m_pitch);
+
+		EmitSound(
+			STRING(pev->noiseRunning),
+			CHAN_STATIC,
+			VOL_NORM,
+			m_flAttenuation,
+			m_pitch,
+			SND_STOP);
 
 		SetThink(&CFuncRotating::Rotate);
 		Rotate();
@@ -665,16 +682,19 @@ void CFuncRotating::RotatingUse(CBaseEntity* pActivator, CBaseEntity* pCaller, U
 		if (pev->avelocity != g_vecZero)
 		{
 			SetThink(&CFuncRotating::SpinDown);
-			//EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, (char *)STRING(pev->noiseStop),
-			//	m_flVolume, m_flAttenuation, 0, m_pitch);
 
 			pev->nextthink = pev->ltime + 0.1;
 		}
 		else // fan is not moving, so start it
 		{
 			SetThink(&CFuncRotating::SpinUp);
-			EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseRunning),
-				0.01, m_flAttenuation, 0, FANPITCHMIN);
+
+			EmitSound(
+				STRING(pev->noiseRunning),
+				CHAN_STATIC,
+				0.01F,
+				m_flAttenuation,
+				FANPITCHMIN);
 
 			pev->nextthink = pev->ltime + 0.1;
 		}
@@ -686,16 +706,17 @@ void CFuncRotating::RotatingUse(CBaseEntity* pActivator, CBaseEntity* pCaller, U
 			// play stopping sound here
 			SetThink(&CFuncRotating::SpinDown);
 
-			// EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, (char *)STRING(pev->noiseStop),
-			//	m_flVolume, m_flAttenuation, 0, m_pitch);
-
 			pev->nextthink = pev->ltime + 0.1;
-			// pev->avelocity = g_vecZero;
 		}
 		else
 		{
-			EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseRunning),
-				m_flVolume, m_flAttenuation, 0, FANPITCHMAX);
+			EmitSound(
+				STRING(pev->noiseRunning),
+				CHAN_STATIC,
+				m_flVolume,
+				m_flAttenuation,
+				FANPITCHMAX);
+
 			pev->avelocity = pev->movedir * pev->speed;
 
 			SetThink(&CFuncRotating::Rotate);

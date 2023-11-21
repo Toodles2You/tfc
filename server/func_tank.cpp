@@ -710,14 +710,14 @@ void CFuncTank::StartRotSound()
 	if (FStringNull(pev->noise) || (pev->spawnflags & SF_TANK_SOUNDON) != 0)
 		return;
 	pev->spawnflags |= SF_TANK_SOUNDON;
-	EMIT_SOUND(edict(), CHAN_STATIC, (char*)STRING(pev->noise), 0.85, ATTN_NORM);
+	EmitSound(STRING(pev->noise), CHAN_STATIC, 0.85F);
 }
 
 
 void CFuncTank::StopRotSound()
 {
 	if ((pev->spawnflags & SF_TANK_SOUNDON) != 0)
-		STOP_SOUND(edict(), CHAN_STATIC, (char*)STRING(pev->noise));
+		StopSound(STRING(pev->noise), CHAN_STATIC);
 	pev->spawnflags &= ~SF_TANK_SOUNDON;
 }
 

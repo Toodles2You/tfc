@@ -277,17 +277,6 @@ void CBreakable::MaterialSoundPrecache(Materials precacheMaterial)
 	}
 }
 
-void CBreakable::MaterialSoundRandom(edict_t* pEdict, Materials soundMaterial, float volume)
-{
-	const char** pSoundList;
-	int soundCount = 0;
-
-	pSoundList = MaterialSoundList(soundMaterial, soundCount);
-
-	if (0 != soundCount)
-		EMIT_SOUND(pEdict, CHAN_BODY, pSoundList[RANDOM_LONG(0, soundCount - 1)], volume, 1.0);
-}
-
 
 void CBreakable::Precache()
 {
@@ -434,7 +423,7 @@ void CBreakable::DamageSound()
 	}
 
 	if (0 != i)
-		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, rgpsz[RANDOM_LONG(0, i - 1)], fvol, ATTN_NORM, 0, pitch);
+		EmitSound(rgpsz[RANDOM_LONG(0, i - 1)], CHAN_VOICE, fvol, ATTN_NORM, pitch);
 }
 
 void CBreakable::BreakTouch(CBaseEntity* pOther)
@@ -512,12 +501,8 @@ void CBreakable::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDi
 			float flVolume = RANDOM_FLOAT(0.7, 1.0); //random volume range
 			switch (RANDOM_LONG(0, 1))
 			{
-			case 0:
-				EMIT_SOUND(ENT(pev), CHAN_VOICE, "buttons/spark5.wav", flVolume, ATTN_NORM);
-				break;
-			case 1:
-				EMIT_SOUND(ENT(pev), CHAN_VOICE, "buttons/spark6.wav", flVolume, ATTN_NORM);
-				break;
+			case 0: EmitSound("buttons/spark5.wav", CHAN_VOICE, flVolume); break;
+			case 1: EmitSound("buttons/spark6.wav", CHAN_VOICE, flVolume); break;
 			}
 		}
 		break;
@@ -617,18 +602,16 @@ void CBreakable::Die()
 	if (fvol > 1.0)
 		fvol = 1.0;
 
+	const char* sample;
 
 	switch (m_Material)
 	{
+	default:
 	case matGlass:
 		switch (RANDOM_LONG(0, 1))
 		{
-		case 0:
-			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "debris/bustglass1.wav", fvol, ATTN_NORM, 0, pitch);
-			break;
-		case 1:
-			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "debris/bustglass2.wav", fvol, ATTN_NORM, 0, pitch);
-			break;
+		case 0: sample ="debris/bustglass1.wav"; break;
+		case 1: sample ="debris/bustglass2.wav"; break;
 		}
 		cFlag = BREAK_GLASS;
 		break;
@@ -636,12 +619,8 @@ void CBreakable::Die()
 	case matWood:
 		switch (RANDOM_LONG(0, 1))
 		{
-		case 0:
-			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "debris/bustcrate1.wav", fvol, ATTN_NORM, 0, pitch);
-			break;
-		case 1:
-			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "debris/bustcrate2.wav", fvol, ATTN_NORM, 0, pitch);
-			break;
+		case 0: sample ="debris/bustcrate1.wav"; break;
+		case 1: sample ="debris/bustcrate2.wav"; break;
 		}
 		cFlag = BREAK_WOOD;
 		break;
@@ -650,12 +629,8 @@ void CBreakable::Die()
 	case matMetal:
 		switch (RANDOM_LONG(0, 1))
 		{
-		case 0:
-			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "debris/bustmetal1.wav", fvol, ATTN_NORM, 0, pitch);
-			break;
-		case 1:
-			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "debris/bustmetal2.wav", fvol, ATTN_NORM, 0, pitch);
-			break;
+		case 0: sample ="debris/bustmetal1.wav"; break;
+		case 1: sample ="debris/bustmetal2.wav"; break;
 		}
 		cFlag = BREAK_METAL;
 		break;
@@ -663,12 +638,8 @@ void CBreakable::Die()
 	case matFlesh:
 		switch (RANDOM_LONG(0, 1))
 		{
-		case 0:
-			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "debris/bustflesh1.wav", fvol, ATTN_NORM, 0, pitch);
-			break;
-		case 1:
-			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "debris/bustflesh2.wav", fvol, ATTN_NORM, 0, pitch);
-			break;
+		case 0: sample ="debris/bustflesh1.wav"; break;
+		case 1: sample ="debris/bustflesh2.wav"; break;
 		}
 		cFlag = BREAK_FLESH;
 		break;
@@ -677,20 +648,18 @@ void CBreakable::Die()
 	case matCinderBlock:
 		switch (RANDOM_LONG(0, 1))
 		{
-		case 0:
-			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "debris/bustconcrete1.wav", fvol, ATTN_NORM, 0, pitch);
-			break;
-		case 1:
-			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "debris/bustconcrete2.wav", fvol, ATTN_NORM, 0, pitch);
-			break;
+		case 0: sample ="debris/bustconcrete1.wav"; break;
+		case 1: sample ="debris/bustconcrete2.wav"; break;
 		}
 		cFlag = BREAK_CONCRETE;
 		break;
 
 	case matCeilingTile:
-		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "debris/bustceiling.wav", fvol, ATTN_NORM, 0, pitch);
+		sample ="debris/bustceiling.wav";
 		break;
 	}
+	
+	EmitSound(sample, CHAN_VOICE, fvol, ATTN_NORM, pitch);
 
 
 	if (m_Explosion == expDirected)
@@ -810,8 +779,6 @@ public:
 	void Move(CBaseEntity* pMover, bool push);
 	bool KeyValue(KeyValueData* pkvd) override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
-	void EXPORT StopSound();
-	//	virtual void	SetActivator( CBaseEntity *pActivator ) { m_pPusher = pActivator; }
 
 	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_CONTINUOUS_USE; }
 	bool Save(CSave& save) override;
@@ -1010,12 +977,12 @@ void CPushable::Move(CBaseEntity* pOther, bool push)
 			if (length > 0 && FBitSet(pev->flags, FL_ONGROUND))
 			{
 				m_lastSound = RANDOM_LONG(0, 2);
-				EMIT_SOUND(ENT(pev), CHAN_WEAPON, m_soundNames[m_lastSound], 0.5, ATTN_NORM);
-				//			SetThink( StopSound );
-				//			pev->nextthink = pev->ltime + 0.1;
+				EmitSound(m_soundNames[m_lastSound], CHAN_WEAPON, 0.5F);
 			}
 			else
-				STOP_SOUND(ENT(pev), CHAN_WEAPON, m_soundNames[m_lastSound]);
+			{
+				StopSound(m_soundNames[m_lastSound], CHAN_WEAPON);
+			}
 		}
 	}
 }

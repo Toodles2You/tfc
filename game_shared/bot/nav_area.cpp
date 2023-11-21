@@ -4200,7 +4200,7 @@ void EditNavAreas( NavEditCmdType cmd )
 					if (area->GetPlace() != ctrl->GetNavPlace())
 					{
 						area->SetPlace( ctrl->GetNavPlace() );
-						EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/lightswitch2.wav", 1, ATTN_NORM, 0, 100 ); 
+						UTIL_GetLocalPlayer()->EmitSound("buttons/lightswitch2.wav", CHAN_ITEM); 
 					}
 				}
 			}
@@ -4212,7 +4212,7 @@ void EditNavAreas( NavEditCmdType cmd )
 				switch( cmd )
 				{
 					case EDIT_TOGGLE_PLACE_MODE:
-						EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+						UTIL_GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 						isPlaceMode = false;
 						return;
 
@@ -4221,13 +4221,13 @@ void EditNavAreas( NavEditCmdType cmd )
 						if (isPlacePainting)
 						{
 							isPlacePainting = false;
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/latchunlocked2.wav", 1, ATTN_NORM, 0, 100 ); 
+							UTIL_GetLocalPlayer()->EmitSound("buttons/latchunlocked2.wav", CHAN_ITEM); 
 						}
 						else
 						{
 							isPlacePainting = true;
 
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/lightswitch2.wav", 1, ATTN_NORM, 0, 100 ); 
+							UTIL_GetLocalPlayer()->EmitSound("buttons/lightswitch2.wav", CHAN_ITEM); 
 
 							// paint the initial area
 							area->SetPlace( ctrl->GetNavPlace() );
@@ -4236,7 +4236,7 @@ void EditNavAreas( NavEditCmdType cmd )
 					}
 
 					case EDIT_PLACE_PICK:
-						EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+						UTIL_GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 						ctrl->SetNavPlace( area->GetPlace() );
 						break;
 
@@ -4317,67 +4317,67 @@ void EditNavAreas( NavEditCmdType cmd )
 				switch( cmd )
 				{
 					case EDIT_TOGGLE_PLACE_MODE:
-						EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+						UTIL_GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 						isPlaceMode = true;
 						return;
 
 					case EDIT_DELETE:
-						EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+						UTIL_GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 						TheNavAreaList.remove( area );
 						delete area;
 						return;
 
 					case EDIT_ATTRIB_CROUCH:
-						EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/bell1.wav", 1, ATTN_NORM, 0, 100 ); 
+						UTIL_GetLocalPlayer()->EmitSound("buttons/bell1.wav", CHAN_ITEM); 
 						area->SetAttributes( area->GetAttributes() ^ NAV_CROUCH );
 						break;
 
 					case EDIT_ATTRIB_JUMP:
-						EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/bell1.wav", 1, ATTN_NORM, 0, 100 ); 
+						UTIL_GetLocalPlayer()->EmitSound("buttons/bell1.wav", CHAN_ITEM); 
 						area->SetAttributes( area->GetAttributes() ^ NAV_JUMP );
 						break;
 
 					case EDIT_ATTRIB_PRECISE:
-						EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/bell1.wav", 1, ATTN_NORM, 0, 100 ); 
+						UTIL_GetLocalPlayer()->EmitSound("buttons/bell1.wav", CHAN_ITEM); 
 						area->SetAttributes( area->GetAttributes() ^ NAV_PRECISE );
 						break;
 
 					case EDIT_ATTRIB_NO_JUMP:
-						EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/bell1.wav", 1, ATTN_NORM, 0, 100 ); 
+						UTIL_GetLocalPlayer()->EmitSound("buttons/bell1.wav", CHAN_ITEM); 
 						area->SetAttributes( area->GetAttributes() ^ NAV_NO_JUMP );
 						break;
 
 					case EDIT_SPLIT:
 						if (area->SplitEdit( splitAlongX, splitEdge ))
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "weapons/knife_hitwall1.wav", 1, ATTN_NORM, 0, 100 ); 
+							UTIL_GetLocalPlayer()->EmitSound("weapons/knife_hitwall1.wav", CHAN_ITEM); 
 						else
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 );
+							UTIL_GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM);
 						break;
 
 					case EDIT_MERGE:
 						if (markedArea)
 						{
 							if (area->MergeEdit( markedArea ))
-								EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+								UTIL_GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 							else
-								EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 );
+								UTIL_GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM);
 						}
 						else
 						{
 							HintMessageToAllPlayers( "To merge, mark an area, highlight a second area, then invoke the merge command" );
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 ); 
+							UTIL_GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM); 
 						}
 						break;
 
 					case EDIT_MARK:
 						if (markedArea)
 						{
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+							UTIL_GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 							markedArea = NULL;
 						}
 						else
 						{
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip2.wav", 1, ATTN_NORM, 0, 100 ); 
+							UTIL_GetLocalPlayer()->EmitSound("buttons/blip2.wav", CHAN_ITEM); 
 							markedArea = area;
 
 							int connected = 0;
@@ -4395,7 +4395,7 @@ void EditNavAreas( NavEditCmdType cmd )
 					case EDIT_MARK_UNNAMED:
 						if (markedArea)
 						{
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+							UTIL_GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 							markedArea = NULL;
 						}
 						else
@@ -4412,11 +4412,11 @@ void EditNavAreas( NavEditCmdType cmd )
 							}
 							if ( !markedArea )
 							{
-								EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+								UTIL_GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 							}
 							else
 							{
-								EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip2.wav", 1, ATTN_NORM, 0, 100 ); 
+								UTIL_GetLocalPlayer()->EmitSound("buttons/blip2.wav", CHAN_ITEM); 
 
 								int connected = 0;
 								connected += markedArea->GetAdjacentCount( NORTH );
@@ -4453,7 +4453,7 @@ void EditNavAreas( NavEditCmdType cmd )
 						}
 						else
 						{
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 ); 
+							UTIL_GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM); 
 						}
 						break;
 
@@ -4463,18 +4463,18 @@ void EditNavAreas( NavEditCmdType cmd )
 							NavDirType dir = markedArea->ComputeDirection( &cursor );
 							if (dir == NUM_DIRECTIONS)
 							{
-								EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 ); 
+								UTIL_GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM); 
 							}
 							else
 							{
 								markedArea->ConnectTo( area, dir );
-								EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+								UTIL_GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 							}
 						}
 						else
 						{
 							HintMessageToAllPlayers( "To connect areas, mark an area, highlight a second area, then invoke the connect command. Make sure the cursor is directly north, south, east, or west of the marked area." );
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 ); 
+							UTIL_GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM); 
 						}
 						break;
 
@@ -4483,12 +4483,12 @@ void EditNavAreas( NavEditCmdType cmd )
 						{
 							markedArea->Disconnect( area );
 							area->Disconnect( markedArea );
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+							UTIL_GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 						}
 						else
 						{
 							HintMessageToAllPlayers( "To disconnect areas, mark an area, highlight a second area, then invoke the disconnect command. This will remove all connections between the two areas." );
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 ); 
+							UTIL_GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM); 
 						}
 						break;
 
@@ -4496,14 +4496,14 @@ void EditNavAreas( NavEditCmdType cmd )
 						if (markedArea)
 						{
 							if (area->SpliceEdit( markedArea ))
-								EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+								UTIL_GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 							else
-								EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 );
+								UTIL_GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM);
 						}
 						else
 						{
 							HintMessageToAllPlayers( "To splice, mark an area, highlight a second area, then invoke the splice command to create an area between them" );
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 ); 
+							UTIL_GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM); 
 						}
 						break;
 
@@ -4512,11 +4512,11 @@ void EditNavAreas( NavEditCmdType cmd )
 						{
 							int corner = (markedCorner + 1) % (NUM_CORNERS + 1);
 							markedCorner = (NavCornerType)corner;
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+							UTIL_GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 						}
 						else
 						{
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 ); 
+							UTIL_GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM); 
 						}
 						break;
 
@@ -4524,11 +4524,11 @@ void EditNavAreas( NavEditCmdType cmd )
 						if (markedArea)
 						{
 							markedArea->RaiseCorner( markedCorner, 1 );
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+							UTIL_GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 						}
 						else
 						{
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 ); 
+							UTIL_GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM); 
 						}
 						break;
 
@@ -4536,11 +4536,11 @@ void EditNavAreas( NavEditCmdType cmd )
 						if (markedArea)
 						{
 							markedArea->RaiseCorner( markedCorner, -1 );
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+							UTIL_GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 						}
 						else
 						{
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 ); 
+							UTIL_GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM); 
 						}
 						break;
 				}
@@ -4555,11 +4555,11 @@ void EditNavAreas( NavEditCmdType cmd )
 				if (isCreatingNavArea)
 				{
 					isCreatingNavArea = false;
-					EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 );
+					UTIL_GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM);
 				}
 				else
 				{
-					EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip2.wav", 1, ATTN_NORM, 0, 100 ); 
+					UTIL_GetLocalPlayer()->EmitSound("buttons/blip2.wav", CHAN_ITEM); 
 					isCreatingNavArea = true;
 					isAnchored = false;
 				}
@@ -4574,7 +4574,7 @@ void EditNavAreas( NavEditCmdType cmd )
 					CNavArea *newArea = new CNavArea( &anchor, &cursor );
 					TheNavAreaList.push_back( newArea );
 					TheNavAreaGrid.AddNavArea( newArea );
-					EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+					UTIL_GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 
 					// if we have a marked area, inter-connect the two
 					if (markedArea)
@@ -4610,7 +4610,7 @@ void EditNavAreas( NavEditCmdType cmd )
 				}
 				else
 				{
-					EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 );
+					UTIL_GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM);
 				}
 				break;
 			}

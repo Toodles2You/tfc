@@ -99,15 +99,9 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 
 	switch (RANDOM_LONG(0, 2))
 	{
-	case 0:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/debris1.wav", 0.55, ATTN_NORM);
-		break;
-	case 1:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/debris2.wav", 0.55, ATTN_NORM);
-		break;
-	case 2:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/debris3.wav", 0.55, ATTN_NORM);
-		break;
+	case 0: EmitSound("weapons/debris1.wav", CHAN_VOICE, 0.55F); break;
+	case 1: EmitSound("weapons/debris2.wav", CHAN_VOICE, 0.55F); break;
+	case 2: EmitSound("weapons/debris3.wav", CHAN_VOICE, 0.55F); break;
 	}
 
 	pev->effects |= EF_NODRAW;
@@ -267,15 +261,9 @@ void CGrenade::BounceSound()
 {
 	switch (RANDOM_LONG(0, 2))
 	{
-	case 0:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/grenade_hit1.wav", 0.25, ATTN_NORM);
-		break;
-	case 1:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/grenade_hit2.wav", 0.25, ATTN_NORM);
-		break;
-	case 2:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/grenade_hit3.wav", 0.25, ATTN_NORM);
-		break;
+	case 0: EmitSound("weapons/grenade_hit1.wav", CHAN_VOICE, 0.25F); break;
+	case 1: EmitSound("weapons/grenade_hit2.wav", CHAN_VOICE, 0.25F); break;
+	case 2: EmitSound("weapons/grenade_hit3.wav", CHAN_VOICE, 0.25F); break;
 	}
 }
 
