@@ -443,13 +443,13 @@ void CWreckage::Think()
 	VecSrc.y = RANDOM_FLOAT(pev->absmin.y, pev->absmax.y);
 	VecSrc.z = RANDOM_FLOAT(pev->absmin.z, pev->absmax.z);
 
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, VecSrc);
-	WRITE_BYTE(TE_SMOKE);
-	WRITE_COORD(VecSrc.x);
-	WRITE_COORD(VecSrc.y);
-	WRITE_COORD(VecSrc.z);
-	WRITE_SHORT(g_sModelIndexSmoke);
-	WRITE_BYTE(RANDOM_LONG(0, 49) + 50); // scale * 10
-	WRITE_BYTE(RANDOM_LONG(0, 3) + 8);	 // framerate
-	MESSAGE_END();
+	MessageBegin(MSG_PVS, SVC_TEMPENTITY, VecSrc);
+	WriteByte(TE_SMOKE);
+	WriteCoord(VecSrc.x);
+	WriteCoord(VecSrc.y);
+	WriteCoord(VecSrc.z);
+	WriteShort(g_sModelIndexSmoke);
+	WriteByte(RANDOM_LONG(0, 49) + 50); // scale * 10
+	WriteByte(RANDOM_LONG(0, 3) + 8);	 // framerate
+	MessageEnd();
 }

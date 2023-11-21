@@ -382,16 +382,16 @@ void CGauss::Fire(Vector vecOrigSrc, Vector vecDir, float flDamage)
 			pEntity->TraceAttack(m_pPlayer, flDamage, vecDir, &tr, DMG_BULLET);
 			ApplyMultiDamage(m_pPlayer, m_pPlayer);
 
-			MESSAGE_BEGIN(MSG_PVS, gmsgBlood, pEntity->pev->origin);
-			WRITE_FLOAT(vecDir.x);
-			WRITE_FLOAT(vecDir.y);
-			WRITE_FLOAT(vecDir.z);
-			WRITE_BYTE(0);
-			WRITE_BYTE(0);
-			WRITE_COORD(tr.vecEndPos.x);
-			WRITE_COORD(tr.vecEndPos.y);
-			WRITE_COORD(tr.vecEndPos.z);
-			MESSAGE_END();
+			MessageBegin(MSG_PVS, gmsgBlood, pEntity->pev->origin);
+			WriteFloat(vecDir.x);
+			WriteFloat(vecDir.y);
+			WriteFloat(vecDir.z);
+			WriteByte(0);
+			WriteByte(0);
+			WriteCoord(tr.vecEndPos.x);
+			WriteCoord(tr.vecEndPos.y);
+			WriteCoord(tr.vecEndPos.z);
+			MessageEnd();
 		}
 
 		if (pEntity->ReflectGauss())

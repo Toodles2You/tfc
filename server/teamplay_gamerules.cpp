@@ -184,21 +184,21 @@ void CHalfLifeTeamplay::InitHUD(CBasePlayer* pPlayer)
 	CHalfLifeMultiplay::InitHUD(pPlayer);
 
 	// Send down the team names
-	MESSAGE_BEGIN(MSG_ONE, gmsgTeamNames, NULL, pPlayer->edict());
-	WRITE_BYTE(m_numTeams);
+	MessageBegin(MSG_ONE, gmsgTeamNames, pPlayer);
+	WriteByte(m_numTeams);
 	for (auto t = m_teams.begin(); t != m_teams.end(); t++)
 	{
-		WRITE_STRING((*t).m_name.c_str());
+		WriteString((*t).m_name.c_str());
 	}
-	MESSAGE_END();
+	MessageEnd();
 
 	for (auto t = m_teams.begin(); t != m_teams.end(); t++)
 	{
-		MESSAGE_BEGIN(MSG_ONE, gmsgTeamScore, nullptr, pPlayer->edict());
-		WRITE_STRING((*t).m_name.c_str());
-		WRITE_SHORT((*t).m_score);
-		WRITE_SHORT(0);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgTeamScore, pPlayer);
+		WriteString((*t).m_name.c_str());
+		WriteShort((*t).m_score);
+		WriteShort(0);
+		MessageEnd();
 	}
 
 	int clientIndex = pPlayer->entindex();
@@ -209,10 +209,10 @@ void CHalfLifeTeamplay::InitHUD(CBasePlayer* pPlayer)
 		CBaseEntity* plr = UTIL_PlayerByIndex(i);
 		if (plr && IsValidTeam(plr->TeamID()))
 		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgTeamInfo, NULL, pPlayer->edict());
-			WRITE_BYTE(plr->entindex());
-			WRITE_STRING(plr->TeamID());
-			MESSAGE_END();
+			MessageBegin(MSG_ONE, gmsgTeamInfo, pPlayer);
+			WriteByte(plr->entindex());
+			WriteString(plr->TeamID());
+			MessageEnd();
 		}
 	}
 }

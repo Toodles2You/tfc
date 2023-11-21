@@ -54,23 +54,23 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 
 	int iContents = UTIL_PointContents(pev->origin);
 
-	MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
-	WRITE_BYTE(TE_EXPLOSION);	// This makes a dynamic light and the explosion sprites/sound
-	WRITE_COORD(pev->origin.x); // Send to PAS because of the sound
-	WRITE_COORD(pev->origin.y);
-	WRITE_COORD(pev->origin.z);
+	MessageBegin(MSG_PAS, SVC_TEMPENTITY, pev->origin);
+	WriteByte(TE_EXPLOSION);	// This makes a dynamic light and the explosion sprites/sound
+	WriteCoord(pev->origin.x); // Send to PAS because of the sound
+	WriteCoord(pev->origin.y);
+	WriteCoord(pev->origin.z);
 	if (iContents != CONTENTS_WATER)
 	{
-		WRITE_SHORT(g_sModelIndexFireball);
+		WriteShort(g_sModelIndexFireball);
 	}
 	else
 	{
-		WRITE_SHORT(g_sModelIndexWExplosion);
+		WriteShort(g_sModelIndexWExplosion);
 	}
-	WRITE_BYTE((pev->dmg - 50) * .60); // scale * 10
-	WRITE_BYTE(15);					   // framerate
-	WRITE_BYTE(TE_EXPLFLAG_NONE);
-	MESSAGE_END();
+	WriteByte((pev->dmg - 50) * .60); // scale * 10
+	WriteByte(15);					   // framerate
+	WriteByte(TE_EXPLFLAG_NONE);
+	MessageEnd();
 
 	CBaseEntity* owner;
 	if (pev->owner)
@@ -126,15 +126,15 @@ void CGrenade::Smoke()
 	}
 	else
 	{
-		MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
-		WRITE_BYTE(TE_SMOKE);
-		WRITE_COORD(pev->origin.x);
-		WRITE_COORD(pev->origin.y);
-		WRITE_COORD(pev->origin.z);
-		WRITE_SHORT(g_sModelIndexSmoke);
-		WRITE_BYTE((pev->dmg - 50) * 0.80); // scale * 10
-		WRITE_BYTE(12);						// framerate
-		MESSAGE_END();
+		MessageBegin(MSG_PVS, SVC_TEMPENTITY, pev->origin);
+		WriteByte(TE_SMOKE);
+		WriteCoord(pev->origin.x);
+		WriteCoord(pev->origin.y);
+		WriteCoord(pev->origin.z);
+		WriteShort(g_sModelIndexSmoke);
+		WriteByte((pev->dmg - 50) * 0.80); // scale * 10
+		WriteByte(12);						// framerate
+		MessageEnd();
 	}
 	Remove();
 }

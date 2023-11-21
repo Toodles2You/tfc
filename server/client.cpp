@@ -390,17 +390,17 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 			if (!client->IsObserver())
 				continue;
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgSayText, NULL, client->pev);
-		WRITE_BYTE(ENTINDEX(pEntity));
-		WRITE_STRING(text);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgSayText, client);
+		WriteByte(ENTINDEX(pEntity));
+		WriteString(text);
+		MessageEnd();
 	}
 
 	// print to the sending client
-	MESSAGE_BEGIN(MSG_ONE, gmsgSayText, NULL, &pEntity->v);
-	WRITE_BYTE(ENTINDEX(pEntity));
-	WRITE_STRING(text);
-	MESSAGE_END();
+	MessageBegin(MSG_ONE, gmsgSayText, CBaseEntity::Instance(pEntity));
+	WriteByte(ENTINDEX(pEntity));
+	WriteString(text);
+	MessageEnd();
 
 	// echo to server console
 	g_engfuncs.pfnServerPrint(text);
@@ -515,7 +515,9 @@ void ClientCommand(edict_t* pEntity)
 													 (!FStringNull(pev->netname) && STRING(pev->netname)[0] != 0) ? STRING(pev->netname) : "unconnected"));
 		}
 		else
-			ClientPrint(pev, HUD_PRINTCONSOLE, "Spectator mode is disabled.\n");
+		{
+			ClientPrint(player, HUD_PRINTCONSOLE, "Spectator mode is disabled.\n");
+		}
 	}
 	else if (FStrEq(pcmd, "specmode")) // new spectator mode
 	{
@@ -550,7 +552,7 @@ void ClientCommand(edict_t* pEntity)
 		command[127] = '\0';
 
 		// tell the user they entered an unknown command
-		ClientPrint(&pEntity->v, HUD_PRINTCONSOLE, UTIL_VarArgs("Unknown command: %s\n", command));
+		ClientPrint(player, HUD_PRINTCONSOLE, UTIL_VarArgs("Unknown command: %s\n", command));
 	}
 }
 
@@ -593,10 +595,10 @@ void ClientUserInfoChanged(edict_t* pEntity, char* infobuffer)
 		{
 			char text[256];
 			sprintf(text, "* %s changed name to %s\n", STRING(pEntity->v.netname), g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
-			MESSAGE_BEGIN(MSG_ALL, gmsgSayText, NULL);
-			WRITE_BYTE(ENTINDEX(pEntity));
-			WRITE_STRING(text);
-			MESSAGE_END();
+			MessageBegin(MSG_ALL, gmsgSayText);
+			WriteByte(ENTINDEX(pEntity));
+			WriteString(text);
+			MessageEnd();
 
 			// team match?
 			if (g_pGameRules->IsTeamplay())

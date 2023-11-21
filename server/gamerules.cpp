@@ -82,9 +82,9 @@ bool CSpawnPoint::IsValid(CBasePlayer *pPlayer, int attempt)
 
 void CGameRules::UpdateGameMode(CBasePlayer* pPlayer)
 {
-	MESSAGE_BEGIN(MSG_ONE, gmsgGameMode, NULL, pPlayer->edict());
-	WRITE_BYTE(GetGameMode());
-	MESSAGE_END();
+	MessageBegin(MSG_ONE, gmsgGameMode, pPlayer);
+	WriteByte(GetGameMode());
+	MessageEnd();
 }
 
 void CGameRules::InitHUD(CBasePlayer* pl)

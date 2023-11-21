@@ -179,29 +179,29 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	// draw fireball
 	if ((pev->spawnflags & SF_ENVEXPLOSION_NOFIREBALL) == 0)
 	{
-		MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
-		WRITE_BYTE(TE_EXPLOSION);
-		WRITE_COORD(pev->origin.x);
-		WRITE_COORD(pev->origin.y);
-		WRITE_COORD(pev->origin.z);
-		WRITE_SHORT(g_sModelIndexFireball);
-		WRITE_BYTE((byte)m_spriteScale); // scale * 10
-		WRITE_BYTE(15);					 // framerate
-		WRITE_BYTE(TE_EXPLFLAG_NONE);
-		MESSAGE_END();
+		MessageBegin(MSG_PAS, SVC_TEMPENTITY, pev->origin);
+		WriteByte(TE_EXPLOSION);
+		WriteCoord(pev->origin.x);
+		WriteCoord(pev->origin.y);
+		WriteCoord(pev->origin.z);
+		WriteShort(g_sModelIndexFireball);
+		WriteByte((byte)m_spriteScale); // scale * 10
+		WriteByte(15);					 // framerate
+		WriteByte(TE_EXPLFLAG_NONE);
+		MessageEnd();
 	}
 	else
 	{
-		MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
-		WRITE_BYTE(TE_EXPLOSION);
-		WRITE_COORD(pev->origin.x);
-		WRITE_COORD(pev->origin.y);
-		WRITE_COORD(pev->origin.z);
-		WRITE_SHORT(g_sModelIndexFireball);
-		WRITE_BYTE(0);	// no sprite
-		WRITE_BYTE(15); // framerate
-		WRITE_BYTE(TE_EXPLFLAG_NONE);
-		MESSAGE_END();
+		MessageBegin(MSG_PAS, SVC_TEMPENTITY, pev->origin);
+		WriteByte(TE_EXPLOSION);
+		WriteCoord(pev->origin.x);
+		WriteCoord(pev->origin.y);
+		WriteCoord(pev->origin.z);
+		WriteShort(g_sModelIndexFireball);
+		WriteByte(0);	// no sprite
+		WriteByte(15); // framerate
+		WriteByte(TE_EXPLFLAG_NONE);
+		MessageEnd();
 	}
 
 	// do damage
@@ -229,15 +229,15 @@ void CEnvExplosion::Smoke()
 {
 	if ((pev->spawnflags & SF_ENVEXPLOSION_NOSMOKE) == 0)
 	{
-		MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
-		WRITE_BYTE(TE_SMOKE);
-		WRITE_COORD(pev->origin.x);
-		WRITE_COORD(pev->origin.y);
-		WRITE_COORD(pev->origin.z);
-		WRITE_SHORT(g_sModelIndexSmoke);
-		WRITE_BYTE((byte)m_spriteScale); // scale * 10
-		WRITE_BYTE(12);					 // framerate
-		MESSAGE_END();
+		MessageBegin(MSG_PAS, SVC_TEMPENTITY, pev->origin);
+		WriteByte(TE_SMOKE);
+		WriteCoord(pev->origin.x);
+		WriteCoord(pev->origin.y);
+		WriteCoord(pev->origin.z);
+		WriteShort(g_sModelIndexSmoke);
+		WriteByte((byte)m_spriteScale); // scale * 10
+		WriteByte(12);					 // framerate
+		MessageEnd();
 	}
 
 	if ((pev->spawnflags & SF_ENVEXPLOSION_REPEATABLE) == 0)

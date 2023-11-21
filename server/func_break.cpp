@@ -672,39 +672,39 @@ void CBreakable::Die()
 	}
 
 	vecSpot = pev->origin + (pev->mins + pev->maxs) * 0.5;
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, vecSpot);
-	WRITE_BYTE(TE_BREAKMODEL);
+	MessageBegin(MSG_PVS, SVC_TEMPENTITY, vecSpot);
+	WriteByte(TE_BREAKMODEL);
 
 	// position
-	WRITE_COORD(vecSpot.x);
-	WRITE_COORD(vecSpot.y);
-	WRITE_COORD(vecSpot.z);
+	WriteCoord(vecSpot.x);
+	WriteCoord(vecSpot.y);
+	WriteCoord(vecSpot.z);
 
 	// size
-	WRITE_COORD(pev->size.x);
-	WRITE_COORD(pev->size.y);
-	WRITE_COORD(pev->size.z);
+	WriteCoord(pev->size.x);
+	WriteCoord(pev->size.y);
+	WriteCoord(pev->size.z);
 
 	// velocity
-	WRITE_COORD(vecVelocity.x);
-	WRITE_COORD(vecVelocity.y);
-	WRITE_COORD(vecVelocity.z);
+	WriteCoord(vecVelocity.x);
+	WriteCoord(vecVelocity.y);
+	WriteCoord(vecVelocity.z);
 
 	// randomization
-	WRITE_BYTE(10);
+	WriteByte(10);
 
 	// Model
-	WRITE_SHORT(m_idShard); //model id#
+	WriteShort(m_idShard); //model id#
 
 	// # of shards
-	WRITE_BYTE(0); // let client decide
+	WriteByte(0); // let client decide
 
 	// duration
-	WRITE_BYTE(25); // 2.5 seconds
+	WriteByte(25); // 2.5 seconds
 
 	// flags
-	WRITE_BYTE(cFlag);
-	MESSAGE_END();
+	WriteByte(cFlag);
+	MessageEnd();
 
 	float size = pev->size.x;
 	if (size < pev->size.y)

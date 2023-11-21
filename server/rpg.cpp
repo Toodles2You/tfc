@@ -173,19 +173,19 @@ void CRpgRocket::IgniteThink()
 	EmitSound("weapons/rocket1.wav", CHAN_VOICE, VOL_NORM, 0.5);
 
 	// rocket trail
-	MESSAGE_BEGIN(MSG_BROADCAST, SVC_TEMPENTITY);
+	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
 
-	WRITE_BYTE(TE_BEAMFOLLOW);
-	WRITE_SHORT(entindex()); // entity
-	WRITE_SHORT(m_iTrail);	 // model
-	WRITE_BYTE(40);			 // life
-	WRITE_BYTE(5);			 // width
-	WRITE_BYTE(224);		 // r, g, b
-	WRITE_BYTE(224);		 // r, g, b
-	WRITE_BYTE(255);		 // r, g, b
-	WRITE_BYTE(255);		 // brightness
+	WriteByte(TE_BEAMFOLLOW);
+	WriteShort(entindex()); // entity
+	WriteShort(m_iTrail);	 // model
+	WriteByte(40);			 // life
+	WriteByte(5);			 // width
+	WriteByte(224);		 // r, g, b
+	WriteByte(224);		 // r, g, b
+	WriteByte(255);		 // r, g, b
+	WriteByte(255);		 // brightness
 
-	MESSAGE_END(); // move PHS/PVS data sending into here (SEND_ALL, SEND_PVS, SEND_PHS)
+	MessageEnd(); // move PHS/PVS data sending into here (SEND_ALL, SEND_PVS, SEND_PHS)
 
 	m_flIgniteTime = gpGlobals->time;
 

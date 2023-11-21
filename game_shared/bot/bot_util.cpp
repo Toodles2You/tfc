@@ -537,50 +537,50 @@ Vector UTIL_ComputeOrigin( edict_t * pentEdict )
 //------------------------------------------------------------------------------------------------------------
 void UTIL_DrawBeamFromEnt( int iIndex, Vector vecEnd, int iLifetime, byte bRed, byte bGreen, byte bBlue )
 {
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecEnd );   // vecEnd = origin???
-									WRITE_BYTE( TE_BEAMENTPOINT );
-									WRITE_SHORT( iIndex );
-									WRITE_COORD( vecEnd.x );
-									WRITE_COORD( vecEnd.y );
-									WRITE_COORD( vecEnd.z );
-									WRITE_SHORT( s_iBeamSprite );
-									WRITE_BYTE( 0 );		 // startframe
-									WRITE_BYTE( 0 );		 // framerate
-									WRITE_BYTE( iLifetime ); // life
-									WRITE_BYTE( 10 );		 // width
-									WRITE_BYTE( 0 );		 // noise
-									WRITE_BYTE( bRed );		 // r, g, b
-									WRITE_BYTE( bGreen );		 // r, g, b
-									WRITE_BYTE( bBlue );    // r, g, b
-									WRITE_BYTE( 255 );	 // brightness
-									WRITE_BYTE( 0 );		 // speed
-									MESSAGE_END();
+	MessageBegin( MSG_PVS, SVC_TEMPENTITY, vecEnd );   // vecEnd = origin???
+									WriteByte( TE_BEAMENTPOINT );
+									WriteShort( iIndex );
+									WriteCoord( vecEnd.x );
+									WriteCoord( vecEnd.y );
+									WriteCoord( vecEnd.z );
+									WriteShort( s_iBeamSprite );
+									WriteByte( 0 );		 // startframe
+									WriteByte( 0 );		 // framerate
+									WriteByte( iLifetime ); // life
+									WriteByte( 10 );		 // width
+									WriteByte( 0 );		 // noise
+									WriteByte( bRed );		 // r, g, b
+									WriteByte( bGreen );		 // r, g, b
+									WriteByte( bBlue );    // r, g, b
+									WriteByte( 255 );	 // brightness
+									WriteByte( 0 );		 // speed
+									MessageEnd();
 }
 
 
 //------------------------------------------------------------------------------------------------------------
 void UTIL_DrawBeamPoints( Vector vecStart, Vector vecEnd, int iLifetime, byte bRed, byte bGreen, byte bBlue )
 {
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecStart );
-									WRITE_BYTE( TE_BEAMPOINTS );
-									WRITE_COORD( vecStart.x );
-									WRITE_COORD( vecStart.y );
-									WRITE_COORD( vecStart.z );
-									WRITE_COORD( vecEnd.x );
-									WRITE_COORD( vecEnd.y );
-									WRITE_COORD( vecEnd.z );
-									WRITE_SHORT( s_iBeamSprite );
-									WRITE_BYTE( 0 );		 // startframe
-									WRITE_BYTE( 0 );		 // framerate
-									WRITE_BYTE( iLifetime ); // life
-									WRITE_BYTE( 10 );		 // width
-									WRITE_BYTE( 0 );		 // noise
-									WRITE_BYTE( bRed );		 // r, g, b
-									WRITE_BYTE( bGreen );		 // r, g, b
-									WRITE_BYTE( bBlue );    // r, g, b
-									WRITE_BYTE( 255 );	 // brightness
-									WRITE_BYTE( 0 );		 // speed
-									MESSAGE_END();
+	MessageBegin( MSG_PVS, SVC_TEMPENTITY, vecStart );
+									WriteByte( TE_BEAMPOINTS );
+									WriteCoord( vecStart.x );
+									WriteCoord( vecStart.y );
+									WriteCoord( vecStart.z );
+									WriteCoord( vecEnd.x );
+									WriteCoord( vecEnd.y );
+									WriteCoord( vecEnd.z );
+									WriteShort( s_iBeamSprite );
+									WriteByte( 0 );		 // startframe
+									WriteByte( 0 );		 // framerate
+									WriteByte( iLifetime ); // life
+									WriteByte( 10 );		 // width
+									WriteByte( 0 );		 // noise
+									WriteByte( bRed );		 // r, g, b
+									WriteByte( bGreen );		 // r, g, b
+									WriteByte( bBlue );    // r, g, b
+									WriteByte( 255 );	 // brightness
+									WriteByte( 0 );		 // speed
+									MessageEnd();
 }
 
 

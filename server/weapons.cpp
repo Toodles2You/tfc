@@ -175,19 +175,19 @@ void EjectBrass(const Vector& vecOrigin, const Vector& vecVelocity, float rotati
 {
 	// FIX: when the player shoots, their gun isn't in the same position as it is on the model other players see.
 
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, vecOrigin);
-	WRITE_BYTE(TE_MODEL);
-	WRITE_COORD(vecOrigin.x);
-	WRITE_COORD(vecOrigin.y);
-	WRITE_COORD(vecOrigin.z);
-	WRITE_COORD(vecVelocity.x);
-	WRITE_COORD(vecVelocity.y);
-	WRITE_COORD(vecVelocity.z);
-	WRITE_ANGLE(rotation);
-	WRITE_SHORT(model);
-	WRITE_BYTE(soundtype);
-	WRITE_BYTE(25); // 2.5 seconds
-	MESSAGE_END();
+	MessageBegin(MSG_PVS, SVC_TEMPENTITY, vecOrigin);
+	WriteByte(TE_MODEL);
+	WriteCoord(vecOrigin.x);
+	WriteCoord(vecOrigin.y);
+	WriteCoord(vecOrigin.z);
+	WriteCoord(vecVelocity.x);
+	WriteCoord(vecVelocity.y);
+	WriteCoord(vecVelocity.z);
+	WriteAngle(rotation);
+	WriteShort(model);
+	WriteByte(soundtype);
+	WriteByte(25); // 2.5 seconds
+	MessageEnd();
 }
 
 
@@ -595,10 +595,10 @@ void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int body)
 	if (skiplocal && ENGINE_CANSKIP(m_pPlayer->edict()))
 		return;
 
-	MESSAGE_BEGIN(MSG_ONE, SVC_WEAPONANIM, NULL, m_pPlayer->pev);
-	WRITE_BYTE(iAnim);	   // sequence number
-	WRITE_BYTE(pev->body); // weaponmodel bodygroup.
-	MESSAGE_END();
+	MessageBegin(MSG_ONE, SVC_WEAPONANIM, m_pPlayer);
+	WriteByte(iAnim);	   // sequence number
+	WriteByte(pev->body); // weaponmodel bodygroup.
+	MessageEnd();
 }
 
 void CBasePlayerWeapon::PlayWeaponSound(int iChannel, const char* szSound, float flVolume, float flAttn, int iFlags, float flPitch)

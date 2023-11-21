@@ -32,6 +32,24 @@
 #include "gamerules.h"
 #include "UserMessages.h"
 
+inline void MessageBegin(int dest, int type, const Vector& origin, CBaseEntity* entity)
+{
+	g_engfuncs.pfnMessageBegin(
+		dest,
+		type,
+		origin,
+		entity ? entity->pev->pContainingEntity : nullptr);
+}
+
+inline void MessageBegin(int dest, int type, CBaseEntity* entity)
+{
+	g_engfuncs.pfnMessageBegin(
+		dest,
+		type,
+		nullptr,
+		entity ? entity->pev->pContainingEntity : nullptr);
+}
+
 float UTIL_WeaponTimeBase()
 {
 	return 0.0;
@@ -684,13 +702,13 @@ void UTIL_ScreenShake(const Vector& center, float amplitude, float frequency, fl
 		{
 			shake.amplitude = FixedUnsigned16(localAmplitude, 1 << 12); // 4.12 fixed
 
-			MESSAGE_BEGIN(MSG_ONE, gmsgShake, NULL, pPlayer->edict()); // use the magic #1 for "one client"
+			MessageBegin(MSG_ONE, gmsgShake, pPlayer);
 
-			WRITE_SHORT(shake.amplitude); // shake amount
-			WRITE_SHORT(shake.duration);  // shake lasts this long
-			WRITE_SHORT(shake.frequency); // shake noise frequency
+			WriteShort(shake.amplitude); // shake amount
+			WriteShort(shake.duration);  // shake lasts this long
+			WriteShort(shake.frequency); // shake noise frequency
 
-			MESSAGE_END();
+			MessageEnd();
 		}
 	}
 }
@@ -720,17 +738,17 @@ void UTIL_ScreenFadeWrite(const ScreenFade& fade, CBaseEntity* pEntity)
 	if (!pEntity || !pEntity->IsNetClient())
 		return;
 
-	MESSAGE_BEGIN(MSG_ONE, gmsgFade, NULL, pEntity->edict()); // use the magic #1 for "one client"
+	MessageBegin(MSG_ONE, gmsgFade, pEntity);
 
-	WRITE_SHORT(fade.duration);	 // fade lasts this long
-	WRITE_SHORT(fade.holdTime);	 // fade lasts this long
-	WRITE_SHORT(fade.fadeFlags); // fade type (in / out)
-	WRITE_BYTE(fade.r);			 // fade red
-	WRITE_BYTE(fade.g);			 // fade green
-	WRITE_BYTE(fade.b);			 // fade blue
-	WRITE_BYTE(fade.a);			 // fade blue
+	WriteShort(fade.duration);	 // fade lasts this long
+	WriteShort(fade.holdTime);	 // fade lasts this long
+	WriteShort(fade.fadeFlags); // fade type (in / out)
+	WriteByte(fade.r);			 // fade red
+	WriteByte(fade.g);			 // fade green
+	WriteByte(fade.b);			 // fade blue
+	WriteByte(fade.a);			 // fade blue
 
-	MESSAGE_END();
+	MessageEnd();
 }
 
 
@@ -765,43 +783,43 @@ void UTIL_HudMessage(CBaseEntity* pEntity, const hudtextparms_t& textparms, cons
 	if (!pEntity || !pEntity->IsNetClient())
 		return;
 
-	MESSAGE_BEGIN(MSG_ONE, SVC_TEMPENTITY, NULL, pEntity->edict());
-	WRITE_BYTE(TE_TEXTMESSAGE);
-	WRITE_BYTE(textparms.channel & 0xFF);
+	MessageBegin(MSG_ONE, SVC_TEMPENTITY, pEntity);
+	WriteByte(TE_TEXTMESSAGE);
+	WriteByte(textparms.channel & 0xFF);
 
-	WRITE_SHORT(FixedSigned16(textparms.x, 1 << 13));
-	WRITE_SHORT(FixedSigned16(textparms.y, 1 << 13));
-	WRITE_BYTE(textparms.effect);
+	WriteShort(FixedSigned16(textparms.x, 1 << 13));
+	WriteShort(FixedSigned16(textparms.y, 1 << 13));
+	WriteByte(textparms.effect);
 
-	WRITE_BYTE(textparms.r1);
-	WRITE_BYTE(textparms.g1);
-	WRITE_BYTE(textparms.b1);
-	WRITE_BYTE(textparms.a1);
+	WriteByte(textparms.r1);
+	WriteByte(textparms.g1);
+	WriteByte(textparms.b1);
+	WriteByte(textparms.a1);
 
-	WRITE_BYTE(textparms.r2);
-	WRITE_BYTE(textparms.g2);
-	WRITE_BYTE(textparms.b2);
-	WRITE_BYTE(textparms.a2);
+	WriteByte(textparms.r2);
+	WriteByte(textparms.g2);
+	WriteByte(textparms.b2);
+	WriteByte(textparms.a2);
 
-	WRITE_SHORT(FixedUnsigned16(textparms.fadeinTime, 1 << 8));
-	WRITE_SHORT(FixedUnsigned16(textparms.fadeoutTime, 1 << 8));
-	WRITE_SHORT(FixedUnsigned16(textparms.holdTime, 1 << 8));
+	WriteShort(FixedUnsigned16(textparms.fadeinTime, 1 << 8));
+	WriteShort(FixedUnsigned16(textparms.fadeoutTime, 1 << 8));
+	WriteShort(FixedUnsigned16(textparms.holdTime, 1 << 8));
 
 	if (textparms.effect == 2)
-		WRITE_SHORT(FixedUnsigned16(textparms.fxTime, 1 << 8));
+		WriteShort(FixedUnsigned16(textparms.fxTime, 1 << 8));
 
 	if (strlen(pMessage) < 512)
 	{
-		WRITE_STRING(pMessage);
+		WriteString(pMessage);
 	}
 	else
 	{
 		char tmp[512];
 		strncpy(tmp, pMessage, 511);
 		tmp[511] = 0;
-		WRITE_STRING(tmp);
+		WriteString(tmp);
 	}
-	MESSAGE_END();
+	MessageEnd();
 }
 
 void UTIL_HudMessageAll(const hudtextparms_t& textparms, const char* pMessage)
@@ -818,38 +836,41 @@ void UTIL_HudMessageAll(const hudtextparms_t& textparms, const char* pMessage)
 
 void UTIL_ClientPrintAll(int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4)
 {
-	MESSAGE_BEGIN(MSG_ALL, gmsgTextMsg);
-	WRITE_BYTE(msg_dest);
-	WRITE_STRING(msg_name);
+	MessageBegin(MSG_ALL, gmsgTextMsg);
+	WriteByte(msg_dest);
+	WriteString(msg_name);
 
 	if (param1)
-		WRITE_STRING(param1);
+		WriteString(param1);
 	if (param2)
-		WRITE_STRING(param2);
+		WriteString(param2);
 	if (param3)
-		WRITE_STRING(param3);
+		WriteString(param3);
 	if (param4)
-		WRITE_STRING(param4);
+		WriteString(param4);
 
-	MESSAGE_END();
+	MessageEnd();
 }
 
-void ClientPrint(entvars_t* client, int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4)
+void ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4)
 {
-	MESSAGE_BEGIN(MSG_ONE, gmsgTextMsg, NULL, client);
-	WRITE_BYTE(msg_dest);
-	WRITE_STRING(msg_name);
+	if (!entity->IsNetClient())
+		return;
+
+	MessageBegin(MSG_ONE, gmsgTextMsg, entity);
+	WriteByte(msg_dest);
+	WriteString(msg_name);
 
 	if (param1)
-		WRITE_STRING(param1);
+		WriteString(param1);
 	if (param2)
-		WRITE_STRING(param2);
+		WriteString(param2);
 	if (param3)
-		WRITE_STRING(param3);
+		WriteString(param3);
 	if (param4)
-		WRITE_STRING(param4);
+		WriteString(param4);
 
-	MESSAGE_END();
+	MessageEnd();
 }
 
 void UTIL_SayText(const char* pText, CBaseEntity* pEntity)
@@ -857,18 +878,18 @@ void UTIL_SayText(const char* pText, CBaseEntity* pEntity)
 	if (!pEntity->IsNetClient())
 		return;
 
-	MESSAGE_BEGIN(MSG_ONE, gmsgSayText, NULL, pEntity->edict());
-	WRITE_BYTE(pEntity->entindex());
-	WRITE_STRING(pText);
-	MESSAGE_END();
+	MessageBegin(MSG_ONE, gmsgSayText, pEntity);
+	WriteByte(pEntity->entindex());
+	WriteString(pText);
+	MessageEnd();
 }
 
 void UTIL_SayTextAll(const char* pText, CBaseEntity* pEntity)
 {
-	MESSAGE_BEGIN(MSG_ALL, gmsgSayText, NULL);
-	WRITE_BYTE(pEntity->entindex());
-	WRITE_STRING(pText);
-	MESSAGE_END();
+	MessageBegin(MSG_ALL, gmsgSayText);
+	WriteByte(pEntity->entindex());
+	WriteString(pText);
+	MessageEnd();
 }
 
 
@@ -905,9 +926,9 @@ void UTIL_ShowMessage(const char* pString, CBaseEntity* pEntity)
 	if (!pEntity || !pEntity->IsNetClient())
 		return;
 
-	MESSAGE_BEGIN(MSG_ONE, gmsgHudText, NULL, pEntity->edict());
-	WRITE_STRING(pString);
-	MESSAGE_END();
+	MessageBegin(MSG_ONE, gmsgHudText, pEntity);
+	WriteString(pString);
+	MessageEnd();
 }
 
 
@@ -1096,17 +1117,17 @@ void UTIL_BloodStream(const Vector& origin, const Vector& direction, int color, 
 		return;
 	}
 
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, origin);
-	WRITE_BYTE(TE_BLOODSTREAM);
-	WRITE_COORD(origin.x);
-	WRITE_COORD(origin.y);
-	WRITE_COORD(origin.z);
-	WRITE_COORD(direction.x);
-	WRITE_COORD(direction.y);
-	WRITE_COORD(direction.z);
-	WRITE_BYTE(color);
-	WRITE_BYTE(std::min(amount, 255));
-	MESSAGE_END();
+	MessageBegin(MSG_PVS, SVC_TEMPENTITY, origin);
+	WriteByte(TE_BLOODSTREAM);
+	WriteCoord(origin.x);
+	WriteCoord(origin.y);
+	WriteCoord(origin.z);
+	WriteCoord(direction.x);
+	WriteCoord(direction.y);
+	WriteCoord(direction.z);
+	WriteByte(color);
+	WriteByte(std::min(amount, 255));
+	MessageEnd();
 }
 
 void UTIL_BloodDrips(const Vector& origin, const Vector& direction, int color, int amount)
@@ -1124,16 +1145,16 @@ void UTIL_BloodDrips(const Vector& origin, const Vector& direction, int color, i
 
 	amount = std::min(amount, 255);
 
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, origin);
-	WRITE_BYTE(TE_BLOODSPRITE);
-	WRITE_COORD(origin.x); // pos
-	WRITE_COORD(origin.y);
-	WRITE_COORD(origin.z);
-	WRITE_SHORT(g_sModelIndexBloodSpray);		  // initial sprite model
-	WRITE_SHORT(g_sModelIndexBloodDrop);		  // droplet sprite models
-	WRITE_BYTE(color);							  // color index into host_basepal
-	WRITE_BYTE(std::min(std::max(3, amount / 10), 16)); // size
-	MESSAGE_END();
+	MessageBegin(MSG_PVS, SVC_TEMPENTITY, origin);
+	WriteByte(TE_BLOODSPRITE);
+	WriteCoord(origin.x); // pos
+	WriteCoord(origin.y);
+	WriteCoord(origin.z);
+	WriteShort(g_sModelIndexBloodSpray);		  // initial sprite model
+	WriteShort(g_sModelIndexBloodDrop);		  // droplet sprite models
+	WriteByte(color);							  // color index into host_basepal
+	WriteByte(std::min(std::max(3, amount / 10), 16)); // size
+	MessageEnd();
 }
 
 Vector UTIL_RandomBloodVector()
@@ -1212,15 +1233,15 @@ void UTIL_DecalTrace(TraceResult* pTrace, int decalNumber)
 		}
 	}
 
-	MESSAGE_BEGIN(MSG_BROADCAST, SVC_TEMPENTITY);
-	WRITE_BYTE(message);
-	WRITE_COORD(pTrace->vecEndPos.x);
-	WRITE_COORD(pTrace->vecEndPos.y);
-	WRITE_COORD(pTrace->vecEndPos.z);
-	WRITE_BYTE(index);
+	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte(message);
+	WriteCoord(pTrace->vecEndPos.x);
+	WriteCoord(pTrace->vecEndPos.y);
+	WriteCoord(pTrace->vecEndPos.z);
+	WriteByte(index);
 	if (0 != entityIndex)
-		WRITE_SHORT(entityIndex);
-	MESSAGE_END();
+		WriteShort(entityIndex);
+	MessageEnd();
 }
 
 /*
@@ -1251,15 +1272,15 @@ void UTIL_PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber, 
 	if (pTrace->flFraction == 1.0)
 		return;
 
-	MESSAGE_BEGIN(MSG_BROADCAST, SVC_TEMPENTITY);
-	WRITE_BYTE(TE_PLAYERDECAL);
-	WRITE_BYTE(playernum);
-	WRITE_COORD(pTrace->vecEndPos.x);
-	WRITE_COORD(pTrace->vecEndPos.y);
-	WRITE_COORD(pTrace->vecEndPos.z);
-	WRITE_SHORT((short)ENTINDEX(pTrace->pHit));
-	WRITE_BYTE(index);
-	MESSAGE_END();
+	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte(TE_PLAYERDECAL);
+	WriteByte(playernum);
+	WriteCoord(pTrace->vecEndPos.x);
+	WriteCoord(pTrace->vecEndPos.y);
+	WriteCoord(pTrace->vecEndPos.z);
+	WriteShort((short)ENTINDEX(pTrace->pHit));
+	WriteByte(index);
+	MessageEnd();
 }
 
 void UTIL_GunshotDecalTrace(TraceResult* pTrace, int decalNumber)
@@ -1274,37 +1295,37 @@ void UTIL_GunshotDecalTrace(TraceResult* pTrace, int decalNumber)
 	if (pTrace->flFraction == 1.0)
 		return;
 
-	MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pTrace->vecEndPos);
-	WRITE_BYTE(TE_GUNSHOTDECAL);
-	WRITE_COORD(pTrace->vecEndPos.x);
-	WRITE_COORD(pTrace->vecEndPos.y);
-	WRITE_COORD(pTrace->vecEndPos.z);
-	WRITE_SHORT((short)ENTINDEX(pTrace->pHit));
-	WRITE_BYTE(index);
-	MESSAGE_END();
+	MessageBegin(MSG_PAS, SVC_TEMPENTITY, pTrace->vecEndPos);
+	WriteByte(TE_GUNSHOTDECAL);
+	WriteCoord(pTrace->vecEndPos.x);
+	WriteCoord(pTrace->vecEndPos.y);
+	WriteCoord(pTrace->vecEndPos.z);
+	WriteShort((short)ENTINDEX(pTrace->pHit));
+	WriteByte(index);
+	MessageEnd();
 }
 
 
 void UTIL_Sparks(const Vector& position)
 {
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, position);
-	WRITE_BYTE(TE_SPARKS);
-	WRITE_COORD(position.x);
-	WRITE_COORD(position.y);
-	WRITE_COORD(position.z);
-	MESSAGE_END();
+	MessageBegin(MSG_PVS, SVC_TEMPENTITY, position);
+	WriteByte(TE_SPARKS);
+	WriteCoord(position.x);
+	WriteCoord(position.y);
+	WriteCoord(position.z);
+	MessageEnd();
 }
 
 
 void UTIL_Ricochet(const Vector& position, float scale)
 {
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, position);
-	WRITE_BYTE(TE_ARMOR_RICOCHET);
-	WRITE_COORD(position.x);
-	WRITE_COORD(position.y);
-	WRITE_COORD(position.z);
-	WRITE_BYTE((int)(scale * 10));
-	MESSAGE_END();
+	MessageBegin(MSG_PVS, SVC_TEMPENTITY, position);
+	WriteByte(TE_ARMOR_RICOCHET);
+	WriteCoord(position.x);
+	WriteCoord(position.y);
+	WriteCoord(position.z);
+	WriteByte((int)(scale * 10));
+	MessageEnd();
 }
 
 
@@ -1448,19 +1469,19 @@ void UTIL_Bubbles(Vector mins, Vector maxs, int count)
 	float flHeight = UTIL_WaterLevel(mid, mid.z, mid.z + 1024);
 	flHeight = flHeight - mins.z;
 
-	MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, mid);
-	WRITE_BYTE(TE_BUBBLES);
-	WRITE_COORD(mins.x); // mins
-	WRITE_COORD(mins.y);
-	WRITE_COORD(mins.z);
-	WRITE_COORD(maxs.x); // maxz
-	WRITE_COORD(maxs.y);
-	WRITE_COORD(maxs.z);
-	WRITE_COORD(flHeight); // height
-	WRITE_SHORT(g_sModelIndexBubbles);
-	WRITE_BYTE(count); // count
-	WRITE_COORD(8);	   // speed
-	MESSAGE_END();
+	MessageBegin(MSG_PAS, SVC_TEMPENTITY, mid);
+	WriteByte(TE_BUBBLES);
+	WriteCoord(mins.x); // mins
+	WriteCoord(mins.y);
+	WriteCoord(mins.z);
+	WriteCoord(maxs.x); // maxz
+	WriteCoord(maxs.y);
+	WriteCoord(maxs.z);
+	WriteCoord(flHeight); // height
+	WriteShort(g_sModelIndexBubbles);
+	WriteByte(count); // count
+	WriteCoord(8);	   // speed
+	MessageEnd();
 }
 
 void UTIL_BubbleTrail(Vector from, Vector to, int count)
@@ -1481,19 +1502,19 @@ void UTIL_BubbleTrail(Vector from, Vector to, int count)
 	if (count > 255)
 		count = 255;
 
-	MESSAGE_BEGIN(MSG_BROADCAST, SVC_TEMPENTITY);
-	WRITE_BYTE(TE_BUBBLETRAIL);
-	WRITE_COORD(from.x); // mins
-	WRITE_COORD(from.y);
-	WRITE_COORD(from.z);
-	WRITE_COORD(to.x); // maxz
-	WRITE_COORD(to.y);
-	WRITE_COORD(to.z);
-	WRITE_COORD(flHeight); // height
-	WRITE_SHORT(g_sModelIndexBubbles);
-	WRITE_BYTE(count); // count
-	WRITE_COORD(8);	   // speed
-	MESSAGE_END();
+	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte(TE_BUBBLETRAIL);
+	WriteCoord(from.x); // mins
+	WriteCoord(from.y);
+	WriteCoord(from.z);
+	WriteCoord(to.x); // maxz
+	WriteCoord(to.y);
+	WriteCoord(to.z);
+	WriteCoord(flHeight); // height
+	WriteShort(g_sModelIndexBubbles);
+	WriteByte(count); // count
+	WriteCoord(8);	   // speed
+	MessageEnd();
 }
 
 

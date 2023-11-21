@@ -69,18 +69,18 @@ void CTeam::AddPlayer(CBasePlayer *player)
 
 	player->m_team = this;
 
-	MESSAGE_BEGIN(MSG_ALL, gmsgTeamInfo);
-	WRITE_BYTE(player->entindex());
-	WRITE_STRING(m_name.c_str());
-	MESSAGE_END();
+	MessageBegin(MSG_ALL, gmsgTeamInfo);
+	WriteByte(player->entindex());
+	WriteString(m_name.c_str());
+	MessageEnd();
 
-	MESSAGE_BEGIN(MSG_ALL, gmsgScoreInfo);
-	WRITE_BYTE(player->entindex());
-	WRITE_SHORT(player->pev->frags);
-	WRITE_SHORT(player->m_iDeaths);
-	WRITE_SHORT(0);
-	WRITE_SHORT(player->pev->team);
-	MESSAGE_END();
+	MessageBegin(MSG_ALL, gmsgScoreInfo);
+	WriteByte(player->entindex());
+	WriteShort(player->pev->frags);
+	WriteShort(player->m_iDeaths);
+	WriteShort(0);
+	WriteShort(player->pev->team);
+	MessageEnd();
 
 	m_players.push_back(player);
 	m_numPlayers = m_players.size();
@@ -108,11 +108,11 @@ void CTeam::AddPoints(int score)
 
 	m_score += score;
 
-	MESSAGE_BEGIN(MSG_ALL, gmsgTeamScore);
-	WRITE_STRING(m_name.c_str());
-	WRITE_SHORT(m_score);
-	WRITE_SHORT(0);
-	MESSAGE_END();
+	MessageBegin(MSG_ALL, gmsgTeamScore);
+	WriteString(m_name.c_str());
+	WriteShort(m_score);
+	WriteShort(0);
+	MessageEnd();
 }
 
 //*********************************************************
@@ -519,15 +519,15 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 
 	// sending just one score makes the hud scoreboard active;  otherwise
 	// it is just disabled for single play
-	MESSAGE_BEGIN(MSG_ONE, gmsgScoreInfo, NULL, pl->edict());
-	WRITE_BYTE(ENTINDEX(pl->edict()));
-	WRITE_SHORT(0);
-	WRITE_SHORT(0);
-	WRITE_SHORT(0);
-	WRITE_SHORT(0);
-	MESSAGE_END();
+	MessageBegin(MSG_ONE, gmsgScoreInfo, pl);
+	WriteByte(ENTINDEX(pl->edict()));
+	WriteShort(0);
+	WriteShort(0);
+	WriteShort(0);
+	WriteShort(0);
+	MessageEnd();
 
-	SendMOTDToClient(pl->edict());
+	SendMOTDToClient(pl);
 
 	// loop through all active players and send their score info to the new client
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
@@ -537,20 +537,20 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 
 		if (plr)
 		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgScoreInfo, NULL, pl->edict());
-			WRITE_BYTE(i); // client number
-			WRITE_SHORT(plr->pev->frags);
-			WRITE_SHORT(plr->m_iDeaths);
-			WRITE_SHORT(0);
-			WRITE_SHORT(plr->TeamNumber());
-			MESSAGE_END();
+			MessageBegin(MSG_ONE, gmsgScoreInfo, pl);
+			WriteByte(i); // client number
+			WriteShort(plr->pev->frags);
+			WriteShort(plr->m_iDeaths);
+			WriteShort(0);
+			WriteShort(plr->TeamNumber());
+			MessageEnd();
 		}
 	}
 
 	if (g_fGameOver)
 	{
-		MESSAGE_BEGIN(MSG_ONE, SVC_INTERMISSION, NULL, pl->edict());
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, SVC_INTERMISSION, pl);
+		MessageEnd();
 	}
 }
 
@@ -750,24 +750,24 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer,
 
 	// update the scores
 	// killed scores
-	MESSAGE_BEGIN(MSG_ALL, gmsgScoreInfo);
-	WRITE_BYTE(ENTINDEX(pVictim->edict()));
-	WRITE_SHORT(pVictim->pev->frags);
-	WRITE_SHORT(pVictim->m_iDeaths);
-	WRITE_SHORT(0);
-	WRITE_SHORT(pVictim->TeamNumber());
-	MESSAGE_END();
+	MessageBegin(MSG_ALL, gmsgScoreInfo);
+	WriteByte(ENTINDEX(pVictim->edict()));
+	WriteShort(pVictim->pev->frags);
+	WriteShort(pVictim->m_iDeaths);
+	WriteShort(0);
+	WriteShort(pVictim->TeamNumber());
+	MessageEnd();
 
 	// killers score, if it's a player
 	if (killer->IsPlayer())
 	{
-		MESSAGE_BEGIN(MSG_ALL, gmsgScoreInfo);
-		WRITE_BYTE(killer->entindex());
-		WRITE_SHORT(killer->pev->frags);
-		WRITE_SHORT(((CBasePlayer *)killer)->m_iDeaths);
-		WRITE_SHORT(0);
-		WRITE_SHORT(killer->TeamNumber());
-		MESSAGE_END();
+		MessageBegin(MSG_ALL, gmsgScoreInfo);
+		WriteByte(killer->entindex());
+		WriteShort(killer->pev->frags);
+		WriteShort(((CBasePlayer *)killer)->m_iDeaths);
+		WriteShort(0);
+		WriteShort(killer->TeamNumber());
+		MessageEnd();
 
 		// let the killer paint another decal as soon as they'd like.
 		((CBasePlayer *)killer)->m_flNextDecalTime = gpGlobals->time;
@@ -843,12 +843,12 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 		flags |= kDamageFlagFriendlyFire;
 	}
 
-	MESSAGE_BEGIN(MSG_ALL, gmsgDeathMsg);
-	WRITE_BYTE(killer_index);				// the killer
-	WRITE_BYTE(ENTINDEX(pVictim->edict())); // the victim
-	WRITE_BYTE(flags);						// the flags
-	WRITE_STRING(killer_weapon_name);		// what they were killed by (should this be a string?)
-	MESSAGE_END();
+	MessageBegin(MSG_ALL, gmsgDeathMsg);
+	WriteByte(killer_index);				// the killer
+	WriteByte(ENTINDEX(pVictim->edict())); // the victim
+	WriteByte(flags);						// the flags
+	WriteString(killer_weapon_name);		// what they were killed by (should this be a string?)
+	MessageEnd();
 
 	// replace the code names with the 'real' names
 	if (0 == strcmp(killer_weapon_name, "egon"))
@@ -935,13 +935,13 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 		}
 	}
 
-	MESSAGE_BEGIN(MSG_SPEC, SVC_DIRECTOR);
-	WRITE_BYTE(9);							 // command length in bytes
-	WRITE_BYTE(DRC_CMD_EVENT);				 // player killed
-	WRITE_SHORT(pVictim->entindex()); // index number of primary entity
-	WRITE_SHORT(inflictor->entindex()); // index number of secondary entity
-	WRITE_LONG(7 | DRC_FLAG_DRAMATIC);		 // eventflags (priority and flags)
-	MESSAGE_END();
+	MessageBegin(MSG_SPEC, SVC_DIRECTOR);
+	WriteByte(9);							 // command length in bytes
+	WriteByte(DRC_CMD_EVENT);				 // player killed
+	WriteShort(pVictim->entindex()); // index number of primary entity
+	WriteShort(inflictor->entindex()); // index number of secondary entity
+	WriteLong(7 | DRC_FLAG_DRAMATIC);		 // eventflags (priority and flags)
+	MessageEnd();
 }
 
 //=========================================================
@@ -1349,8 +1349,8 @@ void CHalfLifeMultiplay::GoToIntermission()
 	if (g_fGameOver)
 		return; // intermission has already been triggered, so ignore.
 
-	MESSAGE_BEGIN(MSG_ALL, SVC_INTERMISSION);
-	MESSAGE_END();
+	MessageBegin(MSG_ALL, SVC_INTERMISSION);
+	MessageEnd();
 
 	// bounds check
 	int time = (int)CVAR_GET_FLOAT("mp_chattime");
@@ -1857,7 +1857,7 @@ void CHalfLifeMultiplay::ChangeLevel()
 #define MAX_MOTD_CHUNK 60
 #define MAX_MOTD_LENGTH 1536 // (MAX_MOTD_CHUNK * 4)
 
-void CHalfLifeMultiplay::SendMOTDToClient(edict_t* client)
+void CHalfLifeMultiplay::SendMOTDToClient(CBasePlayer* player)
 {
 	// read from the MOTD.txt file
 	int length, char_count = 0;
@@ -1865,9 +1865,9 @@ void CHalfLifeMultiplay::SendMOTDToClient(edict_t* client)
 	char* aFileList = pFileList = (char*)LOAD_FILE_FOR_ME((char*)CVAR_GET_STRING("motdfile"), &length);
 
 	// send the server name
-	MESSAGE_BEGIN(MSG_ONE, gmsgServerName, NULL, client);
-	WRITE_STRING(CVAR_GET_STRING("hostname"));
-	MESSAGE_END();
+	MessageBegin(MSG_ONE, gmsgServerName, player);
+	WriteString(CVAR_GET_STRING("hostname"));
+	MessageEnd();
 
 	// Send the message of the day
 	// read it chunk-by-chunk,  and send it in parts
@@ -1892,10 +1892,10 @@ void CHalfLifeMultiplay::SendMOTDToClient(edict_t* client)
 		else
 			*pFileList = 0;
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgMOTD, NULL, client);
-		WRITE_BYTE(static_cast<int>('\0' == *pFileList)); // false means there is still more message to come
-		WRITE_STRING(chunk);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgMOTD, player);
+		WriteByte(static_cast<int>('\0' == *pFileList)); // false means there is still more message to come
+		WriteString(chunk);
+		MessageEnd();
 	}
 
 	FREE_FILE(aFileList);

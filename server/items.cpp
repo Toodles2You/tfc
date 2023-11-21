@@ -232,9 +232,9 @@ class CItemBattery : public CItem
 
 			pPlayer->EmitSound("items/gunpickup2.wav", CHAN_ITEM);
 
-			MESSAGE_BEGIN(MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev);
-			WRITE_STRING(STRING(pev->classname));
-			MESSAGE_END();
+			MessageBegin(MSG_ONE, gmsgItemPickup, pPlayer);
+			WriteString(STRING(pev->classname));
+			MessageEnd();
 
 
 			// Suit reports new power level
@@ -326,9 +326,9 @@ class CItemLongJump : public CItem
 
 			g_engfuncs.pfnSetPhysicsKeyValue(pPlayer->edict(), "slj", "1");
 
-			MESSAGE_BEGIN(MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev);
-			WRITE_STRING(STRING(pev->classname));
-			MESSAGE_END();
+			MessageBegin(MSG_ONE, gmsgItemPickup, pPlayer);
+			WriteString(STRING(pev->classname));
+			MessageEnd();
 
 			pPlayer->SetSuitUpdate("!HEV_A1", false, SUIT_REPEAT_OK);
 			return true;

@@ -144,12 +144,12 @@ bool CBubbling::KeyValue(KeyValueData* pkvd)
 
 void CBubbling::FizzThink()
 {
-	MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, VecBModelOrigin(pev));
-	WRITE_BYTE(TE_FIZZ);
-	WRITE_SHORT((short)ENTINDEX(edict()));
-	WRITE_SHORT((short)m_bubbleModel);
-	WRITE_BYTE(m_density);
-	MESSAGE_END();
+	MessageBegin(MSG_PAS, SVC_TEMPENTITY, VecBModelOrigin(pev));
+	WriteByte(TE_FIZZ);
+	WriteShort((short)ENTINDEX(edict()));
+	WriteShort((short)m_bubbleModel);
+	WriteByte(m_density);
+	MessageEnd();
 
 	if (m_frequency > 19)
 		pev->nextthink = gpGlobals->time + 0.5;
@@ -664,7 +664,7 @@ void CLightning::StrikeThink()
 			}
 		}
 
-		MESSAGE_BEGIN(MSG_BROADCAST, SVC_TEMPENTITY);
+		MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
 		if (IsPointEntity(pStart) || IsPointEntity(pEnd))
 		{
 			if (!IsPointEntity(pEnd)) // One point entity must be in pEnd
@@ -676,45 +676,45 @@ void CLightning::StrikeThink()
 			}
 			if (!IsPointEntity(pStart)) // One sided
 			{
-				WRITE_BYTE(TE_BEAMENTPOINT);
-				WRITE_SHORT(pStart->entindex());
-				WRITE_COORD(pEnd->pev->origin.x);
-				WRITE_COORD(pEnd->pev->origin.y);
-				WRITE_COORD(pEnd->pev->origin.z);
+				WriteByte(TE_BEAMENTPOINT);
+				WriteShort(pStart->entindex());
+				WriteCoord(pEnd->pev->origin.x);
+				WriteCoord(pEnd->pev->origin.y);
+				WriteCoord(pEnd->pev->origin.z);
 			}
 			else
 			{
-				WRITE_BYTE(TE_BEAMPOINTS);
-				WRITE_COORD(pStart->pev->origin.x);
-				WRITE_COORD(pStart->pev->origin.y);
-				WRITE_COORD(pStart->pev->origin.z);
-				WRITE_COORD(pEnd->pev->origin.x);
-				WRITE_COORD(pEnd->pev->origin.y);
-				WRITE_COORD(pEnd->pev->origin.z);
+				WriteByte(TE_BEAMPOINTS);
+				WriteCoord(pStart->pev->origin.x);
+				WriteCoord(pStart->pev->origin.y);
+				WriteCoord(pStart->pev->origin.z);
+				WriteCoord(pEnd->pev->origin.x);
+				WriteCoord(pEnd->pev->origin.y);
+				WriteCoord(pEnd->pev->origin.z);
 			}
 		}
 		else
 		{
 			if ((pev->spawnflags & SF_BEAM_RING) != 0)
-				WRITE_BYTE(TE_BEAMRING);
+				WriteByte(TE_BEAMRING);
 			else
-				WRITE_BYTE(TE_BEAMENTS);
-			WRITE_SHORT(pStart->entindex());
-			WRITE_SHORT(pEnd->entindex());
+				WriteByte(TE_BEAMENTS);
+			WriteShort(pStart->entindex());
+			WriteShort(pEnd->entindex());
 		}
 
-		WRITE_SHORT(m_spriteTexture);
-		WRITE_BYTE(m_frameStart);			 // framestart
-		WRITE_BYTE((int)pev->framerate);	 // framerate
-		WRITE_BYTE((int)(m_life * 10.0));	 // life
-		WRITE_BYTE(m_boltWidth);			 // width
-		WRITE_BYTE(m_noiseAmplitude);		 // noise
-		WRITE_BYTE((int)pev->rendercolor.x); // r, g, b
-		WRITE_BYTE((int)pev->rendercolor.y); // r, g, b
-		WRITE_BYTE((int)pev->rendercolor.z); // r, g, b
-		WRITE_BYTE(pev->renderamt);			 // brightness
-		WRITE_BYTE(m_speed);				 // speed
-		MESSAGE_END();
+		WriteShort(m_spriteTexture);
+		WriteByte(m_frameStart);			 // framestart
+		WriteByte((int)pev->framerate);	 // framerate
+		WriteByte((int)(m_life * 10.0));	 // life
+		WriteByte(m_boltWidth);			 // width
+		WriteByte(m_noiseAmplitude);		 // noise
+		WriteByte((int)pev->rendercolor.x); // r, g, b
+		WriteByte((int)pev->rendercolor.y); // r, g, b
+		WriteByte((int)pev->rendercolor.z); // r, g, b
+		WriteByte(pev->renderamt);			 // brightness
+		WriteByte(m_speed);				 // speed
+		MessageEnd();
 		DoSparks(pStart->pev->origin, pEnd->pev->origin);
 		if (pev->dmg > 0)
 		{
@@ -761,40 +761,40 @@ void CLightning::DamageThink()
 void CLightning::Zap(const Vector& vecSrc, const Vector& vecDest)
 {
 #if 1
-	MESSAGE_BEGIN(MSG_BROADCAST, SVC_TEMPENTITY);
-	WRITE_BYTE(TE_BEAMPOINTS);
-	WRITE_COORD(vecSrc.x);
-	WRITE_COORD(vecSrc.y);
-	WRITE_COORD(vecSrc.z);
-	WRITE_COORD(vecDest.x);
-	WRITE_COORD(vecDest.y);
-	WRITE_COORD(vecDest.z);
-	WRITE_SHORT(m_spriteTexture);
-	WRITE_BYTE(m_frameStart);			 // framestart
-	WRITE_BYTE((int)pev->framerate);	 // framerate
-	WRITE_BYTE((int)(m_life * 10.0));	 // life
-	WRITE_BYTE(m_boltWidth);			 // width
-	WRITE_BYTE(m_noiseAmplitude);		 // noise
-	WRITE_BYTE((int)pev->rendercolor.x); // r, g, b
-	WRITE_BYTE((int)pev->rendercolor.y); // r, g, b
-	WRITE_BYTE((int)pev->rendercolor.z); // r, g, b
-	WRITE_BYTE(pev->renderamt);			 // brightness
-	WRITE_BYTE(m_speed);				 // speed
-	MESSAGE_END();
+	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte(TE_BEAMPOINTS);
+	WriteCoord(vecSrc.x);
+	WriteCoord(vecSrc.y);
+	WriteCoord(vecSrc.z);
+	WriteCoord(vecDest.x);
+	WriteCoord(vecDest.y);
+	WriteCoord(vecDest.z);
+	WriteShort(m_spriteTexture);
+	WriteByte(m_frameStart);			 // framestart
+	WriteByte((int)pev->framerate);	 // framerate
+	WriteByte((int)(m_life * 10.0));	 // life
+	WriteByte(m_boltWidth);			 // width
+	WriteByte(m_noiseAmplitude);		 // noise
+	WriteByte((int)pev->rendercolor.x); // r, g, b
+	WriteByte((int)pev->rendercolor.y); // r, g, b
+	WriteByte((int)pev->rendercolor.z); // r, g, b
+	WriteByte(pev->renderamt);			 // brightness
+	WriteByte(m_speed);				 // speed
+	MessageEnd();
 #else
-	MESSAGE_BEGIN(MSG_BROADCAST, SVC_TEMPENTITY);
-	WRITE_BYTE(TE_LIGHTNING);
-	WRITE_COORD(vecSrc.x);
-	WRITE_COORD(vecSrc.y);
-	WRITE_COORD(vecSrc.z);
-	WRITE_COORD(vecDest.x);
-	WRITE_COORD(vecDest.y);
-	WRITE_COORD(vecDest.z);
-	WRITE_BYTE(10);
-	WRITE_BYTE(50);
-	WRITE_BYTE(40);
-	WRITE_SHORT(m_spriteTexture);
-	MESSAGE_END();
+	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte(TE_LIGHTNING);
+	WriteCoord(vecSrc.x);
+	WriteCoord(vecSrc.y);
+	WriteCoord(vecSrc.z);
+	WriteCoord(vecDest.x);
+	WriteCoord(vecDest.y);
+	WriteCoord(vecDest.z);
+	WriteByte(10);
+	WriteByte(50);
+	WriteByte(40);
+	WriteShort(m_spriteTexture);
+	MessageEnd();
 #endif
 	DoSparks(vecSrc, vecDest);
 }
@@ -1648,18 +1648,18 @@ void CTestEffect::TestThink()
 
 #if 0
 		Vector vecMid = (vecSrc + tr.vecEndPos) * 0.5;
-		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-			WRITE_BYTE(TE_DLIGHT);
-			WRITE_COORD(vecMid.x);	// X
-			WRITE_COORD(vecMid.y);	// Y
-			WRITE_COORD(vecMid.z);	// Z
-			WRITE_BYTE( 20 );		// radius * 0.1
-			WRITE_BYTE( 255 );		// r
-			WRITE_BYTE( 180 );		// g
-			WRITE_BYTE( 100 );		// b
-			WRITE_BYTE( 20 );		// time * 10
-			WRITE_BYTE( 0 );		// decay * 0.1
-		MESSAGE_END( );
+		MessageBegin( MSG_BROADCAST, SVC_TEMPENTITY );
+			WriteByte(TE_DLIGHT);
+			WriteCoord(vecMid.x);	// X
+			WriteCoord(vecMid.y);	// Y
+			WriteCoord(vecMid.z);	// Z
+			WriteByte( 20 );		// radius * 0.1
+			WriteByte( 255 );		// r
+			WriteByte( 180 );		// g
+			WriteByte( 100 );		// b
+			WriteByte( 20 );		// time * 10
+			WriteByte( 0 );		// decay * 0.1
+		MessageEnd( );
 #endif
 	}
 
@@ -2099,24 +2099,24 @@ LINK_ENTITY_TO_CLASS(env_funnel, CEnvFunnel);
 
 void CEnvFunnel::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
-	MESSAGE_BEGIN(MSG_BROADCAST, SVC_TEMPENTITY);
-	WRITE_BYTE(TE_LARGEFUNNEL);
-	WRITE_COORD(pev->origin.x);
-	WRITE_COORD(pev->origin.y);
-	WRITE_COORD(pev->origin.z);
-	WRITE_SHORT(m_iSprite);
+	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte(TE_LARGEFUNNEL);
+	WriteCoord(pev->origin.x);
+	WriteCoord(pev->origin.y);
+	WriteCoord(pev->origin.z);
+	WriteShort(m_iSprite);
 
 	if ((pev->spawnflags & SF_FUNNEL_REVERSE) != 0) // funnel flows in reverse?
 	{
-		WRITE_SHORT(1);
+		WriteShort(1);
 	}
 	else
 	{
-		WRITE_SHORT(0);
+		WriteShort(0);
 	}
 
 
-	MESSAGE_END();
+	MessageEnd();
 
 	Remove();
 }

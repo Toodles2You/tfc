@@ -324,11 +324,11 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 			flags |= kDamageFlagSelf;
 		}
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgHitFeedback, nullptr, attacker->pev);
-		WRITE_BYTE(entindex());
-		WRITE_BYTE(flags);
-		WRITE_SHORT(flDamage);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgHitFeedback, attacker);
+		WriteByte(entindex());
+		WriteByte(flags);
+		WriteShort(flDamage);
+		MessageEnd();
 	}
 
 	if (pev->health <= 0)
@@ -346,13 +346,13 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		}
 	}
 
-	MESSAGE_BEGIN(MSG_SPEC, SVC_DIRECTOR);
-		WRITE_BYTE(9);							  // command length in bytes
-		WRITE_BYTE(DRC_CMD_EVENT);				  // take damage event
-		WRITE_SHORT(entindex());	  // index number of primary entity
-		WRITE_SHORT(inflictor->entindex()); // index number of secondary entity
-		WRITE_LONG(5);							  // eventflags (priority and flags)
-	MESSAGE_END();
+	MessageBegin(MSG_SPEC, SVC_DIRECTOR);
+		WriteByte(9);							  // command length in bytes
+		WriteByte(DRC_CMD_EVENT);				  // take damage event
+		WriteShort(entindex());	  // index number of primary entity
+		WriteShort(inflictor->entindex()); // index number of secondary entity
+		WriteLong(5);							  // eventflags (priority and flags)
+	MessageEnd();
 
 	return true;
 }
@@ -1172,10 +1172,10 @@ void CBasePlayer::StartDeathCam()
 void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle)
 {
 	// clear any clientside entities attached to this player
-	MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
-	WRITE_BYTE(TE_KILLPLAYERATTACHMENTS);
-	WRITE_BYTE((byte)entindex());
-	MESSAGE_END();
+	MessageBegin(MSG_PAS, SVC_TEMPENTITY, pev->origin);
+	WriteByte(TE_KILLPLAYERATTACHMENTS);
+	WriteByte((byte)entindex());
+	MessageEnd();
 
 	// Holster weapon immediately, to allow it to cleanup
 	if (m_pActiveWeapon)
@@ -1212,10 +1212,10 @@ void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle)
 	m_fInitHUD = true;
 
 	pev->team = 0;
-	MESSAGE_BEGIN(MSG_ALL, gmsgTeamInfo);
-	WRITE_BYTE(ENTINDEX(edict()));
-	WRITE_STRING("");
-	MESSAGE_END();
+	MessageBegin(MSG_ALL, gmsgTeamInfo);
+	WriteByte(ENTINDEX(edict()));
+	WriteString("");
+	MessageEnd();
 
 	// Remove all the player's stuff
 	RemoveAllWeapons(false);
@@ -1437,13 +1437,13 @@ void CBasePlayer::AddPoints(int score, bool bAllowNegativeScore)
 		m_team->AddPoints(score);
 	}
 
-	MESSAGE_BEGIN(MSG_ALL, gmsgScoreInfo);
-	WRITE_BYTE(ENTINDEX(edict()));
-	WRITE_SHORT(pev->frags);
-	WRITE_SHORT(m_iDeaths);
-	WRITE_SHORT(0);
-	WRITE_SHORT(TeamNumber());
-	MESSAGE_END();
+	MessageBegin(MSG_ALL, gmsgScoreInfo);
+	WriteByte(ENTINDEX(edict()));
+	WriteShort(pev->frags);
+	WriteShort(m_iDeaths);
+	WriteShort(0);
+	WriteShort(TeamNumber());
+	MessageEnd();
 }
 
 
@@ -1523,10 +1523,10 @@ void CBasePlayer::UpdateStatusBar()
 
 	if (0 != strcmp(sbuf0, m_SbarString0))
 	{
-		MESSAGE_BEGIN(MSG_ONE, gmsgStatusText, NULL, pev);
-		WRITE_BYTE(0);
-		WRITE_STRING(sbuf0);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgStatusText, this);
+		WriteByte(0);
+		WriteString(sbuf0);
+		MessageEnd();
 
 		strcpy(m_SbarString0, sbuf0);
 
@@ -1536,10 +1536,10 @@ void CBasePlayer::UpdateStatusBar()
 
 	if (0 != strcmp(sbuf1, m_SbarString1))
 	{
-		MESSAGE_BEGIN(MSG_ONE, gmsgStatusText, NULL, pev);
-		WRITE_BYTE(1);
-		WRITE_STRING(sbuf1);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgStatusText, this);
+		WriteByte(1);
+		WriteString(sbuf1);
+		MessageEnd();
 
 		strcpy(m_SbarString1, sbuf1);
 
@@ -1552,10 +1552,10 @@ void CBasePlayer::UpdateStatusBar()
 	{
 		if (newSBarState[i] != m_izSBarState[i] || bForceResend)
 		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgStatusValue, NULL, pev);
-			WRITE_BYTE(i);
-			WRITE_SHORT(newSBarState[i]);
-			MESSAGE_END();
+			MessageBegin(MSG_ONE, gmsgStatusValue, this);
+			WriteByte(i);
+			WriteShort(newSBarState[i]);
+			MessageEnd();
 
 			m_izSBarState[i] = newSBarState[i];
 		}
@@ -1816,9 +1816,9 @@ void CBasePlayer::UpdateGeigerCounter()
 	{
 		m_igeigerRangePrev = range;
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgGeigerRange, NULL, pev);
-		WRITE_BYTE(range);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgGeigerRange, this);
+		WriteByte(range);
+		MessageEnd();
 	}
 
 	// reset counter and semaphore
@@ -2778,9 +2778,9 @@ bool CBasePlayer::AddPlayerWeapon(CBasePlayerWeapon* pWeapon)
 		// Don't show weapon pickup if we're spawning or if it's an exhaustible weapon (will show ammo pickup instead).
 		if (!m_bIsSpawning && (pWeapon->iFlags() & WEAPON_FLAG_EXHAUSTIBLE) == 0)
 		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgWeapPickup, NULL, pev);
-			WRITE_BYTE(pWeapon->m_iId);
-			MESSAGE_END();
+			MessageBegin(MSG_ONE, gmsgWeapPickup, this);
+			WriteByte(pWeapon->m_iId);
+			MessageEnd();
 		}
 
 		// Should we switch to this weapon?
@@ -2863,10 +2863,10 @@ int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax)
 	if (0 != gmsgAmmoPickup) // make sure the ammo messages have been linked first
 	{
 		// Send the message that ammo has been picked up
-		MESSAGE_BEGIN(MSG_ONE, gmsgAmmoPickup, NULL, pev);
-		WRITE_BYTE(iType); // ammo ID
-		WRITE_BYTE(iAdd);				  // amount
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgAmmoPickup, this);
+		WriteByte(iType); // ammo ID
+		WriteByte(iAdd);				  // amount
+		MessageEnd();
 	}
 
 	return iType;
@@ -2954,14 +2954,14 @@ void CBasePlayer::UpdateClientData()
 		m_fInitHUD = false;
 		gInitHUD = false;
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgResetHUD, NULL, pev);
-		WRITE_BYTE(0);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgResetHUD, this);
+		WriteByte(0);
+		MessageEnd();
 
 		if (!m_fGameHUDInitialized)
 		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgInitHUD, NULL, pev);
-			MESSAGE_END();
+			MessageBegin(MSG_ONE, gmsgInitHUD, this);
+			MessageEnd();
 
 			g_pGameRules->InitHUD(this);
 			m_fGameHUDInitialized = true;
@@ -2981,9 +2981,9 @@ void CBasePlayer::UpdateClientData()
 
 	if (m_iHideHUD != m_iClientHideHUD)
 	{
-		MESSAGE_BEGIN(MSG_ONE, gmsgHideWeapon, NULL, pev);
-		WRITE_BYTE(m_iHideHUD);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgHideWeapon, this);
+		WriteByte(m_iHideHUD);
+		MessageEnd();
 
 		m_iClientHideHUD = m_iHideHUD;
 	}
@@ -2995,10 +2995,10 @@ void CBasePlayer::UpdateClientData()
 		const int lowerBits = m_WeaponBits & 0xFFFFFFFF;
 		const int upperBits = (m_WeaponBits >> 32) & 0xFFFFFFFF;
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgWeapons, nullptr, pev);
-		WRITE_LONG(lowerBits);
-		WRITE_LONG(upperBits);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgWeapons, this);
+		WriteLong(lowerBits);
+		WriteLong(upperBits);
+		MessageEnd();
 	}
 
 	if (0 != pev->dmg_take || 0 != pev->dmg_save || m_bitsHUDDamage != m_bitsDamageType)
@@ -3018,14 +3018,14 @@ void CBasePlayer::UpdateClientData()
 		// only send down damage type that have hud art
 		int visibleDamageBits = m_bitsDamageType & DMG_SHOWNHUD;
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgDamage, NULL, pev);
-		WRITE_BYTE(pev->dmg_save);
-		WRITE_BYTE(pev->dmg_take);
-		WRITE_LONG(visibleDamageBits);
-		WRITE_COORD(damageOrigin.x);
-		WRITE_COORD(damageOrigin.y);
-		WRITE_COORD(damageOrigin.z);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgDamage, this);
+		WriteByte(pev->dmg_save);
+		WriteByte(pev->dmg_take);
+		WriteLong(visibleDamageBits);
+		WriteCoord(damageOrigin.x);
+		WriteCoord(damageOrigin.y);
+		WriteCoord(damageOrigin.z);
+		MessageEnd();
 
 		pev->dmg_take = 0;
 		pev->dmg_save = 0;
@@ -3040,9 +3040,9 @@ void CBasePlayer::UpdateClientData()
 	{
 		ASSERT(gmsgTrain > 0);
 		// send "health" update message
-		MESSAGE_BEGIN(MSG_ONE, gmsgTrain, NULL, pev);
-		WRITE_BYTE(m_iTrain & 0xF);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgTrain, this);
+		WriteByte(m_iTrain & 0xF);
+		MessageEnd();
 
 		m_iTrain &= ~TRAIN_NEW;
 	}
@@ -3083,17 +3083,17 @@ void CBasePlayer::UpdateClientData()
 			else
 				pszName = II.pszName;
 
-			MESSAGE_BEGIN(MSG_ONE, gmsgWeaponList, NULL, pev);
-			WRITE_STRING(pszName);				   // string	weapon name
-			WRITE_BYTE(II.iAmmo1); // byte		Ammo Type
-			WRITE_BYTE(II.iMaxAmmo1);			   // byte     Max Ammo 1
-			WRITE_BYTE(II.iAmmo2); // byte		Ammo2 Type
-			WRITE_BYTE(II.iMaxAmmo2);			   // byte     Max Ammo 2
-			WRITE_BYTE(II.iSlot);				   // byte		bucket
-			WRITE_BYTE(II.iPosition);			   // byte		bucket pos
-			WRITE_BYTE(II.iId);					   // byte		id (bit index into m_WeaponBits)
-			WRITE_BYTE(II.iFlags);				   // byte		Flags
-			MESSAGE_END();
+			MessageBegin(MSG_ONE, gmsgWeaponList, this);
+			WriteString(pszName);				   // string	weapon name
+			WriteByte(II.iAmmo1); // byte		Ammo Type
+			WriteByte(II.iMaxAmmo1);			   // byte     Max Ammo 1
+			WriteByte(II.iAmmo2); // byte		Ammo2 Type
+			WriteByte(II.iMaxAmmo2);			   // byte     Max Ammo 2
+			WriteByte(II.iSlot);				   // byte		bucket
+			WriteByte(II.iPosition);			   // byte		bucket pos
+			WriteByte(II.iId);					   // byte		id (bit index into m_WeaponBits)
+			WriteByte(II.iFlags);				   // byte		Flags
+			MessageEnd();
 		}
 	}
 
@@ -3109,9 +3109,9 @@ void CBasePlayer::UpdateClientData()
 	{
 		m_ClientSndRoomtype = m_SndRoomtype;
 
-		MESSAGE_BEGIN(MSG_ONE, SVC_ROOMTYPE, nullptr, edict());
-		WRITE_SHORT((short)m_SndRoomtype); // sequence number
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, SVC_ROOMTYPE, this);
+		WriteShort((short)m_SndRoomtype); // sequence number
+		MessageEnd();
 	}
 
 	//Handled anything that needs resetting

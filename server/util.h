@@ -25,8 +25,6 @@
 
 class CBaseEntity;
 
-inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float* pOrigin, entvars_t* ent); // implementation later in this file
-
 inline globalvars_t* gpGlobals = nullptr;
 
 // Use this instead of ALLOC_STRING on constant strings
@@ -143,9 +141,72 @@ inline entvars_t* VARS(edict_t* pent)
 
 inline int ENTINDEX(edict_t* pEdict) { return (*g_engfuncs.pfnIndexOfEdict)(pEdict); }
 inline edict_t* INDEXENT(int iEdictNum) { return (*g_engfuncs.pfnPEntityOfEntIndex)(iEdictNum); }
-inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float* pOrigin, entvars_t* ent)
+
+inline void MessageBegin(int dest, int type, const Vector& origin, CBaseEntity* entity);
+inline void MessageBegin(int dest, int type, CBaseEntity* entity);
+
+inline void MessageBegin(int dest, int type, const Vector& origin)
 {
-	(*g_engfuncs.pfnMessageBegin)(msg_dest, msg_type, pOrigin, ENT(ent));
+	g_engfuncs.pfnMessageBegin(
+		dest,
+		type,
+		origin,
+		nullptr);
+}
+
+inline void MessageBegin(int dest, int type)
+{
+	g_engfuncs.pfnMessageBegin(dest, type, nullptr, nullptr);
+}
+
+inline void MessageEnd()
+{
+	g_engfuncs.pfnMessageEnd();
+}
+
+inline void WriteByte(int value)
+{
+	g_engfuncs.pfnWriteByte(value);
+}
+
+inline void WriteChar(int value)
+{
+	g_engfuncs.pfnWriteChar(value);
+}
+
+inline void WriteShort(int value)
+{
+	g_engfuncs.pfnWriteShort(value);
+}
+
+inline void WriteLong(int value)
+{
+	g_engfuncs.pfnWriteLong(value);
+}
+
+inline void WriteAngle(float value)
+{
+	g_engfuncs.pfnWriteAngle(value);
+}
+
+inline void WriteCoord(float value)
+{
+	g_engfuncs.pfnWriteCoord(value);
+}
+
+inline void WriteString(const char* value)
+{
+	g_engfuncs.pfnWriteString(value);
+}
+
+inline void WriteEntity(int value)
+{
+	g_engfuncs.pfnWriteEntity(value);
+}
+
+inline void WriteFloat(float value)
+{
+	WriteLong(*reinterpret_cast<int*>(&value));
 }
 
 // Testing the three types of "entity" for nullity
@@ -269,8 +330,8 @@ typedef enum
 	ignore_glass = 1,
 	dont_ignore_glass = 0
 } IGNORE_GLASS;
-extern void UTIL_TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, CBaseEntity* ignore, TraceResult* ptr);
-extern void UTIL_TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, CBaseEntity* ignore, TraceResult* ptr);
+void UTIL_TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, CBaseEntity* ignore, TraceResult* ptr);
+void UTIL_TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, CBaseEntity* ignore, TraceResult* ptr);
 enum
 {
 	point_hull = 0,
@@ -327,7 +388,7 @@ class CBasePlayerWeapon;
 class CBasePlayer;
 
 // prints messages through the HUD
-extern void ClientPrint(entvars_t* client, int msg_dest, const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL);
+void ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL);
 
 // prints a message to the HUD say (chat)
 extern void UTIL_SayText(const char* pText, CBaseEntity* pEntity);

@@ -224,26 +224,26 @@ void CMortar::Precache()
 void CMortar::MortarExplode()
 {
 	// mortar beam
-	MESSAGE_BEGIN(MSG_BROADCAST, SVC_TEMPENTITY);
-	WRITE_BYTE(TE_BEAMPOINTS);
-	WRITE_COORD(pev->origin.x);
-	WRITE_COORD(pev->origin.y);
-	WRITE_COORD(pev->origin.z);
-	WRITE_COORD(pev->origin.x);
-	WRITE_COORD(pev->origin.y);
-	WRITE_COORD(pev->origin.z + 1024);
-	WRITE_SHORT(m_spriteTexture);
-	WRITE_BYTE(0);	 // framerate
-	WRITE_BYTE(0);	 // framerate
-	WRITE_BYTE(1);	 // life
-	WRITE_BYTE(40);	 // width
-	WRITE_BYTE(0);	 // noise
-	WRITE_BYTE(255); // r, g, b
-	WRITE_BYTE(160); // r, g, b
-	WRITE_BYTE(100); // r, g, b
-	WRITE_BYTE(128); // brightness
-	WRITE_BYTE(0);	 // speed
-	MESSAGE_END();
+	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte(TE_BEAMPOINTS);
+	WriteCoord(pev->origin.x);
+	WriteCoord(pev->origin.y);
+	WriteCoord(pev->origin.z);
+	WriteCoord(pev->origin.x);
+	WriteCoord(pev->origin.y);
+	WriteCoord(pev->origin.z + 1024);
+	WriteShort(m_spriteTexture);
+	WriteByte(0);	 // framerate
+	WriteByte(0);	 // framerate
+	WriteByte(1);	 // life
+	WriteByte(40);	 // width
+	WriteByte(0);	 // noise
+	WriteByte(255); // r, g, b
+	WriteByte(160); // r, g, b
+	WriteByte(100); // r, g, b
+	WriteByte(128); // brightness
+	WriteByte(0);	 // speed
+	MessageEnd();
 
 	TraceResult tr;
 	UTIL_TraceLine(pev->origin + Vector(0, 0, 1024), pev->origin - Vector(0, 0, 1024), dont_ignore_monsters, this, &tr);

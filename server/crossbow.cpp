@@ -189,23 +189,23 @@ void CCrossbowBolt::ExplodeThink()
 	pev->dmg = 40;
 	iScale = 10;
 
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
-	WRITE_BYTE(TE_EXPLOSION);
-	WRITE_COORD(pev->origin.x);
-	WRITE_COORD(pev->origin.y);
-	WRITE_COORD(pev->origin.z);
+	MessageBegin(MSG_PVS, SVC_TEMPENTITY, pev->origin);
+	WriteByte(TE_EXPLOSION);
+	WriteCoord(pev->origin.x);
+	WriteCoord(pev->origin.y);
+	WriteCoord(pev->origin.z);
 	if (iContents != CONTENTS_WATER)
 	{
-		WRITE_SHORT(g_sModelIndexFireball);
+		WriteShort(g_sModelIndexFireball);
 	}
 	else
 	{
-		WRITE_SHORT(g_sModelIndexWExplosion);
+		WriteShort(g_sModelIndexWExplosion);
 	}
-	WRITE_BYTE(iScale); // scale * 10
-	WRITE_BYTE(15);		// framerate
-	WRITE_BYTE(TE_EXPLFLAG_NONE);
-	MESSAGE_END();
+	WriteByte(iScale); // scale * 10
+	WriteByte(15);		// framerate
+	WriteByte(TE_EXPLFLAG_NONE);
+	MessageEnd();
 
 	CBaseEntity* owner;
 

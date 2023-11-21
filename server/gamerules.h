@@ -424,7 +424,7 @@ protected:
 	float m_flIntermissionStartTime = 0;
 	float m_flIntermissionEndTime = 0;
 	bool m_iEndIntermissionButtonHit;
-	void SendMOTDToClient(edict_t* client);
+	void SendMOTDToClient(CBasePlayer* player);
 
 	virtual bool PrivilegedCommand(CBasePlayer* pPlayer, const char* pcmd);
 };

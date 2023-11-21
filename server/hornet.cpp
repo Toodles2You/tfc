@@ -210,43 +210,43 @@ b14
 
 old colors
 		case HORNET_TYPE_RED:
-			WRITE_BYTE( 255 );   // r, g, b
-			WRITE_BYTE( 128 );   // r, g, b
-			WRITE_BYTE( 0 );   // r, g, b
+			WriteByte( 255 );   // r, g, b
+			WriteByte( 128 );   // r, g, b
+			WriteByte( 0 );   // r, g, b
 			break;
 		case HORNET_TYPE_ORANGE:
-			WRITE_BYTE( 0   );   // r, g, b
-			WRITE_BYTE( 100 );   // r, g, b
-			WRITE_BYTE( 255 );   // r, g, b
+			WriteByte( 0   );   // r, g, b
+			WriteByte( 100 );   // r, g, b
+			WriteByte( 255 );   // r, g, b
 			break;
 	
 */
 
 	// trail
-	MESSAGE_BEGIN(MSG_BROADCAST, SVC_TEMPENTITY);
-	WRITE_BYTE(TE_BEAMFOLLOW);
-	WRITE_SHORT(entindex());   // entity
-	WRITE_SHORT(iHornetTrail); // model
-	WRITE_BYTE(10);			   // life
-	WRITE_BYTE(2);			   // width
+	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte(TE_BEAMFOLLOW);
+	WriteShort(entindex());   // entity
+	WriteShort(iHornetTrail); // model
+	WriteByte(10);			   // life
+	WriteByte(2);			   // width
 
 	switch (m_iHornetType)
 	{
 	case HORNET_TYPE_RED:
-		WRITE_BYTE(179); // r, g, b
-		WRITE_BYTE(39);	 // r, g, b
-		WRITE_BYTE(14);	 // r, g, b
+		WriteByte(179); // r, g, b
+		WriteByte(39);	 // r, g, b
+		WriteByte(14);	 // r, g, b
 		break;
 	case HORNET_TYPE_ORANGE:
-		WRITE_BYTE(255); // r, g, b
-		WRITE_BYTE(128); // r, g, b
-		WRITE_BYTE(0);	 // r, g, b
+		WriteByte(255); // r, g, b
+		WriteByte(128); // r, g, b
+		WriteByte(0);	 // r, g, b
 		break;
 	}
 
-	WRITE_BYTE(128); // brightness
+	WriteByte(128); // brightness
 
-	MESSAGE_END();
+	MessageEnd();
 }
 
 //=========================================================
@@ -346,16 +346,16 @@ void CHornet::TrackTarget()
 	{
 		if (flDelta >= 0.4 && (pev->origin - m_vecEnemyLKP).Length() <= 300)
 		{
-			MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
-			WRITE_BYTE(TE_SPRITE);
-			WRITE_COORD(pev->origin.x); // pos
-			WRITE_COORD(pev->origin.y);
-			WRITE_COORD(pev->origin.z);
-			WRITE_SHORT(iHornetPuff); // model
-			// WRITE_BYTE( 0 );				// life * 10
-			WRITE_BYTE(2);	 // size * 10
-			WRITE_BYTE(128); // brightness
-			MESSAGE_END();
+			MessageBegin(MSG_PVS, SVC_TEMPENTITY, pev->origin);
+			WriteByte(TE_SPRITE);
+			WriteCoord(pev->origin.x); // pos
+			WriteCoord(pev->origin.y);
+			WriteCoord(pev->origin.z);
+			WriteShort(iHornetPuff); // model
+			// WriteByte( 0 );				// life * 10
+			WriteByte(2);	 // size * 10
+			WriteByte(128); // brightness
+			MessageEnd();
 
 			switch (RANDOM_LONG(0, 2))
 			{

@@ -308,19 +308,19 @@ void CBasePlayer::FireBullets(
 	
 	if (traceHits != 0)
 	{
-		MESSAGE_BEGIN(MSG_PVS, gmsgBlood, gun);
-		WRITE_FLOAT(dir.x);
-		WRITE_FLOAT(dir.y);
-		WRITE_FLOAT(dir.z);
-		WRITE_BYTE(traceHits - 1);
-		WRITE_BYTE(traceFlags);
+		MessageBegin(MSG_PVS, gmsgBlood, gun);
+		WriteFloat(dir.x);
+		WriteFloat(dir.y);
+		WriteFloat(dir.z);
+		WriteByte(traceHits - 1);
+		WriteByte(traceFlags);
 		for (auto i = 0; i < traceHits; i++)
 		{
-			WRITE_COORD(traceEndPos[i].x);
-			WRITE_COORD(traceEndPos[i].y);
-			WRITE_COORD(traceEndPos[i].z);
+			WriteCoord(traceEndPos[i].x);
+			WriteCoord(traceEndPos[i].y);
+			WriteCoord(traceEndPos[i].z);
 		}
-		MESSAGE_END();
+		MessageEnd();
 	}
 }
 
