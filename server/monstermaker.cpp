@@ -153,7 +153,7 @@ void CMonsterMaker::Precache()
 {
 	CBaseToggle::Precache();
 
-	UTIL_PrecacheOther(STRING(m_iszMonsterClassname));
+	util::PrecacheOther(STRING(m_iszMonsterClassname));
 }
 
 //=========================================================
@@ -174,7 +174,7 @@ void CMonsterMaker::MakeMonster()
 		// set altitude. Now that I'm activated, any breakables, etc should be out from under me.
 		TraceResult tr;
 
-		UTIL_TraceLine(pev->origin, pev->origin - Vector(0, 0, 2048), ignore_monsters, ENT(pev), &tr);
+		util::TraceLine(pev->origin, pev->origin - Vector(0, 0, 2048), util::ignore_monsters, this, &tr);
 		m_flGround = tr.vecEndPos.z;
 	}
 
@@ -184,7 +184,7 @@ void CMonsterMaker::MakeMonster()
 	mins.z = m_flGround;
 
 	CBaseEntity* pList[2];
-	int count = UTIL_EntitiesInBox(pList, 2, mins, maxs, FL_CLIENT | FL_MONSTER);
+	int count = util::EntitiesInBox(pList, 2, mins, maxs, FL_CLIENT | FL_MONSTER);
 	if (0 != count)
 	{
 		// don't build a stack of monsters!
@@ -202,8 +202,8 @@ void CMonsterMaker::MakeMonster()
 	// If I have a target, fire!
 	if (!FStringNull(pev->target))
 	{
-		// delay already overloaded for this entity, so can't call SUB_UseTargets()
-		FireTargets(STRING(pev->target), this, this, USE_TOGGLE, 0);
+		// delay already overloaded for this entity, so can't call UseTargets()
+		util::FireTargets(STRING(pev->target), this, this, USE_TOGGLE, 0);
 	}
 
 	pevCreate = VARS(pent);

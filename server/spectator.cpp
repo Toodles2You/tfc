@@ -94,7 +94,7 @@ void CBaseSpectator::SpectatorImpulseCommand()
 			break;
 
 		pGoal = pCurrentGoal;
-		UTIL_SetOrigin(pev, pGoal->v.origin);
+		SetOrigin(pGoal->v.origin);
 		pev->angles = pGoal->v.angles;
 		pev->fixangle = 0;
 		break;

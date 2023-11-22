@@ -113,11 +113,11 @@ void CBasePlayer::Pain()
 	flRndSound = RANDOM_FLOAT(0, 1);
 
 	if (flRndSound <= 0.33)
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_pain5.wav", 1, ATTN_NORM);
+		EmitSound("player/pl_pain5.wav", CHAN_VOICE);
 	else if (flRndSound <= 0.66)
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_pain6.wav", 1, ATTN_NORM);
+		EmitSound("player/pl_pain6.wav", CHAN_VOICE);
 	else
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_pain7.wav", 1, ATTN_NORM);
+		EmitSound("player/pl_pain7.wav", CHAN_VOICE);
 }
 
 
@@ -151,7 +151,7 @@ void CBasePlayer::DeathSound()
 	/*
 	if (pev->waterlevel == 3)
 	{
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/h2odeath.wav", 1, ATTN_NONE);
+		EmitSound("player/h2odeath.wav", CHAN_VOICE);
 		return;
 	}
 	*/
@@ -159,21 +159,15 @@ void CBasePlayer::DeathSound()
 	// temporarily using pain sounds for death sounds
 	switch (RANDOM_LONG(1, 5))
 	{
-	case 1:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_pain5.wav", 1, ATTN_NORM);
-		break;
-	case 2:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_pain6.wav", 1, ATTN_NORM);
-		break;
-	case 3:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_pain7.wav", 1, ATTN_NORM);
-		break;
+	case 1: EmitSound("player/pl_pain5.wav", CHAN_VOICE); break;
+	case 2: EmitSound("player/pl_pain6.wav", CHAN_VOICE); break;
+	case 3: EmitSound("player/pl_pain7.wav", CHAN_VOICE); break;
 	}
 
 	// play one of the suit death alarms
-	if (!UTIL_IsDeathmatch())
+	if (!util::IsDeathmatch())
 	{
-		EMIT_GROUPNAME_SUIT(ENT(pev), "HEV_DEAD");
+		EmitSuitSound("HEV_DEAD");
 	}
 }
 
@@ -195,7 +189,7 @@ bool CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
 //=========================================================
 // TraceAttack
 //=========================================================
-void CBasePlayer::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
+void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
 {
 	if (pev->takedamage == DAMAGE_NO)
 	{
@@ -232,7 +226,7 @@ void CBasePlayer::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vec
 		}
 	}
 
-	AddMultiDamage(pevAttacker, this, flDamage, bitsDamageType);
+	AddMultiDamage(attacker, attacker, this, flDamage, bitsDamageType);
 }
 
 static inline float DamageForce(entvars_t* pev, int damage)
@@ -262,14 +256,14 @@ static float ArmourBonus(float &damage, float armour, float ratio, float bonus)
 #define kArmourRatio 0.2f // Armor Takes 80% of the damage
 #define kArmourBonus 0.5f // Each Point of Armor is work 1/x points of health
 
-bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
+bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType)
 {
 	if (pev->takedamage == DAMAGE_NO || !IsAlive())
 	{
 		return false;
 	}
-	CBaseEntity* pAttacker = CBaseEntity::Instance(pevAttacker);
-	if (!g_pGameRules->FPlayerCanTakeDamage(this, pAttacker))
+
+	if (!g_pGameRules->FPlayerCanTakeDamage(this, attacker))
 	{
 		return false;
 	}
@@ -282,7 +276,7 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	if ((bitsDamageType & DMG_ARMOR_PIERCING) == 0)
 	{
 		float armourBonus = kArmourBonus;
-		if ((bitsDamageType & DMG_BLAST) != 0 && UTIL_IsDeathmatch())
+		if ((bitsDamageType & DMG_BLAST) != 0 && util::IsDeathmatch())
 		{
 			armourBonus *= 2;
 		}
@@ -290,21 +284,14 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	}
 
 	// Grab the vector of the incoming attack. (Pretend that the inflictor is a little lower than it really is, so the body will tend to fly upward a bit.)
-	if (!FNullEnt(pevInflictor))
+	if (attacker->pev->solid != SOLID_TRIGGER)
 	{
-		if (FNullEnt(pevAttacker) || pevAttacker->solid != SOLID_TRIGGER)
-		{
-			CBaseEntity* pInflictor = CBaseEntity::Instance(pevInflictor);
-			if (pInflictor)
-			{
-				// Move them around!
-				g_vecAttackDir = (pInflictor->Center() - Vector(0, 0, 10) - Center()).Normalize();
+		// Move them around!
+		g_vecAttackDir = (inflictor->Center() - Vector(0, 0, 10) - Center()).Normalize();
 
-				pev->velocity = pev->velocity + g_vecAttackDir * -DamageForce(pev, flDamage);
-			}
-		}
-		pev->dmg_inflictor = ENT(pevInflictor);
+		pev->velocity = pev->velocity + g_vecAttackDir * -DamageForce(pev, flDamage);
 	}
+	pev->dmg_inflictor = inflictor->edict();
 
 	// Check for godmode or invincibility.
 	if ((pev->flags & FL_GODMODE) != 0)
@@ -317,7 +304,7 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	pev->health -= flDamage;
 	pev->armorvalue -= flArmour;
 
-	if (!FNullEnt(pevAttacker) && (pevAttacker->flags & FL_CLIENT) != 0)
+	if ((attacker->pev->flags & FL_CLIENT) != 0)
 	{
 		int flags = 0;
 
@@ -325,26 +312,28 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 		{
 			flags |= kDamageFlagDead;
 		}
+
 		if ((bitsDamageType & DMG_AIMED) != 0
 		 && m_LastHitGroup == HITGROUP_HEAD)
 		{
 			flags |= kDamageFlagHeadshot;
 		}
-		if (pevAttacker == pev)
+
+		if (attacker == this)
 		{
 			flags |= kDamageFlagSelf;
 		}
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgHitFeedback, nullptr, pevAttacker);
-		WRITE_BYTE(entindex());
-		WRITE_BYTE(flags);
-		WRITE_SHORT(flDamage);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgHitFeedback, attacker);
+		WriteByte(entindex());
+		WriteByte(flags);
+		WriteShort(flDamage);
+		MessageEnd();
 	}
 
 	if (pev->health <= 0)
 	{
-		Killed(pevInflictor, pevAttacker, bitsDamageType);
+		Killed(inflictor, attacker, bitsDamageType);
 		return false;
 	}
 
@@ -357,13 +346,13 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 		}
 	}
 
-	MESSAGE_BEGIN(MSG_SPEC, SVC_DIRECTOR);
-		WRITE_BYTE(9);							  // command length in bytes
-		WRITE_BYTE(DRC_CMD_EVENT);				  // take damage event
-		WRITE_SHORT(ENTINDEX(this->edict()));	  // index number of primary entity
-		WRITE_SHORT(ENTINDEX(ENT(pevInflictor))); // index number of secondary entity
-		WRITE_LONG(5);							  // eventflags (priority and flags)
-	MESSAGE_END();
+	MessageBegin(MSG_SPEC, SVC_DIRECTOR);
+		WriteByte(9);							  // command length in bytes
+		WriteByte(DRC_CMD_EVENT);				  // take damage event
+		WriteShort(entindex());	  // index number of primary entity
+		WriteShort(inflictor->entindex()); // index number of secondary entity
+		WriteLong(5);							  // eventflags (priority and flags)
+	MessageEnd();
 
 	return true;
 }
@@ -528,7 +517,7 @@ void CBasePlayer::RemoveAllWeapons(bool removeSuit)
 }
 
 
-void CBasePlayer::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
+void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType)
 {
 	// Holster weapon immediately, to allow it to cleanup
 	if (m_pActiveWeapon)
@@ -536,7 +525,7 @@ void CBasePlayer::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bi
 		m_pActiveWeapon->Holster();
 	}
 
-	g_pGameRules->PlayerKilled(this, pevAttacker, pevInflictor, bitsDamageType);
+	g_pGameRules->PlayerKilled(this, attacker, inflictor, bitsDamageType);
 
 	if (m_pTank != NULL)
 	{
@@ -576,7 +565,7 @@ void CBasePlayer::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bi
 		g_usGibbed,
 		0.0f,
 		pev->origin,
-		UTIL_VecToAngles(g_vecAttackDir),
+		util::VecToAngles(g_vecAttackDir),
 		0.0,
 		pev->health,
 		pev->sequence,
@@ -781,7 +770,7 @@ Activity CBasePlayer::GetDeathActivity()
 	fTriedDirection = false;
 	deathActivity = ACT_DIESIMPLE; // in case we can't find any special deaths to do.
 
-	UTIL_MakeVectors(pev->angles);
+	util::MakeVectors(pev->angles);
 	flDot = DotProduct(gpGlobals->v_forward, g_vecAttackDir * -1);
 
 	switch (m_LastHitGroup)
@@ -857,7 +846,7 @@ Activity CBasePlayer::GetDeathActivity()
 	if (deathActivity == ACT_DIEFORWARD)
 	{
 		// make sure there's room to fall forward
-		UTIL_TraceHull(vecSrc, vecSrc + gpGlobals->v_forward * 64, dont_ignore_monsters, head_hull, edict(), &tr);
+		util::TraceHull(vecSrc, vecSrc + gpGlobals->v_forward * 64, util::dont_ignore_monsters, util::head_hull, edict(), &tr);
 
 		if (tr.flFraction != 1.0)
 		{
@@ -868,7 +857,7 @@ Activity CBasePlayer::GetDeathActivity()
 	if (deathActivity == ACT_DIEBACKWARD)
 	{
 		// make sure there's room to fall backward
-		UTIL_TraceHull(vecSrc, vecSrc - gpGlobals->v_forward * 64, dont_ignore_monsters, head_hull, edict(), &tr);
+		util::TraceHull(vecSrc, vecSrc - gpGlobals->v_forward * 64, util::dont_ignore_monsters, util::head_hull, edict(), &tr);
 
 		if (tr.flFraction != 1.0)
 		{
@@ -890,7 +879,7 @@ Activity CBasePlayer::GetSmallFlinchActivity()
 	float flDot;
 
 	fTriedDirection = false;
-	UTIL_MakeVectors(pev->angles);
+	util::MakeVectors(pev->angles);
 	flDot = DotProduct(gpGlobals->v_forward, g_vecAttackDir * -1);
 
 	switch (m_LastHitGroup)
@@ -960,9 +949,9 @@ void CBasePlayer::WaterMove()
 
 		// play 'up for air' sound
 		if (pev->air_finished < gpGlobals->time)
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_wade1.wav", 1, ATTN_NORM);
+			EmitSound("player/pl_wade1.wav", CHAN_VOICE);
 		else if (pev->air_finished < gpGlobals->time + 9)
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_wade2.wav", 1, ATTN_NORM);
+			EmitSound("player/pl_wade2.wav", CHAN_VOICE);
 
 		pev->air_finished = gpGlobals->time + AIRTIME;
 		pev->dmg = 2;
@@ -999,7 +988,7 @@ void CBasePlayer::WaterMove()
 
 				const float oldHealth = pev->health;
 
-				TakeDamage(CWorld::World->pev, CWorld::World->pev, pev->dmg, DMG_DROWN);
+				TakeDamage(CWorld::World, CWorld::World, pev->dmg, DMG_DROWN);
 				pev->pain_finished = gpGlobals->time + 1;
 
 				// track drowning damage, give it back when
@@ -1037,16 +1026,16 @@ void CBasePlayer::WaterMove()
 			switch (RANDOM_LONG(0, 3))
 			{
 			case 0:
-				EMIT_SOUND(ENT(pev), CHAN_BODY, "player/pl_swim1.wav", 0.8, ATTN_NORM);
+				EmitSound("player/pl_swim1.wav", CHAN_VOICE, 0.8F);
 				break;
 			case 1:
-				EMIT_SOUND(ENT(pev), CHAN_BODY, "player/pl_swim2.wav", 0.8, ATTN_NORM);
+				EmitSound("player/pl_swim2.wav", CHAN_VOICE, 0.8F);
 				break;
 			case 2:
-				EMIT_SOUND(ENT(pev), CHAN_BODY, "player/pl_swim3.wav", 0.8, ATTN_NORM);
+				EmitSound("player/pl_swim3.wav", CHAN_VOICE, 0.8F);
 				break;
 			case 3:
-				EMIT_SOUND(ENT(pev), CHAN_BODY, "player/pl_swim4.wav", 0.8, ATTN_NORM);
+				EmitSound("player/pl_swim4.wav", CHAN_VOICE, 0.8F);
 				break;
 			}
 		}
@@ -1055,12 +1044,12 @@ void CBasePlayer::WaterMove()
 	if (pev->watertype == CONTENT_LAVA) // do damage
 	{
 		if (pev->dmgtime < gpGlobals->time)
-			TakeDamage(CWorld::World->pev, CWorld::World->pev, 10 * pev->waterlevel, DMG_BURN);
+			TakeDamage(CWorld::World, CWorld::World, 10 * pev->waterlevel, DMG_BURN);
 	}
 	else if (pev->watertype == CONTENT_SLIME) // do damage
 	{
 		pev->dmgtime = gpGlobals->time + 1;
-		TakeDamage(CWorld::World->pev, CWorld::World->pev, 4 * pev->waterlevel, DMG_ACID);
+		TakeDamage(CWorld::World, CWorld::World, 4 * pev->waterlevel, DMG_ACID);
 	}
 
 	if (!FBitSet(pev->flags, FL_INWATER))
@@ -1079,7 +1068,7 @@ bool CBasePlayer::IsOnLadder()
 
 void CBasePlayer::PlayerDeathFrame()
 {
-	const auto bIsMultiplayer = UTIL_IsMultiplayer();
+	const auto bIsMultiplayer = util::IsMultiplayer();
 
 	if (HasWeapons())
 	{
@@ -1156,17 +1145,17 @@ void CBasePlayer::StartDeathCam()
 			iRand--;
 		}
 
-		UTIL_SetOrigin(pev, pSpot->v.origin);
+		SetOrigin(pSpot->v.origin);
 		pev->angles = pev->v_angle = pSpot->v.v_angle;
 	}
 	else
 	{
 		// no intermission spot. Push them up in the air, looking down at their corpse
 		TraceResult tr;
-		UTIL_TraceLine(pev->origin, pev->origin + Vector(0, 0, 128), ignore_monsters, edict(), &tr);
+		util::TraceLine(pev->origin, pev->origin + Vector(0, 0, 128), util::ignore_monsters, this, &tr);
 
-		UTIL_SetOrigin(pev, tr.vecEndPos);
-		pev->angles = pev->v_angle = UTIL_VecToAngles(tr.vecEndPos - pev->origin);
+		SetOrigin(tr.vecEndPos);
+		pev->angles = pev->v_angle = util::VecToAngles(tr.vecEndPos - pev->origin);
 	}
 
 	// start death cam
@@ -1183,10 +1172,10 @@ void CBasePlayer::StartDeathCam()
 void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle)
 {
 	// clear any clientside entities attached to this player
-	MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
-	WRITE_BYTE(TE_KILLPLAYERATTACHMENTS);
-	WRITE_BYTE((byte)entindex());
-	MESSAGE_END();
+	MessageBegin(MSG_PAS, SVC_TEMPENTITY, pev->origin);
+	WriteByte(TE_KILLPLAYERATTACHMENTS);
+	WriteByte((byte)entindex());
+	MessageEnd();
 
 	// Holster weapon immediately, to allow it to cleanup
 	if (m_pActiveWeapon)
@@ -1223,16 +1212,16 @@ void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle)
 	m_fInitHUD = true;
 
 	pev->team = 0;
-	MESSAGE_BEGIN(MSG_ALL, gmsgTeamInfo);
-	WRITE_BYTE(ENTINDEX(edict()));
-	WRITE_STRING("");
-	MESSAGE_END();
+	MessageBegin(MSG_ALL, gmsgTeamInfo);
+	WriteByte(ENTINDEX(edict()));
+	WriteString("");
+	MessageEnd();
 
 	// Remove all the player's stuff
 	RemoveAllWeapons(false);
 
 	// Move them to the new position
-	UTIL_SetOrigin(pev, vecPosition);
+	SetOrigin(vecPosition);
 
 	// Find a player to watch
 	m_flNextObserverInput = 0;
@@ -1281,7 +1270,7 @@ void CBasePlayer::PlayerUse()
 					m_afPhysicsFlags |= PFLAG_ONTRAIN;
 					m_iTrain = TrainSpeed(pTrain->pev->speed, pTrain->pev->impulse);
 					m_iTrain |= TRAIN_NEW;
-					EMIT_SOUND(ENT(pev), CHAN_ITEM, "plats/train_use1.wav", 0.8, ATTN_NORM);
+					EmitSound("plats/train_use1.wav", CHAN_VOICE);
 					return;
 				}
 			}
@@ -1294,9 +1283,9 @@ void CBasePlayer::PlayerUse()
 	float flMaxDot = VIEW_FIELD_NARROW;
 	float flDot;
 
-	UTIL_MakeVectors(pev->v_angle); // so we know which way we are facing
+	util::MakeVectors(pev->v_angle); // so we know which way we are facing
 
-	while ((pObject = UTIL_FindEntityInSphere(pObject, pev->origin, PLAYER_SEARCH_RADIUS)) != NULL)
+	while ((pObject = util::FindEntityInSphere(pObject, pev->origin, PLAYER_SEARCH_RADIUS)) != NULL)
 	{
 
 		if ((pObject->ObjectCaps() & (FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE)) != 0)
@@ -1304,11 +1293,11 @@ void CBasePlayer::PlayerUse()
 			// !!!PERFORMANCE- should this check be done on a per case basis AFTER we've determined that
 			// this object is actually usable? This dot is being done for every object within PLAYER_SEARCH_RADIUS
 			// when player hits the use key. How many objects can be in that area, anyway? (sjb)
-			vecLOS = (VecBModelOrigin(pObject->pev) - (pev->origin + pev->view_ofs));
+			vecLOS = (pObject->Center() - (pev->origin + pev->view_ofs));
 
 			// This essentially moves the origin of the target to the corner nearest the player to test to see
 			// if it's "hull" is in the view cone
-			vecLOS = UTIL_ClampVectorToBox(vecLOS, pObject->pev->size * 0.5);
+			vecLOS = util::ClampVectorToBox(vecLOS, pObject->pev->size * 0.5);
 
 			flDot = DotProduct(vecLOS, gpGlobals->v_forward);
 			if (flDot > flMaxDot)
@@ -1329,7 +1318,7 @@ void CBasePlayer::PlayerUse()
 		int caps = pObject->ObjectCaps();
 
 		if ((m_afButtonPressed & IN_USE) != 0)
-			EMIT_SOUND(ENT(pev), CHAN_ITEM, "common/wpn_select.wav", 0.4, ATTN_NORM);
+			EmitSound("common/wpn_select.wav", CHAN_VOICE);
 
 		if (((pev->button & IN_USE) != 0 && (caps & FCAP_CONTINUOUS_USE) != 0) ||
 			((m_afButtonPressed & IN_USE) != 0 && (caps & (FCAP_IMPULSE_USE | FCAP_ONOFF_USE)) != 0))
@@ -1348,7 +1337,7 @@ void CBasePlayer::PlayerUse()
 	else
 	{
 		if ((m_afButtonPressed & IN_USE) != 0)
-			EMIT_SOUND(ENT(pev), CHAN_ITEM, "common/wpn_denyselect.wav", 0.4, ATTN_NORM);
+			EmitSound("common/wpn_denyselect.wav", CHAN_VOICE);
 	}
 }
 
@@ -1381,7 +1370,7 @@ void CBasePlayer::Jump()
 	}
 
 	// many features in this function use v_forward, so makevectors now.
-	UTIL_MakeVectors(pev->angles);
+	util::MakeVectors(pev->angles);
 
 	// ClearBits(pev->flags, FL_ONGROUND);		// don't stairwalk
 
@@ -1448,13 +1437,13 @@ void CBasePlayer::AddPoints(int score, bool bAllowNegativeScore)
 		m_team->AddPoints(score);
 	}
 
-	MESSAGE_BEGIN(MSG_ALL, gmsgScoreInfo);
-	WRITE_BYTE(ENTINDEX(edict()));
-	WRITE_SHORT(pev->frags);
-	WRITE_SHORT(m_iDeaths);
-	WRITE_SHORT(0);
-	WRITE_SHORT(TeamNumber());
-	MESSAGE_END();
+	MessageBegin(MSG_ALL, gmsgScoreInfo);
+	WriteByte(ENTINDEX(edict()));
+	WriteShort(pev->frags);
+	WriteShort(m_iDeaths);
+	WriteShort(0);
+	WriteShort(TeamNumber());
+	MessageEnd();
 }
 
 
@@ -1464,7 +1453,7 @@ void CBasePlayer::AddPointsToTeam(int score, bool bAllowNegativeScore)
 
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		CBaseEntity* pPlayer = UTIL_PlayerByIndex(i);
+		CBaseEntity* pPlayer = util::PlayerByIndex(i);
 
 		if (pPlayer && i != index)
 		{
@@ -1495,10 +1484,10 @@ void CBasePlayer::UpdateStatusBar()
 
 	// Find an ID Target
 	TraceResult tr;
-	UTIL_MakeVectors(pev->v_angle + pev->punchangle);
+	util::MakeVectors(pev->v_angle + pev->punchangle);
 	Vector vecSrc = EyePosition();
 	Vector vecEnd = vecSrc + (gpGlobals->v_forward * MAX_ID_RANGE);
-	UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, edict(), &tr);
+	util::TraceLine(vecSrc, vecEnd, util::dont_ignore_monsters, this, &tr);
 
 	if (tr.flFraction != 1.0)
 	{
@@ -1534,10 +1523,10 @@ void CBasePlayer::UpdateStatusBar()
 
 	if (0 != strcmp(sbuf0, m_SbarString0))
 	{
-		MESSAGE_BEGIN(MSG_ONE, gmsgStatusText, NULL, pev);
-		WRITE_BYTE(0);
-		WRITE_STRING(sbuf0);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgStatusText, this);
+		WriteByte(0);
+		WriteString(sbuf0);
+		MessageEnd();
 
 		strcpy(m_SbarString0, sbuf0);
 
@@ -1547,10 +1536,10 @@ void CBasePlayer::UpdateStatusBar()
 
 	if (0 != strcmp(sbuf1, m_SbarString1))
 	{
-		MESSAGE_BEGIN(MSG_ONE, gmsgStatusText, NULL, pev);
-		WRITE_BYTE(1);
-		WRITE_STRING(sbuf1);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgStatusText, this);
+		WriteByte(1);
+		WriteString(sbuf1);
+		MessageEnd();
 
 		strcpy(m_SbarString1, sbuf1);
 
@@ -1563,10 +1552,10 @@ void CBasePlayer::UpdateStatusBar()
 	{
 		if (newSBarState[i] != m_izSBarState[i] || bForceResend)
 		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgStatusValue, NULL, pev);
-			WRITE_BYTE(i);
-			WRITE_SHORT(newSBarState[i]);
-			MESSAGE_END();
+			MessageBegin(MSG_ONE, gmsgStatusValue, this);
+			WriteByte(i);
+			WriteShort(newSBarState[i]);
+			MessageEnd();
 
 			m_izSBarState[i] = newSBarState[i];
 		}
@@ -1587,7 +1576,7 @@ void CBasePlayer::PreThink()
 	if (g_fGameOver)
 		return; // intermission or finale
 
-	UTIL_MakeVectors(pev->v_angle); // is this still used?
+	util::MakeVectors(pev->v_angle); // is this still used?
 
 	WeaponPreFrame();
 	WaterMove();
@@ -1644,7 +1633,7 @@ void CBasePlayer::PreThink()
 		{
 			TraceResult trainTrace;
 			// Maybe this is on the other side of a level transition
-			UTIL_TraceLine(pev->origin, pev->origin + Vector(0, 0, -38), ignore_monsters, ENT(pev), &trainTrace);
+			util::TraceLine(pev->origin, pev->origin + Vector(0, 0, -38), util::ignore_monsters, this, &trainTrace);
 
 			// HACKHACK - Just look for the func_tracktrain classname
 			if (trainTrace.flFraction != 1.0 && trainTrace.pHit)
@@ -1743,7 +1732,7 @@ void CBasePlayer::CheckTimeBasedDamage()
 				bDuration = NERVEGAS_DURATION;
 				break;
 			case itbd_Poison:
-				TakeDamage(pev, pev, POISON_DAMAGE, DMG_GENERIC);
+				TakeDamage(CWorld::World, CWorld::World, POISON_DAMAGE, DMG_GENERIC);
 				bDuration = POISON_DURATION;
 				break;
 			case itbd_Radiation:
@@ -1827,9 +1816,9 @@ void CBasePlayer::UpdateGeigerCounter()
 	{
 		m_igeigerRangePrev = range;
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgGeigerRange, NULL, pev);
-		WRITE_BYTE(range);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgGeigerRange, this);
+		WriteByte(range);
+		MessageEnd();
 	}
 
 	// reset counter and semaphore
@@ -1861,7 +1850,7 @@ void CBasePlayer::CheckSuitUpdate()
 	// if in range of radiation source, ping geiger counter
 	UpdateGeigerCounter();
 
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		// don't bother updating HEV voice in multiplayer.
 		return;
@@ -1890,12 +1879,12 @@ void CBasePlayer::CheckSuitUpdate()
 				char sentence[CBSENTENCENAME_MAX + 1];
 				strcpy(sentence, "!");
 				strcat(sentence, gszallsentencenames[isentence]);
-				EMIT_SOUND_SUIT(ENT(pev), sentence);
+				EmitSuitSound(sentence);
 			}
 			else
 			{
 				// play sentence group
-				EMIT_GROUPID_SUIT(ENT(pev), -isentence);
+				EmitSuitSound(-isentence);
 			}
 			m_flSuitUpdate = gpGlobals->time + SUITUPDATETIME;
 		}
@@ -1922,7 +1911,7 @@ void CBasePlayer::SetSuitUpdate(const char* name, bool fgroup, int iNoRepeatTime
 	if (!HasSuit())
 		return;
 
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		// due to static channel design, etc. We don't play HEV sounds in multiplayer right now.
 		return;
@@ -2005,7 +1994,7 @@ void CBasePlayer::SetSuitUpdate(const char* name, bool fgroup, int iNoRepeatTime
 
 void CBasePlayer::CheckAmmoLevel(CBasePlayerWeapon* pWeapon, bool bPrimary)
 {
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		return;
 	}
@@ -2071,7 +2060,7 @@ void CBasePlayer::PostThink()
 			// BUG - this happens all the time in water, especially when
 			// BUG - water has current force
 			// if ( !pev->groundentity || VARS(pev->groundentity)->velocity.z == 0 )
-			// EMIT_SOUND(ENT(pev), CHAN_BODY, "player/pl_wade1.wav", 1, ATTN_NORM);
+			// EmitSound("player/pl_wade1.wav", CHAN_VOICE);
 		}
 		else if (m_flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED)
 		{ // after this point, we start doing damage
@@ -2080,11 +2069,11 @@ void CBasePlayer::PostThink()
 
 			if (flFallDamage > 0)
 			{
-				TakeDamage(CWorld::World->pev, CWorld::World->pev, flFallDamage, DMG_FALL);
+				TakeDamage(CWorld::World, CWorld::World, flFallDamage, DMG_FALL);
 
 				if (pev->health <= 0)
 				{
-					EMIT_SOUND(ENT(pev), CHAN_ITEM, "common/bodysplat.wav", 1, ATTN_NORM);
+					EmitSound("common/bodysplat.wav", CHAN_VOICE);
 				}
 			}
 		}
@@ -2193,7 +2182,7 @@ bool CBasePlayer::Spawn()
 
 	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "slj", "0");
 	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "hl", "1");
-	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "bj", UTIL_dtos1(sv_allowbunnyhopping.value != 0 ? 1 : 0));
+	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "bj", util::dtos1(sv_allowbunnyhopping.value != 0 ? 1 : 0));
 
 	m_iFOV = 0;		   // init field of view.
 	m_ClientSndRoomtype = -1;
@@ -2217,13 +2206,13 @@ bool CBasePlayer::Spawn()
 	pev->punchangle = g_vecZero;
 	pev->fixangle = 1;
 
-	SET_MODEL(ENT(pev), "models/player.mdl");
+	SetModel("models/player.mdl");
 	pev->sequence = LookupActivity(ACT_IDLE);
 
 	if (FBitSet(pev->flags, FL_DUCKING))
-		UTIL_SetSize(pev, VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX);
+		SetSize(VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX);
 	else
-		UTIL_SetSize(pev, VEC_HULL_MIN, VEC_HULL_MAX);
+		SetSize(VEC_HULL_MIN, VEC_HULL_MAX);
 
 	pev->view_ofs = VEC_VIEW;
 	Precache();
@@ -2306,11 +2295,11 @@ bool CBasePlayer::Restore(CRestore& restore)
 
 	if (FBitSet(pev->flags, FL_DUCKING))
 	{
-		UTIL_SetSize(pev, VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX);
+		SetSize(VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX);
 	}
 	else
 	{
-		UTIL_SetSize(pev, VEC_HULL_MIN, VEC_HULL_MAX);
+		SetSize(VEC_HULL_MIN, VEC_HULL_MAX);
 	}
 
 	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "hl", "1");
@@ -2419,21 +2408,21 @@ int CBasePlayer::TeamNumber()
 class CSprayCan : public CBaseEntity
 {
 public:
-	bool Spawn(entvars_t* pevOwner);
+	bool Spawn(CBaseEntity* owner);
 	void Think() override;
 
 	int ObjectCaps() override { return FCAP_DONT_SAVE; }
 };
 
-bool CSprayCan::Spawn(entvars_t* pevOwner)
+bool CSprayCan::Spawn(CBaseEntity* owner)
 {
-	pev->origin = pevOwner->origin + Vector(0, 0, 32);
-	pev->angles = pevOwner->v_angle;
-	pev->owner = ENT(pevOwner);
+	pev->origin = owner->pev->origin + Vector(0, 0, 32);
+	pev->angles = owner->pev->v_angle;
+	pev->owner = owner->edict();
 	pev->frame = 0;
 
 	pev->nextthink = gpGlobals->time + 0.1;
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/sprayer.wav", 1, ATTN_NORM);
+	EmitSound("player/sprayer.wav", CHAN_VOICE);
 
 	return true;
 }
@@ -2456,18 +2445,18 @@ void CSprayCan::Think()
 
 	// ALERT(at_console, "Spray by player %i, %i of %i\n", playernum, (int)(pev->frame + 1), nFrames);
 
-	UTIL_MakeVectors(pev->angles);
-	UTIL_TraceLine(pev->origin, pev->origin + gpGlobals->v_forward * 128, ignore_monsters, pev->owner, &tr);
+	util::MakeVectors(pev->angles);
+	util::TraceLine(pev->origin, pev->origin + gpGlobals->v_forward * 128, util::ignore_monsters, pPlayer, &tr);
 
 	// No customization present.
 	if (nFrames == -1)
 	{
-		UTIL_DecalTrace(&tr, DECAL_LAMBDA6);
+		util::DecalTrace(&tr, DECAL_LAMBDA6);
 		Remove();
 	}
 	else
 	{
-		UTIL_PlayerDecalTrace(&tr, playernum, pev->frame, true);
+		util::PlayerDecalTrace(&tr, playernum, pev->frame, true);
 		// Just painted last custom frame.
 		if (pev->frame++ >= (nFrames - 1))
 			Remove();
@@ -2592,14 +2581,14 @@ void CBasePlayer::ImpulseCommands()
 			break;
 		}
 
-		UTIL_MakeVectors(pev->v_angle);
-		UTIL_TraceLine(pev->origin + pev->view_ofs, pev->origin + pev->view_ofs + gpGlobals->v_forward * 128, ignore_monsters, ENT(pev), &tr);
+		util::MakeVectors(pev->v_angle);
+		util::TraceLine(pev->origin + pev->view_ofs, pev->origin + pev->view_ofs + gpGlobals->v_forward * 128, util::ignore_monsters, this, &tr);
 
 		if (tr.flFraction != 1.0)
 		{ // line hit something, so paint a decal
 			m_flNextDecalTime = gpGlobals->time + decalfrequency.value;
-			CSprayCan* pCan = GetClassPtr((CSprayCan*)NULL);
-			pCan->Spawn(pev);
+			CSprayCan* pCan = GetClassPtr((CSprayCan*)nullptr);
+			pCan->Spawn(this);
 		}
 
 		break;
@@ -2663,7 +2652,7 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 
 	case 106:
 		// Give me the classname and targetname of this entity.
-		pEntity = UTIL_FindEntityForward(this);
+		pEntity = util::FindEntityForward(this);
 		if (pEntity)
 		{
 			ALERT(at_console, "Classname: %s", STRING(pEntity->pev->classname));
@@ -2691,7 +2680,7 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 
 		Vector start = pev->origin + pev->view_ofs;
 		Vector end = start + gpGlobals->v_forward * 1024;
-		UTIL_TraceLine(start, end, ignore_monsters, edict(), &tr);
+		util::TraceLine(start, end, util::ignore_monsters, this, &tr);
 		if (tr.pHit)
 			pWorld = tr.pHit;
 		const char* pTextureName = TRACE_TEXTURE(pWorld, start, end);
@@ -2735,7 +2724,7 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 	case 202: // Random blood splatter
 		break;
 	case 203: // remove creature.
-		pEntity = UTIL_FindEntityForward(this);
+		pEntity = util::FindEntityForward(this);
 		if (pEntity)
 		{
 			if (0 != pEntity->pev->takedamage)
@@ -2789,9 +2778,9 @@ bool CBasePlayer::AddPlayerWeapon(CBasePlayerWeapon* pWeapon)
 		// Don't show weapon pickup if we're spawning or if it's an exhaustible weapon (will show ammo pickup instead).
 		if (!m_bIsSpawning && (pWeapon->iFlags() & WEAPON_FLAG_EXHAUSTIBLE) == 0)
 		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgWeapPickup, NULL, pev);
-			WRITE_BYTE(pWeapon->m_iId);
-			MESSAGE_END();
+			MessageBegin(MSG_ONE, gmsgWeapPickup, this);
+			WriteByte(pWeapon->m_iId);
+			MessageEnd();
 		}
 
 		// Should we switch to this weapon?
@@ -2874,10 +2863,10 @@ int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax)
 	if (0 != gmsgAmmoPickup) // make sure the ammo messages have been linked first
 	{
 		// Send the message that ammo has been picked up
-		MESSAGE_BEGIN(MSG_ONE, gmsgAmmoPickup, NULL, pev);
-		WRITE_BYTE(iType); // ammo ID
-		WRITE_BYTE(iAdd);				  // amount
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgAmmoPickup, this);
+		WriteByte(iType); // ammo ID
+		WriteByte(iAdd);				  // amount
+		MessageEnd();
 	}
 
 	return iType;
@@ -2965,36 +2954,36 @@ void CBasePlayer::UpdateClientData()
 		m_fInitHUD = false;
 		gInitHUD = false;
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgResetHUD, NULL, pev);
-		WRITE_BYTE(0);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgResetHUD, this);
+		WriteByte(0);
+		MessageEnd();
 
 		if (!m_fGameHUDInitialized)
 		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgInitHUD, NULL, pev);
-			MESSAGE_END();
+			MessageBegin(MSG_ONE, gmsgInitHUD, this);
+			MessageEnd();
 
 			g_pGameRules->InitHUD(this);
 			m_fGameHUDInitialized = true;
 
 			m_iObserverLastMode = OBS_ROAMING;
 
-			if (UTIL_IsMultiplayer())
+			if (util::IsMultiplayer())
 			{
-				FireTargets("game_playerjoin", this, this, USE_TOGGLE, 0);
+				util::FireTargets("game_playerjoin", this, this, USE_TOGGLE, 0);
 			}
 		}
 
-		FireTargets("game_playerspawn", this, this, USE_TOGGLE, 0);
+		util::FireTargets("game_playerspawn", this, this, USE_TOGGLE, 0);
 
 		InitStatusBar();
 	}
 
 	if (m_iHideHUD != m_iClientHideHUD)
 	{
-		MESSAGE_BEGIN(MSG_ONE, gmsgHideWeapon, NULL, pev);
-		WRITE_BYTE(m_iHideHUD);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgHideWeapon, this);
+		WriteByte(m_iHideHUD);
+		MessageEnd();
 
 		m_iClientHideHUD = m_iHideHUD;
 	}
@@ -3006,10 +2995,10 @@ void CBasePlayer::UpdateClientData()
 		const int lowerBits = m_WeaponBits & 0xFFFFFFFF;
 		const int upperBits = (m_WeaponBits >> 32) & 0xFFFFFFFF;
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgWeapons, nullptr, pev);
-		WRITE_LONG(lowerBits);
-		WRITE_LONG(upperBits);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgWeapons, this);
+		WriteLong(lowerBits);
+		WriteLong(upperBits);
+		MessageEnd();
 	}
 
 	if (0 != pev->dmg_take || 0 != pev->dmg_save || m_bitsHUDDamage != m_bitsDamageType)
@@ -3029,14 +3018,14 @@ void CBasePlayer::UpdateClientData()
 		// only send down damage type that have hud art
 		int visibleDamageBits = m_bitsDamageType & DMG_SHOWNHUD;
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgDamage, NULL, pev);
-		WRITE_BYTE(pev->dmg_save);
-		WRITE_BYTE(pev->dmg_take);
-		WRITE_LONG(visibleDamageBits);
-		WRITE_COORD(damageOrigin.x);
-		WRITE_COORD(damageOrigin.y);
-		WRITE_COORD(damageOrigin.z);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgDamage, this);
+		WriteByte(pev->dmg_save);
+		WriteByte(pev->dmg_take);
+		WriteLong(visibleDamageBits);
+		WriteCoord(damageOrigin.x);
+		WriteCoord(damageOrigin.y);
+		WriteCoord(damageOrigin.z);
+		MessageEnd();
 
 		pev->dmg_take = 0;
 		pev->dmg_save = 0;
@@ -3051,9 +3040,9 @@ void CBasePlayer::UpdateClientData()
 	{
 		ASSERT(gmsgTrain > 0);
 		// send "health" update message
-		MESSAGE_BEGIN(MSG_ONE, gmsgTrain, NULL, pev);
-		WRITE_BYTE(m_iTrain & 0xF);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgTrain, this);
+		WriteByte(m_iTrain & 0xF);
+		MessageEnd();
 
 		m_iTrain &= ~TRAIN_NEW;
 	}
@@ -3094,17 +3083,17 @@ void CBasePlayer::UpdateClientData()
 			else
 				pszName = II.pszName;
 
-			MESSAGE_BEGIN(MSG_ONE, gmsgWeaponList, NULL, pev);
-			WRITE_STRING(pszName);				   // string	weapon name
-			WRITE_BYTE(II.iAmmo1); // byte		Ammo Type
-			WRITE_BYTE(II.iMaxAmmo1);			   // byte     Max Ammo 1
-			WRITE_BYTE(II.iAmmo2); // byte		Ammo2 Type
-			WRITE_BYTE(II.iMaxAmmo2);			   // byte     Max Ammo 2
-			WRITE_BYTE(II.iSlot);				   // byte		bucket
-			WRITE_BYTE(II.iPosition);			   // byte		bucket pos
-			WRITE_BYTE(II.iId);					   // byte		id (bit index into m_WeaponBits)
-			WRITE_BYTE(II.iFlags);				   // byte		Flags
-			MESSAGE_END();
+			MessageBegin(MSG_ONE, gmsgWeaponList, this);
+			WriteString(pszName);				   // string	weapon name
+			WriteByte(II.iAmmo1); // byte		Ammo Type
+			WriteByte(II.iMaxAmmo1);			   // byte     Max Ammo 1
+			WriteByte(II.iAmmo2); // byte		Ammo2 Type
+			WriteByte(II.iMaxAmmo2);			   // byte     Max Ammo 2
+			WriteByte(II.iSlot);				   // byte		bucket
+			WriteByte(II.iPosition);			   // byte		bucket pos
+			WriteByte(II.iId);					   // byte		id (bit index into m_WeaponBits)
+			WriteByte(II.iFlags);				   // byte		Flags
+			MessageEnd();
 		}
 	}
 
@@ -3120,9 +3109,9 @@ void CBasePlayer::UpdateClientData()
 	{
 		m_ClientSndRoomtype = m_SndRoomtype;
 
-		MESSAGE_BEGIN(MSG_ONE, SVC_ROOMTYPE, nullptr, edict());
-		WRITE_SHORT((short)m_SndRoomtype); // sequence number
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, SVC_ROOMTYPE, this);
+		WriteShort((short)m_SndRoomtype); // sequence number
+		MessageEnd();
 	}
 
 	//Handled anything that needs resetting
@@ -3159,7 +3148,7 @@ void CBasePlayer::EnableControl(bool fControl)
 //=========================================================
 Vector CBasePlayer::GetAimVector()
 {
-	UTIL_MakeVectors(pev->v_angle + pev->punchangle);
+	util::MakeVectors(pev->v_angle + pev->punchangle);
 	return gpGlobals->v_forward;
 }
 
@@ -3199,7 +3188,7 @@ int CBasePlayer::GetCustomDecalFrames()
 //=========================================================
 void CBasePlayer::DropPlayerWeapon(char* pszWeaponName)
 {
-	if (!UTIL_IsMultiplayer() || (weaponstay.value > 0))
+	if (!util::IsMultiplayer() || (weaponstay.value > 0))
 	{
 		// no dropping in single player.
 		return;
@@ -3238,7 +3227,7 @@ void CBasePlayer::DropPlayerWeapon(char* pszWeaponName)
 
 	ClearWeaponBit(pWeapon->m_iId); // take weapon off hud
 
-	UTIL_MakeVectors(pev->angles);
+	util::MakeVectors(pev->angles);
 
 	CWeaponBox* pWeaponBox = (CWeaponBox*)CBaseEntity::Create("weaponbox", pev->origin + gpGlobals->v_forward * 10, pev->angles, edict());
 	pWeaponBox->pev->angles.x = 0;
@@ -3375,9 +3364,9 @@ void CStripWeapons::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	{
 		pPlayer = (CBasePlayer*)pActivator;
 	}
-	else if (!UTIL_IsDeathmatch())
+	else if (!util::IsDeathmatch())
 	{
-		pPlayer = (CBasePlayer*)UTIL_GetLocalPlayer();
+		pPlayer = (CBasePlayer*)util::GetLocalPlayer();
 	}
 
 	if (pPlayer)
@@ -3450,7 +3439,7 @@ bool CRevertSaved::KeyValue(KeyValueData* pkvd)
 
 void CRevertSaved::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
-	UTIL_ScreenFadeAll(pev->rendercolor, Duration(), HoldTime(), pev->renderamt, FFADE_OUT);
+	util::ScreenFadeAll(pev->rendercolor, Duration(), HoldTime(), pev->renderamt, FFADE_OUT);
 	pev->nextthink = gpGlobals->time + MessageTime();
 	SetThink(&CRevertSaved::MessageThink);
 }
@@ -3458,7 +3447,7 @@ void CRevertSaved::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE u
 
 void CRevertSaved::MessageThink()
 {
-	UTIL_ShowMessageAll(STRING(pev->message));
+	util::ShowMessageAll(STRING(pev->message));
 	float nextThink = LoadTime() - MessageTime();
 	if (nextThink > 0)
 	{
@@ -3472,7 +3461,7 @@ void CRevertSaved::MessageThink()
 
 void CRevertSaved::LoadThink()
 {
-	if (!UTIL_IsMultiplayer())
+	if (!util::IsMultiplayer())
 	{
 		SERVER_COMMAND("reload\n");
 	}
@@ -3490,7 +3479,7 @@ class CInfoIntermission : public CPointEntity
 
 bool CInfoIntermission::Spawn()
 {
-	UTIL_SetOrigin(pev, pev->origin);
+	SetOrigin(pev->origin);
 	pev->solid = SOLID_NOT;
 	pev->effects = EF_NODRAW;
 	pev->v_angle = g_vecZero;
@@ -3509,7 +3498,7 @@ void CInfoIntermission::Think()
 
 	if (!FNullEnt(pTarget))
 	{
-		pev->v_angle = UTIL_VecToAngles((pTarget->v.origin - pev->origin).Normalize());
+		pev->v_angle = util::VecToAngles((pTarget->v.origin - pev->origin).Normalize());
 		pev->v_angle.x = -pev->v_angle.x;
 	}
 }

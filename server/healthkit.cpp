@@ -51,7 +51,7 @@ IMPLEMENT_SAVERESTORE( CHealthKit, CItem);
 bool CHealthKit::Spawn()
 {
 	Precache();
-	SET_MODEL(ENT(pev), "models/w_medkit.mdl");
+	SetModel("models/w_medkit.mdl");
 
 	return CItem::Spawn();
 }
@@ -71,11 +71,11 @@ bool CHealthKit::MyTouch(CBasePlayer* pPlayer)
 
 	if (pPlayer->TakeHealth(gSkillData.healthkitCapacity, DMG_GENERIC))
 	{
-		MESSAGE_BEGIN(MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev);
-		WRITE_STRING(STRING(pev->classname));
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgItemPickup, pPlayer);
+		WriteString(STRING(pev->classname));
+		MessageEnd();
 
-		EMIT_SOUND(ENT(pPlayer->pev), CHAN_ITEM, "items/smallmedkit1.wav", 1, ATTN_NORM);
+		pPlayer->EmitSound("items/smallmedkit1.wav", CHAN_ITEM);
 		return true;
 	}
 
@@ -149,9 +149,9 @@ bool CWallHealth::Spawn()
 	pev->solid = SOLID_BSP;
 	pev->movetype = MOVETYPE_PUSH;
 
-	UTIL_SetOrigin(pev, pev->origin); // set size and link into world
-	UTIL_SetSize(pev, pev->mins, pev->maxs);
-	SET_MODEL(ENT(pev), STRING(pev->model));
+	SetSize(pev->mins, pev->maxs);
+	SetOrigin(pev->origin); // set size and link into world
+	SetModel(STRING(pev->model));
 	m_iJuice = gSkillData.healthchargerCapacity;
 	pev->frame = 0;
 
@@ -190,7 +190,7 @@ void CWallHealth::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE us
 		if (m_flSoundTime <= gpGlobals->time)
 		{
 			m_flSoundTime = gpGlobals->time + 0.62;
-			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/medshotno1.wav", 1.0, ATTN_NORM);
+			EmitSound("items/medshotno1.wav", CHAN_ITEM);
 		}
 		return;
 	}
@@ -207,13 +207,13 @@ void CWallHealth::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE us
 	if (0 == m_iOn)
 	{
 		m_iOn++;
-		EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/medshot4.wav", 1.0, ATTN_NORM);
+		EmitSound("items/medshot4.wav", CHAN_ITEM);
 		m_flSoundTime = 0.56 + gpGlobals->time;
 	}
 	if ((m_iOn == 1) && (m_flSoundTime <= gpGlobals->time))
 	{
 		m_iOn++;
-		EMIT_SOUND(ENT(pev), CHAN_STATIC, "items/medcharge4.wav", 1.0, ATTN_NORM);
+		EmitSound("items/medcharge4.wav", CHAN_STATIC);
 	}
 
 
@@ -229,7 +229,7 @@ void CWallHealth::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE us
 
 void CWallHealth::Recharge()
 {
-	EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/medshot4.wav", 1.0, ATTN_NORM);
+	EmitSound("items/medshot4.wav", CHAN_ITEM);
 	m_iJuice = gSkillData.healthchargerCapacity;
 	pev->frame = 0;
 	SetThink(nullptr);
@@ -239,7 +239,7 @@ void CWallHealth::Off()
 {
 	// Stop looping sound.
 	if (m_iOn > 1)
-		STOP_SOUND(ENT(pev), CHAN_STATIC, "items/medcharge4.wav");
+		StopSound("items/medcharge4.wav", CHAN_STATIC);
 
 	m_iOn = 0;
 

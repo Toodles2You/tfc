@@ -141,10 +141,10 @@ bool CBaseDelay::KeyValue(KeyValueData* pkvd)
 
 /*
 ==============================
-SUB_UseTargets
+UseTargets
 
 If self.delay is set, a DelayedUse entity will be created that will actually
-do the SUB_UseTargets after that many seconds have passed.
+do the UseTargets after that many seconds have passed.
 
 Removes all entities with a targetname that match self.killtarget,
 and removes them, so some events can remove other triggers.
@@ -154,19 +154,19 @@ match (string)self.target and call their .use function (if they have one)
 
 ==============================
 */
-void CBaseEntity::SUB_UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value)
+void CBaseEntity::UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value)
 {
 	//
 	// fire targets
 	//
 	if (!FStringNull(pev->target))
 	{
-		FireTargets(STRING(pev->target), pActivator, this, useType, value);
+		util::FireTargets(STRING(pev->target), pActivator, this, useType, value);
 	}
 }
 
 
-void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+void util::FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	edict_t* pentTarget = NULL;
 	if (!targetName)
@@ -192,7 +192,7 @@ void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* p
 LINK_ENTITY_TO_CLASS(DelayedUse, CBaseDelay);
 
 
-void CBaseDelay::SUB_UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value)
+void CBaseDelay::UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value)
 {
 	//
 	// exit immediatly if we don't have a target or kill target
@@ -259,7 +259,7 @@ void CBaseDelay::SUB_UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float
 	//
 	if (!FStringNull(pev->target))
 	{
-		FireTargets(STRING(pev->target), pActivator, this, useType, value);
+		util::FireTargets(STRING(pev->target), pActivator, this, useType, value);
 	}
 }
 
@@ -267,26 +267,28 @@ void CBaseDelay::SUB_UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float
 QuakeEd only writes a single float for angles (bad idea), so up and down are
 just constant angles.
 */
-void SetMovedir(entvars_t* pev)
+Vector util::SetMovedir(Vector& angles)
 {
-	if (pev->angles == Vector(0, -1, 0))
+	Vector movedir = g_vecZero;
+
+	if (angles == Vector(0, -1, 0))
 	{
-		pev->movedir = Vector(0, 0, 1);
+		movedir = Vector(0, 0, 1);
 	}
-	else if (pev->angles == Vector(0, -2, 0))
+	else if (angles == Vector(0, -2, 0))
 	{
-		pev->movedir = Vector(0, 0, -1);
+		movedir = Vector(0, 0, -1);
 	}
 	else
 	{
-		UTIL_MakeVectors(pev->angles);
-		pev->movedir = gpGlobals->v_forward;
+		util::MakeVectors(angles);
+		movedir = gpGlobals->v_forward;
 	}
 
-	pev->angles = g_vecZero;
+	angles = g_vecZero;
+
+	return movedir;
 }
-
-
 
 
 void CBaseDelay::DelayThink()
@@ -298,7 +300,7 @@ void CBaseDelay::DelayThink()
 		pActivator = CBaseEntity::Instance(pev->owner);
 	}
 	// The use type is cached (and stashed) in pev->button
-	SUB_UseTargets(pActivator, (USE_TYPE)pev->button, 0);
+	UseTargets(pActivator, (USE_TYPE)pev->button, 0);
 	Remove();
 }
 
@@ -407,7 +409,7 @@ void CBaseToggle::LinearMoveDone()
 		return;
 	}
 
-	UTIL_SetOrigin(pev, m_vecFinalDest);
+	SetOrigin(m_vecFinalDest);
 	pev->velocity = g_vecZero;
 	pev->nextthink = -1;
 	if (m_pfnCallWhenMoveDone)
@@ -416,7 +418,7 @@ void CBaseToggle::LinearMoveDone()
 
 bool CBaseToggle::IsLockedByMaster()
 {
-	return !FStringNull(m_sMaster) && !UTIL_IsMasterTriggered(m_sMaster, m_hActivator);
+	return !FStringNull(m_sMaster) && !util::IsMasterTriggered(m_sMaster, m_hActivator);
 }
 
 /*
@@ -503,31 +505,4 @@ float CBaseToggle::AxisDelta(int flags, const Vector& angle1, const Vector& angl
 		return angle1.x - angle2.x;
 
 	return angle1.y - angle2.y;
-}
-
-
-/*
-=============
-FEntIsVisible
-
-returns true if the passed entity is visible to caller, even if not infront ()
-=============
-*/
-bool FEntIsVisible(
-	entvars_t* pev,
-	entvars_t* pevTarget)
-{
-	Vector vecSpot1 = pev->origin + pev->view_ofs;
-	Vector vecSpot2 = pevTarget->origin + pevTarget->view_ofs;
-	TraceResult tr;
-
-	UTIL_TraceLine(vecSpot1, vecSpot2, ignore_monsters, ENT(pev), &tr);
-
-	if (0 != tr.fInOpen && 0 != tr.fInWater)
-		return false; // sight line crossed contents
-
-	if (tr.flFraction == 1)
-		return true;
-
-	return false;
 }

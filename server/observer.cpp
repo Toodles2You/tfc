@@ -48,7 +48,7 @@ void CBasePlayer::Observer_FindNextPlayer(bool bReverse)
 		if (iCurrent < 1)
 			iCurrent = gpGlobals->maxClients;
 
-		CBaseEntity* pEnt = UTIL_PlayerByIndex(iCurrent);
+		CBaseEntity* pEnt = util::PlayerByIndex(iCurrent);
 		if (!pEnt)
 			continue;
 		if (pEnt == this)
@@ -68,7 +68,7 @@ void CBasePlayer::Observer_FindNextPlayer(bool bReverse)
 	if (m_hObserverTarget)
 	{
 		// Move to the target
-		UTIL_SetOrigin(pev, m_hObserverTarget->pev->origin);
+		SetOrigin(m_hObserverTarget->pev->origin);
 
 		// ALERT( at_console, "Now Tracking %s\n", STRING( m_hObserverTarget->pev->netname ) );
 
@@ -150,7 +150,7 @@ void CBasePlayer::Observer_CheckTarget()
 		}
 	}
 
-	CBasePlayer* target = (CBasePlayer*)(UTIL_PlayerByIndex(ENTINDEX(m_hObserverTarget->edict())));
+	CBasePlayer* target = (CBasePlayer*)(util::PlayerByIndex(ENTINDEX(m_hObserverTarget->edict())));
 
 	if (!target)
 	{
@@ -175,7 +175,7 @@ void CBasePlayer::Observer_CheckProperties()
 	// try to find a traget if we have no current one
 	if (pev->iuser1 == OBS_IN_EYE && m_hObserverTarget != NULL)
 	{
-		CBasePlayer* target = (CBasePlayer*)(UTIL_PlayerByIndex(ENTINDEX(m_hObserverTarget->edict())));
+		CBasePlayer* target = (CBasePlayer*)(util::PlayerByIndex(ENTINDEX(m_hObserverTarget->edict())));
 
 		if (!target)
 			return;
@@ -186,18 +186,18 @@ void CBasePlayer::Observer_CheckProperties()
 		{
 			m_iFOV = target->m_iFOV;
 			// write fov before wepon data, so zoomed crosshair is set correctly
-			MESSAGE_BEGIN(MSG_ONE, gmsgSetFOV, NULL, pev);
-			WRITE_BYTE(m_iFOV);
-			MESSAGE_END();
+			MessageBegin(MSG_ONE, gmsgSetFOV, this);
+			WriteByte(m_iFOV);
+			MessageEnd();
 
 
 			m_iObserverWeapon = weapon;
 			//send weapon update
-			MESSAGE_BEGIN(MSG_ONE, gmsgCurWeapon, NULL, pev);
-			WRITE_BYTE(1); // 1 = current weapon, not on target
-			WRITE_BYTE(m_iObserverWeapon);
-			WRITE_BYTE(0); // clip
-			MESSAGE_END();
+			MessageBegin(MSG_ONE, gmsgCurWeapon, this);
+			WriteByte(1); // 1 = current weapon, not on target
+			WriteByte(m_iObserverWeapon);
+			WriteByte(0); // clip
+			MessageEnd();
 		}
 	}
 	else
@@ -208,11 +208,11 @@ void CBasePlayer::Observer_CheckProperties()
 		{
 			m_iObserverWeapon = 0;
 
-			MESSAGE_BEGIN(MSG_ONE, gmsgCurWeapon, NULL, pev);
-			WRITE_BYTE(1); // 1 = current weapon
-			WRITE_BYTE(m_iObserverWeapon);
-			WRITE_BYTE(0); // clip
-			MESSAGE_END();
+			MessageBegin(MSG_ONE, gmsgCurWeapon, this);
+			WriteByte(1); // 1 = current weapon
+			WriteByte(m_iObserverWeapon);
+			WriteByte(0); // clip
+			MessageEnd();
 		}
 	}
 }
@@ -250,7 +250,7 @@ void CBasePlayer::Observer_SetMode(int iMode)
 		// if we didn't find a valid target switch to roaming
 		if (m_hObserverTarget == NULL)
 		{
-			ClientPrint(pev, HUD_PRINTCENTER, "#Spec_NoTarget");
+			util::ClientPrint(this, HUD_PRINTCENTER, "#Spec_NoTarget");
 			pev->iuser1 = OBS_ROAMING;
 		}
 	}
@@ -269,7 +269,7 @@ void CBasePlayer::Observer_SetMode(int iMode)
 
 	char modemsg[16];
 	sprintf(modemsg, "#Spec_Mode%i", pev->iuser1);
-	ClientPrint(pev, HUD_PRINTCENTER, modemsg);
+	util::ClientPrint(this, HUD_PRINTCENTER, modemsg);
 
 	m_iObserverLastMode = iMode;
 }

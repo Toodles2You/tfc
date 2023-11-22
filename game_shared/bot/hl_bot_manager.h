@@ -43,7 +43,7 @@ protected:
 	float m_NextQuotaCheckTime;
 };
 
-inline DLL_GLOBAL CBotManager *g_pBotMan = nullptr;
+inline CBotManager *g_pBotMan = nullptr;
 
 
 #endif // HL_BOT_MANAGER_H

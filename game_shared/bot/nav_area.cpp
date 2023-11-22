@@ -1073,9 +1073,9 @@ inline CNavArea *FindFirstAreaInDirection( const Vector *start, NavDirType dir, 
 		TraceResult result;
 
 		if (traceIgnore)
-			UTIL_TraceLine( *start, pos, ignore_monsters, ENT( traceIgnore->pev ), &result );
+			util::TraceLine( *start, pos, util::ignore_monsters, traceIgnore, &result );
 		else
-			UTIL_TraceLine( *start, pos, ignore_monsters, NULL, &result );
+			util::TraceLine( *start, pos, util::ignore_monsters, nullptr, &result );
 
 		if (result.flFraction != 1.0f)
 			break;
@@ -1124,13 +1124,13 @@ inline bool testJumpDown( const Vector *fromPos, const Vector *toPos )
 	Vector to( toPos->x, toPos->y, from.z );
 
 	TraceResult result;
-	UTIL_TraceLine( from, to, ignore_monsters, NULL, &result );
+	util::TraceLine( from, to, util::ignore_monsters, nullptr, &result );
 	if (result.flFraction != 1.0f || result.fStartSolid)
 		return false;
 
 	from = to;
 	to.z = toPos->z + 2.0f;
-	UTIL_TraceLine( from, to, ignore_monsters, NULL, &result );
+	util::TraceLine( from, to, util::ignore_monsters, nullptr, &result );
 	if (result.flFraction != 1.0f || result.fStartSolid)
 		return false;
 
@@ -1651,7 +1651,7 @@ void BuildLadders( void )
 	DestroyLadders();
 
 	TraceResult result;
-	CBaseEntity *entity = UTIL_FindEntityByClassname( NULL, "func_ladder" );
+	CBaseEntity *entity = util::FindEntityByClassname( NULL, "func_ladder" );
 	while( entity && !FNullEnt( entity->edict() ) )
 	{
 		CNavLadder *ladder = new CNavLadder;
@@ -1675,7 +1675,7 @@ void BuildLadders( void )
 			Vector from = ladder->m_bottom + Vector( 0.0f, GenerationStepSize, GenerationStepSize );
 			Vector to = ladder->m_top + Vector( 0.0f, GenerationStepSize, -GenerationStepSize );
 
-			UTIL_TraceLine( from, to, ignore_monsters, ENT( entity->pev ), &result );
+			util::TraceLine( from, to, util::ignore_monsters, entity, &result );
 
 			if (result.flFraction != 1.0f || result.fStartSolid)
 				ladder->m_dir = NORTH;
@@ -1688,7 +1688,7 @@ void BuildLadders( void )
 			Vector from = ladder->m_bottom + Vector( GenerationStepSize, 0.0f, GenerationStepSize );
 			Vector to = ladder->m_top + Vector( GenerationStepSize, 0.0f, -GenerationStepSize );
 
-			UTIL_TraceLine( from, to, ignore_monsters, ENT( entity->pev ), &result );
+			util::TraceLine( from, to, util::ignore_monsters, entity, &result );
 
 			if (result.flFraction != 1.0f || result.fStartSolid)
 				ladder->m_dir = WEST;
@@ -1713,7 +1713,7 @@ void BuildLadders( void )
 			out = on;
 			AddDirectionVector( &out, ladder->m_dir, minLadderClearance );
 
-			UTIL_TraceLine( on, out, ignore_monsters, ENT( entity->pev ), &result );
+			util::TraceLine( on, out, util::ignore_monsters, entity, &result );
 
 			if (result.flFraction == 1.0f && !result.fStartSolid)
 			{
@@ -1731,7 +1731,7 @@ void BuildLadders( void )
 			out = on;
 			AddDirectionVector( &out, ladder->m_dir, minLadderClearance );
 
-			UTIL_TraceLine( on, out, ignore_monsters, ENT( entity->pev ), &result );
+			util::TraceLine( on, out, util::ignore_monsters, entity, &result );
 
 			if (result.flFraction == 1.0f && !result.fStartSolid)
 			{
@@ -1855,7 +1855,7 @@ void BuildLadders( void )
 		// add ladder to global list
 		TheNavLadderList.push_back( ladder );		
 
-		entity = UTIL_FindEntityByClassname( entity, "func_ladder" );
+		entity = util::FindEntityByClassname( entity, "func_ladder" );
 	}
 }
 
@@ -2804,7 +2804,7 @@ bool IsHidingSpotInCover( const Vector *spot )
 
 	// if we are crouched underneath something, that counts as good cover
 	to = from + Vector( 0, 0, 20.0f );
-	UTIL_TraceLine( from, to, ignore_monsters, NULL, &result );
+	util::TraceLine( from, to, util::ignore_monsters, nullptr, &result );
 	if (result.flFraction != 1.0f)
 		return true;
 
@@ -2815,7 +2815,7 @@ bool IsHidingSpotInCover( const Vector *spot )
 	{
 		to = from + Vector( coverRange * cos(angle), coverRange * sin(angle), HalfHumanHeight );
 
-		UTIL_TraceLine( from, to, ignore_monsters, NULL, &result );
+		util::TraceLine( from, to, util::ignore_monsters, nullptr, &result );
 
 		// if traceline hit something, it hit "cover"
 		if (result.flFraction != 1.0f)
@@ -2988,7 +2988,7 @@ void ClassifySniperSpot( HidingSpot *spot )
 				walkable.z = area->GetZ( &walkable ) + HalfHumanHeight;
 				
 				// check line of sight
-				UTIL_TraceLine( eye, walkable, ignore_monsters, ignore_glass, NULL, &result );
+				util::TraceLine( eye, walkable, util::ignore_monsters, util::ignore_glass, nullptr, &result );
 
 				if (result.flFraction == 1.0f && !result.fStartSolid)
 				{
@@ -3158,7 +3158,7 @@ void CNavArea::AddSpotEncounters( const CNavArea *from, NavDirType fromDir, cons
 				continue;
 
 			// check if we have LOS
-			UTIL_TraceLine( eye, Vector( spotPos->x, spotPos->y, spotPos->z + HalfHumanHeight ), ignore_monsters, ignore_glass, NULL, &result );
+			util::TraceLine( eye, Vector( spotPos->x, spotPos->y, spotPos->z + HalfHumanHeight ), util::ignore_monsters, util::ignore_glass, nullptr, &result );
 			if (result.flFraction != 1.0f)
 				continue;
 
@@ -3597,7 +3597,7 @@ bool IsCrossingLineOfFire( const Vector &start, const Vector &finish, CBaseEntit
 {
 	for ( int p=1; p <= gpGlobals->maxClients; ++p )
 	{
-		CBasePlayer *player = static_cast<CBasePlayer *>( UTIL_PlayerByIndex( p ) );
+		CBasePlayer *player = static_cast<CBasePlayer *>( util::PlayerByIndex( p ) );
 
 		if (!IsEntityValid( player ))
 			continue;
@@ -3612,7 +3612,7 @@ bool IsCrossingLineOfFire( const Vector &start, const Vector &finish, CBaseEntit
 			continue;
 
 		// compute player's unit aiming vector 
-		UTIL_MakeVectors( player->pev->v_angle + player->pev->punchangle );
+		util::MakeVectors( player->pev->v_angle + player->pev->punchangle );
 
 		const float longRange = 5000.0f;
 		Vector playerTarget = player->pev->origin + longRange * gpGlobals->v_forward;
@@ -3715,7 +3715,7 @@ int CNavArea::GetPlayerCount( int teamID, CBasePlayer *ignore ) const
 
 	for( int i=1; i<=gpGlobals->maxClients; ++i )
 	{
-		CBasePlayer *player = static_cast<CBasePlayer *>( UTIL_PlayerByIndex( i ) );
+		CBasePlayer *player = static_cast<CBasePlayer *>( util::PlayerByIndex( i ) );
 
 		if (player == ignore)
 			continue;
@@ -3806,7 +3806,7 @@ void DrawHidingSpots( const CNavArea *area )
  */
 void CNavArea::DrawConnectedAreas( void )
 {
-	CBasePlayer *player = static_cast<CBasePlayer *>(UTIL_GetLocalPlayer());
+	CBasePlayer *player = static_cast<CBasePlayer *>(util::GetLocalPlayer());
 	if (player == NULL)
 		return;
 
@@ -4008,7 +4008,7 @@ void EditNavAreas( NavEditCmdType cmd )
 {
 	CGameBotManager *ctrl = static_cast<CGameBotManager *>( g_pBotMan );
 
-	CBasePlayer *player = static_cast<CBasePlayer *>(UTIL_GetLocalPlayer());
+	CBasePlayer *player = static_cast<CBasePlayer *>(util::GetLocalPlayer());
 	if (player == NULL)
 		return;
 
@@ -4101,13 +4101,13 @@ void EditNavAreas( NavEditCmdType cmd )
 	}
 
 	Vector dir;
-	UTIL_MakeVectorsPrivate( player->pev->v_angle, dir, NULL, NULL );
+	util::MakeVectorsPrivate( player->pev->v_angle, dir, NULL, NULL );
 
 	Vector from = player->pev->origin + player->pev->view_ofs;	// eye position
 	Vector to = from + maxRange * dir;
 
 	TraceResult result;
-	UTIL_TraceLine( from, to, ignore_monsters, ignore_glass, ENT( player->pev ), &result );
+	util::TraceLine( from, to, util::ignore_monsters, util::ignore_glass, player, &result );
 
 	if (result.flFraction != 1.0f)
 	{
@@ -4192,7 +4192,7 @@ void EditNavAreas( NavEditCmdType cmd )
 
 				sprintf( buffer, "Area #%d %s %s\n", area->GetID(), locName, attrib );
 
-				UTIL_SayTextAll( buffer, player );
+				util::SayTextAll( buffer, player );
 
 				// do "place painting"
 				if (isPlacePainting)
@@ -4200,7 +4200,7 @@ void EditNavAreas( NavEditCmdType cmd )
 					if (area->GetPlace() != ctrl->GetNavPlace())
 					{
 						area->SetPlace( ctrl->GetNavPlace() );
-						EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/lightswitch2.wav", 1, ATTN_NORM, 0, 100 ); 
+						util::GetLocalPlayer()->EmitSound("buttons/lightswitch2.wav", CHAN_ITEM); 
 					}
 				}
 			}
@@ -4212,7 +4212,7 @@ void EditNavAreas( NavEditCmdType cmd )
 				switch( cmd )
 				{
 					case EDIT_TOGGLE_PLACE_MODE:
-						EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+						util::GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 						isPlaceMode = false;
 						return;
 
@@ -4221,13 +4221,13 @@ void EditNavAreas( NavEditCmdType cmd )
 						if (isPlacePainting)
 						{
 							isPlacePainting = false;
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/latchunlocked2.wav", 1, ATTN_NORM, 0, 100 ); 
+							util::GetLocalPlayer()->EmitSound("buttons/latchunlocked2.wav", CHAN_ITEM); 
 						}
 						else
 						{
 							isPlacePainting = true;
 
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/lightswitch2.wav", 1, ATTN_NORM, 0, 100 ); 
+							util::GetLocalPlayer()->EmitSound("buttons/lightswitch2.wav", CHAN_ITEM); 
 
 							// paint the initial area
 							area->SetPlace( ctrl->GetNavPlace() );
@@ -4236,7 +4236,7 @@ void EditNavAreas( NavEditCmdType cmd )
 					}
 
 					case EDIT_PLACE_PICK:
-						EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+						util::GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 						ctrl->SetNavPlace( area->GetPlace() );
 						break;
 
@@ -4317,67 +4317,67 @@ void EditNavAreas( NavEditCmdType cmd )
 				switch( cmd )
 				{
 					case EDIT_TOGGLE_PLACE_MODE:
-						EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+						util::GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 						isPlaceMode = true;
 						return;
 
 					case EDIT_DELETE:
-						EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+						util::GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 						TheNavAreaList.remove( area );
 						delete area;
 						return;
 
 					case EDIT_ATTRIB_CROUCH:
-						EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/bell1.wav", 1, ATTN_NORM, 0, 100 ); 
+						util::GetLocalPlayer()->EmitSound("buttons/bell1.wav", CHAN_ITEM); 
 						area->SetAttributes( area->GetAttributes() ^ NAV_CROUCH );
 						break;
 
 					case EDIT_ATTRIB_JUMP:
-						EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/bell1.wav", 1, ATTN_NORM, 0, 100 ); 
+						util::GetLocalPlayer()->EmitSound("buttons/bell1.wav", CHAN_ITEM); 
 						area->SetAttributes( area->GetAttributes() ^ NAV_JUMP );
 						break;
 
 					case EDIT_ATTRIB_PRECISE:
-						EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/bell1.wav", 1, ATTN_NORM, 0, 100 ); 
+						util::GetLocalPlayer()->EmitSound("buttons/bell1.wav", CHAN_ITEM); 
 						area->SetAttributes( area->GetAttributes() ^ NAV_PRECISE );
 						break;
 
 					case EDIT_ATTRIB_NO_JUMP:
-						EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/bell1.wav", 1, ATTN_NORM, 0, 100 ); 
+						util::GetLocalPlayer()->EmitSound("buttons/bell1.wav", CHAN_ITEM); 
 						area->SetAttributes( area->GetAttributes() ^ NAV_NO_JUMP );
 						break;
 
 					case EDIT_SPLIT:
 						if (area->SplitEdit( splitAlongX, splitEdge ))
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "weapons/knife_hitwall1.wav", 1, ATTN_NORM, 0, 100 ); 
+							util::GetLocalPlayer()->EmitSound("weapons/knife_hitwall1.wav", CHAN_ITEM); 
 						else
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 );
+							util::GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM);
 						break;
 
 					case EDIT_MERGE:
 						if (markedArea)
 						{
 							if (area->MergeEdit( markedArea ))
-								EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+								util::GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 							else
-								EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 );
+								util::GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM);
 						}
 						else
 						{
 							HintMessageToAllPlayers( "To merge, mark an area, highlight a second area, then invoke the merge command" );
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 ); 
+							util::GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM); 
 						}
 						break;
 
 					case EDIT_MARK:
 						if (markedArea)
 						{
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+							util::GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 							markedArea = NULL;
 						}
 						else
 						{
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip2.wav", 1, ATTN_NORM, 0, 100 ); 
+							util::GetLocalPlayer()->EmitSound("buttons/blip2.wav", CHAN_ITEM); 
 							markedArea = area;
 
 							int connected = 0;
@@ -4388,14 +4388,14 @@ void EditNavAreas( NavEditCmdType cmd )
 
 							char buffer[80];
 							sprintf( buffer, "Marked Area is connected to %d other Areas\n", connected );
-							UTIL_SayTextAll( buffer, player );
+							util::SayTextAll( buffer, player );
 						}
 						break;
 
 					case EDIT_MARK_UNNAMED:
 						if (markedArea)
 						{
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+							util::GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 							markedArea = NULL;
 						}
 						else
@@ -4412,11 +4412,11 @@ void EditNavAreas( NavEditCmdType cmd )
 							}
 							if ( !markedArea )
 							{
-								EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+								util::GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 							}
 							else
 							{
-								EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip2.wav", 1, ATTN_NORM, 0, 100 ); 
+								util::GetLocalPlayer()->EmitSound("buttons/blip2.wav", CHAN_ITEM); 
 
 								int connected = 0;
 								connected += markedArea->GetAdjacentCount( NORTH );
@@ -4436,7 +4436,7 @@ void EditNavAreas( NavEditCmdType cmd )
 
 								char buffer[80];
 								sprintf( buffer, "Marked Area is connected to %d other Areas - there are %d total unnamed areas\n", connected, totalUnnamedAreas );
-								UTIL_SayTextAll( buffer, player );
+								util::SayTextAll( buffer, player );
 							}
 						}
 						break;
@@ -4444,16 +4444,16 @@ void EditNavAreas( NavEditCmdType cmd )
 					case EDIT_WARP_TO_MARK:
 						if (markedArea)
 						{
-							CBasePlayer *pLocalPlayer = static_cast<CBasePlayer *>(UTIL_GetLocalPlayer());
+							CBasePlayer *pLocalPlayer = static_cast<CBasePlayer *>(util::GetLocalPlayer());
 							if ( pLocalPlayer && /*pLocalPlayer->TeamNumber() == SPECTATOR &&*/ pLocalPlayer->pev->iuser1 == OBS_ROAMING )
 							{
 								Vector origin = *markedArea->GetCenter() + Vector( 0, 0, 0.75f * HumanHeight );
-								UTIL_SetOrigin( pLocalPlayer->pev, origin );
+								pLocalPlayer->SetOrigin( origin );
 							}
 						}
 						else
 						{
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 ); 
+							util::GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM); 
 						}
 						break;
 
@@ -4463,18 +4463,18 @@ void EditNavAreas( NavEditCmdType cmd )
 							NavDirType dir = markedArea->ComputeDirection( &cursor );
 							if (dir == NUM_DIRECTIONS)
 							{
-								EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 ); 
+								util::GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM); 
 							}
 							else
 							{
 								markedArea->ConnectTo( area, dir );
-								EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+								util::GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 							}
 						}
 						else
 						{
 							HintMessageToAllPlayers( "To connect areas, mark an area, highlight a second area, then invoke the connect command. Make sure the cursor is directly north, south, east, or west of the marked area." );
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 ); 
+							util::GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM); 
 						}
 						break;
 
@@ -4483,12 +4483,12 @@ void EditNavAreas( NavEditCmdType cmd )
 						{
 							markedArea->Disconnect( area );
 							area->Disconnect( markedArea );
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+							util::GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 						}
 						else
 						{
 							HintMessageToAllPlayers( "To disconnect areas, mark an area, highlight a second area, then invoke the disconnect command. This will remove all connections between the two areas." );
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 ); 
+							util::GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM); 
 						}
 						break;
 
@@ -4496,14 +4496,14 @@ void EditNavAreas( NavEditCmdType cmd )
 						if (markedArea)
 						{
 							if (area->SpliceEdit( markedArea ))
-								EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+								util::GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 							else
-								EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 );
+								util::GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM);
 						}
 						else
 						{
 							HintMessageToAllPlayers( "To splice, mark an area, highlight a second area, then invoke the splice command to create an area between them" );
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 ); 
+							util::GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM); 
 						}
 						break;
 
@@ -4512,11 +4512,11 @@ void EditNavAreas( NavEditCmdType cmd )
 						{
 							int corner = (markedCorner + 1) % (NUM_CORNERS + 1);
 							markedCorner = (NavCornerType)corner;
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+							util::GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 						}
 						else
 						{
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 ); 
+							util::GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM); 
 						}
 						break;
 
@@ -4524,11 +4524,11 @@ void EditNavAreas( NavEditCmdType cmd )
 						if (markedArea)
 						{
 							markedArea->RaiseCorner( markedCorner, 1 );
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+							util::GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 						}
 						else
 						{
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 ); 
+							util::GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM); 
 						}
 						break;
 
@@ -4536,11 +4536,11 @@ void EditNavAreas( NavEditCmdType cmd )
 						if (markedArea)
 						{
 							markedArea->RaiseCorner( markedCorner, -1 );
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+							util::GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 						}
 						else
 						{
-							EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 ); 
+							util::GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM); 
 						}
 						break;
 				}
@@ -4555,11 +4555,11 @@ void EditNavAreas( NavEditCmdType cmd )
 				if (isCreatingNavArea)
 				{
 					isCreatingNavArea = false;
-					EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 );
+					util::GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM);
 				}
 				else
 				{
-					EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip2.wav", 1, ATTN_NORM, 0, 100 ); 
+					util::GetLocalPlayer()->EmitSound("buttons/blip2.wav", CHAN_ITEM); 
 					isCreatingNavArea = true;
 					isAnchored = false;
 				}
@@ -4574,7 +4574,7 @@ void EditNavAreas( NavEditCmdType cmd )
 					CNavArea *newArea = new CNavArea( &anchor, &cursor );
 					TheNavAreaList.push_back( newArea );
 					TheNavAreaGrid.AddNavArea( newArea );
-					EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/blip1.wav", 1, ATTN_NORM, 0, 100 ); 
+					util::GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
 
 					// if we have a marked area, inter-connect the two
 					if (markedArea)
@@ -4610,7 +4610,7 @@ void EditNavAreas( NavEditCmdType cmd )
 				}
 				else
 				{
-					EMIT_SOUND_DYN( ENT(UTIL_GetLocalPlayer()->pev), CHAN_ITEM, "buttons/button11.wav", 1, ATTN_NORM, 0, 100 );
+					util::GetLocalPlayer()->EmitSound("buttons/button11.wav", CHAN_ITEM);
 				}
 				break;
 			}
@@ -4668,7 +4668,7 @@ bool GetGroundHeight( const Vector *pos, float *height, Vector *normal )
 	{
 		from = *pos + Vector( 0, 0, offset );
 
-		UTIL_TraceLine( from, to, ignore_monsters, dont_ignore_glass, ignore, &result );
+		util::TraceLine( from, to, util::ignore_monsters, util::dont_ignore_glass, CBaseEntity::Instance(ignore), &result );
 
 		// if the trace came down thru a door, ignore the door and try again
 		// also ignore breakable floors
@@ -4737,7 +4737,7 @@ bool GetSimpleGroundHeight( const Vector *pos, float *height, Vector *normal )
 
 	TraceResult result;
 
-	UTIL_TraceLine( *pos, to, ignore_monsters, dont_ignore_glass, NULL, &result );
+	util::TraceLine( *pos, to, util::ignore_monsters, util::dont_ignore_glass, nullptr, &result );
 
 	if (result.fStartSolid)
 		return false;
@@ -4805,7 +4805,7 @@ inline bool IsAreaVisible( const Vector *pos, const CNavArea *area )
 		corner = *area->GetCorner( (NavCornerType)c );
 		corner.z += 0.75f * HumanHeight;
 
-		UTIL_TraceLine( *pos, corner, ignore_monsters, NULL, &result );
+		util::TraceLine( *pos, corner, util::ignore_monsters, nullptr, &result );
 		if (result.flFraction == 1.0f)
 		{
 			// we can see this area
@@ -5178,7 +5178,7 @@ CNavArea *CNavAreaGrid::GetNearestNavArea( const Vector *pos, bool anyZ ) const
 			if (!anyZ)
 			{
 				TraceResult result;
-				UTIL_TraceLine( source, areaPos + Vector( 0, 0, HalfHumanHeight ), ignore_monsters, ignore_glass, NULL, &result );
+				util::TraceLine( source, areaPos + Vector( 0, 0, HalfHumanHeight ), util::ignore_monsters, util::ignore_glass, nullptr, &result );
 				if (result.flFraction != 1.0f)
 					continue;
 			}

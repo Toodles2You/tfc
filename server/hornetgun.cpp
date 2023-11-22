@@ -26,7 +26,7 @@ LINK_ENTITY_TO_CLASS(weapon_hornetgun, CHgun);
 
 int CHgun::GetChargeInterval()
 {
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		return 300;
 	}
@@ -42,7 +42,7 @@ bool CHgun::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_HORNETGUN;
-	SET_MODEL(ENT(pev), "models/w_hgun.mdl");
+	SetModel("models/w_hgun.mdl");
 
 	m_iDefaultAmmo = HIVEHAND_DEFAULT_GIVE;
 	m_iFirePhase = 0;
@@ -60,12 +60,12 @@ void CHgun::Precache()
 
 	m_usHornetFire = PRECACHE_EVENT(1, "events/firehornet.sc");
 
-	UTIL_PrecacheOther("hornet");
+	util::PrecacheOther("hornet");
 }
 
 void CHgun::AddToPlayer(CBasePlayer* pPlayer)
 {
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		// in multiplayer, all hivehands come full.
 		m_iDefaultAmmo = HORNET_MAX_CARRY;
@@ -117,7 +117,7 @@ void CHgun::PrimaryAttack()
 	}
 
 #ifndef CLIENT_DLL
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle);
+	util::MakeVectors(m_pPlayer->pev->v_angle);
 
 	CBaseEntity* pHornet = GetClassPtr((CHornet *)nullptr);
 	pHornet->pev->origin = m_pPlayer->GetGunPosition() + gpGlobals->v_forward * 16 + gpGlobals->v_right * 8 + gpGlobals->v_up * -12;
@@ -137,7 +137,7 @@ void CHgun::PrimaryAttack()
 	m_iNextPrimaryAttack = 250;
 	m_iNextSecondaryAttack = 500;
 
-	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
+	m_iTimeWeaponIdle = util::SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 }
 
 void CHgun::SecondaryAttack()
@@ -169,7 +169,7 @@ void CHgun::SecondaryAttack()
 	CBaseEntity* pHornet;
 	Vector vecSrc;
 
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle);
+	util::MakeVectors(m_pPlayer->pev->v_angle);
 
 	vecSrc = m_pPlayer->GetGunPosition() + gpGlobals->v_forward * 16 + gpGlobals->v_right * 8 + gpGlobals->v_up * -12;
 
@@ -214,7 +214,7 @@ void CHgun::SecondaryAttack()
 		pHornet->pev->angles = m_pPlayer->pev->v_angle;
 		pHornet->pev->owner = m_pPlayer->edict();
 		pHornet->pev->velocity = gpGlobals->v_forward * 1200;
-		pHornet->pev->angles = UTIL_VecToAngles(pHornet->pev->velocity);
+		pHornet->pev->angles = util::VecToAngles(pHornet->pev->velocity);
 		pHornet->SetThink(&CHornet::StartDart);
 		pHornet->Spawn();
 
@@ -229,7 +229,7 @@ void CHgun::SecondaryAttack()
 
 	m_iNextSecondaryAttack = 500;
 
-	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
+	m_iTimeWeaponIdle = util::SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 }
 
 void CHgun::Reload()
@@ -247,7 +247,7 @@ void CHgun::WeaponIdle()
 		return;
 
 	int iAnim;
-	float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
+	float flRand = util::SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
 	if (flRand <= 0.75)
 	{
 		iAnim = HGUN_IDLE1;

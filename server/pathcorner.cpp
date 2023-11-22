@@ -171,7 +171,7 @@ void CPathTrack::Link()
 bool CPathTrack::Spawn()
 {
 	pev->solid = SOLID_TRIGGER;
-	UTIL_SetSize(pev, Vector(-8, -8, -8), Vector(8, 8, 8));
+	SetSize(Vector(-8, -8, -8), Vector(8, 8, 8));
 
 	m_pnext = NULL;
 	m_pprevious = NULL;
@@ -378,8 +378,8 @@ void CPathTrack::Sparkle()
 
 	pev->nextthink = gpGlobals->time + 0.2;
 	if (FBitSet(pev->spawnflags, SF_PATH_DISABLED))
-		UTIL_ParticleEffect(pev->origin, Vector(0, 0, 100), 210, 10);
+		util::ParticleEffect(pev->origin, Vector(0, 0, 100), 210, 10);
 	else
-		UTIL_ParticleEffect(pev->origin, Vector(0, 0, 100), 84, 10);
+		util::ParticleEffect(pev->origin, Vector(0, 0, 100), 84, 10);
 }
 #endif

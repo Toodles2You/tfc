@@ -90,8 +90,8 @@ bool CItem::Spawn()
 {
 	pev->movetype = MOVETYPE_TOSS;
 	pev->solid = SOLID_TRIGGER;
-	UTIL_SetOrigin(pev, pev->origin);
-	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 16));
+	SetOrigin(pev->origin);
+	SetSize(Vector(-16, -16, 0), Vector(16, 16, 16));
 	SetTouch(&CItem::ItemTouch);
 
 	if (DROP_TO_FLOOR(ENT(pev)) == 0)
@@ -122,7 +122,7 @@ void CItem::ItemTouch(CBaseEntity* pOther)
 
 	if (MyTouch(pPlayer))
 	{
-		SUB_UseTargets(pOther, USE_TOGGLE, 0);
+		UseTargets(pOther, USE_TOGGLE, 0);
 		SetTouch(NULL);
 
 		// player grabbed the item.
@@ -147,7 +147,7 @@ CBaseEntity* CItem::Respawn()
 	SetTouch(NULL);
 	pev->effects |= EF_NODRAW;
 
-	UTIL_SetOrigin(pev, g_pGameRules->VecItemRespawnSpot(this)); // blip to whereever you should respawn.
+	SetOrigin(g_pGameRules->VecItemRespawnSpot(this)); // blip to whereever you should respawn.
 
 	SetThink(&CItem::Materialize);
 	pev->nextthink = g_pGameRules->FlItemRespawnTime(this);
@@ -159,7 +159,7 @@ void CItem::Materialize()
 	if ((pev->effects & EF_NODRAW) != 0)
 	{
 		// changing from invisible state to visible.
-		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "items/itembk2.wav", 1, ATTN_NORM, 0, PITCH_NORM);
+		EmitSound("items/itembk2.wav", CHAN_WEAPON);
 		pev->effects &= ~EF_NODRAW;
 		pev->effects |= EF_MUZZLEFLASH;
 	}
@@ -174,7 +174,7 @@ class CItemSuit : public CItem
 	bool Spawn() override
 	{
 		Precache();
-		SET_MODEL(ENT(pev), "models/w_suit.mdl");
+		SetModel("models/w_suit.mdl");
 		return CItem::Spawn();
 	}
 	void Precache() override
@@ -206,7 +206,7 @@ class CItemBattery : public CItem
 	bool Spawn() override
 	{
 		Precache();
-		SET_MODEL(ENT(pev), "models/w_battery.mdl");
+		SetModel("models/w_battery.mdl");
 		return CItem::Spawn();
 	}
 	void Precache() override
@@ -230,11 +230,11 @@ class CItemBattery : public CItem
 			pPlayer->pev->armorvalue += gSkillData.batteryCapacity;
 			pPlayer->pev->armorvalue = std::min(pPlayer->pev->armorvalue, MAX_NORMAL_BATTERY);
 
-			EMIT_SOUND(pPlayer->edict(), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM);
+			pPlayer->EmitSound("items/gunpickup2.wav", CHAN_ITEM);
 
-			MESSAGE_BEGIN(MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev);
-			WRITE_STRING(STRING(pev->classname));
-			MESSAGE_END();
+			MessageBegin(MSG_ONE, gmsgItemPickup, pPlayer);
+			WriteString(STRING(pev->classname));
+			MessageEnd();
 
 
 			// Suit reports new power level
@@ -261,7 +261,7 @@ class CItemAntidote : public CItem
 	bool Spawn() override
 	{
 		Precache();
-		SET_MODEL(ENT(pev), "models/w_antidote.mdl");
+		SetModel("models/w_antidote.mdl");
 		return CItem::Spawn();
 	}
 	void Precache() override
@@ -285,7 +285,7 @@ class CItemSecurity : public CItem
 	bool Spawn() override
 	{
 		Precache();
-		SET_MODEL(ENT(pev), "models/w_security.mdl");
+		SetModel("models/w_security.mdl");
 		return CItem::Spawn();
 	}
 	void Precache() override
@@ -306,7 +306,7 @@ class CItemLongJump : public CItem
 	bool Spawn() override
 	{
 		Precache();
-		SET_MODEL(ENT(pev), "models/w_longjump.mdl");
+		SetModel("models/w_longjump.mdl");
 		return CItem::Spawn();
 	}
 	void Precache() override
@@ -326,9 +326,9 @@ class CItemLongJump : public CItem
 
 			g_engfuncs.pfnSetPhysicsKeyValue(pPlayer->edict(), "slj", "1");
 
-			MESSAGE_BEGIN(MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev);
-			WRITE_STRING(STRING(pev->classname));
-			MESSAGE_END();
+			MessageBegin(MSG_ONE, gmsgItemPickup, pPlayer);
+			WriteString(STRING(pev->classname));
+			MessageEnd();
 
 			pPlayer->SetSuitUpdate("!HEV_A1", false, SUIT_REPEAT_OK);
 			return true;

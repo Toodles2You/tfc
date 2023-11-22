@@ -79,10 +79,12 @@ void ClientDisconnect(edict_t* pEntity)
 	if (g_fGameOver)
 		return;
 
+	auto entity = CBaseEntity::Instance(pEntity);
+
 	// since the edict doesn't get deleted, fix it so it doesn't interfere.
-	pEntity->v.takedamage = DAMAGE_NO; // don't attract autoaim
-	pEntity->v.solid = SOLID_NOT;	   // nonsolid
-	UTIL_SetOrigin(&pEntity->v, pEntity->v.origin);
+	entity->pev->takedamage = DAMAGE_NO; // don't attract autoaim
+	entity->pev->solid = SOLID_NOT;	   // nonsolid
+	entity->SetOrigin(entity->pev->origin);
 
 	auto pPlayer = reinterpret_cast<CBasePlayer*>(GET_PRIVATE(pEntity));
 
@@ -123,8 +125,8 @@ void ClientKill(edict_t* pEntity)
 
 	pev->health = 0;
 	pl->Killed(
-		CWorld::World->pev,
-		CWorld::World->pev,
+		CWorld::World,
+		CWorld::World,
 		DMG_GENERIC);
 }
 
@@ -365,7 +367,7 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 	// so check it, or it will infinite loop
 
 	client = NULL;
-	while (((client = (CBasePlayer*)UTIL_FindEntityByClassname(client, "player")) != NULL) && (!FNullEnt(client->edict())))
+	while (((client = (CBasePlayer*)util::FindEntityByClassname(client, "player")) != NULL) && (!FNullEnt(client->edict())))
 	{
 		if (!client->pev)
 			continue;
@@ -388,17 +390,17 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 			if (!client->IsObserver())
 				continue;
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgSayText, NULL, client->pev);
-		WRITE_BYTE(ENTINDEX(pEntity));
-		WRITE_STRING(text);
-		MESSAGE_END();
+		MessageBegin(MSG_ONE, gmsgSayText, client);
+		WriteByte(ENTINDEX(pEntity));
+		WriteString(text);
+		MessageEnd();
 	}
 
 	// print to the sending client
-	MESSAGE_BEGIN(MSG_ONE, gmsgSayText, NULL, &pEntity->v);
-	WRITE_BYTE(ENTINDEX(pEntity));
-	WRITE_STRING(text);
-	MESSAGE_END();
+	MessageBegin(MSG_ONE, gmsgSayText, CBaseEntity::Instance(pEntity));
+	WriteByte(ENTINDEX(pEntity));
+	WriteString(text);
+	MessageEnd();
 
 	// echo to server console
 	g_engfuncs.pfnServerPrint(text);
@@ -412,7 +414,7 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 	// team match?
 	if (g_pGameRules->IsTeamplay())
 	{
-		UTIL_LogPrintf("\"%s<%i><%s><%s>\" %s \"%s\"\n",
+		util::LogPrintf("\"%s<%i><%s><%s>\" %s \"%s\"\n",
 			STRING(pEntity->v.netname),
 			GETPLAYERUSERID(pEntity),
 			GETPLAYERAUTHID(pEntity),
@@ -422,7 +424,7 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 	}
 	else
 	{
-		UTIL_LogPrintf("\"%s<%i><%s><%i>\" %s \"%s\"\n",
+		util::LogPrintf("\"%s<%i><%s><%i>\" %s \"%s\"\n",
 			STRING(pEntity->v.netname),
 			GETPLAYERUSERID(pEntity),
 			GETPLAYERAUTHID(pEntity),
@@ -488,7 +490,7 @@ void ClientCommand(edict_t* pEntity)
 			}
 			else
 			{
-				CLIENT_PRINTF(pEntity, print_console, UTIL_VarArgs("\"fov\" is \"%d\"\n", (int)player->m_iFOV));
+				CLIENT_PRINTF(pEntity, print_console, util::VarArgs("\"fov\" is \"%d\"\n", (int)player->m_iFOV));
 			}
 		}
 	}
@@ -509,11 +511,13 @@ void ClientCommand(edict_t* pEntity)
 			player->StartObserver(spawn->m_origin, spawn->m_angles);
 
 			// notify other clients of player switching to spectator mode
-			UTIL_ClientPrintAll(HUD_PRINTNOTIFY, UTIL_VarArgs("%s switched to spectator mode\n",
+			util::ClientPrintAll(HUD_PRINTNOTIFY, util::VarArgs("%s switched to spectator mode\n",
 													 (!FStringNull(pev->netname) && STRING(pev->netname)[0] != 0) ? STRING(pev->netname) : "unconnected"));
 		}
 		else
-			ClientPrint(pev, HUD_PRINTCONSOLE, "Spectator mode is disabled.\n");
+		{
+			util::ClientPrint(player, HUD_PRINTCONSOLE, "Spectator mode is disabled.\n");
+		}
 	}
 	else if (FStrEq(pcmd, "specmode")) // new spectator mode
 	{
@@ -548,7 +552,7 @@ void ClientCommand(edict_t* pEntity)
 		command[127] = '\0';
 
 		// tell the user they entered an unknown command
-		ClientPrint(&pEntity->v, HUD_PRINTCONSOLE, UTIL_VarArgs("Unknown command: %s\n", command));
+		util::ClientPrint(player, HUD_PRINTCONSOLE, util::VarArgs("Unknown command: %s\n", command));
 	}
 }
 
@@ -587,19 +591,19 @@ void ClientUserInfoChanged(edict_t* pEntity, char* infobuffer)
 		// Set the name
 		g_engfuncs.pfnSetClientKeyValue(ENTINDEX(pEntity), infobuffer, "name", sName);
 
-		if (UTIL_IsMultiplayer())
+		if (util::IsMultiplayer())
 		{
 			char text[256];
 			sprintf(text, "* %s changed name to %s\n", STRING(pEntity->v.netname), g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
-			MESSAGE_BEGIN(MSG_ALL, gmsgSayText, NULL);
-			WRITE_BYTE(ENTINDEX(pEntity));
-			WRITE_STRING(text);
-			MESSAGE_END();
+			MessageBegin(MSG_ALL, gmsgSayText);
+			WriteByte(ENTINDEX(pEntity));
+			WriteString(text);
+			MessageEnd();
 
 			// team match?
 			if (g_pGameRules->IsTeamplay())
 			{
-				UTIL_LogPrintf("\"%s<%i><%s><%s>\" changed name to \"%s\"\n",
+				util::LogPrintf("\"%s<%i><%s><%s>\" changed name to \"%s\"\n",
 					STRING(pEntity->v.netname),
 					GETPLAYERUSERID(pEntity),
 					GETPLAYERAUTHID(pEntity),
@@ -608,7 +612,7 @@ void ClientUserInfoChanged(edict_t* pEntity, char* infobuffer)
 			}
 			else
 			{
-				UTIL_LogPrintf("\"%s<%i><%s><%i>\" changed name to \"%s\"\n",
+				util::LogPrintf("\"%s<%i><%s><%i>\" changed name to \"%s\"\n",
 					STRING(pEntity->v.netname),
 					GETPLAYERUSERID(pEntity),
 					GETPLAYERAUTHID(pEntity),
@@ -727,7 +731,7 @@ void ParmsChangeLevel()
 	SAVERESTOREDATA* pSaveData = (SAVERESTOREDATA*)gpGlobals->pSaveData;
 
 	if (pSaveData)
-		pSaveData->connectionCount = BuildChangeList(pSaveData->levelList, MAX_LEVEL_CONNECTIONS);
+		pSaveData->connectionCount = util::BuildChangeList(pSaveData->levelList, MAX_LEVEL_CONNECTIONS);
 }
 
 static std::vector<std::string> g_MapsToLoad;
@@ -746,7 +750,7 @@ static void LoadNextMap()
 		g_MapsToLoad.shrink_to_fit();
 	}
 
-	SERVER_COMMAND(UTIL_VarArgs("map \"%s\"\n", mapName.c_str()));
+	SERVER_COMMAND(util::VarArgs("map \"%s\"\n", mapName.c_str()));
 }
 
 static void LoadAllMaps()
@@ -850,14 +854,14 @@ void StartFrame()
 
 		for (int i = 1; i <= gpGlobals->maxClients; ++i)
 		{
-			auto player = UTIL_PlayerByIndex(i);
+			auto player = util::PlayerByIndex(i);
 
 			if (!player)
 			{
 				continue;
 			}
 
-			g_engfuncs.pfnSetPhysicsKeyValue(player->edict(), "bj", UTIL_dtos1(allowBunnyHopping ? 1 : 0));
+			g_engfuncs.pfnSetPhysicsKeyValue(player->edict(), "bj", util::dtos1(allowBunnyHopping ? 1 : 0));
 		}
 	}
 
@@ -1217,24 +1221,24 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 
 	if (0 != host->v.groupinfo)
 	{
-		UTIL_SetGroupTrace(host->v.groupinfo, GROUP_OP_AND);
+		util::SetGroupTrace(host->v.groupinfo, util::GROUP_OP_AND);
 
 		// Should always be set, of course
 		if (0 != ent->v.groupinfo)
 		{
-			if (g_groupop == GROUP_OP_AND)
+			if (util::g_groupop == util::GROUP_OP_AND)
 			{
 				if ((ent->v.groupinfo & host->v.groupinfo) == 0)
 					return 0;
 			}
-			else if (g_groupop == GROUP_OP_NAND)
+			else if (util::g_groupop == util::GROUP_OP_NAND)
 			{
 				if ((ent->v.groupinfo & host->v.groupinfo) != 0)
 					return 0;
 			}
 		}
 
-		UTIL_UnsetGroupTrace();
+		util::UnsetGroupTrace();
 	}
 
 	memset(state, 0, sizeof(*state));
@@ -1870,7 +1874,7 @@ void CmdStart(const edict_t* player, const struct usercmd_s* cmd, unsigned int r
 
 	if (pl->pev->groupinfo != 0)
 	{
-		UTIL_SetGroupTrace(pl->pev->groupinfo, GROUP_OP_AND);
+		util::SetGroupTrace(pl->pev->groupinfo, util::GROUP_OP_AND);
 	}
 
 	pl->random_seed = random_seed;
@@ -1892,7 +1896,7 @@ void CmdEnd(const edict_t* player)
 		return;
 	if (pl->pev->groupinfo != 0)
 	{
-		UTIL_UnsetGroupTrace();
+		util::UnsetGroupTrace();
 	}
 }
 
@@ -1949,7 +1953,7 @@ void CreateInstancedBaselines()
 	// iret = ENGINE_INSTANCE_BASELINE( pc->pev->classname, &state );
 
 	// Destroy objects.
-	//UTIL_Remove( pc );
+	//util::Remove( pc );
 }
 
 /*

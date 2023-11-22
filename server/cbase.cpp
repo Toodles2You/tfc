@@ -26,8 +26,6 @@ void EntvarsKeyvalue(entvars_t* pev, KeyValueData* pkvd);
 
 void OnFreeEntPrivateData(edict_s* pEdict);
 
-extern Vector VecBModelOrigin(entvars_t* pevBModel);
-
 static DLL_FUNCTIONS gFunctionTable =
 	{
 		GameDLLInit,			   //pfnGameInit
@@ -405,7 +403,7 @@ int DispatchRestore(edict_t* pent, SAVERESTOREDATA* pSaveData, int globalEntity)
 			pSaveData->vecLandmarkOffset = oldOffset;
 			if (pEntity)
 			{
-				UTIL_SetOrigin(pEntity->pev, pEntity->pev->origin);
+				pEntity->SetOrigin(pEntity->pev->origin);
 				pEntity->OverrideReset();
 			}
 		}
@@ -545,7 +543,7 @@ bool CBaseEntity::TakeHealth(float flHealth, int bitsDamageType)
 
 // inflict damage on this entity.  bitsDamageType indicates type of damage inflicted, ie: DMG_CRUSH
 
-bool CBaseEntity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
+bool CBaseEntity::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType)
 {
 	Vector vecTemp;
 
@@ -556,14 +554,14 @@ bool CBaseEntity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 
 	// if Attacker == Inflictor, the attack was a melee or other instant-hit attack.
 	// (that is, no actual entity projectile was involved in the attack so use the shooter's origin).
-	if (pevAttacker == pevInflictor)
+	if (attacker == inflictor)
 	{
-		vecTemp = pevInflictor->origin - (VecBModelOrigin(pev));
+		vecTemp = inflictor->pev->origin - Center();
 	}
 	else
 	// an actual missile was involved.
 	{
-		vecTemp = pevInflictor->origin - (VecBModelOrigin(pev));
+		vecTemp = inflictor->pev->origin - Center();
 	}
 
 	// this global is still used for glass and other non-monster killables, along with decals.
@@ -572,9 +570,9 @@ bool CBaseEntity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	// save damage based on the target's armor level
 
 	// figure momentum add (don't let hurt brushes or other triggers move player)
-	if ((!FNullEnt(pevInflictor)) && (pev->movetype == MOVETYPE_WALK || pev->movetype == MOVETYPE_STEP) && (pevAttacker->solid != SOLID_TRIGGER))
+	if ((!FNullEnt(inflictor->pev)) && (pev->movetype == MOVETYPE_WALK || pev->movetype == MOVETYPE_STEP) && (inflictor->pev->solid != SOLID_TRIGGER))
 	{
-		Vector vecDir = pev->origin - (pevInflictor->absmin + pevInflictor->absmax) * 0.5;
+		Vector vecDir = pev->origin - (inflictor->pev->absmin + inflictor->pev->absmax) * 0.5;
 		vecDir = vecDir.Normalize();
 
 		float flForce = flDamage * ((32 * 32 * 72.0) / (pev->size.x * pev->size.y * pev->size.z)) * 5;
@@ -588,7 +586,7 @@ bool CBaseEntity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	pev->health -= flDamage;
 	if (pev->health <= 0)
 	{
-		Killed(pevInflictor, pevAttacker, bitsDamageType);
+		Killed(inflictor, attacker, bitsDamageType);
 		return false;
 	}
 
@@ -596,7 +594,7 @@ bool CBaseEntity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 }
 
 
-void CBaseEntity::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
+void CBaseEntity::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType)
 {
 	pev->takedamage = DAMAGE_NO;
 	pev->deadflag = DEAD_DEAD;
@@ -652,8 +650,8 @@ bool CBaseEntity::Restore(CRestore& restore)
 
 
 		PRECACHE_MODEL((char*)STRING(pev->model));
-		SET_MODEL(ENT(pev), STRING(pev->model));
-		UTIL_SetSize(pev, mins, maxs); // Reset them
+		SetModel(STRING(pev->model));
+		SetSize(mins, maxs); // Reset them
 	}
 
 	return status;
@@ -706,6 +704,25 @@ void CBaseEntity::SetObjectCollisionBox()
 }
 
 
+void CBaseEntity::SetOrigin(const Vector& org)
+{
+	pev->origin = org;
+	g_engfuncs.pfnSetOrigin(pev->pContainingEntity, org);
+}
+
+
+void CBaseEntity::SetSize(const Vector& mins, const Vector& maxs)
+{
+	g_engfuncs.pfnSetSize(pev->pContainingEntity, mins, maxs);
+}
+
+
+void CBaseEntity::SetModel(const char* name)
+{
+	g_engfuncs.pfnSetModel(pev->pContainingEntity, name);
+}
+
+
 bool CBaseEntity::Intersects(CBaseEntity* pOther)
 {
 	if (pOther->pev->absmin.x > pev->absmax.x ||
@@ -731,7 +748,7 @@ void CBaseEntity::MakeDormant()
 	// Don't think
 	pev->nextthink = 0;
 	// Relink
-	UTIL_SetOrigin(pev, pev->origin);
+	SetOrigin(pev->origin);
 }
 
 bool CBaseEntity::IsDormant()

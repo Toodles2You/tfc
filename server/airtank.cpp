@@ -25,7 +25,7 @@ class CAirtank : public CGrenade
 	void EXPORT TankThink();
 	void EXPORT TankTouch(CBaseEntity* pOther);
 	int BloodColor() override { return DONT_BLEED; }
-	void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType) override;
+	void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType) override;
 
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
@@ -48,13 +48,12 @@ IMPLEMENT_SAVERESTORE(CAirtank, CGrenade);
 bool CAirtank::Spawn()
 {
 	Precache();
-	// motor
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL(ENT(pev), "models/w_oxygen.mdl");
-	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 36));
-	UTIL_SetOrigin(pev, pev->origin);
+	SetModel("models/w_oxygen.mdl");
+	SetSize(Vector(-16, -16, 0), Vector(16, 16, 36));
+	SetOrigin(pev->origin);
 
 	SetTouch(&CAirtank::TankTouch);
 	SetThink(&CAirtank::TankThink);
@@ -75,9 +74,9 @@ void CAirtank::Precache()
 }
 
 
-void CAirtank::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
+void CAirtank::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType)
 {
-	pev->owner = ENT(pevAttacker);
+	pev->owner = attacker->edict();
 
 	Explode(pev->origin, Vector(0, 0, -1));
 }
@@ -87,7 +86,7 @@ void CAirtank::TankThink()
 {
 	// Fire trigger
 	m_state = true;
-	SUB_UseTargets(this, USE_TOGGLE, 0);
+	UseTargets(this, USE_TOGGLE, 0);
 }
 
 
@@ -99,7 +98,7 @@ void CAirtank::TankTouch(CBaseEntity* pOther)
 	if (!m_state)
 	{
 		// "no oxygen" sound
-		EMIT_SOUND(ENT(pev), CHAN_BODY, "player/pl_swim2.wav", 1.0, ATTN_NORM);
+		EmitSound("player/pl_swim2.wav", CHAN_BODY);
 		return;
 	}
 
@@ -107,10 +106,10 @@ void CAirtank::TankTouch(CBaseEntity* pOther)
 	pOther->pev->air_finished = gpGlobals->time + 12;
 
 	// suit recharge sound
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, "doors/aliendoor3.wav", 1.0, ATTN_NORM);
+	EmitSound("doors/aliendoor3.wav", CHAN_VOICE);
 
 	// recharge airtank in 30 seconds
 	pev->nextthink = gpGlobals->time + 30;
 	m_state = false;
-	SUB_UseTargets(this, USE_TOGGLE, 1);
+	UseTargets(this, USE_TOGGLE, 1);
 }

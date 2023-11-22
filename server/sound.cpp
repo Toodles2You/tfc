@@ -26,7 +26,60 @@
 #include "pm_materials.h"
 #include "pm_shared.h"
 
+#define AMBIENT_SOUND_EVERYWHERE 1
+#define AMBIENT_SOUND_SMALLRADIUS 2
+#define AMBIENT_SOUND_MEDIUMRADIUS 4
+#define AMBIENT_SOUND_LARGERADIUS 8
+#define AMBIENT_SOUND_START_SILENT 16
+#define AMBIENT_SOUND_NOT_LOOPING 32
+
+#define SPEAKER_START_SILENT 1 // wait for trigger 'on' to start announcements
+
+#define LFO_SQUARE 1
+#define LFO_TRIANGLE 2
+#define LFO_RANDOM 3
+
 static char* memfgets(byte* pMemFile, int fileSize, int& filePos, char* pBuffer, int bufferSize);
+
+static void EmitAmbientSound(
+	CBaseEntity* entity,
+	const Vector& vecOrigin,
+	const char* samp,
+	float vol,
+	float attenuation,
+	int fFlags,
+	int pitch)
+{
+	float rgfl[3];
+	vecOrigin.CopyToArray(rgfl);
+
+	if (samp != nullptr && samp[0] == '!')
+	{
+		char name[32];
+		if (SENTENCEG_Lookup(samp, name) >= 0)
+		{
+			g_engfuncs.pfnEmitAmbientSound(
+				entity->pev->pContainingEntity,
+				rgfl,
+				name,
+				vol,
+				attenuation,
+				fFlags,
+				pitch);
+		}
+	}
+	else
+	{
+		g_engfuncs.pfnEmitAmbientSound(
+			entity->pev->pContainingEntity,
+			rgfl,
+			samp,
+			vol,
+			attenuation,
+			fFlags,
+			pitch);
+	}
+}
 
 
 // ==================== GENERIC AMBIENT SOUND ======================================
@@ -232,7 +285,7 @@ void CAmbientGeneric::Precache()
 	}
 	if (m_fActive)
 	{
-		UTIL_EmitAmbientSound(ENT(pev), pev->origin, szSoundFile,
+		EmitAmbientSound(this, pev->origin, szSoundFile,
 			(m_dpv.vol * 0.01), m_flAttenuation, SND_SPAWNING, m_dpv.pitch);
 
 		pev->nextthink = gpGlobals->time + 0.1;
@@ -282,7 +335,7 @@ void CAmbientGeneric::RampThink()
 			m_dpv.spindown = 0; // done with ramp down
 
 			// shut sound off
-			UTIL_EmitAmbientSound(ENT(pev), pev->origin, szSoundFile,
+			EmitAmbientSound(this, pev->origin, szSoundFile,
 				0, 0, SND_STOP, 0);
 
 			// return without setting nextthink
@@ -326,7 +379,7 @@ void CAmbientGeneric::RampThink()
 			m_dpv.fadeout = 0; // done with ramp down
 
 			// shut sound off
-			UTIL_EmitAmbientSound(ENT(pev), pev->origin, szSoundFile,
+			EmitAmbientSound(this, pev->origin, szSoundFile,
 				0, 0, SND_STOP, 0);
 
 			// return without setting nextthink
@@ -432,7 +485,7 @@ void CAmbientGeneric::RampThink()
 		if (pitch == PITCH_NORM)
 			pitch = PITCH_NORM + 1; // don't send 'no pitch' !
 
-		UTIL_EmitAmbientSound(ENT(pev), pev->origin, szSoundFile,
+		EmitAmbientSound(this, pev->origin, szSoundFile,
 			(vol * 0.01), m_flAttenuation, flags, pitch);
 	}
 
@@ -554,7 +607,7 @@ void CAmbientGeneric::ToggleUse(CBaseEntity* pActivator, CBaseEntity* pCaller, U
 
 		m_dpv.pitch = fraction * 255;
 
-		UTIL_EmitAmbientSound(ENT(pev), pev->origin, szSoundFile,
+		EmitAmbientSound(this, pev->origin, szSoundFile,
 			0, 0, SND_CHANGE_PITCH, m_dpv.pitch);
 
 		return;
@@ -609,7 +662,7 @@ void CAmbientGeneric::ToggleUse(CBaseEntity* pActivator, CBaseEntity* pCaller, U
 				pev->nextthink = gpGlobals->time + 0.1;
 			}
 			else
-				UTIL_EmitAmbientSound(ENT(pev), pev->origin, szSoundFile,
+				EmitAmbientSound(this, pev->origin, szSoundFile,
 					0, 0, SND_STOP, 0);
 		}
 	}
@@ -625,14 +678,14 @@ void CAmbientGeneric::ToggleUse(CBaseEntity* pActivator, CBaseEntity* pCaller, U
 			m_fActive = true;
 		else
 			// shut sound off now - may be interrupting a long non-looping sound
-			UTIL_EmitAmbientSound(ENT(pev), pev->origin, szSoundFile,
+			EmitAmbientSound(this, pev->origin, szSoundFile,
 				0, 0, SND_STOP, 0);
 
 		// init all ramp params for startup
 
 		InitModulationParms();
 
-		UTIL_EmitAmbientSound(ENT(pev), pev->origin, szSoundFile,
+		EmitAmbientSound(this, pev->origin, szSoundFile,
 			(m_dpv.vol * 0.01), m_flAttenuation, 0, m_dpv.pitch);
 
 		pev->nextthink = gpGlobals->time + 0.1;
@@ -876,7 +929,7 @@ bool FEnvSoundInRange(CEnvSound* pSound, entvars_t* pevTarget, float& flRange)
 	const Vector vecSpot2 = pevTarget->origin + pevTarget->view_ofs;
 	TraceResult tr;
 
-	UTIL_TraceLine(vecSpot1, vecSpot2, ignore_monsters, pSound->edict(), &tr);
+	util::TraceLine(vecSpot1, vecSpot2, util::ignore_monsters, pSound, &tr);
 
 	// check if line of sight crosses water boundary, or is blocked
 
@@ -1164,7 +1217,7 @@ int SENTENCEG_GetIndex(const char* szgroupname)
 // play from the group. Ipick is only needed if you plan on stopping
 // the sound before playback is done (see SENTENCEG_Stop).
 
-int SENTENCEG_PlayRndI(edict_t* entity, int isentenceg,
+int SENTENCEG_PlayRndI(CBaseEntity* entity, int isentenceg,
 	float volume, float attenuation, int flags, int pitch)
 {
 	char name[64];
@@ -1177,13 +1230,13 @@ int SENTENCEG_PlayRndI(edict_t* entity, int isentenceg,
 
 	ipick = USENTENCEG_Pick(isentenceg, name);
 	if (ipick > 0 && name)
-		EMIT_SOUND_DYN(entity, CHAN_VOICE, name, volume, attenuation, flags, pitch);
+		entity->EmitSound(name, CHAN_VOICE, volume, attenuation, pitch, flags);
 	return ipick;
 }
 
 // same as above, but takes sentence group name instead of index
 
-int SENTENCEG_PlayRndSz(edict_t* entity, const char* szgroupname,
+int SENTENCEG_PlayRndSz(CBaseEntity* entity, const char* szgroupname,
 	float volume, float attenuation, int flags, int pitch)
 {
 	char name[64];
@@ -1204,14 +1257,14 @@ int SENTENCEG_PlayRndSz(edict_t* entity, const char* szgroupname,
 
 	ipick = USENTENCEG_Pick(isentenceg, name);
 	if (ipick >= 0 && '\0' != name[0])
-		EMIT_SOUND_DYN(entity, CHAN_VOICE, name, volume, attenuation, flags, pitch);
+		entity->EmitSound(name, CHAN_VOICE, volume, attenuation, pitch, flags);
 
 	return ipick;
 }
 
 // play sentences in sequential order from sentence group.  Reset after last sentence.
 
-int SENTENCEG_PlaySequentialSz(edict_t* entity, const char* szgroupname,
+int SENTENCEG_PlaySequentialSz(CBaseEntity* entity, const char* szgroupname,
 	float volume, float attenuation, int flags, int pitch, int ipick, bool freset)
 {
 	char name[64];
@@ -1229,7 +1282,7 @@ int SENTENCEG_PlaySequentialSz(edict_t* entity, const char* szgroupname,
 
 	ipicknext = USENTENCEG_PickSequential(isentenceg, name, ipick, freset);
 	if (ipicknext >= 0 && '\0' != name[0])
-		EMIT_SOUND_DYN(entity, CHAN_VOICE, name, volume, attenuation, flags, pitch);
+		entity->EmitSound(name, CHAN_VOICE, volume, attenuation, pitch, flags);
 	return ipicknext;
 }
 
@@ -1237,7 +1290,7 @@ int SENTENCEG_PlaySequentialSz(edict_t* entity, const char* szgroupname,
 // for this entity, for the given sentence within the sentence group, stop
 // the sentence.
 
-void SENTENCEG_Stop(edict_t* entity, int isentenceg, int ipick)
+void SENTENCEG_Stop(CBaseEntity* entity, int isentenceg, int ipick)
 {
 	char buffer[64];
 	char sznum[8];
@@ -1253,7 +1306,7 @@ void SENTENCEG_Stop(edict_t* entity, int isentenceg, int ipick)
 	sprintf(sznum, "%d", ipick);
 	strcat(buffer, sznum);
 
-	STOP_SOUND(entity, CHAN_VOICE, buffer);
+	entity->StopSound(buffer, CHAN_VOICE);
 }
 
 // open sentences.txt, scan for groups, build rgsentenceg
@@ -1402,78 +1455,74 @@ int SENTENCEG_Lookup(const char* sample, char* sentencenum)
 	return -1;
 }
 
-void EMIT_SOUND_DYN(edict_t* entity, int channel, const char* sample, float volume, float attenuation,
-	int flags, int pitch)
+void CBaseEntity::EmitSound(
+	const char* sample,
+	int channel,
+	float volume,
+	float attenuation,
+	int pitch,
+	int flags)
 {
-	if (sample && *sample == '!')
+	if (sample[0] == '!')
 	{
 		char name[32];
 		if (SENTENCEG_Lookup(sample, name) >= 0)
-			EMIT_SOUND_DYN2(entity, channel, name, volume, attenuation, flags, pitch);
+		{
+			g_engfuncs.pfnEmitSound(
+				pev->pContainingEntity,
+				channel,
+				name,
+				volume,
+				attenuation,
+				flags,
+				pitch);
+		}
 		else
+		{
 			ALERT(at_aiconsole, "Unable to find %s in sentences.txt\n", sample);
+		}
 	}
 	else
-		EMIT_SOUND_DYN2(entity, channel, sample, volume, attenuation, flags, pitch);
+	{
+		g_engfuncs.pfnEmitSound(
+			pev->pContainingEntity,
+			channel,
+			sample,
+			volume,
+			attenuation,
+			flags,
+			pitch);
+	}
 }
 
-void EMIT_SOUND_PREDICTED(edict_t* entity, int channel, const char* sample, float volume, float attenuation,
-	int flags, int pitch)
+void CBaseEntity::EmitSoundPredicted(
+	const char* sample,
+	int channel,
+	float volume,
+	float attenuation,
+	int pitch,
+	int flags)
 {
-	//If entity is not a player this will return false.
-	if (0 != g_engfuncs.pfnCanSkipPlayer(entity))
+	if (g_engfuncs.pfnCanSkipPlayer(pev->pContainingEntity) != 0)
 	{
 		pmove->PM_PlaySound(channel, sample, volume, attenuation, flags, pitch);
 	}
 	else
 	{
-		EMIT_SOUND_DYN(entity, channel, sample, volume, attenuation, flags, pitch);
+		EmitSound(sample, channel, volume, attenuation, flags, pitch);
 	}
 }
 
-// play a specific sentence over the HEV suit speaker - just pass player entity, and !sentencename
-
-void EMIT_SOUND_SUIT(edict_t* entity, const char* sample)
+void CBaseEntity::StopSound(const char* sample, int channel)
 {
-	float fvol;
-	int pitch = PITCH_NORM;
-
-	fvol = CVAR_GET_FLOAT("suitvolume");
-	if (RANDOM_LONG(0, 1))
-		pitch = RANDOM_LONG(0, 6) + 98;
-
-	if (fvol > 0.05)
-		EMIT_SOUND_DYN(entity, CHAN_STATIC, sample, fvol, ATTN_NORM, 0, pitch);
-}
-
-// play a sentence, randomly selected from the passed in group id, over the HEV suit speaker
-
-void EMIT_GROUPID_SUIT(edict_t* entity, int isentenceg)
-{
-	float fvol;
-	int pitch = PITCH_NORM;
-
-	fvol = CVAR_GET_FLOAT("suitvolume");
-	if (RANDOM_LONG(0, 1))
-		pitch = RANDOM_LONG(0, 6) + 98;
-
-	if (fvol > 0.05)
-		SENTENCEG_PlayRndI(entity, isentenceg, fvol, ATTN_NORM, 0, pitch);
-}
-
-// play a sentence, randomly selected from the passed in groupname
-
-void EMIT_GROUPNAME_SUIT(edict_t* entity, const char* groupname)
-{
-	float fvol;
-	int pitch = PITCH_NORM;
-
-	fvol = CVAR_GET_FLOAT("suitvolume");
-	if (RANDOM_LONG(0, 1))
-		pitch = RANDOM_LONG(0, 6) + 98;
-
-	if (fvol > 0.05)
-		SENTENCEG_PlayRndSz(entity, groupname, fvol, ATTN_NORM, 0, pitch);
+	g_engfuncs.pfnEmitSound(
+		pev->pContainingEntity,
+		channel,
+		sample,
+		VOL_NORM,
+		ATTN_NORM,
+		SND_STOP,
+		PITCH_NORM);
 }
 
 // ===================== MATERIAL TYPE DETECTION, MAIN ROUTINES ========================
@@ -1789,26 +1838,23 @@ float TEXTURETYPE_PlaySound(TraceResult* ptr, Vector vecSrc, Vector vecEnd, int 
 
 		if (ptr->flFraction != 1.0 && RANDOM_LONG(0, 1))
 		{
-			UTIL_Sparks(ptr->vecEndPos);
+			util::Sparks(ptr->vecEndPos);
 
 			float flVolume = RANDOM_FLOAT(0.7, 1.0); //random volume range
 			switch (RANDOM_LONG(0, 1))
 			{
 			case 0:
-				UTIL_EmitAmbientSound(CWorld::World->edict(), ptr->vecEndPos, "buttons/spark5.wav", flVolume, ATTN_NORM, 0, 100);
+				EmitAmbientSound(CWorld::World, ptr->vecEndPos, "buttons/spark5.wav", flVolume, ATTN_NORM, 0, 100);
 				break;
 			case 1:
-				UTIL_EmitAmbientSound(CWorld::World->edict(), ptr->vecEndPos, "buttons/spark6.wav", flVolume, ATTN_NORM, 0, 100);
+				EmitAmbientSound(CWorld::World, ptr->vecEndPos, "buttons/spark6.wav", flVolume, ATTN_NORM, 0, 100);
 				break;
-				// case 0: EMIT_SOUND(ENT(pev), CHAN_VOICE, "buttons/spark5.wav", flVolume, ATTN_NORM);	break;
-				// case 1: EMIT_SOUND(ENT(pev), CHAN_VOICE, "buttons/spark6.wav", flVolume, ATTN_NORM);	break;
 			}
 		}
 	}
 
 	// play material hit sound
-	UTIL_EmitAmbientSound(CWorld::World->edict(), ptr->vecEndPos, rgsz[RANDOM_LONG(0, cnt - 1)], fvol, fattn, 0, 96 + RANDOM_LONG(0, 0xf));
-	//EMIT_SOUND_DYN( ENT(m_pPlayer->pev), CHAN_WEAPON, rgsz[RANDOM_LONG(0,cnt-1)], fvol, ATTN_NORM, 0, 96 + RANDOM_LONG(0,0xf));
+	EmitAmbientSound(CWorld::World, ptr->vecEndPos, rgsz[RANDOM_LONG(0, cnt - 1)], fvol, fattn, 0, 96 + RANDOM_LONG(0, 0xf));
 
 	return fvolbar;
 }
@@ -1913,7 +1959,7 @@ void CSpeaker::SpeakerThink()
 	if (szSoundFile[0] == '!')
 	{
 		// play single sentence, one shot
-		UTIL_EmitAmbientSound(ENT(pev), pev->origin, szSoundFile,
+		EmitAmbientSound(this, pev->origin, szSoundFile,
 			flvolume, flattenuation, flags, pitch);
 
 		// shut off and reset
@@ -1923,7 +1969,7 @@ void CSpeaker::SpeakerThink()
 	{
 		// make random announcement from sentence group
 
-		if (SENTENCEG_PlayRndSz(ENT(pev), szSoundFile, flvolume, flattenuation, flags, pitch) < 0)
+		if (SENTENCEG_PlayRndSz(this, szSoundFile, flvolume, flattenuation, flags, pitch) < 0)
 			ALERT(at_console, "Level Design Error!\nSPEAKER has bad sentence group name: %s\n", szSoundFile);
 
 		// set next announcement time for random 5 to 10 minute delay

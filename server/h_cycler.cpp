@@ -32,7 +32,7 @@ class CCycler : public CBaseAnimating
 public:
 	bool GenericCyclerSpawn(const char* szModel, Vector vecMin, Vector vecMax);
 	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE); }
-	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
+	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
 	bool Spawn() override;
 	void Think() override;
 	//void Pain( float flDamage );
@@ -79,14 +79,14 @@ bool CCycler::GenericCyclerSpawn(const char* szModel, Vector vecMin, Vector vecM
 
 	pev->classname = MAKE_STRING("cycler");
 	PRECACHE_MODEL(szModel);
-	SET_MODEL(ENT(pev), szModel);
+	SetModel(szModel);
 
 	if (!CCycler::Spawn())
 	{
 		return false;
 	}
 
-	UTIL_SetSize(pev, vecMin, vecMax);
+	SetSize(vecMin, vecMax);
 
 	return true;
 }
@@ -167,8 +167,7 @@ void CCycler::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useTyp
 //
 // CyclerPain , changes sequences when shot
 //
-//void CCycler:: Pain( float flDamage )
-bool CCycler::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
+bool CCycler::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType)
 {
 	if (m_animate)
 	{
@@ -201,7 +200,7 @@ public:
 	void Think() override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE); }
-	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
+	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
 	void Animate(float frames);
 
 	bool Save(CSave& save) override;
@@ -239,7 +238,7 @@ bool CCyclerSprite::Spawn()
 	m_lastTime = gpGlobals->time;
 
 	PRECACHE_MODEL((char*)STRING(pev->model));
-	SET_MODEL(ENT(pev), STRING(pev->model));
+	SetModel(STRING(pev->model));
 
 	m_maxFrame = (float)MODEL_FRAMES(pev->modelindex) - 1;
 
@@ -264,7 +263,7 @@ void CCyclerSprite::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 }
 
 
-bool CCyclerSprite::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
+bool CCyclerSprite::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType)
 {
 	if (m_maxFrame > 1.0)
 	{
@@ -308,12 +307,12 @@ bool CWeaponCycler::Spawn()
 	pev->movetype = MOVETYPE_NONE;
 
 	PRECACHE_MODEL((char*)STRING(pev->model));
-	SET_MODEL(ENT(pev), STRING(pev->model));
+	SetModel(STRING(pev->model));
 	m_iszModel = pev->model;
 	m_iModel = pev->modelindex;
 
-	UTIL_SetOrigin(pev, pev->origin);
-	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 16));
+	SetSize(Vector(-16, -16, 0), Vector(16, 16, 16));
+	SetOrigin(pev->origin);
 	SetTouch(&CWeaponCycler::DefaultTouch);
 
 	return true;
@@ -405,7 +404,7 @@ bool CWreckage::Spawn()
 	if (!FStringNull(pev->model))
 	{
 		PRECACHE_MODEL((char*)STRING(pev->model));
-		SET_MODEL(ENT(pev), STRING(pev->model));
+		SetModel(STRING(pev->model));
 	}
 	// pev->scale = 5.0;
 
@@ -444,13 +443,13 @@ void CWreckage::Think()
 	VecSrc.y = RANDOM_FLOAT(pev->absmin.y, pev->absmax.y);
 	VecSrc.z = RANDOM_FLOAT(pev->absmin.z, pev->absmax.z);
 
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, VecSrc);
-	WRITE_BYTE(TE_SMOKE);
-	WRITE_COORD(VecSrc.x);
-	WRITE_COORD(VecSrc.y);
-	WRITE_COORD(VecSrc.z);
-	WRITE_SHORT(g_sModelIndexSmoke);
-	WRITE_BYTE(RANDOM_LONG(0, 49) + 50); // scale * 10
-	WRITE_BYTE(RANDOM_LONG(0, 3) + 8);	 // framerate
-	MESSAGE_END();
+	MessageBegin(MSG_PVS, SVC_TEMPENTITY, VecSrc);
+	WriteByte(TE_SMOKE);
+	WriteCoord(VecSrc.x);
+	WriteCoord(VecSrc.y);
+	WriteCoord(VecSrc.z);
+	WriteShort(g_sModelIndexSmoke);
+	WriteByte(RANDOM_LONG(0, 49) + 50); // scale * 10
+	WriteByte(RANDOM_LONG(0, 3) + 8);	 // framerate
+	MessageEnd();
 }

@@ -50,7 +50,7 @@ extern "C" DLLEXPORT int GetNewDLLFunctions(NEW_DLL_FUNCTIONS* pFunctionTable, i
 */
 inline bool gTouchDisabled = false;
 
-inline DLL_GLOBAL Vector g_vecAttackDir;
+inline Vector g_vecAttackDir;
 
 extern int DispatchSpawn(edict_t* pent);
 extern void DispatchKeyValue(edict_t* pentKeyvalue, KeyValueData* pkvd);
@@ -66,16 +66,6 @@ extern void SaveReadFields(SAVERESTOREDATA* pSaveData, const char* pname, void* 
 extern void SaveGlobalState(SAVERESTOREDATA* pSaveData);
 extern void RestoreGlobalState(SAVERESTOREDATA* pSaveData);
 extern void ResetGlobalState();
-
-typedef enum
-{
-	USE_OFF = 0,
-	USE_ON = 1,
-	USE_SET = 2,
-	USE_TOGGLE = 3
-} USE_TYPE;
-
-extern void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
 
 // For CLASSIFY
 #define CLASS_NONE 0
@@ -161,6 +151,10 @@ public:
 	// Setup the object->object collision box (pev->mins / pev->maxs is the object->world collision box)
 	virtual void SetObjectCollisionBox();
 
+	void SetOrigin(const Vector& org);
+	void SetSize(const Vector& mins, const Vector& maxs);
+	void SetModel(const char* name);
+
 	// Classify - returns the type of group (i.e, "houndeye", or "human military" so that monsters with different classnames
 	// still realize that they are teammates. (overridden for monsters that form groups)
 	virtual int Classify() { return CLASS_NONE; }
@@ -169,10 +163,10 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
-	virtual void TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType);
-	virtual bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
+	virtual void TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType);
+	virtual bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType);
 	virtual bool TakeHealth(float flHealth, int bitsDamageType);
-	virtual void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType);
+	virtual void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType);
 	virtual int BloodColor() { return DONT_BLEED; }
 	virtual void TraceBleed(float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType);
 	virtual bool IsTriggered(CBaseEntity* pActivator) { return true; }
@@ -252,7 +246,7 @@ public:
 
 	virtual CBaseEntity* Respawn() { return NULL; }
 
-	void SUB_UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value);
+	void UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value);
 	// Do the bounding boxes of these two intersect?
 	bool Intersects(CBaseEntity* pOther);
 	void MakeDormant();
@@ -268,8 +262,8 @@ public:
 
 	static CBaseEntity* Create(const char* szName, const Vector& vecOrigin, const Vector& vecAngles, edict_t* pentOwner = NULL);
 
-	edict_t* edict() { return ENT(pev); }
-	int entindex() { return ENTINDEX(edict()); }
+	edict_t* edict() { return pev->pContainingEntity; }
+	int entindex() { return g_engfuncs.pfnIndexOfEdict(pev->pContainingEntity); }
 
 	virtual Vector Center() { return (pev->absmax + pev->absmin) * 0.5; } // center point of entity
 	virtual Vector EyePosition() { return pev->origin + pev->view_ofs; }  // position of eyes
@@ -296,6 +290,28 @@ public:
 	int m_fireState;
 
 	float m_flFieldOfView;
+
+	void EmitSound(
+		const char* sample,
+		int channel = CHAN_AUTO,
+		float volume = VOL_NORM,
+		float attenuation = ATTN_NORM,
+		int pitch = PITCH_NORM,
+		int flags = 0);
+
+	/**
+	*	@brief Just like @see EmitSound, but will skip the current host player if they have cl_lw turned on.
+	*	@details entity must be the current host entity for this to work, and must be called only inside a player's PostThink method.
+	*/
+	void EmitSoundPredicted(
+		const char* sample,
+		int channel = CHAN_AUTO,
+		float volume = VOL_NORM,
+		float attenuation = ATTN_NORM,
+		int pitch = PITCH_NORM,
+		int flags = 0);
+
+	void StopSound(const char* sample, int channel = CHAN_AUTO);
 };
 
 inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->edict()); }
@@ -331,7 +347,7 @@ typedef struct locksounds // sounds that doors and buttons make when locked/unlo
 	byte bEOFUnlocked;	  // true if hit end of list of unlocked sentences
 } locksound_t;
 
-void PlayLockSounds(entvars_t* pev, locksound_t* pls, bool flocked, bool fbutton);
+void PlayLockSounds(CBaseEntity* entity, locksound_t* pls, bool flocked, bool fbutton);
 
 //
 // MultiSouce
@@ -377,7 +393,7 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 	// common member functions
-	void SUB_UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value);
+	void UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value);
 	void EXPORT DelayThink();
 };
 
@@ -536,7 +552,7 @@ public:
 	void EXPORT ButtonReturn();
 	void EXPORT ButtonBackHome();
 	void EXPORT ButtonUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
-	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
+	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
 

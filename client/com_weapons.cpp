@@ -132,19 +132,6 @@ void HUD_SetMaxSpeed(const edict_t* ed, float speed)
 }
 
 
-/*
-=====================
-UTIL_WeaponTimeBase
-
-Always 0.0 on client, even if not predicting weapons ( won't get called
- in that case )
-=====================
-*/
-float UTIL_WeaponTimeBase()
-{
-	return 0.0;
-}
-
 static unsigned int glSeed = 0;
 
 unsigned int seed_table[256] =
@@ -181,10 +168,10 @@ void U_Srand(unsigned int seed)
 
 /*
 =====================
-UTIL_SharedRandomLong
+util::SharedRandomLong
 =====================
 */
-int UTIL_SharedRandomLong(unsigned int seed, int low, int high)
+int util::SharedRandomLong(unsigned int seed, int low, int high)
 {
 	unsigned int range;
 
@@ -210,10 +197,10 @@ int UTIL_SharedRandomLong(unsigned int seed, int low, int high)
 
 /*
 =====================
-UTIL_SharedRandomFloat
+util::SharedRandomFloat
 =====================
 */
-float UTIL_SharedRandomFloat(unsigned int seed, float low, float high)
+float util::SharedRandomFloat(unsigned int seed, float low, float high)
 {
 	//
 	unsigned int range;
@@ -241,19 +228,19 @@ float UTIL_SharedRandomFloat(unsigned int seed, float low, float high)
 	}
 }
 
-gamemode_e UTIL_GetGameMode()
+gamemode_e util::GetGameMode()
 {
 	return gHUD.m_GameMode;
 }
 
-bool UTIL_IsMultiplayer()
+bool util::IsMultiplayer()
 {
-	return UTIL_GetGameMode() > kGamemodeSingleplayer;
+	return util::GetGameMode() > kGamemodeSingleplayer;
 }
 
-bool UTIL_IsDeathmatch()
+bool util::IsDeathmatch()
 {
-	return UTIL_GetGameMode() > kGamemodeCooperative;
+	return util::GetGameMode() > kGamemodeCooperative;
 }
 
 /*

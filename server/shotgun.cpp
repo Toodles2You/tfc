@@ -27,7 +27,7 @@ bool CShotgun::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_SHOTGUN;
-	SET_MODEL(ENT(pev), "models/w_shotgun.mdl");
+	SetModel("models/w_shotgun.mdl");
 
 	m_iDefaultAmmo = SHOTGUN_DEFAULT_GIVE;
 
@@ -111,7 +111,7 @@ void CShotgun::PrimaryAttack()
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
 #ifndef CLIENT_DLL
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		m_pPlayer->FireBullets(gSkillData.plrDmgBuckshot, Vector2D(10, 5), 4, 2048);
 	}
@@ -157,7 +157,7 @@ void CShotgun::SecondaryAttack()
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
 #ifndef CLIENT_DLL
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		m_pPlayer->FireBullets(gSkillData.plrDmgBuckshot, Vector2D(20, 5), 8, 2048);
 	}
@@ -209,7 +209,7 @@ void CShotgun::Reload()
 		// was waiting for gun to move to side
 		m_fInSpecialReload = 2;
 
-		if (UTIL_SharedRandomLong(m_pPlayer->random_seed, 0, 1) == 1)
+		if (util::SharedRandomLong(m_pPlayer->random_seed, 0, 1) == 1)
 			PlayWeaponSound(CHAN_ITEM, "weapons/reload1.wav");
 		else
 			PlayWeaponSound(CHAN_ITEM, "weapons/reload3.wav");
@@ -238,7 +238,7 @@ void CShotgun::WeaponIdle()
 		return;
 
 	int iAnim;
-	float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
+	float flRand = util::SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
 	if (flRand <= 0.8)
 	{
 		iAnim = SHOTGUN_IDLE_DEEP;

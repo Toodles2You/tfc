@@ -31,7 +31,7 @@ bool CMP5::Spawn()
 {
 	pev->classname = MAKE_STRING("weapon_9mmAR"); // hack to allow for old names
 	Precache();
-	SET_MODEL(ENT(pev), "models/w_9mmAR.mdl");
+	SetModel("models/w_9mmAR.mdl");
 	m_iId = WEAPON_MP5;
 
 	m_iDefaultAmmo = MP5_DEFAULT_GIVE;
@@ -136,7 +136,7 @@ void CMP5::PrimaryAttack()
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
 #ifndef CLIENT_DLL
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		m_pPlayer->FireBullets(gSkillData.plrDmgMP5, Vector2D(6, 6), shots);
 	}
@@ -150,7 +150,7 @@ void CMP5::PrimaryAttack()
 
 	m_pPlayer->CheckAmmoLevel(this);
 
-	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
+	m_iTimeWeaponIdle = util::SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 }
 
 
@@ -176,10 +176,9 @@ void CMP5::SecondaryAttack()
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+	util::MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
-	// we don't add in player velocity anymore.
-	CGrenade::ShootContact(m_pPlayer->pev,
+	CGrenade::ShootContact(m_pPlayer,
 		m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_forward * 16,
 		gpGlobals->v_forward * 800);
 
@@ -217,7 +216,7 @@ void CMP5::WeaponIdle()
 
 	SendWeaponAnim(iAnim);
 
-	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000); // how long till we do this again.
+	m_iTimeWeaponIdle = util::SharedRandomLong(m_pPlayer->random_seed, 10000, 15000); // how long till we do this again.
 }
 
 

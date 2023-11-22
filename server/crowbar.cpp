@@ -30,7 +30,7 @@ bool CCrowbar::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_CROWBAR;
-	SET_MODEL(ENT(pev), "models/w_crowbar.mdl");
+	SetModel("models/w_crowbar.mdl");
 	m_iClip = -1;
 
 	FallInit(); // get ready to fall down.
@@ -94,7 +94,7 @@ void FindHullIntersection(const Vector& vecSrc, TraceResult& tr, const Vector& m
 	distance = 1e6f;
 
 	vecHullEnd = vecSrc + ((vecHullEnd - vecSrc) * 2);
-	UTIL_TraceLine(vecSrc, vecHullEnd, dont_ignore_monsters, pEntity, &tmpTrace);
+	util::TraceLine(vecSrc, vecHullEnd, util::dont_ignore_monsters, CBaseEntity::Instance(pEntity), &tmpTrace);
 	if (tmpTrace.flFraction < 1.0)
 	{
 		tr = tmpTrace;
@@ -111,7 +111,7 @@ void FindHullIntersection(const Vector& vecSrc, TraceResult& tr, const Vector& m
 				vecEnd.y = vecHullEnd.y + minmaxs[j]->y;
 				vecEnd.z = vecHullEnd.z + minmaxs[k]->z;
 
-				UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, pEntity, &tmpTrace);
+				util::TraceLine(vecSrc, vecEnd, util::dont_ignore_monsters, CBaseEntity::Instance(pEntity), &tmpTrace);
 				if (tmpTrace.flFraction < 1.0)
 				{
 					float thisDistance = (tmpTrace.vecEndPos - vecSrc).Length();
@@ -155,16 +155,16 @@ bool CCrowbar::Swing(bool fFirst)
 
 	TraceResult tr;
 
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle);
+	util::MakeVectors(m_pPlayer->pev->v_angle);
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecEnd = vecSrc + gpGlobals->v_forward * 32;
 
-	UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr);
+	util::TraceLine(vecSrc, vecEnd, util::dont_ignore_monsters, m_pPlayer, &tr);
 
 #ifndef CLIENT_DLL
 	if (tr.flFraction >= 1.0)
 	{
-		UTIL_TraceHull(vecSrc, vecEnd, dont_ignore_monsters, head_hull, ENT(m_pPlayer->pev), &tr);
+		util::TraceHull(vecSrc, vecEnd, util::dont_ignore_monsters, util::head_hull, ENT(m_pPlayer->pev), &tr);
 		if (tr.flFraction < 1.0)
 		{
 			// Calculate the point of intersection of the line (or hull) and the object we hit
@@ -220,17 +220,17 @@ bool CCrowbar::Swing(bool fFirst)
 
 		ClearMultiDamage();
 
-		if ((m_iNextPrimaryAttack + 1000 < 0) || UTIL_IsDeathmatch())
+		if ((m_iNextPrimaryAttack + 1000 < 0) || util::IsDeathmatch())
 		{
 			// first swing does full damage
-			pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgCrowbar, gpGlobals->v_forward, &tr, DMG_CLUB);
+			pEntity->TraceAttack(m_pPlayer, gSkillData.plrDmgCrowbar, gpGlobals->v_forward, &tr, DMG_CLUB);
 		}
 		else
 		{
 			// subsequent swings do half
-			pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgCrowbar / 2, gpGlobals->v_forward, &tr, DMG_CLUB);
+			pEntity->TraceAttack(m_pPlayer, gSkillData.plrDmgCrowbar / 2, gpGlobals->v_forward, &tr, DMG_CLUB);
 		}
-		ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+		ApplyMultiDamage(m_pPlayer, m_pPlayer);
 
 #endif
 
@@ -248,15 +248,9 @@ bool CCrowbar::Swing(bool fFirst)
 				// play thwack or smack sound
 				switch (RANDOM_LONG(0, 2))
 				{
-				case 0:
-					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hitbod1.wav", 1, ATTN_NORM);
-					break;
-				case 1:
-					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hitbod2.wav", 1, ATTN_NORM);
-					break;
-				case 2:
-					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hitbod3.wav", 1, ATTN_NORM);
-					break;
+				case 0: m_pPlayer->EmitSound("weapons/cbar_hitbod1.wav", CHAN_ITEM); break;
+				case 1: m_pPlayer->EmitSound("weapons/cbar_hitbod2.wav", CHAN_ITEM); break;
+				case 2: m_pPlayer->EmitSound("weapons/cbar_hitbod3.wav", CHAN_ITEM); break;
 				}
 				if (!pEntity->IsAlive())
 					return true;
@@ -281,12 +275,8 @@ bool CCrowbar::Swing(bool fFirst)
 			// also play crowbar strike
 			switch (RANDOM_LONG(0, 1))
 			{
-			case 0:
-				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hit1.wav", fvolbar, ATTN_NORM, 0, 98 + RANDOM_LONG(0, 3));
-				break;
-			case 1:
-				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hit2.wav", fvolbar, ATTN_NORM, 0, 98 + RANDOM_LONG(0, 3));
-				break;
+			case 0: m_pPlayer->EmitSound("weapons/cbar_hit1.wav", CHAN_ITEM, fvolbar, ATTN_NORM, 98 + RANDOM_LONG(0, 3)); break;
+			case 1: m_pPlayer->EmitSound("weapons/cbar_hit2.wav", CHAN_ITEM, fvolbar, ATTN_NORM, 98 + RANDOM_LONG(0, 3)); break;
 			}
 
 			// delay the decal a bit

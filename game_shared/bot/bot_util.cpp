@@ -28,7 +28,7 @@ bool UTIL_IsNameTaken( const char *name, bool ignoreHumans )
 {
 	for ( int i = 1; i <= gpGlobals->maxClients; ++i )
 	{
-		CBaseEntity * player = UTIL_PlayerByIndex( i );
+		CBaseEntity * player = util::PlayerByIndex( i );
 
 		if (player == NULL)
 			continue;
@@ -70,7 +70,7 @@ int UTIL_ClientsInGame( void )
 
 	for ( int iIndex = 1; iIndex <= gpGlobals->maxClients; iIndex++ )
 	{
-		CBaseEntity * pPlayer = UTIL_PlayerByIndex( iIndex );
+		CBaseEntity * pPlayer = util::PlayerByIndex( iIndex );
 
 		if ( pPlayer == NULL )
 			continue;
@@ -97,7 +97,7 @@ int UTIL_ActivePlayersInGame( void )
 
 	for (int iIndex = 1; iIndex <= gpGlobals->maxClients; iIndex++ )
 	{
-		CBaseEntity *entity = UTIL_PlayerByIndex( iIndex );
+		CBaseEntity *entity = util::PlayerByIndex( iIndex );
 
 		if ( entity == NULL )
 			continue;
@@ -129,7 +129,7 @@ int UTIL_HumansInGame( bool ignoreSpectators )
 
 	for (int iIndex = 1; iIndex <= gpGlobals->maxClients; iIndex++ )
 	{
-		CBaseEntity *entity = UTIL_PlayerByIndex( iIndex );
+		CBaseEntity *entity = util::PlayerByIndex( iIndex );
 
 		if ( entity == NULL )
 			continue;
@@ -172,7 +172,7 @@ int UTIL_HumansOnTeam( int teamID, bool isAlive )
 
 	for (int iIndex = 1; iIndex <= gpGlobals->maxClients; iIndex++ )
 	{
-		CBaseEntity *entity = UTIL_PlayerByIndex( iIndex );
+		CBaseEntity *entity = util::PlayerByIndex( iIndex );
 
 		if ( entity == NULL )
 			continue;
@@ -208,7 +208,7 @@ int UTIL_BotsInGame( void )
 
 	for (int iIndex = 1; iIndex <= gpGlobals->maxClients; iIndex++ )
 	{
-		CBasePlayer *pPlayer = static_cast<CBasePlayer *>(UTIL_PlayerByIndex( iIndex ));
+		CBasePlayer *pPlayer = static_cast<CBasePlayer *>(util::PlayerByIndex( iIndex ));
 
 		if ( pPlayer == NULL )
 			continue;
@@ -239,7 +239,7 @@ bool UTIL_KickBotFromTeam( int kickTeam )
 	// try to kick a dead bot first
 	for ( i = 1; i <= gpGlobals->maxClients; ++i )
 	{
-		CBasePlayer *player = static_cast<CBasePlayer *>( UTIL_PlayerByIndex( i ) );
+		CBasePlayer *player = static_cast<CBasePlayer *>( util::PlayerByIndex( i ) );
 
 		if (player == NULL)
 			continue;
@@ -257,7 +257,7 @@ bool UTIL_KickBotFromTeam( int kickTeam )
 		if (!player->IsAlive() && (kickTeam == -1 || player->TeamNumber() == kickTeam))
 		{
 			// its a bot on the right team - kick it
-			SERVER_COMMAND( UTIL_VarArgs( "kick \"%s\"\n", STRING( player->pev->netname ) ) );
+			SERVER_COMMAND( util::VarArgs( "kick \"%s\"\n", STRING( player->pev->netname ) ) );
 
 			return true;
 		}
@@ -266,7 +266,7 @@ bool UTIL_KickBotFromTeam( int kickTeam )
 	// no dead bots, kick any bot on the given team
 	for ( i = 1; i <= gpGlobals->maxClients; ++i )
 	{
-		CBasePlayer *player = static_cast<CBasePlayer *>( UTIL_PlayerByIndex( i ) );
+		CBasePlayer *player = static_cast<CBasePlayer *>( util::PlayerByIndex( i ) );
 
 		if (player == NULL)
 			continue;
@@ -284,7 +284,7 @@ bool UTIL_KickBotFromTeam( int kickTeam )
 		if ((kickTeam == -1 || player->TeamNumber() == kickTeam))
 		{
 			// its a bot on the right team - kick it
-			SERVER_COMMAND( UTIL_VarArgs( "kick \"%s\"\n", STRING( player->pev->netname ) ) );
+			SERVER_COMMAND( util::VarArgs( "kick \"%s\"\n", STRING( player->pev->netname ) ) );
 
 			return true;
 		}
@@ -303,7 +303,7 @@ bool UTIL_IsTeamAllBots( int team )
 
 	for( int i=1; i <= gpGlobals->maxClients; ++i )
 	{
-		CBasePlayer *player = static_cast<CBasePlayer *>( UTIL_PlayerByIndex( i ) );
+		CBasePlayer *player = static_cast<CBasePlayer *>( util::PlayerByIndex( i ) );
 
 		if (player == NULL)
 			continue;
@@ -342,7 +342,7 @@ CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, float *distance, CBasePla
 
 	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
 	{
-		CBasePlayer *player = static_cast<CBasePlayer *>( UTIL_PlayerByIndex( i ) );
+		CBasePlayer *player = static_cast<CBasePlayer *>( util::PlayerByIndex( i ) );
 
 		if (!IsEntityValid( player ))
 			continue;
@@ -379,7 +379,7 @@ CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, int team, float *distance
 
 	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
 	{
-		CBasePlayer *player = static_cast<CBasePlayer *>( UTIL_PlayerByIndex( i ) );
+		CBasePlayer *player = static_cast<CBasePlayer *>( util::PlayerByIndex( i ) );
 
 		if (!IsEntityValid( player ))
 			continue;
@@ -414,7 +414,7 @@ CBasePlayer *UTIL_GetClosestEnemyPlayer( CBasePlayer *self, float *distance )
 
 	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
 	{
-		CBasePlayer *player = static_cast<CBasePlayer *>( UTIL_PlayerByIndex( i ) );
+		CBasePlayer *player = static_cast<CBasePlayer *>( util::PlayerByIndex( i ) );
 
 		if (!IsEntityValid( player ))
 			continue;
@@ -477,7 +477,7 @@ bool UTIL_IsVisibleToTeam( const Vector &spot, int team, float maxRange )
 {
 	for( int i = 1; i <= gpGlobals->maxClients; ++i )
 	{
-		CBasePlayer *player = static_cast<CBasePlayer *>( UTIL_PlayerByIndex( i ) );
+		CBasePlayer *player = static_cast<CBasePlayer *>( util::PlayerByIndex( i ) );
 
 		if (player == NULL)
 			continue;
@@ -498,7 +498,7 @@ bool UTIL_IsVisibleToTeam( const Vector &spot, int team, float maxRange )
 			continue;
 
 		TraceResult result;
-		UTIL_TraceLine( player->EyePosition(), spot, ignore_monsters, ignore_glass, ENT( player->pev ), &result );
+		util::TraceLine( player->EyePosition(), spot, util::ignore_monsters, util::ignore_glass, player, &result );
 
 		if (result.flFraction == 1.0f)
 			return true;
@@ -537,50 +537,50 @@ Vector UTIL_ComputeOrigin( edict_t * pentEdict )
 //------------------------------------------------------------------------------------------------------------
 void UTIL_DrawBeamFromEnt( int iIndex, Vector vecEnd, int iLifetime, byte bRed, byte bGreen, byte bBlue )
 {
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecEnd );   // vecEnd = origin???
-									WRITE_BYTE( TE_BEAMENTPOINT );
-									WRITE_SHORT( iIndex );
-									WRITE_COORD( vecEnd.x );
-									WRITE_COORD( vecEnd.y );
-									WRITE_COORD( vecEnd.z );
-									WRITE_SHORT( s_iBeamSprite );
-									WRITE_BYTE( 0 );		 // startframe
-									WRITE_BYTE( 0 );		 // framerate
-									WRITE_BYTE( iLifetime ); // life
-									WRITE_BYTE( 10 );		 // width
-									WRITE_BYTE( 0 );		 // noise
-									WRITE_BYTE( bRed );		 // r, g, b
-									WRITE_BYTE( bGreen );		 // r, g, b
-									WRITE_BYTE( bBlue );    // r, g, b
-									WRITE_BYTE( 255 );	 // brightness
-									WRITE_BYTE( 0 );		 // speed
-									MESSAGE_END();
+	MessageBegin( MSG_PVS, SVC_TEMPENTITY, vecEnd );   // vecEnd = origin???
+									WriteByte( TE_BEAMENTPOINT );
+									WriteShort( iIndex );
+									WriteCoord( vecEnd.x );
+									WriteCoord( vecEnd.y );
+									WriteCoord( vecEnd.z );
+									WriteShort( s_iBeamSprite );
+									WriteByte( 0 );		 // startframe
+									WriteByte( 0 );		 // framerate
+									WriteByte( iLifetime ); // life
+									WriteByte( 10 );		 // width
+									WriteByte( 0 );		 // noise
+									WriteByte( bRed );		 // r, g, b
+									WriteByte( bGreen );		 // r, g, b
+									WriteByte( bBlue );    // r, g, b
+									WriteByte( 255 );	 // brightness
+									WriteByte( 0 );		 // speed
+									MessageEnd();
 }
 
 
 //------------------------------------------------------------------------------------------------------------
 void UTIL_DrawBeamPoints( Vector vecStart, Vector vecEnd, int iLifetime, byte bRed, byte bGreen, byte bBlue )
 {
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecStart );
-									WRITE_BYTE( TE_BEAMPOINTS );
-									WRITE_COORD( vecStart.x );
-									WRITE_COORD( vecStart.y );
-									WRITE_COORD( vecStart.z );
-									WRITE_COORD( vecEnd.x );
-									WRITE_COORD( vecEnd.y );
-									WRITE_COORD( vecEnd.z );
-									WRITE_SHORT( s_iBeamSprite );
-									WRITE_BYTE( 0 );		 // startframe
-									WRITE_BYTE( 0 );		 // framerate
-									WRITE_BYTE( iLifetime ); // life
-									WRITE_BYTE( 10 );		 // width
-									WRITE_BYTE( 0 );		 // noise
-									WRITE_BYTE( bRed );		 // r, g, b
-									WRITE_BYTE( bGreen );		 // r, g, b
-									WRITE_BYTE( bBlue );    // r, g, b
-									WRITE_BYTE( 255 );	 // brightness
-									WRITE_BYTE( 0 );		 // speed
-									MESSAGE_END();
+	MessageBegin( MSG_PVS, SVC_TEMPENTITY, vecStart );
+									WriteByte( TE_BEAMPOINTS );
+									WriteCoord( vecStart.x );
+									WriteCoord( vecStart.y );
+									WriteCoord( vecStart.z );
+									WriteCoord( vecEnd.x );
+									WriteCoord( vecEnd.y );
+									WriteCoord( vecEnd.z );
+									WriteShort( s_iBeamSprite );
+									WriteByte( 0 );		 // startframe
+									WriteByte( 0 );		 // framerate
+									WriteByte( iLifetime ); // life
+									WriteByte( 10 );		 // width
+									WriteByte( 0 );		 // noise
+									WriteByte( bRed );		 // r, g, b
+									WriteByte( bGreen );		 // r, g, b
+									WriteByte( bBlue );    // r, g, b
+									WriteByte( 255 );	 // brightness
+									WriteByte( 0 );		 // speed
+									MessageEnd();
 }
 
 
@@ -609,7 +609,7 @@ void CONSOLE_ECHO_LOGGED( char * pszMsg, ... )
 	va_end( argptr );
 
 	(*g_engfuncs.pfnServerPrint)( szStr );
-	UTIL_LogPrintf( szStr );
+	util::LogPrintf( szStr );
 }
 
 
@@ -868,7 +868,7 @@ bool IsGameEventAudible( GameEventType event, CBaseEntity *entity, CBaseEntity *
  */
 void HintMessageToAllPlayers( const char *message )
 {
-	hudtextparms_t textParms;
+	util::hudtextparms_t textParms;
 
 	textParms.x = -1.0f;
 	textParms.y = -1.0f;
@@ -885,6 +885,6 @@ void HintMessageToAllPlayers( const char *message )
 	textParms.effect = 0;
 	textParms.channel = 0;
 
-	UTIL_HudMessageAll( textParms, message );
+	util::HudMessageAll( textParms, message );
 }
 

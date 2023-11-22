@@ -18,10 +18,10 @@
 #include "bot_util.h"
 #include "bot_constants.h"
 
-extern DLL_GLOBAL float g_flBotCommandInterval;
-extern DLL_GLOBAL float g_flBotFullThinkInterval;
+extern float g_flBotCommandInterval;
+extern float g_flBotFullThinkInterval;
 
-extern DLL_GLOBAL CBotManager *g_pBotMan;
+extern CBotManager *g_pBotMan;
 
 class BotProfile;
 
@@ -129,15 +129,15 @@ public:
 	//
 
 	/// invoked when injured by something (EXTEND)
-	virtual bool TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType )
+	virtual bool TakeDamage( CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType )
 	{
-		return CBasePlayer::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+		return CBasePlayer::TakeDamage( inflictor, attacker, flDamage, bitsDamageType );
 	}
 
 	/// invoked when killed (EXTEND)
-	virtual void Killed( entvars_t* pevInflictor, entvars_t *pevAttacker, int bitsDamageType )
+	virtual void Killed( CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType )
 	{ 
-		CBasePlayer::Killed( pevInflictor, pevAttacker, bitsDamageType );
+		CBasePlayer::Killed( inflictor, attacker, bitsDamageType );
 	}
 
 	virtual void OnTouchingWeapon( CWeaponBox *box ) { }	///< invoked when in contact with a CWeaponBox
@@ -340,7 +340,7 @@ inline bool CBot::IsPlayerFacingMe( CBasePlayer *other ) const
 	Vector toOther = other->pev->origin - pev->origin;
 
 	// compute the unit vector along our other player's
-	UTIL_MakeVectors( other->pev->v_angle + other->pev->punchangle );
+	util::MakeVectors( other->pev->v_angle + other->pev->punchangle );
 	Vector otherDir = gpGlobals->v_forward;
 
 	if (otherDir.x * toOther.x + otherDir.y * toOther.y < 0.0f)
@@ -356,7 +356,7 @@ inline bool CBot::IsPlayerLookingAtMe( CBasePlayer *other ) const
 	toOther.NormalizeInPlace();
 
 	// compute the unit vector along our other player's
-	UTIL_MakeVectors( other->pev->v_angle + other->pev->punchangle );
+	util::MakeVectors( other->pev->v_angle + other->pev->punchangle );
 	Vector otherDir = gpGlobals->v_forward;
 
 	// other player must be pointing nearly right at us to be "looking at" us

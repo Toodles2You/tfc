@@ -29,15 +29,16 @@ This file contains "stubs" of class member implementations so that we can predic
 #include "nodes.h"
 #include "skill.h"
 
-void EMIT_SOUND_DYN(edict_t* entity, int channel, const char* sample, float volume, float attenuation, int flags, int pitch) {}
-
 // CBaseEntity Stubs
 bool CBaseEntity::TakeHealth(float flHealth, int bitsDamageType) { return true; }
-bool CBaseEntity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) { return true; }
+bool CBaseEntity::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) { return true; }
 CBaseEntity* CBaseEntity::GetNextTarget() { return NULL; }
 bool CBaseEntity::Save(CSave& save) { return true; }
 bool CBaseEntity::Restore(CRestore& restore) { return true; }
 void CBaseEntity::SetObjectCollisionBox() {}
+void CBaseEntity::SetOrigin(const Vector& org) {}
+void CBaseEntity::SetModel(const char* name) {}
+void CBaseEntity::SetSize(const Vector& mins, const Vector& maxs) {}
 bool CBaseEntity::Intersects(CBaseEntity* pOther) { return false; }
 void CBaseEntity::MakeDormant() {}
 bool CBaseEntity::IsDormant() { return false; }
@@ -60,17 +61,16 @@ bool CBaseAnimating::Save(class CSave&) { return true; }
 edict_t* DBG_EntOfVars(const entvars_t* pev) { return NULL; }
 void DBG_AssertFunction(bool fExpr, const char* szExpr, const char* szFile, int szLine, const char* szMessage) {}
 
-// UTIL_* Stubs
-void UTIL_PrecacheOther(const char* szClassname) {}
-void UTIL_BloodDrips(const Vector& origin, const Vector& direction, int color, int amount) {}
-void UTIL_DecalTrace(TraceResult* pTrace, int decalNumber) {}
-void UTIL_GunshotDecalTrace(TraceResult* pTrace, int decalNumber) {}
-void UTIL_MakeVectors(const Vector& vecAngles) {}
-bool UTIL_IsValidEntity(edict_t* pent) { return true; }
-void UTIL_SetOrigin(entvars_t*, const Vector& org) {}
-void UTIL_LogPrintf(char*, ...) {}
-void UTIL_ClientPrintAll(int, char const*, char const*, char const*, char const*, char const*) {}
-void ClientPrint(entvars_t* client, int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4) {}
+// util Stubs
+void util::PrecacheOther(const char* szClassname) {}
+void util::BloodDrips(const Vector& origin, const Vector& direction, int color, int amount) {}
+void util::DecalTrace(TraceResult* pTrace, int decalNumber) {}
+void util::GunshotDecalTrace(TraceResult* pTrace, int decalNumber) {}
+void util::MakeVectors(const Vector& vecAngles) {}
+bool util::IsValidEntity(edict_t* pent) { return true; }
+void util::LogPrintf(const char*, ...) {}
+void util::ClientPrintAll(int, char const*, char const*, char const*, char const*, char const*) {}
+void util::ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4) {}
 
 // CBaseToggle Stubs
 bool CBaseToggle::Restore(class CRestore&) { return true; }
@@ -81,16 +81,15 @@ bool CBaseToggle::KeyValue(struct KeyValueData_s*) { return false; }
 void CGrenade::BounceSound() {}
 void CGrenade::Explode(Vector, Vector) {}
 void CGrenade::Explode(TraceResult*, int) {}
-void CGrenade::Killed(entvars_t*, entvars_t*, int) {}
+void CGrenade::Killed(CBaseEntity*, CBaseEntity*, int) {}
 bool CGrenade::Spawn() { return false; }
-CGrenade* CGrenade::ShootTimed(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time) { return 0; }
-CGrenade* CGrenade::ShootContact(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity) { return 0; }
+CGrenade* CGrenade::ShootTimed(CBaseEntity* owner, Vector vecStart, Vector vecVelocity, float time) { return 0; }
+CGrenade* CGrenade::ShootContact(CBaseEntity* owner, Vector vecStart, Vector vecVelocity) { return 0; }
 void CGrenade::DetonateUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) {}
 
-void UTIL_SetSize(entvars_t* pev, const Vector& vecMin, const Vector& vecMax) {}
-CBaseEntity* UTIL_FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius) { return 0; }
+CBaseEntity* util::FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius) { return 0; }
 
-Vector UTIL_VecToAngles(const Vector& vec) { return 0; }
+Vector util::VecToAngles(const Vector& vec) { return 0; }
 CSprite* CSprite::SpriteCreate(const char* pSpriteName, const Vector& origin, bool animate) { return 0; }
 void CBeam::PointEntInit(const Vector& start, int endIndex) {}
 CBeam* CBeam::BeamCreate(const char* pSpriteName, int width) { return NULL; }
@@ -119,14 +118,14 @@ int CBaseAnimating::FindTransition(int iEndingSequence, int iGoalSequence, int* 
 void CBaseAnimating::GetAutomovement(Vector& origin, Vector& angles, float flInterval) {}
 void CBaseAnimating::SetBodygroup(int iGroup, int iValue) {}
 int CBaseAnimating::GetBodygroup(int iGroup) { return 0; }
-void CBaseEntity::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) {}
+void CBaseEntity::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) {}
 void CBaseEntity::TraceBleed(float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) {}
 
 int TrainSpeed(int iSpeed, int iMax) { return 0; }
 void CBasePlayer::DeathSound() {}
 bool CBasePlayer::TakeHealth(float flHealth, int bitsDamageType) { return false; }
-void CBasePlayer::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) {}
-bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) { return false; }
+void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) {}
+bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) { return false; }
 void CBasePlayer::PackDeadPlayerWeapons() {}
 void CBasePlayer::RemoveAllWeapons(bool removeSuit) {}
 void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim) {}
@@ -175,8 +174,8 @@ void CBasePlayer::AddPoints(int score, bool bAllowNegativeScore) {}
 void CBasePlayer::AddPointsToTeam(int score, bool bAllowNegativeScore) {}
 
 void ClearMultiDamage() {}
-void ApplyMultiDamage(entvars_t* pevInflictor, entvars_t* pevAttacker) {}
-void AddMultiDamage(entvars_t* pevInflictor, CBaseEntity* pEntity, float flDamage, int bitsDamageType) {}
+void ApplyMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker) {}
+void AddMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker, CBaseEntity* pEntity, float flDamage, int bitsDamageType) {}
 void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage) {}
 int DamageDecal(CBaseEntity* pEntity, int bitsDamageType) { return 0; }
 void DecalGunshot(TraceResult* pTrace, int iBulletType) {}
@@ -206,4 +205,9 @@ bool CBasePlayerWeapon::ExtractAmmo(CBasePlayerWeapon* pWeapon) { return false; 
 bool CBasePlayerWeapon::ExtractClipAmmo(CBasePlayerWeapon* pWeapon) { return false; }
 void CBasePlayerWeapon::RetireWeapon() {}
 void CBasePlayerWeapon::DoRetireWeapon() {}
-void RadiusDamage(Vector vecSrc, entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType) {}
+void RadiusDamage(Vector vecSrc, CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType) {}
+
+
+void CBaseEntity::EmitSound(const char* sample, int channel, float volume, float attenuation, int pitch, int flags) {}
+void CBaseEntity::EmitSoundPredicted(const char* sample, int channel, float volume, float attenuation, int pitch, int flags) {}
+void CBaseEntity::StopSound(const char* sample, int channel) {}

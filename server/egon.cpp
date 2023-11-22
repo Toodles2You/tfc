@@ -37,7 +37,7 @@ bool CEgon::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_EGON;
-	SET_MODEL(ENT(pev), "models/w_egon.mdl");
+	SetModel("models/w_egon.mdl");
 
 	m_iDefaultAmmo = EGON_DEFAULT_GIVE;
 
@@ -150,7 +150,7 @@ void CEgon::Attack()
 		return;
 	}
 
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+	util::MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 	Vector vecAiming = gpGlobals->v_forward;
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 
@@ -172,7 +172,7 @@ void CEgon::Attack()
 		m_shakeTime = 0;
 
 		m_iTimeWeaponIdle = 100;
-		pev->fuser1 = UTIL_WeaponTimeBase() + 2;
+		pev->fuser1 = 2.0F;
 
 		pev->dmgtime = gpGlobals->time + GetPulseInterval();
 		m_fireState = FIRE_CHARGE;
@@ -183,7 +183,7 @@ void CEgon::Attack()
 	{
 		Fire(vecSrc, vecAiming);
 
-		if (pev->fuser1 <= UTIL_WeaponTimeBase())
+		if (pev->fuser1 <= 0.0F)
 		{
 			m_pPlayer->PlaybackEvent(m_usEgonFire, 0.0, 0.0, 0, m_fireMode, false, false);
 			pev->fuser1 = 1000;
@@ -208,15 +208,11 @@ void CEgon::PrimaryAttack()
 void CEgon::Fire(const Vector& vecOrigSrc, const Vector& vecDir)
 {
 	Vector vecDest = vecOrigSrc + vecDir * 2048;
-	edict_t* pentIgnore;
 	TraceResult tr;
 
-	pentIgnore = m_pPlayer->edict();
 	Vector tmpSrc = vecOrigSrc + gpGlobals->v_up * -8 + gpGlobals->v_right * 3;
 
-	// ALERT( at_console, "." );
-
-	UTIL_TraceLine(vecOrigSrc, vecDest, dont_ignore_monsters, pentIgnore, &tr);
+	util::TraceLine(vecOrigSrc, vecDest, util::dont_ignore_monsters, m_pPlayer, &tr);
 
 	if (0 != tr.fAllSolid)
 		return;
@@ -227,7 +223,7 @@ void CEgon::Fire(const Vector& vecOrigSrc, const Vector& vecDir)
 	if (pEntity == NULL)
 		return;
 
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		if (m_pSprite && 0 != pEntity->pev->takedamage)
 		{
@@ -255,11 +251,11 @@ void CEgon::Fire(const Vector& vecOrigSrc, const Vector& vecDir)
 			ClearMultiDamage();
 			if (0 != pEntity->pev->takedamage)
 			{
-				pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgEgonNarrow, vecDir, &tr, DMG_ENERGYBEAM);
+				pEntity->TraceAttack(m_pPlayer, gSkillData.plrDmgEgonNarrow, vecDir, &tr, DMG_ENERGYBEAM);
 			}
-			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+			ApplyMultiDamage(m_pPlayer, m_pPlayer);
 
-			if (UTIL_IsDeathmatch())
+			if (util::IsDeathmatch())
 			{
 				// multiplayer uses 1 ammo every 1/10th second
 				if (gpGlobals->time >= m_flAmmoUseTime)
@@ -292,20 +288,20 @@ void CEgon::Fire(const Vector& vecOrigSrc, const Vector& vecDir)
 			ClearMultiDamage();
 			if (0 != pEntity->pev->takedamage)
 			{
-				pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgEgonWide, vecDir, &tr, DMG_ENERGYBEAM | DMG_ALWAYSGIB);
+				pEntity->TraceAttack(m_pPlayer, gSkillData.plrDmgEgonWide, vecDir, &tr, DMG_ENERGYBEAM | DMG_ALWAYSGIB);
 			}
-			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+			ApplyMultiDamage(m_pPlayer, m_pPlayer);
 
-			if (UTIL_IsDeathmatch())
+			if (util::IsDeathmatch())
 			{
 				// radius damage a little more potent in multiplayer.
-				::RadiusDamage(tr.vecEndPos, pev, m_pPlayer->pev, gSkillData.plrDmgEgonWide / 4, 128, CLASS_NONE, DMG_ENERGYBEAM | DMG_BLAST | DMG_ALWAYSGIB);
+				RadiusDamage(tr.vecEndPos, this, m_pPlayer, gSkillData.plrDmgEgonWide / 4, 128, CLASS_NONE, DMG_ENERGYBEAM | DMG_BLAST | DMG_ALWAYSGIB);
 			}
 
 			if (!m_pPlayer->IsAlive())
 				return;
 
-			if (UTIL_IsDeathmatch())
+			if (util::IsDeathmatch())
 			{
 				//multiplayer uses 5 ammo/second
 				if (gpGlobals->time >= m_flAmmoUseTime)
@@ -327,7 +323,7 @@ void CEgon::Fire(const Vector& vecOrigSrc, const Vector& vecDir)
 			pev->dmgtime = gpGlobals->time + GetDischargeInterval();
 			if (m_shakeTime < gpGlobals->time)
 			{
-				UTIL_ScreenShake(tr.vecEndPos, 5.0, 150.0, 0.75, 250.0);
+				util::ScreenShake(tr.vecEndPos, 5.0, 150.0, 0.75, 250.0);
 				m_shakeTime = gpGlobals->time + 1.5;
 			}
 		}
@@ -364,7 +360,7 @@ void CEgon::UpdateEffect(const Vector& startPoint, const Vector& endPoint, float
 		m_pBeam->SetColor(60 + (25 * timeBlend), 120 + (30 * timeBlend), 64 + 80 * fabs(sin(gpGlobals->time * 10)));
 
 
-	UTIL_SetOrigin(m_pSprite->pev, endPoint);
+	m_pSprite->SetOrigin(endPoint);
 	m_pSprite->pev->frame += 8 * gpGlobals->frametime;
 	if (m_pSprite->pev->frame > m_pSprite->Frames())
 		m_pSprite->pev->frame = 0;
@@ -469,7 +465,7 @@ void CEgon::WeaponIdle()
 	if (flRand <= 0.5)
 	{
 		iAnim = EGON_IDLE1;
-		m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
+		m_iTimeWeaponIdle = util::SharedRandomLong(m_pPlayer->random_seed, 10000, 15000);
 	}
 	else
 	{

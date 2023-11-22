@@ -131,19 +131,19 @@ void CDecal::TriggerDecal(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 	TraceResult trace;
 	int entityIndex;
 
-	UTIL_TraceLine(pev->origin - Vector(5, 5, 5), pev->origin + Vector(5, 5, 5), ignore_monsters, ENT(pev), &trace);
+	util::TraceLine(pev->origin - Vector(5, 5, 5), pev->origin + Vector(5, 5, 5), util::ignore_monsters, this, &trace);
 
-	MESSAGE_BEGIN(MSG_BROADCAST, SVC_TEMPENTITY);
-	WRITE_BYTE(TE_BSPDECAL);
-	WRITE_COORD(pev->origin.x);
-	WRITE_COORD(pev->origin.y);
-	WRITE_COORD(pev->origin.z);
-	WRITE_SHORT((int)pev->skin);
+	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte(TE_BSPDECAL);
+	WriteCoord(pev->origin.x);
+	WriteCoord(pev->origin.y);
+	WriteCoord(pev->origin.z);
+	WriteShort((int)pev->skin);
 	entityIndex = (short)ENTINDEX(trace.pHit);
-	WRITE_SHORT(entityIndex);
+	WriteShort(entityIndex);
 	if (0 != entityIndex)
-		WRITE_SHORT((int)VARS(trace.pHit)->modelindex);
-	MESSAGE_END();
+		WriteShort((int)VARS(trace.pHit)->modelindex);
+	MessageEnd();
 
 	Remove();
 }
@@ -154,7 +154,7 @@ void CDecal::StaticDecal()
 	TraceResult trace;
 	int entityIndex, modelIndex;
 
-	UTIL_TraceLine(pev->origin - Vector(5, 5, 5), pev->origin + Vector(5, 5, 5), ignore_monsters, ENT(pev), &trace);
+	util::TraceLine(pev->origin - Vector(5, 5, 5), pev->origin + Vector(5, 5, 5), util::ignore_monsters, this, &trace);
 
 	entityIndex = (short)ENTINDEX(trace.pHit);
 	if (0 != entityIndex)

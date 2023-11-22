@@ -77,7 +77,7 @@ void ClearMultiDamage()
 // GLOBALS USED:
 //		gMultiDamage
 
-void ApplyMultiDamage(entvars_t* pevInflictor, entvars_t* pevAttacker)
+void ApplyMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker)
 {
 	Vector vecSpot1; //where blood comes from
 	Vector vecDir;	 //direction blood should go
@@ -86,14 +86,14 @@ void ApplyMultiDamage(entvars_t* pevInflictor, entvars_t* pevAttacker)
 	if (!gMultiDamage.pEntity)
 		return;
 
-	gMultiDamage.pEntity->TakeDamage(pevInflictor, pevAttacker, gMultiDamage.amount, gMultiDamage.type);
+	gMultiDamage.pEntity->TakeDamage(inflictor, attacker, gMultiDamage.amount, gMultiDamage.type);
 }
 
 
 // GLOBALS USED:
 //		gMultiDamage
 
-void AddMultiDamage(entvars_t* pevInflictor, CBaseEntity* pEntity, float flDamage, int bitsDamageType)
+void AddMultiDamage(CBaseEntity *inflictor, CBaseEntity *attacker, CBaseEntity* pEntity, float flDamage, int bitsDamageType)
 {
 	if (!pEntity)
 		return;
@@ -102,7 +102,7 @@ void AddMultiDamage(entvars_t* pevInflictor, CBaseEntity* pEntity, float flDamag
 
 	if (pEntity != gMultiDamage.pEntity)
 	{
-		ApplyMultiDamage(pevInflictor, pevInflictor); // UNDONE: wrong attacker!
+		ApplyMultiDamage(inflictor, attacker); // UNDONE: wrong attacker!
 		gMultiDamage.pEntity = pEntity;
 		gMultiDamage.amount = 0;
 	}
@@ -117,7 +117,7 @@ SpawnBlood
 */
 void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage)
 {
-	UTIL_BloodDrips(vecSpot, g_vecAttackDir, bloodColor, (int)flDamage);
+	util::BloodDrips(vecSpot, g_vecAttackDir, bloodColor, (int)flDamage);
 }
 
 
@@ -132,7 +132,7 @@ int DamageDecal(CBaseEntity* pEntity, int bitsDamageType)
 void DecalGunshot(TraceResult* pTrace, int iBulletType)
 {
 	// Is the entity valid
-	if (!UTIL_IsValidEntity(pTrace->pHit))
+	if (!util::IsValidEntity(pTrace->pHit))
 		return;
 
 	if (VARS(pTrace->pHit)->solid == SOLID_BSP || VARS(pTrace->pHit)->movetype == MOVETYPE_PUSHSTEP)
@@ -152,15 +152,15 @@ void DecalGunshot(TraceResult* pTrace, int iBulletType)
 		case BULLET_PLAYER_357:
 		default:
 			// smoke and decal
-			UTIL_GunshotDecalTrace(pTrace, DamageDecal(pEntity, DMG_BULLET));
+			util::GunshotDecalTrace(pTrace, DamageDecal(pEntity, DMG_BULLET));
 			break;
 		case BULLET_MONSTER_12MM:
 			// smoke and decal
-			UTIL_GunshotDecalTrace(pTrace, DamageDecal(pEntity, DMG_BULLET));
+			util::GunshotDecalTrace(pTrace, DamageDecal(pEntity, DMG_BULLET));
 			break;
 		case BULLET_PLAYER_CROWBAR:
 			// wall decal
-			UTIL_DecalTrace(pTrace, DamageDecal(pEntity, DMG_CLUB));
+			util::DecalTrace(pTrace, DamageDecal(pEntity, DMG_CLUB));
 			break;
 		}
 	}
@@ -175,24 +175,24 @@ void EjectBrass(const Vector& vecOrigin, const Vector& vecVelocity, float rotati
 {
 	// FIX: when the player shoots, their gun isn't in the same position as it is on the model other players see.
 
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, vecOrigin);
-	WRITE_BYTE(TE_MODEL);
-	WRITE_COORD(vecOrigin.x);
-	WRITE_COORD(vecOrigin.y);
-	WRITE_COORD(vecOrigin.z);
-	WRITE_COORD(vecVelocity.x);
-	WRITE_COORD(vecVelocity.y);
-	WRITE_COORD(vecVelocity.z);
-	WRITE_ANGLE(rotation);
-	WRITE_SHORT(model);
-	WRITE_BYTE(soundtype);
-	WRITE_BYTE(25); // 2.5 seconds
-	MESSAGE_END();
+	MessageBegin(MSG_PVS, SVC_TEMPENTITY, vecOrigin);
+	WriteByte(TE_MODEL);
+	WriteCoord(vecOrigin.x);
+	WriteCoord(vecOrigin.y);
+	WriteCoord(vecOrigin.z);
+	WriteCoord(vecVelocity.x);
+	WriteCoord(vecVelocity.y);
+	WriteCoord(vecVelocity.z);
+	WriteAngle(rotation);
+	WriteShort(model);
+	WriteByte(soundtype);
+	WriteByte(25); // 2.5 seconds
+	MessageEnd();
 }
 
 
 // Precaches the weapon and queues the weapon info for sending to clients
-void UTIL_PrecacheOtherWeapon(const char* szClassname)
+void util::PrecacheWeapon(const char* szClassname)
 {
 	edict_t* pent;
 
@@ -229,65 +229,65 @@ void W_Precache()
 	// custom items...
 
 	// common world objects
-	UTIL_PrecacheOther("item_battery");
-	UTIL_PrecacheOther("item_healthkit");
-	UTIL_PrecacheOther("item_antidote");
-	UTIL_PrecacheOther("item_security");
-	UTIL_PrecacheOther("item_longjump");
+	util::PrecacheOther("item_battery");
+	util::PrecacheOther("item_healthkit");
+	util::PrecacheOther("item_antidote");
+	util::PrecacheOther("item_security");
+	util::PrecacheOther("item_longjump");
 
 	// shotgun
-	UTIL_PrecacheOtherWeapon("weapon_shotgun");
-	UTIL_PrecacheOther("ammo_buckshot");
+	util::PrecacheWeapon("weapon_shotgun");
+	util::PrecacheOther("ammo_buckshot");
 
 	// crowbar
-	UTIL_PrecacheOtherWeapon("weapon_crowbar");
+	util::PrecacheWeapon("weapon_crowbar");
 
 	// glock
-	UTIL_PrecacheOtherWeapon("weapon_9mmhandgun");
-	UTIL_PrecacheOther("ammo_9mmclip");
+	util::PrecacheWeapon("weapon_9mmhandgun");
+	util::PrecacheOther("ammo_9mmclip");
 
 	// mp5
-	UTIL_PrecacheOtherWeapon("weapon_9mmAR");
-	UTIL_PrecacheOther("ammo_9mmAR");
-	UTIL_PrecacheOther("ammo_ARgrenades");
+	util::PrecacheWeapon("weapon_9mmAR");
+	util::PrecacheOther("ammo_9mmAR");
+	util::PrecacheOther("ammo_ARgrenades");
 
 	// python
-	UTIL_PrecacheOtherWeapon("weapon_357");
-	UTIL_PrecacheOther("ammo_357");
+	util::PrecacheWeapon("weapon_357");
+	util::PrecacheOther("ammo_357");
 
 	// gauss
-	UTIL_PrecacheOtherWeapon("weapon_gauss");
-	UTIL_PrecacheOther("ammo_gaussclip");
+	util::PrecacheWeapon("weapon_gauss");
+	util::PrecacheOther("ammo_gaussclip");
 
 	// rpg
-	UTIL_PrecacheOtherWeapon("weapon_rpg");
-	UTIL_PrecacheOther("ammo_rpgclip");
+	util::PrecacheWeapon("weapon_rpg");
+	util::PrecacheOther("ammo_rpgclip");
 
 	// crossbow
-	UTIL_PrecacheOtherWeapon("weapon_crossbow");
-	UTIL_PrecacheOther("ammo_crossbow");
+	util::PrecacheWeapon("weapon_crossbow");
+	util::PrecacheOther("ammo_crossbow");
 
 	// egon
-	UTIL_PrecacheOtherWeapon("weapon_egon");
+	util::PrecacheWeapon("weapon_egon");
 
 	// tripmine
-	UTIL_PrecacheOtherWeapon("weapon_tripmine");
+	util::PrecacheWeapon("weapon_tripmine");
 
 	// satchel charge
-	UTIL_PrecacheOtherWeapon("weapon_satchel");
+	util::PrecacheWeapon("weapon_satchel");
 
 	// hand grenade
-	UTIL_PrecacheOtherWeapon("weapon_handgrenade");
+	util::PrecacheWeapon("weapon_handgrenade");
 
 	// squeak grenade
-	UTIL_PrecacheOtherWeapon("weapon_snark");
+	util::PrecacheWeapon("weapon_snark");
 
 	// hornetgun
-	UTIL_PrecacheOtherWeapon("weapon_hornetgun");
+	util::PrecacheWeapon("weapon_hornetgun");
 
-	if (UTIL_IsMultiplayer())
+	if (util::IsMultiplayer())
 	{
-		UTIL_PrecacheOther("weaponbox"); // container for dropped deathmatch weapons
+		util::PrecacheOther("weaponbox"); // container for dropped deathmatch weapons
 	}
 
 	g_sModelIndexFireball = PRECACHE_MODEL("sprites/zerogxplode.spr");	// fireball
@@ -365,8 +365,8 @@ void CBasePlayerWeapon::FallInit()
 	pev->movetype = MOVETYPE_TOSS;
 	pev->solid = SOLID_BBOX;
 
-	UTIL_SetOrigin(pev, pev->origin);
-	UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0)); //pointsize until it lands on the ground.
+	SetSize(g_vecZero, g_vecZero); //pointsize until it lands on the ground.
+	SetOrigin(pev->origin);
 
 	SetTouch(&CBasePlayerWeapon::DefaultTouch);
 	SetThink(&CBasePlayerWeapon::FallThink);
@@ -391,8 +391,7 @@ void CBasePlayerWeapon::FallThink()
 		// don't clatter if the gun is waiting to respawn (if it's waiting, it is invisible!)
 		if (!FNullEnt(pev->owner))
 		{
-			int pitch = 95 + RANDOM_LONG(0, 29);
-			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "items/weapondrop1.wav", 1, ATTN_NORM, 0, pitch);
+			EmitSound("items/weapondrop1.wav", CHAN_VOICE, VOL_NORM, ATTN_NORM, 95 + RANDOM_LONG(0, 29));
 		}
 
 		// lie flat
@@ -411,14 +410,14 @@ void CBasePlayerWeapon::Materialize()
 	if ((pev->effects & EF_NODRAW) != 0)
 	{
 		// changing from invisible state to visible.
-		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "items/itembk2.wav", 1, ATTN_NORM, 0, PITCH_NORM);
+		EmitSound("items/itembk2.wav", CHAN_WEAPON);
 		pev->effects &= ~EF_NODRAW;
 		pev->effects |= EF_MUZZLEFLASH;
 	}
 
 	pev->solid = SOLID_TRIGGER;
 
-	UTIL_SetOrigin(pev, pev->origin); // link into world.
+	SetOrigin(pev->origin);
 	SetTouch(&CBasePlayerWeapon::DefaultTouch);
 	SetThink(NULL);
 }
@@ -510,11 +509,11 @@ void CBasePlayerWeapon::DefaultTouch(CBaseEntity* pOther)
 		AttachToPlayer(pPlayer);
 		if (!pPlayer->m_bIsSpawning)
 		{
-			EMIT_SOUND(ENT(pPlayer->pev), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM);
+			pPlayer->EmitSound("items/gunpickup2.wav", CHAN_ITEM);
 		}
 	}
 
-	SUB_UseTargets(pOther, USE_TOGGLE, 0); // UNDONE: when should this happen?
+	UseTargets(pOther, USE_TOGGLE, 0); // UNDONE: when should this happen?
 }
 
 void CBasePlayerWeapon::DestroyWeapon()
@@ -596,15 +595,15 @@ void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int body)
 	if (skiplocal && ENGINE_CANSKIP(m_pPlayer->edict()))
 		return;
 
-	MESSAGE_BEGIN(MSG_ONE, SVC_WEAPONANIM, NULL, m_pPlayer->pev);
-	WRITE_BYTE(iAnim);	   // sequence number
-	WRITE_BYTE(pev->body); // weaponmodel bodygroup.
-	MESSAGE_END();
+	MessageBegin(MSG_ONE, SVC_WEAPONANIM, m_pPlayer);
+	WriteByte(iAnim);	   // sequence number
+	WriteByte(pev->body); // weaponmodel bodygroup.
+	MessageEnd();
 }
 
 void CBasePlayerWeapon::PlayWeaponSound(int iChannel, const char* szSound, float flVolume, float flAttn, int iFlags, float flPitch)
 {
-	EMIT_SOUND_PREDICTED(m_pPlayer->edict(), iChannel, szSound, flVolume, flAttn, iFlags, flPitch);
+	m_pPlayer->EmitSoundPredicted(szSound, iChannel, flVolume, flAttn, flPitch, iFlags);
 }
 
 bool CBasePlayerWeapon::AddPrimaryAmmo(CBasePlayerWeapon* origin, int iCount, int iType, int iMaxClip, int iMaxCarry)
@@ -636,7 +635,7 @@ bool CBasePlayerWeapon::AddPrimaryAmmo(CBasePlayerWeapon* origin, int iCount, in
 		{
 			// play the "got ammo" sound only if we gave some ammo to a player that already had this gun.
 			// if the player is just getting this gun for the first time, DefaultTouch will play the "picked up gun" sound for us.
-			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
+			EmitSound("items/9mmclip1.wav", CHAN_ITEM);
 		}
 	}
 
@@ -652,7 +651,7 @@ bool CBasePlayerWeapon::AddSecondaryAmmo(int iCount, int iType, int iMax)
 
 	if (iIdAmmo > AMMO_NONE)
 	{
-		EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
+		EmitSound("items/9mmclip1.wav", CHAN_ITEM);
 	}
 	return iIdAmmo > 0 ? true : false;
 }
@@ -759,8 +758,8 @@ bool CBasePlayerAmmo::Spawn()
 {
 	pev->movetype = MOVETYPE_TOSS;
 	pev->solid = SOLID_TRIGGER;
-	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 16));
-	UTIL_SetOrigin(pev, pev->origin);
+	SetSize(Vector(-16, -16, 0), Vector(16, 16, 16));
+	SetOrigin(pev->origin);
 
 	SetTouch(&CBasePlayerAmmo::DefaultTouch);
 
@@ -772,7 +771,7 @@ CBaseEntity* CBasePlayerAmmo::Respawn()
 	pev->effects |= EF_NODRAW;
 	SetTouch(NULL);
 
-	UTIL_SetOrigin(pev, g_pGameRules->VecAmmoRespawnSpot(this)); // move to wherever I'm supposed to repawn.
+	SetOrigin(g_pGameRules->VecAmmoRespawnSpot(this)); // move to wherever I'm supposed to repawn.
 
 	SetThink(&CBasePlayerAmmo::Materialize);
 	pev->nextthink = g_pGameRules->FlAmmoRespawnTime(this);
@@ -785,7 +784,7 @@ void CBasePlayerAmmo::Materialize()
 	if ((pev->effects & EF_NODRAW) != 0)
 	{
 		// changing from invisible state to visible.
-		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "items/itembk2.wav", 1, ATTN_NORM, 0, PITCH_NORM);
+		EmitSound("items/itembk2.wav", CHAN_WEAPON);
 		pev->effects &= ~EF_NODRAW;
 		pev->effects |= EF_MUZZLEFLASH;
 	}
@@ -802,7 +801,7 @@ void CBasePlayerAmmo::DefaultTouch(CBaseEntity* pOther)
 
 	if (AddAmmo(pOther))
 	{
-		EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
+		EmitSound("items/9mmclip1.wav", CHAN_ITEM);
 
 		if (g_pGameRules->AmmoShouldRespawn(this) == GR_AMMO_RESPAWN_YES)
 		{
@@ -955,9 +954,9 @@ bool CWeaponBox::Spawn()
 	pev->movetype = MOVETYPE_TOSS;
 	pev->solid = SOLID_TRIGGER;
 
-	UTIL_SetSize(pev, g_vecZero, g_vecZero);
+	SetSize(g_vecZero, g_vecZero);
 
-	SET_MODEL(ENT(pev), "models/w_weaponbox.mdl");
+	SetModel("models/w_weaponbox.mdl");
 
 	return true;
 }
@@ -1043,7 +1042,7 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 		}
 	}
 
-	EMIT_SOUND(pOther->edict(), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM);
+	pOther->EmitSound("items/gunpickup2.wav", CHAN_ITEM);
 	SetTouch(NULL);
 	Remove();
 }

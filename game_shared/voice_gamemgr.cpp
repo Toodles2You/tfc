@@ -46,7 +46,7 @@ static CBasePlayer* FindPlayerByName(const char* pTestName)
 {
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		CBaseEntity* pEnt = UTIL_PlayerByIndex(i);
+		CBaseEntity* pEnt = util::PlayerByIndex(i);
 		if (pEnt)
 		{
 			const char* pNetName = STRING(pEnt->pev->netname);
@@ -216,15 +216,15 @@ void CVoiceGameMgr::UpdateMasks()
 
 	for (int iClient = 0; iClient < m_nMaxPlayers; iClient++)
 	{
-		CBaseEntity* pEnt = UTIL_PlayerByIndex(iClient + 1);
+		CBaseEntity* pEnt = util::PlayerByIndex(iClient + 1);
 		if (!pEnt || !pEnt->IsPlayer())
 			continue;
 
 		// Request the state of their "VModEnable" cvar.
 		if (g_bWantModEnable[iClient])
 		{
-			MESSAGE_BEGIN(MSG_ONE, m_msgRequestState, NULL, pEnt->pev);
-			MESSAGE_END();
+			MessageBegin(MSG_ONE, m_msgRequestState, pEnt);
+			MessageEnd();
 		}
 
 		CBasePlayer* pPlayer = (CBasePlayer*)pEnt;
@@ -235,7 +235,7 @@ void CVoiceGameMgr::UpdateMasks()
 			// Build a mask of who they can hear based on the game rules.
 			for (int iOtherClient = 0; iOtherClient < m_nMaxPlayers; iOtherClient++)
 			{
-				CBaseEntity* pEnt = UTIL_PlayerByIndex(iOtherClient + 1);
+				CBaseEntity* pEnt = util::PlayerByIndex(iOtherClient + 1);
 				if (pEnt && (bAllTalk || m_pHelper->CanPlayerHearPlayer(pPlayer, (CBasePlayer*)pEnt)))
 				{
 					gameRulesMask[iOtherClient] = true;
@@ -250,14 +250,14 @@ void CVoiceGameMgr::UpdateMasks()
 			g_SentGameRulesMasks[iClient] = gameRulesMask;
 			g_SentBanMasks[iClient] = g_BanMasks[iClient];
 
-			MESSAGE_BEGIN(MSG_ONE, m_msgPlayerVoiceMask, NULL, pPlayer->pev);
+			MessageBegin(MSG_ONE, m_msgPlayerVoiceMask, pPlayer);
 			int dw;
 			for (dw = 0; dw < VOICE_MAX_PLAYERS_DW; dw++)
 			{
-				WRITE_LONG(gameRulesMask.GetDWord(dw));
-				WRITE_LONG(g_BanMasks[iClient].GetDWord(dw));
+				WriteLong(gameRulesMask.GetDWord(dw));
+				WriteLong(g_BanMasks[iClient].GetDWord(dw));
 			}
-			MESSAGE_END();
+			MessageEnd();
 		}
 
 		// Tell the engine.

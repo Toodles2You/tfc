@@ -24,6 +24,7 @@
 #include "util.h"
 #include "cbase.h"
 
+#define SF_LIGHT_START_OFF 1
 
 
 class CLight : public CPointEntity
@@ -178,7 +179,7 @@ bool CEnvLight::KeyValue(KeyValueData* pkvd)
 bool CEnvLight::Spawn()
 {
 	char szVector[64];
-	UTIL_MakeAimVectors(pev->angles);
+	util::MakeAimVectors(pev->angles);
 
 	sprintf(szVector, "%f", gpGlobals->v_forward.x);
 	CVAR_SET_STRING("sv_skyvec_x", szVector);

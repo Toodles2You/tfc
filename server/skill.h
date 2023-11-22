@@ -70,4 +70,4 @@ struct skilldata_t
 	float plrArm;
 };
 
-inline DLL_GLOBAL skilldata_t gSkillData;
+inline skilldata_t gSkillData;

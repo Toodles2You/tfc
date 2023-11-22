@@ -211,7 +211,7 @@ void CMultiSource::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE u
 		USE_TYPE useType = USE_TOGGLE;
 		if (!FStringNull(m_globalstate))
 			useType = USE_ON;
-		SUB_UseTargets(NULL, useType, 0);
+		UseTargets(NULL, useType, 0);
 	}
 }
 
@@ -437,7 +437,7 @@ bool CBaseButton::KeyValue(KeyValueData* pkvd)
 //
 // ButtonShot
 //
-bool CBaseButton::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
+bool CBaseButton::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType)
 {
 	BUTTON_CODE code = ButtonResponseToTouch();
 
@@ -446,17 +446,17 @@ bool CBaseButton::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	// Temporarily disable the touch function, until movement is finished.
 	SetTouch(NULL);
 
-	m_hActivator = CBaseEntity::Instance(pevAttacker);
+	m_hActivator = attacker;
 	if (m_hActivator == NULL)
 		return false;
 
 	if (code == BUTTON_RETURN)
 	{
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, (char*)STRING(pev->noise), 1, ATTN_NORM);
+		EmitSound(STRING(pev->noise), CHAN_VOICE);
 
 		// Toggle buttons fire when they get back to their "home" position
 		if ((pev->spawnflags & SF_BUTTON_TOGGLE) == 0)
-			SUB_UseTargets(m_hActivator, USE_TOGGLE, 0);
+			UseTargets(m_hActivator, USE_TOGGLE, 0);
 		ButtonReturn();
 	}
 	else // code == BUTTON_ACTIVATE
@@ -488,11 +488,11 @@ bool CBaseButton::Spawn()
 		pev->nextthink = gpGlobals->time + 0.5; // no hurry, make sure everything else spawns
 	}
 
-	SetMovedir(pev);
+	pev->movedir = util::SetMovedir(pev->angles);
 
 	pev->movetype = MOVETYPE_PUSH;
 	pev->solid = SOLID_BSP;
-	SET_MODEL(ENT(pev), STRING(pev->model));
+	SetModel(STRING(pev->model));
 
 	if (pev->speed == 0)
 		pev->speed = 40;
@@ -621,33 +621,24 @@ const char* ButtonSound(int sound)
 // Makes flagged buttons spark when turned off
 //
 
-void DoSpark(entvars_t* pev, const Vector& location)
+static void DoSpark(CBaseEntity *entity, const Vector& location)
 {
-	Vector tmp = location + pev->size * 0.5;
-	UTIL_Sparks(tmp);
+	Vector tmp = location + entity->pev->size * 0.5;
+	util::Sparks(tmp);
 
 	float flVolume = RANDOM_FLOAT(0.25, 0.75) * 0.4; //random volume range
+	const char *sample;
 	switch ((int)(RANDOM_FLOAT(0, 1) * 6))
 	{
-	case 0:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "buttons/spark1.wav", flVolume, ATTN_NORM);
-		break;
-	case 1:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "buttons/spark2.wav", flVolume, ATTN_NORM);
-		break;
-	case 2:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "buttons/spark3.wav", flVolume, ATTN_NORM);
-		break;
-	case 3:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "buttons/spark4.wav", flVolume, ATTN_NORM);
-		break;
-	case 4:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "buttons/spark5.wav", flVolume, ATTN_NORM);
-		break;
-	case 5:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "buttons/spark6.wav", flVolume, ATTN_NORM);
-		break;
+	case 0: sample ="buttons/spark1.wav"; break;
+	case 1: sample ="buttons/spark2.wav"; break;
+	case 2: sample ="buttons/spark3.wav"; break;
+	case 3: sample ="buttons/spark4.wav"; break;
+	case 4: sample ="buttons/spark5.wav"; break;
+	case 5: sample ="buttons/spark6.wav"; break;
 	}
+
+	entity->EmitSound(sample, CHAN_VOICE, flVolume);
 }
 
 void CBaseButton::ButtonSpark()
@@ -655,7 +646,7 @@ void CBaseButton::ButtonSpark()
 	SetThink(&CBaseButton::ButtonSpark);
 	pev->nextthink = pev->ltime + (0.1 + RANDOM_FLOAT(0, 1.5)); // spark again at random interval
 
-	DoSpark(pev, pev->absmin);
+	DoSpark(this, pev->absmin);
 }
 
 
@@ -673,9 +664,8 @@ void CBaseButton::ButtonUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_T
 	{
 		if (!m_fStayPushed && FBitSet(pev->spawnflags, SF_BUTTON_TOGGLE))
 		{
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, (char*)STRING(pev->noise), 1, ATTN_NORM);
+			EmitSound(STRING(pev->noise), CHAN_VOICE);
 
-			//SUB_UseTargets( m_eoActivator );
 			ButtonReturn();
 		}
 	}
@@ -722,10 +712,10 @@ void CBaseButton::ButtonTouch(CBaseEntity* pOther)
 	if (code == BUTTON_NOTHING)
 		return;
 
-	if (!UTIL_IsMasterTriggered(m_sMaster, pOther))
+	if (!util::IsMasterTriggered(m_sMaster, pOther))
 	{
 		// play button locked sound
-		PlayLockSounds(pev, &m_ls, true, true);
+		PlayLockSounds(this, &m_ls, true, true);
 		return;
 	}
 
@@ -734,8 +724,8 @@ void CBaseButton::ButtonTouch(CBaseEntity* pOther)
 
 	if (code == BUTTON_RETURN)
 	{
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, (char*)STRING(pev->noise), 1, ATTN_NORM);
-		SUB_UseTargets(m_hActivator, USE_TOGGLE, 0);
+		EmitSound(STRING(pev->noise), CHAN_VOICE);
+		UseTargets(m_hActivator, USE_TOGGLE, 0);
 		ButtonReturn();
 	}
 	else // code == BUTTON_ACTIVATE
@@ -747,18 +737,18 @@ void CBaseButton::ButtonTouch(CBaseEntity* pOther)
 //
 void CBaseButton::ButtonActivate()
 {
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, (char*)STRING(pev->noise), 1, ATTN_NORM);
+	EmitSound(STRING(pev->noise), CHAN_VOICE);
 
-	if (!UTIL_IsMasterTriggered(m_sMaster, m_hActivator))
+	if (!util::IsMasterTriggered(m_sMaster, m_hActivator))
 	{
 		// button is locked, play locked sound
-		PlayLockSounds(pev, &m_ls, true, true);
+		PlayLockSounds(this, &m_ls, true, true);
 		return;
 	}
 	else
 	{
 		// button is unlocked, play unlocked sound
-		PlayLockSounds(pev, &m_ls, false, true);
+		PlayLockSounds(this, &m_ls, false, true);
 	}
 
 	ASSERT(m_toggle_state == TS_AT_BOTTOM);
@@ -778,7 +768,7 @@ void CBaseButton::TriggerAndWait()
 {
 	ASSERT(m_toggle_state == TS_GOING_UP);
 
-	if (!UTIL_IsMasterTriggered(m_sMaster, m_hActivator))
+	if (!util::IsMasterTriggered(m_sMaster, m_hActivator))
 		return;
 
 	m_toggle_state = TS_AT_TOP;
@@ -804,7 +794,7 @@ void CBaseButton::TriggerAndWait()
 	pev->frame = 1; // use alternate textures
 
 
-	SUB_UseTargets(m_hActivator, USE_TOGGLE, 0);
+	UseTargets(m_hActivator, USE_TOGGLE, 0);
 }
 
 
@@ -836,9 +826,7 @@ void CBaseButton::ButtonBackHome()
 
 	if (FBitSet(pev->spawnflags, SF_BUTTON_TOGGLE))
 	{
-		//EMIT_SOUND(ENT(pev), CHAN_VOICE, (char*)STRING(pev->noise), 1, ATTN_NORM);
-
-		SUB_UseTargets(m_hActivator, USE_TOGGLE, 0);
+		UseTargets(m_hActivator, USE_TOGGLE, 0);
 	}
 
 
@@ -917,7 +905,7 @@ bool CRotButton::Spawn()
 	else
 		pev->solid = SOLID_BSP;
 
-	SET_MODEL(ENT(pev), STRING(pev->model));
+	SetModel(STRING(pev->model));
 
 	if (pev->speed == 0)
 		pev->speed = 40;
@@ -1033,8 +1021,8 @@ bool CMomentaryRotButton::Spawn()
 		pev->solid = SOLID_NOT;
 
 	pev->movetype = MOVETYPE_PUSH;
-	UTIL_SetOrigin(pev, pev->origin);
-	SET_MODEL(ENT(pev), STRING(pev->model));
+	SetOrigin(pev->origin);
+	SetModel(STRING(pev->model));
 
 	const char* pszSound = ButtonSound(m_sounds);
 	PRECACHE_SOUND(pszSound);
@@ -1062,7 +1050,7 @@ bool CMomentaryRotButton::KeyValue(KeyValueData* pkvd)
 
 void CMomentaryRotButton::PlaySound()
 {
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, (char*)STRING(pev->noise), 1, ATTN_NORM);
+	EmitSound(STRING(pev->noise), CHAN_VOICE);
 }
 
 // BUGBUG: This design causes a latentcy.  When the button is retriggered, the first impulse
@@ -1296,7 +1284,7 @@ bool CEnvSpark::KeyValue(KeyValueData* pkvd)
 void EXPORT CEnvSpark::SparkThink()
 {
 	pev->nextthink = gpGlobals->time + 0.1 + RANDOM_FLOAT(0, m_flDelay);
-	DoSpark(pev, pev->origin);
+	DoSpark(this, pev->origin);
 }
 
 void EXPORT CEnvSpark::SparkStart(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
@@ -1320,7 +1308,7 @@ class CButtonTarget : public CBaseEntity
 public:
 	bool Spawn() override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
-	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
+	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
 	int ObjectCaps() override;
 };
 
@@ -1330,7 +1318,7 @@ bool CButtonTarget::Spawn()
 {
 	pev->movetype = MOVETYPE_PUSH;
 	pev->solid = SOLID_BSP;
-	SET_MODEL(ENT(pev), STRING(pev->model));
+	SetModel(STRING(pev->model));
 	pev->takedamage = DAMAGE_YES;
 
 	if (FBitSet(pev->spawnflags, SF_BTARGET_ON))
@@ -1345,9 +1333,9 @@ void CButtonTarget::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 		return;
 	pev->frame = 0 != pev->frame ? 0 : 1;
 	if (0 != pev->frame)
-		SUB_UseTargets(pActivator, USE_ON, 0);
+		UseTargets(pActivator, USE_ON, 0);
 	else
-		SUB_UseTargets(pActivator, USE_OFF, 0);
+		UseTargets(pActivator, USE_OFF, 0);
 }
 
 
@@ -1362,9 +1350,9 @@ int CButtonTarget::ObjectCaps()
 }
 
 
-bool CButtonTarget::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
+bool CButtonTarget::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType)
 {
-	Use(Instance(pevAttacker), this, USE_TOGGLE, 0);
+	Use(attacker, this, USE_TOGGLE, 0);
 
 	return true;
 }

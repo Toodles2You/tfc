@@ -767,3 +767,11 @@ typedef struct
 	edict_t* ent;	// entity the surface is on
 	int hitgroup;	// 0 == generic, non zero is specific body part
 } trace_t;
+
+typedef enum
+{
+	USE_OFF = 0,
+	USE_ON = 1,
+	USE_SET = 2,
+	USE_TOGGLE = 3
+} USE_TYPE;

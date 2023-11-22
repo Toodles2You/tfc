@@ -50,8 +50,8 @@ bool CShower::Spawn()
 	pev->gravity = 0.5;
 	pev->nextthink = gpGlobals->time + 0.1;
 	pev->solid = SOLID_NOT;
-	SET_MODEL(edict(), "models/grenade.mdl"); // Need a model, just use the grenade, we don't draw it anyway
-	UTIL_SetSize(pev, g_vecZero, g_vecZero);
+	SetModel("models/grenade.mdl"); // Need a model, just use the grenade, we don't draw it anyway
+	SetSize(g_vecZero, g_vecZero);
 	pev->effects |= EF_NODRAW;
 	pev->speed = RANDOM_FLOAT(0.5, 1.5);
 
@@ -63,7 +63,7 @@ bool CShower::Spawn()
 
 void CShower::Think()
 {
-	UTIL_Sparks(pev->origin);
+	util::Sparks(pev->origin);
 
 	pev->speed -= 0.1;
 	if (pev->speed > 0)
@@ -151,7 +151,7 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 
 	vecSpot = pev->origin + Vector(0, 0, 8);
 
-	UTIL_TraceLine(vecSpot, vecSpot + Vector(0, 0, -40), ignore_monsters, ENT(pev), &tr);
+	util::TraceLine(vecSpot, vecSpot + Vector(0, 0, -40), util::ignore_monsters, this, &tr);
 
 	// Pull out of the wall a bit
 	if (tr.flFraction != 1.0)
@@ -168,46 +168,46 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	{
 		if (RANDOM_FLOAT(0, 1) < 0.5)
 		{
-			UTIL_DecalTrace(&tr, DECAL_SCORCH1);
+			util::DecalTrace(&tr, DECAL_SCORCH1);
 		}
 		else
 		{
-			UTIL_DecalTrace(&tr, DECAL_SCORCH2);
+			util::DecalTrace(&tr, DECAL_SCORCH2);
 		}
 	}
 
 	// draw fireball
 	if ((pev->spawnflags & SF_ENVEXPLOSION_NOFIREBALL) == 0)
 	{
-		MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
-		WRITE_BYTE(TE_EXPLOSION);
-		WRITE_COORD(pev->origin.x);
-		WRITE_COORD(pev->origin.y);
-		WRITE_COORD(pev->origin.z);
-		WRITE_SHORT(g_sModelIndexFireball);
-		WRITE_BYTE((byte)m_spriteScale); // scale * 10
-		WRITE_BYTE(15);					 // framerate
-		WRITE_BYTE(TE_EXPLFLAG_NONE);
-		MESSAGE_END();
+		MessageBegin(MSG_PAS, SVC_TEMPENTITY, pev->origin);
+		WriteByte(TE_EXPLOSION);
+		WriteCoord(pev->origin.x);
+		WriteCoord(pev->origin.y);
+		WriteCoord(pev->origin.z);
+		WriteShort(g_sModelIndexFireball);
+		WriteByte((byte)m_spriteScale); // scale * 10
+		WriteByte(15);					 // framerate
+		WriteByte(TE_EXPLFLAG_NONE);
+		MessageEnd();
 	}
 	else
 	{
-		MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
-		WRITE_BYTE(TE_EXPLOSION);
-		WRITE_COORD(pev->origin.x);
-		WRITE_COORD(pev->origin.y);
-		WRITE_COORD(pev->origin.z);
-		WRITE_SHORT(g_sModelIndexFireball);
-		WRITE_BYTE(0);	// no sprite
-		WRITE_BYTE(15); // framerate
-		WRITE_BYTE(TE_EXPLFLAG_NONE);
-		MESSAGE_END();
+		MessageBegin(MSG_PAS, SVC_TEMPENTITY, pev->origin);
+		WriteByte(TE_EXPLOSION);
+		WriteCoord(pev->origin.x);
+		WriteCoord(pev->origin.y);
+		WriteCoord(pev->origin.z);
+		WriteShort(g_sModelIndexFireball);
+		WriteByte(0);	// no sprite
+		WriteByte(15); // framerate
+		WriteByte(TE_EXPLFLAG_NONE);
+		MessageEnd();
 	}
 
 	// do damage
 	if ((pev->spawnflags & SF_ENVEXPLOSION_NODAMAGE) == 0)
 	{
-		RadiusDamage(pev->origin, pev, pev, m_iMagnitude, m_iMagnitude * 2.5, CLASS_NONE, DMG_BLAST);
+		RadiusDamage(pev->origin, this, this, m_iMagnitude, m_iMagnitude * 2.5, CLASS_NONE, DMG_BLAST);
 	}
 
 	SetThink(&CEnvExplosion::Smoke);
@@ -229,15 +229,15 @@ void CEnvExplosion::Smoke()
 {
 	if ((pev->spawnflags & SF_ENVEXPLOSION_NOSMOKE) == 0)
 	{
-		MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
-		WRITE_BYTE(TE_SMOKE);
-		WRITE_COORD(pev->origin.x);
-		WRITE_COORD(pev->origin.y);
-		WRITE_COORD(pev->origin.z);
-		WRITE_SHORT(g_sModelIndexSmoke);
-		WRITE_BYTE((byte)m_spriteScale); // scale * 10
-		WRITE_BYTE(12);					 // framerate
-		MESSAGE_END();
+		MessageBegin(MSG_PAS, SVC_TEMPENTITY, pev->origin);
+		WriteByte(TE_SMOKE);
+		WriteCoord(pev->origin.x);
+		WriteCoord(pev->origin.y);
+		WriteCoord(pev->origin.z);
+		WriteShort(g_sModelIndexSmoke);
+		WriteByte((byte)m_spriteScale); // scale * 10
+		WriteByte(12);					 // framerate
+		MessageEnd();
 	}
 
 	if ((pev->spawnflags & SF_ENVEXPLOSION_REPEATABLE) == 0)

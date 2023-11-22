@@ -44,13 +44,13 @@ IMPLEMENT_SAVERESTORE(CHornet, CBaseAnimating);
 //=========================================================
 // don't let hornets gib, ever.
 //=========================================================
-bool CHornet::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
+bool CHornet::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType)
 {
 	// filter these bits a little.
 	bitsDamageType &= ~(DMG_ALWAYSGIB);
 	bitsDamageType |= DMG_NEVERGIB;
 
-	return CBaseAnimating::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
+	return CBaseAnimating::TakeDamage(inflictor, attacker, flDamage, bitsDamageType);
 }
 
 //=========================================================
@@ -65,7 +65,7 @@ bool CHornet::Spawn()
 	pev->flags |= FL_MONSTER;
 	pev->health = 1; // weak!
 
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		// hornets don't live as long in multiplayer
 		m_flStopAttack = gpGlobals->time + 3.5;
@@ -88,8 +88,8 @@ bool CHornet::Spawn()
 		m_flFlySpeed = HORNET_ORANGE_SPEED;
 	}
 
-	SET_MODEL(ENT(pev), "models/hornet.mdl");
-	UTIL_SetSize(pev, Vector(-4, -4, -4), Vector(4, 4, 4));
+	SetModel("models/hornet.mdl");
+	SetSize(Vector(-4, -4, -4), Vector(4, 4, 4));
 
 	SetTouch(&CHornet::DieTouch);
 	SetThink(&CHornet::StartTrack);
@@ -210,43 +210,43 @@ b14
 
 old colors
 		case HORNET_TYPE_RED:
-			WRITE_BYTE( 255 );   // r, g, b
-			WRITE_BYTE( 128 );   // r, g, b
-			WRITE_BYTE( 0 );   // r, g, b
+			WriteByte( 255 );   // r, g, b
+			WriteByte( 128 );   // r, g, b
+			WriteByte( 0 );   // r, g, b
 			break;
 		case HORNET_TYPE_ORANGE:
-			WRITE_BYTE( 0   );   // r, g, b
-			WRITE_BYTE( 100 );   // r, g, b
-			WRITE_BYTE( 255 );   // r, g, b
+			WriteByte( 0   );   // r, g, b
+			WriteByte( 100 );   // r, g, b
+			WriteByte( 255 );   // r, g, b
 			break;
 	
 */
 
 	// trail
-	MESSAGE_BEGIN(MSG_BROADCAST, SVC_TEMPENTITY);
-	WRITE_BYTE(TE_BEAMFOLLOW);
-	WRITE_SHORT(entindex());   // entity
-	WRITE_SHORT(iHornetTrail); // model
-	WRITE_BYTE(10);			   // life
-	WRITE_BYTE(2);			   // width
+	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte(TE_BEAMFOLLOW);
+	WriteShort(entindex());   // entity
+	WriteShort(iHornetTrail); // model
+	WriteByte(10);			   // life
+	WriteByte(2);			   // width
 
 	switch (m_iHornetType)
 	{
 	case HORNET_TYPE_RED:
-		WRITE_BYTE(179); // r, g, b
-		WRITE_BYTE(39);	 // r, g, b
-		WRITE_BYTE(14);	 // r, g, b
+		WriteByte(179); // r, g, b
+		WriteByte(39);	 // r, g, b
+		WriteByte(14);	 // r, g, b
 		break;
 	case HORNET_TYPE_ORANGE:
-		WRITE_BYTE(255); // r, g, b
-		WRITE_BYTE(128); // r, g, b
-		WRITE_BYTE(0);	 // r, g, b
+		WriteByte(255); // r, g, b
+		WriteByte(128); // r, g, b
+		WriteByte(0);	 // r, g, b
 		break;
 	}
 
-	WRITE_BYTE(128); // brightness
+	WriteByte(128); // brightness
 
-	MESSAGE_END();
+	MessageEnd();
 }
 
 //=========================================================
@@ -297,13 +297,13 @@ void CHornet::TrackTarget()
 		switch (RANDOM_LONG(0, 2))
 		{
 		case 0:
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "hornet/ag_buzz1.wav", HORNET_BUZZ_VOLUME, ATTN_NORM);
+			EmitSound("hornet/ag_buzz1.wav", CHAN_VOICE, HORNET_BUZZ_VOLUME);
 			break;
 		case 1:
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "hornet/ag_buzz2.wav", HORNET_BUZZ_VOLUME, ATTN_NORM);
+			EmitSound("hornet/ag_buzz2.wav", CHAN_VOICE, HORNET_BUZZ_VOLUME);
 			break;
 		case 2:
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "hornet/ag_buzz3.wav", HORNET_BUZZ_VOLUME, ATTN_NORM);
+			EmitSound("hornet/ag_buzz3.wav", CHAN_VOICE, HORNET_BUZZ_VOLUME);
 			break;
 		}
 	}
@@ -336,38 +336,32 @@ void CHornet::TrackTarget()
 		break;
 	}
 
-	pev->angles = UTIL_VecToAngles(pev->velocity);
+	pev->angles = util::VecToAngles(pev->velocity);
 
 	pev->solid = SOLID_BBOX;
 
 	// if hornet is close to the enemy, jet in a straight line for a half second.
 	// (only in the single player game)
-	if (m_hEnemy != NULL && !UTIL_IsDeathmatch())
+	if (m_hEnemy != NULL && !util::IsDeathmatch())
 	{
 		if (flDelta >= 0.4 && (pev->origin - m_vecEnemyLKP).Length() <= 300)
 		{
-			MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
-			WRITE_BYTE(TE_SPRITE);
-			WRITE_COORD(pev->origin.x); // pos
-			WRITE_COORD(pev->origin.y);
-			WRITE_COORD(pev->origin.z);
-			WRITE_SHORT(iHornetPuff); // model
-			// WRITE_BYTE( 0 );				// life * 10
-			WRITE_BYTE(2);	 // size * 10
-			WRITE_BYTE(128); // brightness
-			MESSAGE_END();
+			MessageBegin(MSG_PVS, SVC_TEMPENTITY, pev->origin);
+			WriteByte(TE_SPRITE);
+			WriteCoord(pev->origin.x); // pos
+			WriteCoord(pev->origin.y);
+			WriteCoord(pev->origin.z);
+			WriteShort(iHornetPuff); // model
+			// WriteByte( 0 );				// life * 10
+			WriteByte(2);	 // size * 10
+			WriteByte(128); // brightness
+			MessageEnd();
 
 			switch (RANDOM_LONG(0, 2))
 			{
-			case 0:
-				EMIT_SOUND(ENT(pev), CHAN_VOICE, "hornet/ag_buzz1.wav", HORNET_BUZZ_VOLUME, ATTN_NORM);
-				break;
-			case 1:
-				EMIT_SOUND(ENT(pev), CHAN_VOICE, "hornet/ag_buzz2.wav", HORNET_BUZZ_VOLUME, ATTN_NORM);
-				break;
-			case 2:
-				EMIT_SOUND(ENT(pev), CHAN_VOICE, "hornet/ag_buzz3.wav", HORNET_BUZZ_VOLUME, ATTN_NORM);
-				break;
+			case 0: EmitSound("hornet/ag_buzz1.wav", CHAN_VOICE, HORNET_BUZZ_VOLUME); break;
+			case 1: EmitSound("hornet/ag_buzz2.wav", CHAN_VOICE, HORNET_BUZZ_VOLUME); break;
+			case 2: EmitSound("hornet/ag_buzz3.wav", CHAN_VOICE, HORNET_BUZZ_VOLUME); break;
 			}
 			pev->velocity = pev->velocity * 2;
 			pev->nextthink = gpGlobals->time + 1.0;
@@ -420,18 +414,12 @@ void CHornet::DieTouch(CBaseEntity* pOther)
 
 		switch (RANDOM_LONG(0, 2))
 		{ // buzz when you plug someone
-		case 0:
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "hornet/ag_hornethit1.wav", 1, ATTN_NORM);
-			break;
-		case 1:
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "hornet/ag_hornethit2.wav", 1, ATTN_NORM);
-			break;
-		case 2:
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "hornet/ag_hornethit3.wav", 1, ATTN_NORM);
-			break;
+		case 0: EmitSound("hornet/ag_hornethit1.wav", CHAN_VOICE); break;
+		case 1: EmitSound("hornet/ag_hornethit2.wav", CHAN_VOICE); break;
+		case 2: EmitSound("hornet/ag_hornethit3.wav", CHAN_VOICE); break;
 		}
 
-		pOther->TakeDamage(pev, VARS(pev->owner), pev->dmg, DMG_BULLET);
+		pOther->TakeDamage(this, CBaseEntity::Instance(pev->owner), pev->dmg, DMG_BULLET);
 	}
 
 	pev->modelindex = 0; // so will disappear for the 0.1 secs we wait until NEXTTHINK gets rid

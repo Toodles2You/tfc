@@ -42,16 +42,8 @@ class CGrenade : public CBaseAnimating
 public:
 	bool Spawn() override;
 
-	typedef enum
-	{
-		SATCHEL_DETONATE = 0,
-		SATCHEL_RELEASE
-	} SATCHELCODE;
-
-	static CGrenade* ShootTimed(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time);
-	static CGrenade* ShootContact(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity);
-	static CGrenade* ShootSatchelCharge(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity);
-	static void UseSatchelCharges(entvars_t* pevOwner, SATCHELCODE code);
+	static CGrenade* ShootTimed(CBaseEntity* owner, Vector vecStart, Vector vecVelocity, float time);
+	static CGrenade* ShootContact(CBaseEntity* owner, Vector vecStart, Vector vecVelocity);
 
 	void Explode(Vector vecSrc, Vector vecAim);
 	void Explode(TraceResult* pTrace, int bitsDamageType);
@@ -66,7 +58,7 @@ public:
 
 	virtual void BounceSound();
 	int BloodColor() override { return DONT_BLEED; }
-	void Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType) override;
+	void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType) override;
 
 	float m_flNextAttack;
 };
@@ -332,7 +324,7 @@ class DLLClassName : public CBasePlayerAmmo \
 	bool Spawn() override \
 	{ \
 		Precache(); \
-		SET_MODEL(ENT(pev), modelName); \
+		SetModel(modelName); \
 		return CBasePlayerAmmo::Spawn(); \
 	} \
 	void Precache() override \
@@ -346,25 +338,25 @@ class DLLClassName : public CBasePlayerAmmo \
 }; \
 LINK_ENTITY_TO_CLASS(mapClassName, DLLClassName) \
 
-inline DLL_GLOBAL short g_sModelIndexLaser; // holds the index for the laser beam
-constexpr DLL_GLOBAL const char* g_pModelNameLaser = "sprites/laserbeam.spr";
+inline short g_sModelIndexLaser; // holds the index for the laser beam
+constexpr const char* g_pModelNameLaser = "sprites/laserbeam.spr";
 
-inline DLL_GLOBAL short g_sModelIndexLaserDot;	 // holds the index for the laser beam dot
-inline DLL_GLOBAL short g_sModelIndexFireball;	 // holds the index for the fireball
-inline DLL_GLOBAL short g_sModelIndexSmoke;		 // holds the index for the smoke cloud
-inline DLL_GLOBAL short g_sModelIndexWExplosion; // holds the index for the underwater explosion
-inline DLL_GLOBAL short g_sModelIndexBubbles;	 // holds the index for the bubbles model
-inline DLL_GLOBAL short g_sModelIndexBloodDrop;	 // holds the sprite index for blood drops
-inline DLL_GLOBAL short g_sModelIndexBloodSpray; // holds the sprite index for blood spray (bigger)
+inline short g_sModelIndexLaserDot;	 // holds the index for the laser beam dot
+inline short g_sModelIndexFireball;	 // holds the index for the fireball
+inline short g_sModelIndexSmoke;		 // holds the index for the smoke cloud
+inline short g_sModelIndexWExplosion; // holds the index for the underwater explosion
+inline short g_sModelIndexBubbles;	 // holds the index for the bubbles model
+inline short g_sModelIndexBloodDrop;	 // holds the sprite index for blood drops
+inline short g_sModelIndexBloodSpray; // holds the sprite index for blood spray (bigger)
 
 extern void ClearMultiDamage();
-extern void ApplyMultiDamage(entvars_t* pevInflictor, entvars_t* pevAttacker);
-extern void AddMultiDamage(entvars_t* pevInflictor, CBaseEntity* pEntity, float flDamage, int bitsDamageType);
+extern void ApplyMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker);
+extern void AddMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker, CBaseEntity* pEntity, float flDamage, int bitsDamageType);
 
 extern void DecalGunshot(TraceResult* pTrace, int iBulletType);
 extern void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage);
 extern int DamageDecal(CBaseEntity* pEntity, int bitsDamageType);
-extern void RadiusDamage(Vector vecSrc, entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType);
+extern void RadiusDamage(Vector vecSrc, CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType);
 
 typedef struct
 {

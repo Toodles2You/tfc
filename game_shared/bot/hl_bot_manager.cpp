@@ -144,7 +144,7 @@ void CHLBotManager::ServerDeactivate()
 	CBasePlayer *player;
 	for (i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		player = static_cast<CBasePlayer *>(UTIL_PlayerByIndex(i));
+		player = static_cast<CBasePlayer *>(util::PlayerByIndex(i));
 		if (!IsEntityValid(player))
 		{
 			continue;

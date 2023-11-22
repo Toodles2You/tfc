@@ -48,13 +48,12 @@ void CSatchelCharge::Deactivate()
 bool CSatchelCharge::Spawn()
 {
 	Precache();
-	// motor
 	pev->movetype = MOVETYPE_BOUNCE;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL(ENT(pev), "models/w_satchel.mdl");
-	UTIL_SetSize(pev, Vector(-4, -4, -4), Vector(4, 4, 4)); // Uses point-sized, and can be stepped over
-	UTIL_SetOrigin(pev, pev->origin);
+	SetModel("models/w_satchel.mdl");
+	SetSize(Vector(-4, -4, -4), Vector(4, 4, 4)); // Uses point-sized, and can be stepped over
+	SetOrigin(pev->origin);
 
 	SetTouch(&CSatchelCharge::SatchelSlide);
 	SetUse(&CSatchelCharge::DetonateUse);
@@ -84,7 +83,7 @@ void CSatchelCharge::SatchelSlide(CBaseEntity* pOther)
 
 	// HACKHACK - On ground isn't always set, so look for ground underneath
 	TraceResult tr;
-	UTIL_TraceLine(pev->origin, pev->origin - Vector(0, 0, 10), ignore_monsters, edict(), &tr);
+	util::TraceLine(pev->origin, pev->origin - Vector(0, 0, 10), util::ignore_monsters, this, &tr);
 
 	if (tr.flFraction < 1.0)
 	{
@@ -141,15 +140,9 @@ void CSatchelCharge::BounceSound()
 {
 	switch (RANDOM_LONG(0, 2))
 	{
-	case 0:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/g_bounce1.wav", 1, ATTN_NORM);
-		break;
-	case 1:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/g_bounce2.wav", 1, ATTN_NORM);
-		break;
-	case 2:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/g_bounce3.wav", 1, ATTN_NORM);
-		break;
+	case 0: EmitSound("weapons/g_bounce1.wav", CHAN_VOICE); break;
+	case 1: EmitSound("weapons/g_bounce2.wav", CHAN_VOICE); break;
+	case 2: EmitSound("weapons/g_bounce3.wav", CHAN_VOICE); break;
 	}
 }
 
@@ -164,7 +157,7 @@ bool CSatchel::AddDuplicate(CBasePlayerWeapon* pOriginal)
 {
 	CSatchel* pSatchel;
 
-	if (UTIL_IsDeathmatch())
+	if (util::IsDeathmatch())
 	{
 		pSatchel = (CSatchel*)pOriginal;
 
@@ -190,7 +183,7 @@ bool CSatchel::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_SATCHEL;
-	SET_MODEL(ENT(pev), "models/w_satchel.mdl");
+	SetModel("models/w_satchel.mdl");
 
 	m_iDefaultAmmo = SATCHEL_DEFAULT_GIVE;
 
@@ -208,7 +201,7 @@ void CSatchel::Precache()
 	PRECACHE_MODEL("models/p_satchel.mdl");
 	PRECACHE_MODEL("models/p_satchel_radio.mdl");
 
-	UTIL_PrecacheOther("monster_satchel");
+	util::PrecacheOther("monster_satchel");
 }
 
 
@@ -321,7 +314,7 @@ void CSatchel::PrimaryAttack()
 
 		CBaseEntity* pSatchel = NULL;
 
-		while ((pSatchel = UTIL_FindEntityInSphere(pSatchel, m_pPlayer->pev->origin, 4096)) != NULL)
+		while ((pSatchel = util::FindEntityInSphere(pSatchel, m_pPlayer->pev->origin, 4096)) != NULL)
 		{
 			if (FClassnameIs(pSatchel->pev, "monster_satchel"))
 			{
@@ -432,7 +425,7 @@ void CSatchel::WeaponIdle()
 		m_chargeReady = 0;
 		break;
 	}
-	m_iTimeWeaponIdle = UTIL_SharedRandomLong(m_pPlayer->random_seed, 10000, 15000); // how long till we do this again.
+	m_iTimeWeaponIdle = util::SharedRandomLong(m_pPlayer->random_seed, 10000, 15000); // how long till we do this again.
 }
 
 //=========================================================

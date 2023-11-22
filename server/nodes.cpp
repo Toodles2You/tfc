@@ -37,8 +37,6 @@
 #define MAX_NODE_INITIAL_LINKS 128
 #define MAX_NODES 1024
 
-Vector VecBModelOrigin(entvars_t* pevBModel);
-
 CGraph WorldGraph;
 
 LINK_ENTITY_TO_CLASS(info_node, CNodeEnt);
@@ -183,9 +181,7 @@ entvars_t* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
 			{ // only buttons are handled right now.
 
 				// trace from the node to the trigger, make sure it's one we can see from the node.
-				// !!!HACKHACK Use bodyqueue here cause there are no ents we really wish to ignore!
-				UTIL_TraceLine(pNode->m_vecOrigin, VecBModelOrigin(pevTrigger), ignore_monsters, NULL, &tr);
-
+				util::TraceLine(pNode->m_vecOrigin, CBaseEntity::Instance(pevTrigger)->Center(), util::ignore_monsters, nullptr, &tr);
 
 				if (VARS(tr.pHit) == pevTrigger)
 				{ // good to go!
@@ -389,12 +385,12 @@ int	CGraph:: FindNearestLink ( const Vector &vecTestPoint, int *piNearestLink, b
 			if ( flDistToLine < flMinDist )
 			{// just found a line nearer than any other so far
 				
-				UTIL_TraceLine ( vecTestPoint, SourceNode( i, j ).m_vecOrigin, ignore_monsters, NULL, &tr );
+				util::TraceLine ( vecTestPoint, SourceNode( i, j ).m_vecOrigin, util::ignore_monsters, nullptr, &tr );
 
 				if ( tr.flFraction != 1.0 )
 				{// crap. can't see the first node of this link, try to see the other
 					
-					UTIL_TraceLine ( vecTestPoint, DestNode( i, j ).m_vecOrigin, ignore_monsters, NULL, &tr );
+					util::TraceLine ( vecTestPoint, DestNode( i, j ).m_vecOrigin, util::ignore_monsters, nullptr, &tr );
 					if ( tr.flFraction != 1.0 )
 					{// can't use this link, cause can't see either node!
 						continue;
@@ -414,16 +410,16 @@ int	CGraph:: FindNearestLink ( const Vector &vecTestPoint, int *piNearestLink, b
 /*
 	if ( fSuccess )
 	{
-		WRITE_BYTE(MSG_BROADCAST, SVC_TEMPENTITY);
-		WRITE_BYTE(MSG_BROADCAST, TE_SHOWLINE);
+		WriteByte(MSG_BROADCAST, SVC_TEMPENTITY);
+		WriteByte(MSG_BROADCAST, TE_SHOWLINE);
 		
-		WRITE_COORD(MSG_BROADCAST, m_pNodes[ m_pLinkPool[ iNearestLink ].m_iSrcNode ].m_vecOrigin.x );
-		WRITE_COORD(MSG_BROADCAST, m_pNodes[ m_pLinkPool[ iNearestLink ].m_iSrcNode ].m_vecOrigin.y );
-		WRITE_COORD(MSG_BROADCAST, m_pNodes[ m_pLinkPool[ iNearestLink ].m_iSrcNode ].m_vecOrigin.z + NODE_HEIGHT);
+		WriteCoord(MSG_BROADCAST, m_pNodes[ m_pLinkPool[ iNearestLink ].m_iSrcNode ].m_vecOrigin.x );
+		WriteCoord(MSG_BROADCAST, m_pNodes[ m_pLinkPool[ iNearestLink ].m_iSrcNode ].m_vecOrigin.y );
+		WriteCoord(MSG_BROADCAST, m_pNodes[ m_pLinkPool[ iNearestLink ].m_iSrcNode ].m_vecOrigin.z + NODE_HEIGHT);
 
-		WRITE_COORD(MSG_BROADCAST, m_pNodes[ m_pLinkPool[ iNearestLink ].m_iDestNode ].m_vecOrigin.x );
-		WRITE_COORD(MSG_BROADCAST, m_pNodes[ m_pLinkPool[ iNearestLink ].m_iDestNode ].m_vecOrigin.y );
-		WRITE_COORD(MSG_BROADCAST, m_pNodes[ m_pLinkPool[ iNearestLink ].m_iDestNode ].m_vecOrigin.z + NODE_HEIGHT);
+		WriteCoord(MSG_BROADCAST, m_pNodes[ m_pLinkPool[ iNearestLink ].m_iDestNode ].m_vecOrigin.x );
+		WriteCoord(MSG_BROADCAST, m_pNodes[ m_pLinkPool[ iNearestLink ].m_iDestNode ].m_vecOrigin.y );
+		WriteCoord(MSG_BROADCAST, m_pNodes[ m_pLinkPool[ iNearestLink ].m_iDestNode ].m_vecOrigin.z + NODE_HEIGHT);
 	}
 */
 
@@ -743,33 +739,33 @@ int CGraph::FindShortestPath(int* piPath, int iStart, int iDest, int iHull, int 
 
 		for ( int i = 0 ; i < iNumPathNodes - 1 ; i++ )
 		{
-			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-				WRITE_BYTE( TE_SHOWLINE);
+			MessageBegin( MSG_BROADCAST, SVC_TEMPENTITY );
+				WriteByte( TE_SHOWLINE);
 				
-				WRITE_COORD( m_pNodes[ piPath[ i ] ].m_vecOrigin.x );
-				WRITE_COORD( m_pNodes[ piPath[ i ] ].m_vecOrigin.y );
-				WRITE_COORD( m_pNodes[ piPath[ i ] ].m_vecOrigin.z + NODE_HEIGHT );
+				WriteCoord( m_pNodes[ piPath[ i ] ].m_vecOrigin.x );
+				WriteCoord( m_pNodes[ piPath[ i ] ].m_vecOrigin.y );
+				WriteCoord( m_pNodes[ piPath[ i ] ].m_vecOrigin.z + NODE_HEIGHT );
 
-				WRITE_COORD( m_pNodes[ piPath[ i + 1 ] ].m_vecOrigin.x );
-				WRITE_COORD( m_pNodes[ piPath[ i + 1 ] ].m_vecOrigin.y );
-				WRITE_COORD( m_pNodes[ piPath[ i + 1 ] ].m_vecOrigin.z + NODE_HEIGHT );
-			MESSAGE_END();
+				WriteCoord( m_pNodes[ piPath[ i + 1 ] ].m_vecOrigin.x );
+				WriteCoord( m_pNodes[ piPath[ i + 1 ] ].m_vecOrigin.y );
+				WriteCoord( m_pNodes[ piPath[ i + 1 ] ].m_vecOrigin.z + NODE_HEIGHT );
+			MessageEnd();
 		}
 	}
 
 #endif
 #if 0 // MAZE map
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-		WRITE_BYTE( TE_SHOWLINE);
+	MessageBegin( MSG_BROADCAST, SVC_TEMPENTITY );
+		WriteByte( TE_SHOWLINE);
 		
-		WRITE_COORD( m_pNodes[ 4 ].m_vecOrigin.x );
-		WRITE_COORD( m_pNodes[ 4 ].m_vecOrigin.y );
-		WRITE_COORD( m_pNodes[ 4 ].m_vecOrigin.z + NODE_HEIGHT );
+		WriteCoord( m_pNodes[ 4 ].m_vecOrigin.x );
+		WriteCoord( m_pNodes[ 4 ].m_vecOrigin.y );
+		WriteCoord( m_pNodes[ 4 ].m_vecOrigin.z + NODE_HEIGHT );
 
-		WRITE_COORD( m_pNodes[ 9 ].m_vecOrigin.x );
-		WRITE_COORD( m_pNodes[ 9 ].m_vecOrigin.y );
-		WRITE_COORD( m_pNodes[ 9 ].m_vecOrigin.z + NODE_HEIGHT );
-	MESSAGE_END();
+		WriteCoord( m_pNodes[ 9 ].m_vecOrigin.x );
+		WriteCoord( m_pNodes[ 9 ].m_vecOrigin.y );
+		WriteCoord( m_pNodes[ 9 ].m_vecOrigin.z + NODE_HEIGHT );
+	MessageEnd();
 #endif
 
 	return iNumPathNodes;
@@ -831,7 +827,7 @@ void CGraph::CheckNode(Vector vecOrigin, int iNode)
 		TraceResult tr;
 
 		// make sure that vecOrigin can trace to this node!
-		UTIL_TraceLine(vecOrigin, m_pNodes[iNode].m_vecOriginPeek, ignore_monsters, 0, &tr);
+		util::TraceLine(vecOrigin, m_pNodes[iNode].m_vecOriginPeek, util::ignore_monsters, nullptr, &tr);
 
 		if (tr.flFraction == 1.0)
 		{
@@ -1079,7 +1075,7 @@ int CGraph::FindNearestNode(const Vector& vecOrigin, int afNodeTypes)
 		if ( flDist < m_flShortest )
 		{
 			// make sure that vecOrigin can trace to this node!
-			UTIL_TraceLine ( vecOrigin, m_pNodes[ i ].m_vecOriginPeek, ignore_monsters, 0, &tr );
+			util::TraceLine ( vecOrigin, m_pNodes[ i ].m_vecOriginPeek, util::ignore_monsters, nullptr, &tr );
 
 			if ( tr.flFraction == 1.0 )
 			{
@@ -1136,7 +1132,7 @@ void CGraph::ShowNodeConnections(int iNode)
 
 	pNode = &m_pNodes[iNode];
 
-	UTIL_ParticleEffect(pNode->m_vecOrigin, g_vecZero, 255, 20); // show node position
+	util::ParticleEffect(pNode->m_vecOrigin, g_vecZero, 255, 20); // show node position
 
 	if (pNode->m_cNumLinks <= 0)
 	{ // no connections!
@@ -1149,17 +1145,17 @@ void CGraph::ShowNodeConnections(int iNode)
 		pLinkNode = &Node(NodeLink(iNode, i).m_iDestNode);
 		vecSpot = pLinkNode->m_vecOrigin;
 
-		MESSAGE_BEGIN(MSG_BROADCAST, SVC_TEMPENTITY);
-		WRITE_BYTE(TE_SHOWLINE);
+		MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
+		WriteByte(TE_SHOWLINE);
 
-		WRITE_COORD(m_pNodes[iNode].m_vecOrigin.x);
-		WRITE_COORD(m_pNodes[iNode].m_vecOrigin.y);
-		WRITE_COORD(m_pNodes[iNode].m_vecOrigin.z + NODE_HEIGHT);
+		WriteCoord(m_pNodes[iNode].m_vecOrigin.x);
+		WriteCoord(m_pNodes[iNode].m_vecOrigin.y);
+		WriteCoord(m_pNodes[iNode].m_vecOrigin.z + NODE_HEIGHT);
 
-		WRITE_COORD(vecSpot.x);
-		WRITE_COORD(vecSpot.y);
-		WRITE_COORD(vecSpot.z + NODE_HEIGHT);
-		MESSAGE_END();
+		WriteCoord(vecSpot.x);
+		WriteCoord(vecSpot.y);
+		WriteCoord(vecSpot.z + NODE_HEIGHT);
+		MessageEnd();
 	}
 }
 
@@ -1258,10 +1254,10 @@ int CGraph::LinkVisibleNodes(CLink* pLinkPool, FSFile& file, int* piBadNode)
 			tr.pHit = NULL; // clear every time so we don't get stuck with last trace's hit ent
 			pTraceEnt = 0;
 
-			UTIL_TraceLine(m_pNodes[i].m_vecOrigin,
+			util::TraceLine(m_pNodes[i].m_vecOrigin,
 				m_pNodes[j].m_vecOrigin,
-				ignore_monsters,
-				NULL, //!!!HACKHACK no real ent to supply here, using a global we don't care about
+				util::ignore_monsters,
+				nullptr,
 				&tr);
 
 
@@ -1273,10 +1269,10 @@ int CGraph::LinkVisibleNodes(CLink* pLinkPool, FSFile& file, int* piBadNode)
 
 				pTraceEnt = tr.pHit; // store the ent that the trace hit, for comparison
 
-				UTIL_TraceLine(m_pNodes[j].m_vecOrigin,
+				util::TraceLine(m_pNodes[j].m_vecOrigin,
 					m_pNodes[i].m_vecOrigin,
-					ignore_monsters,
-					NULL, //!!!HACKHACK no real ent to supply here, using a global we don't care about
+					util::ignore_monsters,
+					nullptr,
 					&tr);
 
 
@@ -1489,8 +1485,8 @@ LINK_ENTITY_TO_CLASS(testhull, CTestHull);
 //=========================================================
 bool CTestHull::Spawn(entvars_t* pevMasterNode)
 {
-	SET_MODEL(ENT(pev), "models/player.mdl");
-	UTIL_SetSize(pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX);
+	SetModel("models/player.mdl");
+	SetSize(VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX);
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
@@ -1518,9 +1514,9 @@ bool CTestHull::Spawn(entvars_t* pevMasterNode)
 //=========================================================
 void CTestHull::DropDelay()
 {
-	//	UTIL_CenterPrintAll( "Node Graph out of Date. Rebuilding..." );
+	//	util::CenterPrintAll( "Node Graph out of Date. Rebuilding..." );
 
-	UTIL_SetOrigin(pev, WorldGraph.m_pNodes[0].m_vecOrigin);
+	SetOrigin(WorldGraph.m_pNodes[0].m_vecOrigin);
 
 	SetThink(&CTestHull::CallBuildNodeGraph);
 
@@ -1604,13 +1600,13 @@ void CTestHull::ShowBadNode()
 	pev->movetype = MOVETYPE_FLY;
 	pev->angles.y = pev->angles.y + 4;
 
-	UTIL_MakeVectors(pev->angles);
+	util::MakeVectors(pev->angles);
 
-	UTIL_ParticleEffect(pev->origin, g_vecZero, 255, 25);
-	UTIL_ParticleEffect(pev->origin + gpGlobals->v_forward * 64, g_vecZero, 255, 25);
-	UTIL_ParticleEffect(pev->origin - gpGlobals->v_forward * 64, g_vecZero, 255, 25);
-	UTIL_ParticleEffect(pev->origin + gpGlobals->v_right * 64, g_vecZero, 255, 25);
-	UTIL_ParticleEffect(pev->origin - gpGlobals->v_right * 64, g_vecZero, 255, 25);
+	util::ParticleEffect(pev->origin, g_vecZero, 255, 25);
+	util::ParticleEffect(pev->origin + gpGlobals->v_forward * 64, g_vecZero, 255, 25);
+	util::ParticleEffect(pev->origin - gpGlobals->v_forward * 64, g_vecZero, 255, 25);
+	util::ParticleEffect(pev->origin + gpGlobals->v_right * 64, g_vecZero, 255, 25);
+	util::ParticleEffect(pev->origin - gpGlobals->v_right * 64, g_vecZero, 255, 25);
 
 	pev->nextthink = gpGlobals->time + 0.1;
 }
@@ -1727,7 +1723,7 @@ void CTestHull::BuildNodeGraph()
 		{
 			// do nothing
 		}
-		else if (UTIL_PointContents(WorldGraph.m_pNodes[i].m_vecOrigin) == CONTENTS_WATER)
+		else if (util::PointContents(WorldGraph.m_pNodes[i].m_vecOrigin) == CONTENTS_WATER)
 		{
 			WorldGraph.m_pNodes[i].m_afNodeInfo |= bits_NODE_WATER;
 		}
@@ -1741,18 +1737,18 @@ void CTestHull::BuildNodeGraph()
 			//
 			TraceResult tr;
 
-			UTIL_TraceLine(WorldGraph.m_pNodes[i].m_vecOrigin,
+			util::TraceLine(WorldGraph.m_pNodes[i].m_vecOrigin,
 				WorldGraph.m_pNodes[i].m_vecOrigin - Vector(0, 0, 384),
-				ignore_monsters,
-				NULL, //!!!HACKHACK no real ent to supply here, using a global we don't care about
+				util::ignore_monsters,
+				nullptr,
 				&tr);
 
 			// This trace is ONLY used if we hit an entity flagged with FL_WORLDBRUSH
 			TraceResult trEnt;
-			UTIL_TraceLine(WorldGraph.m_pNodes[i].m_vecOrigin,
+			util::TraceLine(WorldGraph.m_pNodes[i].m_vecOrigin,
 				WorldGraph.m_pNodes[i].m_vecOrigin - Vector(0, 0, 384),
-				dont_ignore_monsters,
-				NULL, //!!!HACKHACK no real ent to supply here, using a global we don't care about
+				util::dont_ignore_monsters,
+				nullptr,
 				&trEnt);
 
 
@@ -1818,21 +1814,20 @@ void CTestHull::BuildNodeGraph()
 				switch (hull)
 				{
 				case NODE_SMALL_HULL:
-					UTIL_SetSize(pev, Vector(-12, -12, 0), Vector(12, 12, 24));
+					SetSize(Vector(-12, -12, 0), Vector(12, 12, 24));
 					break;
 				case NODE_HUMAN_HULL:
-					UTIL_SetSize(pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX);
+					SetSize(VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX);
 					break;
 				case NODE_LARGE_HULL:
-					UTIL_SetSize(pev, Vector(-32, -32, 0), Vector(32, 32, 64));
+					SetSize(Vector(-32, -32, 0), Vector(32, 32, 64));
 					break;
 				case NODE_FLY_HULL:
-					UTIL_SetSize(pev, Vector(-32, -32, 0), Vector(32, 32, 64));
-					// UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
+					SetSize(Vector(-32, -32, 0), Vector(32, 32, 64));
 					break;
 				}
 
-				UTIL_SetOrigin(pev, pSrcNode->m_vecOrigin); // place the hull on the node
+				SetOrigin(pSrcNode->m_vecOrigin); // place the hull on the node
 
 				if (!FBitSet(pev->flags, FL_ONGROUND))
 				{
@@ -1866,7 +1861,7 @@ void CTestHull::BuildNodeGraph()
 						MoveMode = WALKMOVE_NORMAL;
 					}
 
-					flYaw = UTIL_VecToYaw(pDestNode->m_vecOrigin - pev->origin);
+					flYaw = util::VecToYaw(pDestNode->m_vecOrigin - pev->origin);
 
 					flDist = (vecSpot - pev->origin).Length2D();
 
@@ -1926,7 +1921,7 @@ void CTestHull::BuildNodeGraph()
 				{
 					TraceResult tr;
 
-					UTIL_TraceHull(pSrcNode->m_vecOrigin + Vector(0, 0, 32), pDestNode->m_vecOriginPeek + Vector(0, 0, 32), ignore_monsters, large_hull, ENT(pev), &tr);
+					util::TraceHull(pSrcNode->m_vecOrigin + Vector(0, 0, 32), pDestNode->m_vecOriginPeek + Vector(0, 0, 32), util::ignore_monsters, util::large_hull, ENT(pev), &tr);
 					if (0 != tr.fStartSolid || tr.flFraction < 1.0)
 					{
 						pTempPool[pSrcNode->m_iFirstLink + j].m_afLinkInfo &= ~bits_LINK_FLY_HULL;
@@ -2101,17 +2096,17 @@ void CTestHull::PathFind()
 
 		pNextNode = &WorldGraph.m_pNodes[iPath[i + 1]];
 
-		MESSAGE_BEGIN(MSG_BROADCAST, SVC_TEMPENTITY);
-		WRITE_BYTE(TE_SHOWLINE);
+		MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
+		WriteByte(TE_SHOWLINE);
 
-		WRITE_COORD(pNode->m_vecOrigin.x);
-		WRITE_COORD(pNode->m_vecOrigin.y);
-		WRITE_COORD(pNode->m_vecOrigin.z + NODE_HEIGHT);
+		WriteCoord(pNode->m_vecOrigin.x);
+		WriteCoord(pNode->m_vecOrigin.y);
+		WriteCoord(pNode->m_vecOrigin.z + NODE_HEIGHT);
 
-		WRITE_COORD(pNextNode->m_vecOrigin.x);
-		WRITE_COORD(pNextNode->m_vecOrigin.y);
-		WRITE_COORD(pNextNode->m_vecOrigin.z + NODE_HEIGHT);
-		MESSAGE_END();
+		WriteCoord(pNextNode->m_vecOrigin.x);
+		WriteCoord(pNextNode->m_vecOrigin.y);
+		WriteCoord(pNextNode->m_vecOrigin.z + NODE_HEIGHT);
+		MessageEnd();
 
 		pNode = pNextNode;
 	}
@@ -3614,27 +3609,27 @@ void CNodeViewer::DrawThink()
 		}
 
 		extern short g_sModelIndexLaser;
-		MESSAGE_BEGIN(MSG_BROADCAST, SVC_TEMPENTITY);
-		WRITE_BYTE(TE_BEAMPOINTS);
-		WRITE_COORD(WorldGraph.m_pNodes[m_aFrom[m_iDraw]].m_vecOrigin.x);
-		WRITE_COORD(WorldGraph.m_pNodes[m_aFrom[m_iDraw]].m_vecOrigin.y);
-		WRITE_COORD(WorldGraph.m_pNodes[m_aFrom[m_iDraw]].m_vecOrigin.z + NODE_HEIGHT);
+		MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
+		WriteByte(TE_BEAMPOINTS);
+		WriteCoord(WorldGraph.m_pNodes[m_aFrom[m_iDraw]].m_vecOrigin.x);
+		WriteCoord(WorldGraph.m_pNodes[m_aFrom[m_iDraw]].m_vecOrigin.y);
+		WriteCoord(WorldGraph.m_pNodes[m_aFrom[m_iDraw]].m_vecOrigin.z + NODE_HEIGHT);
 
-		WRITE_COORD(WorldGraph.m_pNodes[m_aTo[m_iDraw]].m_vecOrigin.x);
-		WRITE_COORD(WorldGraph.m_pNodes[m_aTo[m_iDraw]].m_vecOrigin.y);
-		WRITE_COORD(WorldGraph.m_pNodes[m_aTo[m_iDraw]].m_vecOrigin.z + NODE_HEIGHT);
-		WRITE_SHORT(g_sModelIndexLaser);
-		WRITE_BYTE(0);			  // framerate
-		WRITE_BYTE(0);			  // framerate
-		WRITE_BYTE(250);		  // life
-		WRITE_BYTE(40);			  // width
-		WRITE_BYTE(0);			  // noise
-		WRITE_BYTE(m_vecColor.x); // r, g, b
-		WRITE_BYTE(m_vecColor.y); // r, g, b
-		WRITE_BYTE(m_vecColor.z); // r, g, b
-		WRITE_BYTE(128);		  // brightness
-		WRITE_BYTE(0);			  // speed
-		MESSAGE_END();
+		WriteCoord(WorldGraph.m_pNodes[m_aTo[m_iDraw]].m_vecOrigin.x);
+		WriteCoord(WorldGraph.m_pNodes[m_aTo[m_iDraw]].m_vecOrigin.y);
+		WriteCoord(WorldGraph.m_pNodes[m_aTo[m_iDraw]].m_vecOrigin.z + NODE_HEIGHT);
+		WriteShort(g_sModelIndexLaser);
+		WriteByte(0);			  // framerate
+		WriteByte(0);			  // framerate
+		WriteByte(250);		  // life
+		WriteByte(40);			  // width
+		WriteByte(0);			  // noise
+		WriteByte(m_vecColor.x); // r, g, b
+		WriteByte(m_vecColor.y); // r, g, b
+		WriteByte(m_vecColor.z); // r, g, b
+		WriteByte(128);		  // brightness
+		WriteByte(0);			  // speed
+		MessageEnd();
 
 		m_iDraw++;
 	}

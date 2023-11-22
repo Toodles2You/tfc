@@ -133,7 +133,7 @@ CBaseEntity:: Killed
 If weapons code "kills" an entity, just set its effects to EF_NODRAW
 =====================
 */
-void CBaseEntity::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
+void CBaseEntity::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType)
 {
 	pev->effects |= EF_NODRAW;
 }
@@ -264,7 +264,7 @@ CBasePlayer::Killed
 
 =====================
 */
-void CBasePlayer::Killed(entvars_t* pevInflictor, entvars_t* pevAttacker, int bitsDamageType)
+void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType)
 {
 	// Holster weapon immediately, to allow it to cleanup
 	if (m_pActiveWeapon)
@@ -291,89 +291,15 @@ bool CBasePlayer::Spawn()
 
 /*
 =====================
-UTIL_TraceLine
+util::TraceLine
 
 Don't actually trace, but act like the trace didn't hit anything.
 =====================
 */
-void UTIL_TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, edict_t* pentIgnore, TraceResult* ptr)
+void util::TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, CBaseEntity* ignore, TraceResult* ptr)
 {
 	memset(ptr, 0, sizeof(*ptr));
 	ptr->flFraction = 1.0;
-}
-
-/*
-=====================
-UTIL_ParticleBox
-
-For debugging, draw a box around a player made out of particles
-=====================
-*/
-void UTIL_ParticleBox(CBasePlayer* player, float* mins, float* maxs, float life, unsigned char r, unsigned char g, unsigned char b)
-{
-	int i;
-	Vector mmin, mmax;
-
-	for (i = 0; i < 3; i++)
-	{
-		mmin[i] = player->pev->origin[i] + mins[i];
-		mmax[i] = player->pev->origin[i] + maxs[i];
-	}
-
-	gEngfuncs.pEfxAPI->R_ParticleBox((float*)&mmin, (float*)&mmax, 5.0, 0, 255, 0);
-}
-
-/*
-=====================
-UTIL_ParticleBoxes
-
-For debugging, draw boxes for other collidable players
-=====================
-*/
-void UTIL_ParticleBoxes()
-{
-	int idx;
-	physent_t* pe;
-	cl_entity_t* player;
-	Vector mins, maxs;
-
-	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(0, 1);
-
-	// Store off the old count
-	gEngfuncs.pEventAPI->EV_PushPMStates();
-
-	player = gEngfuncs.GetLocalPlayer();
-	// Now add in all of the players.
-	gEngfuncs.pEventAPI->EV_SetSolidPlayers(player->index - 1);
-
-	for (idx = 1; idx < 100; idx++)
-	{
-		pe = gEngfuncs.pEventAPI->EV_GetPhysent(idx);
-		if (!pe)
-			break;
-
-		if (pe->info >= 1 && pe->info <= gEngfuncs.GetMaxClients())
-		{
-			mins = pe->origin + pe->mins;
-			maxs = pe->origin + pe->maxs;
-
-			gEngfuncs.pEfxAPI->R_ParticleBox((float*)&mins, (float*)&maxs, 0, 0, 255, 2.0);
-		}
-	}
-
-	gEngfuncs.pEventAPI->EV_PopPMStates();
-}
-
-/*
-=====================
-UTIL_ParticleLine
-
-For debugging, draw a line made out of particles
-=====================
-*/
-void UTIL_ParticleLine(CBasePlayer* player, float* start, float* end, float life, unsigned char r, unsigned char g, unsigned char b)
-{
-	gEngfuncs.pEfxAPI->R_ParticleLine(start, end, r, g, b, life);
 }
 
 /*
@@ -785,7 +711,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	if (g_runfuncs && (HUD_GetWeaponAnim() != to->client.weaponanim))
 	{
 		//Make sure the 357 has the right body
-		g_Python.pev->body = UTIL_IsDeathmatch() ? 1 : 0;
+		g_Python.pev->body = util::IsDeathmatch() ? 1 : 0;
 
 		// Force a fixed anim down to viewmodel
 		HUD_SendWeaponAnim(to->client.weaponanim, pWeapon->pev->body, true);
