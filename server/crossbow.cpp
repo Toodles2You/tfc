@@ -326,6 +326,30 @@ void CCrossbow::FireSniperBolt()
 		ClearMultiDamage();
 		CBaseEntity::Instance(tr.pHit)->TraceAttack(m_pPlayer, 120, vecDir, &tr, DMG_BULLET | DMG_AIMED | DMG_NEVERGIB);
 		ApplyMultiDamage(this, m_pPlayer);
+
+		auto traceFlags = 0;
+
+		if ((tr.pHit->v.flags  & FL_CLIENT) != 0)
+		{
+			const auto hit =
+				reinterpret_cast<CBasePlayer *>(CBaseEntity::Instance(tr.pHit));
+
+			if (hit->m_LastHitGroup == HITGROUP_HEAD)
+			{
+				traceFlags |= 1;
+			}
+		}
+
+		MessageBegin(MSG_PVS, gmsgBlood, tr.pHit->v.origin);
+		WriteFloat(vecDir.x);
+		WriteFloat(vecDir.y);
+		WriteFloat(vecDir.z);
+		WriteByte(0);
+		WriteByte(traceFlags);
+		WriteCoord(tr.vecEndPos.x);
+		WriteCoord(tr.vecEndPos.y);
+		WriteCoord(tr.vecEndPos.z);
+		MessageEnd();
 	}
 #endif
 }
