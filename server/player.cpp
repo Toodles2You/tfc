@@ -2373,9 +2373,6 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 
 	switch (iImpulse)
 	{
-	case 76:
-		break;
-
 	case 101:
 		gEvilImpulse101 = true;
 		SetHasSuit(true);
@@ -2458,8 +2455,6 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 		}
 	}
 	break;
-	case 202: // Random blood splatter
-		break;
 	case 203: // remove creature.
 		pEntity = util::FindEntityForward(this);
 		if (pEntity)

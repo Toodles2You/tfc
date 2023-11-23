@@ -142,27 +142,7 @@ void DecalGunshot(TraceResult* pTrace, int iBulletType)
 		if (!FNullEnt(pTrace->pHit))
 			pEntity = CBaseEntity::Instance(pTrace->pHit);
 
-		switch (iBulletType)
-		{
-		case BULLET_PLAYER_9MM:
-		case BULLET_MONSTER_9MM:
-		case BULLET_PLAYER_MP5:
-		case BULLET_MONSTER_MP5:
-		case BULLET_PLAYER_BUCKSHOT:
-		case BULLET_PLAYER_357:
-		default:
-			// smoke and decal
-			util::GunshotDecalTrace(pTrace, DamageDecal(pEntity, DMG_BULLET));
-			break;
-		case BULLET_MONSTER_12MM:
-			// smoke and decal
-			util::GunshotDecalTrace(pTrace, DamageDecal(pEntity, DMG_BULLET));
-			break;
-		case BULLET_PLAYER_CROWBAR:
-			// wall decal
-			util::DecalTrace(pTrace, DamageDecal(pEntity, DMG_CLUB));
-			break;
-		}
+		util::GunshotDecalTrace(pTrace, DamageDecal(pEntity, DMG_BULLET));
 	}
 }
 

@@ -70,100 +70,7 @@ public:
 
 #define MAX_NORMAL_BATTERY 100.0F
 
-
-// weapon weight factors (for auto-switching)   (-1 = noswitch)
-#define CROWBAR_WEIGHT 0
-#define GLOCK_WEIGHT 10
-#define PYTHON_WEIGHT 15
-#define MP5_WEIGHT 15
-#define SHOTGUN_WEIGHT 15
-#define CROSSBOW_WEIGHT 10
-#define RPG_WEIGHT 20
-#define GAUSS_WEIGHT 20
-#define EGON_WEIGHT 20
-#define HORNETGUN_WEIGHT 15
-#define HANDGRENADE_WEIGHT 5
-#define SNARK_WEIGHT 5
-#define SATCHEL_WEIGHT -10
-#define TRIPMINE_WEIGHT -10
-
-
-// weapon clip/carry ammo capacities
-#define URANIUM_MAX_CARRY 100
-#define _9MM_MAX_CARRY 250
-#define _357_MAX_CARRY 36
-#define BUCKSHOT_MAX_CARRY 125
-#define BOLT_MAX_CARRY 50
-#define ROCKET_MAX_CARRY 5
-#define HANDGRENADE_MAX_CARRY 10
-#define SATCHEL_MAX_CARRY 5
-#define TRIPMINE_MAX_CARRY 5
-#define SNARK_MAX_CARRY 15
-#define HORNET_MAX_CARRY 8
-#define M203_GRENADE_MAX_CARRY 10
-
-// the maximum amount of ammo each weapon's clip can hold
 #define WEAPON_NOCLIP -1
-
-//#define CROWBAR_MAX_CLIP		WEAPON_NOCLIP
-#define GLOCK_MAX_CLIP 17
-#define PYTHON_MAX_CLIP 6
-#define MP5_MAX_CLIP 50
-#define SHOTGUN_MAX_CLIP 8
-#define CROSSBOW_MAX_CLIP 5
-#define RPG_MAX_CLIP 1
-#define GAUSS_MAX_CLIP WEAPON_NOCLIP
-#define EGON_MAX_CLIP WEAPON_NOCLIP
-#define HORNETGUN_MAX_CLIP WEAPON_NOCLIP
-#define HANDGRENADE_MAX_CLIP WEAPON_NOCLIP
-#define SATCHEL_MAX_CLIP WEAPON_NOCLIP
-#define TRIPMINE_MAX_CLIP WEAPON_NOCLIP
-#define SNARK_MAX_CLIP WEAPON_NOCLIP
-
-
-// the default amount of ammo that comes with each gun when it spawns
-#define GLOCK_DEFAULT_GIVE 17
-#define PYTHON_DEFAULT_GIVE 6
-#define MP5_DEFAULT_GIVE 50
-#define MP5_M203_DEFAULT_GIVE 0
-#define SHOTGUN_DEFAULT_GIVE 12
-#define CROSSBOW_DEFAULT_GIVE 5
-#define RPG_DEFAULT_GIVE 1
-#define GAUSS_DEFAULT_GIVE 20
-#define EGON_DEFAULT_GIVE 20
-#define HANDGRENADE_DEFAULT_GIVE 5
-#define SATCHEL_DEFAULT_GIVE 1
-#define TRIPMINE_DEFAULT_GIVE 1
-#define SNARK_DEFAULT_GIVE 5
-#define HIVEHAND_DEFAULT_GIVE 8
-
-// The amount of ammo given to a player by an ammo item.
-#define AMMO_URANIUMBOX_GIVE 20
-#define AMMO_GLOCKCLIP_GIVE GLOCK_MAX_CLIP
-#define AMMO_357BOX_GIVE PYTHON_MAX_CLIP
-#define AMMO_MP5CLIP_GIVE MP5_MAX_CLIP
-#define AMMO_CHAINBOX_GIVE 200
-#define AMMO_M203BOX_GIVE 2
-#define AMMO_BUCKSHOTBOX_GIVE 12
-#define AMMO_CROSSBOWCLIP_GIVE CROSSBOW_MAX_CLIP
-#define AMMO_RPGCLIP_GIVE RPG_MAX_CLIP
-#define AMMO_URANIUMBOX_GIVE 20
-#define AMMO_SNARKBOX_GIVE 5
-
-// bullet types
-typedef enum
-{
-	BULLET_NONE = 0,
-	BULLET_PLAYER_9MM,		// glock
-	BULLET_PLAYER_MP5,		// mp5
-	BULLET_PLAYER_357,		// python
-	BULLET_PLAYER_BUCKSHOT, // shotgun
-	BULLET_PLAYER_CROWBAR,	// crowbar swipe
-
-	BULLET_MONSTER_9MM,
-	BULLET_MONSTER_MP5,
-	BULLET_MONSTER_12MM,
-} Bullet;
 
 typedef struct
 {
@@ -313,25 +220,6 @@ public:
 	void EXPORT Materialize();
 };
 
-#define IMPLEMENT_AMMO_CLASS(mapClassName, DLLClassName, modelName, give, ammoType, maxCarry) \
-class DLLClassName : public CBasePlayerAmmo \
-{ \
-	bool Spawn() override \
-	{ \
-		Precache(); \
-		SetModel(modelName); \
-		return CBasePlayerAmmo::Spawn(); \
-	} \
-	void Precache() override \
-	{ \
-		PRECACHE_MODEL(modelName); \
-	} \
-	bool AddAmmo(CBaseEntity* pOther) override \
-	{ \
-		return pOther->GiveAmmo(give, ammoType, maxCarry) != -1; \
-	} \
-}; \
-LINK_ENTITY_TO_CLASS(mapClassName, DLLClassName) \
 
 inline short g_sModelIndexLaser; // holds the index for the laser beam
 constexpr const char* g_pModelNameLaser = "sprites/laserbeam.spr";

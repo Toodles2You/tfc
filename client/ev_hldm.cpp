@@ -110,9 +110,9 @@ static void EV_BubbleTrail(Vector from, Vector to, int count)
 }
 
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
-// original traceline endpoints used by the attacker, iBulletType is the type of bullet that hit the texture.
+// original traceline endpoints used by the attacker.
 // returns volume of strike instrument (crowbar) to play
-static float EV_PlayTextureSound(int idx, pmtrace_t* ptr, float* vecSrc, float* vecEnd, int iBulletType)
+static float EV_PlayTextureSound(int idx, pmtrace_t* ptr, float* vecSrc, float* vecEnd)
 {
 	// hit the world, try to play sound based on texture material type
 	char chTextureType = CHAR_TEX_CONCRETE;
@@ -235,8 +235,6 @@ static float EV_PlayTextureSound(int idx, pmtrace_t* ptr, float* vecSrc, float* 
 		cnt = 3;
 		break;
 	case CHAR_TEX_FLESH:
-		if (iBulletType == BULLET_PLAYER_CROWBAR)
-			return 0.0; // crowbar already makes this sound
 		fvol = 1.0;
 		fvolbar = 0.2;
 		rgsz[0] = "weapons/bullet_hit1.wav";
@@ -335,7 +333,7 @@ static void EV_BloodTrace(Vector pos, Vector dir, int damage)
 	}
 }
 
-static void EV_DecalGunshot(pmtrace_t* pTrace, int iBulletType, Vector vecDir)
+static void EV_DecalGunshot(pmtrace_t* pTrace, Vector vecDir)
 {
 	physent_t* pe = gEngfuncs.pEventAPI->EV_GetPhysent(pTrace->ent);
 
@@ -443,9 +441,9 @@ static void EV_FireBullets(
 		{
 			if (playTextureSounds)
 			{
-				EV_PlayTextureSound(args->entindex, &tr, gun, tr.endpos, BULLET_PLAYER_9MM);
+				EV_PlayTextureSound(args->entindex, &tr, gun, tr.endpos);
 			}
-			EV_DecalGunshot(&tr, BULLET_PLAYER_9MM, forward);
+			EV_DecalGunshot(&tr, forward);
 		}
 	}
 
