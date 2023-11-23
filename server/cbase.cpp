@@ -25,6 +25,7 @@
 void EntvarsKeyvalue(entvars_t* pev, KeyValueData* pkvd);
 
 void OnFreeEntPrivateData(edict_s* pEdict);
+int ShouldCollide(edict_t* pentTouched, edict_t* pentOther);
 
 static DLL_FUNCTIONS gFunctionTable =
 	{
@@ -94,6 +95,7 @@ NEW_DLL_FUNCTIONS gNewDLLFunctions =
 	{
 		OnFreeEntPrivateData, //pfnOnFreeEntPrivateData
 		GameDLLShutdown,
+		ShouldCollide,
 };
 
 static void SetObjectCollisionBox(entvars_t* pev);
@@ -299,6 +301,11 @@ void OnFreeEntPrivateData(edict_s* pEdict)
 		//Zero this out so the engine doesn't try to free it again.
 		pEdict->pvPrivateData = nullptr;
 	}
+}
+
+int ShouldCollide(edict_t* pentTouched, edict_t* pentOther)
+{
+	return 1;
 }
 
 // Find the matching global entity.  Spit out an error if the designer made entities of
