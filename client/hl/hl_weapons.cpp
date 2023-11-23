@@ -44,28 +44,9 @@ static globalvars_t Globals;
 
 static CBasePlayerWeapon* g_pWpns[MAX_WEAPONS];
 
-float g_flApplyVel = 0.0;
-bool g_irunninggausspred = false;
-
 Vector previousorigin;
 
 Vector g_PunchAngle;
-
-// HLDM Weapon placeholder entities.
-CGlock g_Glock;
-CCrowbar g_Crowbar;
-CPython g_Python;
-CMP5 g_Mp5;
-CCrossbow g_Crossbow;
-CShotgun g_Shotgun;
-CRpg g_Rpg;
-CGauss g_Gauss;
-CEgon g_Egon;
-CHgun g_HGun;
-CHandGrenade g_HandGren;
-CSatchel g_Satchel;
-CTripmine g_Tripmine;
-CSqueak g_Snark;
 
 
 /*
@@ -153,7 +134,6 @@ bool CBasePlayerWeapon::DefaultDeploy(const char* szViewModel, const char* szWea
 
 	SendWeaponAnim(iAnim, body);
 
-	g_irunninggausspred = false;
 	m_pPlayer->m_iNextAttack = 500;
 	m_iNextPrimaryAttack = std::max(m_iNextPrimaryAttack, 500);
 	m_iNextSecondaryAttack = std::max(m_iNextSecondaryAttack, 500);
@@ -177,7 +157,6 @@ bool CBasePlayerWeapon::DefaultHolster(int iAnim, int body)
 	m_fInReload = false; // Cancel any reload in progress.
 	m_fInSpecialReload = 0;
 	m_pPlayer->m_iFOV = 0;
-	g_irunninggausspred = false;
 
 	return true;
 }
@@ -211,7 +190,6 @@ bool CBasePlayerWeapon::Holster()
 {
 	m_fInReload = false; // cancel any reload in progress.
 	m_fInSpecialReload = 0;
-	g_irunninggausspred = false;
 	m_pPlayer->pev->viewmodel = 0;
 	return true;
 }
@@ -269,8 +247,6 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 	// Holster weapon immediately, to allow it to cleanup
 	if (m_pActiveWeapon)
 		m_pActiveWeapon->Holster();
-
-	g_irunninggausspred = false;
 }
 
 /*
@@ -283,8 +259,6 @@ bool CBasePlayer::Spawn()
 {
 	if (m_pActiveWeapon)
 		m_pActiveWeapon->Deploy();
-
-	g_irunninggausspred = false;
 
 	return true;
 }
@@ -373,23 +347,9 @@ void HUD_InitClientWeapons()
 	g_engfuncs.pfnCVarGetFloat = gEngfuncs.pfnGetCvarFloat;
 
 	// Allocate a slot for the local player
-	HUD_PrepEntity(&player, NULL);
+	HUD_PrepEntity(&player, nullptr);
 
-	// Allocate slot(s) for each weapon that we are going to be predicting
-	HUD_PrepEntity(&g_Glock, &player);
-	HUD_PrepEntity(&g_Crowbar, &player);
-	HUD_PrepEntity(&g_Python, &player);
-	HUD_PrepEntity(&g_Mp5, &player);
-	HUD_PrepEntity(&g_Crossbow, &player);
-	HUD_PrepEntity(&g_Shotgun, &player);
-	HUD_PrepEntity(&g_Rpg, &player);
-	HUD_PrepEntity(&g_Gauss, &player);
-	HUD_PrepEntity(&g_Egon, &player);
-	HUD_PrepEntity(&g_HGun, &player);
-	HUD_PrepEntity(&g_HandGren, &player);
-	HUD_PrepEntity(&g_Satchel, &player);
-	HUD_PrepEntity(&g_Tripmine, &player);
-	HUD_PrepEntity(&g_Snark, &player);
+	// Allocate slots for each weapon that we are going to be predicting
 }
 
 /*
@@ -439,12 +399,10 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 {
 	int i;
 	int buttonsChanged;
-	CBasePlayerWeapon* pWeapon = NULL;
+	CBasePlayerWeapon* pWeapon = nullptr;
 	CBasePlayerWeapon* pCurrent;
-	weapon_data_t nulldata, *pfrom, *pto;
+	weapon_data_t *pfrom, *pto;
 	static int lasthealth;
-
-	memset(&nulldata, 0, sizeof(nulldata));
 
 	// Get current clock
 	//Use actual time instead of prediction frame time because that time value breaks anything that uses absolute time values.
@@ -453,64 +411,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	//Lets weapons code use frametime to decrement timers and stuff.
 	gpGlobals->frametime = cmd->msec / 1000.0f;
 
-	// Fill in data based on selected weapon
-	// FIXME, make this a method in each weapon?  where you pass in an entity_state_t *?
 	switch (from->client.m_iId)
 	{
-	case WEAPON_CROWBAR:
-		pWeapon = &g_Crowbar;
-		break;
-
-	case WEAPON_GLOCK:
-		pWeapon = &g_Glock;
-		break;
-
-	case WEAPON_PYTHON:
-		pWeapon = &g_Python;
-		break;
-
-	case WEAPON_MP5:
-		pWeapon = &g_Mp5;
-		break;
-
-	case WEAPON_CROSSBOW:
-		pWeapon = &g_Crossbow;
-		break;
-
-	case WEAPON_SHOTGUN:
-		pWeapon = &g_Shotgun;
-		break;
-
-	case WEAPON_RPG:
-		pWeapon = &g_Rpg;
-		break;
-
-	case WEAPON_GAUSS:
-		pWeapon = &g_Gauss;
-		break;
-
-	case WEAPON_EGON:
-		pWeapon = &g_Egon;
-		break;
-
-	case WEAPON_HORNETGUN:
-		pWeapon = &g_HGun;
-		break;
-
-	case WEAPON_HANDGRENADE:
-		pWeapon = &g_HandGren;
-		break;
-
-	case WEAPON_SATCHEL:
-		pWeapon = &g_Satchel;
-		break;
-
-	case WEAPON_TRIPMINE:
-		pWeapon = &g_Tripmine;
-		break;
-
-	case WEAPON_SNARK:
-		pWeapon = &g_Snark;
+	default:
 		break;
 	}
 
@@ -558,17 +461,11 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 		pCurrent->m_fInReload = 0 != pfrom->m_fInReload;
 		pCurrent->m_fInSpecialReload = pfrom->m_fInSpecialReload;
-		//		pCurrent->m_flPumpTime			= pfrom->m_flPumpTime;
 		pCurrent->m_iClip = pfrom->m_iClip;
 		pCurrent->m_iNextPrimaryAttack = *(int*)&pfrom->m_flNextPrimaryAttack;
 		pCurrent->m_iNextSecondaryAttack = *(int*)&pfrom->m_flNextSecondaryAttack;
 		pCurrent->m_iTimeWeaponIdle = *(int*)&pfrom->m_flTimeWeaponIdle;
-		pCurrent->pev->fuser1 = pfrom->fuser1;
-		pCurrent->m_flStartThrow = pfrom->fuser2;
-		pCurrent->m_flReleaseThrow = pfrom->fuser3;
-		pCurrent->m_chargeReady = pfrom->iuser1;
 		pCurrent->m_fInAttack = pfrom->iuser2;
-		pCurrent->m_fireState = pfrom->iuser3;
 
 		pCurrent->SetWeaponData(*pfrom);
 	}
@@ -601,8 +498,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	player.pev->weaponanim = from->client.weaponanim;
 	player.pev->viewmodel = from->client.viewmodel;
 	player.m_iNextAttack = *(int*)&from->client.m_flNextAttack;
-	player.m_flNextAmmoBurn = from->client.fuser2;
-	player.m_flAmmoStartCharge = from->client.fuser3;
 	gEngfuncs.GetViewAngles(player.pev->v_angle);
 	player.pev->origin = from->client.origin;
 	player.pev->punchangle = from->client.punchangle;
@@ -633,12 +528,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	if (WEAPON_NONE != from->client.m_iId)
 	{
 		player.m_pActiveWeapon = g_pWpns[from->client.m_iId];
-	}
-
-	if (player.m_pActiveWeapon->m_iId == WEAPON_RPG)
-	{
-		((CRpg*)player.m_pActiveWeapon)->m_fSpotActive = static_cast<bool>(from->client.vuser2[1]);
-		((CRpg*)player.m_pActiveWeapon)->m_cActiveRockets = (int)from->client.vuser2[2];
 	}
 
 	// Don't go firing anything if we have died or are spectating
@@ -681,8 +570,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	to->client.fov = player.m_iFOV;
 	to->client.weaponanim = player.pev->weaponanim;
 	*(int*)&to->client.m_flNextAttack = player.m_iNextAttack;
-	to->client.fuser2 = player.m_flNextAmmoBurn;
-	to->client.fuser3 = player.m_flAmmoStartCharge;
 	to->client.maxspeed = player.pev->maxspeed;
 	to->client.punchangle = player.pev->punchangle;
 
@@ -707,19 +594,10 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	ammo_cells[2] = player.m_rgAmmo[AMMO_TRIPMINES];
 	ammo_cells[3] = player.m_rgAmmo[AMMO_SNARKS];
 
-	if (player.m_pActiveWeapon->m_iId == WEAPON_RPG)
-	{
-		to->client.vuser2[1] = static_cast<float>(((CRpg*)player.m_pActiveWeapon)->m_fSpotActive);
-		to->client.vuser2[2] = ((CRpg*)player.m_pActiveWeapon)->m_cActiveRockets;
-	}
-
 	// Make sure that weapon animation matches what the game .dll is telling us
 	//  over the wire ( fixes some animation glitches )
 	if (g_runfuncs && (HUD_GetWeaponAnim() != to->client.weaponanim))
 	{
-		//Make sure the 357 has the right body
-		g_Python.pev->body = util::IsDeathmatch() ? 1 : 0;
-
 		// Force a fixed anim down to viewmodel
 		HUD_SendWeaponAnim(to->client.weaponanim, pWeapon->pev->body, true);
 	}
@@ -774,17 +652,11 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 		pto->m_fInReload = static_cast<int>(pCurrent->m_fInReload);
 		pto->m_fInSpecialReload = pCurrent->m_fInSpecialReload;
-		//		pto->m_flPumpTime				= pCurrent->m_flPumpTime;
 		pto->m_iClip = pCurrent->m_iClip;
 		*(int*)&pto->m_flNextPrimaryAttack = pCurrent->m_iNextPrimaryAttack;
 		*(int*)&pto->m_flNextSecondaryAttack = pCurrent->m_iNextSecondaryAttack;
 		*(int*)&pto->m_flTimeWeaponIdle = pCurrent->m_iTimeWeaponIdle;
-		pto->fuser1 = pCurrent->pev->fuser1;
-		pto->fuser2 = pCurrent->m_flStartThrow;
-		pto->fuser3 = pCurrent->m_flReleaseThrow;
-		pto->iuser1 = pCurrent->m_chargeReady;
 		pto->iuser2 = pCurrent->m_fInAttack;
-		pto->iuser3 = pCurrent->m_fireState;
 
 		// Decrement weapon counters, server does this at same time ( during post think, after doing everything else )
 		pto->m_flNextReload -= cmd->msec / 1000.0;
@@ -821,11 +693,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		if (pto->m_flNextReload < -0.001)
 		{
 			pto->m_flNextReload = -0.001;
-		}
-
-		if (pto->fuser1 < -0.001)
-		{
-			pto->fuser1 = -0.001;
 		}
 	}
 
@@ -873,14 +740,6 @@ void DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* 
 	//Event code depends on this stuff, so always initialize it.
 	HUD_InitClientWeapons();
 	HUD_WeaponsPostThink(from, to, cmd, time, random_seed);
-
-	if (g_irunninggausspred)
-	{
-		Vector forward;
-		gEngfuncs.pfnAngleVectors(v_angles, forward, NULL, NULL);
-		to->client.velocity = to->client.velocity - forward * g_flApplyVel * 5;
-		g_irunninggausspred = false;
-	}
 
 	g_CurrentWeaponId = to->client.m_iId;
 	g_PunchAngle = to->client.punchangle * 2;

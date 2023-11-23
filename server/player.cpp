@@ -99,8 +99,6 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 		DEFINE_FIELD(CBasePlayer, m_iFOV, FIELD_INTEGER),
 
 		DEFINE_FIELD(CBasePlayer, m_SndRoomtype, FIELD_INTEGER),
-
-		DEFINE_FIELD(CBasePlayer, m_flStartCharge, FIELD_TIME),
 };
 
 LINK_ENTITY_TO_CLASS(player, CBasePlayer);
@@ -205,21 +203,17 @@ void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecD
 		case HITGROUP_GENERIC:
 			break;
 		case HITGROUP_HEAD:
-			flDamage *= gSkillData.plrHead;
+			flDamage *= 3;
 			break;
 		case HITGROUP_CHEST:
-			flDamage *= gSkillData.plrChest;
 			break;
 		case HITGROUP_STOMACH:
-			flDamage *= gSkillData.plrStomach;
 			break;
 		case HITGROUP_LEFTARM:
 		case HITGROUP_RIGHTARM:
-			flDamage *= gSkillData.plrArm;
 			break;
 		case HITGROUP_LEFTLEG:
 		case HITGROUP_RIGHTLEG:
-			flDamage *= gSkillData.plrLeg;
 			break;
 		default:
 			break;
@@ -2020,30 +2014,12 @@ pt_end:
 		gun->m_iNextSecondaryAttack = std::max(gun->m_iNextSecondaryAttack - msec, -1);
 		gun->m_iTimeWeaponIdle = std::max(gun->m_iTimeWeaponIdle - msec, -1);
 
-		gun->pev->fuser1 = std::max(gun->pev->fuser1 - gpGlobals->frametime, -0.001F);
-
 		gun->DecrementTimers(msec);
 	}
 
 	m_iNextAttack -= msec;
 	if (m_iNextAttack < -1)
 		m_iNextAttack = -1;
-
-	if (m_flNextAmmoBurn != 1000)
-	{
-		m_flNextAmmoBurn -= gpGlobals->frametime;
-
-		if (m_flNextAmmoBurn < -0.001)
-			m_flNextAmmoBurn = -0.001;
-	}
-
-	if (m_flAmmoStartCharge != 1000)
-	{
-		m_flAmmoStartCharge -= gpGlobals->frametime;
-
-		if (m_flAmmoStartCharge < -0.001)
-			m_flAmmoStartCharge = -0.001;
-	}
 
 	// Track button info so we can detect 'pressed' and 'released' buttons next frame
 	m_afButtonLast = pev->button;
@@ -2523,28 +2499,6 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 	case 101:
 		gEvilImpulse101 = true;
 		SetHasSuit(true);
-		GiveNamedItem("weapon_crowbar");
-		GiveNamedItem("weapon_9mmhandgun");
-		GiveNamedItem("ammo_9mmclip");
-		GiveNamedItem("weapon_shotgun");
-		GiveNamedItem("ammo_buckshot");
-		GiveNamedItem("weapon_9mmAR");
-		GiveNamedItem("ammo_9mmAR");
-		GiveNamedItem("ammo_ARgrenades");
-		GiveNamedItem("weapon_handgrenade");
-		GiveNamedItem("weapon_tripmine");
-		GiveNamedItem("weapon_357");
-		GiveNamedItem("ammo_357");
-		GiveNamedItem("weapon_crossbow");
-		GiveNamedItem("ammo_crossbow");
-		GiveNamedItem("weapon_egon");
-		GiveNamedItem("weapon_gauss");
-		GiveNamedItem("ammo_gaussclip");
-		GiveNamedItem("weapon_rpg");
-		GiveNamedItem("ammo_rpgclip");
-		GiveNamedItem("weapon_satchel");
-		GiveNamedItem("weapon_snark");
-		GiveNamedItem("weapon_hornetgun");
 		gEvilImpulse101 = false;
 		break;
 

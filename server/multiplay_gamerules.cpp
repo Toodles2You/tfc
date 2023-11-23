@@ -241,88 +241,11 @@ void CHalfLifeMultiplay::RefreshSkillData()
 	// load all default values
 	CGameRules::RefreshSkillData();
 
-	// override some values for multiplay.
+	// override some values for deathmatch
 	if (!IsDeathmatch())
+	{
 		return;
-	
-	// Snark
-	gSkillData.snarkHealth = 2;
-	gSkillData.snarkDmgBite = 10;
-	gSkillData.snarkDmgPop = 5;
-
-	// PLAYER WEAPONS
-
-	// Crowbar whack
-	gSkillData.plrDmgCrowbar = 25;
-
-	// Glock Round
-	gSkillData.plrDmg9MM = 12;
-
-	// 357 Round
-	gSkillData.plrDmg357 = 40;
-
-	// MP5 Round
-	gSkillData.plrDmgMP5 = 12;
-
-	// M203 grenade
-	gSkillData.plrDmgM203Grenade = 100;
-
-	// Shotgun buckshot
-	gSkillData.plrDmgBuckshot = 20;
-
-	// Crossbow
-	gSkillData.plrDmgCrossbowClient = 20;
-	gSkillData.plrDmgCrossbowMonster = 50;
-
-	// RPG
-	gSkillData.plrDmgRPG = 120;
-
-	// Gauss gun
-	gSkillData.plrDmgGauss = 20;
-
-	// Egon Gun
-	gSkillData.plrDmgEgonNarrow = 10;
-	gSkillData.plrDmgEgonWide = 20;
-
-	// Hand Grendade
-	gSkillData.plrDmgHandGrenade = 100;
-
-	// Satchel Charge
-	gSkillData.plrDmgSatchel = 120;
-
-	// Tripmine
-	gSkillData.plrDmgTripmine = 150;
-
-	// MONSTER WEAPONS
-	gSkillData.monDmg12MM = 10;
-	gSkillData.monDmgMP5 = 4;
-	gSkillData.monDmg9MM = 5;
-
-	// MONSTER HORNET
-	gSkillData.monDmgHornet = 5;
-
-	// PLAYER HORNET
-	gSkillData.plrDmgHornet = 10;
-
-	// HEALTH/CHARGE
-	gSkillData.suitchargerCapacity = 30;
-	gSkillData.batteryCapacity = 15;
-	gSkillData.healthchargerCapacity = 40;
-	gSkillData.healthkitCapacity = 15;
-
-	// monster damage adj
-	gSkillData.monHead = 3;
-	gSkillData.monChest = 1;
-	gSkillData.monStomach = 1;
-	gSkillData.monLeg = 1;
-	gSkillData.monArm = 1;
-
-	// player damage adj
-	gSkillData.plrHead = 3;
-	gSkillData.plrChest = 1;
-	gSkillData.plrStomach = 1;
-	gSkillData.plrLeg = 1;
-	gSkillData.plrArm = 1;
+	}
 }
 
 // longest the intermission can last, in seconds
@@ -676,9 +599,6 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 
 	if (addDefault)
 	{
-		pPlayer->GiveNamedItem("weapon_crowbar");
-		pPlayer->GiveNamedItem("weapon_9mmhandgun");
-		pPlayer->GiveAmmo(GLOCK_MAX_CLIP * 4, AMMO_9MM, _9MM_MAX_CARRY); // 4 full reloads
 	}
 
 	pPlayer->m_iAutoWepSwitch = originalAutoWepSwitch;
@@ -771,11 +691,6 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer,
 
 		// let the killer paint another decal as soon as they'd like.
 		((CBasePlayer *)killer)->m_flNextDecalTime = gpGlobals->time;
-	}
-
-	if (pVictim->HasNamedPlayerWeapon("weapon_satchel"))
-	{
-		DeactivateSatchels(pVictim);
 	}
 }
 

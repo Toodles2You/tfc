@@ -296,10 +296,6 @@ public:
 	void SetCustomDecalFrames(int nFrames);
 	int GetCustomDecalFrames();
 
-	float m_flStartCharge;
-	float m_flAmmoStartCharge;
-	float m_flNextAmmoBurn; // while charging, when to absorb another unit of player's ammo?
-
 	float m_flNextChatTime;
 
 	void SetPrefsFromUserinfo(char* infobuffer);

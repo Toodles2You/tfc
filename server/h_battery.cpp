@@ -93,7 +93,7 @@ bool CRecharge::Spawn()
 	SetSize(pev->mins, pev->maxs);
 	SetOrigin(pev->origin); // set size and link into world
 	SetModel(STRING(pev->model));
-	m_iJuice = gSkillData.suitchargerCapacity;
+	m_iJuice = 30;
 	pev->frame = 0;
 
 	return true;
@@ -184,7 +184,7 @@ void CRecharge::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 
 void CRecharge::Recharge()
 {
-	m_iJuice = gSkillData.suitchargerCapacity;
+	m_iJuice = 30;
 	pev->frame = 0;
 	SetThink(nullptr);
 }

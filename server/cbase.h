@@ -282,12 +282,7 @@ public:
 	int m_iNextAttack;
 
 	//Special stuff for grenades and satchels.
-	float m_flStartThrow;
-	float m_flReleaseThrow;
-	int m_chargeReady;
 	int m_fInAttack;
-
-	int m_fireState;
 
 	float m_flFieldOfView;
 

@@ -29,7 +29,6 @@ HL1_OBJS = \
 	$(HL1_OBJ_DIR)/hud_spectator.o \
 	$(HL1_OBJ_DIR)/ev_hldm.o \
 	$(HL1_OBJ_DIR)/hl/hl_baseentity.o \
-	$(HL1_OBJ_DIR)/hl/hl_events.o \
 	$(HL1_OBJ_DIR)/hl/hl_objects.o \
 	$(HL1_OBJ_DIR)/hl/hl_weapons.o \
 	$(HL1_OBJ_DIR)/hud.o \
@@ -44,7 +43,6 @@ HL1_OBJS = \
 	$(HL1_OBJ_DIR)/demo.o \
 	$(HL1_OBJ_DIR)/entity.o \
 	$(HL1_OBJ_DIR)/ev_common.o \
-	$(HL1_OBJ_DIR)/events.o \
 	$(HL1_OBJ_DIR)/flashlight.o \
 	$(HL1_OBJ_DIR)/GameStudioModelRenderer.o \
 	$(HL1_OBJ_DIR)/geiger.o \
@@ -85,20 +83,6 @@ HL1_PARTICLEMAN_OBJS = \
 	$(HL1_PARTICLEMAN_OBJ_DIR)/IParticleMan_Active.o \
 	
 DLL_OBJS = \
-	$(HL1_SERVER_OBJ_DIR)/crossbow.o \
-	$(HL1_SERVER_OBJ_DIR)/crowbar.o \
-	$(HL1_SERVER_OBJ_DIR)/egon.o \
-	$(HL1_SERVER_OBJ_DIR)/gauss.o \
-	$(HL1_SERVER_OBJ_DIR)/glock.o \
-	$(HL1_SERVER_OBJ_DIR)/handgrenade.o \
-	$(HL1_SERVER_OBJ_DIR)/hornetgun.o \
-	$(HL1_SERVER_OBJ_DIR)/mp5.o \
-	$(HL1_SERVER_OBJ_DIR)/python.o \
-	$(HL1_SERVER_OBJ_DIR)/rpg.o \
-	$(HL1_SERVER_OBJ_DIR)/satchel.o \
-	$(HL1_SERVER_OBJ_DIR)/shotgun.o \
-	$(HL1_SERVER_OBJ_DIR)/squeakgrenade.o \
-	$(HL1_SERVER_OBJ_DIR)/tripmine.o \
 	$(HL1_SERVER_OBJ_DIR)/weapons_shared.o \
 
 

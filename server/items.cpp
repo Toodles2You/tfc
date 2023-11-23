@@ -227,7 +227,7 @@ class CItemBattery : public CItem
 			int pct;
 			char szcharge[64];
 
-			pPlayer->pev->armorvalue += gSkillData.batteryCapacity;
+			pPlayer->pev->armorvalue += 15;
 			pPlayer->pev->armorvalue = std::min(pPlayer->pev->armorvalue, MAX_NORMAL_BATTERY);
 
 			pPlayer->EmitSound("items/gunpickup2.wav", CHAN_ITEM);

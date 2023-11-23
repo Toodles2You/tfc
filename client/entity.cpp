@@ -226,12 +226,6 @@ Gives us a chance to add additional entities to the render this frame
 */
 void DLLEXPORT HUD_CreateEntities()
 {
-	//	RecClCreateEntities();
-
-#if defined(BEAM_TEST)
-	Beams();
-#endif
-
 	// Add in any game specific objects
 	Game_AddObjects();
 

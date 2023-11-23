@@ -1717,12 +1717,7 @@ int GetWeaponData(struct edict_s* player, struct weapon_data_s* info)
 		*(int*)&data->m_flNextSecondaryAttack = std::max(gun->m_iNextSecondaryAttack, -1);
 		data->m_fInReload = static_cast<int>(gun->m_fInReload);
 		data->m_fInSpecialReload = gun->m_fInSpecialReload;
-		data->fuser1 = std::max(gun->pev->fuser1, -0.001F);
-		data->fuser2 = gun->m_flStartThrow;
-		data->fuser3 = gun->m_flReleaseThrow;
-		data->iuser1 = gun->m_chargeReady;
 		data->iuser2 = gun->m_fInAttack;
-		data->iuser3 = gun->m_fireState;
 
 		gun->GetWeaponData(*data);
 	}
@@ -1811,8 +1806,6 @@ void UpdateClientData(const edict_t* ent, int sendweapons, struct clientdata_s* 
 		if (pl)
 		{
 			*(int*)&cd->m_flNextAttack = pl->m_iNextAttack;
-			cd->fuser2 = pl->m_flNextAmmoBurn;
-			cd->fuser3 = pl->m_flAmmoStartCharge;
 
 			ammo_shells[0] = pl->m_rgAmmo[AMMO_9MM];
 			ammo_shells[1] = pl->m_rgAmmo[AMMO_357];
@@ -1839,12 +1832,6 @@ void UpdateClientData(const edict_t* ent, int sendweapons, struct clientdata_s* 
 				gun->GetWeaponInfo(&II);
 
 				cd->m_iId = II.iId;
-
-				if (pl->m_pActiveWeapon->m_iId == WEAPON_RPG)
-				{
-					cd->vuser2.y = static_cast<vec_t>(((CRpg*)pl->m_pActiveWeapon)->m_fSpotActive);
-					cd->vuser2.z = ((CRpg*)pl->m_pActiveWeapon)->m_cActiveRockets;
-				}
 			}
 		}
 	}

@@ -69,5 +69,3 @@ struct skilldata_t
 	float plrLeg;
 	float plrArm;
 };
-
-inline skilldata_t gSkillData;
