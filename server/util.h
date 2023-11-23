@@ -394,6 +394,14 @@ void ShowMessageAll(const char* pString);
 void ScreenFadeAll(const Vector& color, float fadeTime, float holdTime, int alpha, int flags);
 void ScreenFade(CBaseEntity* pEntity, const Vector& color, float fadeTime, float fadeHold, int alpha, int flags);
 
+enum
+{
+	kTraceIgnoreMonsters = 1,
+	kTraceIgnoreGlass = 2,
+	kTraceBox = 4, /* Trace against bounding boxes, rather than models */
+	kTraceBoxModel = 8, /* Perform a second trace after the box trace to check for a body part hit */
+};
+
 typedef enum
 {
 	ignore_monsters = 1,
@@ -407,6 +415,9 @@ typedef enum
 } IGNORE_GLASS;
 void TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, CBaseEntity* ignore, TraceResult* ptr);
 void TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, CBaseEntity* ignore, TraceResult* ptr);
+
+bool TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CBaseEntity* ignore = nullptr, int flags = 0, int hull = 0);
+
 enum
 {
 	point_hull = 0,

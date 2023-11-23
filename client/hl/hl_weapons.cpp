@@ -302,6 +302,13 @@ void util::TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTE
 	ptr->flFraction = 1.0;
 }
 
+bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CBaseEntity* ignore, int flags, int hull)
+{
+	memset(tr, 0, sizeof(*tr));
+	tr->flFraction = 1.0;
+	return false;
+}
+
 /*
 =====================
 HUD_PlaybackEvent

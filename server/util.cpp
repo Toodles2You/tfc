@@ -942,6 +942,58 @@ void util::TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTE
 }
 
 
+bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CBaseEntity* ignore, int flags, int hull)
+{
+	int traceFlags = 0;
+
+	if ((flags & kTraceIgnoreMonsters) != 0)
+	{
+		traceFlags |= 1;
+	}
+
+	if ((flags & kTraceIgnoreGlass) != 0)
+	{
+		traceFlags |= 256;
+	}
+
+	if ((flags & kTraceBox) != 0)
+	{
+		gpGlobals->trace_flags |= FTRACE_SIMPLEBOX;
+	}
+
+	edict_t* ignoreEnt = ignore ? ignore->pev->pContainingEntity : nullptr;
+
+	if (hull == point_hull)
+	{	
+		g_engfuncs.pfnTraceLine(start, end, traceFlags, ignoreEnt, tr);
+	}
+	else
+	{
+		g_engfuncs.pfnTraceHull(start, end, traceFlags, hull, ignoreEnt, tr);
+	}
+
+	if ((flags & kTraceBoxModel) != 0 && tr->flFraction != 1.0F)
+	{
+		TraceResult tr2;
+		if (hull == point_hull)
+		{
+			g_engfuncs.pfnTraceLine(tr->vecEndPos, end, traceFlags, ignoreEnt, &tr2);
+		}
+		else
+		{
+			g_engfuncs.pfnTraceHull(start, end, traceFlags, hull, ignoreEnt, &tr2);
+		}
+		
+		if (tr2.flFraction != 1.0F && tr2.pHit == tr->pHit)
+		{
+			*tr = tr2;
+		}
+	}
+
+	return tr->flFraction != 1.0F;
+}
+
+
 void util::TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t* pentIgnore, TraceResult* ptr)
 {
 	TRACE_HULL(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), hullNumber, pentIgnore, ptr);

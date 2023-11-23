@@ -479,18 +479,21 @@ enum crowbar_e
 class CCrowbar : public CBasePlayerWeapon
 {
 public:
+	enum
+	{
+		kCrowbarMiss = 0,
+		kCrowbarHitWorld,
+		kCrowbarHitPlayer,
+	};
+
 	bool Spawn() override;
 	void Precache() override;
-	void EXPORT SwingAgain();
-	void EXPORT Smack();
 	bool GetWeaponInfo(WeaponInfo* p) override;
 
 	void PrimaryAttack() override;
-	bool Swing(bool fFirst);
 	bool Deploy() override;
 	bool Holster() override;
-	int m_iSwing;
-	TraceResult m_trHit;
+	void WeaponPostFrame() override;
 
 private:
 	unsigned short m_usCrowbar;

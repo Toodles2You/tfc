@@ -1039,35 +1039,122 @@ void EV_FireGauss(event_args_t* args)
 //======================
 //	   CROWBAR START
 //======================
-int g_iSwing;
+static int g_iSwing;
 
-//Only predict the miss sounds, hit sounds are still played
-//server side, so players don't get the wrong idea.
 void EV_Crowbar(event_args_t* args)
 {
-	int idx;
-	Vector origin;
+	Vector gun;
+	EV_GetGunPosition(args, gun, args->origin);
 
-	idx = args->entindex;
-	VectorCopy(args->origin, origin);
+	const auto reliable = args->bparam1;
+	auto hit = args->iparam1;
 
-	//Play Swing sound
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/cbar_miss1.wav", 1, ATTN_NORM, 0, PITCH_NORM);
+	pmtrace_t tr;
 
-	if (EV_IsLocal(idx))
+	if (!reliable)
 	{
-		switch ((g_iSwing++) % 3)
+		gEngfuncs.pEventAPI->EV_PushPMStates();
+		gEngfuncs.pEventAPI->EV_SetSolidPlayers(args->entindex - 1);
+		gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+
+		Vector forward, right, up;
+		AngleVectors(args->angles, forward, right, up);
+
+		gEngfuncs.pEventAPI->EV_PlayerTrace(gun, gun + forward * 64, PM_NORMAL, -1, &tr);
+
+		if (EV_IsLocal(args->entindex))
 		{
-		case 0:
-			gEngfuncs.pEventAPI->EV_WeaponAnimation(CROWBAR_ATTACK1MISS, 0);
-			break;
-		case 1:
-			gEngfuncs.pEventAPI->EV_WeaponAnimation(CROWBAR_ATTACK2MISS, 0);
-			break;
-		case 2:
-			gEngfuncs.pEventAPI->EV_WeaponAnimation(CROWBAR_ATTACK3MISS, 0);
-			break;
+			g_iSwing++;
 		}
+
+		if (tr.fraction != 1.0F)
+		{
+			auto ent = gEngfuncs.pEventAPI->EV_GetPhysent(tr.ent);
+
+			if (ent->solid != SOLID_BSP && ent->movetype != MOVETYPE_PUSHSTEP)
+			{
+				hit = CCrowbar::kCrowbarHitPlayer;
+			}
+			else
+			{
+				hit = CCrowbar::kCrowbarHitWorld;
+			}
+		}
+		else
+		{
+			hit = CCrowbar::kCrowbarMiss;
+		}
+	}
+
+	if (hit == CCrowbar::kCrowbarMiss)
+	{
+		if (EV_IsLocal(args->entindex))
+		{
+			switch (g_iSwing % 3)
+			{
+			case 0: gEngfuncs.pEventAPI->EV_WeaponAnimation(CROWBAR_ATTACK1MISS, 0); break;
+			case 1: gEngfuncs.pEventAPI->EV_WeaponAnimation(CROWBAR_ATTACK2MISS, 0); break;
+			case 2: gEngfuncs.pEventAPI->EV_WeaponAnimation(CROWBAR_ATTACK3MISS, 0); break;
+			}
+		}
+
+		//Play Swing sound
+		gEngfuncs.pEventAPI->EV_PlaySound(
+			args->entindex,
+			args->origin,
+			CHAN_WEAPON,
+			"weapons/cbar_miss1.wav",
+			VOL_NORM,
+			ATTN_NORM,
+			0,
+			PITCH_NORM);
+	}
+	else
+	{
+		if (EV_IsLocal(args->entindex))
+		{
+			switch (g_iSwing % 3)
+			{
+			case 0: gEngfuncs.pEventAPI->EV_WeaponAnimation(CROWBAR_ATTACK1HIT, 0); break;
+			case 1: gEngfuncs.pEventAPI->EV_WeaponAnimation(CROWBAR_ATTACK2HIT, 0); break;
+			case 2: gEngfuncs.pEventAPI->EV_WeaponAnimation(CROWBAR_ATTACK3HIT, 0); break;
+			}
+		}
+
+		const char* sample;
+
+		if (hit == CCrowbar::kCrowbarHitWorld)
+		{
+			switch (gEngfuncs.pfnRandomLong(0, 1))
+			{
+				case 0: sample = "weapons/cbar_hit1.wav"; break;
+				case 1: sample = "weapons/cbar_hit2.wav"; break;
+			}
+		}
+		else
+		{
+			switch (gEngfuncs.pfnRandomLong(0, 2))
+			{
+				case 0: sample = "weapons/cbar_hitbod1.wav"; break;
+				case 1: sample = "weapons/cbar_hitbod2.wav"; break;
+				case 2: sample = "weapons/cbar_hitbod3.wav"; break;
+			}
+		}
+
+		gEngfuncs.pEventAPI->EV_PlaySound(
+			args->entindex,
+			args->origin,
+			CHAN_ITEM,
+			sample,
+			VOL_NORM,
+			ATTN_NORM,
+			0,
+			PITCH_NORM);
+	}
+	
+	if (!reliable)
+	{
+		gEngfuncs.pEventAPI->EV_PopPMStates();
 	}
 }
 //======================
