@@ -2645,10 +2645,11 @@ void PM_Jump()
 		// Adjust for super long jump module
 		if (cansuperjump)
 		{
-			for (i = 0; i < 2; i++)
-			{
-				pmove->velocity[i] = pmove->forward[i] * PLAYER_LONGJUMP_SPEED * 1.6;
-			}
+			Vector yaw = {0, pmove->angles[YAW], 0};
+			Vector flatForward;
+			AngleVectors(yaw, &flatForward, nullptr, nullptr);
+
+			pmove->velocity = flatForward * PLAYER_LONGJUMP_SPEED * 1.6F;
 
 			pmove->velocity[2] = sqrt(2 * 800 * 56.0);
 		}
