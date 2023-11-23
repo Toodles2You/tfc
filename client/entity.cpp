@@ -70,16 +70,11 @@ structure, we need to copy them into the state structure at this point.
 */
 void DLLEXPORT HUD_TxferLocalOverrides(struct entity_state_s* state, const struct clientdata_s* client)
 {
-	VectorCopy(client->origin, state->origin);
+	state->origin = client->origin;
 
-	// Spectator
 	state->iuser1 = client->iuser1;
 	state->iuser2 = client->iuser2;
-
-	// Duck prevention
 	state->iuser3 = client->iuser3;
-
-	// Fire prevention
 	state->iuser4 = client->iuser4;
 
 	state->health = static_cast<int>(client->health);
@@ -187,12 +182,10 @@ void DLLEXPORT HUD_TxferPredictionData(struct entity_state_s* ps, const struct e
 	// Spectating or not dead == get control over view angles.
 	g_iAlive = (0 != ppcd->iuser1 || (pcd->deadflag == DEAD_NO));
 
-	// Spectator
 	pcd->iuser1 = ppcd->iuser1;
 	pcd->iuser2 = ppcd->iuser2;
-
-	// Duck prevention
 	pcd->iuser3 = ppcd->iuser3;
+	pcd->iuser4 = ppcd->iuser4;
 
 	if (0 != gEngfuncs.IsSpectateOnly())
 	{
@@ -202,17 +195,6 @@ void DLLEXPORT HUD_TxferPredictionData(struct entity_state_s* ps, const struct e
 		pcd->iuser2 = g_iUser2; // first target
 		pcd->iuser3 = g_iUser3; // second target
 	}
-
-	// Fire prevention
-	pcd->iuser4 = ppcd->iuser4;
-
-	pcd->fuser2 = ppcd->fuser2;
-	pcd->fuser3 = ppcd->fuser3;
-
-	VectorCopy(ppcd->vuser1, pcd->vuser1);
-	VectorCopy(ppcd->vuser2, pcd->vuser2);
-	VectorCopy(ppcd->vuser3, pcd->vuser3);
-	VectorCopy(ppcd->vuser4, pcd->vuser4);
 
 	memcpy(wd, pwd, MAX_WEAPONS * sizeof(weapon_data_t));
 }

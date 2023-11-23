@@ -653,8 +653,8 @@ bool CBasePlayerWeapon::DefaultDeploy(const char* szViewModel, const char* szWea
 	if (!CanDeploy())
 		return false;
 
-	m_pPlayer->pev->viewmodel = MAKE_STRING(szViewModel);
-	m_pPlayer->pev->weaponmodel = MAKE_STRING(szWeaponModel);
+	m_pPlayer->pev->viewmodel = g_engfuncs.pfnModelIndex(szViewModel);
+	m_pPlayer->pev->weaponmodel = g_engfuncs.pfnModelIndex(szWeaponModel);
 	strcpy(m_pPlayer->m_szAnimExtention, szAnimExt);
 	SendWeaponAnim(iAnim, body);
 
@@ -837,9 +837,8 @@ void CBasePlayerWeapon::DoRetireWeapon()
 	}
 
 	// first, no viewmodel at all.
-	m_pPlayer->pev->viewmodel = iStringNull;
-	m_pPlayer->pev->weaponmodel = iStringNull;
-	//m_pPlayer->pev->viewmodelindex = NULL;
+	m_pPlayer->pev->viewmodel = 0;
+	m_pPlayer->pev->weaponmodel = 0;
 
 	g_pGameRules->GetNextBestWeapon(m_pPlayer, this);
 

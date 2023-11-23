@@ -1473,9 +1473,6 @@ void CBasePlayer::PreThink()
 	if (g_fGameOver)
 		return; // intermission or finale
 
-	util::MakeVectors(pev->v_angle); // is this still used?
-
-	WeaponPreFrame();
 	WaterMove();
 
 	if (m_bResetViewEntity)
@@ -1915,117 +1912,6 @@ void CBasePlayer::CheckAmmoLevel(CBasePlayerWeapon* pWeapon, bool bPrimary)
 	}
 }
 
-
-void CBasePlayer::PostThink()
-{
-	if (g_fGameOver)
-		goto pt_end; // intermission or finale
-
-	if (!IsAlive())
-		goto pt_end;
-
-	// Handle Tank controlling
-	if (m_pTank != NULL)
-	{ // if they've moved too far from the gun,  or selected a weapon, unuse the gun
-		if (m_pTank->OnControls(pev) && 0 == pev->weaponmodel)
-		{
-			m_pTank->Use(this, this, USE_SET, 2); // try fire the gun
-		}
-		else
-		{ // they've moved off the platform
-			m_pTank->Use(this, this, USE_OFF, 0);
-			m_pTank = NULL;
-		}
-	}
-
-	// do weapon stuff
-	WeaponPostFrame();
-
-	// check to see if player landed hard enough to make a sound
-	// falling farther than half of the maximum safe distance, but not as far a max safe distance will
-	// play a bootscrape sound, and no damage will be inflicted. Fallling a distance shorter than half
-	// of maximum safe distance will make no sound. Falling farther than max safe distance will play a
-	// fallpain sound, and damage will be inflicted based on how far the player fell
-
-	if ((FBitSet(pev->flags, FL_ONGROUND)) && (pev->health > 0) && m_flFallVelocity >= PLAYER_FALL_PUNCH_THRESHHOLD)
-	{
-		// ALERT ( at_console, "%f\n", m_flFallVelocity );
-
-		if (pev->watertype == CONTENT_WATER)
-		{
-			// Did he hit the world or a non-moving entity?
-			// BUG - this happens all the time in water, especially when
-			// BUG - water has current force
-			// if ( !pev->groundentity || VARS(pev->groundentity)->velocity.z == 0 )
-			// EmitSound("player/pl_wade1.wav", CHAN_VOICE);
-		}
-		else if (m_flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED)
-		{ // after this point, we start doing damage
-
-			float flFallDamage = g_pGameRules->FlPlayerFallDamage(this);
-
-			if (flFallDamage > 0)
-			{
-				TakeDamage(CWorld::World, CWorld::World, flFallDamage, DMG_FALL);
-
-				if (pev->health <= 0)
-				{
-					EmitSound("common/bodysplat.wav", CHAN_VOICE);
-				}
-			}
-		}
-
-		SetAnimation(PLAYER_WALK);
-	}
-
-	if (FBitSet(pev->flags, FL_ONGROUND))
-	{
-		m_flFallVelocity = 0;
-	}
-
-	// select the proper animation for the player character
-	if (0 == pev->velocity.x && 0 == pev->velocity.y)
-	{
-		SetAnimation(PLAYER_IDLE);
-	}
-	else if (FBitSet(pev->flags, FL_ONGROUND))
-	{
-		SetAnimation(PLAYER_WALK);
-	}
-	else if (pev->waterlevel > 1)
-	{
-		SetAnimation(PLAYER_WALK);
-	}
-
-pt_end:
-	StudioFrameAdvance();
-
-	const int msec = static_cast<int>(std::roundf(gpGlobals->frametime * 1000));
-
-	float len = VectorNormalize(pev->punchangle);
-	len -= (10.0 + len * 0.5) * gpGlobals->frametime;
-	len = std::max(len, 0.0F);
-	VectorScale(pev->punchangle, len, pev->punchangle);
-
-	// Decay timers on weapons
-	for (auto gun : m_lpPlayerWeapons)
-	{
-		gun->m_iNextPrimaryAttack = std::max(gun->m_iNextPrimaryAttack - msec, -1100);
-		gun->m_iNextSecondaryAttack = std::max(gun->m_iNextSecondaryAttack - msec, -1);
-		gun->m_iTimeWeaponIdle = std::max(gun->m_iTimeWeaponIdle - msec, -1);
-
-		gun->DecrementTimers(msec);
-	}
-
-	m_iNextAttack -= msec;
-	if (m_iNextAttack < -1)
-		m_iNextAttack = -1;
-
-	// Track button info so we can detect 'pressed' and 'released' buttons next frame
-	m_afButtonLast = pev->button;
-}
-
-
 bool CBasePlayer::Spawn()
 {
 	m_bIsSpawning = true;
@@ -2446,12 +2332,6 @@ void CBasePlayer::ImpulseCommands()
 	int iImpulse = (int)pev->impulse;
 	switch (iImpulse)
 	{
-	case 99:
-		break;
-	case 100:
-		// temporary flashlight for level designers
-		break;
-
 	case 201: // paint decal
 
 		if (gpGlobals->time < m_flNextDecalTime)
@@ -2727,58 +2607,6 @@ int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax)
 	}
 
 	return iType;
-}
-
-
-/*
-============
-WeaponPreFrame
-
-Called every frame by the player PreThink
-============
-*/
-void CBasePlayer::WeaponPreFrame()
-{
-	if (m_iNextAttack > 0)
-	{
-		return;
-	}
-
-	if (!m_pActiveWeapon)
-		return;
-
-	m_pActiveWeapon->WeaponPreFrame();
-}
-
-
-/*
-============
-WeaponPostFrame
-
-Called every frame by the player PostThink
-============
-*/
-void CBasePlayer::WeaponPostFrame()
-{
-	ImpulseCommands();
-
-	// check if the player is using a tank
-	if (m_pTank != NULL)
-		return;
-
-	if (m_iNextAttack > 0)
-	{
-		return;
-	}
-
-	// check again if the player is using a tank if they started using it in PlayerUse
-	if (m_pTank != NULL)
-		return;
-
-	if (!m_pActiveWeapon)
-		return;
-
-	m_pActiveWeapon->WeaponPostFrame();
 }
 
 int CBasePlayer::AmmoInventory(int iAmmoIndex)

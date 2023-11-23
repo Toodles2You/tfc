@@ -398,10 +398,6 @@ Run Weapon firing code on client
 void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd, double time, unsigned int random_seed)
 {
 	int i;
-	int buttonsChanged;
-	CBasePlayerWeapon* pWeapon = nullptr;
-	CBasePlayerWeapon* pCurrent;
-	weapon_data_t *pfrom, *pto;
 	static int lasthealth;
 
 	// Get current clock
@@ -442,87 +438,24 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		gHUD.m_Battery.Update_Battery(to->client.vuser4.z);
 	}
 
-	// We are not predicting the current weapon, just bow out here.
-	if (!pWeapon)
-	{
-		gHUD.m_Ammo.Update_CurWeapon(0, -1, -1);
-		return;
-	}
+	player.random_seed = random_seed;
+
+	player.pev->button = cmd->buttons;
+	player.m_afButtonLast = from->playerstate.oldbuttons;
+	
+	player.PreThink();
+
+	player.SetClientData(from->client);
 
 	for (i = 0; i < MAX_WEAPONS; i++)
 	{
-		pCurrent = g_pWpns[i];
-		if (!pCurrent)
+		const auto current = g_pWpns[i];
+		if (!current)
 		{
 			continue;
 		}
-
-		pfrom = &from->weapondata[i];
-
-		pCurrent->m_fInReload = 0 != pfrom->m_fInReload;
-		pCurrent->m_fInSpecialReload = pfrom->m_fInSpecialReload;
-		pCurrent->m_iClip = pfrom->m_iClip;
-		pCurrent->m_iNextPrimaryAttack = *(int*)&pfrom->m_flNextPrimaryAttack;
-		pCurrent->m_iNextSecondaryAttack = *(int*)&pfrom->m_flNextSecondaryAttack;
-		pCurrent->m_iTimeWeaponIdle = *(int*)&pfrom->m_flTimeWeaponIdle;
-		pCurrent->m_fInAttack = pfrom->iuser2;
-
-		pCurrent->SetWeaponData(*pfrom);
+		current->SetWeaponData(from->weapondata[i]);
 	}
-
-	// For random weapon events, use this seed to seed random # generator
-	player.random_seed = random_seed;
-
-	// Get old buttons from previous state.
-	player.m_afButtonLast = from->playerstate.oldbuttons;
-
-	// Which buttsons chave changed
-	buttonsChanged = (player.m_afButtonLast ^ cmd->buttons); // These buttons have changed this frame
-
-	// Debounced button codes for pressed/released
-	// The changed ones still down are "pressed"
-	player.m_afButtonPressed = buttonsChanged & cmd->buttons;
-	// The ones not down are "released"
-	player.m_afButtonReleased = buttonsChanged & (~cmd->buttons);
-
-	// Set player variables that weapons code might check/alter
-	player.pev->button = cmd->buttons;
-
-	player.pev->velocity = from->client.velocity;
-	player.pev->flags = from->client.flags;
-
-	player.pev->deadflag = from->client.deadflag;
-	player.pev->waterlevel = from->client.waterlevel;
-	player.pev->maxspeed = from->client.maxspeed;
-	player.m_iFOV = from->client.fov;
-	player.pev->weaponanim = from->client.weaponanim;
-	player.pev->viewmodel = from->client.viewmodel;
-	player.m_iNextAttack = *(int*)&from->client.m_flNextAttack;
-	gEngfuncs.GetViewAngles(player.pev->v_angle);
-	player.pev->origin = from->client.origin;
-	player.pev->punchangle = from->client.punchangle;
-
-	//Stores all our ammo info, so the client side weapons can use them.
-	byte* ammo_shells = (byte*)&from->client.ammo_shells;
-	byte* ammo_nails = (byte*)&from->client.ammo_nails;
-	byte* ammo_cells = (byte*)&from->client.ammo_cells;
-	byte* ammo_rockets = (byte*)&from->client.ammo_rockets;
-
-	player.m_rgAmmo[AMMO_9MM] = ammo_shells[0];
-	player.m_rgAmmo[AMMO_357] = ammo_shells[1];
-	player.m_rgAmmo[AMMO_ARGRENADES] = ammo_shells[2];
-	player.m_rgAmmo[AMMO_BOLTS] = ammo_shells[3];
-
-	player.m_rgAmmo[AMMO_BUCKSHOT] = ammo_nails[0];
-	player.m_rgAmmo[AMMO_URANIUM] = ammo_nails[1];
-	player.m_rgAmmo[AMMO_ROCKETS] = ammo_nails[2];
-	player.m_rgAmmo[AMMO_HORNETS] = ammo_nails[3];
-
-	player.m_rgAmmo[AMMO_HANDGRENADES] = ammo_cells[0];
-	player.m_rgAmmo[AMMO_SATCHELS] = ammo_cells[1];
-	player.m_rgAmmo[AMMO_TRIPMINES] = ammo_cells[2];
-	player.m_rgAmmo[AMMO_SNARKS] = ammo_cells[3];
-
 
 	// Point to current weapon object
 	if (WEAPON_NONE != from->client.m_iId)
@@ -530,190 +463,27 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		player.m_pActiveWeapon = g_pWpns[from->client.m_iId];
 	}
 
-	// Don't go firing anything if we have died or are spectating
-	// Or if we don't have a weapon model deployed
-	if ((player.pev->deadflag != (DEAD_DISCARDBODY + 1)) &&
-		!CL_IsDead() && 0 != player.pev->viewmodel && 0 == g_iUser1)
-	{
-		if (player.m_iNextAttack <= 0)
-		{
-			pWeapon->WeaponPostFrame();
-		}
-	}
-
-	// Assume that we are not going to switch weapons
-	to->client.m_iId = from->client.m_iId;
-
-	// Now see if we issued a changeweapon command ( and we're not dead )
-	if (0 != cmd->weaponselect && (player.pev->deadflag != (DEAD_DISCARDBODY + 1)))
-	{
-		// Switched to a different weapon?
-		if (from->weapondata[cmd->weaponselect].m_iId == cmd->weaponselect)
-		{
-			CBasePlayerWeapon* pNew = g_pWpns[cmd->weaponselect];
-			if (pNew && (pNew != pWeapon))
-			{
-				// Put away old weapon
-				// Deploy new weapon
-				if ((!player.m_pActiveWeapon || player.m_pActiveWeapon->Holster()) && pNew->Deploy())
-				{
-					player.m_pActiveWeapon = pNew;
-					// Update weapon id so we can predict things correctly.
-					to->client.m_iId = cmd->weaponselect;
-				}
-			}
-		}
-	}
-
-	// Copy in results of prediction code
-	to->client.viewmodel = player.pev->viewmodel;
-	to->client.fov = player.m_iFOV;
-	to->client.weaponanim = player.pev->weaponanim;
-	*(int*)&to->client.m_flNextAttack = player.m_iNextAttack;
-	to->client.maxspeed = player.pev->maxspeed;
-	to->client.punchangle = player.pev->punchangle;
-
-	//HL Weapons
-	ammo_shells = (byte*)&to->client.ammo_shells;
-	ammo_nails = (byte*)&to->client.ammo_nails;
-	ammo_cells = (byte*)&to->client.ammo_cells;
-	ammo_rockets = (byte*)&to->client.ammo_rockets;
-
-	ammo_shells[0] = player.m_rgAmmo[AMMO_9MM];
-	ammo_shells[1] = player.m_rgAmmo[AMMO_357];
-	ammo_shells[2] = player.m_rgAmmo[AMMO_ARGRENADES];
-	ammo_shells[3] = player.m_rgAmmo[AMMO_BOLTS];
-
-	ammo_nails[0] = player.m_rgAmmo[AMMO_BUCKSHOT];
-	ammo_nails[1] = player.m_rgAmmo[AMMO_URANIUM];
-	ammo_nails[2] = player.m_rgAmmo[AMMO_ROCKETS];
-	ammo_nails[3] = player.m_rgAmmo[AMMO_HORNETS];
-
-	ammo_cells[0] = player.m_rgAmmo[AMMO_HANDGRENADES];
-	ammo_cells[1] = player.m_rgAmmo[AMMO_SATCHELS];
-	ammo_cells[2] = player.m_rgAmmo[AMMO_TRIPMINES];
-	ammo_cells[3] = player.m_rgAmmo[AMMO_SNARKS];
-
-	// Make sure that weapon animation matches what the game .dll is telling us
-	//  over the wire ( fixes some animation glitches )
-	if (g_runfuncs && (HUD_GetWeaponAnim() != to->client.weaponanim))
-	{
-		// Force a fixed anim down to viewmodel
-		HUD_SendWeaponAnim(to->client.weaponanim, pWeapon->pev->body, true);
-	}
+	player.PostThink();
 
 	if (g_runfuncs)
 	{
 		gHUD.Update_SetFOV(to->client.fov);
 	}
 
-	float len = VectorNormalize(to->client.punchangle);
-	len -= (10.0 + len * 0.5) * cmd->msec / 1000.0;
-	len = std::max(len, 0.0F);
-	VectorScale(to->client.punchangle, len, to->client.punchangle);
-
-	static bool bAmmoUpdated[MAX_AMMO_SLOTS];
-	int iAmmoType, iAmmo2Type;
-
-	memset(bAmmoUpdated, 0, sizeof(bAmmoUpdated));
-
 	for (i = 0; i < MAX_WEAPONS; i++)
 	{
-		pCurrent = g_pWpns[i];
-
-		pto = &to->weapondata[i];
-
-		if (!pCurrent)
+		const auto current = g_pWpns[i];
+		if (!current)
 		{
-			memset(pto, 0, sizeof(weapon_data_t));
+			memset(to->weapondata + i, 0, sizeof(weapon_data_t));
 			continue;
 		}
-
-		if (g_runfuncs)
-		{
-			gHUD.m_Ammo.Update_CurWeapon(to->client.m_iId == pCurrent->m_iId ? 1 : 0, pCurrent->m_iId, pCurrent->m_iClip);
-
-			iAmmoType = pCurrent->iAmmo1();
-
-			if (iAmmoType > AMMO_NONE && !bAmmoUpdated[iAmmoType])
-			{
-				gHUD.m_Ammo.Update_AmmoX(iAmmoType, player.m_rgAmmo[iAmmoType]);
-				bAmmoUpdated[iAmmoType] = true;
-			}
-
-			iAmmo2Type = pCurrent->iAmmo2();
-
-			if (iAmmo2Type > AMMO_NONE && !bAmmoUpdated[iAmmo2Type])
-			{
-				gHUD.m_Ammo.Update_AmmoX(iAmmo2Type, player.m_rgAmmo[iAmmo2Type]);
-				bAmmoUpdated[iAmmo2Type] = true;
-			}
-		}
-
-		pto->m_fInReload = static_cast<int>(pCurrent->m_fInReload);
-		pto->m_fInSpecialReload = pCurrent->m_fInSpecialReload;
-		pto->m_iClip = pCurrent->m_iClip;
-		*(int*)&pto->m_flNextPrimaryAttack = pCurrent->m_iNextPrimaryAttack;
-		*(int*)&pto->m_flNextSecondaryAttack = pCurrent->m_iNextSecondaryAttack;
-		*(int*)&pto->m_flTimeWeaponIdle = pCurrent->m_iTimeWeaponIdle;
-		pto->iuser2 = pCurrent->m_fInAttack;
-
-		// Decrement weapon counters, server does this at same time ( during post think, after doing everything else )
-		pto->m_flNextReload -= cmd->msec / 1000.0;
-		pto->m_fNextAimBonus -= cmd->msec / 1000.0;
-		*(int*)&pto->m_flNextPrimaryAttack -= cmd->msec;
-		*(int*)&pto->m_flNextSecondaryAttack -= cmd->msec;
-		*(int*)&pto->m_flTimeWeaponIdle -= cmd->msec;
-		pto->fuser1 -= cmd->msec / 1000.0;
-
-		pCurrent->DecrementTimers(cmd->msec);
-
-		pCurrent->GetWeaponData(*pto);
-
-		if (pto->m_fNextAimBonus < -1.0)
-		{
-			pto->m_fNextAimBonus = -1.0;
-		}
-
-		if (*(int*)&pto->m_flNextPrimaryAttack < -1100)
-		{
-			*(int*)&pto->m_flNextPrimaryAttack = -1100;
-		}
-
-		if (*(int*)&pto->m_flNextSecondaryAttack < -1)
-		{
-			*(int*)&pto->m_flNextSecondaryAttack = -1;
-		}
-
-		if (*(int*)&pto->m_flTimeWeaponIdle < -1)
-		{
-			*(int*)&pto->m_flTimeWeaponIdle = -1;
-		}
-
-		if (pto->m_flNextReload < -0.001)
-		{
-			pto->m_flNextReload = -0.001;
-		}
+		current->DecrementTimers(cmd->msec);
+		current->GetWeaponData(to->weapondata[i]);
 	}
 
-	// m_flNextAttack is now part of the weapons, but is part of the player instead
-	*(int*)&to->client.m_flNextAttack -= cmd->msec;
-	if (*(int*)&to->client.m_flNextAttack < -1)
-	{
-		*(int*)&to->client.m_flNextAttack = -1;
-	}
-
-	to->client.fuser2 -= cmd->msec / 1000.0;
-	if (to->client.fuser2 < -0.001)
-	{
-		to->client.fuser2 = -0.001;
-	}
-
-	to->client.fuser3 -= cmd->msec / 1000.0;
-	if (to->client.fuser3 < -0.001)
-	{
-		to->client.fuser3 = -0.001;
-	}
+	player.DecrementTimers(cmd->msec);
+	player.GetClientData(to->client, true);
 
 	// Store off the last position from the predicted state.
 	HUD_SetLastOrg();

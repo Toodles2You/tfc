@@ -699,7 +699,9 @@ void PlayerPreThink(edict_t* pEntity)
 	CBasePlayer* pPlayer = (CBasePlayer*)GET_PRIVATE(pEntity);
 
 	if (pPlayer)
+	{
 		pPlayer->PreThink();
+	}
 }
 
 /*
@@ -713,9 +715,19 @@ void PlayerPostThink(edict_t* pEntity)
 {
 	entvars_t* pev = &pEntity->v;
 	CBasePlayer* pPlayer = (CBasePlayer*)GET_PRIVATE(pEntity);
+	const int msec = static_cast<int>(std::roundf(gpGlobals->frametime * 1000));
 
 	if (pPlayer)
+	{
 		pPlayer->PostThink();
+
+		pPlayer->DecrementTimers(msec);
+
+		for (auto gun : pPlayer->m_lpPlayerWeapons)
+		{
+			gun->DecrementTimers(msec);
+		}
+	}
 }
 
 
@@ -1689,12 +1701,7 @@ int GetWeaponData(struct edict_s* player, struct weapon_data_s* info)
 {
 	memset(info, 0, MAX_WEAPONS * sizeof(weapon_data_t));
 
-	int i;
-	weapon_data_t* data;
-	entvars_t* pev = &player->v;
-	CBasePlayer* pl = dynamic_cast<CBasePlayer*>(CBasePlayer::Instance(pev));
-
-	WeaponInfo II;
+	CBasePlayer* pl = dynamic_cast<CBasePlayer*>(CBasePlayer::Instance(player));
 
 	if (!pl)
 	{
@@ -1703,23 +1710,7 @@ int GetWeaponData(struct edict_s* player, struct weapon_data_s* info)
 
 	for (auto gun : pl->m_lpPlayerWeapons)
 	{
-		// Get The ID.
-		memset(&II, 0, sizeof(II));
-		gun->GetWeaponInfo(&II);
-
-		data = &info[II.iId];
-
-		data->m_iId = II.iId;
-		data->m_iClip = gun->m_iClip;
-
-		*(int*)&data->m_flTimeWeaponIdle = std::max(gun->m_iTimeWeaponIdle, -1);
-		*(int*)&data->m_flNextPrimaryAttack = std::max(gun->m_iNextPrimaryAttack, -1);
-		*(int*)&data->m_flNextSecondaryAttack = std::max(gun->m_iNextSecondaryAttack, -1);
-		data->m_fInReload = static_cast<int>(gun->m_fInReload);
-		data->m_fInSpecialReload = gun->m_fInSpecialReload;
-		data->iuser2 = gun->m_fInAttack;
-
-		gun->GetWeaponData(*data);
+		gun->GetWeaponData(info[gun->m_iId]);
 	}
 	return 1;
 }
@@ -1734,107 +1725,18 @@ engine sets cd to 0 before calling.
 */
 void UpdateClientData(const edict_t* ent, int sendweapons, struct clientdata_s* cd)
 {
-	if (!ent || !ent->pvPrivateData)
+	if (ent == nullptr || ent->pvPrivateData == nullptr)
+	{
 		return;
-	entvars_t* pev = (entvars_t*)&ent->v;
-	CBasePlayer* pl = dynamic_cast<CBasePlayer*>(CBasePlayer::Instance(pev));
-	entvars_t* pevOrg = NULL;
-
-	// if user is spectating different player in First person, override some vars
-	if (pl && pl->pev->iuser1 == OBS_IN_EYE)
-	{
-		if (pl->m_hObserverTarget)
-		{
-			pevOrg = pev;
-			pev = pl->m_hObserverTarget->pev;
-			pl = dynamic_cast<CBasePlayer*>(CBasePlayer::Instance(pev));
-		}
 	}
 
-	cd->flags = pev->flags;
-	cd->health = (pev->deadflag == DEAD_NO) ? std::max(pev->health, 1.0F) : 0.0F;
-	cd->vuser4.z = pev->armorvalue;
+	auto player =
+		dynamic_cast<CBasePlayer*>(CBasePlayer::Instance((edict_t*)ent));
 
-	cd->viewmodel = MODEL_INDEX(STRING(pev->viewmodel));
+	cd->pushmsec = ent->v.pushmsec;
+	strcpy(cd->physinfo, g_engfuncs.pfnGetPhysicsInfoString(ent));
 
-	cd->waterlevel = pev->waterlevel;
-	cd->watertype = pev->watertype;
-	cd->weapons = pev->weapons;
-
-	// Vectors
-	cd->origin = pev->origin;
-	cd->velocity = pev->velocity;
-	cd->view_ofs = pev->view_ofs;
-	cd->punchangle = pev->punchangle;
-
-	cd->bInDuck = pev->bInDuck;
-	cd->flTimeStepSound = pev->flTimeStepSound;
-	cd->flDuckTime = pev->flDuckTime;
-	cd->flSwimTime = pev->flSwimTime;
-	cd->waterjumptime = pev->teleport_time;
-
-	strcpy(cd->physinfo, ENGINE_GETPHYSINFO(ent));
-
-	cd->maxspeed = pev->maxspeed;
-	cd->fov = pl->m_iFOV;
-	cd->weaponanim = pev->weaponanim;
-
-	cd->pushmsec = pev->pushmsec;
-
-	//Spectator mode
-	if (pevOrg != NULL)
-	{
-		// don't use spec vars from chased player
-		cd->iuser1 = pevOrg->iuser1;
-		cd->iuser2 = pevOrg->iuser2;
-	}
-	else
-	{
-		cd->iuser1 = pev->iuser1;
-		cd->iuser2 = pev->iuser2;
-	}
-
-
-
-	if (0 != sendweapons)
-	{
-		byte* ammo_shells = (byte*)&cd->ammo_shells;
-		byte* ammo_nails = (byte*)&cd->ammo_nails;
-		byte* ammo_cells = (byte*)&cd->ammo_cells;
-		byte* ammo_rockets = (byte*)&cd->ammo_rockets;
-
-		if (pl)
-		{
-			*(int*)&cd->m_flNextAttack = pl->m_iNextAttack;
-
-			ammo_shells[0] = pl->m_rgAmmo[AMMO_9MM];
-			ammo_shells[1] = pl->m_rgAmmo[AMMO_357];
-			ammo_shells[2] = pl->m_rgAmmo[AMMO_ARGRENADES];
-			ammo_shells[3] = pl->m_rgAmmo[AMMO_BOLTS];
-
-			ammo_nails[0] = pl->m_rgAmmo[AMMO_BUCKSHOT];
-			ammo_nails[1] = pl->m_rgAmmo[AMMO_URANIUM];
-			ammo_nails[2] = pl->m_rgAmmo[AMMO_ROCKETS];
-			ammo_nails[3] = pl->m_rgAmmo[AMMO_HORNETS];
-
-			ammo_cells[0] = pl->m_rgAmmo[AMMO_HANDGRENADES];
-			ammo_cells[1] = pl->m_rgAmmo[AMMO_SATCHELS];
-			ammo_cells[2] = pl->m_rgAmmo[AMMO_TRIPMINES];
-			ammo_cells[3] = pl->m_rgAmmo[AMMO_SNARKS];
-
-
-			if (pl->m_pActiveWeapon)
-			{
-				CBasePlayerWeapon* gun = pl->m_pActiveWeapon;
-
-				WeaponInfo II;
-				memset(&II, 0, sizeof(II));
-				gun->GetWeaponInfo(&II);
-
-				cd->m_iId = II.iId;
-			}
-		}
-	}
+	player->GetClientData(*cd, sendweapons != 0);
 }
 
 /*

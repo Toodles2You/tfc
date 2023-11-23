@@ -19,32 +19,6 @@
 #include "weapons.h"
 #include "gamerules.h"
 
-void
-CBasePlayer::PlaybackEvent(
-	unsigned short event,
-	float fParam1,
-	float fParam2,
-	int iParam1,
-	int iParam2,
-	qboolean bParam1,
-	qboolean bParam2,
-	unsigned int flags)
-{
-	g_engfuncs.pfnPlaybackEvent(
-		flags,
-		edict(),
-		event,
-		0.0f,
-		pev->origin,
-		pev->angles + pev->punchangle,
-		fParam1,
-		fParam2,
-		iParam1,
-		iParam2,
-		bParam1,
-		bParam2);
-}
-
 bool CBasePlayerWeapon::CanDeploy()
 {
 	bool bHasAmmo = false;

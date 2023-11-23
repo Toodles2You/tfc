@@ -83,6 +83,7 @@ HL1_PARTICLEMAN_OBJS = \
 	$(HL1_PARTICLEMAN_OBJ_DIR)/IParticleMan_Active.o \
 	
 DLL_OBJS = \
+	$(HL1_SERVER_OBJ_DIR)/player_shared.o \
 	$(HL1_SERVER_OBJ_DIR)/weapons_shared.o \
 
 

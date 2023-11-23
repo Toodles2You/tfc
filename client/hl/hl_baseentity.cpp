@@ -138,13 +138,11 @@ void CBasePlayer::PlayerUse() {}
 void CBasePlayer::Jump() {}
 void CBasePlayer::Duck() {}
 int CBasePlayer::Classify() { return 0; }
-void CBasePlayer::PreThink() {}
 void CBasePlayer::CheckTimeBasedDamage() {}
 void CBasePlayer::UpdateGeigerCounter() {}
 void CBasePlayer::CheckSuitUpdate() {}
 void CBasePlayer::SetSuitUpdate(const char* name, bool fgroup, int iNoRepeatTime) {}
 void CBasePlayer::CheckAmmoLevel(CBasePlayerWeapon* pWeapon, bool bPrimary) {}
-void CBasePlayer::PostThink() {}
 void CBasePlayer::Precache() {}
 bool CBasePlayer::Save(CSave& save) { return false; }
 bool CBasePlayer::Restore(CRestore& restore) { return false; }
@@ -156,8 +154,6 @@ void CBasePlayer::ImpulseCommands() {}
 void CBasePlayer::CheatImpulseCommands(int iImpulse) {}
 bool CBasePlayer::AddPlayerWeapon(CBasePlayerWeapon* pWeapon) { return false; }
 bool CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* pWeapon) { return false; }
-void CBasePlayer::WeaponPreFrame() {}
-void CBasePlayer::WeaponPostFrame() {}
 int CBasePlayer::AmmoInventory(int iAmmoIndex) { return -1; }
 void CBasePlayer::UpdateClientData() {}
 void CBasePlayer::EnableControl(bool fControl) {}

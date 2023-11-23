@@ -16,6 +16,7 @@
 #pragma once
 
 #include "pm_materials.h"
+#include "entity_state.h"
 
 #include <forward_list>
 
@@ -258,7 +259,6 @@ public:
 	bool HasWeapons(); // do I have ANY weapons?
 	void SelectWeapon(const char* pstr);
 	void SelectWeapon(int iId);
-	void WeaponPreFrame();
 	void WeaponPostFrame();
 	void GiveNamedItem(const char* szName);
 	void GiveNamedItem(const char* szName, int defaultAmmo);
@@ -316,6 +316,10 @@ public:
 	int m_LastHitGroup; // the last body region that took damage
 
 	void FireBullets(const float damage, const Vector2D& spread, const unsigned int count = 1, const float distance = 8192);
+
+	void GetClientData(clientdata_t& data, bool sendWeapons);
+	void SetClientData(const clientdata_t& data);
+	void DecrementTimers(const int msec);
 
 protected:
 	/** @brief Just a stub for now */

@@ -237,7 +237,6 @@ public:
 	bool DefaultHolster(int iAnim, int body = 0);
 	bool DefaultReload(int iClipSize, int iAnim, int fDelay, int body = 0);
 
-	virtual void WeaponPreFrame() {} // called each frame by the player PreThink
 	virtual void WeaponPostFrame(); // called each frame by the player PostThink
 	// called by CBasePlayerWeapons WeaponPostFrame()
 	virtual void PrimaryAttack() {}						  // do "+ATTACK"
