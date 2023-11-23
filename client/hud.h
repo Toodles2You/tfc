@@ -622,6 +622,7 @@ private:
 	char* m_rgszSpriteNames;					  /*[HUD_SPRITE_COUNT][MAX_SPRITE_NAME_LENGTH]*/
 
 	cvar_t *default_fov;
+	cvar_t *zoom_sensitivity_ratio;
 
 public:
 	HSPRITE GetSprite(int index)

@@ -342,7 +342,7 @@ void CHud::Init()
 	m_iLogo = 0;
 	m_iFOV = 0;
 
-	CVAR_CREATE("zoom_sensitivity_ratio", "1.2", 0);
+	zoom_sensitivity_ratio = CVAR_CREATE("zoom_sensitivity_ratio", "1.0", 0);
 	CVAR_CREATE("cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO);
 	default_fov = CVAR_CREATE("default_fov", "90", FCVAR_ARCHIVE);
 	m_pCvarCrosshair = gEngfuncs.pfnGetCvarPointer("crosshair");
@@ -670,7 +670,7 @@ void CHud::Update_SetFOV(int iFov)
 	else if (m_iFOV != iFov)
 	{
 		m_iFOV = iFov;
-		m_flMouseSensitivity = sensitivity->value * ((float)iFov / (float)default_fov->value) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
+		m_flMouseSensitivity = sensitivity->value * ((float)iFov / (float)default_fov->value) * zoom_sensitivity_ratio->value;
 	}
 }
 
