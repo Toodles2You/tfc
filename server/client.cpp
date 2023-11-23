@@ -1747,26 +1747,22 @@ We're about to run this usercmd for the specified player.  We can set up groupin
 This is the time to examine the usercmd for anything extra.  This call happens even if think does not.
 =================
 */
-void CmdStart(const edict_t* player, const struct usercmd_s* cmd, unsigned int random_seed)
+void CmdStart(const edict_t* ent, const struct usercmd_s* cmd, unsigned int random_seed)
 {
-	entvars_t* pev = (entvars_t*)&player->v;
-	CBasePlayer* pl = dynamic_cast<CBasePlayer*>(CBasePlayer::Instance(pev));
-
-	if (!pl)
+	if (ent == nullptr || ent->pvPrivateData == nullptr)
+	{
 		return;
-
-	if (cmd->weaponselect != 0)
-	{
-		pl->SelectWeapon(cmd->weaponselect);
-		((usercmd_t*)cmd)->weaponselect = 0;
 	}
 
-	if (pl->pev->groupinfo != 0)
-	{
-		util::SetGroupTrace(pl->pev->groupinfo, util::GROUP_OP_AND);
-	}
+	auto player =
+		dynamic_cast<CBasePlayer*>(CBasePlayer::Instance((edict_t*)ent));
 
-	pl->random_seed = random_seed;
+	player->StartCmd(*cmd, random_seed);
+
+	if (player->pev->groupinfo != 0)
+	{
+		util::SetGroupTrace(player->pev->groupinfo, util::GROUP_OP_AND);
+	}
 }
 
 /*

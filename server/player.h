@@ -17,6 +17,7 @@
 
 #include "pm_materials.h"
 #include "entity_state.h"
+#include "usercmd.h"
 
 #include <forward_list>
 
@@ -101,7 +102,7 @@ public:
 	int m_iObserverLastMode; // last used observer mode
 	bool IsObserver() { return 0 != pev->iuser1; }
 
-	int random_seed; // See that is shared between client & server for shared weapons code
+	unsigned int m_randomSeed; // See that is shared between client & server for shared weapons code
 
 	int m_afButtonLast;
 	int m_afButtonPressed;
@@ -320,6 +321,7 @@ public:
 	void GetClientData(clientdata_t& data, bool sendWeapons);
 	void SetClientData(const clientdata_t& data);
 	void DecrementTimers(const int msec);
+	void StartCmd(const usercmd_t& cmd, unsigned int randomSeed);
 
 protected:
 	/** @brief Just a stub for now */

@@ -251,3 +251,15 @@ void CBasePlayer::DecrementTimers(const int msec)
 	m_iNextAttack = std::max(m_iNextAttack - msec, -1);
 }
 
+
+void CBasePlayer::StartCmd(const usercmd_t& cmd, unsigned int randomSeed)
+{
+	if (cmd.weaponselect != 0)
+	{
+        SelectWeapon(cmd.weaponselect);
+		((usercmd_t*)&cmd)->weaponselect = 0;
+	}
+
+	m_randomSeed = randomSeed;
+}
+

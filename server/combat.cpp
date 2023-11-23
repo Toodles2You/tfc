@@ -258,10 +258,10 @@ void CBasePlayer::FireBullets(
 	{
 		const Vector2D spreadScale
 		{
-			util::SharedRandomFloat(random_seed + i * 4, -0.5, 0.5)
-				+ util::SharedRandomFloat(random_seed + 1 + i * 4, -0.5, 0.5),
-			util::SharedRandomFloat(random_seed + 2 + i * 4, -0.5, 0.5)
-				+ util::SharedRandomFloat(random_seed + 3 + i * 4, -0.5, 0.5)
+			util::SharedRandomFloat(m_randomSeed + i * 4, -0.5, 0.5)
+				+ util::SharedRandomFloat(m_randomSeed + 1 + i * 4, -0.5, 0.5),
+			util::SharedRandomFloat(m_randomSeed + 2 + i * 4, -0.5, 0.5)
+				+ util::SharedRandomFloat(m_randomSeed + 3 + i * 4, -0.5, 0.5)
 		};
 
 		const Vector angles

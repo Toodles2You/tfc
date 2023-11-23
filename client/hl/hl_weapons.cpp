@@ -438,10 +438,10 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		gHUD.m_Battery.Update_Battery(to->client.vuser4.z);
 	}
 
-	player.random_seed = random_seed;
-
 	player.pev->button = cmd->buttons;
 	player.m_afButtonLast = from->playerstate.oldbuttons;
+	
+	player.StartCmd(*cmd, random_seed);
 	
 	player.PreThink();
 
@@ -455,12 +455,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 			continue;
 		}
 		current->SetWeaponData(from->weapondata[i]);
-	}
-
-	// Point to current weapon object
-	if (WEAPON_NONE != from->client.m_iId)
-	{
-		player.m_pActiveWeapon = g_pWpns[from->client.m_iId];
 	}
 
 	player.PostThink();
