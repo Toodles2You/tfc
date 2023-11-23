@@ -50,9 +50,6 @@ inline int gmsgShowMenu = 0;
 inline int gmsgGeigerRange = 0;
 inline int gmsgTeamNames = 0;
 
-inline int gmsgStatusText = 0;
-inline int gmsgStatusValue = 0;
-
 inline int gmsgWeapons = 0;
 
 inline int gmsgHitFeedback = 0;

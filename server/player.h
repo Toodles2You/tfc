@@ -300,15 +300,6 @@ public:
 	float m_flAmmoStartCharge;
 	float m_flNextAmmoBurn; // while charging, when to absorb another unit of player's ammo?
 
-	//Player ID
-	void InitStatusBar();
-	void UpdateStatusBar();
-	int m_izSBarState[SBAR_END];
-	float m_flNextSBarUpdateTime;
-	float m_flStatusBarDisappearDelay;
-	char m_SbarString0[SBAR_STRING_SIZE];
-	char m_SbarString1[SBAR_STRING_SIZE];
-
 	float m_flNextChatTime;
 
 	void SetPrefsFromUserinfo(char* infobuffer);

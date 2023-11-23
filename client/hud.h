@@ -220,27 +220,20 @@ public:
 	bool VidInit() override;
 	bool Draw(float flTime) override;
 	void Reset() override;
-	void ParseStatusString(int line_num);
 
-	bool MsgFunc_StatusText(const char* pszName, int iSize, void* pbuf);
-	bool MsgFunc_StatusValue(const char* pszName, int iSize, void* pbuf);
+	void UpdateStatusBar(cl_entity_t* entity);
 
 protected:
 	enum
 	{
 		MAX_STATUSTEXT_LENGTH = 128,
-		MAX_STATUSBAR_VALUES = 8,
-		MAX_STATUSBAR_LINES = 3,
 	};
 
-	char m_szStatusText[MAX_STATUSBAR_LINES][MAX_STATUSTEXT_LENGTH]; // a text string describing how the status bar is to be drawn
-	char m_szStatusBar[MAX_STATUSBAR_LINES][MAX_STATUSTEXT_LENGTH];	 // the constructed bar that is drawn
-	int m_iStatusValues[MAX_STATUSBAR_VALUES];						 // an array of values for use in the status bar
-
-	bool m_bReparseString; // set to true whenever the m_szStatusBar needs to be recalculated
-
-	// an array of colors...one color for each line
-	float* m_pflNameColors[MAX_STATUSBAR_LINES];
+	char m_szStatusBar[MAX_STATUSTEXT_LENGTH];	 // the constructed bar that is drawn
+	int m_targetIndex;
+	float m_targetExpireTime;
+	cvar_t *hud_centerid;
+	cvar_t *hud_expireid;
 };
 
 struct extra_player_info_t

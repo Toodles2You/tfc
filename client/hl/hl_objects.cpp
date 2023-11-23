@@ -199,5 +199,18 @@ void Game_AddObjects()
 		}
 	}
 
+	cl_entity_t* target = nullptr;
+
+	if (trLong.fraction != 1.0f)
+	{
+		auto entIndex = gEngfuncs.pEventAPI->EV_IndexFromTrace(&trLong);
+		if (entIndex >= 1 && entIndex <= gEngfuncs.GetMaxClients())
+		{
+			target = gEngfuncs.GetEntityByIndex(entIndex);
+		}
+	}
+
+	gHUD.m_StatusBar.UpdateStatusBar(target);
+
 	gEngfuncs.pEventAPI->EV_PopPMStates();
 }

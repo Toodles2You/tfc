@@ -1465,103 +1465,6 @@ void CBasePlayer::AddPointsToTeam(int score, bool bAllowNegativeScore)
 	}
 }
 
-//Player ID
-void CBasePlayer::InitStatusBar()
-{
-	m_flStatusBarDisappearDelay = 0;
-	m_SbarString1[0] = m_SbarString0[0] = 0;
-}
-
-void CBasePlayer::UpdateStatusBar()
-{
-	int newSBarState[SBAR_END];
-	char sbuf0[SBAR_STRING_SIZE];
-	char sbuf1[SBAR_STRING_SIZE];
-
-	memset(newSBarState, 0, sizeof(newSBarState));
-	strcpy(sbuf0, m_SbarString0);
-	strcpy(sbuf1, m_SbarString1);
-
-	// Find an ID Target
-	TraceResult tr;
-	util::MakeVectors(pev->v_angle + pev->punchangle);
-	Vector vecSrc = EyePosition();
-	Vector vecEnd = vecSrc + (gpGlobals->v_forward * MAX_ID_RANGE);
-	util::TraceLine(vecSrc, vecEnd, util::dont_ignore_monsters, this, &tr);
-
-	if (tr.flFraction != 1.0)
-	{
-		if (!FNullEnt(tr.pHit))
-		{
-			CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
-
-			if (pEntity->Classify() == CLASS_PLAYER)
-			{
-				newSBarState[SBAR_ID_TARGETNAME] = ENTINDEX(pEntity->edict());
-				strcpy(sbuf1, "1 %p1\n2 Health: %i2%%\n3 Armor: %i3%%");
-
-				// allies and medics get to see the targets health
-				if (g_pGameRules->PlayerRelationship(this, pEntity) == GR_TEAMMATE)
-				{
-					newSBarState[SBAR_ID_TARGETHEALTH] = 100 * (pEntity->pev->health / pEntity->pev->max_health);
-					newSBarState[SBAR_ID_TARGETARMOR] = pEntity->pev->armorvalue; //No need to get it % based since 100 it's the max.
-				}
-
-				m_flStatusBarDisappearDelay = gpGlobals->time + 1.0;
-			}
-		}
-		else if (m_flStatusBarDisappearDelay > gpGlobals->time)
-		{
-			// hold the values for a short amount of time after viewing the object
-			newSBarState[SBAR_ID_TARGETNAME] = m_izSBarState[SBAR_ID_TARGETNAME];
-			newSBarState[SBAR_ID_TARGETHEALTH] = m_izSBarState[SBAR_ID_TARGETHEALTH];
-			newSBarState[SBAR_ID_TARGETARMOR] = m_izSBarState[SBAR_ID_TARGETARMOR];
-		}
-	}
-
-	bool bForceResend = false;
-
-	if (0 != strcmp(sbuf0, m_SbarString0))
-	{
-		MessageBegin(MSG_ONE, gmsgStatusText, this);
-		WriteByte(0);
-		WriteString(sbuf0);
-		MessageEnd();
-
-		strcpy(m_SbarString0, sbuf0);
-
-		// make sure everything's resent
-		bForceResend = true;
-	}
-
-	if (0 != strcmp(sbuf1, m_SbarString1))
-	{
-		MessageBegin(MSG_ONE, gmsgStatusText, this);
-		WriteByte(1);
-		WriteString(sbuf1);
-		MessageEnd();
-
-		strcpy(m_SbarString1, sbuf1);
-
-		// make sure everything's resent
-		bForceResend = true;
-	}
-
-	// Check values and send if they don't match
-	for (int i = 1; i < SBAR_END; i++)
-	{
-		if (newSBarState[i] != m_izSBarState[i] || bForceResend)
-		{
-			MessageBegin(MSG_ONE, gmsgStatusValue, this);
-			WriteByte(i);
-			WriteShort(newSBarState[i]);
-			MessageEnd();
-
-			m_izSBarState[i] = newSBarState[i];
-		}
-	}
-}
-
 
 void CBasePlayer::PreThink()
 {
@@ -2975,8 +2878,6 @@ void CBasePlayer::UpdateClientData()
 		}
 
 		util::FireTargets("game_playerspawn", this, this, USE_TOGGLE, 0);
-
-		InitStatusBar();
 	}
 
 	if (m_iHideHUD != m_iClientHideHUD)
@@ -3095,13 +2996,6 @@ void CBasePlayer::UpdateClientData()
 			WriteByte(II.iFlags);				   // byte		Flags
 			MessageEnd();
 		}
-	}
-
-	// Update Status Bar
-	if (m_flNextSBarUpdateTime < gpGlobals->time)
-	{
-		UpdateStatusBar();
-		m_flNextSBarUpdateTime = gpGlobals->time + 0.2;
 	}
 
 	// Send new room type to client.
