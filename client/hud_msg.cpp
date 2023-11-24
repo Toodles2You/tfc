@@ -24,8 +24,7 @@
 #include "particleman.h"
 extern IParticleMan* g_pParticleMan;
 
-extern TEMPENTITY* pLaserDot;
-
+void EV_Init();
 
 /// USER-DEFINED SERVER MESSAGE HANDLERS
 
@@ -77,8 +76,7 @@ void CHud::MsgFunc_InitHUD(const char* pszName, int iSize, void* pbuf)
 	if (g_pParticleMan)
 		g_pParticleMan->ResetParticles();
 
-	//Probably not a good place to put this.
-	pLaserDot = nullptr;
+	EV_Init();
 }
 
 

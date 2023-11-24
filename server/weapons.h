@@ -206,10 +206,10 @@ public:
 	void EXPORT Materialize();
 };
 
-
+inline short g_sModelIndexPlayer;
+inline short g_sModelIndexGibs;
+inline short g_sModelIndexShell;
 inline short g_sModelIndexLaser; // holds the index for the laser beam
-constexpr const char* g_pModelNameLaser = "sprites/laserbeam.spr";
-
 inline short g_sModelIndexLaserDot;	 // holds the index for the laser beam dot
 inline short g_sModelIndexFireball;	 // holds the index for the fireball
 inline short g_sModelIndexSmoke;		 // holds the index for the smoke cloud

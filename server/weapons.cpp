@@ -159,16 +159,16 @@ void W_Precache()
 		util::PrecacheOther("weaponbox"); // container for dropped deathmatch weapons
 	}
 
+	g_sModelIndexShell = PRECACHE_MODEL("models/shell.mdl");
+
+	g_sModelIndexLaser = PRECACHE_MODEL("sprites/laserbeam.spr");
+	g_sModelIndexLaserDot = PRECACHE_MODEL("sprites/laserdot.spr");
 	g_sModelIndexFireball = PRECACHE_MODEL("sprites/zerogxplode.spr");	// fireball
 	g_sModelIndexWExplosion = PRECACHE_MODEL("sprites/WXplo1.spr");		// underwater fireball
 	g_sModelIndexSmoke = PRECACHE_MODEL("sprites/steam1.spr");			// smoke
 	g_sModelIndexBubbles = PRECACHE_MODEL("sprites/bubble.spr");		//bubbles
 	g_sModelIndexBloodSpray = PRECACHE_MODEL("sprites/bloodspray.spr"); // initial blood
 	g_sModelIndexBloodDrop = PRECACHE_MODEL("sprites/blood.spr");		// splattered blood
-
-	g_sModelIndexLaser = PRECACHE_MODEL((char*)g_pModelNameLaser);
-	g_sModelIndexLaserDot = PRECACHE_MODEL("sprites/laserdot.spr");
-
 
 	// used by explosions
 	PRECACHE_MODEL("models/grenade.mdl");

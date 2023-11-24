@@ -462,9 +462,6 @@ void CWorld::Precache()
 	PRECACHE_SOUND("common/bodydrop3.wav");
 	PRECACHE_SOUND("common/bodydrop4.wav");
 
-	PRECACHE_MODEL("models/hgibs.mdl");
-	PRECACHE_MODEL("models/agibs.mdl");
-
 	PRECACHE_SOUND("weapons/ric1.wav");
 	PRECACHE_SOUND("weapons/ric2.wav");
 	PRECACHE_SOUND("weapons/ric3.wav");

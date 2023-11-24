@@ -103,7 +103,7 @@ static void EV_BubbleTrail(Vector from, Vector to, int count)
 		from,
 		to,
 		flHeight,
-		gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/bubble.spr"),
+		g_sModelIndexBubbles,
 		std::min(count, 255),
 		8
 	);
@@ -117,10 +117,8 @@ static void EV_Bubbles(const Vector& origin, float radius)
 
 	auto height = EV_WaterLevel(mid, mid.z, mid.z + 1024);
 	height = height - mins.z;
-
-	const auto bleb = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/bubble.spr");
 	
-	gEngfuncs.pEfxAPI->R_Bubbles(mins, maxs, height, bleb, 100, 8);
+	gEngfuncs.pEfxAPI->R_Bubbles(mins, maxs, height, g_sModelIndexBubbles, 100, 8);
 }
 
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
@@ -475,7 +473,6 @@ void EV_FireGlock(event_args_t* args)
 
 	Vector ShellVelocity;
 	Vector ShellOrigin;
-	int shell;
 	Vector up, right, forward;
 
 	idx = args->entindex;
@@ -486,8 +483,6 @@ void EV_FireGlock(event_args_t* args)
 	empty = 0 != args->bparam1;
 	AngleVectors(angles, forward, right, up);
 
-	shell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shell.mdl"); // brass shell
-
 	if (EV_IsLocal(idx))
 	{
 		EV_MuzzleFlash();
@@ -497,7 +492,7 @@ void EV_FireGlock(event_args_t* args)
 	}
 
 	EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20, -12, 4);
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[YAW], shell, TE_BOUNCE_SHELL);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[YAW], g_sModelIndexShell, TE_BOUNCE_SHELL);
 
 	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/pl_gun3.wav", gEngfuncs.pfnRandomFloat(0.92, 1.0), ATTN_NORM, 0, 98 + gEngfuncs.pfnRandomLong(0, 3));
 
@@ -515,7 +510,6 @@ void EV_FireMP5(event_args_t* args)
 
 	Vector ShellVelocity;
 	Vector ShellOrigin;
-	int shell;
 	Vector up, right, forward;
 
 	idx = args->entindex;
@@ -524,8 +518,6 @@ void EV_FireMP5(event_args_t* args)
 	VectorCopy(args->velocity, velocity);
 
 	AngleVectors(angles, forward, right, up);
-
-	shell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shell.mdl"); // brass shell
 
 	if (EV_IsLocal(idx))
 	{
@@ -537,7 +529,7 @@ void EV_FireMP5(event_args_t* args)
 	}
 
 	EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20, -12, 4);
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[YAW], shell, TE_BOUNCE_SHELL);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[YAW], g_sModelIndexShell, TE_BOUNCE_SHELL);
 
 	switch (gEngfuncs.pfnRandomLong(0, 1))
 	{
@@ -723,7 +715,7 @@ void EV_LaserDotOn(event_args_t* args)
 			args->origin,
 			g_vecZero,
 			1.0,
-			gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/laserdot.spr"),
+			g_sModelIndexLaserDot,
 			kRenderGlow,
 			kRenderFxNoDissipation,
 			1.0,
@@ -855,7 +847,6 @@ static void EV_SpawnGibs(event_args_t* args, int count)
 	);
 	TEMPENTITY *gib;
 	Vector velocity, dir;
-	auto modelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex("models/hgibs.mdl");
 	auto body = 0;
 	Vector forward;
 	AngleVectors(args->angles, forward, nullptr, nullptr);
@@ -870,7 +861,7 @@ static void EV_SpawnGibs(event_args_t* args, int count)
 		velocity = dir * gEngfuncs.pfnRandomFloat(500, 1200);
 		velocity[2] += 600;
 
-		gib = gEngfuncs.pEfxAPI->R_TempModel(args->origin, velocity, rotate, 15.0f, modelIndex, TE_BOUNCE_NULL);
+		gib = gEngfuncs.pEfxAPI->R_TempModel(args->origin, velocity, rotate, 15.0f, g_sModelIndexGibs, TE_BOUNCE_NULL);
 
 		if (gib != nullptr)
 		{
@@ -890,7 +881,7 @@ static void EV_SpawnCorpse(event_args_t* args)
 	{
 		return;
 	}
-	auto model = gEngfuncs.hudGetModelByIndex(gEngfuncs.pEventAPI->EV_FindModelIndex("models/player.mdl"));
+	auto model = gEngfuncs.hudGetModelByIndex(g_sModelIndexPlayer);
 	if (model == nullptr)
 	{
 		return;
@@ -951,7 +942,7 @@ static void EV_SmokeCallback(TEMPENTITY* ent, float frametime, float currenttime
 		ent->entity.origin,
 		ent->entity.angles,
 		1.0F,
-		gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/steam1.spr"),
+		g_sModelIndexSmoke,
 		kRenderTransAlpha,
 		kRenderFxNone,
 		1.0F,
@@ -1002,13 +993,11 @@ void EV_Explosion(event_args_t* args)
 		origin = tr.endpos + tr.plane.normal * 64 * scale;
 	}
 
-	const char* spriteName = "sprites/zerogxplode.spr";
+	auto sprite = g_sModelIndexFireball;
 	if (underwater)
 	{
-		spriteName = "sprites/WXplo1.spr";
+		sprite = g_sModelIndexWExplosion;
 	}
-	
-	const auto sprite = gEngfuncs.pEventAPI->EV_FindModelIndex(spriteName);
 
 	gEngfuncs.pEfxAPI->R_Explosion(
 		origin,
@@ -1068,9 +1057,6 @@ int MSG_Blood(const char* name, int size, void* buf)
 {
 	BEGIN_READ(buf, size);
 
-	const auto spray = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/bloodspray.spr");
-	const auto drip = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/blood.spr");
-
 	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(0, 0);
 	gEngfuncs.pEventAPI->EV_PushPMStates();
 	gEngfuncs.pEventAPI->EV_SetSolidPlayers(0);
@@ -1109,8 +1095,8 @@ int MSG_Blood(const char* name, int size, void* buf)
 			gEngfuncs.pEfxAPI->R_BloodSprite(
 				traceEndPos,
 				BLOOD_COLOR_RED,
-				spray,
-				drip,
+				g_sModelIndexBloodSpray,
+				g_sModelIndexBloodDrop,
 				8);
 		}
 
@@ -1142,4 +1128,26 @@ void EV_HookEvents()
 	gEngfuncs.pfnHookEvent("events/train.sc", EV_TrainPitchAdjust);
 
 	gEngfuncs.pfnHookUserMsg("blood", MSG_Blood);
+}
+
+void EV_Init()
+{
+	g_sModelIndexPlayer = gEngfuncs.pEventAPI->EV_FindModelIndex("models/player.mdl");
+	g_sModelIndexGibs = gEngfuncs.pEventAPI->EV_FindModelIndex("models/hgibs.mdl");
+	g_sModelIndexShell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shell.mdl");
+
+	g_sModelIndexLaser = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/laserbeam.spr");
+	g_sModelIndexLaserDot = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/laserdot.spr");
+	g_sModelIndexFireball = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/zerogxplode.spr");
+	g_sModelIndexWExplosion = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/WXplo1.spr");
+	g_sModelIndexSmoke = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/steam1.spr");
+	g_sModelIndexBubbles = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/bubble.spr");
+	g_sModelIndexBloodSpray = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/bloodspray.spr");
+	g_sModelIndexBloodDrop = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/blood.spr");
+
+	if (pLaserDot != nullptr)
+	{
+		pLaserDot->die = -1000;
+		pLaserDot = nullptr;
+	}
 }
