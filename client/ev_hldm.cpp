@@ -881,17 +881,19 @@ static void EV_SpawnCorpse(event_args_t* args)
 	{
 		return;
 	}
+
 	auto model = gEngfuncs.hudGetModelByIndex(g_sModelIndexPlayer);
 	if (model == nullptr)
 	{
 		return;
 	}
+	
 	auto gib = gEngfuncs.pEfxAPI->CL_TempEntAllocHigh(args->origin, model);
 	if (gib == nullptr)
 	{
 		return;
 	}
-	/*! FIXME: Doesn't actually fade because dead player render mode uses render amount. */
+
 	/*! FIXME: Colormap doesn't get copied. */
 	gib->flags |= (FTENT_COLLIDEWORLD | FTENT_PERSIST | FTENT_GRAVITY | FTENT_FADEOUT);
 	gib->entity.origin = player->origin;
@@ -900,15 +902,27 @@ static void EV_SpawnCorpse(event_args_t* args)
 	gib->entity.curstate.frame = 0.0f;
 	gib->entity.curstate.framerate = 1.0f;
 	gib->entity.curstate.renderfx = kRenderFxDeadPlayer;
-	gib->entity.curstate.renderamt = args->entindex;
+	gib->entity.curstate.iuser4 = args->entindex;
+	gib->entity.baseline = gib->entity.curstate;
 	gib->die = gEngfuncs.GetClientTime() + 15.0f;
 }
 
 void EV_Gibbed(event_args_t* args)
 {
-	if (violence_hgibs->value != 0.0f && (args->iparam2 == GIB_ALWAYS || (args->iparam2 == GIB_NORMAL && args->fparam2 < -40.0f)))
+	if (violence_hgibs->value != 0.0f
+	 && (args->iparam2 == GIB_ALWAYS
+	 || (args->iparam2 == GIB_NORMAL && args->fparam2 < -40.0f)))
 	{
-		gEngfuncs.pEventAPI->EV_PlaySound(0, args->origin, CHAN_STATIC, "common/bodysplat.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+		gEngfuncs.pEventAPI->EV_PlaySound(
+			0,
+			args->origin,
+			CHAN_STATIC,
+			"common/bodysplat.wav",
+			1.0,
+			ATTN_NORM,
+			0,
+			PITCH_NORM);
+
 		EV_SpawnGibs(args, 5);
 		return;
 	}
@@ -917,7 +931,16 @@ void EV_Gibbed(event_args_t* args)
 
 void EV_Teleport(event_args_t* args)
 {
-	gEngfuncs.pEventAPI->EV_PlaySound(0, args->origin, CHAN_STATIC, "misc/r_tele1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+	gEngfuncs.pEventAPI->EV_PlaySound(
+		0,
+		args->origin,
+		CHAN_STATIC,
+		"misc/r_tele1.wav",
+		1.0,
+		ATTN_NORM,
+		0,
+		PITCH_NORM);
+
 	gEngfuncs.pEfxAPI->R_TeleportSplash(args->origin);
 }
 

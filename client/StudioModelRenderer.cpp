@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <memory.h>
+#include <algorithm>
 
 #include "studio_util.h"
 #include "r_studioint.h"
@@ -1103,14 +1104,14 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 		bool result;
 		bool save_interp;
 
-		if (m_pCurrentEntity->curstate.renderamt <= 0 || m_pCurrentEntity->curstate.renderamt > gEngfuncs.GetMaxClients())
+		if (m_pCurrentEntity->curstate.iuser4 <= 0 || m_pCurrentEntity->curstate.iuser4 > gEngfuncs.GetMaxClients())
 			return false;
 
 		// get copy of player
-		deadplayer = *(IEngineStudio.GetPlayerState(m_pCurrentEntity->curstate.renderamt - 1)); //cl.frames[cl.parsecount & CL_UPDATE_MASK].playerstate[m_pCurrentEntity->curstate.renderamt-1];
+		deadplayer = *(IEngineStudio.GetPlayerState(m_pCurrentEntity->curstate.iuser4 - 1)); //cl.frames[cl.parsecount & CL_UPDATE_MASK].playerstate[m_pCurrentEntity->curstate.renderamt-1];
 
 		// clear weapon, movement state
-		deadplayer.number = m_pCurrentEntity->curstate.renderamt;
+		deadplayer.number = m_pCurrentEntity->curstate.iuser4;
 		deadplayer.weaponmodel = 0;
 		deadplayer.gaitsequence = 0;
 
@@ -1473,11 +1474,6 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 			m_pCurrentEntity->curstate.body = 255;
 		}
 
-		if (!(m_pCvarDeveloper->value == 0 && !util::IsDeathmatch()) && (m_pRenderModel == m_pCurrentEntity->model))
-		{
-			m_pCurrentEntity->curstate.body = 1; // force helmet
-		}
-
 		lighting.plightvec = dir;
 		IEngineStudio.StudioDynamicLight(m_pCurrentEntity, &lighting);
 
@@ -1489,19 +1485,8 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 
 		// get remap colors
-		m_nTopColor = m_pPlayerInfo->topcolor;
-		m_nBottomColor = m_pPlayerInfo->bottomcolor;
-
-
-		// bounds check
-		if (m_nTopColor < 0)
-			m_nTopColor = 0;
-		if (m_nTopColor > 360)
-			m_nTopColor = 360;
-		if (m_nBottomColor < 0)
-			m_nBottomColor = 0;
-		if (m_nBottomColor > 360)
-			m_nBottomColor = 360;
+		m_nTopColor = std::clamp(m_pPlayerInfo->topcolor, 0, 360);
+		m_nBottomColor = std::clamp(m_pPlayerInfo->bottomcolor, 0, 360);
 
 		IEngineStudio.StudioSetRemapColors(m_nTopColor, m_nBottomColor);
 
