@@ -61,6 +61,30 @@ void tent::TeleportSplash(CBaseEntity* entity)
 }
 
 
+void tent::Explosion(
+	const Vector& origin,
+	const Vector& velocity,
+	float damage,
+	bool smoke,
+	bool sparks)
+{
+	g_engfuncs.pfnPlaybackEvent(
+		FEV_GLOBAL | FEV_RELIABLE,
+		CWorld::World->edict(),
+		g_usExplosion,
+		0.0F,
+		origin,
+		velocity,
+		0.0F,
+		0.0F,
+		damage,
+		0,
+		smoke,
+		sparks
+	);
+}
+
+
 void tent::BloodStream(const Vector& origin, const Vector& direction, int color, int amount)
 {
 	if (color == DONT_BLEED || amount == 0)

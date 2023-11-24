@@ -45,7 +45,6 @@ public:
 
 	void Explode(Vector vecSrc, Vector vecAim);
 	void Explode(TraceResult* pTrace, int bitsDamageType);
-	void EXPORT Smoke();
 
 	void EXPORT BounceTouch(CBaseEntity* pOther);
 	void EXPORT SlideTouch(CBaseEntity* pOther);

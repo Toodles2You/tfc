@@ -520,6 +520,7 @@ namespace tent
 void Sparks(const Vector& position);
 void Ricochet(const Vector& position, float scale);
 void TeleportSplash(CBaseEntity* entity);
+void Explosion(const Vector& origin, const Vector& velocity, float damage = 100.0F, bool smoke = true, bool sparks = true);
 
 void BloodStream(const Vector& origin, const Vector& direction, int color, int amount);
 void BloodDrips(const Vector& origin, const Vector& direction, int color, int amount);

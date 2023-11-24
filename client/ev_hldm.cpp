@@ -109,6 +109,20 @@ static void EV_BubbleTrail(Vector from, Vector to, int count)
 	);
 }
 
+static void EV_Bubbles(const Vector& origin, float radius)
+{
+	auto mins = origin + Vector(-radius, -radius, -radius);
+	auto maxs = origin + Vector(radius, radius, radius);
+	auto mid = (mins + maxs) * 0.5;
+
+	auto height = EV_WaterLevel(mid, mid.z, mid.z + 1024);
+	height = height - mins.z;
+
+	const auto bleb = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/bubble.spr");
+	
+	gEngfuncs.pEfxAPI->R_Bubbles(mins, maxs, height, bleb, 100, 8);
+}
+
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
 // original traceline endpoints used by the attacker.
 // returns volume of strike instrument (crowbar) to play
@@ -916,6 +930,140 @@ void EV_Teleport(event_args_t* args)
 	gEngfuncs.pEfxAPI->R_TeleportSplash(args->origin);
 }
 
+static void EV_SmokeCallback(TEMPENTITY* ent, float frametime, float currenttime)
+{
+	if (ent->entity.curstate.fuser1 > currenttime)
+	{
+		return;
+	}
+
+	ent->callback = nullptr;
+	ent->flags &= ~FTENT_CLIENTCUSTOM;
+	ent->die = currenttime;
+
+	if (ent->entity.curstate.iuser2)
+	{
+		EV_Bubbles(ent->entity.origin, 64);
+		return;
+	}
+
+	auto smonk = gEngfuncs.pEfxAPI->R_TempSprite(
+		ent->entity.origin,
+		ent->entity.angles,
+		1.0F,
+		gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/steam1.spr"),
+		kRenderTransAlpha,
+		kRenderFxNone,
+		1.0F,
+		1.0F,
+		FTENT_SPRANIMATE);
+
+	if (smonk)
+	{
+		gEngfuncs.pEfxAPI->R_Sprite_Smoke(
+			smonk,
+			(ent->entity.curstate.iuser1 - 50) * 0.08);
+	}
+}
+
+void EV_Explosion(event_args_t* args)
+{
+	const auto underwater =
+		gEngfuncs.PM_PointContents(args->origin, nullptr) == CONTENTS_WATER;
+
+	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(0, 0);
+	gEngfuncs.pEventAPI->EV_PushPMStates();
+	gEngfuncs.pEventAPI->EV_SetSolidPlayers(-1);
+	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+
+	Vector dir = args->angles;
+	if (dir == g_vecZero)
+	{
+		dir = Vector(0, 0, -1);
+	}
+	else
+	{
+		dir = dir.Normalize();
+	}
+	Vector origin = args->origin;
+
+	pmtrace_t tr;
+	gEngfuncs.pEventAPI->EV_PlayerTrace(
+		origin,
+		origin + dir * 64,
+		PM_WORLD_ONLY,
+		-1,
+		&tr);
+	
+	const auto scale = (args->iparam1 - 50) * 0.06F;
+
+	if (tr.fraction != 1.0F)
+	{
+		origin = tr.endpos + tr.plane.normal * 64 * scale;
+	}
+
+	const char* spriteName = "sprites/zerogxplode.spr";
+	if (underwater)
+	{
+		spriteName = "sprites/WXplo1.spr";
+	}
+	
+	const auto sprite = gEngfuncs.pEventAPI->EV_FindModelIndex(spriteName);
+
+	gEngfuncs.pEfxAPI->R_Explosion(
+		origin,
+		sprite,
+		scale,
+		15,
+		TE_EXPLFLAG_NONE);
+
+	EV_DecalTrace(&tr, EV_DecalName("{scorch%i", 3));
+
+	gEngfuncs.pEventAPI->EV_PopPMStates();
+
+	const char* sample;
+
+	switch (gEngfuncs.pfnRandomLong(0, 2))
+	{
+	case 0: sample = "weapons/debris1.wav"; break;
+	case 1: sample = "weapons/debris2.wav"; break;
+	case 2: sample = "weapons/debris3.wav"; break;
+	}
+
+	gEngfuncs.pEventAPI->EV_PlaySound(
+		-1,
+		tr.endpos,
+		CHAN_STATIC,
+		sample,
+		0.55F,
+		ATTN_NORM,
+		0,
+		PITCH_NORM);
+
+	if (args->bparam1)
+	{
+		auto smonk = gEngfuncs.pEfxAPI->CL_TempEntAllocNoModel(origin);
+		if (smonk)
+		{
+			smonk->flags |= FTENT_CLIENTCUSTOM;
+			smonk->callback = EV_SmokeCallback;
+			smonk->die = gEngfuncs.GetClientTime() + 3.0F;
+			smonk->entity.curstate.fuser1 = gEngfuncs.GetClientTime() + 0.3F;
+			smonk->entity.curstate.iuser1 = args->iparam1;
+			smonk->entity.curstate.iuser2 = underwater ? 1 : 0;
+		}
+	}
+
+	if (args->bparam2 && !underwater)
+	{
+		/* Toodles: Why don't these work right, Gabe? */
+		for (auto i = gEngfuncs.pfnRandomLong(0, 3); i > 0; i--)
+		{
+			gEngfuncs.pEfxAPI->R_SparkShower(origin);
+		}
+	}
+}
+
 int MSG_Blood(const char* name, int size, void* buf)
 {
 	BEGIN_READ(buf, size);
@@ -990,6 +1138,7 @@ void EV_HookEvents()
 	gEngfuncs.pfnHookEvent("events/laser_off.sc", EV_LaserDotOff);
 	gEngfuncs.pfnHookEvent("events/gibs.sc", EV_Gibbed);
 	gEngfuncs.pfnHookEvent("events/teleport.sc", EV_Teleport);
+	gEngfuncs.pfnHookEvent("events/explosion.sc", EV_Explosion);
 	gEngfuncs.pfnHookEvent("events/train.sc", EV_TrainPitchAdjust);
 
 	gEngfuncs.pfnHookUserMsg("blood", MSG_Blood);

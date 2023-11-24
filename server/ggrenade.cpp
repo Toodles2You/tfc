@@ -52,25 +52,7 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 		pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
 	}
 
-	int iContents = util::PointContents(pev->origin);
-
-	MessageBegin(MSG_PAS, SVC_TEMPENTITY, pev->origin);
-	WriteByte(TE_EXPLOSION);	// This makes a dynamic light and the explosion sprites/sound
-	WriteCoord(pev->origin.x); // Send to PAS because of the sound
-	WriteCoord(pev->origin.y);
-	WriteCoord(pev->origin.z);
-	if (iContents != CONTENTS_WATER)
-	{
-		WriteShort(g_sModelIndexFireball);
-	}
-	else
-	{
-		WriteShort(g_sModelIndexWExplosion);
-	}
-	WriteByte((pev->dmg - 50) * .60); // scale * 10
-	WriteByte(15);					   // framerate
-	WriteByte(TE_EXPLFLAG_NONE);
-	MessageEnd();
+	tent::Explosion(pev->origin, g_vecZero, pev->dmg);
 
 	CBaseEntity* owner;
 	if (pev->owner)
@@ -86,58 +68,9 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 
 	RadiusDamage(origin, this, owner, pev->dmg, pev->dmg * 2.5, bitsDamageType);
 
-	if (RANDOM_FLOAT(0, 1) < 0.5)
-	{
-		util::DecalTrace(pTrace, DECAL_SCORCH1);
-	}
-	else
-	{
-		util::DecalTrace(pTrace, DECAL_SCORCH2);
-	}
-
-	flRndSound = RANDOM_FLOAT(0, 1);
-
-	switch (RANDOM_LONG(0, 2))
-	{
-	case 0: EmitSound("weapons/debris1.wav", CHAN_VOICE, 0.55F); break;
-	case 1: EmitSound("weapons/debris2.wav", CHAN_VOICE, 0.55F); break;
-	case 2: EmitSound("weapons/debris3.wav", CHAN_VOICE, 0.55F); break;
-	}
-
-	pev->effects |= EF_NODRAW;
-	SetThink(&CGrenade::Smoke);
-	pev->velocity = g_vecZero;
-	pev->nextthink = gpGlobals->time + 0.3;
-
-	if (iContents != CONTENTS_WATER)
-	{
-		int sparkCount = RANDOM_LONG(0, 3);
-		for (int i = 0; i < sparkCount; i++)
-			Create("spark_shower", pev->origin, pTrace->vecPlaneNormal, NULL);
-	}
-}
-
-
-void CGrenade::Smoke()
-{
-	if (util::PointContents(pev->origin) == CONTENTS_WATER)
-	{
-		util::Bubbles(pev->origin - Vector(64, 64, 64), pev->origin + Vector(64, 64, 64), 100);
-	}
-	else
-	{
-		MessageBegin(MSG_PVS, SVC_TEMPENTITY, pev->origin);
-		WriteByte(TE_SMOKE);
-		WriteCoord(pev->origin.x);
-		WriteCoord(pev->origin.y);
-		WriteCoord(pev->origin.z);
-		WriteShort(g_sModelIndexSmoke);
-		WriteByte((pev->dmg - 50) * 0.80); // scale * 10
-		WriteByte(12);						// framerate
-		MessageEnd();
-	}
 	Remove();
 }
+
 
 void CGrenade::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType)
 {
