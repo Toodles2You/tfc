@@ -35,6 +35,7 @@
 #include "Platform.h"
 #include "saverestore.h"
 #include "monsterevent.h"
+#include "entity_state.h"
 
 // C functions for external declarations that call the appropriate C++ methods
 
@@ -307,6 +308,8 @@ public:
 		int flags = 0);
 
 	void StopSound(const char* sample, int channel = CHAN_AUTO);
+
+	virtual void SetEntityState(entity_state_t& state);
 };
 
 inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->edict()); }

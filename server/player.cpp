@@ -3016,6 +3016,34 @@ void CBasePlayer::SetPrefsFromUserinfo(char* infobuffer)
 	}
 }
 
+void CBasePlayer::SetEntityState(entity_state_t& state)
+{
+	CBaseEntity::SetEntityState(state);
+
+	state.team = pev->team;
+	state.playerclass = pev->playerclass;
+
+	state.basevelocity = pev->basevelocity;
+
+	state.weaponmodel = pev->weaponmodel;
+	state.gaitsequence = pev->gaitsequence;
+	state.spectator = (pev->flags & FL_SPECTATOR) != 0;
+	state.friction = pev->friction;
+
+	state.gravity = pev->gravity;
+
+	state.usehull = (pev->flags & FL_DUCKING) != 0 ? 1 : 0;
+
+	if (pev->health > 0.0F)
+	{
+		state.health = std::max(pev->health, 1.0F);
+	}
+	else
+	{
+		state.health = 0.0F;
+	}
+}
+
 
 class CStripWeapons : public CPointEntity
 {

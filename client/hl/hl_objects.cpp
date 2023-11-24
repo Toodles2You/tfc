@@ -28,7 +28,6 @@
 #include "r_efx.h"
 
 extern TEMPENTITY* pLaserDot;
-void HUD_GetLastOrg(float* org);
 
 extern Vector g_PunchAngle;
 
@@ -44,7 +43,7 @@ static void GetCrosshairTarget(pmtrace_t* tr, float distance)
 	angles = angles + g_PunchAngle;
 
 	// Determine our last predicted origin
-	HUD_GetLastOrg((float*)&origin);
+	origin = HUD_GetLastOrg();
 
 	AngleVectors(angles, forward, right, up);
 

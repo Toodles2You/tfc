@@ -839,3 +839,94 @@ CBaseEntity* CBaseEntity::Create(const char* szName, const Vector& vecOrigin, co
 	DispatchSpawn(pEntity->edict());
 	return pEntity;
 }
+
+
+void CBaseEntity::SetEntityState(entity_state_t& state)
+{
+	state.entityType = ENTITY_NORMAL;
+
+	// Flag custom entities.
+	if ((pev->flags & FL_CUSTOMENTITY) != 0)
+	{
+		state.entityType = ENTITY_BEAM;
+	}
+
+	// Round animtime to nearest millisecond
+	state.animtime = (int)(1000.0 * pev->animtime) / 1000.0;
+
+	state.origin = pev->origin;
+	state.angles = pev->angles;
+	state.mins = pev->mins;
+	state.maxs = pev->maxs;
+
+	state.startpos = pev->startpos;
+	state.endpos = pev->endpos;
+
+	state.impacttime = pev->impacttime;
+	state.starttime = pev->starttime;
+
+	state.modelindex = pev->modelindex;
+
+	state.frame = pev->frame;
+
+	state.skin = pev->skin;
+	state.effects = pev->effects;
+
+	if ((pev->flags & FL_FLY) != 0)
+	{
+		state.eflags |= EFLAG_SLERP;
+	}
+	else
+	{
+		state.eflags &= ~EFLAG_SLERP;
+	}
+
+	state.eflags |= m_EFlags;
+
+	state.scale = pev->scale;
+	state.solid = pev->solid;
+	state.colormap = pev->colormap;
+
+	state.movetype = pev->movetype;
+	state.sequence = pev->sequence;
+	state.framerate = pev->framerate;
+	state.body = pev->body;
+
+	for (int i = 0; i < 4; i++)
+	{
+		state.controller[i] = pev->controller[i];
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		state.blending[i] = pev->blending[i];
+	}
+
+	state.rendermode = pev->rendermode;
+	state.renderamt = pev->renderamt;
+	state.renderfx = pev->renderfx;
+	state.rendercolor.r = pev->rendercolor.x;
+	state.rendercolor.g = pev->rendercolor.y;
+	state.rendercolor.b = pev->rendercolor.z;
+
+	state.aiment = 0;
+	if (pev->aiment)
+	{
+		state.aiment = ENTINDEX(pev->aiment);
+	}
+
+	state.owner = 0;
+	if (pev->owner)
+	{
+		int owner = ENTINDEX(pev->owner);
+
+		// Only care if owned by a player
+		if (owner >= 1 && owner <= gpGlobals->maxClients)
+		{
+			state.owner = owner;
+		}
+	}
+
+	// Class is overridden for non-players to signify a breakable glass object ( sort of a class? )
+	state.playerclass = pev->playerclass;
+}

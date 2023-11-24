@@ -207,3 +207,6 @@ void RadiusDamage(Vector vecSrc, CBaseEntity* inflictor, CBaseEntity* attacker, 
 void CBaseEntity::EmitSound(const char* sample, int channel, float volume, float attenuation, int pitch, int flags) {}
 void CBaseEntity::EmitSoundPredicted(const char* sample, int channel, float volume, float attenuation, int pitch, int flags) {}
 void CBaseEntity::StopSound(const char* sample, int channel) {}
+
+void CBaseEntity::SetEntityState(entity_state_t& state) {}
+void CBasePlayer::SetEntityState(entity_state_t& state) {}

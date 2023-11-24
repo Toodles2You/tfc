@@ -283,6 +283,27 @@ bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CB
 	return false;
 }
 
+void HUD_TraceLine(const float* v1, const float* v2, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
+{
+	pmtrace_t tr;
+	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(1, 1);
+	gEngfuncs.pEventAPI->EV_PushPMStates();
+	gEngfuncs.pEventAPI->EV_SetSolidPlayers(-1);
+	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+	gEngfuncs.pEventAPI->EV_PlayerTrace((float*)v1, (float*)v2, fNoMonsters, -1, &tr);
+	gEngfuncs.pEventAPI->EV_PopPMStates();
+	ptr->fAllSolid = tr.allsolid;
+	ptr->fStartSolid = tr.startsolid;
+	ptr->fInOpen = tr.inopen;
+	ptr->fInWater = tr.inwater;
+	ptr->flFraction = tr.fraction;
+	ptr->vecEndPos = tr.endpos;
+	ptr->flPlaneDist = tr.plane.dist;
+	ptr->vecPlaneNormal = tr.plane.normal;
+	ptr->pHit = nullptr;
+	ptr->iHitgroup = tr.hitgroup;
+}
+
 /*
 =====================
 HUD_PlaybackEvent
@@ -335,6 +356,7 @@ void HUD_InitClientWeapons()
 	g_engfuncs.pfnSetClientMaxspeed = HUD_SetMaxSpeed;
 
 	// Handled locally
+	g_engfuncs.pfnTraceLine = HUD_TraceLine;
 	g_engfuncs.pfnPlaybackEvent = HUD_PlaybackEvent;
 	g_engfuncs.pfnAlertMessage = AlertMessage;
 
@@ -359,15 +381,9 @@ HUD_GetLastOrg
 Retruns the last position that we stored for egon beam endpoint.
 =====================
 */
-void HUD_GetLastOrg(float* org)
+Vector HUD_GetLastOrg()
 {
-	int i;
-
-	// Return last origin
-	for (i = 0; i < 3; i++)
-	{
-		org[i] = previousorigin[i];
-	}
+	return previousorigin;
 }
 
 /*
@@ -379,39 +395,31 @@ Remember our exact predicted origin so we can draw the egon to the right positio
 */
 void HUD_SetLastOrg()
 {
-	int i;
-
-	// Offset final origin by view_offset
-	for (i = 0; i < 3; i++)
-	{
-		previousorigin[i] = g_finalstate->playerstate.origin[i] + g_finalstate->client.view_ofs[i];
-	}
+	previousorigin = g_finalstate->playerstate.origin + g_finalstate->client.view_ofs;
 }
 
 /*
 =====================
-HUD_WeaponsPostThink
+HUD_PostRunCmd
 
-Run Weapon firing code on client
+Client calls this during prediction, after it has moved the player and updated any info changed into to->
+time is the current client clock based on prediction
+cmd is the command that caused the movement, etc
+runfuncs is 1 if this is the first time we've predicted this command.  If so, sounds and effects should play, otherwise, they should
+be ignored
 =====================
 */
-void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd, double time, unsigned int random_seed)
+void DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct usercmd_s* cmd, int runfuncs, double time, unsigned int random_seed)
 {
 	int i;
 	static int lasthealth;
 
-	// Get current clock
-	//Use actual time instead of prediction frame time because that time value breaks anything that uses absolute time values.
-	gpGlobals->time = gEngfuncs.GetClientTime(); //time;
+	g_runfuncs = runfuncs != 0;
 
-	//Lets weapons code use frametime to decrement timers and stuff.
+	HUD_InitClientWeapons();
+
+	gpGlobals->time = gEngfuncs.GetClientTime();
 	gpGlobals->frametime = cmd->msec / 1000.0f;
-
-	switch (from->client.m_iId)
-	{
-	default:
-		break;
-	}
 
 	// Store pointer to our destination entity_state_t so we can get our origin, etc. from it
 	//  for setting up events on the client
@@ -440,10 +448,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 	player.pev->button = cmd->buttons;
 	player.m_afButtonLast = from->playerstate.oldbuttons;
-	
-	player.StartCmd(*cmd, random_seed);
-	
-	player.PreThink();
 
 	player.SetClientData(from->client);
 
@@ -456,6 +460,10 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		}
 		current->SetWeaponData(from->weapondata[i]);
 	}
+
+	player.StartCmd(*cmd, random_seed);
+	
+	player.PreThink();
 
 	player.PostThink();
 
@@ -484,26 +492,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 	// Wipe it so we can't use it after this frame
 	g_finalstate = NULL;
-}
-
-/*
-=====================
-HUD_PostRunCmd
-
-Client calls this during prediction, after it has moved the player and updated any info changed into to->
-time is the current client clock based on prediction
-cmd is the command that caused the movement, etc
-runfuncs is 1 if this is the first time we've predicted this command.  If so, sounds and effects should play, otherwise, they should
-be ignored
-=====================
-*/
-void DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct usercmd_s* cmd, int runfuncs, double time, unsigned int random_seed)
-{
-	g_runfuncs = runfuncs != 0;
-
-	//Event code depends on this stuff, so always initialize it.
-	HUD_InitClientWeapons();
-	HUD_WeaponsPostThink(from, to, cmd, time, random_seed);
 
 	g_CurrentWeaponId = to->client.m_iId;
 	g_PunchAngle = to->client.punchangle * 2;

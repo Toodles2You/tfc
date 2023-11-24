@@ -36,6 +36,7 @@ int stub_PrecacheSound(const char* s);
 unsigned short stub_PrecacheEvent(int type, const char* s);
 const char* stub_NameForFunction(uint32 function);
 void stub_SetModel(struct edict_s* e, const char* m);
+Vector HUD_GetLastOrg();
 
 
 extern bool g_runfuncs;

@@ -323,6 +323,8 @@ public:
 	void DecrementTimers(const int msec);
 	void StartCmd(const usercmd_t& cmd, unsigned int randomSeed);
 
+	void SetEntityState(entity_state_t& state) override;
+
 protected:
 	/** @brief Just a stub for now */
 	void EmitSuitSound(const char* sample) {}
