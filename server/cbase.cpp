@@ -806,18 +806,6 @@ bool CBaseEntity::ShouldToggle(USE_TYPE useType, bool currentState)
 }
 
 
-int CBaseEntity::DamageDecal(int bitsDamageType)
-{
-	if (pev->rendermode == kRenderTransAlpha)
-		return -1;
-
-	if (pev->rendermode != kRenderNormal)
-		return DECAL_BPROOF1;
-
-	return DECAL_GUNSHOT1 + RANDOM_LONG(0, 4);
-}
-
-
 
 // NOTE: szName must be a pointer to constant memory, e.g. "monster_class" because the entity
 // will keep a pointer to it after this call.

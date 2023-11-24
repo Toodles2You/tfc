@@ -1053,13 +1053,6 @@ void CBasePlayer::WaterMove()
 	}
 }
 
-
-// true if the player is attached to a ladder
-bool CBasePlayer::IsOnLadder()
-{
-	return (pev->movetype == MOVETYPE_FLY);
-}
-
 void CBasePlayer::PlayerDeathFrame()
 {
 	const auto bIsMultiplayer = util::IsMultiplayer();
@@ -1398,14 +1391,6 @@ void CBasePlayer::Duck()
 	}
 }
 
-//
-// ID's player as such.
-//
-int CBasePlayer::Classify()
-{
-	return CLASS_PLAYER;
-}
-
 
 void CBasePlayer::AddPoints(int score, bool bAllowNegativeScore)
 {
@@ -1687,39 +1672,6 @@ void CBasePlayer::CheckTimeBasedDamage()
 	}
 }
 
-
-// if in range of radiation source, ping geiger counter
-
-#define GEIGERDELAY 0.25
-
-void CBasePlayer::UpdateGeigerCounter()
-{
-	byte range;
-
-	// delay per update ie: don't flood net with these msgs
-	if (gpGlobals->time < m_flgeigerDelay)
-		return;
-
-	m_flgeigerDelay = gpGlobals->time + GEIGERDELAY;
-
-	// send range to radition source to client
-
-	range = (byte)(m_flgeigerRange / 4);
-
-	if (range != m_igeigerRangePrev)
-	{
-		m_igeigerRangePrev = range;
-
-		MessageBegin(MSG_ONE, gmsgGeigerRange, this);
-		WriteByte(range);
-		MessageEnd();
-	}
-
-	// reset counter and semaphore
-	if (!RANDOM_LONG(0, 3))
-		m_flgeigerRange = 1000;
-}
-
 /*
 ================
 CheckSuitUpdate
@@ -1740,9 +1692,6 @@ void CBasePlayer::CheckSuitUpdate()
 	// Ignore suit updates if no suit
 	if (!HasSuit())
 		return;
-
-	// if in range of radiation source, ping geiger counter
-	UpdateGeigerCounter();
 
 	if (util::IsDeathmatch())
 	{
@@ -1954,9 +1903,6 @@ bool CBasePlayer::Spawn()
 
 	m_flNextDecalTime = 0; // let this player decal as soon as he spawns.
 
-	m_flgeigerDelay = gpGlobals->time + 2.0; // wait a few seconds until user-defined message registrations
-											 // are recieved by all clients
-
 	m_iNextAttack = 0;
 
 	// dont let uninitialized value here hurt the player
@@ -2002,9 +1948,6 @@ bool CBasePlayer::Spawn()
 
 void CBasePlayer::Precache()
 {
-	m_flgeigerRange = 1000;
-	m_igeigerRangePrev = 1000;
-
 	m_bitsDamageType = 0;
 	m_bitsHUDDamage = -1;
 
@@ -2716,7 +2659,6 @@ void CBasePlayer::UpdateClientData()
 
 	if ((m_iTrain & TRAIN_NEW) != 0)
 	{
-		ASSERT(gmsgTrain > 0);
 		// send "health" update message
 		MessageBegin(MSG_ONE, gmsgTrain, this);
 		WriteByte(m_iTrain & 0xF);

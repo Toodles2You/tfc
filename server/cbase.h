@@ -68,22 +68,6 @@ extern void SaveGlobalState(SAVERESTOREDATA* pSaveData);
 extern void RestoreGlobalState(SAVERESTOREDATA* pSaveData);
 extern void ResetGlobalState();
 
-// For CLASSIFY
-#define CLASS_NONE 0
-#define CLASS_MACHINE 1
-#define CLASS_PLAYER 2
-#define CLASS_HUMAN_PASSIVE 3
-#define CLASS_HUMAN_MILITARY 4
-#define CLASS_ALIEN_MILITARY 5
-#define CLASS_ALIEN_PASSIVE 6
-#define CLASS_ALIEN_MONSTER 7
-#define CLASS_ALIEN_PREY 8
-#define CLASS_ALIEN_PREDATOR 9
-#define CLASS_INSECT 10
-#define CLASS_PLAYER_ALLY 11
-#define CLASS_PLAYER_BIOWEAPON 12 // hornets and snarks.launched by players
-#define CLASS_ALIEN_BIOWEAPON 13  // hornets and snarks.launched by the alien menace
-
 
 // monster to monster relationship types
 #define R_AL -2 // (ALLY) pals. Good alternative to R_NO when applicable.
@@ -117,7 +101,6 @@ public:
 	CBaseEntity* operator=(CBaseEntity* pEntity);
 	CBaseEntity* operator->();
 };
-
 
 //
 // Base Entity.  All entity types derive from this
@@ -156,9 +139,6 @@ public:
 	void SetSize(const Vector& mins, const Vector& maxs);
 	void SetModel(const char* name);
 
-	// Classify - returns the type of group (i.e, "houndeye", or "human military" so that monsters with different classnames
-	// still realize that they are teammates. (overridden for monsters that form groups)
-	virtual int Classify() { return CLASS_NONE; }
 	virtual void DeathNotice(entvars_t* pevChild) {} // monster maker children use this to tell the monster maker that they have died.
 
 
@@ -168,8 +148,6 @@ public:
 	virtual bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType);
 	virtual bool TakeHealth(float flHealth, int bitsDamageType);
 	virtual void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType);
-	virtual int BloodColor() { return DONT_BLEED; }
-	virtual void TraceBleed(float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType);
 	virtual bool IsTriggered(CBaseEntity* pActivator) { return true; }
 	virtual int GetToggleState() { return TS_AT_TOP; }
 	virtual void AddPoints(int score, bool bAllowNegativeScore) {}
@@ -180,7 +158,6 @@ public:
 	virtual float GetDelay() { return 0; }
 	virtual bool IsMoving() { return pev->velocity != g_vecZero; }
 	virtual void OverrideReset() {}
-	virtual int DamageDecal(int bitsDamageType);
 	// This is ONLY used by the node graph to test movement through a door
 	virtual void SetToggleState(int state) {}
 	virtual bool OnControls(entvars_t* pev) { return false; }

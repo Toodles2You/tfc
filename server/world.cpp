@@ -239,10 +239,7 @@ void CGlobalState::DumpGlobals()
 
 void CGlobalState::EntityAdd(string_t globalname, string_t mapName, GLOBALESTATE state)
 {
-	ASSERT(!Find(globalname));
-
 	globalentity_t* pNewEntity = (globalentity_t*)calloc(sizeof(globalentity_t), 1);
-	ASSERT(pNewEntity != NULL);
 	pNewEntity->pNext = m_pList;
 	m_pList = pNewEntity;
 	strcpy(pNewEntity->name, STRING(globalname));
@@ -450,9 +447,6 @@ void CWorld::Precache()
 	// init sentence group playback stuff from sentences.txt.
 	// ok to call this multiple times, calls after first are ignored.
 	SENTENCEG_Init();
-
-	// init texture type array from materials.txt
-	TEXTURETYPE_Init();
 
 	// player precaches
 	W_Precache();

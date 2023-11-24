@@ -35,8 +35,6 @@ typedef enum
 	matLastMaterial
 } Materials;
 
-#define NUM_SHARDS 6 // this many shards spawned when breakable objects break;
-
 class CBreakable : public CBaseDelay
 {
 public:
@@ -54,8 +52,6 @@ public:
 	void TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) override;
 
 	bool IsBreakable();
-
-	int DamageDecal(int bitsDamageType) override;
 
 	void EXPORT Die();
 	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION); }

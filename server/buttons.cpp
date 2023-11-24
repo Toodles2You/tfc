@@ -751,7 +751,6 @@ void CBaseButton::ButtonActivate()
 		PlayLockSounds(this, &m_ls, false, true);
 	}
 
-	ASSERT(m_toggle_state == TS_AT_BOTTOM);
 	m_toggle_state = TS_GOING_UP;
 
 	SetMoveDone(&CBaseButton::TriggerAndWait);
@@ -766,8 +765,6 @@ void CBaseButton::ButtonActivate()
 //
 void CBaseButton::TriggerAndWait()
 {
-	ASSERT(m_toggle_state == TS_GOING_UP);
-
 	if (!util::IsMasterTriggered(m_sMaster, m_hActivator))
 		return;
 
@@ -803,7 +800,6 @@ void CBaseButton::TriggerAndWait()
 //
 void CBaseButton::ButtonReturn()
 {
-	ASSERT(m_toggle_state == TS_AT_TOP);
 	m_toggle_state = TS_GOING_DOWN;
 
 	SetMoveDone(&CBaseButton::ButtonBackHome);
@@ -821,7 +817,6 @@ void CBaseButton::ButtonReturn()
 //
 void CBaseButton::ButtonBackHome()
 {
-	ASSERT(m_toggle_state == TS_GOING_DOWN);
 	m_toggle_state = TS_AT_BOTTOM;
 
 	if (FBitSet(pev->spawnflags, SF_BUTTON_TOGGLE))
@@ -921,7 +916,6 @@ bool CRotButton::Spawn()
 	m_toggle_state = TS_AT_BOTTOM;
 	m_vecAngle1 = pev->angles;
 	m_vecAngle2 = pev->angles + pev->movedir * m_flMoveDistance;
-	ASSERTSZ(m_vecAngle1 != m_vecAngle2, "rotating button start/end positions are equal");
 
 	m_fStayPushed = (m_flWait == -1 ? true : false);
 	m_fRotating = true;

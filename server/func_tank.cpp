@@ -403,8 +403,6 @@ void CFuncTank::StopControl()
 // Called each frame by the player's WeaponPostFrame
 void CFuncTank::ControllerPostFrame()
 {
-	ASSERT(m_pController != NULL);
-
 	if (gpGlobals->time < m_flNextAttack)
 		return;
 
@@ -428,7 +426,7 @@ void CFuncTank::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 	if ((pev->spawnflags & SF_TANK_CANCONTROL) != 0)
 	{ // player controlled turret
 
-		if (pActivator->Classify() != CLASS_PLAYER)
+		if (!pActivator->IsPlayer())
 			return;
 
 		if (value == 2 && useType == USE_SET)
@@ -1003,8 +1001,6 @@ void CFuncTankControls::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_T
 { // pass the Use command onto the controls
 	if (m_pTank)
 		m_pTank->Use(pActivator, pCaller, useType, value);
-
-	ASSERT(m_pTank != NULL); // if this fails,  most likely means save/restore hasn't worked properly
 }
 
 

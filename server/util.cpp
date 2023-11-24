@@ -320,40 +320,6 @@ CBaseEntity* util::GetLocalPlayer()
 	return util::PlayerByIndex(1);
 }
 
-#ifdef DEBUG
-edict_t* DBG_EntOfVars(const entvars_t* pev)
-{
-	if (pev->pContainingEntity != NULL)
-		return pev->pContainingEntity;
-	ALERT(at_console, "entvars_t pContainingEntity is NULL, calling into engine");
-	edict_t* pent = (*g_engfuncs.pfnFindEntityByVars)((entvars_t*)pev);
-	if (pent == NULL)
-		ALERT(at_console, "DAMN!  Even the engine couldn't FindEntityByVars!");
-	((entvars_t*)pev)->pContainingEntity = pent;
-	return pent;
-}
-#endif //DEBUG
-
-
-#ifdef DEBUG
-void DBG_AssertFunction(
-	bool fExpr,
-	const char* szExpr,
-	const char* szFile,
-	int szLine,
-	const char* szMessage)
-{
-	if (fExpr)
-		return;
-	char szOut[512];
-	if (szMessage != NULL)
-		sprintf(szOut, "ASSERT FAILED:\n %s \n(%s@%d)\n%s", szExpr, szFile, szLine, szMessage);
-	else
-		sprintf(szOut, "ASSERT FAILED:\n %s \n(%s@%d)", szExpr, szFile, szLine);
-	ALERT(at_console, szOut);
-}
-#endif // DEBUG
-
 // ripped this out of the engine
 float util::AngleMod(float a)
 {
@@ -2406,7 +2372,6 @@ bool CRestore::ReadFields(const char* pname, void* pBaseData, TYPEDESCRIPTION* p
 	HEADER header;
 
 	i = ReadShort();
-	ASSERT(i == sizeof(int)); // First entry should be an int
 
 	token = ReadShort();
 
@@ -2444,7 +2409,6 @@ bool CRestore::ReadFields(const char* pname, void* pBaseData, TYPEDESCRIPTION* p
 
 void CRestore::BufferReadHeader(HEADER* pheader)
 {
-	ASSERT(pheader != NULL);
 	pheader->size = ReadShort();	  // Read field size
 	pheader->token = ReadShort();	  // Read field name token
 	pheader->pData = BufferPointer(); // Field Data is next

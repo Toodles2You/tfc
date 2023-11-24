@@ -36,7 +36,7 @@
 // only damage ents that can clearly be seen by the explosion!
 
 
-void RadiusDamage(Vector vecSrc, CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType)
+void RadiusDamage(Vector vecSrc, CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, float flRadius, int bitsDamageType)
 {
 	CBaseEntity* pEntity = NULL;
 	TraceResult tr;
@@ -57,11 +57,6 @@ void RadiusDamage(Vector vecSrc, CBaseEntity* inflictor, CBaseEntity* attacker, 
 	{
 		if (pEntity->pev->takedamage != DAMAGE_NO)
 		{
-			if (iClassIgnore != CLASS_NONE && pEntity->Classify() == iClassIgnore)
-			{ // houndeyes don't hurt other houndeyes with their attack
-				continue;
-			}
-
 			// blast's don't tavel into or out of water
 			if (bInWater && pEntity->pev->waterlevel == 0)
 				continue;
@@ -222,19 +217,9 @@ TraceAttack
 */
 void CBaseEntity::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
 {
-	Vector vecOrigin = ptr->vecEndPos - vecDir * 4;
-
 	if (pev->takedamage != DAMAGE_NO)
 	{
 		AddMultiDamage(attacker, attacker, this, flDamage, bitsDamageType);
-
-		int blood = BloodColor();
-
-		if (blood != DONT_BLEED)
-		{
-			SpawnBlood(vecOrigin, blood, flDamage); // a little surface blood.
-			TraceBleed(flDamage, vecDir, ptr, bitsDamageType);
-		}
 	}
 }
 
@@ -321,73 +306,6 @@ void CBasePlayer::FireBullets(
 			WriteCoord(traceEndPos[i].z);
 		}
 		MessageEnd();
-	}
-}
-
-void CBaseEntity::TraceBleed(float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
-{
-	if (BloodColor() == DONT_BLEED)
-		return;
-
-	if (flDamage == 0)
-		return;
-
-	if ((bitsDamageType & (DMG_CRUSH | DMG_BULLET | DMG_SLASH | DMG_BLAST | DMG_CLUB | DMG_MORTAR)) == 0)
-		return;
-
-	// make blood decal on the wall!
-	TraceResult Bloodtr;
-	Vector vecTraceDir;
-	float flNoise;
-	int cCount;
-	int i;
-
-	/*
-	if ( !IsAlive() )
-	{
-		// dealing with a dead monster. 
-		if ( pev->max_health <= 0 )
-		{
-			// no blood decal for a monster that has already decalled its limit.
-			return; 
-		}
-		else
-		{
-			pev->max_health--;
-		}
-	}
-*/
-
-	if (flDamage < 10)
-	{
-		flNoise = 0.1;
-		cCount = 1;
-	}
-	else if (flDamage < 25)
-	{
-		flNoise = 0.2;
-		cCount = 2;
-	}
-	else
-	{
-		flNoise = 0.3;
-		cCount = 4;
-	}
-
-	for (i = 0; i < cCount; i++)
-	{
-		vecTraceDir = vecDir * -1; // trace in the opposite direction the shot came from (the direction the shot is going)
-
-		vecTraceDir.x += RANDOM_FLOAT(-flNoise, flNoise);
-		vecTraceDir.y += RANDOM_FLOAT(-flNoise, flNoise);
-		vecTraceDir.z += RANDOM_FLOAT(-flNoise, flNoise);
-
-		util::TraceLine(ptr->vecEndPos, ptr->vecEndPos + vecTraceDir * -172, util::ignore_monsters, this, &Bloodtr);
-
-		if (Bloodtr.flFraction != 1.0)
-		{
-			util::BloodDecalTrace(&Bloodtr, BloodColor());
-		}
 	}
 }
 

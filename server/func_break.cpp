@@ -749,18 +749,6 @@ bool CBreakable::IsBreakable()
 }
 
 
-int CBreakable::DamageDecal(int bitsDamageType)
-{
-	if (m_Material == matGlass)
-		return DECAL_GLASSBREAK1 + RANDOM_LONG(0, 2);
-
-	if (m_Material == matUnbreakableGlass)
-		return DECAL_BPROOF1;
-
-	return CBaseEntity::DamageDecal(bitsDamageType);
-}
-
-
 class CPushable : public CBreakable
 {
 public:

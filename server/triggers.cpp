@@ -884,13 +884,6 @@ void CTriggerHurt::RadiationThink()
 
 		vecRange = vecSpot1 - vecSpot2;
 		flRange = vecRange.Length();
-
-		// if player's current geiger counter range is larger
-		// than range to this trigger hurt, reset player's
-		// geiger counter range
-
-		if (pPlayer->m_flgeigerRange >= flRange)
-			pPlayer->m_flgeigerRange = flRange;
 	}
 
 	pev->nextthink = gpGlobals->time + 0.25;
@@ -1397,8 +1390,6 @@ void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 {
 	edict_t* pentLandmark;
 	LEVELLIST levels[16];
-
-	ASSERT(!FStrEq(m_szMapName, ""));
 
 	// Don't work in deathmatch
 	if (util::IsDeathmatch())

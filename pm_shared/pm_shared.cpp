@@ -584,7 +584,7 @@ void PM_UpdateStepSound()
 	speed = Length(pmove->velocity);
 
 	// determine if we are on a ladder
-	const bool fLadder = (pmove->movetype == MOVETYPE_FLY); // IsOnLadder();
+	const bool fLadder = (pmove->movetype == MOVETYPE_FLY);
 
 	if ((pmove->flags & FL_DUCKING) != 0 || fLadder)
 	{

@@ -426,7 +426,6 @@ void CFuncPlat::GoDown()
 	if (!FStringNull(pev->noiseMovement))
 		EmitSound(STRING(pev->noiseMovement), CHAN_STATIC, m_volume);
 
-	ASSERT(m_toggle_state == TS_AT_TOP || m_toggle_state == TS_GOING_UP);
 	m_toggle_state = TS_GOING_DOWN;
 	SetMoveDone(&CFuncPlat::CallHitBottom);
 	LinearMove(m_vecPosition2, pev->speed);
@@ -444,7 +443,6 @@ void CFuncPlat::HitBottom()
 	if (!FStringNull(pev->noiseStopMoving))
 		EmitSound(STRING(pev->noiseStopMoving), CHAN_WEAPON, m_volume);
 
-	ASSERT(m_toggle_state == TS_GOING_DOWN);
 	m_toggle_state = TS_AT_BOTTOM;
 }
 
@@ -457,7 +455,6 @@ void CFuncPlat::GoUp()
 	if (!FStringNull(pev->noiseMovement))
 		EmitSound(STRING(pev->noiseMovement), CHAN_STATIC, m_volume);
 
-	ASSERT(m_toggle_state == TS_AT_BOTTOM || m_toggle_state == TS_GOING_DOWN);
 	m_toggle_state = TS_GOING_UP;
 	SetMoveDone(&CFuncPlat::CallHitTop);
 	LinearMove(m_vecPosition1, pev->speed);
@@ -475,7 +472,6 @@ void CFuncPlat::HitTop()
 	if (!FStringNull(pev->noiseStopMoving))
 		EmitSound(STRING(pev->noiseStopMoving), CHAN_WEAPON, m_volume);
 
-	ASSERT(m_toggle_state == TS_GOING_UP);
 	m_toggle_state = TS_AT_TOP;
 
 	if (!IsTogglePlat())
@@ -497,7 +493,6 @@ void CFuncPlat::Blocked(CBaseEntity* pOther)
 		StopSound(STRING(pev->noiseMovement), CHAN_STATIC);
 
 	// Send the platform back where it came from
-	ASSERT(m_toggle_state == TS_GOING_UP || m_toggle_state == TS_GOING_DOWN);
 	if (m_toggle_state == TS_GOING_UP)
 		GoDown();
 	else if (m_toggle_state == TS_GOING_DOWN)
@@ -2109,8 +2104,6 @@ public:
 	void EXPORT Wait();
 	void Stop();
 
-	int BloodColor() override { return DONT_BLEED; }
-	int Classify() override { return CLASS_MACHINE; }
 	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 	Vector BodyTarget(const Vector& posSrc) override { return pev->origin; }

@@ -110,67 +110,6 @@ void AddMultiDamage(CBaseEntity *inflictor, CBaseEntity *attacker, CBaseEntity* 
 	gMultiDamage.amount += flDamage;
 }
 
-/*
-================
-SpawnBlood
-================
-*/
-void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage)
-{
-	util::BloodDrips(vecSpot, g_vecAttackDir, bloodColor, (int)flDamage);
-}
-
-
-int DamageDecal(CBaseEntity* pEntity, int bitsDamageType)
-{
-	if (!pEntity)
-		return (DECAL_GUNSHOT1 + RANDOM_LONG(0, 4));
-
-	return pEntity->DamageDecal(bitsDamageType);
-}
-
-void DecalGunshot(TraceResult* pTrace, int iBulletType)
-{
-	// Is the entity valid
-	if (!util::IsValidEntity(pTrace->pHit))
-		return;
-
-	if (VARS(pTrace->pHit)->solid == SOLID_BSP || VARS(pTrace->pHit)->movetype == MOVETYPE_PUSHSTEP)
-	{
-		CBaseEntity* pEntity = NULL;
-		// Decal the wall with a gunshot
-		if (!FNullEnt(pTrace->pHit))
-			pEntity = CBaseEntity::Instance(pTrace->pHit);
-
-		util::GunshotDecalTrace(pTrace, DamageDecal(pEntity, DMG_BULLET));
-	}
-}
-
-
-
-//
-// EjectBrass - tosses a brass shell from passed origin at passed velocity
-//
-void EjectBrass(const Vector& vecOrigin, const Vector& vecVelocity, float rotation, int model, int soundtype)
-{
-	// FIX: when the player shoots, their gun isn't in the same position as it is on the model other players see.
-
-	MessageBegin(MSG_PVS, SVC_TEMPENTITY, vecOrigin);
-	WriteByte(TE_MODEL);
-	WriteCoord(vecOrigin.x);
-	WriteCoord(vecOrigin.y);
-	WriteCoord(vecOrigin.z);
-	WriteCoord(vecVelocity.x);
-	WriteCoord(vecVelocity.y);
-	WriteCoord(vecVelocity.z);
-	WriteAngle(rotation);
-	WriteShort(model);
-	WriteByte(soundtype);
-	WriteByte(25); // 2.5 seconds
-	MessageEnd();
-}
-
-
 // Precaches the weapon and queues the weapon info for sending to clients
 void util::PrecacheWeapon(const char* szClassname)
 {

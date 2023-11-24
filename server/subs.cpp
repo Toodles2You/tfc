@@ -367,9 +367,6 @@ pev->origin traveling at flSpeed
 */
 void CBaseToggle::LinearMove(Vector vecDest, float flSpeed)
 {
-	ASSERTSZ(flSpeed != 0, "LinearMove:  no speed is defined!");
-	//	ASSERTSZ(m_pfnCallWhenMoveDone != NULL, "LinearMove: no post-move function defined");
-
 	m_vecFinalDest = vecDest;
 
 	// Already there?
@@ -432,9 +429,6 @@ Just like LinearMove, but rotational.
 */
 void CBaseToggle::AngularMove(Vector vecDestAngle, float flSpeed)
 {
-	ASSERTSZ(flSpeed != 0, "AngularMove:  no speed is defined!");
-	//	ASSERTSZ(m_pfnCallWhenMoveDone != NULL, "AngularMove: no post-move function defined");
-
 	m_vecFinalAngle = vecDestAngle;
 
 	// Already there?

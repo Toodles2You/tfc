@@ -351,7 +351,6 @@ void HUD_InitClientWeapons()
 	g_engfuncs.pfnPrecacheModel = stub_PrecacheModel;
 	g_engfuncs.pfnPrecacheSound = stub_PrecacheSound;
 	g_engfuncs.pfnPrecacheEvent = stub_PrecacheEvent;
-	g_engfuncs.pfnNameForFunction = stub_NameForFunction;
 	g_engfuncs.pfnSetModel = stub_SetModel;
 	g_engfuncs.pfnSetClientMaxspeed = HUD_SetMaxSpeed;
 
@@ -461,7 +460,7 @@ void DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* 
 		current->SetWeaponData(from->weapondata[i]);
 	}
 
-	player.StartCmd(*cmd, random_seed);
+	player.CmdStart(*cmd, random_seed);
 	
 	player.PreThink();
 

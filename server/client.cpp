@@ -985,16 +985,6 @@ void ClientPrecache()
 	PRECACHE_SOUND("common/wpn_select.wav");
 	PRECACHE_SOUND("common/wpn_denyselect.wav");
 
-
-	// geiger sounds
-
-	PRECACHE_SOUND("player/geiger6.wav");
-	PRECACHE_SOUND("player/geiger5.wav");
-	PRECACHE_SOUND("player/geiger4.wav");
-	PRECACHE_SOUND("player/geiger3.wav");
-	PRECACHE_SOUND("player/geiger2.wav");
-	PRECACHE_SOUND("player/geiger1.wav");
-
 	PRECACHE_SOUND("misc/r_tele1.wav");
 
 	g_usGibbed = PRECACHE_EVENT(1, "events/gibs.sc");
@@ -1307,7 +1297,7 @@ void CreateBaseline(int player, int eindex, struct entity_state_s* baseline, str
 		baseline->maxs = entity->v.maxs;
 
 		baseline->colormap = 0;
-		baseline->modelindex = entity->v.modelindex; //SV_ModelIndex(pr_strings + entity->v.model);
+		baseline->modelindex = entity->v.modelindex;
 		baseline->movetype = entity->v.movetype;
 
 		baseline->scale = entity->v.scale;
@@ -1629,7 +1619,7 @@ void CmdStart(const edict_t* ent, const struct usercmd_s* cmd, unsigned int rand
 	auto player =
 		dynamic_cast<CBasePlayer*>(CBasePlayer::Instance((edict_t*)ent));
 
-	player->StartCmd(*cmd, random_seed);
+	player->CmdStart(*cmd, random_seed);
 
 	if (player->pev->groupinfo != 0)
 	{

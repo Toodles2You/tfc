@@ -55,7 +55,6 @@ public:
 	void EXPORT TumbleThink();
 
 	virtual void BounceSound();
-	int BloodColor() override { return DONT_BLEED; }
 	void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType) override;
 
 	float m_flNextAttack;
@@ -86,18 +85,6 @@ typedef struct
 	int iFlags;
 	int iWeight; // this value used to determine this weapon's importance in autoselection.
 } WeaponInfo;
-
-struct AmmoInfo
-{
-	const char* pszName;
-	int iId;
-
-	/**
-	*	@brief For exhaustible weapons. If provided, and the player does not have this weapon in their inventory yet it will be given to them.
-	*/
-	const char* WeaponName = nullptr;
-};
-
 
 // inventory items that commit war crimes
 class CBasePlayerWeapon : public CBaseAnimating
@@ -236,10 +223,7 @@ extern void ClearMultiDamage();
 extern void ApplyMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker);
 extern void AddMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker, CBaseEntity* pEntity, float flDamage, int bitsDamageType);
 
-extern void DecalGunshot(TraceResult* pTrace, int iBulletType);
-extern void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage);
-extern int DamageDecal(CBaseEntity* pEntity, int bitsDamageType);
-extern void RadiusDamage(Vector vecSrc, CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType);
+extern void RadiusDamage(Vector vecSrc, CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, float flRadius, int bitsDamageType);
 
 typedef struct
 {

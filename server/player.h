@@ -137,12 +137,6 @@ public:
 	int m_lastDamageAmount;						 // Last damage taken
 	float m_tbdPrev;							 // Time-based damage timer
 
-	float m_flgeigerRange; // range to nearest radiation source
-	float m_flgeigerDelay; // delay per update of range msg to client
-	int m_igeigerRangePrev;
-	char m_szTextureName[CBTEXTURENAMEMAX]; // current texture name we're standing on
-	char m_chTextureType;					// current texture type
-
 	int m_idrowndmg;	  // track drowning damage taken
 	int m_idrownrestored; // track drowning damage restored
 
@@ -232,15 +226,12 @@ public:
 	// Player is moved across the transition by other means
 	int ObjectCaps() override { return (CBaseAnimating::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_NET_ALWAYS_SEND; }
 	void Precache() override;
-	bool IsOnLadder();
 
 	void DeathSound();
 
-	int Classify() override;
 	void SetAnimation(PLAYER_ANIM playerAnim);
 	Activity CBasePlayer::GetDeathActivity();
 	Activity CBasePlayer::GetSmallFlinchActivity();
-	void SetWeaponAnimType(const char* szExtention);
 	char m_szAnimExtention[32];
 
 	// custom player functions
@@ -284,7 +275,6 @@ public:
 
 	void CheckSuitUpdate();
 	void SetSuitUpdate(const char* name, bool fgroup, int iNoRepeat);
-	void UpdateGeigerCounter();
 	void CheckTimeBasedDamage();
 	void CheckAmmoLevel(CBasePlayerWeapon* pWeapon, bool bPrimary = true);
 
@@ -321,7 +311,7 @@ public:
 	void GetClientData(clientdata_t& data, bool sendWeapons);
 	void SetClientData(const clientdata_t& data);
 	void DecrementTimers(const int msec);
-	void StartCmd(const usercmd_t& cmd, unsigned int randomSeed);
+	void CmdStart(const usercmd_t& cmd, unsigned int randomSeed);
 
 	void SetEntityState(entity_state_t& state) override;
 

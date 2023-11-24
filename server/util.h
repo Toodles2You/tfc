@@ -68,15 +68,10 @@ typedef int EOFFSET;
 //
 // Conversion among the three types of "entity", including identity-conversions.
 //
-#ifdef DEBUG
-edict_t* DBG_EntOfVars(const entvars_t* pev);
-inline edict_t* ENT(const entvars_t* pev) { return DBG_EntOfVars(pev); }
-#else
 inline edict_t* ENT(const entvars_t* pev)
 {
 	return pev->pContainingEntity;
 }
-#endif
 inline edict_t* ENT(edict_t* pent)
 {
 	return pent;
@@ -245,18 +240,6 @@ inline bool FClassnameIs(entvars_t* pev, const char* szClassname)
 }
 
 //
-// How did I ever live without ASSERT?
-//
-#ifdef DEBUG
-void DBG_AssertFunction(bool fExpr, const char* szExpr, const char* szFile, int szLine, const char* szMessage);
-#define ASSERT(f) DBG_AssertFunction(f, #f, __FILE__, __LINE__, NULL)
-#define ASSERTSZ(f, sz) DBG_AssertFunction(f, #f, __FILE__, __LINE__, sz)
-#else // !DEBUG
-#define ASSERT(f)
-#define ASSERTSZ(f, sz)
-#endif // !DEBUG
-
-//
 // Constants that were used only by QC (maybe not used at all now)
 //
 // Un-comment only as needed
@@ -305,10 +288,6 @@ int SENTENCEG_PlayRndSz(CBaseEntity* entity, const char* szrootname, float volum
 int SENTENCEG_PlaySequentialSz(CBaseEntity* entity, const char* szrootname, float volume, float attenuation, int flags, int pitch, int ipick, bool freset);
 int SENTENCEG_GetIndex(const char* szrootname);
 int SENTENCEG_Lookup(const char* sample, char* sentencenum);
-
-void TEXTURETYPE_Init();
-char TEXTURETYPE_Find(char* name);
-float TEXTURETYPE_PlaySound(TraceResult* ptr, Vector vecSrc, Vector vecEnd, int iBulletType);
 
 #define PLAYBACK_EVENT(flags, who, index) PLAYBACK_EVENT_FULL(flags, who, index, 0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 #define PLAYBACK_EVENT_DELAY(flags, who, index, delay) PLAYBACK_EVENT_FULL(flags, who, index, delay, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);

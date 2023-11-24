@@ -84,7 +84,7 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 	Vector origin = pev->origin;
 	origin.z -= 1;
 
-	RadiusDamage(origin, this, owner, pev->dmg, pev->dmg * 2.5, CLASS_NONE, bitsDamageType);
+	RadiusDamage(origin, this, owner, pev->dmg, pev->dmg * 2.5, bitsDamageType);
 
 	if (RANDOM_FLOAT(0, 1) < 0.5)
 	{

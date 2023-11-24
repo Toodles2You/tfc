@@ -252,7 +252,7 @@ void CBasePlayer::DecrementTimers(const int msec)
 }
 
 
-void CBasePlayer::StartCmd(const usercmd_t& cmd, unsigned int randomSeed)
+void CBasePlayer::CmdStart(const usercmd_t& cmd, unsigned int randomSeed)
 {
 	if (cmd.weaponselect != 0)
 	{
