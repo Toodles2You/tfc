@@ -1929,6 +1929,7 @@ bool CBasePlayer::Spawn()
 
 	m_fInitHUD = true;
 	m_iClientHideHUD = -1; // force this to be recalculated
+	m_ClientWeaponBits = 0;
 
 	// reset all ammo values to 0
 	for (int i = 0; i < MAX_AMMO_SLOTS; i++)

@@ -25,14 +25,6 @@
 
 extern engine_studio_api_t IEngineStudio;
 
-#define MAX_LOGO_FRAMES 56
-
-int grgLogoFrame[MAX_LOGO_FRAMES] =
-	{
-		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 13, 13, 13, 13, 13, 12, 11, 10, 9, 8, 14, 15,
-		16, 17, 18, 19, 20, 20, 20, 20, 20, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-		29, 29, 29, 29, 29, 28, 27, 26, 25, 24, 30, 31};
-
 float HUD_GetFOV();
 
 extern cvar_t* sensitivity;
@@ -126,9 +118,6 @@ bool CHud::Redraw(float flTime, bool intermission)
 
 	m_iIntermission = intermission;
 
-	// if no redrawing is necessary
-	// return 0;
-
 	// draw all registered HUD elements
 	if (0 != m_pCvarDraw->value)
 	{
@@ -149,27 +138,6 @@ bool CHud::Redraw(float flTime, bool intermission)
 
 			pList = pList->pNext;
 		}
-	}
-
-	// are we in demo mode? do we need to draw the logo in the top corner?
-	if (0 != m_iLogo)
-	{
-		int x, y, i;
-
-		if (m_hsprLogo == 0)
-			m_hsprLogo = LoadSprite("sprites/%d_logo.spr");
-
-		SPR_Set(m_hsprLogo, 250, 250, 250);
-
-		x = SPR_Width(m_hsprLogo, 0);
-		x = ScreenWidth - x;
-		y = SPR_Height(m_hsprLogo, 0) / 2;
-
-		// Draw the logo at 20 fps
-		int iFrame = (int)(flTime * 20) % MAX_LOGO_FRAMES;
-		i = grgLogoFrame[iFrame] - 1;
-
-		SPR_DrawAdditive(i, x, y, NULL);
 	}
 
 	gEngfuncs.pTriAPI->RenderMode(kRenderNormal);

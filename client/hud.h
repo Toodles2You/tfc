@@ -503,8 +503,6 @@ class CHud
 {
 private:
 	HUDLIST* m_pHudList;
-	HSPRITE m_hsprLogo;
-	int m_iLogo;
 	client_sprite_t* m_pSpriteList;
 	int m_iSpriteCount;
 	int m_iSpriteCountAllRes;
@@ -520,7 +518,6 @@ private:
 	HSPRITE m_hSprDummy;
 
 public:
-	HSPRITE m_hsprCursor;
 	float m_flTime;		  // the current client time
 	float m_fOldTime;	  // the time at which the HUD was last redrawn
 	double m_flTimeDelta; // the difference between flTime and fOldTime
@@ -667,7 +664,6 @@ public:
 	// user messages
 	bool MsgFunc_Damage(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_GameMode(const char* pszName, int iSize, void* pbuf);
-	bool MsgFunc_Logo(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_ResetHUD(const char* pszName, int iSize, void* pbuf);
 	void MsgFunc_InitHUD(const char* pszName, int iSize, void* pbuf);
 	void MsgFunc_ViewMode(const char* pszName, int iSize, void* pbuf);

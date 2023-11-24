@@ -86,13 +86,6 @@ cvar_t* violence_hgibs = nullptr;
 
 void ShutdownInput();
 
-//DECLARE_MESSAGE(m_Logo, Logo)
-int __MsgFunc_Logo(const char* pszName, int iSize, void* pbuf)
-{
-	return static_cast<int>(gHUD.MsgFunc_Logo(pszName, iSize, pbuf));
-}
-
-//DECLARE_MESSAGE(m_Logo, Logo)
 int __MsgFunc_ResetHUD(const char* pszName, int iSize, void* pbuf)
 {
 	return static_cast<int>(gHUD.MsgFunc_ResetHUD(pszName, iSize, pbuf));
@@ -280,7 +273,6 @@ int __MsgFunc_AllowSpec(const char* pszName, int iSize, void* pbuf)
 // This is called every time the DLL is loaded
 void CHud::Init()
 {
-	HOOK_MESSAGE(Logo);
 	HOOK_MESSAGE(ResetHUD);
 	HOOK_MESSAGE(GameMode);
 	HOOK_MESSAGE(InitHUD);
@@ -339,7 +331,6 @@ void CHud::Init()
 	m_cColors[CHud::COLOR_WARNING].b = 16;		// 16
 	m_cColors[CHud::COLOR_WARNING].a = 255;
 
-	m_iLogo = 0;
 	m_iFOV = 0;
 
 	zoom_sensitivity_ratio = CVAR_CREATE("zoom_sensitivity_ratio", "1.0", 0);
@@ -438,14 +429,6 @@ void CHud::VidInit()
 {
 	m_scrinfo.iSize = sizeof(m_scrinfo);
 	GetScreenInfo(&m_scrinfo);
-
-	// ----------
-	// Load Sprites
-	// ---------
-	//	m_hsprFont = LoadSprite("sprites/%d_font.spr");
-
-	m_hsprLogo = 0;
-	m_hsprCursor = 0;
 
 	if (ScreenWidth < 640)
 		m_iRes = 320;
@@ -556,16 +539,6 @@ void CHud::VidInit()
 	m_TextMessage.VidInit();
 	m_StatusIcons.VidInit();
 	GetClientVoiceMgr()->VidInit();
-}
-
-bool CHud::MsgFunc_Logo(const char* pszName, int iSize, void* pbuf)
-{
-	BEGIN_READ(pbuf, iSize);
-
-	// update Train data
-	m_iLogo = READ_BYTE();
-
-	return true;
 }
 
 /*
