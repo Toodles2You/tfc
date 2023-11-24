@@ -58,11 +58,7 @@ bool CBaseAnimating::Save(class CSave&) { return true; }
 
 // util Stubs
 void util::PrecacheOther(const char* szClassname) {}
-void util::BloodDrips(const Vector& origin, const Vector& direction, int color, int amount) {}
-void util::DecalTrace(TraceResult* pTrace, int decalNumber) {}
-void util::GunshotDecalTrace(TraceResult* pTrace, int decalNumber) {}
 void util::MakeVectors(const Vector& vecAngles) {}
-bool util::IsValidEntity(edict_t* pent) { return true; }
 void util::LogPrintf(const char*, ...) {}
 void util::ClientPrintAll(int, char const*, char const*, char const*, char const*, char const*) {}
 void util::ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4) {}

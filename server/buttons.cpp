@@ -624,7 +624,7 @@ const char* ButtonSound(int sound)
 static void DoSpark(CBaseEntity *entity, const Vector& location)
 {
 	Vector tmp = location + entity->pev->size * 0.5;
-	util::Sparks(tmp);
+	tent::Sparks(tmp);
 
 	float flVolume = RANDOM_FLOAT(0.25, 0.75) * 0.4; //random volume range
 	const char *sample;

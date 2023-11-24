@@ -408,18 +408,8 @@ void TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igm
 TraceResult GetGlobalTrace();
 void TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, edict_t* pentModel, TraceResult* ptr);
 Vector GetAimVector(edict_t* pent, float flSpeed);
-int PointContents(const Vector& vec);
 
 bool IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator);
-void BloodStream(const Vector& origin, const Vector& direction, int color, int amount);
-void BloodDrips(const Vector& origin, const Vector& direction, int color, int amount);
-Vector RandomBloodVector();
-void BloodDecalTrace(TraceResult* pTrace, int bloodColor);
-void DecalTrace(TraceResult* pTrace, int decalNumber);
-void PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber, bool bIsCustom);
-void GunshotDecalTrace(TraceResult* pTrace, int decalNumber);
-void Sparks(const Vector& position);
-void Ricochet(const Vector& position, float scale);
 void StringToVector(float* pVector, const char* pString);
 void StringToIntArray(int* pVector, int count, const char* pString);
 Vector ClampVectorToBox(const Vector& input, const Vector& clampSize);
@@ -428,16 +418,10 @@ float ApproachAngle(float target, float value, float speed);
 float AngleDistance(float next, float cur);
 
 char* VarArgs(const char* format, ...);
-bool IsValidEntity(edict_t* pent);
 bool TeamsMatch(const char* pTeamName1, const char* pTeamName2);
 
 // Use for ease-in, ease-out style interpolation (accel/decel)
 float SplineFraction(float value, float scale);
-
-// Search for water transition along a vertical line
-float WaterLevel(const Vector& position, float minz, float maxz);
-void Bubbles(Vector mins, Vector maxs, int count);
-void BubbleTrail(Vector from, Vector to, int count);
 
 // allows precacheing of other entities
 void PrecacheOther(const char* szClassname);
@@ -530,3 +514,17 @@ gamemode_e GetGameMode();
 bool IsMultiplayer();
 bool IsDeathmatch();
 } /* namespace util */
+
+namespace tent
+{
+void Sparks(const Vector& position);
+void Ricochet(const Vector& position, float scale);
+void TeleportSplash(CBaseEntity* entity);
+
+void BloodStream(const Vector& origin, const Vector& direction, int color, int amount);
+void BloodDrips(const Vector& origin, const Vector& direction, int color, int amount);
+void BloodDecalTrace(TraceResult* pTrace, int bloodColor);
+
+void DecalTrace(TraceResult* pTrace, int decalNumber);
+void PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber, bool bIsCustom);
+} // namespace tent

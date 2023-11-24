@@ -1723,7 +1723,7 @@ void CTestHull::BuildNodeGraph()
 		{
 			// do nothing
 		}
-		else if (util::PointContents(WorldGraph.m_pNodes[i].m_vecOrigin) == CONTENTS_WATER)
+		else if (g_engfuncs.pfnPointContents(WorldGraph.m_pNodes[i].m_vecOrigin) == CONTENTS_WATER)
 		{
 			WorldGraph.m_pNodes[i].m_afNodeInfo |= bits_NODE_WATER;
 		}

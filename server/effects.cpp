@@ -361,11 +361,11 @@ void CBeam::DoSparks(const Vector& start, const Vector& end)
 	{
 		if ((pev->spawnflags & SF_BEAM_SPARKSTART) != 0)
 		{
-			util::Sparks(start);
+			tent::Sparks(start);
 		}
 		if ((pev->spawnflags & SF_BEAM_SPARKEND) != 0)
 		{
-			util::Sparks(end);
+			tent::Sparks(end);
 		}
 	}
 }
@@ -740,7 +740,7 @@ void CBeam::BeamDamage(TraceResult* ptr)
 			if ((pev->spawnflags & SF_BEAM_DECALS) != 0)
 			{
 				if (pHit->IsBSPModel())
-					util::DecalTrace(ptr, DECAL_BIGSHOT1 + RANDOM_LONG(0, 4));
+					tent::DecalTrace(ptr, DECAL_BIGSHOT1 + RANDOM_LONG(0, 4));
 			}
 		}
 	}
@@ -1766,7 +1766,15 @@ bool CBlood::KeyValue(KeyValueData* pkvd)
 Vector CBlood::Direction()
 {
 	if ((pev->spawnflags & SF_BLOOD_RANDOM) != 0)
-		return util::RandomBloodVector();
+	{
+		Vector direction;
+
+		direction.x = RANDOM_FLOAT(-1, 1);
+		direction.y = RANDOM_FLOAT(-1, 1);
+		direction.z = RANDOM_FLOAT(0, 1);
+
+		return direction;
+	}
 
 	return pev->movedir;
 }
@@ -1795,9 +1803,9 @@ Vector CBlood::BloodPosition(CBaseEntity* pActivator)
 void CBlood::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	if ((pev->spawnflags & SF_BLOOD_STREAM) != 0)
-		util::BloodStream(BloodPosition(pActivator), Direction(), (Color() == BLOOD_COLOR_RED) ? 70 : Color(), BloodAmount());
+		tent::BloodStream(BloodPosition(pActivator), Direction(), (Color() == BLOOD_COLOR_RED) ? 70 : Color(), BloodAmount());
 	else
-		util::BloodDrips(BloodPosition(pActivator), Direction(), Color(), BloodAmount());
+		tent::BloodDrips(BloodPosition(pActivator), Direction(), Color(), BloodAmount());
 
 	if ((pev->spawnflags & SF_BLOOD_DECAL) != 0)
 	{
@@ -1807,7 +1815,7 @@ void CBlood::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType
 
 		util::TraceLine(start, start + forward * BloodAmount() * 2, util::ignore_monsters, nullptr, &tr);
 		if (tr.flFraction != 1.0)
-			util::BloodDecalTrace(&tr, Color());
+			tent::BloodDecalTrace(&tr, Color());
 	}
 }
 

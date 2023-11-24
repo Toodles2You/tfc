@@ -485,7 +485,7 @@ void CBreakable::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDi
 		{
 		case matComputer:
 		{
-			util::Sparks(ptr->vecEndPos);
+			tent::Sparks(ptr->vecEndPos);
 
 			float flVolume = RANDOM_FLOAT(0.7, 1.0); //random volume range
 			switch (RANDOM_LONG(0, 1))
@@ -497,7 +497,7 @@ void CBreakable::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDi
 		break;
 
 		case matUnbreakableGlass:
-			util::Ricochet(ptr->vecEndPos, RANDOM_FLOAT(0.5, 1.5));
+			tent::Ricochet(ptr->vecEndPos, RANDOM_FLOAT(0.5, 1.5));
 			break;
 		}
 	}

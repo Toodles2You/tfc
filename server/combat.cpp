@@ -48,7 +48,7 @@ void RadiusDamage(Vector vecSrc, CBaseEntity* inflictor, CBaseEntity* attacker, 
 	else
 		falloff = 1.0;
 
-	const bool bInWater = (util::PointContents(vecSrc) == CONTENTS_WATER);
+	const bool bInWater = (g_engfuncs.pfnPointContents(vecSrc) == CONTENTS_WATER);
 
 	vecSrc.z += 1; // in case grenade is lying on the ground
 

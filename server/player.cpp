@@ -42,7 +42,6 @@
 #include "animation.h"
 
 unsigned short g_usGibbed;
-unsigned short g_usTeleport;
 
 #define TRAIN_ACTIVE 0x80
 #define TRAIN_NEW 0xc0
@@ -2159,12 +2158,12 @@ void CSprayCan::Think()
 	// No customization present.
 	if (nFrames == -1)
 	{
-		util::DecalTrace(&tr, DECAL_LAMBDA6);
+		tent::DecalTrace(&tr, DECAL_LAMBDA6);
 		Remove();
 	}
 	else
 	{
-		util::PlayerDecalTrace(&tr, playernum, pev->frame, true);
+		tent::PlayerDecalTrace(&tr, playernum, pev->frame, true);
 		// Just painted last custom frame.
 		if (pev->frame++ >= (nFrames - 1))
 			Remove();

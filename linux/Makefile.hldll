@@ -55,10 +55,12 @@ HLDLL_OBJS = \
 	$(HLDLL_OBJ_DIR)/plats.o \
 	$(HLDLL_OBJ_DIR)/player_shared.o \
 	$(HLDLL_OBJ_DIR)/player.o \
+	$(HLDLL_OBJ_DIR)/saverestore.o \
 	$(HLDLL_OBJ_DIR)/sound.o \
 	$(HLDLL_OBJ_DIR)/spectator.o \
 	$(HLDLL_OBJ_DIR)/subs.o \
 	$(HLDLL_OBJ_DIR)/teamplay_gamerules.o \
+	$(HLDLL_OBJ_DIR)/tent.o \
 	$(HLDLL_OBJ_DIR)/multiplay_gamerules.o \
 	$(HLDLL_OBJ_DIR)/singleplay_gamerules.o \
 	$(HLDLL_OBJ_DIR)/triggers.o \
