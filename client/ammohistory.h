@@ -126,6 +126,7 @@ public:
 	void Reset()
 	{
 		memset(rgAmmoHistory, 0, sizeof rgAmmoHistory);
+		iHistoryGap = 45;
 		iCurrentHistorySlot = 0;
 	}
 
