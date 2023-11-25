@@ -52,6 +52,12 @@ static void GetCrosshairTarget(pmtrace_t* tr, float distance)
 	VectorMA(vecSrc, distance, forward, vecEnd);
 
 	gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_STUDIO_BOX, -1, tr);
+
+	if (tr->startsolid || tr->allsolid)
+	{
+		tr->fraction = 1.0f / distance;
+		tr->endpos = vecSrc + forward;
+	}
 }
 
 static void UpdateLaserDot(const float time, const pmtrace_t *tr)
