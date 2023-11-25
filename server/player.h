@@ -130,10 +130,6 @@ public:
 
 
 	// these are time-sensitive things that we keep track of
-	float m_flTimeWeaponIdle; // when to play another weapon idle animation.
-	float m_flSwimTime;		  // how long player has been underwater
-	float m_flDuckTime;		  // how long we've been ducking
-	float m_flWallJumpTime;	  // how long until next walljump
 
 	float m_flSuitUpdate;						 // when to play next suit update
 	int m_rgSuitPlayList[CSUITPLAYLIST];		 // next sentencenum to play for suit update
@@ -188,9 +184,6 @@ public:
 	bool Spawn() override;
 	void Pain();
 
-	//	void Think() override;
-	virtual void Jump();
-	virtual void Duck();
 	virtual void PreThink();
 	virtual void PostThink();
 	inline Vector GetGunPosition() { return pev->origin + pev->view_ofs; }

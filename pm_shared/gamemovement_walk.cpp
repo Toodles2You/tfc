@@ -55,6 +55,14 @@ void CHalfLifeMovement::Walk()
 
     if (pmove->onground != -1)
     {
+        if (m_wishSpeed != 0.0F)
+        {
+            player->SetAnimation(PLAYER_WALK);
+        }
+        else
+        {
+            player->SetAnimation(PLAYER_IDLE);
+        }
         pmove->velocity.z = 0;
     }
 }
@@ -83,6 +91,11 @@ void CHalfLifeMovement::WalkMove()
     if (trace.fraction == 1)
     {
         pmove->origin = trace.endpos;
+
+        if (pmove->movevars->stepsize >= 1)
+        {
+            StayOnGround();
+        }
         return;
     }
 
@@ -154,6 +167,7 @@ void CHalfLifeMovement::WalkMove()
     {
         pmove->origin = downOrigin;
         pmove->velocity = downVelocity;
+        StayOnGround();
         return;
     }
 
@@ -174,6 +188,8 @@ void CHalfLifeMovement::WalkMove()
         /* Copy z value from slide move */
         pmove->velocity.z = downVelocity.z;
     }
+
+    StayOnGround();
 }
 
 
@@ -198,8 +214,17 @@ void CHalfLifeMovement::Jump()
         return;
     }
 
+    player->SetAnimation(PLAYER_JUMP);
+
     pmove->onground = -1;
     pmove->velocity.z = sqrtf(2 * 800 * 45);
+
+    if (pmove->basevelocity != g_vecZero)
+    {
+        pmove->velocity = pmove->velocity + pmove->basevelocity;
+        pmove->basevelocity = g_vecZero;
+    }
+    
     FixUpGravity();
 }
 
@@ -253,5 +278,28 @@ void CHalfLifeMovement::ApplyFriction()
     }
     newSpeed /= speed;
     pmove->velocity = pmove->velocity * newSpeed;
+}
+
+
+void CHalfLifeMovement::StayOnGround()
+{
+    pmtrace_t trace;
+    Vector start = pmove->origin;
+    Vector end = pmove->origin;
+    start.z += 2;
+    end.z -= pmove->movevars->stepsize;
+
+    trace = pmove->PM_PlayerTrace(pmove->origin, start, PM_STUDIO_BOX, -1);
+    start = trace.endpos;
+    trace = pmove->PM_PlayerTrace(start, end, PM_STUDIO_BOX, -1);
+
+    if (trace.fraction != 0.0F
+     && trace.fraction != 1.0F
+     && trace.startsolid == 0
+     && trace.plane.normal.z >= 0.7
+     && fabsf(pmove->origin.z - trace.endpos.z) > 0.5F)
+    {
+        pmove->origin = trace.endpos;
+    }
 }
 

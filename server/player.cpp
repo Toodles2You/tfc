@@ -65,11 +65,6 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 		DEFINE_ARRAY(CBasePlayer, m_rgItems, FIELD_INTEGER, MAX_ITEMS),
 		DEFINE_FIELD(CBasePlayer, m_afPhysicsFlags, FIELD_INTEGER),
 
-		DEFINE_FIELD(CBasePlayer, m_flTimeWeaponIdle, FIELD_TIME),
-		DEFINE_FIELD(CBasePlayer, m_flSwimTime, FIELD_TIME),
-		DEFINE_FIELD(CBasePlayer, m_flDuckTime, FIELD_TIME),
-		DEFINE_FIELD(CBasePlayer, m_flWallJumpTime, FIELD_TIME),
-
 		DEFINE_FIELD(CBasePlayer, m_flSuitUpdate, FIELD_TIME),
 		DEFINE_ARRAY(CBasePlayer, m_rgSuitPlayList, FIELD_INTEGER, CSUITPLAYLIST),
 		DEFINE_FIELD(CBasePlayer, m_iSuitPlayNext, FIELD_INTEGER),
@@ -1328,69 +1323,6 @@ void CBasePlayer::PlayerUse()
 }
 
 
-
-void CBasePlayer::Jump()
-{
-	Vector vecWallCheckDir; // direction we're tracing a line to find a wall when walljumping
-	Vector vecAdjustedVelocity;
-	Vector vecSpot;
-	TraceResult tr;
-
-	if (FBitSet(pev->flags, FL_WATERJUMP))
-		return;
-
-	if (pev->waterlevel >= 2)
-	{
-		return;
-	}
-
-	// jump velocity is sqrt( height * gravity * 2)
-
-	// If this isn't the first frame pressing the jump button, break out.
-	if (!FBitSet(m_afButtonPressed, IN_JUMP))
-		return; // don't pogo stick
-
-	if ((pev->flags & FL_ONGROUND) == 0 || !pev->groundentity)
-	{
-		return;
-	}
-
-	// many features in this function use v_forward, so makevectors now.
-	util::MakeVectors(pev->angles);
-
-	// ClearBits(pev->flags, FL_ONGROUND);		// don't stairwalk
-
-	SetAnimation(PLAYER_JUMP);
-
-	if (m_fLongJump &&
-		(pev->button & IN_DUCK) != 0 &&
-		(pev->flDuckTime > 0) &&
-		pev->velocity.Length() > 50)
-	{
-		SetAnimation(PLAYER_SUPERJUMP);
-	}
-
-	// If you're standing on a conveyor, add it's velocity to yours (for momentum)
-	entvars_t* pevGround = VARS(pev->groundentity);
-	if (pevGround && (pevGround->flags & FL_CONVEYOR) != 0)
-	{
-		pev->velocity = pev->velocity + pev->basevelocity;
-	}
-}
-
-
-void CBasePlayer::Duck()
-{
-	if ((pev->button & IN_DUCK) != 0)
-	{
-		if (m_IdealActivity != ACT_LEAP)
-		{
-			SetAnimation(PLAYER_WALK);
-		}
-	}
-}
-
-
 void CBasePlayer::AddPoints(int score, bool bAllowNegativeScore)
 {
 	// Positive score always adds
@@ -1555,18 +1487,6 @@ void CBasePlayer::PreThink()
 	}
 	else if ((m_iTrain & TRAIN_ACTIVE) != 0)
 		m_iTrain = TRAIN_NEW; // turn off train
-
-	if ((pev->button & IN_JUMP) != 0)
-	{
-		// If on a ladder, jump off the ladder
-		// else Jump
-		Jump();
-	}
-
-
-	// If trying to duck, already ducked, or in the process of ducking
-	if ((pev->button & IN_DUCK) != 0 || FBitSet(pev->flags, FL_DUCKING) || (m_afPhysicsFlags & PFLAG_DUCKING) != 0)
-		Duck();
 
 	if (!FBitSet(pev->flags, FL_ONGROUND))
 	{

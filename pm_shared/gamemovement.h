@@ -49,6 +49,7 @@ protected:
     virtual void AirMove();
     virtual void Jump();
     virtual void ApplyFriction();
+    void StayOnGround();
 
 public:
     static void ClipVelocity(const Vector& in, const Vector& normal, Vector& out, const float overbounce);

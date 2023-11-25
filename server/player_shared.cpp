@@ -130,27 +130,11 @@ void CBasePlayer::PostThink()
 				}
 			}
 		}
-
-		SetAnimation(PLAYER_WALK);
 	}
 
 	if (FBitSet(pev->flags, FL_ONGROUND))
 	{
 		m_flFallVelocity = 0;
-	}
-
-	// select the proper animation for the player character
-	if (0 == pev->velocity.x && 0 == pev->velocity.y)
-	{
-		SetAnimation(PLAYER_IDLE);
-	}
-	else if (FBitSet(pev->flags, FL_ONGROUND))
-	{
-		SetAnimation(PLAYER_WALK);
-	}
-	else if (pev->waterlevel > 1)
-	{
-		SetAnimation(PLAYER_WALK);
 	}
 #endif
 

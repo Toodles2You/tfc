@@ -124,8 +124,6 @@ void CBasePlayer::PlayerDeathFrame() {}
 void CBasePlayer::StartDeathCam() {}
 void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle) {}
 void CBasePlayer::PlayerUse() {}
-void CBasePlayer::Jump() {}
-void CBasePlayer::Duck() {}
 void CBasePlayer::CheckTimeBasedDamage() {}
 void CBasePlayer::CheckSuitUpdate() {}
 void CBasePlayer::SetSuitUpdate(const char* name, bool fgroup, int iNoRepeatTime) {}
