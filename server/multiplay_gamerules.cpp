@@ -688,7 +688,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer,
 		MessageEnd();
 
 		// let the killer paint another decal as soon as they'd like.
-		((CBasePlayer *)killer)->m_flNextDecalTime = gpGlobals->time;
+		((CBasePlayer *)killer)->m_flNextDecalTime = -decalfrequency.value;
 	}
 }
 
@@ -1234,16 +1234,6 @@ void CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTea
 	{
 		pPlayer->Spawn();
 	}
-}
-
-bool CHalfLifeMultiplay::PlayTextureSounds()
-{
-	return !IsDeathmatch();
-}
-
-bool CHalfLifeMultiplay::FAllowFlashlight()
-{
-	return flashlight.value != 0;
 }
 
 //=========================================================

@@ -20,8 +20,6 @@
 #include "filesystem_utils.h"
 #include "bot/hl_bot.h"
 
-cvar_t displaysoundlist = {"displaysoundlist", "0"};
-
 // multiplayer server rules
 cvar_t teamplay = {"mp_teamplay", "0", FCVAR_SERVER};
 cvar_t fraglimit = {"mp_fraglimit", "0", FCVAR_SERVER};
@@ -30,7 +28,6 @@ cvar_t friendlyfire = {"mp_friendlyfire", "0", FCVAR_SERVER};
 cvar_t falldamage = {"mp_falldamage", "0", FCVAR_SERVER};
 cvar_t weaponstay = {"mp_weaponstay", "0", FCVAR_SERVER};
 cvar_t forcerespawn = {"mp_forcerespawn", "1", FCVAR_SERVER};
-cvar_t flashlight = {"mp_flashlight", "0", FCVAR_SERVER};
 cvar_t aimcrosshair = {"mp_autocrosshair", "1", FCVAR_SERVER};
 cvar_t decalfrequency = {"decalfrequency", "30", FCVAR_SERVER};
 cvar_t teamlist = {"mp_teamlist", "hgrunt;scientist", FCVAR_SERVER};
@@ -62,7 +59,6 @@ void GameDLLInit()
 		return;
 	}
 
-	CVAR_REGISTER(&displaysoundlist);
 	CVAR_REGISTER(&allow_spectators);
 
 	CVAR_REGISTER(&teamplay);
@@ -73,7 +69,6 @@ void GameDLLInit()
 	CVAR_REGISTER(&falldamage);
 	CVAR_REGISTER(&weaponstay);
 	CVAR_REGISTER(&forcerespawn);
-	CVAR_REGISTER(&flashlight);
 	CVAR_REGISTER(&aimcrosshair);
 	CVAR_REGISTER(&decalfrequency);
 	CVAR_REGISTER(&teamlist);

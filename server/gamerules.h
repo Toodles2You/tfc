@@ -89,7 +89,6 @@ public:
 	virtual void Think() = 0;								 // GR_Think - runs every server frame, should handle any timer tasks, periodic events, etc.
 	virtual bool IsAllowedToSpawn(CBaseEntity* pEntity) = 0; // Can this item spawn (eg monsters don't spawn in deathmatch).
 
-	virtual bool FAllowFlashlight() = 0;																			  // Are players allowed to switch on their flashlight?
 	virtual bool FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) = 0;							  // should the player switch to this weapon?
 	virtual bool GetNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pCurrentWeapon, bool alwaysSearch = false); // I can't use this weapon anymore, get me the next best one.
 
@@ -178,9 +177,6 @@ public:
 	virtual void ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib) {}
 	virtual void SetDefaultPlayerTeam(CBasePlayer* pPlayer) {}
 
-	// Sounds
-	virtual bool PlayTextureSounds() { return true; }
-
 	// Monsters
 	virtual bool FAllowMonsters() = 0; //are monsters allowed
 
@@ -210,7 +206,6 @@ public:
 	// GR_Think
 	void Think() override;
 	bool IsAllowedToSpawn(CBaseEntity* pEntity) override;
-	bool FAllowFlashlight() override { return true; }
 
 	bool FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) override;
 	bool GetNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pCurrentWeapon, bool alwaysSearch = false) override;
@@ -314,7 +309,6 @@ public:
 	void Think() override;
 	void RefreshSkillData() override;
 	bool IsAllowedToSpawn(CBaseEntity* pEntity) override;
-	bool FAllowFlashlight() override;
 
 	bool FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) override;
 
@@ -400,8 +394,6 @@ public:
 	bool IsValidTeam(const char* pTeamName) override;
 	void SetDefaultPlayerTeam(CBasePlayer* pPlayer) override;
 	void ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib) override;
-
-	bool PlayTextureSounds() override;
 
 	// Monsters
 	bool FAllowMonsters() override;

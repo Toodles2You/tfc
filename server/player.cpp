@@ -1900,7 +1900,7 @@ bool CBasePlayer::Spawn()
 	m_iFOV = 0;		   // init field of view.
 	m_ClientSndRoomtype = -1;
 
-	m_flNextDecalTime = 0; // let this player decal as soon as he spawns.
+	m_flNextDecalTime = -decalfrequency.value; // let this player decal as soon as they spawn
 
 	m_iNextAttack = 0;
 
@@ -2252,7 +2252,7 @@ void CBasePlayer::ImpulseCommands()
 	{
 	case 201: // paint decal
 
-		if (gpGlobals->time < m_flNextDecalTime)
+		if (gpGlobals->time - m_flNextDecalTime < decalfrequency.value)
 		{
 			// too early!
 			break;
@@ -2263,7 +2263,7 @@ void CBasePlayer::ImpulseCommands()
 
 		if (tr.flFraction != 1.0)
 		{ // line hit something, so paint a decal
-			m_flNextDecalTime = gpGlobals->time + decalfrequency.value;
+			m_flNextDecalTime = gpGlobals->time;
 			CSprayCan* pCan = GetClassPtr((CSprayCan*)nullptr);
 			pCan->Spawn(this);
 		}

@@ -19,8 +19,6 @@ extern void GameDLLInit( void );
 void GameDLLShutdown();
 
 
-extern cvar_t	displaysoundlist;
-
 // multiplayer server rules
 extern cvar_t teamplay;
 extern cvar_t fraglimit;
@@ -29,7 +27,6 @@ extern cvar_t friendlyfire;
 extern cvar_t falldamage;
 extern cvar_t weaponstay;
 extern cvar_t forcerespawn;
-extern cvar_t flashlight;
 extern cvar_t aimcrosshair;
 extern cvar_t decalfrequency;
 extern cvar_t teamlist;
