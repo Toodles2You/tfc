@@ -77,11 +77,11 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 		DEFINE_ARRAY(CBasePlayer, m_rgflSuitNoRepeatTime, FIELD_TIME, CSUITNOREPEAT),
 		DEFINE_FIELD(CBasePlayer, m_lastDamageAmount, FIELD_INTEGER),
 
-		DEFINE_ARRAY(CBasePlayer, m_rgpPlayerWeapons, FIELD_CLASSPTR, MAX_WEAPONS),
+		DEFINE_ARRAY(CBasePlayer, m_rgpPlayerWeapons, FIELD_CLASSPTR, WEAPON_LAST),
 		DEFINE_FIELD(CBasePlayer, m_pActiveWeapon, FIELD_CLASSPTR),
 		DEFINE_FIELD(CBasePlayer, m_WeaponBits, FIELD_INT64),
 
-		DEFINE_ARRAY(CBasePlayer, m_rgAmmo, FIELD_INTEGER, MAX_AMMO_SLOTS),
+		DEFINE_ARRAY(CBasePlayer, m_rgAmmo, FIELD_INTEGER, AMMO_LAST),
 		DEFINE_FIELD(CBasePlayer, m_idrowndmg, FIELD_INTEGER),
 		DEFINE_FIELD(CBasePlayer, m_idrownrestored, FIELD_INTEGER),
 
@@ -362,8 +362,8 @@ void CBasePlayer::PackDeadPlayerWeapons()
 	int iWeaponRules;
 	int iAmmoRules;
 	int i;
-	CBasePlayerWeapon* rgpPackWeapons[MAX_WEAPONS];
-	int iPackAmmo[MAX_AMMO_SLOTS + 1];
+	CBasePlayerWeapon* rgpPackWeapons[WEAPON_LAST];
+	int iPackAmmo[AMMO_LAST + 1];
 	int iPW = 0; // index into packweapons array
 	int iPA = 0; // index into packammo array
 
@@ -406,7 +406,7 @@ void CBasePlayer::PackDeadPlayerWeapons()
 	// now go through ammo and make a list of which types to pack.
 	if (iAmmoRules != GR_PLR_DROP_AMMO_NO)
 	{
-		for (i = 0; i < MAX_AMMO_SLOTS; i++)
+		for (i = 0; i < AMMO_LAST; i++)
 		{
 			if (m_rgAmmo[i] > 0)
 			{
@@ -501,7 +501,7 @@ void CBasePlayer::RemoveAllWeapons(bool removeSuit)
 	//Re-add suit bit if needed.
 	SetHasSuit(!removeSuit);
 
-	for (int i = 0; i < MAX_AMMO_SLOTS; i++)
+	for (int i = 0; i < AMMO_LAST; i++)
 	{
 		m_rgAmmo[i] = 0;
 	}
@@ -1932,7 +1932,7 @@ bool CBasePlayer::Spawn()
 	m_ClientWeaponBits = 0;
 
 	// reset all ammo values to 0
-	for (int i = 0; i < MAX_AMMO_SLOTS; i++)
+	for (int i = 0; i < AMMO_LAST; i++)
 	{
 		m_rgAmmo[i] = 0;
 		m_rgAmmoLast[i] = 0; // client ammo values also have to be reset  (the death hud clear messages does on the client side)
@@ -2055,31 +2055,6 @@ void CBasePlayer::SelectWeapon(const char* pstr)
 	}
 
 	SelectWeapon(iId);
-}
-
-void CBasePlayer::SelectWeapon(int iId)
-{
-	if (iId <= WEAPON_NONE || iId >= MAX_WEAPONS)
-	{
-		return;
-	}
-
-	auto pWeapon = m_rgpPlayerWeapons[iId];
-
-	if (!pWeapon)
-	{
-		return;
-	}
-
-	if (pWeapon == m_pActiveWeapon)
-	{
-		return;
-	}
-
-	if ((!m_pActiveWeapon || m_pActiveWeapon->Holster()) && pWeapon->Deploy())
-	{
-		m_pActiveWeapon = pWeapon;
-	}
 }
 
 
@@ -2246,7 +2221,7 @@ void CBasePlayer::ForceClientDllUpdate()
 	m_ClientWeaponBits = 0;
 	m_ClientSndRoomtype = -1;
 
-	for (int i = 0; i < MAX_AMMO_SLOTS; ++i)
+	for (int i = 0; i < AMMO_LAST; ++i)
 	{
 		m_rgAmmoLast[i] = 0;
 	}
@@ -2319,6 +2294,10 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 	case 101:
 		gEvilImpulse101 = true;
 		SetHasSuit(true);
+		GiveNamedItem("weapon_crowbar");
+		GiveNamedItem("weapon_9mmAR");
+		GiveAmmo(250, AMMO_9MM, 250);
+		GiveAmmo(10, AMMO_ARGRENADES, 10);
 		gEvilImpulse101 = false;
 		break;
 
@@ -2416,7 +2395,7 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 //
 bool CBasePlayer::AddPlayerWeapon(CBasePlayerWeapon* pWeapon)
 {
-	if (pWeapon->m_iId <= WEAPON_NONE || pWeapon->m_iId >= MAX_WEAPONS)
+	if (pWeapon->m_iId <= WEAPON_NONE || pWeapon->m_iId >= WEAPON_LAST)
 	{
 		return false;
 	}
@@ -2477,7 +2456,7 @@ bool CBasePlayer::AddPlayerWeapon(CBasePlayerWeapon* pWeapon)
 
 bool CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* pWeapon)
 {
-	if (pWeapon->m_iId <= WEAPON_NONE || pWeapon->m_iId >= MAX_WEAPONS)
+	if (pWeapon->m_iId <= WEAPON_NONE || pWeapon->m_iId >= WEAPON_LAST)
 	{
 		return false;
 	}
@@ -2513,7 +2492,7 @@ int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax)
 		return -1;
 	}
 
-	if (iType <= AMMO_NONE || iType >= MAX_AMMO_SLOTS)
+	if (iType <= AMMO_NONE || iType >= AMMO_LAST)
 		return -1;
 
 	int iAdd = std::min(iCount, iMax - m_rgAmmo[iType]);
@@ -2690,7 +2669,7 @@ void CBasePlayer::UpdateClientData()
 		// Send ALL the weapon info now
 		int i;
 
-		for (i = 0; i < MAX_WEAPONS; i++)
+		for (i = 0; i < WEAPON_LAST; i++)
 		{
 			WeaponInfo& II = CBasePlayerWeapon::WeaponInfoArray[i];
 
@@ -2740,20 +2719,6 @@ void CBasePlayer::EnableControl(bool fControl)
 		pev->flags &= ~FL_FROZEN;
 }
 
-
-#define DOT_1DEGREE 0.9998476951564
-#define DOT_2DEGREE 0.9993908270191
-#define DOT_3DEGREE 0.9986295347546
-#define DOT_4DEGREE 0.9975640502598
-#define DOT_5DEGREE 0.9961946980917
-#define DOT_6DEGREE 0.9945218953683
-#define DOT_7DEGREE 0.9925461516413
-#define DOT_8DEGREE 0.9902680687416
-#define DOT_9DEGREE 0.9876883405951
-#define DOT_10DEGREE 0.9848077530122
-#define DOT_15DEGREE 0.9659258262891
-#define DOT_20DEGREE 0.9396926207859
-#define DOT_25DEGREE 0.9063077870367
 
 //=========================================================
 // Autoaim
@@ -2874,7 +2839,7 @@ void CBasePlayer::DropPlayerWeapon(char* pszWeaponName)
 //=========================================================
 bool CBasePlayer::HasPlayerWeapon(CBasePlayerWeapon* pCheckWeapon)
 {
-	if (pCheckWeapon->m_iId <= WEAPON_NONE || pCheckWeapon->m_iId >= MAX_WEAPONS)
+	if (pCheckWeapon->m_iId <= WEAPON_NONE || pCheckWeapon->m_iId >= WEAPON_LAST)
 	{
 		return false;
 	}

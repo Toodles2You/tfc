@@ -153,15 +153,15 @@ public:
 	virtual void Kill();
 	virtual void AttachToPlayer(CBasePlayer* pPlayer);
 
-	virtual void GetWeaponData(weapon_data_t& data) {}
+	virtual void GetWeaponData(weapon_data_t& data);
 
-	virtual void SetWeaponData(const weapon_data_t& data) {}
+	virtual void SetWeaponData(const weapon_data_t& data);
 
-	virtual void DecrementTimers(const int msec) {}
+	virtual void DecrementTimers(const int msec);
 
 	virtual bool IsReloading() { return m_fInReload; }
 
-	static inline WeaponInfo WeaponInfoArray[MAX_WEAPONS];
+	static inline WeaponInfo WeaponInfoArray[WEAPON_LAST];
 
 	CBasePlayer* m_pPlayer;
 	int m_iId;
@@ -233,34 +233,6 @@ typedef struct
 
 inline MULTIDAMAGE gMultiDamage;
 
-
-#define LOUD_GUN_VOLUME 1000
-#define NORMAL_GUN_VOLUME 600
-#define QUIET_GUN_VOLUME 200
-
-#define BRIGHT_GUN_FLASH 512
-#define NORMAL_GUN_FLASH 256
-#define DIM_GUN_FLASH 128
-
-#define BIG_EXPLOSION_VOLUME 2048
-#define NORMAL_EXPLOSION_VOLUME 1024
-#define SMALL_EXPLOSION_VOLUME 512
-
-#define WEAPON_ACTIVITY_VOLUME 64
-
-#define VECTOR_CONE_1DEGREES Vector(0.00873, 0.00873, 0.00873)
-#define VECTOR_CONE_2DEGREES Vector(0.01745, 0.01745, 0.01745)
-#define VECTOR_CONE_3DEGREES Vector(0.02618, 0.02618, 0.02618)
-#define VECTOR_CONE_4DEGREES Vector(0.03490, 0.03490, 0.03490)
-#define VECTOR_CONE_5DEGREES Vector(0.04362, 0.04362, 0.04362)
-#define VECTOR_CONE_6DEGREES Vector(0.05234, 0.05234, 0.05234)
-#define VECTOR_CONE_7DEGREES Vector(0.06105, 0.06105, 0.06105)
-#define VECTOR_CONE_8DEGREES Vector(0.06976, 0.06976, 0.06976)
-#define VECTOR_CONE_9DEGREES Vector(0.07846, 0.07846, 0.07846)
-#define VECTOR_CONE_10DEGREES Vector(0.08716, 0.08716, 0.08716)
-#define VECTOR_CONE_15DEGREES Vector(0.13053, 0.13053, 0.13053)
-#define VECTOR_CONE_20DEGREES Vector(0.17365, 0.17365, 0.17365)
-
 //=========================================================
 // CWeaponBox - a single entity that can store weapons
 // and ammo.
@@ -285,9 +257,77 @@ public:
 	bool PackWeapon(CBasePlayerWeapon* pWeapon);
 	bool PackAmmo(int iType, int iCount);
 
-	CBasePlayerWeapon* m_rgpPlayerWeapons[MAX_WEAPONS]; // one slot for each
+	CBasePlayerWeapon* m_rgpPlayerWeapons[WEAPON_LAST]; // one slot for each
 
-	int m_rgAmmo[MAX_AMMO_SLOTS];	 // ammo quantities
+	int m_rgAmmo[AMMO_LAST];	 // ammo quantities
 
 	int m_cAmmoTypes; // how many ammo types packed into this box (if packed by a level designer)
+};
+
+class CCrowbar : public CBasePlayerWeapon
+{
+public:
+	enum
+	{
+		kAnimIdle = 0,
+		kAnimDraw,
+		kAnimHolster,
+		kAnimAttack1Hit,
+		kAnimAttack1Miss,
+		kAnimAttack2Miss,
+		kAnimAttack2Hit,
+		kAnimAttack3Miss,
+		kAnimAttack3Hit
+	};
+
+	enum
+	{
+		kCrowbarMiss = 0,
+		kCrowbarHitWorld,
+		kCrowbarHitPlayer,
+	};
+
+	bool Spawn() override;
+	void Precache() override;
+	bool GetWeaponInfo(WeaponInfo* p) override;
+
+	void PrimaryAttack() override;
+	bool Deploy() override;
+	bool Holster() override;
+	void WeaponPostFrame() override;
+
+private:
+	unsigned short m_usCrowbar;
+};
+
+class CMP5 : public CBasePlayerWeapon
+{
+public:
+	enum
+	{
+		kAnimLongidle = 0,
+		kAnimIdle1,
+		kAnimLaunch,
+		kAnimReload,
+		kAnimDeploy,
+		kAnimFire1,
+		kAnimFire2,
+		kAnimFire3,
+		kAnimHolster,
+	};
+
+	bool Spawn() override;
+	void Precache() override;
+	bool GetWeaponInfo(WeaponInfo* i) override;
+	bool AddDuplicate(CBasePlayerWeapon* original) override;
+
+	void PrimaryAttack() override;
+	void SecondaryAttack() override;
+	bool Deploy() override;
+	bool Holster() override;
+	void Reload() override;
+
+private:
+	unsigned short m_usMP5;
+	unsigned short m_usMP52;
 };

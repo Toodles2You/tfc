@@ -33,7 +33,7 @@
 extern int g_iUser1;
 
 // Pool of client side entities/entvars_t
-static entvars_t ev[MAX_WEAPONS + 1];
+static entvars_t ev[WEAPON_LAST + 1];
 static int num_ents = 0;
 
 // The entity we'll use to represent the local client
@@ -42,7 +42,13 @@ static CBasePlayer player;
 // Local version of game .dll global variables ( time, etc. )
 static globalvars_t Globals;
 
-static CBasePlayerWeapon* g_pWpns[MAX_WEAPONS];
+static CCrowbar crowbar;
+static CMP5 mp5;
+static CBasePlayerWeapon* weapons[] =
+{
+	&crowbar,
+	&mp5,
+};
 
 Vector previousorigin;
 
@@ -103,7 +109,7 @@ void HUD_PrepEntity(CBaseEntity* pEntity, CBasePlayer* pWeaponOwner)
 
 		CBasePlayerWeapon::WeaponInfoArray[info.iId] = info;
 
-		g_pWpns[info.iId] = (CBasePlayerWeapon*)pEntity;
+		pWeaponOwner->m_rgpPlayerWeapons[info.iId] = (CBasePlayerWeapon*)pEntity;
 	}
 }
 
@@ -371,6 +377,10 @@ void HUD_InitClientWeapons()
 	HUD_PrepEntity(&player, nullptr);
 
 	// Allocate slots for each weapon that we are going to be predicting
+	for (auto i = 0; i < ARRAYSIZE(weapons); i++)
+	{
+		HUD_PrepEntity(weapons[i], &player);
+	}
 }
 
 /*
@@ -445,19 +455,17 @@ void DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* 
 		gHUD.m_Battery.Update_Battery(to->client.vuser4.z);
 	}
 
+	gEngfuncs.GetViewAngles(player.pev->v_angle);
 	player.pev->button = cmd->buttons;
 	player.m_afButtonLast = from->playerstate.oldbuttons;
+	player.m_WeaponBits = gHUD.m_iWeaponBits;
 
 	player.SetClientData(from->client);
 
-	for (i = 0; i < MAX_WEAPONS; i++)
+	for (i = 0; i < ARRAYSIZE(weapons); i++)
 	{
-		const auto current = g_pWpns[i];
-		if (!current)
-		{
-			continue;
-		}
-		current->SetWeaponData(from->weapondata[i]);
+		auto weapon = weapons[i];
+		weapon->SetWeaponData(from->weapondata[weapon->m_iId]);
 	}
 
 	player.CmdStart(*cmd, random_seed);
@@ -471,16 +479,39 @@ void DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* 
 		gHUD.Update_SetFOV(to->client.fov);
 	}
 
-	for (i = 0; i < MAX_WEAPONS; i++)
+	static bool ammoUpdated[AMMO_LAST];
+	memset(ammoUpdated, 0, sizeof(ammoUpdated));
+
+	for (i = 0; i < ARRAYSIZE(weapons); i++)
 	{
-		const auto current = g_pWpns[i];
-		if (!current)
+		auto weapon = weapons[i];
+
+		const auto current =
+			weapon == player.m_pActiveWeapon;
+
+		if (g_runfuncs)
 		{
-			memset(to->weapondata + i, 0, sizeof(weapon_data_t));
-			continue;
+			gHUD.m_Ammo.Update_CurWeapon(current ? 1 : 0, weapon->m_iId, weapon->m_iClip);
+
+			auto ammoType = weapon->iAmmo1();
+
+			if (ammoType != AMMO_NONE && !ammoUpdated[ammoType])
+			{
+				gHUD.m_Ammo.Update_AmmoX(ammoType, player.m_rgAmmo[ammoType]);
+				ammoUpdated[ammoType] = true;
+			}
+
+			ammoType = weapon->iAmmo2();
+
+			if (ammoType != AMMO_NONE && !ammoUpdated[ammoType])
+			{
+				gHUD.m_Ammo.Update_AmmoX(ammoType, player.m_rgAmmo[ammoType]);
+				ammoUpdated[ammoType] = true;
+			}
 		}
-		current->DecrementTimers(cmd->msec);
-		current->GetWeaponData(to->weapondata[i]);
+
+		weapon->DecrementTimers(cmd->msec);
+		weapon->GetWeaponData(to->weapondata[weapon->m_iId]);
 	}
 
 	player.DecrementTimers(cmd->msec);

@@ -195,6 +195,12 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 	data.iuser2 = pev->iuser2;
 #endif
 
+	data.m_iId = (m_pActiveWeapon != nullptr) ? m_pActiveWeapon->m_iId : WEAPON_NONE;
+
+	byte* ammo = reinterpret_cast<byte*>(&data.ammo_shells);
+	ammo[0] = m_rgAmmo[AMMO_9MM];
+	ammo[1] = m_rgAmmo[AMMO_ARGRENADES];
+
 	data.viewmodel = pev->viewmodel;
     data.maxspeed = pev->maxspeed;
 	data.weaponanim = pev->weaponanim;
@@ -228,6 +234,22 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 	pev->iuser1 = data.iuser1;
 	pev->iuser2 = data.iuser2;
 
+	if (m_pActiveWeapon == nullptr)
+	{
+		if (data.m_iId != WEAPON_NONE)
+		{
+			m_pActiveWeapon = m_rgpPlayerWeapons[data.m_iId];
+		}
+	}
+	else if (data.m_iId != m_pActiveWeapon->m_iId)
+	{
+		m_pActiveWeapon = m_rgpPlayerWeapons[data.m_iId];
+	}
+
+	const byte* ammo = reinterpret_cast<const byte*>(&data.ammo_shells);
+	m_rgAmmo[AMMO_9MM] = ammo[0];
+	m_rgAmmo[AMMO_ARGRENADES] = ammo[1];
+
 	pev->viewmodel = data.viewmodel;
 	pev->maxspeed = data.maxspeed;
 	pev->weaponanim = data.weaponanim;
@@ -252,12 +274,36 @@ void CBasePlayer::DecrementTimers(const int msec)
 }
 
 
+void CBasePlayer::SelectWeapon(int id)
+{
+	if (id <= WEAPON_NONE || id >= WEAPON_LAST)
+	{
+		return;
+	}
+
+	auto weapon = m_rgpPlayerWeapons[id];
+
+	if (weapon == nullptr
+	 || weapon == m_pActiveWeapon
+	 || (m_pActiveWeapon != nullptr
+	 && !m_pActiveWeapon->Holster()))
+	{
+		return;
+	}
+
+	if (weapon->Deploy())
+	{
+		m_pActiveWeapon = weapon;
+	}
+}
+
+
 void CBasePlayer::CmdStart(const usercmd_t& cmd, unsigned int randomSeed)
 {
-	if (cmd.weaponselect != 0)
+	if (cmd.weaponselect != WEAPON_NONE)
 	{
         SelectWeapon(cmd.weaponselect);
-		((usercmd_t*)&cmd)->weaponselect = 0;
+		((usercmd_t*)&cmd)->weaponselect = WEAPON_NONE;
 	}
 
 	m_randomSeed = randomSeed;

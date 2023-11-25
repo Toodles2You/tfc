@@ -1564,7 +1564,7 @@ void RegisterEncoders()
 
 int GetWeaponData(struct edict_s* player, struct weapon_data_s* info)
 {
-	memset(info, 0, MAX_WEAPONS * sizeof(weapon_data_t));
+	memset(info, 0, WEAPON_LAST * sizeof(weapon_data_t));
 
 	CBasePlayer* pl = dynamic_cast<CBasePlayer*>(CBasePlayer::Instance(player));
 

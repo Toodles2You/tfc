@@ -20,7 +20,6 @@
 #pragma once
 
 constexpr int MAX_PLAYERS = 32;
-#define MAX_WEAPONS 64
 
 #define MAX_WEAPON_SLOTS 5 // hud item selection slots
 
@@ -31,8 +30,6 @@ constexpr int MAX_PLAYERS = 32;
 #define HIDEHUD_ALL (1 << 2)
 #define HIDEHUD_HEALTH (1 << 3)
 
-#define MAX_AMMO_SLOTS 32 // not really slots
-
 #define HUD_PRINTNOTIFY 1
 #define HUD_PRINTCONSOLE 2
 #define HUD_PRINTTALK 3
@@ -41,13 +38,20 @@ constexpr int MAX_PLAYERS = 32;
 enum WeaponId
 {
 	WEAPON_NONE = 0,
+	WEAPON_CROWBAR,
+	WEAPON_MP5,
 
-	WEAPON_SUIT = 31
+	WEAPON_SUIT = 31,
+	WEAPON_LAST = 64
 };
 
 enum AmmoId
 {
 	AMMO_NONE = 0,
+	AMMO_9MM,
+	AMMO_ARGRENADES,
+
+	AMMO_LAST = 16
 };
 
 enum

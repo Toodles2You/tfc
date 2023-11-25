@@ -462,104 +462,76 @@ static void EV_FireBullets(
 	gEngfuncs.pEventAPI->EV_PopPMStates();
 }
 
-void EV_FireGlock(event_args_t* args)
-{
-	#if 0
-	int idx;
-	Vector origin;
-	Vector angles;
-	Vector velocity;
-	bool empty;
-
-	Vector ShellVelocity;
-	Vector ShellOrigin;
-	Vector up, right, forward;
-
-	idx = args->entindex;
-	VectorCopy(args->origin, origin);
-	VectorCopy(args->angles, angles);
-	VectorCopy(args->velocity, velocity);
-
-	empty = 0 != args->bparam1;
-	AngleVectors(angles, forward, right, up);
-
-	if (EV_IsLocal(idx))
-	{
-		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(empty ? GLOCK_SHOOT_EMPTY : GLOCK_SHOOT, 0);
-
-		V_PunchAxis(0, -2.0);
-	}
-
-	EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20, -12, 4);
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[YAW], g_sModelIndexShell, TE_BOUNCE_SHELL);
-
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/pl_gun3.wav", gEngfuncs.pfnRandomFloat(0.92, 1.0), ATTN_NORM, 0, 98 + gEngfuncs.pfnRandomLong(0, 3));
-
-	EV_FireBullets(args, args->iparam1, Vector2D(args->fparam1, args->fparam2), args->iparam2);
-	#endif
-}
-
 void EV_FireMP5(event_args_t* args)
 {
-	#if 0
-	int idx;
-	Vector origin;
-	Vector angles;
-	Vector velocity;
-
-	Vector ShellVelocity;
-	Vector ShellOrigin;
 	Vector up, right, forward;
+	AngleVectors(args->angles, forward, right, up);
 
-	idx = args->entindex;
-	VectorCopy(args->origin, origin);
-	VectorCopy(args->angles, angles);
-	VectorCopy(args->velocity, velocity);
-
-	AngleVectors(angles, forward, right, up);
-
-	if (EV_IsLocal(idx))
+	if (EV_IsLocal(args->entindex))
 	{
-		// Add muzzle flash to current weapon model
 		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(MP5_FIRE1 + gEngfuncs.pfnRandomLong(0, 2), 0);
+
+		gEngfuncs.pEventAPI->EV_WeaponAnimation(
+			CMP5::kAnimFire1 + gEngfuncs.pfnRandomLong(0, 2), 0);
 
 		V_PunchAxis(0, gEngfuncs.pfnRandomFloat(-2, 2));
 	}
 
-	EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20, -12, 4);
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[YAW], g_sModelIndexShell, TE_BOUNCE_SHELL);
+	Vector shellOrigin, shellVelocity;
+	EV_GetDefaultShellInfo(args, args->origin, args->velocity, shellVelocity, shellOrigin, forward, right, up, 20, -12, 4);
+	EV_EjectBrass(shellOrigin, shellVelocity, args->angles[YAW], g_sModelIndexShell, TE_BOUNCE_SHELL);
 
+	const char* sample;
 	switch (gEngfuncs.pfnRandomLong(0, 1))
 	{
-	case 0:
-		gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/hks1.wav", 1, ATTN_NORM, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
-		break;
-	case 1:
-		gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/hks2.wav", 1, ATTN_NORM, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
-		break;
+	case 0: sample = "weapons/hks1.wav"; break;
+	case 1: sample = "weapons/hks2.wav"; break;
 	}
 
-	if (util::IsDeathmatch())
-	{
-		EV_FireBullets(args, args->iparam1, Vector2D(6, 6), args->iparam2, 8192, false, 2);
-	}
-	else
-	{
-		EV_FireBullets(args, args->iparam1, Vector2D(3, 3), args->iparam2, 8192, false, 2);
-	}
-	#endif
+	gEngfuncs.pEventAPI->EV_PlaySound(
+		args->entindex,
+		args->origin,
+		CHAN_WEAPON,
+		sample,
+		VOL_NORM,
+		ATTN_NORM,
+		0,
+		gEngfuncs.pfnRandomLong(94, 109));
+
+	EV_FireBullets(args, args->iparam1, Vector2D(6, 6), args->iparam2, 8192, false, 2);
 }
 
-//======================
-//	   CROWBAR START
-//======================
+void EV_FireMP52(event_args_t* args)
+{
+	if (EV_IsLocal(args->entindex))
+	{
+		gEngfuncs.pEventAPI->EV_WeaponAnimation(CMP5::kAnimLaunch, 0);
+
+		V_PunchAxis(0, -10);
+	}
+
+	const char* sample;
+	switch (gEngfuncs.pfnRandomLong(0, 1))
+	{
+	case 0: sample = "weapons/glauncher.wav"; break;
+	case 1: sample = "weapons/glauncher2.wav"; break;
+	}
+
+	gEngfuncs.pEventAPI->EV_PlaySound(
+		args->entindex,
+		args->origin,
+		CHAN_WEAPON,
+		sample,
+		VOL_NORM,
+		ATTN_NORM,
+		0,
+		gEngfuncs.pfnRandomLong(94, 109));
+}
+
 static int g_iSwing;
 
 void EV_Crowbar(event_args_t* args)
 {
-	#if 0
 	Vector gun;
 	EV_GetGunPosition(args, gun, args->origin);
 
@@ -609,9 +581,9 @@ void EV_Crowbar(event_args_t* args)
 		{
 			switch (g_iSwing % 3)
 			{
-			case 0: gEngfuncs.pEventAPI->EV_WeaponAnimation(CROWBAR_ATTACK1MISS, 0); break;
-			case 1: gEngfuncs.pEventAPI->EV_WeaponAnimation(CROWBAR_ATTACK2MISS, 0); break;
-			case 2: gEngfuncs.pEventAPI->EV_WeaponAnimation(CROWBAR_ATTACK3MISS, 0); break;
+			case 0: gEngfuncs.pEventAPI->EV_WeaponAnimation(CCrowbar::kAnimAttack1Miss, 0); break;
+			case 1: gEngfuncs.pEventAPI->EV_WeaponAnimation(CCrowbar::kAnimAttack2Miss, 0); break;
+			case 2: gEngfuncs.pEventAPI->EV_WeaponAnimation(CCrowbar::kAnimAttack3Miss, 0); break;
 			}
 		}
 
@@ -632,9 +604,9 @@ void EV_Crowbar(event_args_t* args)
 		{
 			switch (g_iSwing % 3)
 			{
-			case 0: gEngfuncs.pEventAPI->EV_WeaponAnimation(CROWBAR_ATTACK1HIT, 0); break;
-			case 1: gEngfuncs.pEventAPI->EV_WeaponAnimation(CROWBAR_ATTACK2HIT, 0); break;
-			case 2: gEngfuncs.pEventAPI->EV_WeaponAnimation(CROWBAR_ATTACK3HIT, 0); break;
+			case 0: gEngfuncs.pEventAPI->EV_WeaponAnimation(CCrowbar::kAnimAttack1Hit, 0); break;
+			case 1: gEngfuncs.pEventAPI->EV_WeaponAnimation(CCrowbar::kAnimAttack2Hit, 0); break;
+			case 2: gEngfuncs.pEventAPI->EV_WeaponAnimation(CCrowbar::kAnimAttack3Hit, 0); break;
 			}
 		}
 
@@ -673,7 +645,6 @@ void EV_Crowbar(event_args_t* args)
 	{
 		gEngfuncs.pEventAPI->EV_PopPMStates();
 	}
-	#endif
 }
 
 TEMPENTITY* pLaserDot;
@@ -1140,8 +1111,8 @@ Associate script file name with callback functions.
 */
 void EV_HookEvents()
 {
-	gEngfuncs.pfnHookEvent("events/glock1.sc", EV_FireGlock);
 	gEngfuncs.pfnHookEvent("events/mp5.sc", EV_FireMP5);
+	gEngfuncs.pfnHookEvent("events/mp52.sc", EV_FireMP52);
 	gEngfuncs.pfnHookEvent("events/crowbar.sc", EV_Crowbar);
 	gEngfuncs.pfnHookEvent("events/laser_on.sc", EV_LaserDotOn);
 	gEngfuncs.pfnHookEvent("events/laser_off.sc", EV_LaserDotOff);

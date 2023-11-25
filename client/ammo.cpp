@@ -43,7 +43,7 @@ int g_lastselect = WEAPON_NONE;
 
 void WeaponsResource::LoadAllWeaponSprites()
 {
-	for (int i = 0; i < MAX_WEAPONS; i++)
+	for (int i = 0; i < WEAPON_LAST; i++)
 	{
 		if (0 != rgWeapons[i].iId)
 			LoadWeaponSprites(&rgWeapons[i]);
@@ -362,7 +362,7 @@ void CHudAmmo::Think()
 	{
 		gWR.iOldWeaponBits = gHUD.m_iWeaponBits;
 
-		for (int i = MAX_WEAPONS - 1; i > 0; i--)
+		for (int i = WEAPON_LAST - 1; i > 0; i--)
 		{
 			WEAPON* p = gWR.GetWeapon(i);
 
@@ -402,7 +402,7 @@ void CHudAmmo::Think()
 
 HSPRITE* WeaponsResource::GetAmmoPicFromWeapon(int iAmmoId, Rect& rect)
 {
-	for (int i = 0; i < MAX_WEAPONS; i++)
+	for (int i = 0; i < WEAPON_LAST; i++)
 	{
 		if (rgWeapons[i].iAmmoType == iAmmoId)
 		{

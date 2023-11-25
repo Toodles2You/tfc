@@ -135,7 +135,6 @@ bool CBasePlayer::Save(CSave& save) { return false; }
 bool CBasePlayer::Restore(CRestore& restore) { return false; }
 bool CBasePlayer::HasWeapons() { return false; }
 void CBasePlayer::SelectWeapon(const char* pstr) {}
-void CBasePlayer::SelectWeapon(int iId) {}
 void CBasePlayer::ForceClientDllUpdate() {}
 void CBasePlayer::ImpulseCommands() {}
 void CBasePlayer::CheatImpulseCommands(int iImpulse) {}

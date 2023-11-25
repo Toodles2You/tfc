@@ -157,7 +157,7 @@ public:
 	int m_iClientHideHUD;
 	int m_iFOV;		  // field of view
 	// usable player weapons
-	CBasePlayerWeapon* m_rgpPlayerWeapons[MAX_WEAPONS];
+	CBasePlayerWeapon* m_rgpPlayerWeapons[WEAPON_LAST];
 	std::forward_list<CBasePlayerWeapon *> m_lpPlayerWeapons;
 	CBasePlayerWeapon* m_pActiveWeapon;
 
@@ -167,8 +167,8 @@ public:
 	std::uint64_t m_ClientWeaponBits;
 
 	// shared ammo slots
-	int m_rgAmmo[MAX_AMMO_SLOTS];
-	int m_rgAmmoLast[MAX_AMMO_SLOTS];
+	int m_rgAmmo[AMMO_LAST];
+	int m_rgAmmoLast[AMMO_LAST];
 
 	Vector m_vecAutoAim;
 	bool m_fOnTarget;
@@ -250,7 +250,7 @@ public:
 	bool HasNamedPlayerWeapon(const char* pszWeaponName);
 	bool HasWeapons(); // do I have ANY weapons?
 	void SelectWeapon(const char* pstr);
-	void SelectWeapon(int iId);
+	void SelectWeapon(int id);
 	void WeaponPostFrame();
 	void GiveNamedItem(const char* szName);
 	void GiveNamedItem(const char* szName, int defaultAmmo);

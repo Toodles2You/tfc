@@ -159,3 +159,31 @@ void CBasePlayerWeapon::WeaponPostFrame()
 		WeaponIdle();
 	}
 }
+
+
+void CBasePlayerWeapon::GetWeaponData(weapon_data_t& data)
+{
+	data.m_fInReload = m_fInReload;
+	data.m_iClip = m_iClip;
+
+    *reinterpret_cast<int*>(&data.m_flNextPrimaryAttack) = m_iNextPrimaryAttack;
+    *reinterpret_cast<int*>(&data.m_flNextSecondaryAttack) = m_iNextSecondaryAttack;
+}
+
+
+void CBasePlayerWeapon::SetWeaponData(const weapon_data_t& data)
+{
+	m_fInReload = data.m_fInReload;
+	m_iClip = data.m_iClip;
+
+    m_iNextPrimaryAttack = *reinterpret_cast<const int*>(&data.m_flNextPrimaryAttack);
+    m_iNextSecondaryAttack = *reinterpret_cast<const int*>(&data.m_flNextSecondaryAttack);
+}
+
+
+void CBasePlayerWeapon::DecrementTimers(const int msec)
+{
+	m_iNextPrimaryAttack = std::max(m_iNextPrimaryAttack - msec, -1100);
+	m_iNextSecondaryAttack = std::max(m_iNextSecondaryAttack - msec, -1100);
+}
+

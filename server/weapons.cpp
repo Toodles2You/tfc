@@ -37,7 +37,7 @@
 //=========================================================
 int MaxAmmoCarry(int iType)
 {
-	for (int i = 0; i < MAX_WEAPONS; i++)
+	for (int i = 0; i < WEAPON_LAST; i++)
 	{
 		if (CBasePlayerWeapon::WeaponInfoArray[i].iAmmo1 == iType)
 			return CBasePlayerWeapon::WeaponInfoArray[i].iMaxAmmo1;
@@ -145,7 +145,9 @@ void W_Precache()
 {
 	memset(CBasePlayerWeapon::WeaponInfoArray, 0, sizeof(CBasePlayerWeapon::WeaponInfoArray));
 
-	// custom items...
+	// weapons
+	util::PrecacheWeapon("weapon_crowbar");
+	util::PrecacheWeapon("weapon_9mmAR");
 
 	// common world objects
 	util::PrecacheOther("item_battery");
@@ -777,8 +779,8 @@ LINK_ENTITY_TO_CLASS(weaponbox, CWeaponBox);
 
 TYPEDESCRIPTION CWeaponBox::m_SaveData[] =
 	{
-		DEFINE_ARRAY(CWeaponBox, m_rgAmmo, FIELD_INTEGER, MAX_AMMO_SLOTS),
-		DEFINE_ARRAY(CWeaponBox, m_rgpPlayerWeapons, FIELD_CLASSPTR, MAX_WEAPONS),
+		DEFINE_ARRAY(CWeaponBox, m_rgAmmo, FIELD_INTEGER, AMMO_LAST),
+		DEFINE_ARRAY(CWeaponBox, m_rgpPlayerWeapons, FIELD_CLASSPTR, WEAPON_LAST),
 		DEFINE_FIELD(CWeaponBox, m_cAmmoTypes, FIELD_INTEGER),
 };
 
@@ -796,7 +798,7 @@ void CWeaponBox::Precache()
 //=========================================================
 bool CWeaponBox::KeyValue(KeyValueData* pkvd)
 {
-	if (m_cAmmoTypes < MAX_AMMO_SLOTS)
+	if (m_cAmmoTypes < AMMO_LAST)
 	{
 		// Toodles FIXME:
 		// PackAmmo(ALLOC_STRING(pkvd->szKeyName), atoi(pkvd->szValue));
@@ -806,7 +808,7 @@ bool CWeaponBox::KeyValue(KeyValueData* pkvd)
 	}
 	else
 	{
-		ALERT(at_console, "WeaponBox too full! only %d ammotypes allowed\n", MAX_AMMO_SLOTS);
+		ALERT(at_console, "WeaponBox too full! only %d ammotypes allowed\n", AMMO_LAST);
 	}
 
 	return false;
@@ -839,7 +841,7 @@ void CWeaponBox::Kill()
 	int i;
 
 	// destroy the weapons
-	for (i = 0; i < MAX_WEAPONS; i++)
+	for (i = 0; i < WEAPON_LAST; i++)
 	{
 		pWeapon = m_rgpPlayerWeapons[i];
 		if (!pWeapon)
@@ -881,7 +883,7 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 	int i;
 
 	// dole out ammo
-	for (i = 0; i < MAX_AMMO_SLOTS; i++)
+	for (i = 0; i < AMMO_LAST; i++)
 	{
 		if (m_rgAmmo[i] > 0)
 		{
@@ -893,7 +895,7 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 	// go through my weapons and try to give the usable ones to the player.
 	// it's important the the player be given ammo first, so the weapons code doesn't refuse
 	// to deploy a better weapon that the player may pick up because he has no ammo for it.
-	for (i = 0; i < MAX_WEAPONS; i++)
+	for (i = 0; i < WEAPON_LAST; i++)
 	{
 		pWeapon = m_rgpPlayerWeapons[i];
 
@@ -998,7 +1000,7 @@ int CWeaponBox::GiveAmmo(int iCount, int iType, int iMax, int* pIndex /* = NULL*
 //=========================================================
 bool CWeaponBox::HasWeapon(CBasePlayerWeapon* pCheckWeapon)
 {
-	if (pCheckWeapon->m_iId <= WEAPON_NONE || pCheckWeapon->m_iId >= MAX_WEAPONS)
+	if (pCheckWeapon->m_iId <= WEAPON_NONE || pCheckWeapon->m_iId >= WEAPON_LAST)
 	{
 		return false;
 	}
@@ -1012,7 +1014,7 @@ bool CWeaponBox::IsEmpty()
 {
 	int i;
 
-	for (i = 0; i < MAX_WEAPONS; i++)
+	for (i = 0; i < WEAPON_LAST; i++)
 	{
 		if (m_rgpPlayerWeapons[i] != nullptr)
 		{
@@ -1020,7 +1022,7 @@ bool CWeaponBox::IsEmpty()
 		}
 	}
 
-	for (i = 0; i < MAX_AMMO_SLOTS; i++)
+	for (i = 0; i < AMMO_LAST; i++)
 	{
 		if (m_rgAmmo[i] > 0)
 		{

@@ -31,6 +31,7 @@ HLDLL_OBJS = \
 	$(HLDLL_OBJ_DIR)/cbase.o \
 	$(HLDLL_OBJ_DIR)/client.o \
 	$(HLDLL_OBJ_DIR)/combat.o \
+	$(HLDLL_OBJ_DIR)/crowbar.o \
 	$(HLDLL_OBJ_DIR)/doors.o \
 	$(HLDLL_OBJ_DIR)/effects.o \
 	$(HLDLL_OBJ_DIR)/explode.o \
@@ -48,6 +49,7 @@ HLDLL_OBJS = \
 	$(HLDLL_OBJ_DIR)/maprules.o \
 	$(HLDLL_OBJ_DIR)/monstermaker.o \
 	$(HLDLL_OBJ_DIR)/mortar.o \
+	$(HLDLL_OBJ_DIR)/mp5.o \
 	$(HLDLL_OBJ_DIR)/nodes.o \
 	$(HLDLL_OBJ_DIR)/observer.o \
 	$(HLDLL_OBJ_DIR)/pathcorner.o \
