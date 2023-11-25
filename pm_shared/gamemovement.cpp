@@ -20,31 +20,6 @@
 #include "gamemovement.h"
 
 
-void CHalfLifeMovement::ClipVelocity(
-    const Vector& in,
-    const Vector& normal,
-    Vector& out,
-    const float overbounce)
-{
-    const float backoff = DotProduct(in, normal) * overbounce;
-
-    out = in - normal * backoff;
-
-    if (out.x > -0.1 && out.x < 0.1)
-    {
-        out.x = 0;
-    }
-    if (out.y > -0.1 && out.y < 0.1)
-    {
-        out.y = 0;
-    }
-    if (out.z > -0.1 && out.z < 0.1)
-    {
-        out.z = 0;
-    }
-}
-
-
 CHalfLifeMovement::CHalfLifeMovement(playermove_t* _pmove, CBasePlayer* _player)
     : CGameMovement{_pmove, _player}
 {
@@ -599,5 +574,30 @@ bool CHalfLifeMovement::AddToTouched(pmtrace_t& tr, Vector& velocity)
 
     pmove->touchindex[pmove->numtouch++] = tr;
     return true;
+}
+
+
+void CHalfLifeMovement::ClipVelocity(
+    const Vector& in,
+    const Vector& normal,
+    Vector& out,
+    const float overbounce)
+{
+    const float backoff = DotProduct(in, normal) * overbounce;
+
+    out = in - normal * backoff;
+
+    if (out.x > -0.1 && out.x < 0.1)
+    {
+        out.x = 0;
+    }
+    if (out.y > -0.1 && out.y < 0.1)
+    {
+        out.y = 0;
+    }
+    if (out.z > -0.1 && out.z < 0.1)
+    {
+        out.z = 0;
+    }
 }
 
