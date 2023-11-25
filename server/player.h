@@ -18,6 +18,12 @@
 #include "pm_materials.h"
 #include "entity_state.h"
 #include "usercmd.h"
+#include "pm_defs.h"
+#include "pm_shared.h"
+#include "pm_materials.h"
+#include "pm_movevars.h"
+#include "pm_debug.h"
+#include "gamemovement.h"
 
 #include <forward_list>
 
@@ -314,6 +320,8 @@ public:
 	void CmdStart(const usercmd_t& cmd, unsigned int randomSeed);
 
 	void SetEntityState(entity_state_t& state) override;
+
+	CGameMovement* m_pGameMovement;
 
 protected:
 	/** @brief Just a stub for now */

@@ -91,6 +91,12 @@ void ClientDisconnect(edict_t* pEntity)
 
 	if (pPlayer)
 	{
+		if (pPlayer->m_pGameMovement != nullptr)
+		{
+			delete pPlayer->m_pGameMovement;
+			pPlayer->m_pGameMovement = nullptr;
+		}
+
 		if (pPlayer->m_pTank != NULL)
 		{
 			pPlayer->m_pTank->Use(pPlayer, pPlayer, USE_OFF, 0);
@@ -1741,4 +1747,25 @@ AllowLagCompensation
 int AllowLagCompensation()
 {
 	return 1;
+}
+
+/*
+This module implements the shared player physics code between any particular game and 
+the engine.  The same PM_Move routine is built into the game .dll and the client .dll and is
+invoked by each side as appropriate.  There should be no distinction, internally, between server
+and client.  This will ensure that prediction behaves appropriately.
+*/
+void PM_Move(struct playermove_s* ppmove, qboolean server)
+{
+	auto player = dynamic_cast<CBasePlayer*>(util::PlayerByIndex(ppmove->player_index + 1));
+
+	if (player)
+	{
+		if (player->m_pGameMovement == nullptr)
+		{
+			player->m_pGameMovement = new CGameMovement(pmove, player);
+		}
+
+		player->m_pGameMovement->Move();
+	}
 }

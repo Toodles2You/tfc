@@ -24,6 +24,8 @@
 #include "pm_defs.h"
 #include "event_api.h"
 #include "r_efx.h"
+#include "pm_shared.h"
+#include "gamemovement.h"
 
 #include "cl_dll.h"
 #include "../com_weapons.h"
@@ -525,4 +527,19 @@ void DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* 
 
 	g_CurrentWeaponId = to->client.m_iId;
 	g_PunchAngle = to->client.punchangle * 2;
+}
+
+void DLLEXPORT HUD_PlayerMoveInit(struct playermove_s* ppmove)
+{
+	PM_Init(ppmove);
+
+	if (player.m_pGameMovement == nullptr)
+	{
+		player.m_pGameMovement = new CGameMovement(pmove, &player);
+	}
+}
+
+void DLLEXPORT HUD_PlayerMove(struct playermove_s* ppmove, int server)
+{
+	player.m_pGameMovement->Move();
 }

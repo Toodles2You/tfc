@@ -85,19 +85,9 @@ int DLLEXPORT HUD_ConnectionlessPacket(const struct netadr_s* net_from, const ch
 	return 0;
 }
 
-void DLLEXPORT HUD_PlayerMoveInit(struct playermove_s* ppmove)
-{
-	PM_Init(ppmove);
-}
-
 char DLLEXPORT HUD_PlayerMoveTexture(char* name)
 {
 	return PM_FindTextureType(name);
-}
-
-void DLLEXPORT HUD_PlayerMove(struct playermove_s* ppmove, int server)
-{
-	PM_Move(ppmove, server);
 }
 
 int DLLEXPORT Initialize(cl_enginefunc_t* pEnginefuncs, int iVersion)

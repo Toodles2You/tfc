@@ -30,6 +30,12 @@
 #include <stdlib.h> // atoi
 #include <ctype.h>	// isspace
 
+#include "extdll.h"
+#include "util.h"
+#include "cbase.h"
+#include "player.h"
+#include "weapons.h"
+
 #ifdef CLIENT_DLL
 // Spectator Mode
 bool iJumpSpectator;
@@ -3268,44 +3274,6 @@ void PM_CreateStuckTable()
 				idx++;
 			}
 		}
-	}
-}
-
-
-
-/*
-This modume implements the shared player physics code between any particular game and 
-the engine.  The same PM_Move routine is built into the game .dll and the client .dll and is
-invoked by each side as appropriate.  There should be no distinction, internally, between server
-and client.  This will ensure that prediction behaves appropriately.
-*/
-
-void PM_Move(struct playermove_s* ppmove, qboolean server)
-{
-	assert(pm_shared_initialized);
-
-	pmove = ppmove;
-
-	if (pmove->movetype == MOVETYPE_NONE)
-	{
-		return;
-	}
-
-	PM_PlayerMove(server);
-
-	if (pmove->onground != -1)
-	{
-		pmove->flags |= FL_ONGROUND;
-	}
-	else
-	{
-		pmove->flags &= ~FL_ONGROUND;
-	}
-
-	// Reset friction after each movement so FrictionModifier Triggers work still.
-	if (pmove->movetype == MOVETYPE_WALK)
-	{
-		pmove->friction = 1.0f;
 	}
 }
 
