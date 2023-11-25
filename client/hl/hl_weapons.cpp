@@ -532,15 +532,11 @@ void DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* 
 void DLLEXPORT HUD_PlayerMoveInit(struct playermove_s* ppmove)
 {
 	PM_Init(ppmove);
-
-	if (player.m_pGameMovement == nullptr)
-	{
-		player.m_pGameMovement = new CHalfLifeMovement(pmove, &player);
-	}
+	player.InstallGameMovement(new CHalfLifeMovement{ppmove, &player});
 }
 
 void DLLEXPORT HUD_PlayerMove(struct playermove_s* ppmove, int server)
 {
 	ppmove->server = 0;
-	player.m_pGameMovement->Move();
+	player.GetGameMovement()->Move();
 }

@@ -91,11 +91,7 @@ void ClientDisconnect(edict_t* pEntity)
 
 	if (pPlayer)
 	{
-		if (pPlayer->m_pGameMovement != nullptr)
-		{
-			delete pPlayer->m_pGameMovement;
-			pPlayer->m_pGameMovement = nullptr;
-		}
+		pPlayer->InstallGameMovement(nullptr);
 
 		if (pPlayer->m_pTank != NULL)
 		{
@@ -151,6 +147,7 @@ void ClientPutInServer(edict_t* pEntity)
 	entvars_t* pev = &pEntity->v;
 
 	pPlayer = GetClassPtr((CBasePlayer*)pev);
+	pPlayer->InstallGameMovement(new CHalfLifeMovement{pmove, pPlayer});
 	pPlayer->SetCustomDecalFrames(-1); // Assume none;
 
 	g_pGameRules->ClientPutInServer(pPlayer);
@@ -1763,11 +1760,6 @@ void PM_Move(struct playermove_s* ppmove, qboolean server)
 
 	if (player)
 	{
-		if (player->m_pGameMovement == nullptr)
-		{
-			player->m_pGameMovement = new CHalfLifeMovement(pmove, player);
-		}
-
-		player->m_pGameMovement->Move();
+		player->GetGameMovement()->Move();
 	}
 }

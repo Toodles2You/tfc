@@ -74,14 +74,7 @@ void CHLBotManager::AddBot(const char *profileName)
 	auto bot = CreateBot<CHLBot>(profile);
 	if (bot && ClientConnect(bot->edict(), STRING(bot->pev->netname), "127.0.0.1", szRejectReason))
 	{
-		bot->SetCustomDecalFrames(-1);
-
-		bot->Spawn();
-
-		bot->pev->effects |= EF_NOINTERP;
-
-		bot->pev->iuser1 = 0;
-		bot->pev->iuser2 = 0;
+		ClientPutInServer(bot->edict());
 	}
 }
 

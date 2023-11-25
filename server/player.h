@@ -314,13 +314,24 @@ public:
 
 	void SetEntityState(entity_state_t& state) override;
 
-	CGameMovement* m_pGameMovement;
+	void InstallGameMovement(CGameMovement* gameMovement)
+	{
+		if (m_gameMovement != nullptr)
+		{
+			delete m_gameMovement;
+		}
+		m_gameMovement = gameMovement;
+	}
+
+	CGameMovement* GetGameMovement() { return m_gameMovement; }
 
 protected:
 	/** @brief Just a stub for now */
 	void EmitSuitSound(const char* sample) {}
 	/** @brief Just a stub for now */
 	void EmitSuitSound(int group) {}
+
+	CGameMovement* m_gameMovement = nullptr;
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)
