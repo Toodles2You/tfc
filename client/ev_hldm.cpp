@@ -984,7 +984,7 @@ void EV_Explosion(event_args_t* args)
 
 	if (tr.fraction != 1.0F)
 	{
-		origin = tr.endpos + tr.plane.normal * 64 * scale;
+		origin = tr.endpos + tr.plane.normal * 16 * scale;
 	}
 
 	auto sprite = g_sModelIndexFireball;

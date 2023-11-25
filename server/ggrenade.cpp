@@ -52,7 +52,7 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 		pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
 	}
 
-	tent::Explosion(pev->origin, g_vecZero, pev->dmg);
+	tent::Explosion(pev->origin, -pTrace->vecPlaneNormal, pev->dmg);
 
 	CBaseEntity* owner;
 	if (pev->owner)
