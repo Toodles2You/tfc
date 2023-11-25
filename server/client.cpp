@@ -1757,13 +1757,15 @@ and client.  This will ensure that prediction behaves appropriately.
 */
 void PM_Move(struct playermove_s* ppmove, qboolean server)
 {
+	ppmove->server = 1;
+
 	auto player = dynamic_cast<CBasePlayer*>(util::PlayerByIndex(ppmove->player_index + 1));
 
 	if (player)
 	{
 		if (player->m_pGameMovement == nullptr)
 		{
-			player->m_pGameMovement = new CGameMovement(pmove, player);
+			player->m_pGameMovement = new CHalfLifeMovement(pmove, player);
 		}
 
 		player->m_pGameMovement->Move();

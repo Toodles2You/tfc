@@ -73,6 +73,7 @@ HLDLL_OBJS = \
 	$(HLDLL_OBJ_DIR)/world.o \
 
 PM_OBJS = \
+	$(PM_OBJ_DIR)/gamemovement_walk.o \
 	$(PM_OBJ_DIR)/gamemovement.o \
 	$(PM_OBJ_DIR)/pm_shared.o \
 	$(PM_OBJ_DIR)/pm_math.o \

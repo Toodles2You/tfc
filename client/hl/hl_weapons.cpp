@@ -535,11 +535,12 @@ void DLLEXPORT HUD_PlayerMoveInit(struct playermove_s* ppmove)
 
 	if (player.m_pGameMovement == nullptr)
 	{
-		player.m_pGameMovement = new CGameMovement(pmove, &player);
+		player.m_pGameMovement = new CHalfLifeMovement(pmove, &player);
 	}
 }
 
 void DLLEXPORT HUD_PlayerMove(struct playermove_s* ppmove, int server)
 {
+	ppmove->server = 0;
 	player.m_pGameMovement->Move();
 }
