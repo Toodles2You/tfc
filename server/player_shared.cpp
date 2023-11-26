@@ -45,7 +45,7 @@ void CBasePlayer::WeaponPostFrame()
 	ImpulseCommands();
 
 	// check if the player is using a tank
-#ifndef CLIENT_DLL
+#ifdef GAME_DLL
 	if (m_pTank != nullptr)
 	{
 		return;
@@ -87,7 +87,7 @@ void CBasePlayer::PostThink()
 		goto pt_end;
 	}
 
-#ifndef CLIENT_DLL
+#ifdef GAME_DLL
 	if (m_pTank != NULL)
 	{
 		if (m_pTank->OnControls(pev) && 0 == pev->weaponmodel)
@@ -104,7 +104,7 @@ void CBasePlayer::PostThink()
 
 	WeaponPostFrame();
 
-#ifndef CLIENT_DLL
+#ifdef GAME_DLL
 	if ((FBitSet(pev->flags, FL_ONGROUND)) && (pev->health > 0) && m_flFallVelocity >= PLAYER_FALL_PUNCH_THRESHHOLD)
 	{
 		if (pev->watertype == CONTENT_WATER)
@@ -147,7 +147,7 @@ pt_end:
 
 void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 {
-#ifndef CLIENT_DLL
+#ifdef GAME_DLL
 	data.flags = pev->flags;
     data.deadflag = pev->deadflag;
 

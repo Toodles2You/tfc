@@ -114,7 +114,7 @@ void CMP5::PrimaryAttack()
 
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-#ifndef CLIENT_DLL
+#ifdef GAME_DLL
 	m_pPlayer->FireBullets(12, Vector2D(6, 6), shots);
 #endif
 

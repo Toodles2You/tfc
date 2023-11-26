@@ -130,7 +130,7 @@ void CBasePlayerWeapon::WeaponPostFrame()
 
 		if (!IsUseable() && bCanPrimaryAttack)
 		{
-#ifndef CLIENT_DLL
+#ifdef GAME_DLL
 			// weapon isn't useable, switch.
 			if ((iFlags() & WEAPON_FLAG_NOAUTOSWITCHEMPTY) == 0 && g_pGameRules->GetNextBestWeapon(m_pPlayer, this))
 			{

@@ -471,7 +471,7 @@ bool CHalfLifeMovement::IsStuck()
     If player is flailing while stuck in another player (should never happen),
     then see if we can't "unstick" them forceably.
     */
-#ifndef CLIENT_DLL
+#ifdef GAME_DLL
     if (pmove->cmd.buttons != 0 && pmove->physents[hitent].player != 0)
     {
         if (!PM_TryToUnstuck(originalOrigin))
