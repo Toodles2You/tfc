@@ -412,10 +412,10 @@ static void EV_FireBullets(
 
 	EV_GetGunPosition(args, gun, args->origin);
 	
-	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(0, 1);
+	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(true, true);
 	gEngfuncs.pEventAPI->EV_PushPMStates();
 	gEngfuncs.pEventAPI->EV_SetSolidPlayers(args->entindex - 1);
-	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+	gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
 
 	for (auto i = 0; i < count; i++)
 	{
@@ -544,7 +544,7 @@ void EV_Crowbar(event_args_t* args)
 	{
 		gEngfuncs.pEventAPI->EV_PushPMStates();
 		gEngfuncs.pEventAPI->EV_SetSolidPlayers(args->entindex - 1);
-		gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+		gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
 
 		Vector forward, right, up;
 		AngleVectors(args->angles, forward, right, up);
@@ -956,10 +956,10 @@ void EV_Explosion(event_args_t* args)
 	const auto underwater =
 		gEngfuncs.PM_PointContents(args->origin, nullptr) == CONTENTS_WATER;
 
-	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(0, 0);
+	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
 	gEngfuncs.pEventAPI->EV_PushPMStates();
 	gEngfuncs.pEventAPI->EV_SetSolidPlayers(-1);
-	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+	gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
 
 	Vector dir = args->angles;
 	if (dir == g_vecZero)
@@ -1051,10 +1051,10 @@ int MSG_Blood(const char* name, int size, void* buf)
 {
 	BEGIN_READ(buf, size);
 
-	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(0, 0);
+	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
 	gEngfuncs.pEventAPI->EV_PushPMStates();
-	gEngfuncs.pEventAPI->EV_SetSolidPlayers(0);
-	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+	gEngfuncs.pEventAPI->EV_SetSolidPlayers(-1);
+	gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
 
 	Vector traceDir;
 	traceDir.x = READ_FLOAT();

@@ -294,10 +294,10 @@ bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CB
 void HUD_TraceLine(const float* v1, const float* v2, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
 {
 	pmtrace_t tr;
-	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(1, 1);
+	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(true, true);
 	gEngfuncs.pEventAPI->EV_PushPMStates();
 	gEngfuncs.pEventAPI->EV_SetSolidPlayers(-1);
-	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+	gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
 	gEngfuncs.pEventAPI->EV_PlayerTrace((float*)v1, (float*)v2, fNoMonsters, -1, &tr);
 	gEngfuncs.pEventAPI->EV_PopPMStates();
 	ptr->fAllSolid = tr.allsolid;

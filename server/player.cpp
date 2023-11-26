@@ -1839,10 +1839,12 @@ bool CBasePlayer::Spawn()
 	SetModel("models/player.mdl");
 	pev->sequence = LookupActivity(ACT_IDLE);
 
-	if (FBitSet(pev->flags, FL_DUCKING))
-		SetSize(VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX);
-	else
-		SetSize(VEC_HULL_MIN, VEC_HULL_MAX);
+	Vector mins, maxs;
+	if (PM_GetHullBounds(
+		(pev->flags & FL_DUCKING) != 0 ? kHullPlayer : kHullDuck, mins, maxs))
+	{
+		SetSize(mins, maxs);
+	}
 
 	pev->view_ofs = VEC_VIEW;
 	Precache();
@@ -1921,13 +1923,11 @@ bool CBasePlayer::Restore(CRestore& restore)
 		m_SndRoomtype = 0;
 	}
 
-	if (FBitSet(pev->flags, FL_DUCKING))
+	Vector mins, maxs;
+	if (PM_GetHullBounds(
+		(pev->flags & FL_DUCKING) != 0 ? kHullPlayer : kHullDuck, mins, maxs))
 	{
-		SetSize(VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX);
-	}
-	else
-	{
-		SetSize(VEC_HULL_MIN, VEC_HULL_MAX);
+		SetSize(mins, maxs);
 	}
 
 	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "hl", "1");

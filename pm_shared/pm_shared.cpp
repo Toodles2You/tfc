@@ -3305,7 +3305,7 @@ void PM_Init(struct playermove_s* ppmove)
 	PM_InitTextureTypes();
 
 	//The engine copies the hull sizes initialized by PM_GetHullBounds *before* PM_GetHullBounds is actually called, so manually initialize these.
-	for (int i = 0; i < NUM_HULLS; ++i)
+	for (int i = 0; i < kHullCount; ++i)
 	{
 		if (!PM_GetHullBounds(i, pmove->player_mins[i], pmove->player_maxs[i]))
 		{
@@ -3321,15 +3321,15 @@ bool PM_GetHullBounds(int hullnumber, float* mins, float* maxs)
 {
 	switch (hullnumber)
 	{
-	case 0: // Normal player
+	case kHullPlayer:
 		VEC_HULL_MIN.CopyToArray(mins);
 		VEC_HULL_MAX.CopyToArray(maxs);
 		return true;
-	case 1: // Crouched player
+	case kHullDuck:
 		VEC_DUCK_HULL_MIN.CopyToArray(mins);
 		VEC_DUCK_HULL_MAX.CopyToArray(maxs);
 		return true;
-	case 2: // Point based hull
+	case kHullPoint:
 		g_vecZero.CopyToArray(mins);
 		g_vecZero.CopyToArray(maxs);
 		return true;

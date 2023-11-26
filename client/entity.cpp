@@ -295,7 +295,7 @@ void DLLEXPORT HUD_TempEntUpdate(
 	// that the client has the player list. We run this code once when we detect any COLLIDEALL
 	// tent, then set this bool to true so the code doesn't get run again if there's more than
 	// one COLLIDEALL ent for this update. (often are).
-	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(0, 1);
+	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
 
 	// Store off the old count
 	gEngfuncs.pEventAPI->EV_PushPMStates();
@@ -365,7 +365,7 @@ void DLLEXPORT HUD_TempEntUpdate(
 		{
 			pprev = pTemp;
 
-			hull = (pTemp->entity.curstate.renderfx == kRenderFxDeadPlayer) ? 0 : 2;
+			hull = (pTemp->entity.curstate.renderfx == kRenderFxDeadPlayer) ? kHullPlayer : kHullPoint;
 
 			VectorCopy(pTemp->entity.origin, pTemp->entity.prevstate.origin);
 

@@ -641,7 +641,17 @@ enum {
 // volume values
 #define VOL_NORM 1.0
 
-constexpr int NUM_HULLS = 4;
+/*
+Hull sizes for player movement
+Don't ask me why they're different from the regular ones
+*/
+enum {
+	kHullPlayer,
+	kHullDuck,
+	kHullPoint,
+	kHullLarge,
+	kHullCount,
+};
 
 // plats
 #define PLAT_LOW_TRIGGER 1

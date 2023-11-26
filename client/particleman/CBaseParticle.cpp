@@ -374,7 +374,7 @@ void CBaseParticle::CheckCollision(float time)
 
 	if ((m_iCollisionFlags & TRI_COLLIDEALL) != 0)
 	{
-		gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+		gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
 		gEngfuncs.pEventAPI->EV_PlayerTrace(m_vPrevOrigin, m_vOrigin, PM_STUDIO_BOX, -1, &trace);
 
 		if (trace.fraction != 1.0)
@@ -391,7 +391,7 @@ void CBaseParticle::CheckCollision(float time)
 	}
 	else if ((m_iCollisionFlags & TRI_COLLIDEWORLD) != 0)
 	{
-		gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+		gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
 		gEngfuncs.pEventAPI->EV_PlayerTrace(m_vPrevOrigin, m_vOrigin, PM_WORLD_ONLY | PM_STUDIO_BOX, -1, &trace);
 
 		if (trace.fraction != 1.0)
