@@ -58,7 +58,7 @@ HUD_GetHullBounds
   Engine calls this to enumerate player collision hulls, for prediction.  Return 0 if the hullnumber doesn't exist.
 ================================
 */
-int DLLEXPORT HUD_GetHullBounds(int hullnumber, float* mins, float* maxs)
+int HUD_GetHullBounds(int hullnumber, float* mins, float* maxs)
 {
 	return static_cast<int>(PM_GetHullBounds(hullnumber, mins, maxs));
 }
@@ -71,7 +71,7 @@ HUD_ConnectionlessPacket
   size of the response_buffer, so you must zero it out if you choose not to respond.
 ================================
 */
-int DLLEXPORT HUD_ConnectionlessPacket(const struct netadr_s* net_from, const char* args, char* response_buffer, int* response_buffer_size)
+int HUD_ConnectionlessPacket(const struct netadr_s* net_from, const char* args, char* response_buffer, int* response_buffer_size)
 {
 	// Parse stuff from args
 	int max_buffer_size = *response_buffer_size;
@@ -85,12 +85,12 @@ int DLLEXPORT HUD_ConnectionlessPacket(const struct netadr_s* net_from, const ch
 	return 0;
 }
 
-char DLLEXPORT HUD_PlayerMoveTexture(char* name)
+char HUD_PlayerMoveTexture(char* name)
 {
 	return PM_FindTextureType(name);
 }
 
-int DLLEXPORT Initialize(cl_enginefunc_t* pEnginefuncs, int iVersion)
+int Initialize(cl_enginefunc_t* pEnginefuncs, int iVersion)
 {
 	gEngfuncs = *pEnginefuncs;
 
@@ -121,7 +121,7 @@ so the HUD can reinitialize itself.
 ==========================
 */
 
-int DLLEXPORT HUD_VidInit()
+int HUD_VidInit()
 {
 	gHUD.VidInit();
 
@@ -140,7 +140,7 @@ the hud variables.
 ==========================
 */
 
-void DLLEXPORT HUD_Init()
+void HUD_Init()
 {
 	InitInput();
 	gHUD.Init();
@@ -157,7 +157,7 @@ redraw the HUD.
 ===========================
 */
 
-int DLLEXPORT HUD_Redraw(float time, int intermission)
+int HUD_Redraw(float time, int intermission)
 {
 	gHUD.Redraw(time, 0 != intermission);
 
@@ -178,7 +178,7 @@ returns 1 if anything has been changed, 0 otherwise.
 ==========================
 */
 
-int DLLEXPORT HUD_UpdateClientData(client_data_t* pcldata, float flTime)
+int HUD_UpdateClientData(client_data_t* pcldata, float flTime)
 {
 	IN_Commands();
 
@@ -193,7 +193,7 @@ Called at start and end of demos to restore to "non"HUD state.
 ==========================
 */
 
-void DLLEXPORT HUD_Reset()
+void HUD_Reset()
 {
 	gHUD.VidInit();
 }
@@ -206,7 +206,7 @@ Called by engine every frame that client .dll is loaded
 ==========================
 */
 
-void DLLEXPORT HUD_Frame(double time)
+void HUD_Frame(double time)
 {
 	GetClientVoiceMgr()->Frame(time);
 }
@@ -220,7 +220,7 @@ Called when a player starts or stops talking.
 ==========================
 */
 
-void DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking)
+void HUD_VoiceStatus(int entindex, qboolean bTalking)
 {
 	GetClientVoiceMgr()->UpdateSpeakerStatus(entindex, 0 != bTalking);
 }
@@ -233,7 +233,7 @@ Called when a director event message was received
 ==========================
 */
 
-void DLLEXPORT HUD_DirectorMessage(int iSize, void* pbuf)
+void HUD_DirectorMessage(int iSize, void* pbuf)
 {
 	gHUD.m_Spectator.DirectorMessage(iSize, pbuf);
 }

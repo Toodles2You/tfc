@@ -254,7 +254,7 @@ void MousePos_ThreadFunction()
 IN_ActivateMouse
 ===========
 */
-void DLLEXPORT IN_ActivateMouse()
+void IN_ActivateMouse()
 {
 	if (mouseinitialized)
 	{
@@ -289,7 +289,7 @@ void DLLEXPORT IN_ActivateMouse()
 IN_DeactivateMouse
 ===========
 */
-void DLLEXPORT IN_DeactivateMouse()
+void IN_DeactivateMouse()
 {
 	if (mouseinitialized)
 	{
@@ -410,7 +410,7 @@ void IN_ResetMouse()
 IN_MouseEvent
 ===========
 */
-void DLLEXPORT IN_MouseEvent(int mstate)
+void IN_MouseEvent(int mstate)
 {
 	int i;
 
@@ -634,7 +634,7 @@ void IN_MouseMove(float frametime, usercmd_t* cmd)
 IN_Accumulate
 ===========
 */
-void DLLEXPORT IN_Accumulate()
+void IN_Accumulate()
 {
 	//only accumulate mouse if we are not moving the camera with the mouse
 	if (!iMouseInUse && !g_iVisibleMouse)
@@ -672,7 +672,7 @@ void DLLEXPORT IN_Accumulate()
 IN_ClearStates
 ===================
 */
-void DLLEXPORT IN_ClearStates()
+void IN_ClearStates()
 {
 	if (!mouseactive)
 		return;

@@ -29,7 +29,7 @@ HUD_AddEntity
 	Return 0 to filter entity from visible list for rendering
 ========================
 */
-int DLLEXPORT HUD_AddEntity(int type, struct cl_entity_s* ent, const char* modelname)
+int HUD_AddEntity(int type, struct cl_entity_s* ent, const char* modelname)
 {
 	switch (type)
 	{
@@ -68,7 +68,7 @@ playerstate update in entity_state_t.  In order for these overrides to eventuall
 structure, we need to copy them into the state structure at this point.
 =========================
 */
-void DLLEXPORT HUD_TxferLocalOverrides(struct entity_state_s* state, const struct clientdata_s* client)
+void HUD_TxferLocalOverrides(struct entity_state_s* state, const struct clientdata_s* client)
 {
 	state->origin = client->origin;
 
@@ -88,7 +88,7 @@ We have received entity_state_t for this player over the network.  We need to co
 playerstate structure
 =========================
 */
-void DLLEXPORT HUD_ProcessPlayerState(struct entity_state_s* dst, const struct entity_state_s* src)
+void HUD_ProcessPlayerState(struct entity_state_s* dst, const struct entity_state_s* src)
 {
 	// Copy in network data
 	VectorCopy(src->origin, dst->origin);
@@ -158,7 +158,7 @@ Because we can predict an arbitrary number of frames before the server responds 
  update is occupying.
 =========================
 */
-void DLLEXPORT HUD_TxferPredictionData(struct entity_state_s* ps, const struct entity_state_s* pps, struct clientdata_s* pcd, const struct clientdata_s* ppcd, struct weapon_data_s* wd, const struct weapon_data_s* pwd)
+void HUD_TxferPredictionData(struct entity_state_s* ps, const struct entity_state_s* pps, struct clientdata_s* pcd, const struct clientdata_s* ppcd, struct weapon_data_s* wd, const struct weapon_data_s* pwd)
 {
 	ps->oldbuttons = pps->oldbuttons;
 	ps->flFallVelocity = pps->flFallVelocity;
@@ -206,7 +206,7 @@ HUD_CreateEntities
 Gives us a chance to add additional entities to the render this frame
 =========================
 */
-void DLLEXPORT HUD_CreateEntities()
+void HUD_CreateEntities()
 {
 	// Add in any game specific objects
 	Game_AddObjects();
@@ -223,7 +223,7 @@ The entity's studio model description indicated an event was
 fired during this frame, handle the event by it's tag ( e.g., muzzleflash, sound )
 =========================
 */
-void DLLEXPORT HUD_StudioEvent(const struct mstudioevent_s* event, const struct cl_entity_s* entity)
+void HUD_StudioEvent(const struct mstudioevent_s* event, const struct cl_entity_s* entity)
 {
 	bool iMuzzleFlash = true;
 
@@ -265,7 +265,7 @@ CL_UpdateTEnts
 Simulation and cleanup of temporary entities
 =================
 */
-void DLLEXPORT HUD_TempEntUpdate(
+void HUD_TempEntUpdate(
 	double frametime,			  // Simulation time
 	double client_time,			  // Absolute time on client
 	double cl_gravity,			  // True gravity on client
@@ -662,7 +662,7 @@ If you specify negative numbers for beam start and end point entities, then
 Indices must start at 1, not zero.
 =================
 */
-cl_entity_t DLLEXPORT* HUD_GetUserEntity(int index)
+cl_entity_t* HUD_GetUserEntity(int index)
 {
 	return NULL;
 }

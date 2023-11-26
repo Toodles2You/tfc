@@ -150,7 +150,7 @@ typedef struct
 
 extern trace_t SV_ClipMoveToEntity(edict_t* ent, Vector start, Vector mins, Vector maxs, Vector end);
 
-void DLLEXPORT CAM_Think()
+void CAM_Think()
 {
 	Vector origin;
 	Vector ext, pnt, camForward, camRight, camUp;
@@ -611,12 +611,12 @@ void CAM_EndDistance()
 	iMouseInUse = false;
 }
 
-int DLLEXPORT CL_IsThirdPerson()
+int CL_IsThirdPerson()
 {
 	return static_cast<int>(cam_thirdperson || (0 != g_iUser1 && (g_iUser2 == gEngfuncs.GetLocalPlayer()->index)));
 }
 
-void DLLEXPORT CL_CameraOffset(float* ofs)
+void CL_CameraOffset(float* ofs)
 {
 	VectorCopy(cam_ofs, ofs);
 }

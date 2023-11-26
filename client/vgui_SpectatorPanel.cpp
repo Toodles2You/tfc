@@ -22,7 +22,7 @@ Sets the location of the input for chat text
 ==========================
 */
 
-void DLLEXPORT HUD_ChatInputPosition(int* x, int* y)
+void HUD_ChatInputPosition(int* x, int* y)
 {
 	gHUD.GetChatInputPosition(*x, *y);
 

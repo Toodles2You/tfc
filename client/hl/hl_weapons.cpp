@@ -420,7 +420,7 @@ runfuncs is 1 if this is the first time we've predicted this command.  If so, so
 be ignored
 =====================
 */
-void DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct usercmd_s* cmd, int runfuncs, double time, unsigned int random_seed)
+void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct usercmd_s* cmd, int runfuncs, double time, unsigned int random_seed)
 {
 	int i;
 	static int lasthealth;
@@ -529,13 +529,13 @@ void DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* 
 	g_PunchAngle = to->client.punchangle * 2;
 }
 
-void DLLEXPORT HUD_PlayerMoveInit(struct playermove_s* ppmove)
+void HUD_PlayerMoveInit(struct playermove_s* ppmove)
 {
 	PM_Init(ppmove);
 	player.InstallGameMovement(new CHalfLifeMovement{ppmove, &player});
 }
 
-void DLLEXPORT HUD_PlayerMove(struct playermove_s* ppmove, int server)
+void HUD_PlayerMove(struct playermove_s* ppmove, int server)
 {
 	ppmove->server = 0;
 	player.GetGameMovement()->Move();
