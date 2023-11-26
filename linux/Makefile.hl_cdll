@@ -13,11 +13,11 @@ PUBLIC_OBJ_DIR=$(HL1_OBJ_DIR)/public
 COMMON_OBJ_DIR=$(HL1_OBJ_DIR)/common
 GAME_SHARED_OBJ_DIR=$(HL1_OBJ_DIR)/game_shared
 HL1_SERVER_OBJ_DIR=$(HL1_OBJ_DIR)/server
-PM_SHARED_OBJ_DIR=$(HL1_OBJ_DIR)/pm_shared
+SHARED_OBJ_DIR=$(HL1_OBJ_DIR)/shared
 
 CFLAGS=$(BASE_CFLAGS) $(ARCH_CFLAGS) -DCLIENT_DLL
 
-INCLUDEDIRS=-I$(HL_SRC_DIR) -I$(HL_PARTICLEMAN_DIR) -I../server -I/usr/include/malloc -I$(COMMON_SRC_DIR) -I$(PUBLIC_SRC_DIR) -I../pm_shared -I../engine -I../external/vgui -I../game_shared -I../external
+INCLUDEDIRS=-I$(HL_SRC_DIR) -I$(HL_PARTICLEMAN_DIR) -I../server -I/usr/include/malloc -I$(COMMON_SRC_DIR) -I$(PUBLIC_SRC_DIR) -I../shared -I../engine -I../external/vgui -I../game_shared -I../external
 
 LDFLAGS=$(SHLIBLDFLAGS) $(CPP_LIB) -L$(CFG) vgui.so -L. libSDL2-2.0.so.0
 
@@ -81,13 +81,6 @@ HL1_PARTICLEMAN_OBJS = \
 	$(HL1_PARTICLEMAN_OBJ_DIR)/CFrustum.o \
 	$(HL1_PARTICLEMAN_OBJ_DIR)/CMiniMem.o \
 	$(HL1_PARTICLEMAN_OBJ_DIR)/IParticleMan_Active.o \
-	
-DLL_OBJS = \
-	$(HL1_SERVER_OBJ_DIR)/crowbar.o \
-	$(HL1_SERVER_OBJ_DIR)/mp5.o \
-	$(HL1_SERVER_OBJ_DIR)/player_shared.o \
-	$(HL1_SERVER_OBJ_DIR)/weapons_shared.o \
-
 
 PUBLIC_OBJS = \
 	$(PUBLIC_OBJ_DIR)/interface.o \
@@ -106,17 +99,21 @@ GAME_SHARED_OBJS = \
 	$(GAME_SHARED_OBJ_DIR)/vgui_slider2.o \
 	$(GAME_SHARED_OBJ_DIR)/voice_banmgr.o \
 	
-PM_SHARED_OBJS = \
-	$(PM_SHARED_OBJ_DIR)/gamemovement_walk.o \
-	$(PM_SHARED_OBJ_DIR)/gamemovement.o \
-	$(PM_SHARED_OBJ_DIR)/pm_debug.o \
-	$(PM_SHARED_OBJ_DIR)/pm_shared.o \
-	$(PM_SHARED_OBJ_DIR)/pm_math.o \
+SHARED_OBJS = \
+	$(SHARED_OBJ_DIR)/crowbar.o \
+	$(SHARED_OBJ_DIR)/gamemovement_walk.o \
+	$(SHARED_OBJ_DIR)/gamemovement.o \
+	$(SHARED_OBJ_DIR)/mp5.o \
+	$(SHARED_OBJ_DIR)/player_shared.o \
+	$(SHARED_OBJ_DIR)/pm_debug.o \
+	$(SHARED_OBJ_DIR)/pm_shared.o \
+	$(SHARED_OBJ_DIR)/pm_math.o \
+	$(SHARED_OBJ_DIR)/weapons_shared.o \
 
 all: client.$(SHLIBEXT)
 
-client.$(SHLIBEXT): $(HL1_OBJS) $(PUBLIC_OBJS) $(COMMON_OBJS) $(GAME_SHARED_OBJS) $(DLL_OBJS) $(PM_SHARED_OBJS) $(HL1_PARTICLEMAN_OBJS)
-	$(CPLUS) -o $(BUILD_DIR)/$@ $(HL1_OBJS) $(PUBLIC_OBJS) $(COMMON_OBJS) $(GAME_SHARED_OBJS) $(DLL_OBJS) $(PM_SHARED_OBJS) $(HL1_PARTICLEMAN_OBJS) $(LDFLAGS) $(CPP_LIB)
+client.$(SHLIBEXT): $(HL1_OBJS) $(PUBLIC_OBJS) $(COMMON_OBJS) $(GAME_SHARED_OBJS) $(SHARED_OBJS) $(HL1_PARTICLEMAN_OBJS)
+	$(CPLUS) -o $(BUILD_DIR)/$@ $(HL1_OBJS) $(PUBLIC_OBJS) $(COMMON_OBJS) $(GAME_SHARED_OBJS) $(SHARED_OBJS) $(HL1_PARTICLEMAN_OBJS) $(LDFLAGS) $(CPP_LIB)
 	./gendbg.sh $(BUILD_DIR)/client.$(SHLIBEXT)
 
 $(HL1_OBJ_DIR):
@@ -139,8 +136,8 @@ $(COMMON_OBJ_DIR):
 $(GAME_SHARED_OBJ_DIR):
 	mkdir -p $(GAME_SHARED_OBJ_DIR)
 
-$(PM_SHARED_OBJ_DIR):
-	mkdir -p $(PM_SHARED_OBJ_DIR)
+$(SHARED_OBJ_DIR):
+	mkdir -p $(SHARED_OBJ_DIR)
 
 $(HL1_OBJ_DIR)/%.o: $(HL_SRC_DIR)/%.cpp $(filter-out $(wildcard  $(HL1_OBJ_DIR)),  $(HL1_OBJ_DIR))
 	$(DO_CC)
@@ -169,7 +166,7 @@ $(COMMON_OBJ_DIR)/%.o : $(COMMON_SRC_DIR)/%.cpp $(filter-out $(wildcard  $(COMMO
 $(GAME_SHARED_OBJ_DIR)/%.o : $(GAME_SHARED_SRC_DIR)/%.cpp $(filter-out $(wildcard  $(GAME_SHARED_OBJ_DIR)),  $(GAME_SHARED_OBJ_DIR))
 	$(DO_CC)
 
-$(PM_SHARED_OBJ_DIR)/%.o : $(PM_SRC_DIR)/%.cpp $(filter-out $(wildcard  $(PM_SHARED_OBJ_DIR)),  $(PM_SHARED_OBJ_DIR))
+$(SHARED_OBJ_DIR)/%.o : $(SHARED_SRC_DIR)/%.cpp $(filter-out $(wildcard  $(SHARED_OBJ_DIR)),  $(SHARED_OBJ_DIR))
 	$(DO_CC)
 
 clean:

@@ -7,14 +7,14 @@
 HLDLL_SRC_DIR=$(SOURCE_DIR)/server
 
 HLDLL_OBJ_DIR=$(BUILD_OBJ_DIR)/hldll
-PM_OBJ_DIR=$(HLDLL_OBJ_DIR)/pm_shared
+SHARED_OBJ_DIR=$(HLDLL_OBJ_DIR)/shared
 GAME_SHARED_OBJ_DIR=$(HLDLL_OBJ_DIR)/game_shared
 PUBLIC_OBJ_DIR=$(HLDLL_OBJ_DIR)/public
 COMMON_OBJ_DIR=$(HLDLL_OBJ_DIR)/common
 
 CFLAGS=$(BASE_CFLAGS)  $(ARCH_CFLAGS) -DGAME_DLL
 
-INCLUDEDIRS=-I$(HLDLL_SRC_DIR) -I$(ENGINE_SRC_DIR) -I$(COMMON_SRC_DIR) -I$(PM_SRC_DIR) -I$(GAME_SHARED_SRC_DIR) -I$(PUBLIC_SRC_DIR)
+INCLUDEDIRS=-I$(HLDLL_SRC_DIR) -I$(ENGINE_SRC_DIR) -I$(COMMON_SRC_DIR) -I$(SHARED_SRC_DIR) -I$(GAME_SHARED_SRC_DIR) -I$(PUBLIC_SRC_DIR)
 
 LDFLAGS= $(CPP_LIB)
 
@@ -31,7 +31,6 @@ HLDLL_OBJS = \
 	$(HLDLL_OBJ_DIR)/cbase.o \
 	$(HLDLL_OBJ_DIR)/client.o \
 	$(HLDLL_OBJ_DIR)/combat.o \
-	$(HLDLL_OBJ_DIR)/crowbar.o \
 	$(HLDLL_OBJ_DIR)/doors.o \
 	$(HLDLL_OBJ_DIR)/effects.o \
 	$(HLDLL_OBJ_DIR)/explode.o \
@@ -49,13 +48,11 @@ HLDLL_OBJS = \
 	$(HLDLL_OBJ_DIR)/maprules.o \
 	$(HLDLL_OBJ_DIR)/monstermaker.o \
 	$(HLDLL_OBJ_DIR)/mortar.o \
-	$(HLDLL_OBJ_DIR)/mp5.o \
 	$(HLDLL_OBJ_DIR)/nodes.o \
 	$(HLDLL_OBJ_DIR)/observer.o \
 	$(HLDLL_OBJ_DIR)/pathcorner.o \
 	$(HLDLL_OBJ_DIR)/plane.o \
 	$(HLDLL_OBJ_DIR)/plats.o \
-	$(HLDLL_OBJ_DIR)/player_shared.o \
 	$(HLDLL_OBJ_DIR)/player.o \
 	$(HLDLL_OBJ_DIR)/saverestore.o \
 	$(HLDLL_OBJ_DIR)/sound.o \
@@ -69,15 +66,18 @@ HLDLL_OBJS = \
 	$(HLDLL_OBJ_DIR)/UserMessages.o \
 	$(HLDLL_OBJ_DIR)/util.o \
 	$(HLDLL_OBJ_DIR)/weapons.o \
-	$(HLDLL_OBJ_DIR)/weapons_shared.o \
 	$(HLDLL_OBJ_DIR)/world.o \
 
-PM_OBJS = \
-	$(PM_OBJ_DIR)/gamemovement_walk.o \
-	$(PM_OBJ_DIR)/gamemovement.o \
-	$(PM_OBJ_DIR)/pm_shared.o \
-	$(PM_OBJ_DIR)/pm_math.o \
-	$(PM_OBJ_DIR)/pm_debug.o
+SHARED_OBJS = \
+	$(SHARED_OBJ_DIR)/crowbar.o \
+	$(SHARED_OBJ_DIR)/gamemovement_walk.o \
+	$(SHARED_OBJ_DIR)/gamemovement.o \
+	$(SHARED_OBJ_DIR)/mp5.o \
+	$(SHARED_OBJ_DIR)/player_shared.o \
+	$(SHARED_OBJ_DIR)/pm_debug.o \
+	$(SHARED_OBJ_DIR)/pm_shared.o \
+	$(SHARED_OBJ_DIR)/pm_math.o \
+	$(SHARED_OBJ_DIR)/weapons_shared.o \
 
 GAME_SHARED_OBJS = \
 	$(GAME_SHARED_OBJ_DIR)/filesystem_utils.o \
@@ -104,20 +104,20 @@ all: dirs hl.$(SHLIBEXT)
 dirs:
 	-mkdir -p $(BUILD_OBJ_DIR)
 	-mkdir -p $(HLDLL_OBJ_DIR)
-	-mkdir -p $(PM_OBJ_DIR)
+	-mkdir -p $(SHARED_OBJ_DIR)
 	-mkdir -p $(GAME_SHARED_OBJ_DIR)
 	-mkdir -p $(GAME_SHARED_OBJ_DIR)/bot
 	-mkdir -p $(PUBLIC_OBJ_DIR)
 	-mkdir -p $(COMMON_OBJ_DIR)
 
-hl.$(SHLIBEXT): $(HLDLL_OBJS) $(PM_OBJS) $(GAME_SHARED_OBJS) $(PUBLIC_OBJS) $(COMMON_OBJS)
-	$(CPLUS) $(LDFLAGS) $(CPP_LIB) $(SHLIBLDFLAGS) -o $(BUILD_DIR)/$@ $(HLDLL_OBJS) $(PM_OBJS) $(GAME_SHARED_OBJS) $(PUBLIC_OBJS) $(COMMON_OBJS)
+hl.$(SHLIBEXT): $(HLDLL_OBJS) $(SHARED_OBJS) $(GAME_SHARED_OBJS) $(PUBLIC_OBJS) $(COMMON_OBJS)
+	$(CPLUS) $(LDFLAGS) $(CPP_LIB) $(SHLIBLDFLAGS) -o $(BUILD_DIR)/$@ $(HLDLL_OBJS) $(SHARED_OBJS) $(GAME_SHARED_OBJS) $(PUBLIC_OBJS) $(COMMON_OBJS)
 	./gendbg.sh $(BUILD_DIR)/hl.$(SHLIBEXT)
 
 $(HLDLL_OBJ_DIR)/%.o : $(HLDLL_SRC_DIR)/%.cpp
 	$(DO_CC)
 
-$(PM_OBJ_DIR)/%.o : $(PM_SRC_DIR)/%.cpp
+$(SHARED_OBJ_DIR)/%.o : $(SHARED_SRC_DIR)/%.cpp
 	$(DO_CC)
 
 $(GAME_SHARED_OBJ_DIR)/%.o : $(GAME_SHARED_SRC_DIR)/%.cpp
@@ -132,6 +132,6 @@ $(COMMON_OBJ_DIR)/%.o : $(COMMON_SRC_DIR)/%.cpp
 clean:
 	-rm -rf $(COMMON_OBJ_DIR)
 	-rm -rf $(GAME_SHARED_OBJ_DIR)
-	-rm -rf $(PM_OBJ_DIR)
+	-rm -rf $(SHARED_OBJ_DIR)
 	-rm -rf $(HLDLL_OBJ_DIR)
 	-rm -f hl_$(ARCH).$(SHLIBEXT)
