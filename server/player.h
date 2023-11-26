@@ -37,20 +37,10 @@
 //
 // Player PHYSICS FLAGS bits
 //
-#define PFLAG_ONLADDER (1 << 0)
-#define PFLAG_ONSWING (1 << 0)
 #define PFLAG_ONTRAIN (1 << 1)
-#define PFLAG_ONBARNACLE (1 << 2)
-#define PFLAG_DUCKING (1 << 3)	// In the process of ducking, but totally squatted yet
 #define PFLAG_USING (1 << 4)	// Using a continuous entity
 #define PFLAG_OBSERVER (1 << 5) // player is locked in stationary cam mode. Spectators can move, observers can't.
 
-//
-// generic player
-//
-//-----------------------------------------------------
-//This is Half-Life player entity
-//-----------------------------------------------------
 #define CSUITPLAYLIST 4 // max of 4 suit sentences queued up at any time
 
 #define SUIT_REPEAT_OK 0
@@ -63,11 +53,6 @@
 
 #define CSUITNOREPEAT 32
 
-#define SOUND_FLASHLIGHT_ON "items/flashlight1.wav"
-#define SOUND_FLASHLIGHT_OFF "items/flashlight1.wav"
-
-#define TEAM_NAME_LENGTH 16
-
 typedef enum
 {
 	PLAYER_IDLE,
@@ -77,17 +62,6 @@ typedef enum
 	PLAYER_DIE,
 	PLAYER_ATTACK1,
 } PLAYER_ANIM;
-
-#define MAX_ID_RANGE 2048
-#define SBAR_STRING_SIZE 128
-
-enum sbar_data
-{
-	SBAR_ID_TARGETNAME = 1,
-	SBAR_ID_TARGETHEALTH,
-	SBAR_ID_TARGETARMOR,
-	SBAR_END,
-};
 
 #define CHAT_INTERVAL 1.0f
 

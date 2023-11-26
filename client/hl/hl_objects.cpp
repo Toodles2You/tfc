@@ -133,7 +133,7 @@ void Game_AddObjects()
 			light->color.g = 255;
 			light->color.b = 255;
 			light->die = time + 0.001;
-			light->radius = 64 * (1.0f - trShort.fraction);
+			light->radius = 96 * (1.0f - trShort.fraction);
 		}
 	}
 

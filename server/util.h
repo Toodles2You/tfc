@@ -259,6 +259,7 @@ inline bool FClassnameIs(entvars_t* pev, const char* szClassname)
 #define SF_PENDULUM_AUTO_RETURN 16
 #define SF_PENDULUM_PASSABLE 32
 
+#define SVC_STUFFTEXT 9
 #define SVC_TEMPENTITY 23
 #define SVC_INTERMISSION 30
 #define SVC_CDTRACK 32

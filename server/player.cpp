@@ -611,7 +611,7 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 		break;
 	case PLAYER_IDLE:
 	case PLAYER_WALK:
-		if (!FBitSet(pev->flags, FL_ONGROUND) && (m_Activity == ACT_HOP || m_Activity == ACT_LEAP)) // Still jumping
+		if ((pev->flags & FL_ONGROUND) == 0 && (m_Activity == ACT_HOP || m_Activity == ACT_LEAP)) // Still jumping
 		{
 			m_IdealActivity = m_Activity;
 		}
@@ -653,7 +653,7 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 		return;
 
 	case ACT_RANGE_ATTACK1:
-		if (FBitSet(pev->flags, FL_DUCKING)) // crouching
+		if ((pev->flags & FL_DUCKING) != 0) // crouching
 			strcpy(szAnim, "crouch_shoot_");
 		else
 			strcpy(szAnim, "ref_shoot_");
@@ -681,7 +681,7 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 	case ACT_WALK:
 		if (m_Activity != ACT_RANGE_ATTACK1 || m_fSequenceFinished)
 		{
-			if (FBitSet(pev->flags, FL_DUCKING)) // crouching
+			if ((pev->flags & FL_DUCKING) != 0) // crouching
 				strcpy(szAnim, "crouch_aim_");
 			else
 				strcpy(szAnim, "ref_aim_");
@@ -697,12 +697,11 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 		}
 	}
 
-	if (FBitSet(pev->flags, FL_DUCKING))
+	if ((pev->flags & FL_DUCKING) != 0)
 	{
 		if (speed == 0)
 		{
 			pev->gaitsequence = LookupActivity(ACT_CROUCHIDLE);
-			// pev->gaitsequence	= LookupActivity( ACT_CROUCH );
 		}
 		else
 		{
@@ -719,7 +718,6 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 	}
 	else
 	{
-		// pev->gaitsequence	= LookupActivity( ACT_WALK );
 		pev->gaitsequence = LookupSequence("deep_idle");
 	}
 
@@ -997,10 +995,7 @@ void CBasePlayer::WaterMove()
 
 	if (0 == pev->waterlevel)
 	{
-		if (FBitSet(pev->flags, FL_INWATER))
-		{
-			ClearBits(pev->flags, FL_INWATER);
-		}
+		pev->dmgtime = 0;
 		return;
 	}
 
@@ -1038,12 +1033,6 @@ void CBasePlayer::WaterMove()
 	{
 		pev->dmgtime = gpGlobals->time + 1;
 		TakeDamage(CWorld::World, CWorld::World, 4 * pev->waterlevel, DMG_ACID);
-	}
-
-	if (!FBitSet(pev->flags, FL_INWATER))
-	{
-		SetBits(pev->flags, FL_INWATER);
-		pev->dmgtime = 0;
 	}
 }
 
@@ -1184,8 +1173,7 @@ void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle)
 	pev->solid = SOLID_NOT;
 	pev->takedamage = DAMAGE_NO;
 	pev->movetype = MOVETYPE_NONE;
-	ClearBits(m_afPhysicsFlags, PFLAG_DUCKING);
-	ClearBits(pev->flags, FL_DUCKING);
+	pev->flags &= ~FL_DUCKING;
 	pev->deadflag = DEAD_RESPAWNABLE;
 	pev->health = 1;
 
@@ -1246,7 +1234,7 @@ void CBasePlayer::PlayerUse()
 			{ // Start controlling the train!
 				CBaseEntity* pTrain = CBaseEntity::Instance(pev->groundentity);
 
-				if (pTrain && (pev->button & IN_JUMP) == 0 && FBitSet(pev->flags, FL_ONGROUND) && (pTrain->ObjectCaps() & FCAP_DIRECTIONAL_USE) != 0 && pTrain->OnControls(pev))
+				if (pTrain && (pev->button & IN_JUMP) == 0 && (pev->flags & FL_ONGROUND) != 0 && (pTrain->ObjectCaps() & FCAP_DIRECTIONAL_USE) != 0 && pTrain->OnControls(pev))
 				{
 					m_afPhysicsFlags |= PFLAG_ONTRAIN;
 					m_iTrain = TrainSpeed(pTrain->pev->speed, pTrain->pev->impulse);
@@ -1458,7 +1446,7 @@ void CBasePlayer::PreThink()
 				return;
 			}
 		}
-		else if (!FBitSet(pev->flags, FL_ONGROUND) || FBitSet(pTrain->pev->spawnflags, SF_TRACKTRAIN_NOCONTROL) || (pev->button & (IN_MOVELEFT | IN_MOVERIGHT)) != 0)
+		else if ((pev->flags & FL_ONGROUND) == 0 || (pTrain->pev->spawnflags & SF_TRACKTRAIN_NOCONTROL) != 0 || (pev->button & (IN_MOVELEFT | IN_MOVERIGHT)) != 0)
 		{
 			// Turn off the train if you jump, strafe, or the train controls go dead
 			m_afPhysicsFlags &= ~PFLAG_ONTRAIN;
@@ -1488,14 +1476,9 @@ void CBasePlayer::PreThink()
 	else if ((m_iTrain & TRAIN_ACTIVE) != 0)
 		m_iTrain = TRAIN_NEW; // turn off train
 
-	if (!FBitSet(pev->flags, FL_ONGROUND))
+	if ((pev->flags & FL_ONGROUND) == 0)
 	{
 		m_flFallVelocity = -pev->velocity.z;
-	}
-
-	if ((m_afPhysicsFlags & PFLAG_ONBARNACLE) != 0)
-	{
-		pev->velocity = g_vecZero;
 	}
 }
 

@@ -677,17 +677,6 @@ enum {
 #define BREAK_CONCRETE 0x40
 #define BREAK_2 0x80
 
-// Colliding temp entity sounds
-
-#define BOUNCE_GLASS BREAK_GLASS
-#define BOUNCE_METAL BREAK_METAL
-#define BOUNCE_FLESH BREAK_FLESH
-#define BOUNCE_WOOD BREAK_WOOD
-#define BOUNCE_SHRAP 0x10
-#define BOUNCE_SHELL 0x20
-#define BOUNCE_CONCRETE BREAK_CONCRETE
-#define BOUNCE_SHOTSHELL 0x80
-
 // Temp entity bounce sound types
 #define TE_BOUNCE_NULL 0
 #define TE_BOUNCE_SHELL 1
@@ -747,11 +736,6 @@ typedef struct
 {
 	unsigned r, g, b, a;
 } colorVec;
-
-typedef struct
-{
-	unsigned short r, g, b, a;
-} PackedColorVec;
 
 typedef struct link_s
 {

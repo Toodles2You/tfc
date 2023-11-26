@@ -966,9 +966,6 @@ void ClientPrecache()
 	PRECACHE_SOUND("debris/glass2.wav");
 	PRECACHE_SOUND("debris/glass3.wav");
 
-	PRECACHE_SOUND(SOUND_FLASHLIGHT_ON);
-	PRECACHE_SOUND(SOUND_FLASHLIGHT_OFF);
-
 	// player gib sounds
 	PRECACHE_SOUND("common/bodysplat.wav");
 
@@ -1697,16 +1694,6 @@ to be created during play ( e.g., grenades, ammo packs, projectiles, corpses, et
 */
 void CreateInstancedBaselines()
 {
-	int iret = 0;
-	entity_state_t state;
-
-	memset(&state, 0, sizeof(state));
-
-	// Create any additional baselines here for things like grendates, etc.
-	// iret = ENGINE_INSTANCE_BASELINE( pc->pev->classname, &state );
-
-	// Destroy objects.
-	//util::Remove( pc );
 }
 
 /*

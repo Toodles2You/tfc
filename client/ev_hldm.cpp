@@ -1091,7 +1091,7 @@ int MSG_Blood(const char* name, int size, void* buf)
 				BLOOD_COLOR_RED,
 				g_sModelIndexBloodSpray,
 				g_sModelIndexBloodDrop,
-				8);
+				4);
 		}
 
 		EV_BloodTrace(traceEndPos, traceDir, 4);
