@@ -1,0 +1,21 @@
+// Valve Game Info file
+
+game "Half-Life: Updated"
+type "multiplayer_only"
+// fallback_dir "valve"
+secure "1"
+
+gamedll "dlls\server.dll"
+gamedll_linux "dlls/server.so"
+gamedll_osx "dlls/server.dylib"
+
+edicts "2048"
+startmap "c0a0"
+trainmap "t0a0"
+mpentity "info_player_deathmatch"
+nomodels "0"
+nohimodel "0"
+
+icon "game"
+animated_title "1"
+hd_background "1"
