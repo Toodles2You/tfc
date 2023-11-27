@@ -24,15 +24,10 @@
 #include "entity_state.h"
 #include "r_efx.h"
 
-// g_runfuncs is true if this is the first time we've "predicated" a particular movement/firing
-//  command.  If it is 1, then we should play events/sounds etc., otherwise, we just will be
-//  updating state info, but not firing events
-bool g_runfuncs = false;
-
 // During our weapon prediction processing, we'll need to reference some data that is part of
 //  the final state passed into the postthink functionality.  We'll set this pointer and then
 //  reset it to NULL as appropriate
-struct local_state_s* g_finalstate = NULL;
+struct local_state_s g_finalstate;
 
 int g_CurrentWeaponId = WEAPON_NONE;
 
@@ -85,7 +80,7 @@ Change weapon model animation
 void HUD_SendWeaponAnim(int iAnim, int body, bool force)
 {
 	// Don't actually change it.
-	if (!g_runfuncs && !force)
+	if (!HUD_FirstTimePredicting() && !force)
 		return;
 
 	g_currentanim = iAnim;
@@ -115,10 +110,12 @@ Play a sound, if we are seeing this command for the first time
 */
 void HUD_PlaySound(const char* sound, float volume)
 {
-	if (!g_runfuncs || !g_finalstate)
+	if (!HUD_FirstTimePredicting())
+	{
 		return;
+	}
 
-	gEngfuncs.pfnPlaySoundByNameAtLocation(sound, volume, (float*)&g_finalstate->playerstate.origin);
+	gEngfuncs.pfnPlaySoundByNameAtLocation(sound, volume, (float*)&g_finalstate.playerstate.origin);
 }
 
 /*

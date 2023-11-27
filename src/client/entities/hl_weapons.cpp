@@ -32,7 +32,9 @@
 #include "demo.h"
 #include "hud.h"
 
-extern int g_iUser1;
+extern struct local_state_s g_finalstate;
+
+static bool firstTimePredicting = false;
 
 // Pool of client side entities/entvars_t
 static entvars_t ev[WEAPON_LAST + 1];
@@ -52,7 +54,7 @@ static CBasePlayerWeapon* weapons[] =
 	&mp5,
 };
 
-Vector previousorigin;
+static Vector previousorigin;
 
 Vector g_PunchAngle;
 
@@ -129,150 +131,6 @@ void CBaseEntity::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 
 /*
 =====================
-CBasePlayerWeapon:: DefaultDeploy
-
-=====================
-*/
-bool CBasePlayerWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, int body)
-{
-	if (!CanDeploy())
-		return false;
-
-	gEngfuncs.CL_LoadModel(szViewModel, &m_pPlayer->pev->viewmodel);
-
-	SendWeaponAnim(iAnim, body);
-
-	m_pPlayer->m_iNextAttack = 500;
-	m_iNextPrimaryAttack = std::max(m_iNextPrimaryAttack, 500);
-	m_iNextSecondaryAttack = std::max(m_iNextSecondaryAttack, 500);
-	m_iTimeWeaponIdle = 1000;
-	m_bPlayEmptySound = true;
-	return true;
-}
-
-bool CBasePlayerWeapon::DefaultHolster(int iAnim, int body)
-{
-	if (!CanHolster())
-		return false;
-
-	if (iAnim >= 0)
-		SendWeaponAnim(iAnim, body);
-
-	m_pPlayer->m_iNextAttack = 500;
-	m_iNextPrimaryAttack = std::max(m_iNextPrimaryAttack, 500);
-	m_iNextSecondaryAttack = std::max(m_iNextSecondaryAttack, 500);
-	m_iTimeWeaponIdle = 1000;
-	m_fInReload = false; // Cancel any reload in progress.
-	m_fInSpecialReload = 0;
-	m_pPlayer->m_iFOV = 0;
-
-	return true;
-}
-
-/*
-=====================
-CBasePlayerWeapon:: PlayEmptySound
-
-=====================
-*/
-void CBasePlayerWeapon::PlayEmptySound()
-{
-	if (!g_runfuncs)
-		return;
-
-	if (m_bPlayEmptySound)
-	{
-		PlayWeaponSound(CHAN_ITEM, "weapons/357_cock1.wav", 0.8);
-		m_bPlayEmptySound = false;
-	}
-}
-
-/*
-=====================
-CBasePlayerWeapon::Holster
-
-Put away weapon
-=====================
-*/
-bool CBasePlayerWeapon::Holster()
-{
-	m_fInReload = false; // cancel any reload in progress.
-	m_fInSpecialReload = 0;
-	m_pPlayer->pev->viewmodel = 0;
-	return true;
-}
-
-/*
-=====================
-CBasePlayerWeapon::SendWeaponAnim
-
-Animate weapon model
-=====================
-*/
-void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int body)
-{
-	m_pPlayer->pev->weaponanim = iAnim;
-
-	HUD_SendWeaponAnim(iAnim, body, false);
-}
-
-void CBasePlayerWeapon::PlayWeaponSound(int iChannel, const char* szSound, float flVolume, float flAttn, int iFlags, float flPitch)
-{
-	if (!g_runfuncs)
-		return;
-
-	auto player = gEngfuncs.GetLocalPlayer();
-
-	if (!player)
-		return;
-
-	gEngfuncs.pEventAPI->EV_PlaySound(player->index, player->origin, iChannel, szSound, flVolume, flAttn, iFlags, flPitch);
-}
-
-/*
-=====================
-CBasePlayer::FireBullets
-
-Only produces random numbers to match the server ones.
-=====================
-*/
-void CBasePlayer::FireBullets(
-	const float damage,
-	const Vector2D& spread,
-	const unsigned int count,
-	const float distance)
-{
-}
-
-/*
-=====================
-CBasePlayer::Killed
-
-=====================
-*/
-void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType)
-{
-	// Holster weapon immediately, to allow it to cleanup
-	if (m_pActiveWeapon)
-		m_pActiveWeapon->Holster();
-}
-
-/*
-=====================
-CBasePlayer::Spawn
-
-=====================
-*/
-bool CBasePlayer::Spawn()
-{
-	if (m_pActiveWeapon)
-		m_pActiveWeapon->Deploy();
-
-	return true;
-}
-
-/*
-=====================
 util::TraceLine
 
 Don't actually trace, but act like the trace didn't hit anything.
@@ -325,11 +183,11 @@ void HUD_PlaybackEvent(int flags, const edict_t* pInvoker, unsigned short eventi
 	Vector org;
 	Vector ang;
 
-	if (!g_runfuncs || !g_finalstate)
+	if (!HUD_FirstTimePredicting())
 		return;
 
 	// Weapon prediction events are assumed to occur at the player's origin
-	org = g_finalstate->playerstate.origin;
+	org = g_finalstate.playerstate.origin;
 	ang = player.pev->v_angle + player.pev->punchangle * 2;
 	gEngfuncs.pfnPlaybackEvent(flags, pInvoker, eventindex, delay, org, ang, fparam1, fparam2, iparam1, iparam2, bparam1, bparam2);
 }
@@ -406,7 +264,7 @@ Remember our exact predicted origin so we can draw the egon to the right positio
 */
 void HUD_SetLastOrg()
 {
-	previousorigin = g_finalstate->playerstate.origin + g_finalstate->client.view_ofs;
+	previousorigin = g_finalstate.playerstate.origin + g_finalstate.client.view_ofs;
 }
 
 /*
@@ -423,9 +281,8 @@ be ignored
 void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct usercmd_s* cmd, int runfuncs, double time, unsigned int random_seed)
 {
 	int i;
-	static int lasthealth;
 
-	g_runfuncs = runfuncs != 0;
+	firstTimePredicting = runfuncs != 0;
 
 	HUD_InitClientWeapons();
 
@@ -434,27 +291,22 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 
 	// Store pointer to our destination entity_state_t so we can get our origin, etc. from it
 	//  for setting up events on the client
-	g_finalstate = to;
+	g_finalstate = *to;
 
 	// If we are running events/etc. go ahead and see if we
 	//  managed to die between last frame and this one
 	// If so, run the appropriate player killed or spawn function
-	if (g_runfuncs)
+	if (HUD_FirstTimePredicting())
 	{
-		if (to->client.health <= 0 && lasthealth > 0)
+		if (to->client.health <= 0 && player.pev->health > 0)
 		{
-			player.Killed(NULL, NULL, DMG_GENERIC);
-			gHUD.m_Ammo.Update_CurWeapon(0, -1, -1);
+			player.Killed(nullptr, nullptr, DMG_GENERIC);
 		}
-		else if (to->client.health > 0 && lasthealth <= 0)
+		else if (to->client.health > 0 && player.pev->health <= 0)
 		{
 			player.Spawn();
 		}
-
-		lasthealth = to->client.health;
-
-		gHUD.m_Health.Update_Health(to->client.health);
-		gHUD.m_Battery.Update_Battery(to->client.vuser4.z);
+		player.pev->health = to->client.health;
 	}
 
 	gEngfuncs.GetViewAngles(player.pev->v_angle);
@@ -471,59 +323,25 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 	}
 
 	player.CmdStart(*cmd, random_seed);
-	
 	player.PreThink();
 
 	player.PostThink();
 
-	if (g_runfuncs)
-	{
-		gHUD.Update_SetFOV(to->client.fov);
-	}
-
-	static bool ammoUpdated[AMMO_LAST];
-	memset(ammoUpdated, 0, sizeof(ammoUpdated));
-
 	for (i = 0; i < ARRAYSIZE(weapons); i++)
 	{
 		auto weapon = weapons[i];
-
-		const auto current =
-			weapon == player.m_pActiveWeapon;
-
-		if (g_runfuncs)
-		{
-			gHUD.m_Ammo.Update_CurWeapon(current ? 1 : 0, weapon->m_iId, weapon->m_iClip);
-
-			auto ammoType = weapon->iAmmo1();
-
-			if (ammoType != AMMO_NONE && !ammoUpdated[ammoType])
-			{
-				gHUD.m_Ammo.Update_AmmoX(ammoType, player.m_rgAmmo[ammoType]);
-				ammoUpdated[ammoType] = true;
-			}
-
-			ammoType = weapon->iAmmo2();
-
-			if (ammoType != AMMO_NONE && !ammoUpdated[ammoType])
-			{
-				gHUD.m_Ammo.Update_AmmoX(ammoType, player.m_rgAmmo[ammoType]);
-				ammoUpdated[ammoType] = true;
-			}
-		}
-
 		weapon->DecrementTimers(cmd->msec);
 		weapon->GetWeaponData(to->weapondata[weapon->m_iId]);
 	}
 
+	player.UpdateHudData();
 	player.DecrementTimers(cmd->msec);
 	player.GetClientData(to->client, true);
 
 	// Store off the last position from the predicted state.
 	HUD_SetLastOrg();
 
-	// Wipe it so we can't use it after this frame
-	g_finalstate = NULL;
+	g_finalstate = *to;
 
 	g_CurrentWeaponId = to->client.m_iId;
 	g_PunchAngle = to->client.punchangle * 2;
@@ -539,4 +357,9 @@ void HUD_PlayerMove(struct playermove_s* ppmove, int server)
 {
 	ppmove->server = 0;
 	player.GetGameMovement()->Move();
+}
+
+bool HUD_FirstTimePredicting()
+{
+	return firstTimePredicting;
 }

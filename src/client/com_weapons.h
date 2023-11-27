@@ -36,9 +36,8 @@ int stub_PrecacheSound(const char* s);
 unsigned short stub_PrecacheEvent(int type, const char* s);
 void stub_SetModel(struct edict_s* e, const char* m);
 Vector HUD_GetLastOrg();
+bool HUD_FirstTimePredicting();
 
 
-extern bool g_runfuncs;
 extern Vector v_angles;
-extern struct local_state_s* g_finalstate;
 extern int g_CurrentWeaponId;

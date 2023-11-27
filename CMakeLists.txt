@@ -150,6 +150,8 @@ set(CLIENT_SRC
     ${CLIENT_SRC_DIR}/entities/hl_baseentity.cpp
     ${CLIENT_SRC_DIR}/entities/hl_objects.cpp
     ${CLIENT_SRC_DIR}/entities/hl_weapons.cpp
+    ${CLIENT_SRC_DIR}/entities/player_client.cpp
+    ${CLIENT_SRC_DIR}/entities/weapons_client.cpp
 
     ${CLIENT_SRC_DIR}/cdll_int.cpp
     ${CLIENT_SRC_DIR}/com_weapons.cpp

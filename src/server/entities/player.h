@@ -281,10 +281,14 @@ public:
 
 	void FireBullets(const float damage, const Vector2D& spread, const unsigned int count = 1, const float distance = 8192);
 
-	void GetClientData(clientdata_t& data, bool sendWeapons);
-	void SetClientData(const clientdata_t& data);
-	void DecrementTimers(const int msec);
-	void CmdStart(const usercmd_t& cmd, unsigned int randomSeed);
+	virtual void GetClientData(clientdata_t& data, bool sendWeapons);
+	virtual void SetClientData(const clientdata_t& data);
+	virtual void DecrementTimers(const int msec);
+	virtual void CmdStart(const usercmd_t& cmd, unsigned int randomSeed);
+
+#ifdef CLIENT_DLL
+	virtual void UpdateHudData();
+#endif
 
 	void SetEntityState(entity_state_t& state) override;
 

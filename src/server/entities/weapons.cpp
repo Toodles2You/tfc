@@ -616,15 +616,6 @@ void CBasePlayerWeapon::PlayEmptySound()
 	}
 }
 
-bool CBasePlayerWeapon::Holster()
-{
-	m_fInReload = false; // cancel any reload in progress.
-	m_fInSpecialReload = 0;
-	m_pPlayer->pev->viewmodel = 0;
-	m_pPlayer->pev->weaponmodel = 0;
-	return true;
-}
-
 bool CBasePlayerAmmo::Spawn()
 {
 	pev->movetype = MOVETYPE_TOSS;

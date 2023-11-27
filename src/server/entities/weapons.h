@@ -147,7 +147,7 @@ public:
 	virtual void DoRetireWeapon();
 	virtual bool ShouldWeaponIdle() { return false; }
 	virtual bool CanHolster() { return true; } // can this weapon be put away right now?
-	virtual bool Holster();
+	virtual bool Holster() {}
 
 	virtual void Drop();
 	virtual void Kill();
