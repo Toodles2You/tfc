@@ -195,6 +195,8 @@ public:
 
 	const BotProfile *GetProfile( void ) const		{ return m_profile; }	///< return our personality profile
 
+	virtual void CmdStart(const usercmd_t& cmd, unsigned int randomSeed) override;
+
 protected:
 	// Do a "client command" - useful for invoking menu choices, etc.
 	void ClientCommand( const char *cmd, const char *arg1 = NULL, const char *arg2 = NULL, const char *arg3 = NULL );
@@ -370,6 +372,12 @@ inline bool CBot::IsPlayerLookingAtMe( CBasePlayer *other ) const
 	}
 
 	return false;
+}
+
+inline void CBot::CmdStart(const usercmd_t& cmd, unsigned int randomSeed)
+{
+	CBasePlayer::CmdStart(cmd, randomSeed);
+	m_randomSeed = g_engfuncs.pfnRandomLong(0, 255);
 }
 
 
