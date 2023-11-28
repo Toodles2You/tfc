@@ -23,6 +23,10 @@ extern Vector v_origin;
 
 bool g_iAlive = true;
 
+extern int g_iObserverMode;
+extern int g_iObserverTarget;
+extern int g_iObserverTarget2;
+
 /*
 ========================
 HUD_AddEntity
@@ -47,7 +51,7 @@ int HUD_AddEntity(int type, struct cl_entity_s* ent, const char* modelname)
 	// each frame every entity passes this function, so the overview hooks
 	// it to filter the overview entities
 
-	if (0 != g_iObserverMode)
+	if (gHUD.IsObserver())
 	{
 		gHUD.m_Spectator.AddOverviewEntity(type, ent, modelname);
 

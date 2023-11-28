@@ -60,13 +60,6 @@ enum
 	GR_TEAMMATE		= 2,
 };
 
-enum
-{
-	TEAM_UNASSIGNED = 0,
-	TEAM_DEFAULT,
-	TEAM_SPECTATORS = 5,
-};
-
 class CSpawnPoint
 {
 public:

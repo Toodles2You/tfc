@@ -113,8 +113,8 @@ CClassMenuPanel::CClassMenuPanel(int iTrans, bool iRemoveMe, int x, int y, int w
 // Update
 void CClassMenuPanel::Update()
 {
-	// Don't allow the player to join a team if they're not in a team
-	if (0 == g_iTeamNumber)
+	// Don't allow the player to join a class if they're not in a team
+	if (g_iTeamNumber == TEAM_UNASSIGNED)
 		return;
 
 	int iYPos = CLASSMENU_TOPLEFT_BUTTON_Y;

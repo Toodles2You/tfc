@@ -43,6 +43,10 @@ extern Vector v_angles;	   // last view angle
 extern Vector v_cl_angles; // last client/mouse angle
 extern Vector v_sim_org;   // last sim origin
 
+int g_iObserverMode = OBS_NONE;
+int g_iObserverTarget = 0;
+int g_iObserverTarget2 = 0;
+
 #if 0 
 const char *GetSpectatorLabel ( int iMode )
 {
@@ -580,7 +584,8 @@ bool CHudSpectator::VidInit()
 	m_lastHudMessage = 0;
 	m_iSpectatorNumber = 0;
 	iJumpSpectator = false;
-	g_iObserverMode = g_iObserverTarget = 0;
+	g_iObserverMode = OBS_NONE;
+	g_iObserverTarget = g_iObserverTarget2 = 0;
 
 	return true;
 }
@@ -603,7 +608,7 @@ bool CHudSpectator::Draw(float flTime)
 	float* color;
 
 	// draw only in spectator mode
-	if (0 == g_iObserverMode)
+	if (!gHUD.IsSpectator())
 		return false;
 
 	// if user pressed zoom, aplly changes
@@ -688,7 +693,7 @@ void CHudSpectator::DirectorMessage(int iSize, void* pbuf)
 	case DRC_CMD_START:
 		// now we have to do some things clientside, since the proxy doesn't know our mod
 		g_iPlayerClass = 0;
-		g_iTeamNumber = 0;
+		g_iTeamNumber = TEAM_UNASSIGNED;
 
 		// fake a InitHUD & ResetHUD message
 		gHUD.MsgFunc_InitHUD(NULL, 0, NULL);
@@ -1021,7 +1026,7 @@ void CHudSpectator::HandleButtonsDown(int ButtonPressed)
 	if (gHUD.m_iIntermission)
 		return;
 
-	if (0 == g_iObserverMode)
+	if (!gHUD.IsSpectator())
 		return; // dont do anything if not in spectator mode
 
 	// don't handle buttons during normal demo playback
@@ -1735,7 +1740,7 @@ void CHudSpectator::DrawOverviewEntities()
 void CHudSpectator::DrawOverview()
 {
 	// draw only in sepctator mode
-	if (0 == g_iObserverMode)
+	if (!gHUD.IsSpectator())
 		return;
 
 	// Only draw the overview if Map Mode is selected for this view
@@ -1887,7 +1892,7 @@ void CHudSpectator::CheckSettings()
 	// in First Person mode since this is our resticted forcecamera mode 2
 	// team number 3 = SPECTATOR see player.h
 
-	if (((g_iTeamNumber == 1) || (g_iTeamNumber == 2)) && (g_iObserverMode == OBS_IN_EYE))
+	if (!gHUD.IsSpectator() && (g_iObserverMode == OBS_IN_EYE))
 		m_pip->value = INSET_OFF;
 
 	// draw small border around inset view, adjust upper black bar
@@ -1952,7 +1957,8 @@ void CHudSpectator::InitHUDData()
 	m_lastHudMessage = 0;
 	m_iSpectatorNumber = 0;
 	iJumpSpectator = false;
-	g_iObserverMode = g_iObserverTarget = 0;
+	g_iObserverMode = OBS_NONE;
+	g_iObserverTarget = g_iObserverTarget2 = 0;
 
 	memset(&m_OverviewData, 0, sizeof(m_OverviewData));
 	memset(&m_OverviewEntities, 0, sizeof(m_OverviewEntities));

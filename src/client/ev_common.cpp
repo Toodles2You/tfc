@@ -25,7 +25,7 @@
 #include "event_api.h"
 #include "pm_shared.h"
 
-#define IS_FIRSTPERSON_SPEC (g_iObserverMode == OBS_IN_EYE || (g_iObserverMode && (gHUD.m_Spectator.m_pip->value == INSET_IN_EYE)))
+#define IS_FIRSTPERSON_SPEC (gHUD.GetObserverMode() == OBS_IN_EYE || (gHUD.IsObserver() && (gHUD.m_Spectator.m_pip->value == INSET_IN_EYE)))
 /*
 =================
 GetEntity
@@ -88,7 +88,7 @@ bool EV_IsLocal(int idx)
 {
 	// check if we are in some way in first person spec mode
 	if (IS_FIRSTPERSON_SPEC)
-		return (g_iObserverTarget == idx);
+		return (gHUD.GetObserverTarget() == idx);
 	else
 		return gEngfuncs.pEventAPI->EV_IsLocal(idx - 1) != 0;
 }

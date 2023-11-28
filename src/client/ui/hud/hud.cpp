@@ -36,6 +36,10 @@ extern engine_studio_api_t IEngineStudio;
 hud_player_info_t g_PlayerInfoList[MAX_PLAYERS_HUD + 1];	// player info from the engine
 extra_player_info_t g_PlayerExtraInfo[MAX_PLAYERS_HUD + 1]; // additional player info sent directly to the client dll
 
+extern int g_iObserverMode;
+extern int g_iObserverTarget;
+extern int g_iObserverTarget2;
+
 class CHLVoiceStatusHelper : public IVoiceStatusHelper
 {
 public:
@@ -747,4 +751,29 @@ float* CHud::GetTeamColor(int teamNumber)
 float* CHud::GetClientColor(int clientIndex)
 {
 	return GetTeamColor(g_PlayerExtraInfo[clientIndex].teamnumber);
+}
+
+int CHud::GetObserverMode()
+{
+	return g_iObserverMode;
+}
+
+int CHud::GetObserverTarget()
+{
+	return g_iObserverTarget;
+}
+
+int CHud::GetObserverTarget2()
+{
+	return g_iObserverTarget2;
+}
+
+bool CHud::IsObserver()
+{
+	return g_iObserverMode != OBS_NONE;
+}
+
+bool CHud::IsSpectator()
+{
+	return g_iTeamNumber == TEAM_SPECTATORS || gEngfuncs.IsSpectateOnly() != 0;
 }

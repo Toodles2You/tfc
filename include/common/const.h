@@ -770,6 +770,13 @@ typedef enum
 	USE_TOGGLE = 3
 } USE_TYPE;
 
+enum
+{
+	TEAM_UNASSIGNED = 0,
+	TEAM_DEFAULT,
+	TEAM_SPECTATORS = 5,
+};
+
 // Spectator Movement modes (stored in pev->iuser1, so the physics code can get at them)
 enum
 {

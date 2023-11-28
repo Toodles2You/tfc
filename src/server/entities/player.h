@@ -68,7 +68,8 @@ public:
 	float m_flNextObserverInput;
 	int m_iObserverWeapon;	 // weapon of current tracked target
 	int m_iObserverLastMode; // last used observer mode
-	bool IsObserver() { return 0 != pev->iuser1; }
+	bool IsObserver() { return pev->iuser1 != OBS_NONE; }
+	bool IsSpectator() { return TeamNumber() == TEAM_SPECTATORS; }
 
 	unsigned int m_randomSeed; // See that is shared between client & server for shared weapons code
 
@@ -143,7 +144,7 @@ public:
 	void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType) override;
 	Vector BodyTarget(const Vector& posSrc) override { return Center() + pev->view_ofs * 0.8; } // position to shoot at
 	bool IsAlive() override { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
-	bool IsPlayer() override { return true; } // Spectators should return false for this, they aren't "players" as far as game logic is concerned
+	bool IsPlayer() override { return !IsSpectator() && !IsObserver(); } // Spectators should return false for this, they aren't "players" as far as game logic is concerned
 
 	bool IsNetClient() override { return true; } // Bots should return false for this, they can't receive NET messages
 												 // Spectators should return true for this

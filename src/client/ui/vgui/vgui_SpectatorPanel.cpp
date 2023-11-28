@@ -26,7 +26,7 @@ void HUD_ChatInputPosition(int* x, int* y)
 {
 	gHUD.GetChatInputPosition(*x, *y);
 
-	if (g_iObserverMode != 0 || 0 != gEngfuncs.IsSpectateOnly())
+	if (gHUD.IsSpectator())
 	{
 		if (gHUD.m_Spectator.m_pip->value == INSET_OFF)
 		{
@@ -377,7 +377,7 @@ void SpectatorPanel::EnableInsetView(bool isEnabled)
 
 	Update();
 
-	m_CamButton->setText(CHudTextMessage::BufferedLocaliseTextString(GetSpectatorLabel(g_iObserverMode)));
+	m_CamButton->setText(CHudTextMessage::BufferedLocaliseTextString(GetSpectatorLabel(gHUD.GetObserverMode())));
 }
 
 

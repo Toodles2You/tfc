@@ -613,7 +613,7 @@ void CAM_EndDistance()
 
 int CL_IsThirdPerson()
 {
-	return static_cast<int>(cam_thirdperson || (0 != g_iObserverMode && (g_iObserverTarget == gEngfuncs.GetLocalPlayer()->index)));
+	return static_cast<int>(cam_thirdperson || (gHUD.IsObserver() && (gHUD.GetObserverTarget() == gEngfuncs.GetLocalPlayer()->index)));
 }
 
 void CL_CameraOffset(float* ofs)

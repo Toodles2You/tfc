@@ -686,12 +686,15 @@ public:
 
 	float* GetTeamColor(int teamNumber);
 	float* GetClientColor(int clientIndex);
+
+	int GetObserverMode();
+	int GetObserverTarget();
+	int GetObserverTarget2();
+	bool IsObserver();
+	bool IsSpectator();
 };
 
 extern CHud gHUD;
 
 extern int g_iPlayerClass;
 extern int g_iTeamNumber;
-extern int g_iObserverMode;
-extern int g_iObserverTarget;
-extern int g_iObserverTarget2;
