@@ -275,6 +275,7 @@ public:
 class CTeam
 {
 public:
+	CTeam();
 	CTeam(std::string name);
 
 	void AddPlayer(CBasePlayer *player);
@@ -401,8 +402,12 @@ protected:
 	bool m_deathmatch = false;
 	bool m_coop = false;
 	bool m_allowMonsters = false;
+	bool m_allowSpectators = false;
 	int m_numTeams;
 	std::vector<CTeam> m_teams;
+	CTeam m_spectators;
+
+	bool AllowSpectators() { return m_allowSpectators; }
 
 	virtual void ChangeLevel();
 	virtual void GoToIntermission();

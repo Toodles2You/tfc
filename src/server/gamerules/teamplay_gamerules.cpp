@@ -54,6 +54,11 @@ CHalfLifeTeamplay::CHalfLifeTeamplay()
 		{
 			m_teams.push_back(CTeam{name});
 			m_numTeams++;
+
+			if (m_numTeams == TEAM_SPECTATORS - 1)
+			{
+				break;
+			}
 		}
 		name = strtok(nullptr, ";");
 	}
@@ -355,7 +360,7 @@ int CHalfLifeTeamplay::IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKill
 int CHalfLifeTeamplay::TeamWithFewestPlayers()
 {
 	int minPlayers = gpGlobals->maxClients + 1;
-	int team = 0;
+	int team = TEAM_UNASSIGNED;
 
 	for (int i = 0; i < m_numTeams; i++)
 	{
@@ -366,9 +371,9 @@ int CHalfLifeTeamplay::TeamWithFewestPlayers()
 		}
 	}
 
-	if (team == 0)
+	if (team == TEAM_UNASSIGNED)
 	{
-		team = g_engfuncs.pfnRandomLong(1, m_numTeams);
+		team = g_engfuncs.pfnRandomLong(TEAM_DEFAULT, m_numTeams);
 	}
 
 	return team;

@@ -52,8 +52,13 @@ public:
 };
 static CMultiplayGameMgrHelper g_GameMgrHelper;
 
+CTeam::CTeam() : m_name{"spectators"}, m_score{0}, m_numPlayers{0}
+{
+	m_players.clear();
+}
+
 CTeam::CTeam(std::string name) : m_name{name}, m_score{0}, m_numPlayers{0}
-{	
+{
 	m_players.clear();
 }
 
@@ -120,9 +125,10 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 {
 	g_VoiceGameMgr.Init(&g_GameMgrHelper, gpGlobals->maxClients);
 
-	m_deathmatch = ((int)gpGlobals->deathmatch != 0);
-	m_coop = ((int)gpGlobals->coop != 0);
-	m_allowMonsters = (allowmonsters.value != 0);
+	m_deathmatch = (int)gpGlobals->deathmatch != 0;
+	m_coop = (int)gpGlobals->coop != 0;
+	m_allowMonsters = (int)allowmonsters.value != 0;
+	m_allowSpectators = (int)allow_spectators.value != 0;
 
 	m_teams.clear();
 	m_teams.push_back(CTeam{"Players"});
@@ -1184,20 +1190,37 @@ int CHalfLifeMultiplay::GetTeamIndex(const char* pTeamName)
 		}
 		i++;
 	}
+
+	if (AllowSpectators() && strcmp(pTeamName, "spectators") == 0)
+	{
+		return TEAM_SPECTATORS;
+	}
+
 	return TEAM_UNASSIGNED;
 }
 
 const char* CHalfLifeMultiplay::GetIndexedTeamName(int teamIndex)
 {
-	if (teamIndex <= TEAM_UNASSIGNED || teamIndex >= m_numTeams)
+	if (AllowSpectators() && teamIndex == TEAM_SPECTATORS)
 	{
-		return nullptr;
+		return "spectators";
 	}
+
+	if (teamIndex <= TEAM_UNASSIGNED || teamIndex > m_numTeams)
+	{
+		return "";
+	}
+
 	return m_teams[teamIndex - 1].m_name.c_str();
 }
 
 bool CHalfLifeMultiplay::IsValidTeam(const char* pTeamName)
 {
+	if (AllowSpectators() && strcmp(pTeamName, "spectators") == 0)
+	{
+		return true;
+	}
+
 	return GetTeamIndex(pTeamName) > TEAM_UNASSIGNED;
 }
 
@@ -1211,12 +1234,14 @@ void CHalfLifeMultiplay::SetDefaultPlayerTeam(CBasePlayer* pPlayer)
 
 void CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib)
 {
-	if (!IsValidTeam(pTeamName))
+	auto teamIndex = GetTeamIndex(pTeamName);
+
+	if (teamIndex == TEAM_UNASSIGNED)
 	{
 		return;
 	}
 	
-	if (bKill)
+	if (bKill && pPlayer->IsPlayer() && pPlayer->IsAlive())
 	{
 		pPlayer->Killed(
 			CWorld::World,
@@ -1224,8 +1249,16 @@ void CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTea
 			bGib ? DMG_ALWAYSGIB : DMG_GENERIC);
 	}
 
-	pPlayer->pev->team = GetTeamIndex(pTeamName);
-	m_teams[pPlayer->pev->team - 1].AddPlayer(pPlayer);
+	pPlayer->pev->team = teamIndex;
+
+	if (teamIndex != TEAM_SPECTATORS)
+	{
+		m_teams[pPlayer->pev->team - 1].AddPlayer(pPlayer);
+	}
+	else
+	{
+		m_spectators.AddPlayer(pPlayer);
+	}
 
 	if (!bKill)
 	{
