@@ -126,9 +126,6 @@ bool CHudFlashlight::Draw(float flTime)
 	int x, y, a;
 	Rect rc;
 
-	if (!gHUD.HasSuit())
-		return true;
-
 	if (m_fOn)
 		a = 225;
 	else

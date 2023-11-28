@@ -25,7 +25,6 @@
 #include "cbase.h"
 #include "saverestore.h"
 #include "player.h"
-#include "skill.h"
 #include "gamerules.h"
 
 class CRecharge : public CBaseToggle
@@ -122,8 +121,8 @@ void CRecharge::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 		Off();
 	}
 
-	// if the player doesn't have the suit, or there is no juice left, make the deny noise
-	if ((m_iJuice <= 0) || !player->HasSuit())
+	// if there is no juice left, make the deny noise
+	if (m_iJuice <= 0)
 	{
 		if (m_flSoundTime <= gpGlobals->time)
 		{

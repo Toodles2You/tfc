@@ -416,8 +416,6 @@ void CBasePlayerWeapon::AttachToPlayer(CBasePlayer* pPlayer)
 	pev->solid = SOLID_NOT;
 	pev->aiment = pPlayer->edict();
 	pev->effects = EF_NODRAW; // ??
-	pev->modelindex = 0;	  // server won't send down to clients if modelindex == 0
-	pev->model = iStringNull;
 	pev->owner = pPlayer->edict();
 	pev->nextthink = gpGlobals->time + .1;
 	SetTouch(NULL);
@@ -934,8 +932,6 @@ bool CWeaponBox::PackWeapon(CBasePlayerWeapon* pWeapon)
 	pWeapon->pev->movetype = MOVETYPE_NONE;
 	pWeapon->pev->solid = SOLID_NOT;
 	pWeapon->pev->effects = EF_NODRAW;
-	pWeapon->pev->modelindex = 0;
-	pWeapon->pev->model = iStringNull;
 	pWeapon->pev->owner = edict();
 	pWeapon->SetThink(NULL); // crowbar may be trying to swing again, etc.
 	pWeapon->SetTouch(NULL);

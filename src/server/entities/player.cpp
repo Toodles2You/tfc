@@ -62,15 +62,7 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 		DEFINE_FIELD(CBasePlayer, m_afButtonPressed, FIELD_INTEGER),
 		DEFINE_FIELD(CBasePlayer, m_afButtonReleased, FIELD_INTEGER),
 
-		DEFINE_ARRAY(CBasePlayer, m_rgItems, FIELD_INTEGER, MAX_ITEMS),
 		DEFINE_FIELD(CBasePlayer, m_afPhysicsFlags, FIELD_INTEGER),
-
-		DEFINE_FIELD(CBasePlayer, m_flSuitUpdate, FIELD_TIME),
-		DEFINE_ARRAY(CBasePlayer, m_rgSuitPlayList, FIELD_INTEGER, CSUITPLAYLIST),
-		DEFINE_FIELD(CBasePlayer, m_iSuitPlayNext, FIELD_INTEGER),
-		DEFINE_ARRAY(CBasePlayer, m_rgiSuitNoRepeat, FIELD_INTEGER, CSUITNOREPEAT),
-		DEFINE_ARRAY(CBasePlayer, m_rgflSuitNoRepeatTime, FIELD_TIME, CSUITNOREPEAT),
-		DEFINE_FIELD(CBasePlayer, m_lastDamageAmount, FIELD_INTEGER),
 
 		DEFINE_ARRAY(CBasePlayer, m_rgpPlayerWeapons, FIELD_CLASSPTR, WEAPON_LAST),
 		DEFINE_FIELD(CBasePlayer, m_pActiveWeapon, FIELD_CLASSPTR),
@@ -83,12 +75,10 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 		DEFINE_FIELD(CBasePlayer, m_iTrain, FIELD_INTEGER),
 		DEFINE_FIELD(CBasePlayer, m_bitsHUDDamage, FIELD_INTEGER),
 		DEFINE_FIELD(CBasePlayer, m_flFallVelocity, FIELD_FLOAT),
-		DEFINE_FIELD(CBasePlayer, m_fLongJump, FIELD_BOOLEAN),
 		DEFINE_FIELD(CBasePlayer, m_fInitHUD, FIELD_BOOLEAN),
 		DEFINE_FIELD(CBasePlayer, m_tbdPrev, FIELD_TIME),
 
 		DEFINE_FIELD(CBasePlayer, m_pTank, FIELD_EHANDLE),
-		DEFINE_FIELD(CBasePlayer, m_hViewEntity, FIELD_EHANDLE),
 		DEFINE_FIELD(CBasePlayer, m_iHideHUD, FIELD_INTEGER),
 		DEFINE_FIELD(CBasePlayer, m_iFOV, FIELD_INTEGER),
 
@@ -154,12 +144,6 @@ void CBasePlayer::DeathSound()
 	case 1: EmitSound("player/pl_pain5.wav", CHAN_VOICE); break;
 	case 2: EmitSound("player/pl_pain6.wav", CHAN_VOICE); break;
 	case 3: EmitSound("player/pl_pain7.wav", CHAN_VOICE); break;
-	}
-
-	// play one of the suit death alarms
-	if (!util::IsDeathmatch())
-	{
-		EmitSuitSound("HEV_DEAD");
 	}
 }
 
@@ -256,7 +240,6 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		return false;
 	}
 
-	m_lastDamageAmount = flDamage;
 	m_bitsDamageType |= bitsDamageType;
 	m_bitsHUDDamage = -1;
 
@@ -372,7 +355,7 @@ void CBasePlayer::PackDeadPlayerWeapons()
 	if (iWeaponRules == GR_PLR_DROP_GUN_NO && iAmmoRules == GR_PLR_DROP_AMMO_NO)
 	{
 		// nothing to pack. Remove the weapons and return. Don't call create on the box!
-		RemoveAllWeapons(true);
+		RemoveAllWeapons();
 		return;
 	}
 
@@ -435,6 +418,11 @@ void CBasePlayer::PackDeadPlayerWeapons()
 	// create a box to pack the stuff into.
 	CWeaponBox* pWeaponBox = (CWeaponBox*)CBaseEntity::Create("weaponbox", pev->origin, pev->angles, edict());
 
+	if (iWeaponRules == GR_PLR_DROP_GUN_ACTIVE && m_pActiveWeapon != nullptr)
+	{
+		pWeaponBox->SetModel(STRING(m_pActiveWeapon->pev->model));
+	}
+
 	pWeaponBox->pev->angles.x = 0; // don't let weaponbox tilt.
 	pWeaponBox->pev->angles.z = 0;
 
@@ -463,10 +451,10 @@ void CBasePlayer::PackDeadPlayerWeapons()
 
 	pWeaponBox->pev->velocity = pev->velocity * 1.2; // weaponbox has player's velocity, then some.
 
-	RemoveAllWeapons(true); // now strip off everything that wasn't handled by the code above.
+	RemoveAllWeapons(); // now strip off everything that wasn't handled by the code above.
 }
 
-void CBasePlayer::RemoveAllWeapons(bool removeSuit)
+void CBasePlayer::RemoveAllWeapons()
 {
 	if (m_pActiveWeapon)
 	{
@@ -492,9 +480,6 @@ void CBasePlayer::RemoveAllWeapons(bool removeSuit)
 	pev->weaponmodel = 0;
 
 	m_WeaponBits = 0ULL;
-
-	//Re-add suit bit if needed.
-	SetHasSuit(!removeSuit);
 
 	for (int i = 0; i < AMMO_LAST; i++)
 	{
@@ -527,8 +512,6 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 	m_fNextSuicideTime = gpGlobals->time + 1.0f;
 
 	pev->deadflag = DEAD_DYING;
-
-	SetSuitUpdate(NULL, false, 0);
 
 	m_iFOV = 0;
 
@@ -572,12 +555,6 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 	char szAnim[64];
 
 	speed = pev->velocity.Length2D();
-
-	if ((pev->flags & FL_FROZEN) != 0)
-	{
-		speed = 0;
-		playerAnim = PLAYER_IDLE;
-	}
 
 	switch (playerAnim)
 	{
@@ -1157,9 +1134,6 @@ void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle)
 		m_pTank = NULL;
 	}
 
-	// clear out the suit message cache so we don't keep chattering
-	SetSuitUpdate(NULL, false, 0);
-
 	// reset FOV
 	m_iFOV = 0;
 
@@ -1187,7 +1161,7 @@ void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle)
 	MessageEnd();
 
 	// Remove all the player's stuff
-	RemoveAllWeapons(false);
+	RemoveAllWeapons();
 
 	// Move them to the new position
 	SetOrigin(vecPosition);
@@ -1379,24 +1353,10 @@ void CBasePlayer::PreThink()
 
 	WaterMove();
 
-	if (m_bResetViewEntity)
-	{
-		m_bResetViewEntity = false;
-
-		CBaseEntity* viewEntity = m_hViewEntity;
-
-		if (viewEntity)
-		{
-			SET_VIEW(edict(), viewEntity->edict());
-		}
-	}
-
 	// JOHN: checks if new client data (for HUD and view control) needs to be sent to the client
 	UpdateClientData();
 
 	CheckTimeBasedDamage();
-
-	CheckSuitUpdate();
 
 	// Observer Button Handling
 	if (IsObserver())
@@ -1546,19 +1506,6 @@ void CBasePlayer::CheckTimeBasedDamage()
 
 			if (0 != m_rgbTimeBasedDamage[i])
 			{
-				// use up an antitoxin on poison or nervegas after a few seconds of damage
-				if (((i == itbd_NerveGas) && (m_rgbTimeBasedDamage[i] < NERVEGAS_DURATION)) ||
-					((i == itbd_Poison) && (m_rgbTimeBasedDamage[i] < POISON_DURATION)))
-				{
-					if (0 != m_rgItems[ITEM_ANTIDOTE])
-					{
-						m_rgbTimeBasedDamage[i] = 0;
-						m_rgItems[ITEM_ANTIDOTE]--;
-						SetSuitUpdate("!HEV_HEAL4", false, SUIT_REPEAT_OK);
-					}
-				}
-
-
 				// decrement damage duration, detect when done.
 				if (0 == m_rgbTimeBasedDamage[i] || --m_rgbTimeBasedDamage[i] == 0)
 				{
@@ -1570,195 +1517,6 @@ void CBasePlayer::CheckTimeBasedDamage()
 			else
 				// first time taking this damage type - init damage duration
 				m_rgbTimeBasedDamage[i] = bDuration;
-		}
-	}
-}
-
-/*
-================
-CheckSuitUpdate
-
-Play suit update if it's time
-================
-*/
-
-#define SUITUPDATETIME 3.5
-#define SUITFIRSTUPDATETIME 0.1
-
-void CBasePlayer::CheckSuitUpdate()
-{
-	int i;
-	int isentence = 0;
-	int isearch = m_iSuitPlayNext;
-
-	// Ignore suit updates if no suit
-	if (!HasSuit())
-		return;
-
-	if (util::IsDeathmatch())
-	{
-		// don't bother updating HEV voice in multiplayer.
-		return;
-	}
-
-	if (gpGlobals->time >= m_flSuitUpdate && m_flSuitUpdate > 0)
-	{
-		// play a sentence off of the end of the queue
-		for (i = 0; i < CSUITPLAYLIST; i++)
-		{
-			isentence = m_rgSuitPlayList[isearch];
-			if (0 != isentence)
-				break;
-
-			if (++isearch == CSUITPLAYLIST)
-				isearch = 0;
-		}
-
-		if (0 != isentence)
-		{
-			m_rgSuitPlayList[isearch] = 0;
-			if (isentence > 0)
-			{
-				// play sentence number
-
-				char sentence[CBSENTENCENAME_MAX + 1];
-				strcpy(sentence, "!");
-				strcat(sentence, gszallsentencenames[isentence]);
-				EmitSuitSound(sentence);
-			}
-			else
-			{
-				// play sentence group
-				EmitSuitSound(-isentence);
-			}
-			m_flSuitUpdate = gpGlobals->time + SUITUPDATETIME;
-		}
-		else
-			// queue is empty, don't check
-			m_flSuitUpdate = 0;
-	}
-}
-
-// add sentence to suit playlist queue. if fgroup is true, then
-// name is a sentence group (HEV_AA), otherwise name is a specific
-// sentence name ie: !HEV_AA0.  If iNoRepeat is specified in
-// seconds, then we won't repeat playback of this word or sentence
-// for at least that number of seconds.
-
-void CBasePlayer::SetSuitUpdate(const char* name, bool fgroup, int iNoRepeatTime)
-{
-	int i;
-	int isentence;
-	int iempty = -1;
-
-
-	// Ignore suit updates if no suit
-	if (!HasSuit())
-		return;
-
-	if (util::IsDeathmatch())
-	{
-		// due to static channel design, etc. We don't play HEV sounds in multiplayer right now.
-		return;
-	}
-
-	// if name == NULL, then clear out the queue
-
-	if (!name)
-	{
-		for (i = 0; i < CSUITPLAYLIST; i++)
-			m_rgSuitPlayList[i] = 0;
-		return;
-	}
-	// get sentence or group number
-	if (!fgroup)
-	{
-		isentence = SENTENCEG_Lookup(name, NULL);
-		if (isentence < 0)
-			return;
-	}
-	else
-		// mark group number as negative
-		isentence = -SENTENCEG_GetIndex(name);
-
-	// check norepeat list - this list lets us cancel
-	// the playback of words or sentences that have already
-	// been played within a certain time.
-
-	for (i = 0; i < CSUITNOREPEAT; i++)
-	{
-		if (isentence == m_rgiSuitNoRepeat[i])
-		{
-			// this sentence or group is already in
-			// the norepeat list
-
-			if (m_rgflSuitNoRepeatTime[i] < gpGlobals->time)
-			{
-				// norepeat time has expired, clear it out
-				m_rgiSuitNoRepeat[i] = 0;
-				m_rgflSuitNoRepeatTime[i] = 0.0;
-				iempty = i;
-				break;
-			}
-			else
-			{
-				// don't play, still marked as norepeat
-				return;
-			}
-		}
-		// keep track of empty slot
-		if (0 == m_rgiSuitNoRepeat[i])
-			iempty = i;
-	}
-
-	// sentence is not in norepeat list, save if norepeat time was given
-
-	if (0 != iNoRepeatTime)
-	{
-		if (iempty < 0)
-			iempty = RANDOM_LONG(0, CSUITNOREPEAT - 1); // pick random slot to take over
-		m_rgiSuitNoRepeat[iempty] = isentence;
-		m_rgflSuitNoRepeatTime[iempty] = iNoRepeatTime + gpGlobals->time;
-	}
-
-	// find empty spot in queue, or overwrite last spot
-
-	m_rgSuitPlayList[m_iSuitPlayNext++] = isentence;
-	if (m_iSuitPlayNext == CSUITPLAYLIST)
-		m_iSuitPlayNext = 0;
-
-	if (m_flSuitUpdate <= gpGlobals->time)
-	{
-		if (m_flSuitUpdate == 0)
-			// play queue is empty, don't delay too long before playback
-			m_flSuitUpdate = gpGlobals->time + SUITFIRSTUPDATETIME;
-		else
-			m_flSuitUpdate = gpGlobals->time + SUITUPDATETIME;
-	}
-}
-
-void CBasePlayer::CheckAmmoLevel(CBasePlayerWeapon* pWeapon, bool bPrimary)
-{
-	if (util::IsDeathmatch())
-	{
-		return;
-	}
-	
-	if (bPrimary)
-	{
-		if (pWeapon->iAmmo1() > WEAPON_NONE
-		 && static_cast<CBasePlayerWeapon*>(pWeapon)->m_iClip == 0
-		 && m_rgAmmo[pWeapon->iAmmo1()] <= 0)
-		{
-			SetSuitUpdate("!HEV_AMO0", false, 0);
-		}
-	}
-	else
-	{
-		if (pWeapon->iAmmo2() > WEAPON_NONE
-		 && m_rgAmmo[pWeapon->iAmmo2()] == 0)
-		{
-			SetSuitUpdate("!HEV_AMO0", false, 0);
 		}
 	}
 }
@@ -1794,9 +1552,7 @@ bool CBasePlayer::Spawn()
 	m_bitsHUDDamage = -1;
 	m_bitsDamageType = 0;
 	m_afPhysicsFlags = 0;
-	m_fLongJump = false; // no longjump module.
 
-	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "slj", "0");
 	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "hl", "1");
 	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "bj", util::dtos1(sv_allowbunnyhopping.value != 0 ? 1 : 0));
 
@@ -1915,18 +1671,7 @@ bool CBasePlayer::Restore(CRestore& restore)
 
 	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "hl", "1");
 
-	if (m_fLongJump)
-	{
-		g_engfuncs.pfnSetPhysicsKeyValue(edict(), "slj", "1");
-	}
-	else
-	{
-		g_engfuncs.pfnSetPhysicsKeyValue(edict(), "slj", "0");
-	}
-
 	m_iNextAttack = 0;
-
-	m_bResetViewEntity = true;
 
 	m_bRestored = true;
 
@@ -1966,7 +1711,7 @@ void CBasePlayer::SelectWeapon(const char* pstr)
 //==============================================
 bool CBasePlayer::HasWeapons()
 {
-	return (m_WeaponBits & ~(1ULL << WEAPON_SUIT)) != 0;
+	return m_WeaponBits != 0;
 }
 
 
@@ -2196,7 +1941,6 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 	{
 	case 101:
 		gEvilImpulse101 = true;
-		SetHasSuit(true);
 		GiveNamedItem("weapon_crowbar");
 		GiveNamedItem("weapon_9mmAR");
 		GiveAmmo(250, AMMO_9MM, 250);
@@ -2711,6 +2455,7 @@ void CBasePlayer::DropPlayerWeapon(char* pszWeaponName)
 	util::MakeVectors(pev->angles);
 
 	CWeaponBox* pWeaponBox = (CWeaponBox*)CBaseEntity::Create("weaponbox", pev->origin + gpGlobals->v_forward * 10, pev->angles, edict());
+	pWeaponBox->SetModel(STRING(pWeapon->pev->model));
 	pWeaponBox->pev->angles.x = 0;
 	pWeaponBox->pev->angles.z = 0;
 	pWeaponBox->PackWeapon(pWeapon);
@@ -2879,7 +2624,7 @@ void CStripWeapons::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	}
 
 	if (pPlayer)
-		pPlayer->RemoveAllWeapons(false);
+		pPlayer->RemoveAllWeapons();
 }
 
 

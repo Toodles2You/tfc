@@ -25,7 +25,6 @@
 #include "cbase.h"
 #include "weapons.h"
 #include "player.h"
-#include "skill.h"
 #include "items.h"
 #include "gamerules.h"
 #include "UserMessages.h"
@@ -183,16 +182,6 @@ class CItemSuit : public CItem
 	}
 	bool MyTouch(CBasePlayer* pPlayer) override
 	{
-		if (pPlayer->HasSuit())
-			return false;
-
-		pPlayer->SetHasSuit(true);
-
-		if ((pev->spawnflags & SF_SUIT_SHORTLOGON) != 0)
-			pPlayer->SetSuitUpdate("!HEV_A0", false, SUIT_REPEAT_OK); // short version of suit logon,
-		else
-			pPlayer->SetSuitUpdate("!HEV_AAx", false, SUIT_REPEAT_OK); // long version of suit logon
-
 		return true;
 	}
 };
@@ -221,8 +210,7 @@ class CItemBattery : public CItem
 			return false;
 		}
 
-		if ((pPlayer->pev->armorvalue < MAX_NORMAL_BATTERY) &&
-			pPlayer->HasSuit())
+		if (pPlayer->pev->armorvalue < MAX_NORMAL_BATTERY)
 		{
 			int pct;
 			char szcharge[64];
@@ -235,18 +223,6 @@ class CItemBattery : public CItem
 			MessageBegin(MSG_ONE, gmsgItemPickup, pPlayer);
 			WriteString(STRING(pev->classname));
 			MessageEnd();
-
-
-			// Suit reports new power level
-			// For some reason this wasn't working in release build -- round it.
-			pct = (int)((float)(pPlayer->pev->armorvalue * 100.0) * (1.0 / MAX_NORMAL_BATTERY) + 0.5);
-			pct = (pct / 5);
-			if (pct > 0)
-				pct--;
-
-			sprintf(szcharge, "!HEV_%1dP", pct);
-
-			pPlayer->SetSuitUpdate(szcharge, false, SUIT_NEXT_IN_30SEC);
 			return true;
 		}
 		return false;
@@ -270,9 +246,6 @@ class CItemAntidote : public CItem
 	}
 	bool MyTouch(CBasePlayer* pPlayer) override
 	{
-		pPlayer->SetSuitUpdate("!HEV_DET4", false, SUIT_NEXT_IN_1MIN);
-
-		pPlayer->m_rgItems[ITEM_ANTIDOTE] += 1;
 		return true;
 	}
 };
@@ -294,7 +267,6 @@ class CItemSecurity : public CItem
 	}
 	bool MyTouch(CBasePlayer* pPlayer) override
 	{
-		pPlayer->m_rgItems[ITEM_SECURITY] += 1;
 		return true;
 	}
 };
@@ -315,25 +287,10 @@ class CItemLongJump : public CItem
 	}
 	bool MyTouch(CBasePlayer* pPlayer) override
 	{
-		if (pPlayer->m_fLongJump)
-		{
-			return false;
-		}
-
-		if (pPlayer->HasSuit())
-		{
-			pPlayer->m_fLongJump = true; // player now has longjump module
-
-			g_engfuncs.pfnSetPhysicsKeyValue(pPlayer->edict(), "slj", "1");
-
-			MessageBegin(MSG_ONE, gmsgItemPickup, pPlayer);
-			WriteString(STRING(pev->classname));
-			MessageEnd();
-
-			pPlayer->SetSuitUpdate("!HEV_A1", false, SUIT_REPEAT_OK);
-			return true;
-		}
-		return false;
+		MessageBegin(MSG_ONE, gmsgItemPickup, pPlayer);
+		WriteString(STRING(pev->classname));
+		MessageEnd();
+		return true;
 	}
 };
 

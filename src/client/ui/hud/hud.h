@@ -584,14 +584,9 @@ public:
 		return (m_iWeaponBits & (1ULL << id)) != 0;
 	}
 
-	bool HasSuit() const
-	{
-		return HasWeapon(WEAPON_SUIT);
-	}
-
 	bool HasAnyWeapons() const
 	{
-		return (m_iWeaponBits & ~(1ULL << WEAPON_SUIT)) != 0;
+		return m_iWeaponBits != 0;
 	}
 
 	inline unsigned int GetWidth() const

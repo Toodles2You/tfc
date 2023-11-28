@@ -202,34 +202,30 @@ bool CHudHealth::Draw(float flTime)
 	
 	auto color = (m_iHealth <= 25) ? CHud::COLOR_WARNING : CHud::COLOR_PRIMARY;
 
-	// Only draw health if we have the suit.
-	if (gHUD.HasSuit())
-	{
-		HealthWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
-		int CrossWidth = gHUD.GetSpriteRect(m_HUD_cross).right - gHUD.GetSpriteRect(m_HUD_cross).left;
+	HealthWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
+	int CrossWidth = gHUD.GetSpriteRect(m_HUD_cross).right - gHUD.GetSpriteRect(m_HUD_cross).left;
 
-		y = gHUD.GetHeight() - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
-		x = CrossWidth / 2;
+	y = gHUD.GetHeight() - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
+	x = CrossWidth / 2;
 
-		gHUD.DrawHudSpriteIndex(m_HUD_cross, x, y, color, a);
+	gHUD.DrawHudSpriteIndex(m_HUD_cross, x, y, color, a);
 
-		x = CrossWidth + HealthWidth / 2;
+	x = CrossWidth + HealthWidth / 2;
 
-		//Reserve space for 3 digits by default, but allow it to expand
-		x += gHUD.GetHudNumberWidth(m_iHealth, 3, DHN_DRAWZERO);
+	//Reserve space for 3 digits by default, but allow it to expand
+	x += gHUD.GetHudNumberWidth(m_iHealth, 3, DHN_DRAWZERO);
 
-		gHUD.DrawHudNumberReverse(x, y, m_iHealth, DHN_DRAWZERO, color, a);
+	gHUD.DrawHudNumberReverse(x, y, m_iHealth, DHN_DRAWZERO, color, a);
 
-		x += HealthWidth / 2;
+	x += HealthWidth / 2;
 
-		int iHeight = gHUD.m_iFontHeight;
-		int iWidth = HealthWidth / 10;
+	int iHeight = gHUD.m_iFontHeight;
+	int iWidth = HealthWidth / 10;
 
-		gHUD.DrawHudFill(x, y, iWidth, iHeight, CHud::COLOR_PRIMARY, MIN_ALPHA);
+	gHUD.DrawHudFill(x, y, iWidth, iHeight, CHud::COLOR_PRIMARY, MIN_ALPHA);
 
-		gHUD.m_Battery.m_iAnchorX = x + HealthWidth / 2;
-		gHUD.m_Battery.m_iAnchorY = gHUD.GetHeight();
-	}
+	gHUD.m_Battery.m_iAnchorX = x + HealthWidth / 2;
+	gHUD.m_Battery.m_iAnchorY = gHUD.GetHeight();
 
 	DrawDamage(flTime);
 	return DrawPain(flTime);

@@ -163,7 +163,6 @@ public:
 	virtual bool OnControls(entvars_t* pev) { return false; }
 	virtual bool IsAlive() { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
 	virtual bool IsBSPModel() { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }
-	virtual bool ReflectGauss() { return (IsBSPModel() && !pev->takedamage); }
 	virtual bool HasTarget(string_t targetname) { return FStrEq(STRING(targetname), STRING(pev->target)); }
 	virtual bool IsInWorld();
 	virtual bool IsPlayer() { return false; }
@@ -258,9 +257,6 @@ public:
 	virtual CBaseEntity* BestVisibleEnemy();		// finds best visible enemy for attack
 
 	int m_iNextAttack;
-
-	//Special stuff for grenades and satchels.
-	int m_fInAttack;
 
 	float m_flFieldOfView;
 
@@ -503,8 +499,6 @@ enum {
 };
 
 class CSound;
-
-#include "skill.h"
 
 const char* ButtonSound(int sound); // get string of button sound number
 

@@ -41,7 +41,6 @@ enum WeaponId
 	WEAPON_CROWBAR,
 	WEAPON_MP5,
 
-	WEAPON_SUIT = 63,
 	WEAPON_LAST = 64
 };
 
@@ -62,8 +61,6 @@ enum
 	WEAPON_FLAG_LIMITINWORLD		= 8,
 	WEAPON_FLAG_EXHAUSTIBLE			= 16, // A player can totally exhaust their ammo supply and lose this weapon
 };
-
-// used by suit voice to indicate damage sustained and repaired type to player
 
 // instant damage
 

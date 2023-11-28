@@ -22,7 +22,6 @@
 #include "weapons.h"
 #include "gamerules.h"
 
-#include "skill.h"
 #include "game.h"
 #include "items.h"
 #include "voice_gamemgr.h"
@@ -514,7 +513,7 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 					GETPLAYERUSERID(pPlayer->edict()));
 			}
 
-			pPlayer->RemoveAllWeapons(true); // destroy all of the players weapons and items
+			pPlayer->RemoveAllWeapons(); // destroy all of the players weapons and items
 		}
 	}
 }
@@ -584,8 +583,6 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 	//Ensure the player switches to the Glock on spawn regardless of setting
 	const int originalAutoWepSwitch = pPlayer->m_iAutoWepSwitch;
 	pPlayer->m_iAutoWepSwitch = 1;
-
-	pPlayer->SetHasSuit(true);
 
 	addDefault = true;
 

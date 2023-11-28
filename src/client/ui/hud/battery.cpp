@@ -88,9 +88,6 @@ bool CHudBattery::Draw(float flTime)
 
 	rc.top += m_iHeight * ((float)(100 - (std::min(100, m_iBat))) * 0.01); // battery can go from 0 to 100 so * 0.01 goes from 0 to 1
 
-	if (!gHUD.HasSuit())
-		return true;
-
 	// Has health changed? Flash the health #
 	if (0 != m_fFade)
 	{

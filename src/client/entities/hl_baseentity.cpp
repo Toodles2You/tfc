@@ -27,7 +27,6 @@ This file contains "stubs" of class member implementations so that we can predic
 #include "player.h"
 #include "weapons.h"
 #include "nodes.h"
-#include "skill.h"
 
 // CBaseEntity Stubs
 bool CBaseEntity::TakeHealth(float flHealth, int bitsDamageType) { return true; }
@@ -117,7 +116,7 @@ bool CBasePlayer::TakeHealth(float flHealth, int bitsDamageType) { return false;
 void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) {}
 bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) { return false; }
 void CBasePlayer::PackDeadPlayerWeapons() {}
-void CBasePlayer::RemoveAllWeapons(bool removeSuit) {}
+void CBasePlayer::RemoveAllWeapons() {}
 void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim) {}
 void CBasePlayer::WaterMove() {}
 void CBasePlayer::PlayerDeathFrame() {}
@@ -125,9 +124,6 @@ void CBasePlayer::StartDeathCam() {}
 void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle) {}
 void CBasePlayer::PlayerUse() {}
 void CBasePlayer::CheckTimeBasedDamage() {}
-void CBasePlayer::CheckSuitUpdate() {}
-void CBasePlayer::SetSuitUpdate(const char* name, bool fgroup, int iNoRepeatTime) {}
-void CBasePlayer::CheckAmmoLevel(CBasePlayerWeapon* pWeapon, bool bPrimary) {}
 void CBasePlayer::Precache() {}
 bool CBasePlayer::Save(CSave& save) { return false; }
 bool CBasePlayer::Restore(CRestore& restore) { return false; }

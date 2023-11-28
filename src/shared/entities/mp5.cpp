@@ -119,8 +119,6 @@ void CMP5::PrimaryAttack()
 #endif
 
 	m_pPlayer->PlaybackEvent(m_usMP5, 0.0F, 0.0F, m_pPlayer->m_randomSeed, shots);
-
-	m_pPlayer->CheckAmmoLevel(this);
 }
 
 
@@ -149,8 +147,6 @@ void CMP5::SecondaryAttack()
 	m_pPlayer->PlaybackEvent(m_usMP52);
 
 	m_iNextPrimaryAttack = m_iNextSecondaryAttack = 1000;
-
-	m_pPlayer->CheckAmmoLevel(this, false);
 }
 
 

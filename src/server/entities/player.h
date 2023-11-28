@@ -41,18 +41,6 @@
 #define PFLAG_USING (1 << 4)	// Using a continuous entity
 #define PFLAG_OBSERVER (1 << 5) // player is locked in stationary cam mode. Spectators can move, observers can't.
 
-#define CSUITPLAYLIST 4 // max of 4 suit sentences queued up at any time
-
-#define SUIT_REPEAT_OK 0
-#define SUIT_NEXT_IN_30SEC 30
-#define SUIT_NEXT_IN_1MIN 60
-#define SUIT_NEXT_IN_5MIN 300
-#define SUIT_NEXT_IN_10MIN 600
-#define SUIT_NEXT_IN_30MIN 1800
-#define SUIT_NEXT_IN_1HOUR 3600
-
-#define CSUITNOREPEAT 32
-
 typedef enum
 {
 	PLAYER_IDLE,
@@ -95,9 +83,7 @@ public:
 
 	float m_flFallVelocity;
 
-	int m_rgItems[MAX_ITEMS];
 	bool m_fKnownItem; // True when a new weapon needs to be added
-	int m_fNewAmmo;	   // True when a new item has been added
 
 	unsigned int m_afPhysicsFlags; // physics flags - set when 'normal' physics should be revisited or overriden
 	float m_fNextSuicideTime;	   // the time after which the player can next use the suicide command
@@ -105,12 +91,6 @@ public:
 
 	// these are time-sensitive things that we keep track of
 
-	float m_flSuitUpdate;						 // when to play next suit update
-	int m_rgSuitPlayList[CSUITPLAYLIST];		 // next sentencenum to play for suit update
-	int m_iSuitPlayNext;						 // next sentence slot for queue storage;
-	int m_rgiSuitNoRepeat[CSUITNOREPEAT];		 // suit sentence no repeat list
-	float m_rgflSuitNoRepeatTime[CSUITNOREPEAT]; // how long to wait before allowing repeat
-	int m_lastDamageAmount;						 // Last damage taken
 	float m_tbdPrev;							 // Time-based damage timer
 
 	int m_idrowndmg;	  // track drowning damage taken
@@ -123,11 +103,7 @@ public:
 	int m_iTrain;	// Train control position
 
 	EHANDLE m_pTank;		 // the tank which the player is currently controlling,  NULL if no tank
-	EHANDLE m_hViewEntity;	 // The view entity being used, or null if the player is using itself as the view entity
-	bool m_bResetViewEntity; //True if the player's view needs to be set back to the view entity
 	float m_fDeadTime;		 // the time at which the player died  (used in PlayerDeathFrame())
-
-	bool m_fLongJump;	   // does this player have the longjump module?
 
 	int m_iHideHUD;		  // the players hud weapon info is to be hidden
 	int m_iClientHideHUD;
@@ -177,7 +153,7 @@ public:
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
 	void PackDeadPlayerWeapons();
-	void RemoveAllWeapons(bool removeSuit);
+	void RemoveAllWeapons();
 	bool SwitchWeapon(CBasePlayerWeapon* pWeapon);
 
 	/**
@@ -187,9 +163,6 @@ public:
 
 	void SetWeaponBit(int id);
 	void ClearWeaponBit(int id);
-
-	bool HasSuit() const;
-	void SetHasSuit(bool hasSuit);
 
 	// JOHN:  sends custom messages if player HUD data has changed  (eg health, ammo)
 	virtual void UpdateClientData();
@@ -246,10 +219,7 @@ public:
 	void PlayerDeathFrame();
 	void PlayerUse();
 
-	void CheckSuitUpdate();
-	void SetSuitUpdate(const char* name, bool fgroup, int iNoRepeat);
 	void CheckTimeBasedDamage();
-	void CheckAmmoLevel(CBasePlayerWeapon* pWeapon, bool bPrimary = true);
 
 	int AmmoInventory(int iAmmoIndex);
 
@@ -304,11 +274,6 @@ public:
 	CGameMovement* GetGameMovement() { return m_gameMovement; }
 
 protected:
-	/** @brief Just a stub for now */
-	void EmitSuitSound(const char* sample) {}
-	/** @brief Just a stub for now */
-	void EmitSuitSound(int group) {}
-
 	CGameMovement* m_gameMovement = nullptr;
 };
 
@@ -320,23 +285,6 @@ inline void CBasePlayer::SetWeaponBit(int id)
 inline void CBasePlayer::ClearWeaponBit(int id)
 {
 	m_WeaponBits &= ~(1ULL << id);
-}
-
-inline bool CBasePlayer::HasSuit() const
-{
-	return (m_WeaponBits & (1ULL << WEAPON_SUIT)) != 0;
-}
-
-inline void CBasePlayer::SetHasSuit(bool hasSuit)
-{
-	if (hasSuit)
-	{
-		SetWeaponBit(WEAPON_SUIT);
-	}
-	else
-	{
-		ClearWeaponBit(WEAPON_SUIT);
-	}
 }
 
 inline bool gInitHUD = true;
