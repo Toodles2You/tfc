@@ -169,7 +169,8 @@ public:
 	virtual bool IsBot() { return false; }
 	virtual bool IsNetClient() { return false; }
 	virtual const char* TeamID() { return ""; }
-	virtual int TeamNumber() { return 0; }
+	virtual int PCNumber() { return pev->playerclass; }
+	virtual int TeamNumber() { return pev->team; }
 
 	virtual CBaseEntity* GetNextTarget();
 

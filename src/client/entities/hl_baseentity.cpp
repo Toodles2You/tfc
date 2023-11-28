@@ -144,7 +144,6 @@ void CBasePlayer::DropPlayerWeapon(char* pszWeaponName) {}
 bool CBasePlayer::HasPlayerWeapon(CBasePlayerWeapon* pCheckWeapon) { return false; }
 bool CBasePlayer::SwitchWeapon(CBasePlayerWeapon* pWeapon) { return false; }
 const char* CBasePlayer::TeamID() { return ""; }
-int CBasePlayer::TeamNumber() { return 0; }
 int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax) { return 0; }
 void CBasePlayer::AddPoints(int score, bool bAllowNegativeScore) {}
 void CBasePlayer::AddPointsToTeam(int score, bool bAllowNegativeScore) {}

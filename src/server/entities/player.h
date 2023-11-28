@@ -151,7 +151,6 @@ public:
 	bool IsNetClient() override { return true; } // Bots should return false for this, they can't receive NET messages
 												 // Spectators should return true for this
 	const char* TeamID() override;
-	int TeamNumber() override;
 
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;

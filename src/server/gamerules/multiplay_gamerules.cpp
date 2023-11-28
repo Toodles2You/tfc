@@ -75,8 +75,8 @@ void CTeam::AddPlayer(CBasePlayer *player)
 	WriteByte(player->entindex());
 	WriteShort(player->pev->frags);
 	WriteShort(player->m_iDeaths);
-	WriteShort(0);
-	WriteShort(player->pev->team);
+	WriteShort(player->PCNumber());
+	WriteShort(player->TeamNumber());
 	MessageEnd();
 
 	m_players.push_back(player);
@@ -443,8 +443,8 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 	WriteByte(ENTINDEX(pl->edict()));
 	WriteShort(0);
 	WriteShort(0);
-	WriteShort(0);
-	WriteShort(0);
+	WriteShort(PC_UNDEFINED);
+	WriteShort(TEAM_UNASSIGNED);
 	MessageEnd();
 
 	SendMOTDToClient(pl);
@@ -461,7 +461,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 			WriteByte(i); // client number
 			WriteShort(plr->pev->frags);
 			WriteShort(plr->m_iDeaths);
-			WriteShort(0);
+			WriteShort(plr->PCNumber());
 			WriteShort(plr->TeamNumber());
 			MessageEnd();
 		}
@@ -669,7 +669,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer,
 	WriteByte(ENTINDEX(pVictim->edict()));
 	WriteShort(pVictim->pev->frags);
 	WriteShort(pVictim->m_iDeaths);
-	WriteShort(0);
+	WriteShort(pVictim->PCNumber());
 	WriteShort(pVictim->TeamNumber());
 	MessageEnd();
 
@@ -680,7 +680,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer,
 		WriteByte(killer->entindex());
 		WriteShort(killer->pev->frags);
 		WriteShort(((CBasePlayer *)killer)->m_iDeaths);
-		WriteShort(0);
+		WriteShort(killer->PCNumber());
 		WriteShort(killer->TeamNumber());
 		MessageEnd();
 

@@ -1313,7 +1313,7 @@ void CBasePlayer::AddPoints(int score, bool bAllowNegativeScore)
 	WriteByte(ENTINDEX(edict()));
 	WriteShort(pev->frags);
 	WriteShort(m_iDeaths);
-	WriteShort(0);
+	WriteShort(PCNumber());
 	WriteShort(TeamNumber());
 	MessageEnd();
 }
@@ -1724,11 +1724,6 @@ const char* CBasePlayer::TeamID()
 
 	// return their team name
 	return m_team->m_name.c_str();
-}
-
-int CBasePlayer::TeamNumber()
-{
-	return pev->team;
 }
 
 
