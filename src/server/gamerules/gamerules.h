@@ -169,7 +169,7 @@ public:
 	virtual bool IsValidTeam(const char* pTeamName) { return true; }
 	virtual bool ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib) {}
 	virtual bool ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib) {}
-	virtual void SetDefaultPlayerTeam(CBasePlayer* pPlayer) {}
+	virtual int GetDefaultPlayerTeam(CBasePlayer* pPlayer) {}
 
 	// Monsters
 	virtual bool FAllowMonsters() = 0; //are monsters allowed
@@ -387,7 +387,7 @@ public:
 	int GetTeamIndex(const char* pTeamName) override;
 	const char* GetIndexedTeamName(int teamIndex) override;
 	bool IsValidTeam(const char* pTeamName) override;
-	void SetDefaultPlayerTeam(CBasePlayer* pPlayer) override;
+	int GetDefaultPlayerTeam(CBasePlayer* pPlayer) override;
 	bool ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib) override;
 	bool ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib) override;
 

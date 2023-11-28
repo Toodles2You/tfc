@@ -148,7 +148,7 @@ bool CHalfLifeTeamplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 }
 
 
-void CHalfLifeTeamplay::SetDefaultPlayerTeam(CBasePlayer* pPlayer)
+int CHalfLifeTeamplay::GetDefaultPlayerTeam(CBasePlayer* pPlayer)
 {
 	// copy out the team name from the model
 	char* mdls = g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "model");
@@ -164,18 +164,16 @@ void CHalfLifeTeamplay::SetDefaultPlayerTeam(CBasePlayer* pPlayer)
 		}
 		else
 		{
-			i = TeamWithFewestPlayers();
+			i = CHalfLifeMultiplay::GetDefaultPlayerTeam(pPlayer);
 		}
 	}
 
-	pPlayer->pev->team = i;
-	m_teams[i - 1].AddPlayer(pPlayer);
+	if (i == TEAM_UNASSIGNED)
+	{
+		i = TEAM_DEFAULT;
+	}
 
-	pPlayer->Spawn();
-
-	int clientIndex = pPlayer->entindex();
-	g_engfuncs.pfnSetClientKeyValue(clientIndex, g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "model", pPlayer->TeamID());
-	g_engfuncs.pfnSetClientKeyValue(clientIndex, g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "team", pPlayer->TeamID());
+	return i;
 }
 
 
@@ -363,26 +361,4 @@ int CHalfLifeTeamplay::IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKill
 		return -1;
 	}
 	return CHalfLifeMultiplay::IPointsForKill(pAttacker, pKilled);
-}
-
-int CHalfLifeTeamplay::TeamWithFewestPlayers()
-{
-	int minPlayers = gpGlobals->maxClients + 1;
-	int team = TEAM_UNASSIGNED;
-
-	for (int i = 0; i < m_numTeams; i++)
-	{
-		if (minPlayers > m_teams[i].m_numPlayers)
-		{
-			minPlayers = m_teams[i].m_numPlayers;
-			team = i + 1;
-		}
-	}
-
-	if (team == TEAM_UNASSIGNED)
-	{
-		team = g_engfuncs.pfnRandomLong(TEAM_DEFAULT, m_numTeams);
-	}
-
-	return team;
 }

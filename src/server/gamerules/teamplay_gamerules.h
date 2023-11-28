@@ -39,9 +39,6 @@ public:
 	const char* GetGameDescription() override { return "HL Teamplay"; } // this is the game name that gets seen in the server browser
 	gamemode_e GetGameMode() override { return kGamemodeTeamplay; }
 	void Think() override;
-	void SetDefaultPlayerTeam(CBasePlayer* pPlayer) override;
+	int GetDefaultPlayerTeam(CBasePlayer* pPlayer) override;
 	bool ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib) override;
-
-private:
-	int TeamWithFewestPlayers();
 };

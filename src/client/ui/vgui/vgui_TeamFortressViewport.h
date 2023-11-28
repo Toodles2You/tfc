@@ -1520,7 +1520,7 @@ public:
 
 		if ( ( m_iMenuID == MENU_INTRO || m_iMenuID == MENU_MAPBRIEFING ) && GetNextMenu() == nullptr )
 		{
-			gEngfuncs.pfnClientCmd( "jointeam 1\n" );
+			gEngfuncs.pfnClientCmd( "jointeam 5\n" );
 		}
 
 		if ( m_iRemoveMe )

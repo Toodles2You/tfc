@@ -222,7 +222,14 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 	{
 		if (CMD_ARGC() > 1)
 		{
-			ChangePlayerTeam(pPlayer, atoi(CMD_ARGV(1)), true, false);
+			auto teamIndex = atoi(CMD_ARGV(1));
+
+			if (teamIndex == 5)
+			{
+				teamIndex = GetDefaultPlayerTeam(pPlayer);
+			}
+
+			ChangePlayerTeam(pPlayer, teamIndex, true, false);
 		}
 		return true;
 	}
@@ -522,6 +529,12 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 
 		if (pPlayer)
 		{
+			if (pPlayer->m_team)
+			{
+				pPlayer->m_team->RemovePlayer(pPlayer);
+				pPlayer->m_team = nullptr;
+			}
+
 			util::FireTargets("game_playerleave", pPlayer, pPlayer, USE_TOGGLE, 0);
 
 			// team match?
@@ -1247,12 +1260,59 @@ bool CHalfLifeMultiplay::IsValidTeam(const char* pTeamName)
 	return GetTeamIndex(pTeamName) > TEAM_UNASSIGNED;
 }
 
-void CHalfLifeMultiplay::SetDefaultPlayerTeam(CBasePlayer* pPlayer)
+int CHalfLifeMultiplay::GetDefaultPlayerTeam(CBasePlayer* pPlayer)
 {
-	pPlayer->pev->team = TEAM_DEFAULT;
-	m_teams[TEAM_DEFAULT - 1].AddPlayer(pPlayer);
+	if (m_numTeams == 1)
+	{
+		return TEAM_DEFAULT;
+	}
 
-	pPlayer->Spawn();
+	int minPlayers = gpGlobals->maxClients + 1;
+	int candidates[TEAM_SPECTATORS - 1];
+	int numCandidates = 0;
+	bool currentTeamIsCandidate = false;
+
+	for (int i = 0; i < m_numTeams; i++)
+	{
+		/* The player is on this team */
+		bool currentTeam = (pPlayer->TeamNumber() == (i + 1));
+		int numPlayers = m_teams[i].m_numPlayers;
+
+		/* Subtract one to account for the player leaving */
+		if (currentTeam)
+		{
+			numPlayers--;
+		}
+
+		if (numPlayers == minPlayers)
+		{
+			/* Matches minimum, add to the list */
+			candidates[numCandidates] = i + 1;
+			numCandidates++;
+
+			if (currentTeam)
+			{
+				currentTeamIsCandidate = true;
+			}
+		}
+		else if (numPlayers < minPlayers)
+		{
+			/* New minimum, reset the list & put this team first */
+			minPlayers = numPlayers;
+
+			candidates[0] = i + 1;
+			numCandidates = 1;
+			currentTeamIsCandidate = currentTeam;
+		}
+	}
+
+	if (currentTeamIsCandidate || numCandidates == 0)
+	{
+		return pPlayer->TeamNumber();
+	}
+
+	/* Choose a team */
+	return candidates[g_engfuncs.pfnRandomLong(1, numCandidates) - 1];
 }
 
 bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib)
@@ -1281,6 +1341,11 @@ bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, b
 
 	if (bKill)
 	{
+		if (!g_pGameRules->FPlayerCanSuicide(pPlayer))
+		{
+			return false;
+		}
+
 		pPlayer->Killed(
 			CWorld::World,
 			CWorld::World,

@@ -71,7 +71,7 @@ void CHLBot::Update()
 {
     if (TeamNumber() == TEAM_UNASSIGNED)
     {
-        g_pGameRules->SetDefaultPlayerTeam(this);
+        g_pGameRules->ChangePlayerTeam(this, g_pGameRules->GetDefaultPlayerTeam(this), false, false);
         return;
     }
     if (!m_pActiveWeapon || m_pActiveWeapon->m_iClip == 0)
