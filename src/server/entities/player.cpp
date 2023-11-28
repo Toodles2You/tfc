@@ -1155,12 +1155,6 @@ void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle)
 	// Clear out the status bar
 	m_fInitHUD = true;
 
-	pev->team = 0;
-	MessageBegin(MSG_ALL, gmsgTeamInfo);
-	WriteByte(ENTINDEX(edict()));
-	WriteString("");
-	MessageEnd();
-
 	// Remove all the player's stuff
 	RemoveAllWeapons();
 
