@@ -501,36 +501,9 @@ void ClientCommand(edict_t* pEntity)
 	{
 		player->SelectWeapon(pcmd);
 	}
-	else if (FStrEq(pcmd, "spectate")) // clients wants to become a spectator
-	{
-		// always allow proxies to become a spectator
-		if ((pev->flags & FL_PROXY) != 0 || 0 != allow_spectators.value)
-		{
-			auto spawn = g_pGameRules->GetPlayerSpawnSpot(player);
-			player->StartObserver(spawn->m_origin, spawn->m_angles);
-
-			// notify other clients of player switching to spectator mode
-			util::ClientPrintAll(HUD_PRINTNOTIFY, util::VarArgs("%s switched to spectator mode\n",
-													 (!FStringNull(pev->netname) && STRING(pev->netname)[0] != 0) ? STRING(pev->netname) : "unconnected"));
-		}
-		else
-		{
-			util::ClientPrint(player, HUD_PRINTCONSOLE, "Spectator mode is disabled.\n");
-		}
-	}
-	else if (FStrEq(pcmd, "specmode")) // new spectator mode
-	{
-		if (player->IsObserver())
-			player->Observer_SetMode(atoi(CMD_ARGV(1)));
-	}
 	else if (FStrEq(pcmd, "closemenus"))
 	{
 		// just ignore it
-	}
-	else if (FStrEq(pcmd, "follownext")) // follow next player
-	{
-		if (player->IsObserver())
-			player->Observer_FindNextPlayer(atoi(CMD_ARGV(1)) != 0);
 	}
 	else if (g_pGameRules->ClientCommand(player, pcmd))
 	{

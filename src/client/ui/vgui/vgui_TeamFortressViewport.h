@@ -1518,9 +1518,9 @@ public:
 		setVisible( false );
 		m_iIsActive = false;
 
-		if ( m_iMenuID == MENU_INTRO )
+		if ( ( m_iMenuID == MENU_INTRO || m_iMenuID == MENU_MAPBRIEFING ) && GetNextMenu() == nullptr )
 		{
-			gEngfuncs.pfnClientCmd( "_firstspawn\n" );
+			gEngfuncs.pfnClientCmd( "jointeam 1\n" );
 		}
 
 		if ( m_iRemoveMe )

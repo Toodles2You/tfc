@@ -2027,6 +2027,12 @@ bool TeamFortressViewport::MsgFunc_ScoreInfo(const char* pszName, int iSize, voi
 		if (g_PlayerExtraInfo[cl].teamnumber < 0)
 			g_PlayerExtraInfo[cl].teamnumber = 0;
 
+		if (cl == gEngfuncs.GetLocalPlayer()->index)
+		{
+			g_iPlayerClass = playerclass;
+			g_iTeamNumber = teamnumber;
+		}
+
 		UpdateOnPlayerInfo();
 	}
 

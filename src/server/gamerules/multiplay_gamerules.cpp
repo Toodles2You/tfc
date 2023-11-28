@@ -131,7 +131,7 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	m_allowSpectators = (int)allow_spectators.value != 0;
 
 	m_teams.clear();
-	m_teams.push_back(CTeam{"Players"});
+	m_teams.push_back(CTeam{"players"});
 	m_numTeams = 1;
 
 	RefreshSkillData();
@@ -218,11 +218,34 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 	if (g_VoiceGameMgr.ClientCommand(pPlayer, pcmd))
 		return true;
 
-	if (strcmp(pcmd, "_firstspawn") == 0
-	 && !IsValidTeam(pPlayer->TeamID()))
+	if (strcmp(pcmd, "jointeam") == 0)
 	{
-		g_pGameRules->SetDefaultPlayerTeam(pPlayer);
+		if (CMD_ARGC() > 1)
+		{
+			ChangePlayerTeam(pPlayer, atoi(CMD_ARGV(1)), true, false);
+		}
 		return true;
+	}
+	else if (strcmp(pcmd, "spectate") == 0)
+	{
+		ChangePlayerTeam(pPlayer, TEAM_SPECTATORS, true, false);
+		return true;
+	}
+	else if (pPlayer->IsObserver())
+	{
+		if (CMD_ARGC() > 1)
+		{
+			if (strcmp(pcmd, "specmode") == 0)
+			{
+				pPlayer->Observer_SetMode(atoi(CMD_ARGV(1)));
+				return true;
+			}
+			else if (strcmp(pcmd, "follownext") == 0)
+			{
+				pPlayer->Observer_FindNextPlayer(atoi(CMD_ARGV(1)) != 0);
+				return true;
+			}
+		}
 	}
 	else if (IsPlayerPrivileged(pPlayer) && PrivilegedCommand(pPlayer, pcmd))
 	{
@@ -1132,7 +1155,7 @@ CSpawnPoint *CHalfLifeMultiplay::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
 	{
 		if (entity->IsPlayer() && entity != pPlayer)
 		{
-			if (g_pGameRules->FPlayerCanTakeDamage((CBasePlayer *)entity, pPlayer))
+			if (FPlayerCanTakeDamage((CBasePlayer *)entity, pPlayer))
 			{
 				entity->TakeDamage(pPlayer, pPlayer, 300.0F, DMG_ALWAYSGIB);
 			}
@@ -1232,16 +1255,31 @@ void CHalfLifeMultiplay::SetDefaultPlayerTeam(CBasePlayer* pPlayer)
 	pPlayer->Spawn();
 }
 
-void CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib)
+bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib)
 {
-	auto teamIndex = GetTeamIndex(pTeamName);
-
-	if (teamIndex == TEAM_UNASSIGNED)
+	if (teamIndex == TEAM_SPECTATORS)
 	{
-		return;
+		if (!AllowSpectators())
+		{
+			return false;
+		}
 	}
-	
-	if (bKill && pPlayer->IsPlayer() && pPlayer->IsAlive())
+	else if (teamIndex <= TEAM_UNASSIGNED || teamIndex > m_numTeams)
+	{
+		return false;
+	}
+
+	if (teamIndex == pPlayer->TeamNumber())
+	{
+		return true;
+	}
+
+	if (!pPlayer->IsPlayer() || !pPlayer->IsAlive())
+	{
+		bKill = false;
+	}
+
+	if (bKill)
 	{
 		pPlayer->Killed(
 			CWorld::World,
@@ -1254,16 +1292,26 @@ void CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTea
 	if (teamIndex != TEAM_SPECTATORS)
 	{
 		m_teams[pPlayer->pev->team - 1].AddPlayer(pPlayer);
+
+		if (!bKill)
+		{
+			pPlayer->Spawn();
+		}
 	}
 	else
 	{
 		m_spectators.AddPlayer(pPlayer);
+
+		auto spawn = GetPlayerSpawnSpot(pPlayer);
+		pPlayer->StartObserver(spawn->m_origin, spawn->m_angles);
 	}
 
-	if (!bKill)
-	{
-		pPlayer->Spawn();
-	}
+	return true;
+}
+
+bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib)
+{
+	return ChangePlayerTeam(pPlayer, GetTeamIndex(pTeamName), bKill, bGib);
 }
 
 //=========================================================

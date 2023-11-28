@@ -40,7 +40,7 @@ public:
 	gamemode_e GetGameMode() override { return kGamemodeTeamplay; }
 	void Think() override;
 	void SetDefaultPlayerTeam(CBasePlayer* pPlayer) override;
-	void ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib) override;
+	bool ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib) override;
 
 private:
 	int TeamWithFewestPlayers();

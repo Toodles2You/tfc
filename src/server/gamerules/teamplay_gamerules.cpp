@@ -223,13 +223,21 @@ void CHalfLifeTeamplay::InitHUD(CBasePlayer* pPlayer)
 }
 
 
-void CHalfLifeTeamplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib)
+bool CHalfLifeTeamplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib)
 {
-	CHalfLifeMultiplay::ChangePlayerTeam(pPlayer, pTeamName, bKill, bGib);
+	if (!CHalfLifeMultiplay::ChangePlayerTeam(pPlayer, pTeamName, bKill, bGib))
+	{
+		return false;
+	}
 
-	int clientIndex = pPlayer->entindex();
-	g_engfuncs.pfnSetClientKeyValue(clientIndex, g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "model", pPlayer->TeamID());
-	g_engfuncs.pfnSetClientKeyValue(clientIndex, g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "team", pPlayer->TeamID());
+	if (pPlayer->TeamNumber() != TEAM_SPECTATORS)
+	{
+		int clientIndex = pPlayer->entindex();
+		g_engfuncs.pfnSetClientKeyValue(clientIndex, g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "model", pPlayer->TeamID());
+		g_engfuncs.pfnSetClientKeyValue(clientIndex, g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "team", pPlayer->TeamID());
+	}
+
+	return true;
 }
 
 
