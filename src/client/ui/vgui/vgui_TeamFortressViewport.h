@@ -24,8 +24,6 @@
 // custom scheme handling
 #include "vgui_SchemeManager.h"
 
-#define PC_LASTCLASS 10
-#define PC_UNDEFINED 0
 #define MENU_DEFAULT				1
 #define MENU_TEAM 					2
 #define MENU_CLASS 					3
@@ -690,23 +688,6 @@ public:
 		else if ( !strcmp( m_pszCommand, "jointeam 4" ) )
 			g_iTeamNumber = 4;
 	}
-};
-
-// Used instead of CMenuHandler_StringCommand for Class Selection buttons.
-// Checks the state of hud_classautokill and kills the player if set
-class CMenuHandler_StringCommandClassSelect : public CMenuHandler_StringCommand
-{
-private:
-public:
-	CMenuHandler_StringCommandClassSelect( const char *pszCommand ) : CMenuHandler_StringCommand( pszCommand )
-	{
-	}
-
-	CMenuHandler_StringCommandClassSelect( const char *pszCommand, int iClose ) : CMenuHandler_StringCommand( pszCommand, iClose )
-	{
-	}
-
-	virtual void actionPerformed(Panel* panel);
 };
 
 class CMenuHandler_PopupSubMenuInput : public InputSignal

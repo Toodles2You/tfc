@@ -122,7 +122,7 @@ void CClassMenuPanel::Update()
 	// Cycle through the rest of the buttons
 
 	// If the player already has a class, make the cancel button visible
-	if (0 != g_iPlayerClass)
+	if (g_iPlayerClass != PC_UNDEFINED)
 	{
 		m_pCancelButton->setPos(CLASSMENU_TOPLEFT_BUTTON_X, iYPos);
 		m_pCancelButton->setVisible(true);

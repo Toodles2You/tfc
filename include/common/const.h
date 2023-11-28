@@ -777,6 +777,12 @@ enum
 	TEAM_SPECTATORS = 5,
 };
 
+enum
+{
+	PC_UNDEFINED = 0,
+	PC_LASTCLASS = 10,
+};
+
 // Spectator Movement modes (stored in pev->iuser1, so the physics code can get at them)
 enum
 {

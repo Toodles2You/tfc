@@ -692,7 +692,7 @@ void CHudSpectator::DirectorMessage(int iSize, void* pbuf)
 	{
 	case DRC_CMD_START:
 		// now we have to do some things clientside, since the proxy doesn't know our mod
-		g_iPlayerClass = 0;
+		g_iPlayerClass = PC_UNDEFINED;
 		g_iTeamNumber = TEAM_UNASSIGNED;
 
 		// fake a InitHUD & ResetHUD message

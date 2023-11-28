@@ -75,7 +75,7 @@ BitmapTGA* LoadTGAForRes(const char* pImageName)
 // All TFC Hud buttons are derived from this one.
 CommandButton::CommandButton(const char* text, int x, int y, int wide, int tall, bool bNoHighlight) : Button("", x, y, wide, tall)
 {
-	m_iPlayerClass = 0;
+	m_iPlayerClass = PC_UNDEFINED;
 	m_bNoHighlight = bNoHighlight;
 	m_bFlat = false;
 	Init();
@@ -93,7 +93,7 @@ CommandButton::CommandButton(int iPlayerClass, const char* text, int x, int y, i
 
 CommandButton::CommandButton(const char* text, int x, int y, int wide, int tall, bool bNoHighlight, bool bFlat) : Button("", x, y, wide, tall)
 {
-	m_iPlayerClass = 0;
+	m_iPlayerClass = PC_UNDEFINED;
 	m_bFlat = bFlat;
 	m_bNoHighlight = bNoHighlight;
 	Init();
@@ -520,16 +520,4 @@ void CHandler_MenuButtonOver::cursorEntered(Panel* panel)
 	{
 		m_pMenuPanel->SetActiveInfo(m_iButton);
 	}
-}
-
-void CMenuHandler_StringCommandClassSelect::actionPerformed(Panel* panel)
-{
-	CMenuHandler_StringCommand::actionPerformed(panel);
-
-	// THIS IS NOW BEING DONE ON THE TFC SERVER TO AVOID KILLING SOMEONE THEN
-	// HAVE THE SERVER SAY "SORRY...YOU CAN'T BE THAT CLASS".
-
-	bool bAutoKill = CVAR_GET_FLOAT("hud_classautokill") != 0;
-	if (bAutoKill && g_iPlayerClass != 0)
-		gEngfuncs.pfnClientCmd("kill");
 }

@@ -272,7 +272,7 @@ bool CCommandMenu::RecalculateVisibles(int iYOffset, bool bHideAll)
 	{
 		int iClass = m_aButtons[i]->GetPlayerClass();
 
-		if ((0 != iClass && iClass != g_iPlayerClass) || (m_aButtons[i]->IsNotValid()) || bHideAll)
+		if ((iClass != PC_UNDEFINED && iClass != g_iPlayerClass) || (m_aButtons[i]->IsNotValid()) || bHideAll)
 		{
 			m_aButtons[i]->setVisible(false);
 			if (m_aButtons[i]->GetSubMenu() != NULL)
@@ -623,7 +623,7 @@ void TeamFortressViewport::Initialize()
 	m_flSpectatorPanelLastUpdated = 0;
 
 	// reset player info
-	g_iPlayerClass = 0;
+	g_iPlayerClass = PC_UNDEFINED;
 	g_iTeamNumber = TEAM_UNASSIGNED;
 
 	strcpy(m_sMapName, "");
@@ -1786,7 +1786,7 @@ bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurren
 			// Escape gets you out of Team/Class menus if the Cancel button is visible
 			if (keynum == K_ESCAPE)
 			{
-				if ((iMenuID == MENU_TEAM && g_iTeamNumber != TEAM_UNASSIGNED) || (iMenuID == MENU_CLASS && 0 != g_iPlayerClass))
+				if ((iMenuID == MENU_TEAM && g_iTeamNumber != TEAM_UNASSIGNED) || (iMenuID == MENU_CLASS && g_iPlayerClass != PC_UNDEFINED))
 				{
 					HideTopMenu();
 					return false;
