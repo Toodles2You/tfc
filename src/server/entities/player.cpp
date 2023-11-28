@@ -511,6 +511,7 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 	m_fDeadTime = gpGlobals->time;
 	m_fNextSuicideTime = gpGlobals->time + 1.0f;
 
+	pev->health = std::min(pev->health, 0.0F);
 	pev->deadflag = DEAD_DYING;
 
 	m_iFOV = 0;
