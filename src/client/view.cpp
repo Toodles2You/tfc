@@ -428,7 +428,7 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 
 	if (0 != gEngfuncs.IsSpectateOnly())
 	{
-		ent = gEngfuncs.GetEntityByIndex(g_iUser2);
+		ent = gEngfuncs.GetEntityByIndex(g_iObserverTarget);
 	}
 	else
 	{
@@ -1089,8 +1089,8 @@ void V_GetChasePos(int target, float* cl_angles, float* origin, float* angles)
 
 	if (0 != gHUD.m_Spectator.m_autoDirector->value)
 	{
-		if (0 != g_iUser3)
-			V_GetDirectedChasePosition(ent, gEngfuncs.GetEntityByIndex(g_iUser3),
+		if (0 != g_iObserverTarget2)
+			V_GetDirectedChasePosition(ent, gEngfuncs.GetEntityByIndex(g_iObserverTarget2),
 				angles, origin);
 		else
 			V_GetDirectedChasePosition(ent, (cl_entity_t*)0xFFFFFFFF,
@@ -1282,7 +1282,7 @@ void V_CalcSpectatorRefdef(struct ref_params_s* pparams)
 	static int lastWeaponModelIndex = 0;
 	static int lastViewModelIndex = 0;
 
-	cl_entity_t* ent = gEngfuncs.GetEntityByIndex(g_iUser2);
+	cl_entity_t* ent = gEngfuncs.GetEntityByIndex(g_iObserverTarget);
 
 	pparams->onlyClientDraw = 0;
 
@@ -1294,7 +1294,7 @@ void V_CalcSpectatorRefdef(struct ref_params_s* pparams)
 	VectorCopy(pparams->viewangles, v_angles);
 	VectorCopy(pparams->vieworg, v_origin);
 
-	if ((g_iUser1 == OBS_IN_EYE || gHUD.m_Spectator.m_pip->value == INSET_IN_EYE) && ent)
+	if ((g_iObserverMode == OBS_IN_EYE || gHUD.m_Spectator.m_pip->value == INSET_IN_EYE) && ent)
 	{
 		// calculate player velocity
 		float timeDiff = ent->curstate.msg_time - ent->prevstate.msg_time;
@@ -1315,7 +1315,7 @@ void V_CalcSpectatorRefdef(struct ref_params_s* pparams)
 		// predict missing client data and set weapon model ( in HLTV mode or inset in eye mode )
 		if (0 != gEngfuncs.IsSpectateOnly())
 		{
-			V_GetInEyePos(g_iUser2, pparams->simorg, pparams->cl_viewangles);
+			V_GetInEyePos(g_iObserverTarget, pparams->simorg, pparams->cl_viewangles);
 
 			pparams->health = 1;
 
@@ -1345,7 +1345,7 @@ void V_CalcSpectatorRefdef(struct ref_params_s* pparams)
 				gunModel->curstate.modelindex = lastViewModelIndex;
 				gunModel->curstate.frame = 0;
 				gunModel->curstate.colormap = 0;
-				gunModel->index = g_iUser2;
+				gunModel->index = g_iObserverTarget;
 			}
 			else
 			{
@@ -1366,14 +1366,14 @@ void V_CalcSpectatorRefdef(struct ref_params_s* pparams)
 	{
 		// first renderer cycle, full screen
 
-		switch (g_iUser1)
+		switch (g_iObserverMode)
 		{
 		case OBS_CHASE_LOCKED:
-			V_GetChasePos(g_iUser2, NULL, v_origin, v_angles);
+			V_GetChasePos(g_iObserverTarget, NULL, v_origin, v_angles);
 			break;
 
 		case OBS_CHASE_FREE:
-			V_GetChasePos(g_iUser2, v_cl_angles, v_origin, v_angles);
+			V_GetChasePos(g_iObserverTarget, v_cl_angles, v_origin, v_angles);
 			break;
 
 		case OBS_ROAMING:
@@ -1395,7 +1395,7 @@ void V_CalcSpectatorRefdef(struct ref_params_s* pparams)
 
 		case OBS_MAP_CHASE:
 			pparams->onlyClientDraw = 1;
-			V_GetMapChasePosition(g_iUser2, v_cl_angles, v_origin, v_angles);
+			V_GetMapChasePosition(g_iObserverTarget, v_cl_angles, v_origin, v_angles);
 			break;
 		}
 
@@ -1419,7 +1419,7 @@ void V_CalcSpectatorRefdef(struct ref_params_s* pparams)
 		switch ((int)gHUD.m_Spectator.m_pip->value)
 		{
 		case INSET_CHASE_FREE:
-			V_GetChasePos(g_iUser2, v_cl_angles, v_origin, v_angles);
+			V_GetChasePos(g_iObserverTarget, v_cl_angles, v_origin, v_angles);
 			break;
 
 		case INSET_IN_EYE:
@@ -1434,10 +1434,10 @@ void V_CalcSpectatorRefdef(struct ref_params_s* pparams)
 		case INSET_MAP_CHASE:
 			pparams->onlyClientDraw = 1;
 
-			if (g_iUser1 == OBS_ROAMING)
+			if (g_iObserverMode == OBS_ROAMING)
 				V_GetMapChasePosition(0, v_cl_angles, v_origin, v_angles);
 			else
-				V_GetMapChasePosition(g_iUser2, v_cl_angles, v_origin, v_angles);
+				V_GetMapChasePosition(g_iObserverTarget, v_cl_angles, v_origin, v_angles);
 
 			break;
 		}
@@ -1460,7 +1460,7 @@ void V_CalcRefdef(struct ref_params_s* pparams)
 	{
 		V_CalcIntermissionRefdef(pparams);
 	}
-	else if (0 != pparams->spectator || 0 != g_iUser1) // g_iUser true if in spectator mode
+	else if (0 != pparams->spectator || 0 != g_iObserverMode) // g_iUser true if in spectator mode
 	{
 		V_CalcSpectatorRefdef(pparams);
 	}

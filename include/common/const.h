@@ -769,3 +769,15 @@ typedef enum
 	USE_SET = 2,
 	USE_TOGGLE = 3
 } USE_TYPE;
+
+// Spectator Movement modes (stored in pev->iuser1, so the physics code can get at them)
+enum
+{
+	OBS_NONE = 0,
+	OBS_CHASE_LOCKED,
+	OBS_CHASE_FREE,
+	OBS_ROAMING,
+	OBS_IN_EYE,
+	OBS_MAP_FREE,
+	OBS_MAP_CHASE,
+};

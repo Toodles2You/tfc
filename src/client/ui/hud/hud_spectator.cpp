@@ -580,7 +580,7 @@ bool CHudSpectator::VidInit()
 	m_lastHudMessage = 0;
 	m_iSpectatorNumber = 0;
 	iJumpSpectator = false;
-	g_iUser1 = g_iUser2 = 0;
+	g_iObserverMode = g_iObserverTarget = 0;
 
 	return true;
 }
@@ -603,11 +603,11 @@ bool CHudSpectator::Draw(float flTime)
 	float* color;
 
 	// draw only in spectator mode
-	if (0 == g_iUser1)
+	if (0 == g_iObserverMode)
 		return false;
 
 	// if user pressed zoom, aplly changes
-	if ((m_zoomDelta != 0.0f) && (g_iUser1 == OBS_MAP_FREE))
+	if ((m_zoomDelta != 0.0f) && (g_iObserverMode == OBS_MAP_FREE))
 	{
 		m_mapZoom += m_zoomDelta;
 
@@ -619,7 +619,7 @@ bool CHudSpectator::Draw(float flTime)
 	}
 
 	// if user moves in map mode, change map origin
-	if ((m_moveDelta != 0.0f) && (g_iUser1 != OBS_ROAMING))
+	if ((m_moveDelta != 0.0f) && (g_iObserverMode != OBS_ROAMING))
 	{
 		Vector right;
 		AngleVectors(v_angles, NULL, right, NULL);
@@ -630,7 +630,7 @@ bool CHudSpectator::Draw(float flTime)
 	}
 
 	// Only draw the icon names only if map mode is in Main Mode
-	if (g_iUser1 < OBS_MAP_FREE)
+	if (g_iObserverMode < OBS_MAP_FREE)
 		return true;
 
 	if (0 == m_drawnames->value)
@@ -703,11 +703,11 @@ void CHudSpectator::DirectorMessage(int iSize, void* pbuf)
 
 		if (0 != m_autoDirector->value)
 		{
-			if ((g_iUser2 != m_lastPrimaryObject) || (g_iUser3 != m_lastSecondaryObject))
+			if ((g_iObserverTarget != m_lastPrimaryObject) || (g_iObserverTarget2 != m_lastSecondaryObject))
 				V_ResetChaseCam();
 
-			g_iUser2 = m_lastPrimaryObject;
-			g_iUser3 = m_lastSecondaryObject;
+			g_iObserverTarget = m_lastPrimaryObject;
+			g_iObserverTarget2 = m_lastSecondaryObject;
 			m_IsInterpolating = false;
 			m_ChaseEntity = 0;
 		}
@@ -892,12 +892,12 @@ void CHudSpectator::FindNextPlayer(bool bReverse)
 		return;
 	}
 
-	if (0 != g_iUser2)
-		iStart = g_iUser2;
+	if (0 != g_iObserverTarget)
+		iStart = g_iObserverTarget;
 	else
 		iStart = 1;
 
-	g_iUser2 = 0;
+	g_iObserverTarget = 0;
 
 	int iCurrent = iStart;
 
@@ -924,13 +924,13 @@ void CHudSpectator::FindNextPlayer(bool bReverse)
 
 		// MOD AUTHORS: Add checks on target here.
 
-		g_iUser2 = iCurrent;
+		g_iObserverTarget = iCurrent;
 		break;
 
 	} while (iCurrent != iStart);
 
 	// Did we find a target?
-	if (0 == g_iUser2)
+	if (0 == g_iObserverTarget)
 	{
 		gEngfuncs.Con_DPrintf("No observer targets.\n");
 		// take save camera position
@@ -964,7 +964,7 @@ void CHudSpectator::FindPlayer(const char* name)
 		return;
 	}
 
-	g_iUser2 = 0;
+	g_iObserverTarget = 0;
 
 	// make sure we have player info
 	gViewPort->GetAllPlayersInfo();
@@ -981,13 +981,13 @@ void CHudSpectator::FindPlayer(const char* name)
 
 		if (!stricmp(g_PlayerInfoList[pEnt->index].name, name))
 		{
-			g_iUser2 = i;
+			g_iObserverTarget = i;
 			break;
 		}
 	}
 
 	// Did we find a target?
-	if (0 == g_iUser2)
+	if (0 == g_iObserverTarget)
 	{
 		gEngfuncs.Con_DPrintf("No observer targets.\n");
 		// take save camera position
@@ -1009,7 +1009,7 @@ void CHudSpectator::HandleButtonsDown(int ButtonPressed)
 {
 	double time = gEngfuncs.GetClientTime();
 
-	int newMainMode = g_iUser1;
+	int newMainMode = g_iObserverMode;
 	int newInsetMode = m_pip->value;
 
 	// gEngfuncs.Con_Printf(" HandleButtons:%i\n", ButtonPressed );
@@ -1021,7 +1021,7 @@ void CHudSpectator::HandleButtonsDown(int ButtonPressed)
 	if (gHUD.m_iIntermission)
 		return;
 
-	if (0 == g_iUser1)
+	if (0 == g_iObserverMode)
 		return; // dont do anything if not in spectator mode
 
 	// don't handle buttons during normal demo playback
@@ -1049,19 +1049,19 @@ void CHudSpectator::HandleButtonsDown(int ButtonPressed)
 		// Jump changes main window modes
 		if ((ButtonPressed & IN_JUMP) != 0)
 		{
-			if (g_iUser1 == OBS_CHASE_LOCKED)
+			if (g_iObserverMode == OBS_CHASE_LOCKED)
 				newMainMode = OBS_CHASE_FREE;
 
-			else if (g_iUser1 == OBS_CHASE_FREE)
+			else if (g_iObserverMode == OBS_CHASE_FREE)
 				newMainMode = OBS_IN_EYE;
 
-			else if (g_iUser1 == OBS_IN_EYE)
+			else if (g_iObserverMode == OBS_IN_EYE)
 				newMainMode = OBS_ROAMING;
 
-			else if (g_iUser1 == OBS_ROAMING)
+			else if (g_iObserverMode == OBS_ROAMING)
 				newMainMode = OBS_MAP_FREE;
 
-			else if (g_iUser1 == OBS_MAP_FREE)
+			else if (g_iObserverMode == OBS_MAP_FREE)
 				newMainMode = OBS_MAP_CHASE;
 
 			else
@@ -1073,7 +1073,7 @@ void CHudSpectator::HandleButtonsDown(int ButtonPressed)
 		{
 			FindNextPlayer((ButtonPressed & IN_ATTACK2) != 0);
 
-			if (g_iUser1 == OBS_ROAMING)
+			if (g_iObserverMode == OBS_ROAMING)
 			{
 				gEngfuncs.SetViewAngles(vJumpAngles);
 				iJumpSpectator = true;
@@ -1085,7 +1085,7 @@ void CHudSpectator::HandleButtonsDown(int ButtonPressed)
 
 	SetModes(newMainMode, newInsetMode);
 
-	if (g_iUser1 == OBS_MAP_FREE)
+	if (g_iObserverMode == OBS_MAP_FREE)
 	{
 		if ((ButtonPressed & IN_FORWARD) != 0)
 			m_zoomDelta = 0.01f;
@@ -1122,7 +1122,7 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 {
 	// if value == -1 keep old value
 	if (iNewMainMode == -1)
-		iNewMainMode = g_iUser1;
+		iNewMainMode = g_iObserverMode;
 
 	if (iNewInsetMode == -1)
 		iNewInsetMode = m_pip->value;
@@ -1140,7 +1140,7 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 	m_ChaseEntity = 0;
 
 	// main mode settings will override inset window settings
-	if (iNewMainMode != g_iUser1)
+	if (iNewMainMode != g_iObserverMode)
 	{
 		// if we are NOT in HLTV mode, main spectator mode is set on server
 		if (0 == gEngfuncs.IsSpectateOnly())
@@ -1152,13 +1152,13 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 			return;
 		}
 
-		if (0 == g_iUser2 && (iNewMainMode != OBS_ROAMING)) // make sure we have a target
+		if (0 == g_iObserverTarget && (iNewMainMode != OBS_ROAMING)) // make sure we have a target
 		{
 			// choose last Director object if still available
 			if (IsActivePlayer(gEngfuncs.GetEntityByIndex(m_lastPrimaryObject)))
 			{
-				g_iUser2 = m_lastPrimaryObject;
-				g_iUser3 = m_lastSecondaryObject;
+				g_iObserverTarget = m_lastPrimaryObject;
+				g_iObserverTarget2 = m_lastSecondaryObject;
 			}
 			else
 				FindNextPlayer(false); // find any target
@@ -1167,43 +1167,43 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 		switch (iNewMainMode)
 		{
 		case OBS_CHASE_LOCKED:
-			g_iUser1 = OBS_CHASE_LOCKED;
+			g_iObserverMode = OBS_CHASE_LOCKED;
 			break;
 
 		case OBS_CHASE_FREE:
-			g_iUser1 = OBS_CHASE_FREE;
+			g_iObserverMode = OBS_CHASE_FREE;
 			break;
 
 		case OBS_ROAMING: // jump to current vJumpOrigin/angle
-			g_iUser1 = OBS_ROAMING;
-			if (0 != g_iUser2)
+			g_iObserverMode = OBS_ROAMING;
+			if (0 != g_iObserverTarget)
 			{
-				V_GetChasePos(g_iUser2, v_cl_angles, vJumpOrigin, vJumpAngles);
+				V_GetChasePos(g_iObserverTarget, v_cl_angles, vJumpOrigin, vJumpAngles);
 				gEngfuncs.SetViewAngles(vJumpAngles);
 				iJumpSpectator = true;
 			}
 			break;
 
 		case OBS_IN_EYE:
-			g_iUser1 = OBS_IN_EYE;
+			g_iObserverMode = OBS_IN_EYE;
 			break;
 
 		case OBS_MAP_FREE:
-			g_iUser1 = OBS_MAP_FREE;
+			g_iObserverMode = OBS_MAP_FREE;
 			// reset user values
 			m_mapZoom = m_OverviewData.zoom;
 			m_mapOrigin = m_OverviewData.origin;
 			break;
 
 		case OBS_MAP_CHASE:
-			g_iUser1 = OBS_MAP_CHASE;
+			g_iObserverMode = OBS_MAP_CHASE;
 			// reset user values
 			m_mapZoom = m_OverviewData.zoom;
 			m_mapOrigin = m_OverviewData.origin;
 			break;
 		}
 
-		if ((g_iUser1 == OBS_IN_EYE) || (g_iUser1 == OBS_ROAMING))
+		if ((g_iObserverMode == OBS_IN_EYE) || (g_iObserverMode == OBS_ROAMING))
 		{
 			m_crosshairRect.left = 24;
 			m_crosshairRect.top = 0;
@@ -1221,7 +1221,7 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 		gViewPort->MsgFunc_ResetFade(NULL, 0, NULL);
 
 		char string[128];
-		sprintf(string, "#Spec_Mode%d", g_iUser1);
+		sprintf(string, "#Spec_Mode%d", g_iObserverMode);
 		sprintf(string, "%c%s", HUD_PRINTCENTER, CHudTextMessage::BufferedLocaliseTextString(string));
 		gHUD.m_TextMessage.MsgFunc_TextMsg(NULL, strlen(string) + 1, string);
 	}
@@ -1672,21 +1672,21 @@ void CHudSpectator::DrawOverviewEntities()
 
 	// get current camera position and angle
 
-	if (m_pip->value == INSET_IN_EYE || g_iUser1 == OBS_IN_EYE)
+	if (m_pip->value == INSET_IN_EYE || g_iObserverMode == OBS_IN_EYE)
 	{
-		V_GetInEyePos(g_iUser2, origin, angles);
+		V_GetInEyePos(g_iObserverTarget, origin, angles);
 	}
-	else if (m_pip->value == INSET_CHASE_FREE || g_iUser1 == OBS_CHASE_FREE)
+	else if (m_pip->value == INSET_CHASE_FREE || g_iObserverMode == OBS_CHASE_FREE)
 	{
-		V_GetChasePos(g_iUser2, v_cl_angles, origin, angles);
+		V_GetChasePos(g_iObserverTarget, v_cl_angles, origin, angles);
 	}
-	else if (g_iUser1 == OBS_ROAMING)
+	else if (g_iObserverMode == OBS_ROAMING)
 	{
 		VectorCopy(v_sim_org, origin);
 		VectorCopy(v_cl_angles, angles);
 	}
 	else
-		V_GetChasePos(g_iUser2, NULL, origin, angles);
+		V_GetChasePos(g_iObserverTarget, NULL, origin, angles);
 
 
 	// draw camera sprite
@@ -1735,11 +1735,11 @@ void CHudSpectator::DrawOverviewEntities()
 void CHudSpectator::DrawOverview()
 {
 	// draw only in sepctator mode
-	if (0 == g_iUser1)
+	if (0 == g_iObserverMode)
 		return;
 
 	// Only draw the overview if Map Mode is selected for this view
-	if (m_iDrawCycle == 0 && ((g_iUser1 != OBS_MAP_FREE) && (g_iUser1 != OBS_MAP_CHASE)))
+	if (m_iDrawCycle == 0 && ((g_iObserverMode != OBS_MAP_FREE) && (g_iObserverMode != OBS_MAP_CHASE)))
 		return;
 
 	if (m_iDrawCycle == 1 && m_pip->value < INSET_MAP_FREE)
@@ -1834,13 +1834,13 @@ void CHudSpectator::CheckSettings()
 
 	m_pip->value = (int)m_pip->value;
 
-	if ((g_iUser1 < OBS_MAP_FREE) && (m_pip->value == INSET_CHASE_FREE || m_pip->value == INSET_IN_EYE))
+	if ((g_iObserverMode < OBS_MAP_FREE) && (m_pip->value == INSET_CHASE_FREE || m_pip->value == INSET_IN_EYE))
 	{
 		// otherwise both would show in World picures
 		m_pip->value = INSET_MAP_FREE;
 	}
 
-	if ((g_iUser1 >= OBS_MAP_FREE) && (m_pip->value >= INSET_MAP_FREE))
+	if ((g_iObserverMode >= OBS_MAP_FREE) && (m_pip->value >= INSET_MAP_FREE))
 	{
 		// both would show map views
 		m_pip->value = INSET_CHASE_FREE;
@@ -1866,7 +1866,7 @@ void CHudSpectator::CheckSettings()
 	}
 
 	// HL/TFC has no oberserver corsshair, so set it client side
-	if ((g_iUser1 == OBS_IN_EYE) || (g_iUser1 == OBS_ROAMING))
+	if ((g_iObserverMode == OBS_IN_EYE) || (g_iObserverMode == OBS_ROAMING))
 	{
 		m_crosshairRect.left = 24;
 		m_crosshairRect.top = 0;
@@ -1887,7 +1887,7 @@ void CHudSpectator::CheckSettings()
 	// in First Person mode since this is our resticted forcecamera mode 2
 	// team number 3 = SPECTATOR see player.h
 
-	if (((g_iTeamNumber == 1) || (g_iTeamNumber == 2)) && (g_iUser1 == OBS_IN_EYE))
+	if (((g_iTeamNumber == 1) || (g_iTeamNumber == 2)) && (g_iObserverMode == OBS_IN_EYE))
 		m_pip->value = INSET_OFF;
 
 	// draw small border around inset view, adjust upper black bar
@@ -1898,7 +1898,7 @@ int CHudSpectator::ToggleInset(bool allowOff)
 {
 	int newInsetMode = (int)m_pip->value + 1;
 
-	if (g_iUser1 < OBS_MAP_FREE)
+	if (g_iObserverMode < OBS_MAP_FREE)
 	{
 		if (newInsetMode > INSET_MAP_CHASE)
 		{
@@ -1952,7 +1952,7 @@ void CHudSpectator::InitHUDData()
 	m_lastHudMessage = 0;
 	m_iSpectatorNumber = 0;
 	iJumpSpectator = false;
-	g_iUser1 = g_iUser2 = 0;
+	g_iObserverMode = g_iObserverTarget = 0;
 
 	memset(&m_OverviewData, 0, sizeof(m_OverviewData));
 	memset(&m_OverviewEntities, 0, sizeof(m_OverviewEntities));
@@ -1966,7 +1966,7 @@ void CHudSpectator::InitHUDData()
 
 	SetModes(OBS_CHASE_LOCKED, INSET_OFF);
 
-	g_iUser2 = 0; // fake not target until first camera command
+	g_iObserverTarget = 0; // fake not target until first camera command
 
 	// reset HUD FOV
 	gHUD.m_iFOV = CVAR_GET_FLOAT("default_fov");

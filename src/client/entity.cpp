@@ -47,12 +47,12 @@ int HUD_AddEntity(int type, struct cl_entity_s* ent, const char* modelname)
 	// each frame every entity passes this function, so the overview hooks
 	// it to filter the overview entities
 
-	if (0 != g_iUser1)
+	if (0 != g_iObserverMode)
 	{
 		gHUD.m_Spectator.AddOverviewEntity(type, ent, modelname);
 
-		if ((g_iUser1 == OBS_IN_EYE || gHUD.m_Spectator.m_pip->value == INSET_IN_EYE) &&
-			ent->index == g_iUser2)
+		if ((g_iObserverMode == OBS_IN_EYE || gHUD.m_Spectator.m_pip->value == INSET_IN_EYE) &&
+			ent->index == g_iObserverTarget)
 			return 0; // don't draw the player we are following in eye
 	}
 
@@ -142,9 +142,9 @@ void HUD_ProcessPlayerState(struct entity_state_s* dst, const struct entity_stat
 		g_iPlayerClass = dst->playerclass;
 		g_iTeamNumber = dst->team;
 
-		g_iUser1 = src->iuser1;
-		g_iUser2 = src->iuser2;
-		g_iUser3 = src->iuser3;
+		g_iObserverMode = src->iuser1;
+		g_iObserverTarget = src->iuser2;
+		g_iObserverTarget2 = src->iuser3;
 	}
 }
 
@@ -191,9 +191,9 @@ void HUD_TxferPredictionData(struct entity_state_s* ps, const struct entity_stat
 	{
 		// in specator mode we tell the engine who we want to spectate and how
 		// iuser3 is not used for duck prevention (since the spectator can't duck at all)
-		pcd->iuser1 = g_iUser1; // observer mode
-		pcd->iuser2 = g_iUser2; // first target
-		pcd->iuser3 = g_iUser3; // second target
+		pcd->iuser1 = g_iObserverMode; // observer mode
+		pcd->iuser2 = g_iObserverTarget; // first target
+		pcd->iuser3 = g_iObserverTarget2; // second target
 	}
 
 	memcpy(wd, pwd, WEAPON_LAST * sizeof(weapon_data_t));

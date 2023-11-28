@@ -62,9 +62,9 @@ extern bool g_iVisibleMouse;
 class CCommandMenu;
 int g_iPlayerClass;
 int g_iTeamNumber;
-int g_iUser1 = 0;
-int g_iUser2 = 0;
-int g_iUser3 = 0;
+int g_iObserverMode = 0;
+int g_iObserverTarget = 0;
+int g_iObserverTarget2 = 0;
 
 // Scoreboard positions
 #define SBOARD_INDENT_X XRES(104)
@@ -569,7 +569,7 @@ TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : P
 	CreateScoreBoard();
 	// Init command menus
 	m_iNumMenus = 0;
-	m_iCurrentTeamNumber = m_iUser1 = m_iUser2 = m_iUser3 = 0;
+	m_iCurrentTeamNumber = m_iObserverMode = m_iObserverTarget = m_iObserverTarget2 = 0;
 
 	m_StandardMenu = CreateCommandMenu("commandmenu.txt", false, CMENU_TOP, false, CMENU_SIZE_X, BUTTON_SIZE_Y, 0);
 	m_SpectatorOptionsMenu = CreateCommandMenu("spectatormenu.txt", true, PANEL_HEIGHT, true, CMENU_SIZE_X, BUTTON_SIZE_Y / 2, 0);						   // above bottom bar, flat design
@@ -1168,14 +1168,14 @@ void COM_FileBase(const char* in, char* out);
 
 void TeamFortressViewport::UpdateSpectatorPanel()
 {
-	m_iUser1 = g_iUser1;
-	m_iUser2 = g_iUser2;
-	m_iUser3 = g_iUser3;
+	m_iObserverMode = g_iObserverMode;
+	m_iObserverTarget = g_iObserverTarget;
+	m_iObserverTarget2 = g_iObserverTarget2;
 
 	if (!m_pSpectatorPanel)
 		return;
 
-	if (0 != g_iUser1 && 0 != gHUD.m_pCvarDraw->value && !gHUD.m_iIntermission) // don't draw in dev_overview mode
+	if (0 != g_iObserverMode && 0 != gHUD.m_pCvarDraw->value && !gHUD.m_iIntermission) // don't draw in dev_overview mode
 	{
 		char bottomText[128];
 		char helpString2[128];
@@ -1198,20 +1198,20 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 			gHUD.m_TextMessage.MsgFunc_TextMsg(NULL, strlen(tempString) + 1, tempString);
 		}
 
-		sprintf(bottomText, "#Spec_Mode%d", g_iUser1);
-		sprintf(helpString2, "#Spec_Mode%d", g_iUser1);
+		sprintf(bottomText, "#Spec_Mode%d", g_iObserverMode);
+		sprintf(helpString2, "#Spec_Mode%d", g_iObserverMode);
 
 		if (0 != gEngfuncs.IsSpectateOnly())
 			strcat(helpString2, " - HLTV");
 
 		// check if we're locked onto a target, show the player's name
-		if ((g_iUser2 > 0) && (g_iUser2 <= gEngfuncs.GetMaxClients()) && (g_iUser1 != OBS_ROAMING))
+		if ((g_iObserverTarget > 0) && (g_iObserverTarget <= gEngfuncs.GetMaxClients()) && (g_iObserverMode != OBS_ROAMING))
 		{
-			player = g_iUser2;
+			player = g_iObserverTarget;
 		}
 
 		// special case in free map and inset off, don't show names
-		if ((g_iUser1 == OBS_MAP_FREE) && 0 == gHUD.m_Spectator.m_pip->value)
+		if ((g_iObserverMode == OBS_MAP_FREE) && 0 == gHUD.m_Spectator.m_pip->value)
 			name = NULL;
 		else
 			name = g_PlayerInfoList[player].name;
@@ -1229,7 +1229,7 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 		}
 
 		// in first person mode colorize player names
-		if ((g_iUser1 == OBS_IN_EYE) && 0 != player)
+		if ((g_iObserverMode == OBS_IN_EYE) && 0 != player)
 		{
 			float* color = gHUD.GetClientColor(player);
 			int r = color[0] * 255;
@@ -1702,7 +1702,7 @@ void TeamFortressViewport::paintBackground()
 	}
 
 	// See if the Spectator Menu needs to be update
-	if ((g_iUser1 != m_iUser1 || g_iUser2 != m_iUser2) ||
+	if ((g_iObserverMode != m_iObserverMode || g_iObserverTarget != m_iObserverTarget) ||
 		(m_flSpectatorPanelLastUpdated < gHUD.m_flTime))
 	{
 		UpdateSpectatorPanel();
@@ -1772,7 +1772,7 @@ bool TeamFortressViewport::SlotInput(int iSlot)
 bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurrentBinding)
 {
 	// Enter gets out of Spectator Mode by bringing up the Team Menu
-	if (0 != m_iUser1 && 0 == gEngfuncs.Con_IsVisible())
+	if (0 != m_iObserverMode && 0 == gEngfuncs.Con_IsVisible())
 	{
 		if (down && (keynum == K_ENTER || keynum == K_KP_ENTER))
 			ShowVGUIMenu(MENU_TEAM);

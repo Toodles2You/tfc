@@ -494,9 +494,9 @@ private:
 	int			 m_iNumMenus;
 	int			 m_iCurrentTeamNumber;
 	int			 m_iCurrentPlayerClass;
-	int			 m_iUser1;
-	int			 m_iUser2;
-	int			 m_iUser3;
+	int			 m_iObserverMode;
+	int			 m_iObserverTarget;
+	int			 m_iObserverTarget2;
 
 	// VGUI Menus
 	void		 CreateTeamMenu( void );

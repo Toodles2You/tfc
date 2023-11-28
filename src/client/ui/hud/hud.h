@@ -692,6 +692,6 @@ extern CHud gHUD;
 
 extern int g_iPlayerClass;
 extern int g_iTeamNumber;
-extern int g_iUser1;
-extern int g_iUser2;
-extern int g_iUser3;
+extern int g_iObserverMode;
+extern int g_iObserverTarget;
+extern int g_iObserverTarget2;

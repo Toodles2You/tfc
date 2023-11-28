@@ -527,7 +527,7 @@ void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip)
 		return;
 	}
 
-	if (g_iUser1 != OBS_IN_EYE)
+	if (g_iObserverMode != OBS_IN_EYE)
 	{
 		// Is player dead???
 		if ((iId == -1) && (iClip == -1))
