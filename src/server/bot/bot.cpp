@@ -529,7 +529,7 @@ bool CBot::IsLocalPlayerWatchingMe( void ) const
 	if (player == NULL)
 		return false;
 
-	if (player->pev->flags & FL_SPECTATOR /*|| player->TeamNumber() == SPECTATOR*/)
+	if (player->IsObserver())
 	{
 		if (player->pev->iuser2 == myIndex)
 		{

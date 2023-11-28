@@ -348,7 +348,7 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 
 	// turn on color set 2  (color on,  no sound)
 	// turn on color set 2  (color on,  no sound)
-	if (player->IsObserver() && (teamonly))
+	if (player->IsSpectator() && (teamonly))
 		sprintf(text, "%c(SPEC) %s: ", 2, STRING(pEntity->v.netname));
 	else if (teamonly)
 		sprintf(text, "%c(TEAM) %s: ", 2, STRING(pEntity->v.netname));
@@ -386,13 +386,8 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 		if (g_VoiceGameMgr.PlayerHasBlockedPlayer(client, player))
 			continue;
 
-		if (!player->IsObserver() && teamonly && g_pGameRules->PlayerRelationship(client, CBaseEntity::Instance(pEntity)) != GR_TEAMMATE)
+		if (teamonly && g_pGameRules->PlayerRelationship(client, CBaseEntity::Instance(pEntity)) != GR_TEAMMATE)
 			continue;
-
-		// Spectators can only talk to other specs
-		if (player->IsObserver() && teamonly)
-			if (!client->IsObserver())
-				continue;
 
 		MessageBegin(MSG_ONE, gmsgSayText, client);
 		WriteByte(ENTINDEX(pEntity));

@@ -4445,7 +4445,7 @@ void EditNavAreas( NavEditCmdType cmd )
 						if (markedArea)
 						{
 							CBasePlayer *pLocalPlayer = static_cast<CBasePlayer *>(util::GetLocalPlayer());
-							if ( pLocalPlayer && /*pLocalPlayer->TeamNumber() == SPECTATOR &&*/ pLocalPlayer->pev->iuser1 == OBS_ROAMING )
+							if ( pLocalPlayer && pLocalPlayer->IsSpectator() && pLocalPlayer->pev->iuser1 == OBS_ROAMING )
 							{
 								Vector origin = *markedArea->GetCenter() + Vector( 0, 0, 0.75f * HumanHeight );
 								pLocalPlayer->SetOrigin( origin );

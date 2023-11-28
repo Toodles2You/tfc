@@ -54,7 +54,7 @@ void CBasePlayer::Observer_FindNextPlayer(bool bReverse)
 		if (pEnt == this)
 			continue;
 		// Don't spec observers or players who haven't picked a class yet
-		if (((CBasePlayer*)pEnt)->IsObserver() || (pEnt->pev->effects & EF_NODRAW) != 0)
+		if (!pEnt->IsPlayer())
 			continue;
 
 		// MOD AUTHORS: Add checks on target here.
@@ -235,7 +235,7 @@ void CBasePlayer::Observer_SetMode(int iMode)
 
 		if ((pEnt == this) || (pEnt == NULL))
 			m_hObserverTarget = NULL;
-		else if (((CBasePlayer*)pEnt)->IsObserver() || (pEnt->pev->effects & EF_NODRAW) != 0)
+		else if (!pEnt->IsPlayer())
 			m_hObserverTarget = NULL;
 	}
 

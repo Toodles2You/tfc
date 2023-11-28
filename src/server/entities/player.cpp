@@ -275,7 +275,7 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	pev->health -= flDamage;
 	pev->armorvalue -= flArmour;
 
-	if ((attacker->pev->flags & FL_CLIENT) != 0)
+	if (attacker->IsNetClient())
 	{
 		int flags = 0;
 
