@@ -1788,16 +1788,6 @@ bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurren
 		// Get number keys as Input for Team/Class menus
 		if (iMenuID == MENU_TEAM || iMenuID == MENU_CLASS)
 		{
-			// Escape gets you out of Team/Class menus if the Cancel button is visible
-			if (keynum == K_ESCAPE)
-			{
-				if ((iMenuID == MENU_TEAM && g_iTeamNumber != TEAM_UNASSIGNED) || (iMenuID == MENU_CLASS && g_iPlayerClass != PC_UNDEFINED))
-				{
-					HideTopMenu();
-					return false;
-				}
-			}
-
 			for (int i = '0'; i <= '9'; i++)
 			{
 				if (down && (keynum == i))
@@ -1809,7 +1799,7 @@ bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurren
 		}
 
 		// Grab enter keys to close TextWindows
-		if (down && (keynum == K_ENTER || keynum == K_KP_ENTER || keynum == K_SPACE || keynum == K_ESCAPE))
+		if (down && (keynum == K_ENTER || keynum == K_KP_ENTER || keynum == K_SPACE))
 		{
 			if (iMenuID == MENU_MAPBRIEFING || iMenuID == MENU_INTRO || iMenuID == MENU_CLASSHELP)
 			{
@@ -1845,13 +1835,6 @@ bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurren
 	// if we're in a command menu, try hit one of it's buttons
 	if (down && m_pCurrentCommandMenu)
 	{
-		// Escape hides the command menu
-		if (keynum == K_ESCAPE)
-		{
-			HideCommandMenu();
-			return false;
-		}
-
 		// only trap the number keys
 		if (keynum >= '0' && keynum <= '9')
 		{
