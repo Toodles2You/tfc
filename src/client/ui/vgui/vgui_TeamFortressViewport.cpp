@@ -1780,13 +1780,6 @@ bool TeamFortressViewport::SlotInput(int iSlot)
 // Direct Key Input
 bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurrentBinding)
 {
-	// Enter gets out of Spectator Mode by bringing up the Team Menu
-	if (0 != m_iObserverMode && 0 == gEngfuncs.Con_IsVisible())
-	{
-		if (down && (keynum == K_ENTER || keynum == K_KP_ENTER))
-			ShowVGUIMenu(MENU_TEAM);
-	}
-
 	// Open Text Window?
 	if (m_pCurrentMenu && 0 == gEngfuncs.Con_IsVisible())
 	{
