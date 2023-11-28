@@ -149,6 +149,16 @@ char* GetVGUITGAName(const char* pszName)
 	return gd;
 }
 
+void Viewport_ServerMOTD()
+{
+	if (g_iTeamNumber == TEAM_UNASSIGNED)
+	{
+		return;
+	}
+
+	gViewPort->ShowVGUIMenu(MENU_INTRO);
+}
+
 //================================================================
 // COMMAND MENU
 //================================================================
@@ -585,6 +595,8 @@ TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : P
 	m_pCommandMenus[m_PlayerMenu]->m_iSpectCmdMenu = true;
 
 	UpdatePlayerMenu(m_PlayerMenu);
+
+	gEngfuncs.pfnAddCommand("servermotd", Viewport_ServerMOTD);
 }
 
 //-----------------------------------------------------------------------------

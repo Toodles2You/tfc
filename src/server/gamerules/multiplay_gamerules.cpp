@@ -473,6 +473,19 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 
 	CGameRules::InitHUD(pl);
 
+	// Send down the team names
+	MessageBegin(MSG_ONE, gmsgTeamNames, pl);
+	WriteByte(m_numTeams);
+	for (auto t = m_teams.begin(); t != m_teams.end(); t++)
+	{
+		WriteString((*t).m_name.c_str());
+	}
+	MessageEnd();
+
+	MessageBegin(MSG_ONE, gmsgAllowSpec, pl);
+	WriteByte(AllowSpectators() ? 1 : 0);
+	MessageEnd();
+
 	// sending just one score makes the hud scoreboard active;  otherwise
 	// it is just disabled for single play
 	MessageBegin(MSG_ONE, gmsgScoreInfo, pl);

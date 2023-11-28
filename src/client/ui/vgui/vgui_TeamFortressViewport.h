@@ -1518,9 +1518,11 @@ public:
 		setVisible( false );
 		m_iIsActive = false;
 
-		if ( ( m_iMenuID == MENU_INTRO || m_iMenuID == MENU_MAPBRIEFING ) && GetNextMenu() == nullptr )
+		if (m_iMenuID == MENU_INTRO
+		 && GetNextMenu() == nullptr
+		 && g_iTeamNumber == TEAM_UNASSIGNED)
 		{
-			gEngfuncs.pfnClientCmd( "jointeam 5\n" );
+			gEngfuncs.pfnClientCmd("jointeam 5\n");
 		}
 
 		if ( m_iRemoveMe )

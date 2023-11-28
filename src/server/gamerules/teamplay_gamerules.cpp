@@ -186,15 +186,6 @@ void CHalfLifeTeamplay::InitHUD(CBasePlayer* pPlayer)
 
 	CHalfLifeMultiplay::InitHUD(pPlayer);
 
-	// Send down the team names
-	MessageBegin(MSG_ONE, gmsgTeamNames, pPlayer);
-	WriteByte(m_numTeams);
-	for (auto t = m_teams.begin(); t != m_teams.end(); t++)
-	{
-		WriteString((*t).m_name.c_str());
-	}
-	MessageEnd();
-
 	for (auto t = m_teams.begin(); t != m_teams.end(); t++)
 	{
 		MessageBegin(MSG_ONE, gmsgTeamScore, pPlayer);

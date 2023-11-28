@@ -36,6 +36,7 @@ inline int gmsgTeamInfo = 0;
 inline int gmsgTeamScore = 0;
 inline int gmsgGameMode = 0;
 inline int gmsgMOTD = 0;
+inline int gmsgVGUIMenu = 0;
 inline int gmsgServerName = 0;
 inline int gmsgAmmoPickup = 0;
 inline int gmsgWeapPickup = 0;
@@ -48,6 +49,7 @@ inline int gmsgSetFOV = 0;
 inline int gmsgShowMenu = 0;
 inline int gmsgGeigerRange = 0;
 inline int gmsgTeamNames = 0;
+inline int gmsgAllowSpec = 0;
 
 inline int gmsgWeapons = 0;
 

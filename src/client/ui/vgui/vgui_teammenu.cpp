@@ -142,6 +142,7 @@ CTeamMenuPanel::CTeamMenuPanel(int iTrans, bool iRemoveMe, int x, int y, int wid
 	m_pCancelButton = new CommandButton(CHudTextMessage::BufferedLocaliseTextString("#Menu_Cancel"), TEAMMENU_TOPLEFT_BUTTON_X, 0, TEAMMENU_BUTTON_SIZE_X, TEAMMENU_BUTTON_SIZE_Y);
 	m_pCancelButton->setParent(this);
 	m_pCancelButton->addActionSignal(new CMenuHandler_TextWindow(HIDE_TEXTWINDOW));
+	m_pCancelButton->addInputSignal(new CHandler_MenuButtonOver(this, 7));
 
 	// Create the Spectate button
 	m_pSpectateButton = new SpectateButton(CHudTextMessage::BufferedLocaliseTextString("#Menu_Spectate"), TEAMMENU_TOPLEFT_BUTTON_X, 0, TEAMMENU_BUTTON_SIZE_X, TEAMMENU_BUTTON_SIZE_Y, true);
@@ -239,9 +240,17 @@ void CTeamMenuPanel::Update()
 		}
 	}
 
-	// Move the AutoAssign button into place
-	m_pButtons[5]->setPos(TEAMMENU_TOPLEFT_BUTTON_X, iYPos);
-	iYPos += TEAMMENU_BUTTON_SIZE_Y + TEAMMENU_BUTTON_SPACER_Y;
+	// AutoAssign button
+	if (gViewPort->GetNumberOfTeams() == 1)
+	{
+		m_pButtons[5]->setVisible(false);
+	}
+	else
+	{
+		m_pButtons[5]->setPos(TEAMMENU_TOPLEFT_BUTTON_X, iYPos);
+		m_pButtons[5]->setVisible(true);
+		iYPos += TEAMMENU_BUTTON_SIZE_Y + TEAMMENU_BUTTON_SPACER_Y;
+	}
 
 	// Spectate button
 	if (m_pSpectateButton->IsNotValid())
@@ -316,15 +325,15 @@ void CTeamMenuPanel::Update()
 // Key inputs
 bool CTeamMenuPanel::SlotInput(int iSlot)
 {
-	// Check for AutoAssign
-	if (iSlot == 5)
+	// AutoAssign
+	if (iSlot == 5 && m_pButtons[5]->isVisible())
 	{
 		m_pButtons[5]->fireActionSignal();
 		return true;
 	}
 
 	// Spectate
-	if (iSlot == 6)
+	if (iSlot == 6 && m_pSpectateButton->isVisible())
 	{
 		m_pSpectateButton->fireActionSignal();
 		return true;
@@ -369,16 +378,20 @@ void CTeamMenuPanel::SetActiveInfo(int iInput)
 {
 	// Remove all the Info panels and bring up the specified one
 	m_pSpectateButton->setArmed(false);
+	m_pCancelButton->setArmed(false);
 	for (int i = 1; i <= 5; i++)
 	{
 		m_pButtons[i]->setArmed(false);
 		m_pTeamInfoPanel[i]->setVisible(false);
 	}
 
-	// 6 is Spectate
 	if (iInput == 6)
 	{
 		m_pSpectateButton->setArmed(true);
+	}
+	else if (iInput == 7)
+	{
+		m_pCancelButton->setArmed(true);
 	}
 	else
 	{
