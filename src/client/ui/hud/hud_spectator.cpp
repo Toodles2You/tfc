@@ -544,7 +544,6 @@ bool CHudSpectator::VidInit()
 	m_hsprUnkownMap = SPR_Load("sprites/tile.spr");
 	m_hsprBeam = SPR_Load("sprites/laserbeam.spr");
 	m_hsprCamera = SPR_Load("sprites/camera.spr");
-	m_hCrosshair = SPR_Load("sprites/crosshairs.spr");
 
 	m_lastPrimaryObject = m_lastSecondaryObject = 0;
 	m_flNextObserverInput = 0.0f;
@@ -1153,21 +1152,6 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 			m_mapZoom = m_OverviewData.zoom;
 			m_mapOrigin = m_OverviewData.origin;
 			break;
-		}
-
-		if ((g_iObserverMode == OBS_IN_EYE) || (g_iObserverMode == OBS_ROAMING))
-		{
-			m_crosshairRect.left = 24;
-			m_crosshairRect.top = 0;
-			m_crosshairRect.right = 48;
-			m_crosshairRect.bottom = 24;
-
-			SetCrosshair(m_hCrosshair, m_crosshairRect, 255, 255, 255);
-		}
-		else
-		{
-			memset(&m_crosshairRect, 0, sizeof(m_crosshairRect));
-			SetCrosshair(0, m_crosshairRect, 0, 0, 0);
 		}
 
 		gViewPort->MsgFunc_ResetFade(NULL, 0, NULL);
@@ -1816,24 +1800,6 @@ void CHudSpectator::CheckSettings()
 			gEngfuncs.pfnServerCmd(chatcmd);
 		}
 	}
-
-	// HL/TFC has no oberserver corsshair, so set it client side
-	if ((g_iObserverMode == OBS_IN_EYE) || (g_iObserverMode == OBS_ROAMING))
-	{
-		m_crosshairRect.left = 24;
-		m_crosshairRect.top = 0;
-		m_crosshairRect.right = 48;
-		m_crosshairRect.bottom = 24;
-
-		SetCrosshair(m_hCrosshair, m_crosshairRect, 255, 255, 255);
-	}
-	else
-	{
-		memset(&m_crosshairRect, 0, sizeof(m_crosshairRect));
-		SetCrosshair(0, m_crosshairRect, 0, 0, 0);
-	}
-
-
 
 	// if we are a real player on server don't allow inset window
 	// in First Person mode since this is our resticted forcecamera mode 2

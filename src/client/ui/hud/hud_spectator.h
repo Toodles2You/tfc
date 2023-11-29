@@ -138,9 +138,6 @@ private:
 	HSPRITE m_hsprViewcone;
 	HSPRITE m_hsprUnkownMap;
 	HSPRITE m_hsprBeam;
-	HSPRITE m_hCrosshair;
-
-	Rect m_crosshairRect;
 
 	struct model_s* m_MapSprite; // each layer image is saved in one sprite, where each tile is a sprite frame
 	float m_flNextObserverInput;
