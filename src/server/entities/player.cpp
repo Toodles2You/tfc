@@ -1030,9 +1030,9 @@ void CBasePlayer::PlayerDeathFrame()
 	// If the player has been dead for 5 seconds,
 	// send the player off to an intermission
 	// camera until they respawn.
-	if (bIsMultiplayer && (m_afPhysicsFlags & PFLAG_OBSERVER) == 0 && (m_fDeadTime + 5.0f) <= gpGlobals->time)
+	if (bIsMultiplayer && !IsObserver() && (m_fDeadTime + 5.0f) <= gpGlobals->time)
 	{
-		StartDeathCam();
+		StartObserver();
 	}
 
 	if (pev->deadflag != DEAD_RESPAWNABLE)
@@ -1061,64 +1061,6 @@ void CBasePlayer::PlayerDeathFrame()
 			SERVER_COMMAND("reload\n");
 		}
 	}
-}
-
-//=========================================================
-// StartDeathCam - find an intermission spot and send the
-// player off into observer mode
-//=========================================================
-void CBasePlayer::StartDeathCam()
-{
-	edict_t *pSpot, *pNewSpot;
-	int iRand;
-
-	if (pev->view_ofs == g_vecZero)
-	{
-		// don't accept subsequent attempts to StartDeathCam()
-		return;
-	}
-
-	pSpot = FIND_ENTITY_BY_CLASSNAME(NULL, "info_intermission");
-
-	if (!FNullEnt(pSpot))
-	{
-		// at least one intermission spot in the world.
-		iRand = RANDOM_LONG(0, 3);
-
-		while (iRand > 0)
-		{
-			pNewSpot = FIND_ENTITY_BY_CLASSNAME(pSpot, "info_intermission");
-
-			if (pNewSpot)
-			{
-				pSpot = pNewSpot;
-			}
-
-			iRand--;
-		}
-
-		SetOrigin(pSpot->v.origin);
-		pev->angles = pev->v_angle = pSpot->v.v_angle;
-	}
-	else
-	{
-		// no intermission spot. Push them up in the air, looking down at their corpse
-		TraceResult tr;
-		util::TraceLine(pev->origin, pev->origin + Vector(0, 0, 128), util::ignore_monsters, this, &tr);
-
-		SetOrigin(tr.vecEndPos);
-		pev->angles = pev->v_angle = util::VecToAngles(tr.vecEndPos - pev->origin);
-	}
-
-	// start death cam
-
-	m_afPhysicsFlags |= PFLAG_OBSERVER;
-	pev->view_ofs = g_vecZero;
-	pev->fixangle = 1;
-	pev->solid = SOLID_NOT;
-	pev->takedamage = DAMAGE_NO;
-	pev->movetype = MOVETYPE_NONE;
-	pev->modelindex = 0;
 }
 
 void CBasePlayer::StartObserver()
@@ -1150,10 +1092,8 @@ void CBasePlayer::StartObserver()
 
 	// Setup flags
 	m_iHideHUD = (HIDEHUD_HEALTH | HIDEHUD_WEAPONS);
-	m_afPhysicsFlags |= PFLAG_OBSERVER;
 	pev->effects = EF_NODRAW;
 	pev->view_ofs = g_vecZero;
-	pev->angles = pev->v_angle = vecViewAngle;
 	pev->fixangle = 1;
 	pev->solid = SOLID_NOT;
 	pev->takedamage = DAMAGE_NO;
@@ -1164,12 +1104,6 @@ void CBasePlayer::StartObserver()
 
 	// Clear out the status bar
 	m_fInitHUD = true;
-
-	// Remove all the player's stuff
-	RemoveAllWeapons();
-
-	// Move them to the new position
-	SetOrigin(vecPosition);
 
 	// Find a player to watch
 	m_flNextObserverInput = 0;

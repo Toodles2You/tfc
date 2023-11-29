@@ -39,7 +39,6 @@
 //
 #define PFLAG_ONTRAIN (1 << 1)
 #define PFLAG_USING (1 << 4)	// Using a continuous entity
-#define PFLAG_OBSERVER (1 << 5) // player is locked in stationary cam mode. Spectators can move, observers can't.
 
 typedef enum
 {
@@ -186,7 +185,6 @@ public:
 	virtual void ImpulseCommands();
 	void CheatImpulseCommands(int iImpulse);
 
-	void StartDeathCam();
 	void StartObserver();
 
 	void AddPoints(int score, bool bAllowNegativeScore) override;

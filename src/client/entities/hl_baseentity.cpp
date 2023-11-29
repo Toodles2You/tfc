@@ -120,7 +120,6 @@ void CBasePlayer::RemoveAllWeapons() {}
 void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim) {}
 void CBasePlayer::WaterMove() {}
 void CBasePlayer::PlayerDeathFrame() {}
-void CBasePlayer::StartDeathCam() {}
 void CBasePlayer::StartObserver() {}
 void CBasePlayer::PlayerUse() {}
 void CBasePlayer::CheckTimeBasedDamage() {}
