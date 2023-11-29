@@ -177,6 +177,7 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 
 	data.iuser1 = pev->iuser1;
 	data.iuser2 = pev->iuser2;
+	data.iuser3 = pev->iuser3;
 #endif
 
 	data.m_iId = (m_pActiveWeapon != nullptr) ? m_pActiveWeapon->m_iId : WEAPON_NONE;
@@ -217,6 +218,7 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 
 	pev->iuser1 = data.iuser1;
 	pev->iuser2 = data.iuser2;
+	pev->iuser3 = data.iuser3;
 
 	if (m_pActiveWeapon == nullptr)
 	{

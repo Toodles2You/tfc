@@ -13,6 +13,7 @@
 #include "pmtrace.h"
 #include "pm_shared.h"
 #include "Exports.h"
+#include "view.h"
 
 #include "particleman.h"
 extern IParticleMan* g_pParticleMan;
@@ -145,6 +146,13 @@ void HUD_ProcessPlayerState(struct entity_state_s* dst, const struct entity_stat
 	{
 		g_iPlayerClass = dst->playerclass;
 		g_iTeamNumber = dst->team;
+
+		if (g_iObserverMode != src->iuser1
+		 || g_iObserverTarget != src->iuser2
+		 || g_iObserverTarget2 != src->iuser3)
+		{
+			V_ResetChaseCam();
+		}
 
 		g_iObserverMode = src->iuser1;
 		g_iObserverTarget = src->iuser2;

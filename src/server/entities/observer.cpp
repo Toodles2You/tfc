@@ -85,12 +85,15 @@ void CBasePlayer::Observer_HandleButtons()
 	if (m_flNextObserverInput > gpGlobals->time)
 		return;
 
+	if (pev->iuser1 == OBS_DEATHCAM)
+		return;
+
 	// Jump changes from modes: Chase to Roaming
 	if ((m_afButtonPressed & IN_JUMP) != 0)
 	{
 		if (IsSpectator())
 		{
-			Observer_SetMode((pev->iuser1 + 1) % OBS_MODES);
+			Observer_SetMode((pev->iuser1 + 1) % OBS_DEATHCAM);
 		}
 		else
 		{
@@ -119,7 +122,7 @@ void CBasePlayer::Observer_HandleButtons()
 
 void CBasePlayer::Observer_CheckTarget()
 {
-	if (pev->iuser1 == OBS_ROAMING)
+	if (pev->iuser1 == OBS_ROAMING || pev->iuser1 == OBS_DEATHCAM)
 		return;
 
 	// try to find a traget if we have no current one
@@ -150,9 +153,13 @@ void CBasePlayer::Observer_CheckTarget()
 	}
 
 	// check taget
-	if (target->pev->deadflag == DEAD_DEAD)
+	if (!target->IsAlive())
 	{
-		if ((target->m_fDeadTime + 2.0f) < gpGlobals->time)
+		if (pev->iuser1 == OBS_IN_EYE)
+		{
+			Observer_SetMode(OBS_CHASE_FREE);
+		}
+		if ((target->m_fDeadTime + 3.0f) < gpGlobals->time)
 		{
 			// 3 secs after death change target
 			Observer_FindNextPlayer(false);
@@ -211,7 +218,6 @@ void CBasePlayer::Observer_CheckProperties()
 // Attempt to change the observer mode
 void CBasePlayer::Observer_SetMode(int iMode)
 {
-
 	// Just abort if we're changing to the mode we're already in
 	if (iMode == pev->iuser1)
 		return;

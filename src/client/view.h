@@ -10,3 +10,4 @@
 void V_StartPitchDrift();
 void V_StopPitchDrift();
 void V_PunchAxis(int axis, float punch);
+void V_ResetChaseCam();

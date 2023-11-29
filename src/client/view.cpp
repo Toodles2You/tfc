@@ -792,47 +792,56 @@ void V_GetChaseOrigin(float* angles, float* origin, float distance, float* retur
 	v_lastDistance = Distance(trace->endpos, origin); // real distance without offset
 }
 
-/*void V_GetDeathCam(cl_entity_t * ent1, cl_entity_t * ent2, float * angle, float * origin)
+void V_GetDeathCam(int victim, int killer, float* cl_angles, float* origin, float* angle)
 {
-	float newAngle[3]; float newOrigin[3]; 
+	float newAngle[3];
+	float newOrigin[3];
 
 	float distance = 168.0f;
 
-	v_lastDistance+= v_frametime * 96.0f;	// move unit per seconds back
+	cl_entity_t* victimEnt = gEngfuncs.GetEntityByIndex(victim);
+	cl_entity_t* killerEnt = nullptr;
+	if (killer != 0)
+	{
+		killerEnt = gEngfuncs.GetEntityByIndex(killer);
+	}
 
-	if ( v_resetCamera )
+	v_lastDistance += v_frametime * 96.0f; // move unit per seconds back
+
+	if (v_resetCamera)
 		v_lastDistance = 64.0f;
 
-	if ( distance > v_lastDistance )
+	if (distance > v_lastDistance)
 		distance = v_lastDistance;
 
-	VectorCopy(ent1->origin, newOrigin);
+	VectorCopy(victimEnt->origin, newOrigin);
 
-	if ( ent1->player )
-		newOrigin[2]+= 17; // head level of living player
+	if (victimEnt->player)
+		newOrigin[2] += 17; // head level of living player
 
 	// get new angle towards second target
-	if ( ent2 )
+	if (killerEnt != nullptr && killerEnt != victimEnt)
 	{
-		VectorSubtract( ent2->origin, ent1->origin, newAngle );
-		VectorAngles( newAngle, newAngle );
+		VectorSubtract(killerEnt->origin, victimEnt->origin, newAngle);
+		VectorAngles(newAngle, newAngle);
 		newAngle[0] = -newAngle[0];
+		VectorCopy(newAngle, cl_angles);
 	}
 	else
 	{
 		// if no second target is given, look down to dead player
-		newAngle[0] = 90.0f;
-		newAngle[1] = 0.0f;
-		newAngle[2] = 0;
+		newAngle[PITCH] = 90.0F;
+		newAngle[YAW] = angle[YAW];
+		newAngle[ROLL] = 0.0F;
 	}
 
 	// and smooth view
-	V_SmoothInterpolateAngles( v_lastAngles, newAngle, angle, 120.0f );
-			
-	V_GetChaseOrigin( angle, newOrigin, distance, origin );
+	V_SmoothInterpolateAngles(v_lastAngles, newAngle, angle, 120.0f);
+
+	V_GetChaseOrigin(angle, newOrigin, distance, origin);
 
 	VectorCopy(angle, v_lastAngles);
-}*/
+}
 
 void V_GetSingleTargetCam(cl_entity_t* ent1, float* angle, float* origin)
 {
@@ -1392,6 +1401,14 @@ void V_CalcSpectatorRefdef(struct ref_params_s* pparams)
 		case OBS_MAP_CHASE:
 			pparams->onlyClientDraw = 1;
 			V_GetMapChasePosition(gHUD.GetObserverTarget(), v_cl_angles, v_origin, v_angles);
+			break;
+
+		case OBS_DEATHCAM:
+#if 1
+			V_GetChasePos(gHUD.GetObserverTarget(), v_cl_angles, v_origin, v_angles);
+#else
+			V_GetDeathCam(gHUD.GetObserverTarget(), gHUD.GetObserverTarget2(), v_cl_angles, v_origin, v_angles);
+#endif
 			break;
 		}
 

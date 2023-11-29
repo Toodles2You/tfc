@@ -517,8 +517,9 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 	m_iFOV = 0;
 
 	m_iObserverLastMode = OBS_CHASE_FREE;
-	pev->iuser2 = attacker->entindex();
-	pev->iuser3 = 0;
+	pev->iuser1 = OBS_DEATHCAM;
+	pev->iuser2 = entindex();
+	pev->iuser3 = attacker->entindex();
 
 	pev->solid = SOLID_NOT;
 	pev->effects |= EF_NODRAW;
@@ -1030,7 +1031,9 @@ void CBasePlayer::PlayerDeathFrame()
 	// If the player has been dead for 5 seconds,
 	// send the player off to an intermission
 	// camera until they respawn.
-	if (bIsMultiplayer && !IsObserver() && (m_fDeadTime + 5.0f) <= gpGlobals->time)
+	if (bIsMultiplayer
+	 && (!IsObserver() || pev->iuser1 == OBS_DEATHCAM)
+	 && (m_fDeadTime + 5.0f) <= gpGlobals->time)
 	{
 		StartObserver();
 	}

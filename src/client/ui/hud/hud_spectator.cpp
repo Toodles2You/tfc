@@ -1020,7 +1020,7 @@ void CHudSpectator::HandleButtonsDown(int ButtonPressed)
 		// Jump changes main window modes
 		if ((ButtonPressed & IN_JUMP) != 0)
 		{
-			newMainMode = (newMainMode + 1) % OBS_MODES;
+			newMainMode = (newMainMode + 1) % OBS_DEATHCAM;
 		}
 
 		// Attack moves to the next player
