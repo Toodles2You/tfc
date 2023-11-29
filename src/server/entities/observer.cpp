@@ -88,23 +88,14 @@ void CBasePlayer::Observer_HandleButtons()
 	// Jump changes from modes: Chase to Roaming
 	if ((m_afButtonPressed & IN_JUMP) != 0)
 	{
-		if (pev->iuser1 == OBS_CHASE_LOCKED)
-			Observer_SetMode(OBS_CHASE_FREE);
-
-		else if (pev->iuser1 == OBS_CHASE_FREE)
-			Observer_SetMode(OBS_IN_EYE);
-
-		else if (pev->iuser1 == OBS_IN_EYE)
-			Observer_SetMode(OBS_ROAMING);
-
-		else if (pev->iuser1 == OBS_ROAMING)
-			Observer_SetMode(OBS_MAP_FREE);
-
-		else if (pev->iuser1 == OBS_MAP_FREE)
-			Observer_SetMode(OBS_MAP_CHASE);
-
+		if (IsSpectator())
+		{
+			Observer_SetMode((pev->iuser1 + 1) % OBS_MODES);
+		}
 		else
-			Observer_SetMode(OBS_CHASE_FREE); // don't use OBS_CHASE_LOCKED anymore
+		{
+			Observer_SetMode((pev->iuser1 + 1) % OBS_ROAMING);
+		}
 
 		m_flNextObserverInput = gpGlobals->time + 0.2;
 	}
@@ -226,8 +217,16 @@ void CBasePlayer::Observer_SetMode(int iMode)
 		return;
 
 	// is valid mode ?
-	if (iMode < OBS_CHASE_LOCKED || iMode > OBS_MAP_CHASE)
-		iMode = OBS_IN_EYE; // now it is
+	if (IsSpectator())
+	{
+		if (iMode < OBS_CHASE_FREE || iMode > OBS_MAP_CHASE)
+			iMode = OBS_CHASE_FREE;
+	}
+	else
+	{
+		if (iMode != OBS_CHASE_FREE && iMode != OBS_IN_EYE)
+			iMode = OBS_CHASE_FREE;
+	}
 	// verify observer target again
 	if (m_hObserverTarget != NULL)
 	{
@@ -250,7 +249,10 @@ void CBasePlayer::Observer_SetMode(int iMode)
 		// if we didn't find a valid target switch to roaming
 		if (m_hObserverTarget == NULL)
 		{
-			util::ClientPrint(this, HUD_PRINTCENTER, "#Spec_NoTarget");
+			if (IsSpectator())
+			{
+				util::ClientPrint(this, HUD_PRINTCENTER, "#Spec_NoTarget");
+			}
 			pev->iuser1 = OBS_ROAMING;
 		}
 	}
@@ -261,15 +263,19 @@ void CBasePlayer::Observer_SetMode(int iMode)
 		pev->iuser2 = 0;
 	}
 	else
+	{
 		pev->iuser2 = ENTINDEX(m_hObserverTarget->edict());
+	}
 
 	pev->iuser3 = 0; // clear second target from death cam
 
 	// print spepctaor mode on client screen
-
-	char modemsg[16];
-	sprintf(modemsg, "#Spec_Mode%i", pev->iuser1);
-	util::ClientPrint(this, HUD_PRINTCENTER, modemsg);
+	if (IsSpectator())
+	{
+		char modemsg[16];
+		sprintf(modemsg, "#Spec_Mode%i", pev->iuser1);
+		util::ClientPrint(this, HUD_PRINTCENTER, modemsg);
+	}
 
 	m_iObserverLastMode = iMode;
 }

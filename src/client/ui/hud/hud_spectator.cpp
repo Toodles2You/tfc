@@ -47,41 +47,8 @@ int g_iObserverMode = OBS_NONE;
 int g_iObserverTarget = 0;
 int g_iObserverTarget2 = 0;
 
-#if 0 
-const char *GetSpectatorLabel ( int iMode )
-{
-	switch ( iMode )
-	{
-		case OBS_CHASE_LOCKED:
-			return "#OBS_CHASE_LOCKED";
-
-		case OBS_CHASE_FREE:
-			return "#OBS_CHASE_FREE";
-
-		case OBS_ROAMING:
-			return "#OBS_ROAMING";
-		
-		case OBS_IN_EYE:
-			return "#OBS_IN_EYE";
-
-		case OBS_MAP_FREE:
-			return "#OBS_MAP_FREE";
-
-		case OBS_MAP_CHASE:
-			return "#OBS_MAP_CHASE";
-
-		case OBS_NONE:
-		default:
-			return "#OBS_NONE";
-	}
-}
-
-#endif
-
 void SpectatorMode()
 {
-
-
 	if (gEngfuncs.Cmd_Argc() <= 1)
 	{
 		gEngfuncs.Con_Printf("usage:  spec_mode <Main Mode> [<Inset Mode>]\n");
@@ -1054,23 +1021,7 @@ void CHudSpectator::HandleButtonsDown(int ButtonPressed)
 		// Jump changes main window modes
 		if ((ButtonPressed & IN_JUMP) != 0)
 		{
-			if (g_iObserverMode == OBS_CHASE_LOCKED)
-				newMainMode = OBS_CHASE_FREE;
-
-			else if (g_iObserverMode == OBS_CHASE_FREE)
-				newMainMode = OBS_IN_EYE;
-
-			else if (g_iObserverMode == OBS_IN_EYE)
-				newMainMode = OBS_ROAMING;
-
-			else if (g_iObserverMode == OBS_ROAMING)
-				newMainMode = OBS_MAP_FREE;
-
-			else if (g_iObserverMode == OBS_MAP_FREE)
-				newMainMode = OBS_MAP_CHASE;
-
-			else
-				newMainMode = OBS_CHASE_FREE; // don't use OBS_CHASE_LOCKED anymore
+			newMainMode = (newMainMode + 1) % OBS_MODES;
 		}
 
 		// Attack moves to the next player
@@ -1135,7 +1086,7 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 	// inset mode is handled only clients side
 	m_pip->value = iNewInsetMode;
 
-	if (iNewMainMode < OBS_CHASE_LOCKED || iNewMainMode > OBS_MAP_CHASE)
+	if (iNewMainMode < OBS_CHASE_FREE || iNewMainMode > OBS_MAP_CHASE)
 	{
 		gEngfuncs.Con_Printf("Invalid spectator mode.\n");
 		return;
@@ -1171,12 +1122,12 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 
 		switch (iNewMainMode)
 		{
-		case OBS_CHASE_LOCKED:
-			g_iObserverMode = OBS_CHASE_LOCKED;
-			break;
-
 		case OBS_CHASE_FREE:
 			g_iObserverMode = OBS_CHASE_FREE;
+			break;
+
+		case OBS_IN_EYE:
+			g_iObserverMode = OBS_IN_EYE;
 			break;
 
 		case OBS_ROAMING: // jump to current vJumpOrigin/angle
@@ -1187,10 +1138,6 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 				gEngfuncs.SetViewAngles(vJumpAngles);
 				iJumpSpectator = true;
 			}
-			break;
-
-		case OBS_IN_EYE:
-			g_iObserverMode = OBS_IN_EYE;
 			break;
 
 		case OBS_MAP_FREE:
@@ -1970,7 +1917,7 @@ void CHudSpectator::InitHUDData()
 
 	Reset();
 
-	SetModes(OBS_CHASE_LOCKED, INSET_OFF);
+	SetModes(OBS_CHASE_FREE, INSET_OFF);
 
 	g_iObserverTarget = 0; // fake not target until first camera command
 

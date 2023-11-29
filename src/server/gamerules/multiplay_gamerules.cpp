@@ -1380,8 +1380,7 @@ bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, b
 	{
 		m_spectators.AddPlayer(pPlayer);
 
-		auto spawn = GetPlayerSpawnSpot(pPlayer);
-		pPlayer->StartObserver(spawn->m_origin, spawn->m_angles);
+		pPlayer->StartObserver();
 	}
 
 	return true;

@@ -1368,12 +1368,12 @@ void V_CalcSpectatorRefdef(struct ref_params_s* pparams)
 
 		switch (gHUD.GetObserverMode())
 		{
-		case OBS_CHASE_LOCKED:
-			V_GetChasePos(gHUD.GetObserverTarget(), NULL, v_origin, v_angles);
-			break;
-
 		case OBS_CHASE_FREE:
 			V_GetChasePos(gHUD.GetObserverTarget(), v_cl_angles, v_origin, v_angles);
+			break;
+
+		case OBS_IN_EYE:
+			V_CalcNormalRefdef(pparams);
 			break;
 
 		case OBS_ROAMING:
@@ -1382,10 +1382,6 @@ void V_CalcSpectatorRefdef(struct ref_params_s* pparams)
 
 			// override values if director is active
 			gHUD.m_Spectator.GetDirectorCamera(v_origin, v_angles);
-			break;
-
-		case OBS_IN_EYE:
-			V_CalcNormalRefdef(pparams);
 			break;
 
 		case OBS_MAP_FREE:

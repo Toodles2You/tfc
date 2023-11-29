@@ -516,6 +516,10 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 
 	m_iFOV = 0;
 
+	m_iObserverLastMode = OBS_CHASE_FREE;
+	pev->iuser2 = attacker->entindex();
+	pev->iuser3 = 0;
+
 	pev->solid = SOLID_NOT;
 	pev->effects |= EF_NODRAW;
 
@@ -1117,7 +1121,7 @@ void CBasePlayer::StartDeathCam()
 	pev->modelindex = 0;
 }
 
-void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle)
+void CBasePlayer::StartObserver()
 {
 	// clear any clientside entities attached to this player
 	MessageBegin(MSG_PAS, SVC_TEMPENTITY, pev->origin);
@@ -1133,6 +1137,12 @@ void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle)
 	{
 		m_pTank->Use(this, this, USE_OFF, 0);
 		m_pTank = NULL;
+	}
+
+	// Remove all the player's stuff
+	if (HasWeapons())
+	{
+		PackDeadPlayerWeapons();
 	}
 
 	// reset FOV
@@ -1356,6 +1366,10 @@ void CBasePlayer::PreThink()
 	// Observer Button Handling
 	if (IsObserver())
 	{
+		if (!IsSpectator())
+		{
+			PlayerDeathFrame();
+		}
 		Observer_HandleButtons();
 		Observer_CheckTarget();
 		Observer_CheckProperties();

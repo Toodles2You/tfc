@@ -187,7 +187,7 @@ public:
 	void CheatImpulseCommands(int iImpulse);
 
 	void StartDeathCam();
-	void StartObserver(Vector vecPosition, Vector vecViewAngle);
+	void StartObserver();
 
 	void AddPoints(int score, bool bAllowNegativeScore) override;
 	void AddPointsToTeam(int score, bool bAllowNegativeScore) override;

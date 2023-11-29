@@ -121,7 +121,7 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim) {}
 void CBasePlayer::WaterMove() {}
 void CBasePlayer::PlayerDeathFrame() {}
 void CBasePlayer::StartDeathCam() {}
-void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle) {}
+void CBasePlayer::StartObserver() {}
 void CBasePlayer::PlayerUse() {}
 void CBasePlayer::CheckTimeBasedDamage() {}
 void CBasePlayer::Precache() {}
