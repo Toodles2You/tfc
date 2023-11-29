@@ -102,6 +102,10 @@ bool CHLBot::IsVisible(const Vector* pos, bool testFOV = false)
 
 bool CHLBot::IsVisible(CBasePlayer* player, bool testFOV = false, unsigned char* visParts = NULL)
 {
+    if (!player->IsPlayer() || !player->IsAlive())
+    {
+        return false;
+    }
     TraceResult tr;
     auto start = GetGunPosition();
     auto end = player->BodyTarget(start);
