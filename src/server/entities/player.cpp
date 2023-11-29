@@ -1300,15 +1300,15 @@ void CBasePlayer::PreThink()
 	// Observer Button Handling
 	if (IsObserver())
 	{
-		if (!IsSpectator())
-		{
-			PlayerDeathFrame();
-		}
 		Observer_HandleButtons();
 		Observer_CheckTarget();
 		Observer_CheckProperties();
 		pev->impulse = 0;
-		return;
+
+		if (IsSpectator())
+		{
+			return;
+		}
 	}
 
 	if (!IsAlive())
