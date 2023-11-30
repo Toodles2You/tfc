@@ -1072,7 +1072,9 @@ void CBasePlayer::PlayerDeathFrame()
 
 	if (bIsMultiplayer)
 	{
-		if (forcerespawn.value > 0.0f || m_afButtonPressed != 0)
+		if (forcerespawn.value > 0.0f
+		 || m_afButtonPressed != 0
+		 || !IsNetClient())
 		{
 			m_afButtonPressed = 0;
 			pev->button = 0;
