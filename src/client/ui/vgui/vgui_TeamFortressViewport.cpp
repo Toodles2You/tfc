@@ -643,7 +643,6 @@ void TeamFortressViewport::Initialize()
 	for (int i = 0; i < 5; i++)
 	{
 		m_iValidClasses[i] = 0;
-		strcpy(m_sTeamNames[i], "");
 	}
 
 	App::getInstance()->setCursorOveride(App::getInstance()->getScheme()->getCursor(Scheme::scu_none));
@@ -1876,18 +1875,18 @@ bool TeamFortressViewport::MsgFunc_TeamNames(const char* pszName, int iSize, voi
 	{
 		int teamNum = i + 1;
 
-		gHUD.m_TextMessage.LocaliseTextString(READ_STRING(), m_sTeamNames[teamNum], MAX_TEAMNAME_SIZE);
+		gHUD.m_TextMessage.LocaliseTextString(READ_STRING(), g_TeamInfo[teamNum].name, MAX_TEAMNAME_SIZE);
 
 		// Set the team name buttons
 		if (m_pTeamButtons[i])
-			m_pTeamButtons[i]->setText(m_sTeamNames[teamNum]);
+			m_pTeamButtons[i]->setText(g_TeamInfo[teamNum].name);
 
 		// range check this value...m_pDisguiseButtons[5];
 		if (teamNum < 5)
 		{
 			// Set the disguise buttons
 			if (m_pDisguiseButtons[teamNum])
-				m_pDisguiseButtons[teamNum]->setText(m_sTeamNames[teamNum]);
+				m_pDisguiseButtons[teamNum]->setText(g_TeamInfo[teamNum].name);
 		}
 	}
 
@@ -1998,15 +1997,16 @@ bool TeamFortressViewport::MsgFunc_ServerName(const char* pszName, int iSize, vo
 bool TeamFortressViewport::MsgFunc_ScoreInfo(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
-	short cl = READ_BYTE();
-	short frags = READ_SHORT();
-	short deaths = READ_SHORT();
-	short playerclass = READ_SHORT();
-	short teamnumber = READ_SHORT();
+
+	auto cl = READ_BYTE();
+	auto score = READ_SHORT();
+	auto deaths = READ_SHORT();
+	auto playerclass = READ_BYTE();
+	auto teamnumber = READ_BYTE();
 
 	if (cl > 0 && cl <= MAX_PLAYERS_HUD)
 	{
-		g_PlayerExtraInfo[cl].frags = frags;
+		g_PlayerExtraInfo[cl].score = score;
 		g_PlayerExtraInfo[cl].deaths = deaths;
 		g_PlayerExtraInfo[cl].playerclass = playerclass;
 		g_PlayerExtraInfo[cl].teamnumber = teamnumber;
@@ -2032,51 +2032,17 @@ bool TeamFortressViewport::MsgFunc_ScoreInfo(const char* pszName, int iSize, voi
 //		string: team name
 //		short: teams kills
 //		short: teams deaths
-// if this message is never received, then scores will simply be the combined totals of the players.
+// if this message is never received, then scores will simply be thegViewPort->GetNumberOfTeams combined totals of the players.
 bool TeamFortressViewport::MsgFunc_TeamScore(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
-	char* TeamName = READ_STRING();
 
-	// find the team matching the name
-	int i;
-	for (i = 1; i <= m_pScoreBoard->m_iNumTeams; i++)
-	{
-		if (!stricmp(TeamName, g_TeamInfo[i].name))
-			break;
-	}
+	auto teamnumber = READ_BYTE();
+	auto score = READ_SHORT();
 
-	if (i > m_pScoreBoard->m_iNumTeams)
-		return true;
+	g_TeamInfo[teamnumber].score = score;
 
-	// use this new score data instead of combined player scoresw
-	g_TeamInfo[i].scores_overriden = true;
-	g_TeamInfo[i].frags = READ_SHORT();
-	g_TeamInfo[i].deaths = READ_SHORT();
-
-	return true;
-}
-
-// Message handler for TeamInfo message
-// accepts two values:
-//		byte: client number
-//		string: client team name
-bool TeamFortressViewport::MsgFunc_TeamInfo(const char* pszName, int iSize, void* pbuf)
-{
-	if (!m_pScoreBoard)
-		return true;
-
-	BEGIN_READ(pbuf, iSize);
-	short cl = READ_BYTE();
-
-	if (cl > 0 && cl <= MAX_PLAYERS_HUD)
-	{
-		// set the players team
-		strncpy(g_PlayerExtraInfo[cl].teamname, READ_STRING(), MAX_TEAM_NAME);
-	}
-
-	// rebuild the list of teams
-	m_pScoreBoard->RebuildTeams();
+	UpdateOnPlayerInfo();
 
 	return true;
 }
@@ -2084,19 +2050,6 @@ bool TeamFortressViewport::MsgFunc_TeamInfo(const char* pszName, int iSize, void
 void TeamFortressViewport::DeathMsg(int killer, int victim)
 {
 	m_pScoreBoard->DeathMsg(killer, victim);
-}
-
-bool TeamFortressViewport::MsgFunc_Spectator(const char* pszName, int iSize, void* pbuf)
-{
-	BEGIN_READ(pbuf, iSize);
-
-	short cl = READ_BYTE();
-	if (cl > 0 && cl <= MAX_PLAYERS_HUD)
-	{
-		g_IsSpectator[cl] = READ_BYTE();
-	}
-
-	return true;
 }
 
 bool TeamFortressViewport::MsgFunc_AllowSpec(const char* pszName, int iSize, void* pbuf)

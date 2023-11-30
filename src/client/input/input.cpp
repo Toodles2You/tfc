@@ -844,17 +844,6 @@ int CL_ButtonBits(bool bResetState)
 		bits |= IN_ALT1;
 	}
 
-	if ((in_score.state & 3) != 0)
-	{
-		bits |= IN_SCORE;
-	}
-
-	// Dead or in intermission? Shore scoreboard, too
-	if (CL_IsDead() || gHUD.m_iIntermission)
-	{
-		bits |= IN_SCORE;
-	}
-
 	if (bResetState)
 	{
 		in_attack.state &= ~2;

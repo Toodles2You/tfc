@@ -525,7 +525,6 @@ private:
 	int			m_iNumberOfTeams;
 	int			m_iBuildState;
 	bool		m_iRandomPC;
-	char		m_sTeamNames[5][MAX_TEAMNAME_SIZE];
 
 	// Localisation strings
 	char		m_sDetpackStrings[3][MAX_BUTTON_SIZE];
@@ -580,7 +579,7 @@ public:
 	int GetIsSettingDetpack() { return m_iIsSettingDetpack; };
 	int GetBuildState() { return m_iBuildState; };
 	bool IsRandomPC() { return m_iRandomPC; };
-	char *GetTeamName( int iTeam ) { return m_sTeamNames[iTeam]; };
+	char *GetTeamName( int iTeam ) { return g_TeamInfo[iTeam].name; };
 	bool GetAllowSpectators() { return m_iAllowSpectators; };
 
 	// Message Handlers
@@ -595,8 +594,6 @@ public:
 	bool MsgFunc_ServerName( const char *pszName, int iSize, void *pbuf );
 	bool MsgFunc_ScoreInfo( const char *pszName, int iSize, void *pbuf );
 	bool MsgFunc_TeamScore( const char *pszName, int iSize, void *pbuf );
-	bool MsgFunc_TeamInfo( const char *pszName, int iSize, void *pbuf );
-	bool MsgFunc_Spectator( const char *pszName, int iSize, void *pbuf );
 	bool MsgFunc_AllowSpec( const char *pszName, int iSize, void *pbuf );
 	bool MsgFunc_SpecFade( const char *pszName, int iSize, void *pbuf );	
 	bool MsgFunc_ResetFade( const char *pszName, int iSize, void *pbuf );	
@@ -1586,7 +1583,7 @@ private:
 	CommandButton		*m_pCancelButton;
 	ScrollPanel			*m_pScrollPanel;
 
-	CImageLabel			*m_pClassImages[MAX_TEAMS][PC_LASTCLASS];
+	CImageLabel			*m_pClassImages[TEAM_SPECTATORS][PC_LASTCLASS];
 
 	int					m_iCurrentInfo;
 

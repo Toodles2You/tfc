@@ -52,12 +52,14 @@ public:
 };
 static CMultiplayGameMgrHelper g_GameMgrHelper;
 
-CTeam::CTeam() : m_name{"spectators"}, m_score{0}, m_numPlayers{0}
+CTeam::CTeam()
+	: m_index{TEAM_SPECTATORS}, m_name{"spectators"}, m_score{0}, m_numPlayers{0}
 {
 	m_players.clear();
 }
 
-CTeam::CTeam(std::string name) : m_name{name}, m_score{0}, m_numPlayers{0}
+CTeam::CTeam(short index, std::string name)
+	: m_index{index}, m_name{name}, m_score{0}, m_numPlayers{0}
 {
 	m_players.clear();
 }
@@ -71,17 +73,12 @@ void CTeam::AddPlayer(CBasePlayer *player)
 
 	player->m_team = this;
 
-	MessageBegin(MSG_ALL, gmsgTeamInfo);
-	WriteByte(player->entindex());
-	WriteString(m_name.c_str());
-	MessageEnd();
-
 	MessageBegin(MSG_ALL, gmsgScoreInfo);
 	WriteByte(player->entindex());
 	WriteShort(player->pev->frags);
 	WriteShort(player->m_iDeaths);
-	WriteShort(player->PCNumber());
-	WriteShort(player->TeamNumber());
+	WriteByte(player->PCNumber());
+	WriteByte(player->TeamNumber());
 	MessageEnd();
 
 	m_players.push_back(player);
@@ -111,9 +108,8 @@ void CTeam::AddPoints(float score)
 	m_score += score;
 
 	MessageBegin(MSG_ALL, gmsgTeamScore);
-	WriteString(m_name.c_str());
+	WriteByte(m_index);
 	WriteShort(m_score);
-	WriteShort(0);
 	MessageEnd();
 }
 
@@ -131,7 +127,7 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	m_allowSpectators = (int)allow_spectators.value != 0;
 
 	m_teams.clear();
-	m_teams.push_back(CTeam{"players"});
+	m_teams.push_back(CTeam{TEAM_DEFAULT, "players"});
 	m_numTeams = 1;
 
 	RefreshSkillData();
@@ -478,8 +474,8 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 	WriteByte(ENTINDEX(pl->edict()));
 	WriteShort(0);
 	WriteShort(0);
-	WriteShort(PC_UNDEFINED);
-	WriteShort(TEAM_UNASSIGNED);
+	WriteByte(PC_UNDEFINED);
+	WriteByte(TEAM_UNASSIGNED);
 	MessageEnd();
 
 	SendMOTDToClient(pl);
@@ -496,8 +492,8 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 			WriteByte(i); // client number
 			WriteShort(plr->pev->frags);
 			WriteShort(plr->m_iDeaths);
-			WriteShort(plr->PCNumber());
-			WriteShort(plr->TeamNumber());
+			WriteByte(plr->PCNumber());
+			WriteByte(plr->TeamNumber());
 			MessageEnd();
 		}
 	}
@@ -723,8 +719,8 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer,
 	WriteByte(ENTINDEX(pVictim->edict()));
 	WriteShort(pVictim->pev->frags);
 	WriteShort(pVictim->m_iDeaths);
-	WriteShort(pVictim->PCNumber());
-	WriteShort(pVictim->TeamNumber());
+	WriteByte(pVictim->PCNumber());
+	WriteByte(pVictim->TeamNumber());
 	MessageEnd();
 
 	// killers score, if it's a player
@@ -734,8 +730,8 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer,
 		WriteByte(killer->entindex());
 		WriteShort(killer->pev->frags);
 		WriteShort(((CBasePlayer *)killer)->m_iDeaths);
-		WriteShort(killer->PCNumber());
-		WriteShort(killer->TeamNumber());
+		WriteByte(killer->PCNumber());
+		WriteByte(killer->TeamNumber());
 		MessageEnd();
 
 		// let the killer paint another decal as soon as they'd like.

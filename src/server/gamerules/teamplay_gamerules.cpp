@@ -52,8 +52,8 @@ CHalfLifeTeamplay::CHalfLifeTeamplay()
 	{
 		if (GetTeamIndex(name) == TEAM_UNASSIGNED)
 		{
-			m_teams.push_back(CTeam{name});
 			m_numTeams++;
+			m_teams.push_back(CTeam{m_numTeams, name});
 
 			if (m_numTeams == TEAM_SPECTATORS - 1)
 			{
@@ -189,25 +189,9 @@ void CHalfLifeTeamplay::InitHUD(CBasePlayer* pPlayer)
 	for (auto t = m_teams.begin(); t != m_teams.end(); t++)
 	{
 		MessageBegin(MSG_ONE, gmsgTeamScore, pPlayer);
-		WriteString((*t).m_name.c_str());
+		WriteByte((*t).m_index);
 		WriteShort((*t).m_score);
-		WriteShort(0);
 		MessageEnd();
-	}
-
-	int clientIndex = pPlayer->entindex();
-	// update this player with all the other players team info
-	// loop through all active players and send their team info to the new client
-	for (i = 1; i <= gpGlobals->maxClients; i++)
-	{
-		CBaseEntity* plr = util::PlayerByIndex(i);
-		if (plr && IsValidTeam(plr->TeamID()))
-		{
-			MessageBegin(MSG_ONE, gmsgTeamInfo, pPlayer);
-			WriteByte(plr->entindex());
-			WriteString(plr->TeamID());
-			MessageEnd();
-		}
 	}
 }
 

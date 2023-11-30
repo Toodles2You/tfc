@@ -1278,8 +1278,8 @@ void CBasePlayer::AddPoints(float score, bool bAllowNegativeScore)
 	WriteByte(ENTINDEX(edict()));
 	WriteShort(pev->frags);
 	WriteShort(m_iDeaths);
-	WriteShort(PCNumber());
-	WriteShort(TeamNumber());
+	WriteByte(PCNumber());
+	WriteByte(TeamNumber());
 	MessageEnd();
 }
 

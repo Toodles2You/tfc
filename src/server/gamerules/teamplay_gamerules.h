@@ -19,9 +19,8 @@
 #pragma once
 
 #define MAX_TEAMNAME_LENGTH 16
-#define MAX_TEAMS 32
 
-#define TEAMPLAY_TEAMLISTLENGTH (MAX_TEAMS * MAX_TEAMNAME_LENGTH)
+#define TEAMPLAY_TEAMLISTLENGTH ((TEAM_SPECTATORS - 1) * MAX_TEAMNAME_LENGTH)
 
 class CHalfLifeTeamplay : public CHalfLifeMultiplay
 {

@@ -238,7 +238,7 @@ protected:
 
 struct extra_player_info_t
 {
-	short frags;
+	short score;
 	short deaths;
 	short playerclass;
 	short health;
@@ -250,15 +250,10 @@ struct extra_player_info_t
 struct team_info_t
 {
 	char name[MAX_TEAM_NAME];
-	short frags;
-	short deaths;
-	short ping;
-	short packetloss;
+	short score;
 	bool ownteam;
 	short players;
 	bool already_drawn;
-	bool scores_overriden;
-	int teamnumber;
 };
 
 #include "player_info.h"

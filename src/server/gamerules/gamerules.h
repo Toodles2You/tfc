@@ -277,7 +277,7 @@ class CTeam
 {
 public:
 	CTeam();
-	CTeam(std::string name);
+	CTeam(short index, std::string name);
 
 	void AddPlayer(CBasePlayer *player);
 	void RemovePlayer(CBasePlayer *player);
@@ -285,6 +285,7 @@ public:
 	void AddPoints(float score = 1);
 
 public:
+	short m_index;
 	std::string m_name;
 	float m_score;
 	int m_numPlayers;

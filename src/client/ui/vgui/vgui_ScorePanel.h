@@ -21,15 +21,18 @@
 #define MAX_SCOREBOARD_TEAMS 5
 
 // Scoreboard cells
-#define COLUMN_TRACKER 0
-#define COLUMN_NAME 1
-#define COLUMN_CLASS 2
-#define COLUMN_KILLS 3
-#define COLUMN_DEATHS 4
-#define COLUMN_LATENCY 5
-#define COLUMN_VOICE 6
-#define COLUMN_BLANK 7
-#define NUM_COLUMNS 8
+enum
+{
+	COLUMN_TRACKER = 0,
+	COLUMN_NAME,
+	COLUMN_CLASS,
+	COLUMN_SCORE,
+	COLUMN_DEATHS,
+	COLUMN_LATENCY,
+	COLUMN_VOICE,
+	COLUMN_BLANK,
+	NUM_COLUMNS
+};
 #define NUM_ROWS (MAX_PLAYERS_HUD + (MAX_SCOREBOARD_TEAMS * 2))
 
 using namespace vgui;
@@ -252,7 +255,6 @@ private:
 	CLabelHeader* GetPlayerEntry(int x, int y) { return &m_PlayerEntries[x][y]; }
 
 public:
-	int m_iNumTeams;
 	int m_iPlayerNum;
 	int m_iShowscoresHeld;
 
@@ -270,8 +272,7 @@ public:
 	void Update();
 
 	void SortTeams();
-	void SortPlayers(int iTeam, char* team);
-	void RebuildTeams();
+	void SortPlayers(int team);
 
 	void FillGrid();
 

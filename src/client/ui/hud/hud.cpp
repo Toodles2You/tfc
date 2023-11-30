@@ -239,20 +239,6 @@ int __MsgFunc_TeamScore(const char* pszName, int iSize, void* pbuf)
 	return 0;
 }
 
-int __MsgFunc_TeamInfo(const char* pszName, int iSize, void* pbuf)
-{
-	if (gViewPort)
-		return static_cast<int>(gViewPort->MsgFunc_TeamInfo(pszName, iSize, pbuf));
-	return 0;
-}
-
-int __MsgFunc_Spectator(const char* pszName, int iSize, void* pbuf)
-{
-	if (gViewPort)
-		return static_cast<int>(gViewPort->MsgFunc_Spectator(pszName, iSize, pbuf));
-	return 0;
-}
-
 int __MsgFunc_SpecFade(const char* pszName, int iSize, void* pbuf)
 {
 	if (gViewPort)
@@ -301,9 +287,7 @@ void CHud::Init()
 	HOOK_MESSAGE(ServerName);
 	HOOK_MESSAGE(ScoreInfo);
 	HOOK_MESSAGE(TeamScore);
-	HOOK_MESSAGE(TeamInfo);
 
-	HOOK_MESSAGE(Spectator);
 	HOOK_MESSAGE(AllowSpec);
 
 	HOOK_MESSAGE(SpecFade);
