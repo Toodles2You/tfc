@@ -270,7 +270,7 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		return false;
 	}
 
-	if (attacker->IsPlayer())
+	if (attacker->IsClient())
 	{
 		if (attacker != m_hLastAttacker[0])
 		{

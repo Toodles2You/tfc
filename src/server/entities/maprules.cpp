@@ -177,7 +177,7 @@ void CGameScore::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE use
 		return;
 
 	// Only players can use this
-	if (pActivator->IsPlayer())
+	if (pActivator->IsClient())
 	{
 		if (AwardToTeam())
 		{
@@ -909,7 +909,7 @@ void CGamePlayerTeam::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 	if (!CanFireForActivator(pActivator))
 		return;
 
-	if (pActivator->IsPlayer())
+	if (pActivator->IsClient())
 	{
 		const char* pszTargetTeam = TargetTeamName(STRING(pev->target));
 		if (pszTargetTeam)

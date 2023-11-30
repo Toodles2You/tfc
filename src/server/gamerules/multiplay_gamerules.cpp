@@ -697,12 +697,12 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer,
 
 	util::FireTargets("game_playerdie", pVictim, pVictim, USE_TOGGLE, 0);
 
-	if (killer->IsPlayer())
+	if (killer->IsClient())
 	{
 		// if a player dies in a deathmatch game and the killer is a client, award the killer some points
 		killer->AddPoints(GetPointsForKill((CBasePlayer *)killer, pVictim), false);
 
-		if (accomplice != nullptr && accomplice->IsPlayer())
+		if (accomplice != nullptr && accomplice->IsClient())
 		{
 			killer->AddPoints(GetPointsForKill((CBasePlayer *)accomplice, pVictim, true), false);
 		}
@@ -724,7 +724,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer,
 	MessageEnd();
 
 	// killers score, if it's a player
-	if (killer->IsPlayer())
+	if (killer->IsClient())
 	{
 		MessageBegin(MSG_ALL, gmsgScoreInfo);
 		WriteByte(killer->entindex());
@@ -748,7 +748,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 	int killerIndex = 0;
 	int accompliceIndex = 0;
 
-	if ((killer->pev->flags & FL_CLIENT) != 0)
+	if (killer->IsClient())
 	{
 		killerIndex = killer->entindex();
 
@@ -780,7 +780,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 		killerWeapon = c + 1;
 	}
 
-	if (accomplice != nullptr && (accomplice->pev->flags & FL_CLIENT) != 0)
+	if (accomplice != nullptr && accomplice->IsClient())
 	{
 		accompliceIndex = accomplice->entindex();
 	}
@@ -831,7 +831,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 				killerWeapon);
 		}
 	}
-	else if ((killer->pev->flags & FL_CLIENT) != 0)
+	else if (killer->IsClient())
 	{
 		if (IsTeamplay())
 		{

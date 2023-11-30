@@ -144,6 +144,8 @@ public:
 	Vector BodyTarget(const Vector& posSrc) override { return Center() + pev->view_ofs * 0.8; } // position to shoot at
 	bool IsAlive() override { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
 
+	bool IsClient() override { return true; }
+
 	// Spectators should return false for this, they aren't "players" as far as game logic is concerned
 	bool IsPlayer() override { return (pev->effects & EF_NODRAW) == 0 && !IsSpectator() && !IsObserver(); }
 

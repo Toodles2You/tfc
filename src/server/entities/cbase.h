@@ -165,6 +165,7 @@ public:
 	virtual bool IsBSPModel() { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }
 	virtual bool HasTarget(string_t targetname) { return FStrEq(STRING(targetname), STRING(pev->target)); }
 	virtual bool IsInWorld();
+	virtual bool IsClient() { return false; }
 	virtual bool IsPlayer() { return false; }
 	virtual bool IsBot() { return false; }
 	virtual bool IsNetClient() { return false; }

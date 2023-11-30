@@ -223,7 +223,7 @@ void CBaseDelay::UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float val
 		// This wasn't in the release build of Half-Life.  We should have moved m_hActivator into this class
 		// but changing member variable hierarchy would break save/restore without some ugly code.
 		// This code is not as ugly as that code
-		if (pActivator && pActivator->IsPlayer()) // If a player activates, then save it
+		if (pActivator && pActivator->IsClient()) // If a player activates, then save it
 		{
 			pTemp->pev->owner = pActivator->edict();
 		}

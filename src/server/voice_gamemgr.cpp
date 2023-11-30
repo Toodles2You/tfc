@@ -217,7 +217,7 @@ void CVoiceGameMgr::UpdateMasks()
 	for (int iClient = 0; iClient < m_nMaxPlayers; iClient++)
 	{
 		CBaseEntity* pEnt = util::PlayerByIndex(iClient + 1);
-		if (!pEnt || !pEnt->IsPlayer())
+		if (!pEnt || !pEnt->IsClient())
 			continue;
 
 		// Request the state of their "VModEnable" cvar.

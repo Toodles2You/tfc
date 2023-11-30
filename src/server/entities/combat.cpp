@@ -274,7 +274,7 @@ void CBasePlayer::FireBullets(
 				&tr,
 				DMG_BULLET | DMG_AIMED | DMG_NEVERGIB);
 			
-			if ((hit->pev->flags & FL_CLIENT) != 0)
+			if (hit->IsClient())
 			{
 				traceEndPos[traceHits] = tr.vecEndPos;
 				traceHits++;
