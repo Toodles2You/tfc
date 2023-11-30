@@ -263,9 +263,6 @@ void CHalfLifeMultiplay::RefreshSkillData()
 	}
 }
 
-// longest the intermission can last, in seconds
-#define MAX_INTERMISSION_TIME 120
-
 //=========================================================
 //=========================================================
 void CHalfLifeMultiplay::Think()
@@ -279,25 +276,12 @@ void CHalfLifeMultiplay::Think()
 	int frags_remaining = 0;
 	int time_remaining = 0;
 
-	if (g_fGameOver) // someone else quit the game already
+	if (g_fGameOver)
 	{
-		// bounds check
-		int time = (int)CVAR_GET_FLOAT("mp_chattime");
-		if (time < 1)
-			CVAR_SET_STRING("mp_chattime", "1");
-		else if (time > MAX_INTERMISSION_TIME)
-			CVAR_SET_STRING("mp_chattime", util::dtos1(MAX_INTERMISSION_TIME));
-
-		m_flIntermissionEndTime = m_flIntermissionStartTime + mp_chattime.value;
-
-		// check to see if we should change levels now
-		if (m_flIntermissionEndTime < gpGlobals->time)
+		if (m_flIntermissionTime + mp_chattime.value <= gpGlobals->time)
 		{
-			if (m_iEndIntermissionButtonHit // check that someone has pressed a key, or the max intermission time is over
-				|| ((m_flIntermissionStartTime + MAX_INTERMISSION_TIME) < gpGlobals->time))
-				ChangeLevel(); // intermission is over
+			ChangeLevel();
 		}
-
 		return;
 	}
 
@@ -587,10 +571,6 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer* pPlayer)
 {
 	if (g_fGameOver)
 	{
-		// check for button presses
-		if ((pPlayer->m_afButtonPressed & (IN_DUCK | IN_ATTACK | IN_ATTACK2 | IN_USE | IN_JUMP)) != 0)
-			m_iEndIntermissionButtonHit = true;
-
 		// clear attack/use commands from player
 		pPlayer->m_afButtonPressed = 0;
 		pPlayer->pev->button = 0;
@@ -1392,18 +1372,9 @@ void CHalfLifeMultiplay::GoToIntermission()
 	MessageBegin(MSG_ALL, SVC_INTERMISSION);
 	MessageEnd();
 
-	// bounds check
-	int time = (int)CVAR_GET_FLOAT("mp_chattime");
-	if (time < 1)
-		CVAR_SET_STRING("mp_chattime", "1");
-	else if (time > MAX_INTERMISSION_TIME)
-		CVAR_SET_STRING("mp_chattime", util::dtos1(MAX_INTERMISSION_TIME));
-
-	m_flIntermissionEndTime = gpGlobals->time + ((int)mp_chattime.value);
-	m_flIntermissionStartTime = gpGlobals->time;
+	m_flIntermissionTime = gpGlobals->time;
 
 	g_fGameOver = true;
-	m_iEndIntermissionButtonHit = false;
 }
 
 #define MAX_RULE_BUFFER 1024

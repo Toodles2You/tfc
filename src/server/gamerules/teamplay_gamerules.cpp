@@ -78,7 +78,7 @@ void CHalfLifeTeamplay::Think()
 
 	g_VoiceGameMgr.Update(gpGlobals->frametime);
 
-	if (g_fGameOver) // someone else quit the game already
+	if (g_fGameOver)
 	{
 		CHalfLifeMultiplay::Think();
 		return;
