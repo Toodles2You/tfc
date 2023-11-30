@@ -287,3 +287,33 @@ public:
 
 	friend class CLabelHeader;
 };
+
+class ScoreBoard : public Panel, public vgui::CDefaultInputSignal
+{
+private:
+	Label m_TitleLabel;
+
+	CommandButton* m_pCloseButton;
+
+public:
+	int m_iPlayerNum;
+
+	int m_iLastKilledBy;
+	int m_fLastKillTime;
+
+public:
+	ScoreBoard(int x, int y, int wide, int tall);
+
+	void Initialize();
+	void Open();
+	void Update();
+
+	void DeathMsg(int killer, int victim);
+	void MouseOverCell(int row, int col);
+
+public:
+	void mousePressed(MouseCode code, Panel* panel) override;
+	void cursorMoved(int x, int y, Panel* panel) override;
+
+	friend class CLabelHeader;
+};

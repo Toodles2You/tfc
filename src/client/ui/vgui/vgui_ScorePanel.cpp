@@ -607,10 +607,12 @@ void CLabelHeader::paintBackground()
 	Color oldBg;
 	getBgColor(oldBg);
 
+#if 0
 	if (gViewPort->GetScoreBoard()->m_iHighlightRow == _row)
 	{
 		setBgColor(134, 91, 19, 0);
 	}
+#endif
 
 	Panel::paintBackground();
 
@@ -626,10 +628,12 @@ void CLabelHeader::paint()
 	Color oldFg;
 	getFgColor(oldFg);
 
+#if 0
 	if (gViewPort->GetScoreBoard()->m_iHighlightRow == _row)
 	{
 		setFgColor(255, 255, 255, 0);
 	}
+#endif
 
 	// draw text
 	int x, y, iwide, itall;
@@ -746,3 +750,116 @@ void CLabelHeader::calcAlignment(int iwide, int itall, int& x, int& y)
 	x += _offset[0];
 	y += _offset[1];
 }
+
+
+ScoreBoard::ScoreBoard(int x, int y, int wide, int tall) : Panel(x, y, wide, tall)
+{
+	CSchemeManager* pSchemes = gViewPort->GetSchemeManager();
+	SchemeHandle_t hTitleScheme = pSchemes->getSchemeHandle("Scoreboard Title Text");
+	SchemeHandle_t hSmallScheme = pSchemes->getSchemeHandle("Scoreboard Small Text");
+	Font* tfont = pSchemes->getFont(hTitleScheme);
+	Font* smallfont = pSchemes->getFont(hSmallScheme);
+
+	setBgColor(0, 0, 0, 96);
+
+	//m_pTrackerIcon = vgui_LoadTGANoInvertAlpha("gfx/vgui/640_scoreboardtracker.tga");
+
+	// Initialize the top title.
+	m_TitleLabel.setFont(tfont);
+	m_TitleLabel.setText("");
+	m_TitleLabel.setBgColor(0, 0, 0, 255);
+	m_TitleLabel.setFgColor(Scheme::sc_primary1);
+	m_TitleLabel.setContentAlignment(vgui::Label::a_west);
+
+	LineBorder* border = new LineBorder(Color(60, 60, 60, 128));
+	setBorder(border);
+	setPaintBorderEnabled(true);
+
+	int xpos = g_ColumnInfo[0].m_Width + 3;
+	if (ScreenWidth >= 640)
+	{
+		// only expand column size for res greater than 640
+		xpos = XRES(xpos);
+	}
+	m_TitleLabel.setBounds(xpos, 4, wide, SBOARD_TITLE_SIZE_Y);
+	m_TitleLabel.setContentFitted(false);
+	m_TitleLabel.setParent(this);
+
+	m_pCloseButton = new CommandButton("x", wide - XRES(12 + 4), YRES(2), XRES(12), YRES(12));
+	m_pCloseButton->setParent(this);
+	m_pCloseButton->addActionSignal(new CMenuHandler_StringCommandWatch("-showscores", true));
+	m_pCloseButton->setBgColor(0, 0, 0, 255);
+	m_pCloseButton->setFgColor(255, 255, 255, 0);
+	m_pCloseButton->setFont(tfont);
+	m_pCloseButton->setBoundKey((char)255);
+	m_pCloseButton->setContentAlignment(Label::a_center);
+
+	Initialize();
+}
+
+
+void ScoreBoard::Initialize()
+{
+	// Clear out scoreboard data
+	m_iLastKilledBy = 0;
+	m_fLastKillTime = 0;
+	m_iPlayerNum = 0;
+	memset(g_PlayerExtraInfo, 0, sizeof g_PlayerExtraInfo);
+	memset(g_TeamInfo, 0, sizeof g_TeamInfo);
+}
+
+
+void ScoreBoard::Open()
+{
+	Update();
+	setVisible(true);
+}
+
+
+void ScoreBoard::Update()
+{
+	int i;
+
+	// Set the title
+	if (gViewPort->m_szServerName)
+	{
+		char sz[MAX_SERVERNAME_LENGTH + 16];
+		sprintf(sz, "%s", gViewPort->m_szServerName);
+		m_TitleLabel.setText(sz);
+	}
+
+	gViewPort->GetAllPlayersInfo();
+
+	// SortPlayers();
+	// FillGrid();
+
+	if (gViewPort->m_pSpectatorPanel->m_menuVisible)
+	{
+		m_pCloseButton->setVisible(true);
+	}
+	else
+	{
+		m_pCloseButton->setVisible(false);
+	}
+}
+
+
+void ScoreBoard::DeathMsg(int killer, int victim)
+{
+}
+
+
+void ScoreBoard::MouseOverCell(int row, int col)
+{
+}
+
+
+void ScoreBoard::mousePressed(MouseCode code, Panel* panel)
+{
+}
+
+
+void ScoreBoard::cursorMoved(int x, int y, Panel* panel)
+{
+}
+

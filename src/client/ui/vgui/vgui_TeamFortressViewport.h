@@ -36,7 +36,7 @@
 using namespace vgui;
 
 class Cursor;
-class ScorePanel;
+class ScoreBoard;
 class SpectatorPanel;
 class CCommandMenu;
 class CommandLabel;
@@ -604,7 +604,7 @@ public:
 	virtual void paintBackground();
 
 	CSchemeManager *GetSchemeManager( void ) { return &m_SchemeManager; }
-	ScorePanel *GetScoreBoard( void ) { return m_pScoreBoard; }
+	ScoreBoard *GetScoreBoard( void ) { return m_pScoreBoard; }
 
 	void *operator new( size_t stAllocateBlock );
 
@@ -617,7 +617,7 @@ public:
 	int						m_SpectatorCameraMenu;
 	int						m_PlayerMenu; // a list of current player
 	CClassMenuPanel	*m_pClassMenu;
-	ScorePanel		*m_pScoreBoard;
+	ScoreBoard		*m_pScoreBoard;
 	SpectatorPanel *		m_pSpectatorPanel;
 	char			m_szServerName[ MAX_SERVERNAME_LENGTH ];
 };

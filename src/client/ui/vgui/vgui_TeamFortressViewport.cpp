@@ -1329,7 +1329,7 @@ void TeamFortressViewport::CreateScoreBoard()
 		ydent = SBOARD_INDENT_Y_400;
 	}
 
-	m_pScoreBoard = new ScorePanel(xdent, ydent, ScreenWidth - (xdent * 2), ScreenHeight - (ydent * 2));
+	m_pScoreBoard = new ScoreBoard(xdent, ydent, ScreenWidth - (xdent * 2), ScreenHeight - (ydent * 2));
 	m_pScoreBoard->setParent(this);
 	m_pScoreBoard->setVisible(false);
 }
