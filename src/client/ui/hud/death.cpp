@@ -262,9 +262,6 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 	strcpy(killedwith, "d_");
 	strncat(killedwith, READ_STRING(), 32);
 
-	if (gViewPort)
-		gViewPort->DeathMsg(killer, victim);
-
 	gHUD.m_Spectator.DeathMessage(victim);
 	int i, j;
 	DeathNoticeItem* item;

@@ -2047,11 +2047,6 @@ bool TeamFortressViewport::MsgFunc_TeamScore(const char* pszName, int iSize, voi
 	return true;
 }
 
-void TeamFortressViewport::DeathMsg(int killer, int victim)
-{
-	m_pScoreBoard->DeathMsg(killer, victim);
-}
-
 bool TeamFortressViewport::MsgFunc_AllowSpec(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);

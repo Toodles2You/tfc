@@ -74,32 +74,9 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 	Font* tfont = pSchemes->getFont(hTitleScheme);
 	Font* smallfont = pSchemes->getFont(hSmallScheme);
 
-	setBgColor(0, 0, 0, 96);
+	setPaintBackgroundEnabled(false);
 	m_pCurrentHighlightLabel = nullptr;
 	m_iHighlightRow = -1;
-
-	//m_pTrackerIcon = vgui_LoadTGANoInvertAlpha("gfx/vgui/640_scoreboardtracker.tga");
-
-	// Initialize the top title.
-	m_TitleLabel.setFont(tfont);
-	m_TitleLabel.setText("");
-	m_TitleLabel.setBgColor(0, 0, 0, 255);
-	m_TitleLabel.setFgColor(Scheme::sc_primary1);
-	m_TitleLabel.setContentAlignment(vgui::Label::a_west);
-
-	LineBorder* border = new LineBorder(Color(60, 60, 60, 128));
-	setBorder(border);
-	setPaintBorderEnabled(true);
-
-	int xpos = g_ColumnInfo[0].m_Width + 3;
-	if (ScreenWidth >= 640)
-	{
-		// only expand column size for res greater than 640
-		xpos = XRES(xpos);
-	}
-	m_TitleLabel.setBounds(xpos, 4, wide, SBOARD_TITLE_SIZE_Y);
-	m_TitleLabel.setContentFitted(false);
-	m_TitleLabel.setParent(this);
 
 	// Setup the header (labels like "name", "class", etc..).
 	m_HeaderGrid.SetDimensions(NUM_COLUMNS, 1);
@@ -189,32 +166,6 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 
 		m_PlayerList.AddItem(pGridRow);
 	}
-
-	m_pCloseButton = new CommandButton("x", wide - XRES(12 + 4), YRES(2), XRES(12), YRES(12));
-	m_pCloseButton->setParent(this);
-	m_pCloseButton->addActionSignal(new CMenuHandler_StringCommandWatch("-showscores", true));
-	m_pCloseButton->setBgColor(0, 0, 0, 255);
-	m_pCloseButton->setFgColor(255, 255, 255, 0);
-	m_pCloseButton->setFont(tfont);
-	m_pCloseButton->setBoundKey((char)255);
-	m_pCloseButton->setContentAlignment(Label::a_center);
-
-
-	Initialize();
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Called each time a new level is started.
-//-----------------------------------------------------------------------------
-void ScorePanel::Initialize()
-{
-	// Clear out scoreboard data
-	m_iLastKilledBy = 0;
-	m_fLastKillTime = 0;
-	m_iPlayerNum = 0;
-	memset(g_PlayerExtraInfo, 0, sizeof g_PlayerExtraInfo);
-	memset(g_TeamInfo, 0, sizeof g_TeamInfo);
 }
 
 bool HACK_GetPlayerUniqueID(int iPlayer, char playerID[16])
@@ -229,14 +180,6 @@ void ScorePanel::Update()
 {
 	int i;
 
-	// Set the title
-	if (gViewPort->m_szServerName)
-	{
-		char sz[MAX_SERVERNAME_LENGTH + 16];
-		sprintf(sz, "%s", gViewPort->m_szServerName);
-		m_TitleLabel.setText(sz);
-	}
-
 	m_iRows = 0;
 	gViewPort->GetAllPlayersInfo();
 
@@ -244,7 +187,6 @@ void ScorePanel::Update()
 	for (i = 0; i < MAX_PLAYERS_HUD; i++)
 	{
 		m_iSortedRows[i] = 0;
-		m_bHasBeenSorted[i] = false;
 	}
 
 	// If it's not teamplay, sort all the players. Otherwise, sort the teams.
@@ -254,15 +196,6 @@ void ScorePanel::Update()
 	m_PlayerList.SetScrollRange(m_iRows);
 
 	FillGrid();
-
-	if (gViewPort->m_pSpectatorPanel->m_menuVisible)
-	{
-		m_pCloseButton->setVisible(true);
-	}
-	else
-	{
-		m_pCloseButton->setVisible(false);
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -281,7 +214,9 @@ void ScorePanel::SortPlayers()
 
 		for (int i = 1; i < MAX_PLAYERS_HUD; i++)
 		{
-			if (m_bHasBeenSorted[i] == false && g_PlayerInfoList[i].name && g_PlayerExtraInfo[i].score >= highest_score)
+			if (!gViewPort->GetScoreBoard()->m_bHasBeenSorted[i]
+			 && g_PlayerInfoList[i].name
+			 && g_PlayerExtraInfo[i].score >= highest_score)
 			{
 				cl_entity_t* ent = gEngfuncs.GetEntityByIndex(i);
 
@@ -303,7 +238,7 @@ void ScorePanel::SortPlayers()
 
 		// Put this player in the sorted list
 		m_iSortedRows[m_iRows] = best_player;
-		m_bHasBeenSorted[best_player] = true;
+		gViewPort->GetScoreBoard()->m_bHasBeenSorted[best_player] = true;
 		m_iRows++;
 	}
 }
@@ -395,11 +330,6 @@ void ScorePanel::FillGrid()
 				pLabel->setFgColor(Scheme::sc_white);
 				pLabel->setBgColor(color[0] * 255, color[1] * 255, color[2] * 255, 196);
 			}
-			else if (m_iSortedRows[row] == m_iLastKilledBy && 0 != m_fLastKillTime && m_fLastKillTime > gHUD.m_flTime)
-			{
-				// Killer's name
-				pLabel->setBgColor(255, 0, 0, 255 - ((float)15 * (float)(m_fLastKillTime - gHUD.m_flTime)));
-			}
 
 			// Align
 			if (col == COLUMN_NAME || col == COLUMN_CLASS)
@@ -476,23 +406,6 @@ void ScorePanel::FillGrid()
 }
 
 
-//-----------------------------------------------------------------------------
-// Purpose: Setup highlights for player names in scoreboard
-//-----------------------------------------------------------------------------
-void ScorePanel::DeathMsg(int killer, int victim)
-{
-	// if we were the one killed,  or the world killed us, set the scoreboard to indicate suicide
-	if (victim == m_iPlayerNum || killer == 0)
-	{
-		m_iLastKilledBy = 0 != killer ? killer : m_iPlayerNum;
-		m_fLastKillTime = gHUD.m_flTime + 10; // display who we were killed by for 10 seconds
-
-		if (killer == m_iPlayerNum)
-			m_iLastKilledBy = m_iPlayerNum;
-	}
-}
-
-
 void ScorePanel::Open()
 {
 	Update();
@@ -551,6 +464,7 @@ void ScorePanel::mousePressed(MouseCode code, Panel* panel)
 	}
 }
 
+
 void ScorePanel::cursorMoved(int x, int y, Panel* panel)
 {
 	if (GetClientVoiceMgr()->IsInSquelchMode())
@@ -567,6 +481,7 @@ void ScorePanel::cursorMoved(int x, int y, Panel* panel)
 		}
 	}
 }
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Handles mouse movement over a cell
@@ -598,6 +513,7 @@ void ScorePanel::MouseOverCell(int row, int col)
 	m_pCurrentHighlightLabel = label;
 	m_iHighlightRow = row;
 }
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Label paint functions - take into account current highligh status
@@ -762,8 +678,6 @@ ScoreBoard::ScoreBoard(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 
 	setBgColor(0, 0, 0, 96);
 
-	//m_pTrackerIcon = vgui_LoadTGANoInvertAlpha("gfx/vgui/640_scoreboardtracker.tga");
-
 	// Initialize the top title.
 	m_TitleLabel.setFont(tfont);
 	m_TitleLabel.setText("");
@@ -794,6 +708,9 @@ ScoreBoard::ScoreBoard(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 	m_pCloseButton->setBoundKey((char)255);
 	m_pCloseButton->setContentAlignment(Label::a_center);
 
+	m_pScorePanel = new ScorePanel(0, 0, wide, tall);
+	m_pScorePanel->setParent(this);
+
 	Initialize();
 }
 
@@ -801,8 +718,6 @@ ScoreBoard::ScoreBoard(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 void ScoreBoard::Initialize()
 {
 	// Clear out scoreboard data
-	m_iLastKilledBy = 0;
-	m_fLastKillTime = 0;
 	m_iPlayerNum = 0;
 	memset(g_PlayerExtraInfo, 0, sizeof g_PlayerExtraInfo);
 	memset(g_TeamInfo, 0, sizeof g_TeamInfo);
@@ -818,9 +733,6 @@ void ScoreBoard::Open()
 
 void ScoreBoard::Update()
 {
-	int i;
-
-	// Set the title
 	if (gViewPort->m_szServerName)
 	{
 		char sz[MAX_SERVERNAME_LENGTH + 16];
@@ -830,22 +742,11 @@ void ScoreBoard::Update()
 
 	gViewPort->GetAllPlayersInfo();
 
-	// SortPlayers();
-	// FillGrid();
+	memset(m_bHasBeenSorted, 0, sizeof(m_bHasBeenSorted));
 
-	if (gViewPort->m_pSpectatorPanel->m_menuVisible)
-	{
-		m_pCloseButton->setVisible(true);
-	}
-	else
-	{
-		m_pCloseButton->setVisible(false);
-	}
-}
+	m_pScorePanel->Update();
 
-
-void ScoreBoard::DeathMsg(int killer, int victim)
-{
+	m_pCloseButton->setVisible(gViewPort->m_pSpectatorPanel->m_menuVisible);
 }
 
 

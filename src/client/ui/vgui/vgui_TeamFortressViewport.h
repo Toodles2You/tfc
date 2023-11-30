@@ -552,7 +552,6 @@ public:
 	bool KeyInput( bool down, int keynum, const char *pszCurrentBinding );
 	void InputPlayerSpecial( void );
 	void GetAllPlayersInfo( void );
-	void DeathMsg( int killer, int victim );
 
 	void ShowCommandMenu(int menuIndex);
 	void InputSignalHideCommandMenu( void );

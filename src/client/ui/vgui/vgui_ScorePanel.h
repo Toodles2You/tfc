@@ -232,16 +232,6 @@ class ScoreTablePanel;
 class ScorePanel : public Panel, public vgui::CDefaultInputSignal
 {
 private:
-	Label m_TitleLabel;
-
-	// Here is how these controls are arranged hierarchically.
-	// m_HeaderGrid
-	//     m_HeaderLabels
-
-	// m_PlayerGridScroll
-	//     m_PlayerGrid
-	//         m_PlayerEntries
-
 	CGrid m_HeaderGrid;
 	CLabelHeader m_HeaderLabels[NUM_COLUMNS]; // Labels above the
 	CLabelHeader* m_pCurrentHighlightLabel;
@@ -251,17 +241,9 @@ private:
 	CGrid m_PlayerGrids[MAX_PLAYERS_HUD];
 	CLabelHeader m_PlayerEntries[NUM_COLUMNS][MAX_PLAYERS_HUD];
 
-	CommandButton* m_pCloseButton;
-
 public:
-	int m_iPlayerNum;
-
 	int m_iRows;
 	int m_iSortedRows[MAX_PLAYERS_HUD];
-	bool m_bHasBeenSorted[MAX_PLAYERS_HUD];
-	int m_iLastKilledBy;
-	int m_fLastKillTime;
-
 
 public:
 	ScorePanel(int x, int y, int wide, int tall);
@@ -272,15 +254,10 @@ public:
 
 	void FillGrid();
 
-	void DeathMsg(int killer, int victim);
-
-	void Initialize();
-
 	void Open();
 
 	void MouseOverCell(int row, int col);
 
-	// InputSignal overrides.
 public:
 	void mousePressed(MouseCode code, Panel* panel) override;
 	void cursorMoved(int x, int y, Panel* panel) override;
@@ -293,13 +270,14 @@ class ScoreBoard : public Panel, public vgui::CDefaultInputSignal
 private:
 	Label m_TitleLabel;
 
+	ScorePanel* m_pScorePanel;
+
 	CommandButton* m_pCloseButton;
 
 public:
 	int m_iPlayerNum;
 
-	int m_iLastKilledBy;
-	int m_fLastKillTime;
+	bool m_bHasBeenSorted[MAX_PLAYERS_HUD];
 
 public:
 	ScoreBoard(int x, int y, int wide, int tall);
@@ -308,7 +286,6 @@ public:
 	void Open();
 	void Update();
 
-	void DeathMsg(int killer, int victim);
 	void MouseOverCell(int row, int col);
 
 public:
