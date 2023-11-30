@@ -17,9 +17,6 @@
 
 #include <ctype.h>
 
-#define MAX_SCORES 10
-#define MAX_SCOREBOARD_TEAMS 5
-
 // Scoreboard cells
 enum
 {
@@ -32,7 +29,6 @@ enum
 	COLUMN_BLANK,
 	NUM_COLUMNS
 };
-#define NUM_ROWS (MAX_PLAYERS_HUD + (MAX_SCOREBOARD_TEAMS * 2))
 
 using namespace vgui;
 
@@ -118,6 +114,11 @@ public:
 	~CLabelHeader()
 	{
 		delete _dualImage;
+	}
+
+	void setTeam(int team)
+	{
+		_team = team;
 	}
 
 	void setRow(int row)
@@ -214,6 +215,7 @@ public:
 
 private:
 	CTextImage2* _dualImage;
+	int _team;
 	int _row;
 	int _gap;
 	int _offset[2];
@@ -233,8 +235,6 @@ class ScorePanel : public Panel, public vgui::CDefaultInputSignal
 private:
 	CGrid m_HeaderGrid;
 	CLabelHeader m_HeaderLabels[NUM_COLUMNS];
-	CLabelHeader* m_pCurrentHighlightLabel;
-	int m_iHighlightRow;
 
 	vgui::CListBox m_PlayerList;
 	CGrid m_PlayerGrids[MAX_PLAYERS_HUD];
@@ -277,18 +277,13 @@ private:
 public:
 	bool m_bHasBeenSorted[MAX_PLAYERS_HUD];
 
+	int m_iHighlightTeam;
+	int m_iHighlightRow;
+
 public:
 	ScoreBoard(int x, int y, int wide, int tall);
 
 	void Initialize();
 	void Open();
 	void Update();
-
-	void MouseOverCell(int row, int col);
-
-public:
-	void mousePressed(MouseCode code, Panel* panel) override;
-	void cursorMoved(int x, int y, Panel* panel) override;
-
-	friend class CLabelHeader;
 };

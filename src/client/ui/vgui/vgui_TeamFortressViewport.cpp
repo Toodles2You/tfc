@@ -1714,10 +1714,12 @@ void TeamFortressViewport::paintBackground()
 	}
 
 	// Update the Scoreboard, if it's visible
-	if (m_pScoreBoard->isVisible() && (m_flScoreBoardLastUpdated < gHUD.m_flTime))
+	if (m_pScoreBoard->isVisible()
+	 && (m_flScoreBoardLastUpdated < gHUD.m_flTime
+	 || GetClientVoiceMgr()->IsInSquelchMode()))
 	{
 		m_pScoreBoard->Update();
-		m_flScoreBoardLastUpdated = gHUD.m_flTime + 0.5;
+		m_flScoreBoardLastUpdated = gHUD.m_flTime + 0.2;
 	}
 
 	int extents[4];

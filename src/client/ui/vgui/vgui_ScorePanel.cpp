@@ -76,8 +76,6 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall, int team) : Panel(x, y,
 	m_iTeamNumber = team;
 
 	setPaintBackgroundEnabled(false);
-	m_pCurrentHighlightLabel = nullptr;
-	m_iHighlightRow = -1;
 
 	// Setup the header (labels like "name", "class", etc..).
 	m_HeaderGrid.SetDimensions(NUM_COLUMNS, 1);
@@ -162,6 +160,7 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall, int team) : Panel(x, y,
 		for (int col = 0; col < NUM_COLUMNS; col++)
 		{
 			m_PlayerEntries[col][row].setContentFitted(false);
+			m_PlayerEntries[col][row].setTeam(m_iTeamNumber);
 			m_PlayerEntries[col][row].setRow(row);
 			m_PlayerEntries[col][row].addInputSignal(this);
 			pGridRow->SetEntry(col, 0, &m_PlayerEntries[col][row]);
@@ -280,12 +279,6 @@ void ScorePanel::FillGrid()
 	int x, y;
 	getApp()->getCursorPos(x, y);
 	cursorMoved(x, y, this);
-
-	// remove highlight row if we're not in squelch mode
-	if (!GetClientVoiceMgr()->IsInSquelchMode())
-	{
-		m_iHighlightRow = -1;
-	}
 
 	bool bNextRowIsGap = false;
 	int row;
@@ -437,46 +430,45 @@ void ScorePanel::mousePressed(MouseCode code, Panel* panel)
 
 	if (!GetClientVoiceMgr()->IsInSquelchMode())
 		return;
-	
-	if (m_iHighlightRow >= 0)
+
+	if (gViewPort->GetScoreBoard()->m_iHighlightTeam != m_iTeamNumber)
+		return;
+
+	int iPlayer = m_iSortedRows[gViewPort->GetScoreBoard()->m_iHighlightRow];
+	if (iPlayer <= 0)
+		return;
+
+	// print text message
+	hud_player_info_t* pl_info = &g_PlayerInfoList[iPlayer];
+
+	if (pl_info && pl_info->name && '\0' != pl_info->name[0])
 	{
-		// mouse has been pressed, toggle mute state
-		int iPlayer = m_iSortedRows[m_iHighlightRow];
-		if (iPlayer > 0)
+		char string[256];
+		if (GetClientVoiceMgr()->IsPlayerBlocked(iPlayer))
 		{
-			// print text message
-			hud_player_info_t* pl_info = &g_PlayerInfoList[iPlayer];
+			char string1[1024];
 
-			if (pl_info && pl_info->name && '\0' != pl_info->name[0])
-			{
-				char string[256];
-				if (GetClientVoiceMgr()->IsPlayerBlocked(iPlayer))
-				{
-					char string1[1024];
+			// remove mute
+			GetClientVoiceMgr()->SetPlayerBlockedState(iPlayer, false);
 
-					// remove mute
-					GetClientVoiceMgr()->SetPlayerBlockedState(iPlayer, false);
+			sprintf(string1, CHudTextMessage::BufferedLocaliseTextString("#Unmuted"), pl_info->name);
+			sprintf(string, "%c- %s\n", HUD_PRINTTALK, string1);
 
-					sprintf(string1, CHudTextMessage::BufferedLocaliseTextString("#Unmuted"), pl_info->name);
-					sprintf(string, "%c** %s\n", HUD_PRINTTALK, string1);
+			gHUD.m_TextMessage.MsgFunc_TextMsg(nullptr, strlen(string) + 1, string);
+		}
+		else
+		{
+			char string1[1024];
+			char string2[1024];
 
-					gHUD.m_TextMessage.MsgFunc_TextMsg(nullptr, strlen(string) + 1, string);
-				}
-				else
-				{
-					char string1[1024];
-					char string2[1024];
+			// mute the player
+			GetClientVoiceMgr()->SetPlayerBlockedState(iPlayer, true);
 
-					// mute the player
-					GetClientVoiceMgr()->SetPlayerBlockedState(iPlayer, true);
+			sprintf(string1, CHudTextMessage::BufferedLocaliseTextString("#Muted"), pl_info->name);
+			sprintf(string2, "%s", CHudTextMessage::BufferedLocaliseTextString("#No_longer_hear_that_player"));
+			sprintf(string, "%c- %s %s\n", HUD_PRINTTALK, string1, string2);
 
-					sprintf(string1, CHudTextMessage::BufferedLocaliseTextString("#Muted"), pl_info->name);
-					sprintf(string2, "%s", CHudTextMessage::BufferedLocaliseTextString("#No_longer_hear_that_player"));
-					sprintf(string, "%c** %s %s\n", HUD_PRINTTALK, string1, string2);
-
-					gHUD.m_TextMessage.MsgFunc_TextMsg(nullptr, strlen(string) + 1, string);
-				}
-			}
+			gHUD.m_TextMessage.MsgFunc_TextMsg(nullptr, strlen(string) + 1, string);
 		}
 	}
 }
@@ -510,11 +502,6 @@ void ScorePanel::MouseOverCell(int row, int col)
 	CLabelHeader* label = &m_PlayerEntries[col][row];
 
 	// clear the previously highlighted label
-	if (m_pCurrentHighlightLabel != label)
-	{
-		m_pCurrentHighlightLabel = nullptr;
-		m_iHighlightRow = -1;
-	}
 	if (!label)
 		return;
 
@@ -527,8 +514,8 @@ void ScorePanel::MouseOverCell(int row, int col)
 		return;
 
 	// setup the new highlight
-	m_pCurrentHighlightLabel = label;
-	m_iHighlightRow = row;
+	gViewPort->GetScoreBoard()->m_iHighlightTeam = m_iTeamNumber;
+	gViewPort->GetScoreBoard()->m_iHighlightRow = row;
 }
 
 
@@ -540,12 +527,11 @@ void CLabelHeader::paintBackground()
 	Color oldBg;
 	getBgColor(oldBg);
 
-#if 0
-	if (gViewPort->GetScoreBoard()->m_iHighlightRow == _row)
+	if (gViewPort->GetScoreBoard()->m_iHighlightTeam == _team
+	 && gViewPort->GetScoreBoard()->m_iHighlightRow == _row)
 	{
 		setBgColor(134, 91, 19, 0);
 	}
-#endif
 
 	Panel::paintBackground();
 
@@ -561,12 +547,11 @@ void CLabelHeader::paint()
 	Color oldFg;
 	getFgColor(oldFg);
 
-#if 0
-	if (gViewPort->GetScoreBoard()->m_iHighlightRow == _row)
+	if (gViewPort->GetScoreBoard()->m_iHighlightTeam == _team
+	 && gViewPort->GetScoreBoard()->m_iHighlightRow == _row)
 	{
 		setFgColor(255, 255, 255, 0);
 	}
-#endif
 
 	// draw text
 	int x, y, iwide, itall;
@@ -694,6 +679,8 @@ ScoreBoard::ScoreBoard(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 	Font* smallfont = pSchemes->getFont(hSmallScheme);
 
 	setBgColor(0, 0, 0, 96);
+	m_iHighlightTeam = -1;
+	m_iHighlightRow = -1;
 
 	// Initialize the top title.
 	m_TitleLabel.setFont(tfont);
@@ -772,9 +759,17 @@ void ScoreBoard::Open()
 	{
 		m_pScorePanels[TEAM_UNASSIGNED]->setVisible(false);
 
+		int wide, tall;
+		m_pScorePanels[TEAM_UNASSIGNED]->getSize(wide, tall);
+		if (gViewPort->GetNumberOfTeams() > 2)
+		{
+			tall /= 2;
+		}
+
 		for (int i = TEAM_DEFAULT; i < TEAM_SPECTATORS; i++)
 		{
 			m_pScorePanels[i]->setVisible(i <= gViewPort->GetNumberOfTeams());
+			m_pScorePanels[i]->setSize(wide, tall);
 		}
 	}
 
@@ -796,6 +791,9 @@ void ScoreBoard::Update()
 
 	memset(m_bHasBeenSorted, 0, sizeof(m_bHasBeenSorted));
 
+	m_iHighlightTeam = -1;
+	m_iHighlightRow = -1;
+
 	if (util::GetGameMode() < kGamemodeTeamplay)
 	{
 		m_pScorePanels[TEAM_UNASSIGNED]->Update();
@@ -809,20 +807,5 @@ void ScoreBoard::Update()
 	}
 
 	m_pCloseButton->setVisible(gViewPort->m_pSpectatorPanel->m_menuVisible);
-}
-
-
-void ScoreBoard::MouseOverCell(int row, int col)
-{
-}
-
-
-void ScoreBoard::mousePressed(MouseCode code, Panel* panel)
-{
-}
-
-
-void ScoreBoard::cursorMoved(int x, int y, Panel* panel)
-{
 }
 
