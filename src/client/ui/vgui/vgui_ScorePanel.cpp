@@ -63,14 +63,6 @@ static SBColumnInfo g_ColumnInfo[NUM_COLUMNS] =
 	{nullptr,		2,		Label::a_east}, // blank column to take up the slack
 };
 
-enum
-{
-	kTeamNo = 0,
-	kTeamYes,
-	kTeamSpectators,
-	kTeamBlank,
-};
-
 //-----------------------------------------------------------------------------
 // Purpose: Create the ScoreBoard panel
 //-----------------------------------------------------------------------------
@@ -174,7 +166,7 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 	m_PlayerList.setBgColor(0, 0, 0, 255);
 	m_PlayerList.setParent(this);
 
-	for (int row = 0; row < NUM_ROWS; row++)
+	for (int row = 0; row < MAX_PLAYERS_HUD; row++)
 	{
 		CGrid* pGridRow = &m_PlayerGrids[row];
 
@@ -249,25 +241,14 @@ void ScorePanel::Update()
 	gViewPort->GetAllPlayersInfo();
 
 	// Clear out sorts
-	for (i = 0; i < NUM_ROWS; i++)
-	{
-		m_iSortedRows[i] = 0;
-		m_iIsATeam[i] = kTeamNo;
-	}
 	for (i = 0; i < MAX_PLAYERS_HUD; i++)
 	{
+		m_iSortedRows[i] = 0;
 		m_bHasBeenSorted[i] = false;
 	}
 
 	// If it's not teamplay, sort all the players. Otherwise, sort the teams.
-	if (util::GetGameMode() < kGamemodeTeamplay)
-	{
-		SortPlayers(TEAM_UNASSIGNED);
-	}
-	else
-	{
-		SortTeams();
-	}
+	SortPlayers();
 
 	// set scrollbar range
 	m_PlayerList.SetScrollRange(m_iRows);
@@ -285,65 +266,11 @@ void ScorePanel::Update()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Sort all the teams
-//-----------------------------------------------------------------------------
-void ScorePanel::SortTeams()
-{
-	int i;
-	for (i = 1; i <= gViewPort->GetNumberOfTeams(); i++)
-	{
-		g_TeamInfo[i].already_drawn = false;
-	}
-
-	// Draw the teams
-	while (true)
-	{
-		int highest_score = -99999;
-		int lowest_deaths = 99999;
-		int best_team = 0;
-
-		for (i = 1; i <= gViewPort->GetNumberOfTeams(); i++)
-		{
-			if (!g_TeamInfo[i].already_drawn && g_TeamInfo[i].score >= highest_score)
-			{
-				if (g_TeamInfo[i].score > highest_score)
-				{
-					best_team = i;
-					highest_score = g_TeamInfo[i].score;
-				}
-			}
-		}
-
-		// draw the best team on the scoreboard
-		if (0 == best_team)
-			break;
-
-		// Put this team in the sorted list
-		m_iSortedRows[m_iRows] = best_team;
-		m_iIsATeam[m_iRows] = kTeamYes;
-		g_TeamInfo[best_team].already_drawn = true; // set the already_drawn to be true, so this team won't get sorted again
-		m_iRows++;
-
-		// Now sort all the players on this team
-		SortPlayers(best_team);
-	}
-
-
-	m_iIsATeam[m_iRows] = kTeamSpectators;
-	m_iRows++;
-
-	// Add all the players who aren't in a team yet into spectators
-	SortPlayers(TEAM_SPECTATORS);
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: Sort a list of players
 //-----------------------------------------------------------------------------
-void ScorePanel::SortPlayers(int team)
+void ScorePanel::SortPlayers()
 {
-	g_TeamInfo[team].players = 0;
-
-	// draw the players, in order,  and restricted to team if set
+	// draw the players in order
 	while (true)
 	{
 		// Find the top ranking player
@@ -358,7 +285,7 @@ void ScorePanel::SortPlayers(int team)
 			{
 				cl_entity_t* ent = gEngfuncs.GetEntityByIndex(i);
 
-				if (ent && (team == TEAM_UNASSIGNED || team == g_PlayerExtraInfo[i].teamnumber))
+				if (ent)
 				{
 					extra_player_info_t* pl_info = &g_PlayerExtraInfo[i];
 					if (pl_info->score > highest_score || pl_info->deaths < lowest_deaths)
@@ -374,17 +301,9 @@ void ScorePanel::SortPlayers(int team)
 		if (0 == best_player)
 			break;
 
-		g_TeamInfo[team].players++;
-
 		// Put this player in the sorted list
 		m_iSortedRows[m_iRows] = best_player;
 		m_bHasBeenSorted[best_player] = true;
-		m_iRows++;
-	}
-
-	if (team != TEAM_UNASSIGNED)
-	{
-		m_iIsATeam[m_iRows] = kTeamBlank;
 		m_iRows++;
 	}
 }
@@ -414,7 +333,7 @@ void ScorePanel::FillGrid()
 
 	bool bNextRowIsGap = false;
 	int row;
-	for (row = 0; row < NUM_ROWS; row++)
+	for (row = 0; row < MAX_PLAYERS_HUD; row++)
 	{
 		CGrid* pGridRow = &m_PlayerGrids[row];
 		pGridRow->SetRowUnderline(0, false, 0, 0, 0, 0, 0);
@@ -461,76 +380,25 @@ void ScorePanel::FillGrid()
 			hud_player_info_t* pl_info = nullptr;
 			team_info_t* team_info = nullptr;
 
-			if (m_iIsATeam[row] == kTeamBlank)
+			auto color = gHUD.GetClientColor(m_iSortedRows[row]);
+
+			// team color text for player names
+			pLabel->setFgColor(color[0] * 255, color[1] * 255, color[2] * 255, 0);
+
+			// Get the player's data
+			pl_info = &g_PlayerInfoList[m_iSortedRows[row]];
+
+			// Set background color
+			if (0 != pl_info->thisplayer) // if it is their name, draw it a different color
 			{
-				pLabel->setText(" ");
-				continue;
+				// Highlight this player
+				pLabel->setFgColor(Scheme::sc_white);
+				pLabel->setBgColor(color[0] * 255, color[1] * 255, color[2] * 255, 196);
 			}
-			else if (m_iIsATeam[row] == kTeamYes)
+			else if (m_iSortedRows[row] == m_iLastKilledBy && 0 != m_fLastKillTime && m_fLastKillTime > gHUD.m_flTime)
 			{
-				// Get the team's data
-				team_info = &g_TeamInfo[m_iSortedRows[row]];
-
-				auto color = gHUD.GetTeamColor(m_iSortedRows[row]);
-
-				// team color text for team names
-				pLabel->setFgColor(color[0] * 255, color[1] * 255, color[2] * 255, 0);
-
-				// different height for team header rows
-				rowheight = 20;
-				if (ScreenHeight >= 480)
-				{
-					rowheight = YRES(rowheight);
-				}
-				pLabel->setSize(pLabel->getWide(), rowheight);
-				pLabel->setFont(tfont);
-
-				pGridRow->SetRowUnderline(0,
-					true,
-					YRES(3),
-					color[0] * 255,
-					color[1] * 255,
-					color[2] * 255,
-					0);
-			}
-			else if (m_iIsATeam[row] == kTeamSpectators)
-			{
-				// grey text for spectators
-				pLabel->setFgColor(100, 100, 100, 0);
-
-				// different height for team header rows
-				rowheight = 20;
-				if (ScreenHeight >= 480)
-				{
-					rowheight = YRES(rowheight);
-				}
-				pLabel->setSize(pLabel->getWide(), rowheight);
-				pLabel->setFont(tfont);
-
-				pGridRow->SetRowUnderline(0, true, YRES(3), 100, 100, 100, 0);
-			}
-			else
-			{
-				auto color = gHUD.GetClientColor(m_iSortedRows[row]);
-
-				// team color text for player names
-				pLabel->setFgColor(color[0] * 255, color[1] * 255, color[2] * 255, 0);
-
-				// Get the player's data
-				pl_info = &g_PlayerInfoList[m_iSortedRows[row]];
-
-				// Set background color
-				if (0 != pl_info->thisplayer) // if it is their name, draw it a different color
-				{
-					// Highlight this player
-					pLabel->setFgColor(Scheme::sc_white);
-					pLabel->setBgColor(color[0] * 255, color[1] * 255, color[2] * 255, 196);
-				}
-				else if (m_iSortedRows[row] == m_iLastKilledBy && 0 != m_fLastKillTime && m_fLastKillTime > gHUD.m_flTime)
-				{
-					// Killer's name
-					pLabel->setBgColor(255, 0, 0, 255 - ((float)15 * (float)(m_fLastKillTime - gHUD.m_flTime)));
-				}
+				// Killer's name
+				pLabel->setBgColor(255, 0, 0, 255 - ((float)15 * (float)(m_fLastKillTime - gHUD.m_flTime)));
 			}
 
 			// Align
@@ -549,103 +417,51 @@ void ScorePanel::FillGrid()
 
 			// Fill out with the correct data
 			strcpy(sz, "");
-			if (kTeamNo != m_iIsATeam[row])
+
+			switch (col)
 			{
-				char sz2[128];
-
-				switch (col)
+			case COLUMN_NAME:
+				sprintf(sz, "%s  ", pl_info->name);
+				break;
+			case COLUMN_VOICE:
+				sz[0] = 0;
+				GetClientVoiceMgr()->UpdateSpeakerImage(pLabel, m_iSortedRows[row]);
+				break;
+			case COLUMN_CLASS:
+				sz[0] = '\0';
+				if (g_PlayerExtraInfo[m_iSortedRows[row]].dead)
 				{
-				case COLUMN_NAME:
-					if (m_iIsATeam[row] == kTeamSpectators)
-					{
-						sprintf(sz2, "%s", CHudTextMessage::BufferedLocaliseTextString("#Spectators"));
-					}
-					else
-					{
-						sprintf(sz2, "%s", gViewPort->GetTeamName(m_iSortedRows[row]));
-					}
-
-					strcpy(sz, sz2);
-
-					// Append the number of players
-					if (m_iIsATeam[row] == kTeamYes)
-					{
-						if (team_info->players == 1)
-						{
-							sprintf(sz2, "(%d %s)", team_info->players, CHudTextMessage::BufferedLocaliseTextString("#Player"));
-						}
-						else
-						{
-							sprintf(sz2, "(%d %s)", team_info->players, CHudTextMessage::BufferedLocaliseTextString("#Player_plural"));
-						}
-
-						pLabel->setText2(sz2);
-						pLabel->setFont2(smallfont);
-					}
-					break;
-				case COLUMN_VOICE:
-					break;
-				case COLUMN_CLASS:
-					break;
-				case COLUMN_SCORE:
-					if (m_iIsATeam[row] == kTeamYes)
-						sprintf(sz, "%d", team_info->score);
-					break;
-				case COLUMN_DEATHS:
-					break;
-				case COLUMN_LATENCY:
-					break;
-				default:
-					break;
+					sprintf(sz, "*%s*", CHudTextMessage::BufferedLocaliseTextString("#DEAD"));
 				}
-			}
-			else
-			{
-				switch (col)
+				break;
+
+			case COLUMN_TRACKER:
+				break;
+
+			case COLUMN_SCORE:
+				sprintf(sz, "%d", g_PlayerExtraInfo[m_iSortedRows[row]].score);
+				break;
+			case COLUMN_DEATHS:
+				break;
+			case COLUMN_LATENCY:
+				if (g_PlayerInfoList[m_iSortedRows[row]].m_nSteamID == 0)
 				{
-				case COLUMN_NAME:
-					sprintf(sz, "%s  ", pl_info->name);
-					break;
-				case COLUMN_VOICE:
-					sz[0] = 0;
-					GetClientVoiceMgr()->UpdateSpeakerImage(pLabel, m_iSortedRows[row]);
-					break;
-				case COLUMN_CLASS:
-					sz[0] = '\0';
-					if (g_PlayerExtraInfo[m_iSortedRows[row]].dead)
-					{
-						sprintf(sz, "*%s*", CHudTextMessage::BufferedLocaliseTextString("#DEAD"));
-					}
-					break;
-
-				case COLUMN_TRACKER:
-					break;
-
-				case COLUMN_SCORE:
-					sprintf(sz, "%d", g_PlayerExtraInfo[m_iSortedRows[row]].score);
-					break;
-				case COLUMN_DEATHS:
-					break;
-				case COLUMN_LATENCY:
-					if (g_PlayerInfoList[m_iSortedRows[row]].m_nSteamID == 0)
-					{
-						strcpy(sz, CHudTextMessage::BufferedLocaliseTextString("#BOT"));
-					}
-					else
-					{
-						sprintf(sz, "%d", g_PlayerInfoList[m_iSortedRows[row]].ping);
-					}
-					break;
-				default:
-					break;
+					strcpy(sz, CHudTextMessage::BufferedLocaliseTextString("#BOT"));
 				}
+				else
+				{
+					sprintf(sz, "%d", g_PlayerInfoList[m_iSortedRows[row]].ping);
+				}
+				break;
+			default:
+				break;
 			}
 
 			pLabel->setText(sz);
 		}
 	}
 
-	for (row = 0; row < NUM_ROWS; row++)
+	for (row = 0; row < MAX_PLAYERS_HUD; row++)
 	{
 		CGrid* pGridRow = &m_PlayerGrids[row];
 
@@ -740,7 +556,7 @@ void ScorePanel::cursorMoved(int x, int y, Panel* panel)
 	if (GetClientVoiceMgr()->IsInSquelchMode())
 	{
 		// look for which cell the mouse is currently over
-		for (int i = 0; i < NUM_ROWS; i++)
+		for (int i = 0; i < MAX_PLAYERS_HUD; i++)
 		{
 			int row, col;
 			if (m_PlayerGrids[i].getCellAtPoint(x, y, row, col))
@@ -768,10 +584,6 @@ void ScorePanel::MouseOverCell(int row, int col)
 		m_iHighlightRow = -1;
 	}
 	if (!label)
-		return;
-
-	// don't act on teams
-	if (m_iIsATeam[row] != kTeamNo)
 		return;
 
 	// don't act on disconnected players or ourselves

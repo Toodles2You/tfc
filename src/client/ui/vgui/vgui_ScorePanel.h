@@ -248,19 +248,16 @@ private:
 	int m_iHighlightRow;
 
 	vgui::CListBox m_PlayerList;
-	CGrid m_PlayerGrids[NUM_ROWS];						 // The grid with player and team info.
-	CLabelHeader m_PlayerEntries[NUM_COLUMNS][NUM_ROWS]; // Labels for the grid entries.
+	CGrid m_PlayerGrids[MAX_PLAYERS_HUD];
+	CLabelHeader m_PlayerEntries[NUM_COLUMNS][MAX_PLAYERS_HUD];
 
 	CommandButton* m_pCloseButton;
-	CLabelHeader* GetPlayerEntry(int x, int y) { return &m_PlayerEntries[x][y]; }
 
 public:
 	int m_iPlayerNum;
-	int m_iShowscoresHeld;
 
 	int m_iRows;
-	int m_iSortedRows[NUM_ROWS];
-	int m_iIsATeam[NUM_ROWS];
+	int m_iSortedRows[MAX_PLAYERS_HUD];
 	bool m_bHasBeenSorted[MAX_PLAYERS_HUD];
 	int m_iLastKilledBy;
 	int m_fLastKillTime;
@@ -271,8 +268,7 @@ public:
 
 	void Update();
 
-	void SortTeams();
-	void SortPlayers(int team);
+	void SortPlayers();
 
 	void FillGrid();
 
