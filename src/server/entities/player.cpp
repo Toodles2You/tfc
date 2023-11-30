@@ -270,6 +270,15 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		return false;
 	}
 
+	if (attacker->IsPlayer())
+	{
+		if (attacker != m_hLastAttacker[0])
+		{
+			m_hLastAttacker[1] = m_hLastAttacker[0];
+		}
+		m_hLastAttacker[0] = attacker;
+	}
+
 	// Do the damage!
 	pev->dmg_take += flDamage;
 	pev->health -= flDamage;
@@ -498,7 +507,21 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 		m_pActiveWeapon->Holster();
 	}
 
-	g_pGameRules->PlayerKilled(this, attacker, inflictor, bitsDamageType);
+	CBaseEntity* accomplice = m_hLastAttacker[1];
+
+	if (accomplice == nullptr && m_hLastAttacker[0] != attacker)
+	{
+		/* No accomplice, yet, the last attacking player is not the killer. */
+		accomplice = m_hLastAttacker[0];
+	}
+
+	if (accomplice == this)
+	{
+		/* Don't account for us assisting in our own death. */
+		accomplice = nullptr;
+	}
+
+	g_pGameRules->PlayerKilled(this, attacker, inflictor, accomplice, bitsDamageType);
 
 	if (m_pTank != NULL)
 	{
@@ -1227,7 +1250,7 @@ void CBasePlayer::PlayerUse()
 }
 
 
-void CBasePlayer::AddPoints(int score, bool bAllowNegativeScore)
+void CBasePlayer::AddPoints(float score, bool bAllowNegativeScore)
 {
 	// Positive score always adds
 	if (score < 0)
@@ -1261,7 +1284,7 @@ void CBasePlayer::AddPoints(int score, bool bAllowNegativeScore)
 }
 
 
-void CBasePlayer::AddPointsToTeam(int score, bool bAllowNegativeScore)
+void CBasePlayer::AddPointsToTeam(float score, bool bAllowNegativeScore)
 {
 	int index = entindex();
 
@@ -1500,6 +1523,7 @@ bool CBasePlayer::Spawn()
 	m_afPhysicsFlags = 0;
 	pev->iuser1 = OBS_NONE;
 	pev->iuser2 = pev->iuser3 = 0;
+	m_hLastAttacker[0] = m_hLastAttacker[1] = nullptr;
 
 	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "hl", "1");
 	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "bj", util::dtos1(sv_allowbunnyhopping.value != 0 ? 1 : 0));

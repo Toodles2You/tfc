@@ -150,8 +150,8 @@ public:
 	virtual void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType);
 	virtual bool IsTriggered(CBaseEntity* pActivator) { return true; }
 	virtual int GetToggleState() { return TS_AT_TOP; }
-	virtual void AddPoints(int score, bool bAllowNegativeScore) {}
-	virtual void AddPointsToTeam(int score, bool bAllowNegativeScore) {}
+	virtual void AddPoints(float score, bool bAllowNegativeScore) {}
+	virtual void AddPointsToTeam(float score, bool bAllowNegativeScore) {}
 	virtual bool AddPlayerWeapon(CBasePlayerWeapon* pWeapon) { return 0; }
 	virtual bool RemovePlayerWeapon(CBasePlayerWeapon* pWeapon) { return 0; }
 	virtual int GiveAmmo(int iAmount, int iType, int iMax) { return -1; }

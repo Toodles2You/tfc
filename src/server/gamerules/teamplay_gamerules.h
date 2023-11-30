@@ -34,7 +34,7 @@ public:
 	bool FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* pAttacker) override;
 	int PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget) override;
 	bool ShouldAutoAim(CBasePlayer* pPlayer, edict_t* target) override;
-	int IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled) override;
+	float GetPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled, bool assist = false) override;
 	void InitHUD(CBasePlayer* pl) override;
 	const char* GetGameDescription() override { return "HL Teamplay"; } // this is the game name that gets seen in the server browser
 	gamemode_e GetGameMode() override { return kGamemodeTeamplay; }

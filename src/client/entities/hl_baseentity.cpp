@@ -144,8 +144,8 @@ bool CBasePlayer::HasPlayerWeapon(CBasePlayerWeapon* pCheckWeapon) { return fals
 bool CBasePlayer::SwitchWeapon(CBasePlayerWeapon* pWeapon) { return false; }
 const char* CBasePlayer::TeamID() { return ""; }
 int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax) { return 0; }
-void CBasePlayer::AddPoints(int score, bool bAllowNegativeScore) {}
-void CBasePlayer::AddPointsToTeam(int score, bool bAllowNegativeScore) {}
+void CBasePlayer::AddPoints(float score, bool bAllowNegativeScore) {}
+void CBasePlayer::AddPointsToTeam(float score, bool bAllowNegativeScore) {}
 
 void ClearMultiDamage() {}
 void ApplyMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker) {}

@@ -120,9 +120,9 @@ public:
 	virtual void ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer) {}		 // the player has changed userinfo;  can change it now
 
 	// Client kills/scoring
-	virtual int IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled) = 0;					// how many points do I award whoever kills this player?
-	virtual void PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, int bitsDamageType) = 0; // Called each time a player dies
-	virtual void DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, int bitsDamageType) = 0;	// Call this from within a GameRules class to report an obituary.
+	virtual float GetPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled, bool assist = false) = 0;					// how many points do I award whoever kills this player?
+	virtual void PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, CBaseEntity* accomplice, int bitsDamageType) = 0; // Called each time a player dies
+	virtual void DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, CBaseEntity* accomplice, int bitsDamageType) = 0;	// Call this from within a GameRules class to report an obituary.
 																									// Weapon retrieval
 	virtual bool CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon);					// The player is touching an CBasePlayerWeapon, do I give it to him?
 	virtual void PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) = 0;				// Called each time a player picks up a weapon from the ground
@@ -227,9 +227,9 @@ public:
 	bool AllowAutoTargetCrosshair() override;
 
 	// Client kills/scoring
-	int IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled) override;
-	void PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, int bitsDamageType) override;
-	void DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, int bitsDamageType) override;
+	float GetPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled, bool assist = false) override;
+	void PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, CBaseEntity* accomplice, int bitsDamageType) override;
+	void DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, CBaseEntity* accomplice, int bitsDamageType) override;
 
 	// Weapon retrieval
 	void PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) override;
@@ -282,11 +282,11 @@ public:
 	void AddPlayer(CBasePlayer *player);
 	void RemovePlayer(CBasePlayer *player);
 
-	void AddPoints(int score = 1);
+	void AddPoints(float score = 1);
 
 public:
 	std::string m_name;
-	int m_score;
+	float m_score;
 	int m_numPlayers;
 	std::vector<CBasePlayer *> m_players;
 };
@@ -341,9 +341,9 @@ public:
 	void ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer) override;
 
 	// Client kills/scoring
-	int IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled) override;
-	void PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, int bitsDamageType) override;
-	void DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, int bitsDamageType) override;
+	float GetPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled, bool assist = false) override;
+	void PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, CBaseEntity* accomplice, int bitsDamageType) override;
+	void DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, CBaseEntity* accomplice, int bitsDamageType) override;
 
 	// Weapon retrieval
 	void PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) override;

@@ -29,15 +29,16 @@ DECLARE_MESSAGE(m_DeathNotice, DeathMsg);
 struct DeathNoticeItem
 {
 	char szKiller[MAX_PLAYER_NAME_LENGTH * 2];
+	char szAccomplice[MAX_PLAYER_NAME_LENGTH * 2];
 	char szVictim[MAX_PLAYER_NAME_LENGTH * 2];
 	int iId; // the index number of the associated sprite
 	bool bSuicide;
 	bool bTeamKill;
-	bool bNonPlayerKill;
 	bool bHeadshot;
 	bool bLocalPlayerInvolved;
 	float flDisplayTime;
 	float* KillerColor;
+	float* AccompliceColor;
 	float* VictimColor;
 };
 
@@ -85,15 +86,18 @@ bool CHudDeathNotice::Draw(float flTime)
 		return true;
 	}
 
+	DeathNoticeItem* item;
 	for (int i = 0; i < MAX_DEATHNOTICES; i++)
 	{
-		if (rgDeathNoticeList[i].iId == 0)
+		item = rgDeathNoticeList + i;
+
+		if (item->iId == 0)
 			break; // we've gone through them all
 		
-		auto deltaTime = flTime - rgDeathNoticeList[i].flDisplayTime;
+		auto deltaTime = flTime - item->flDisplayTime;
 		auto displayTime = hud_deathnotice_time->value;
 
-		if (rgDeathNoticeList[i].bLocalPlayerInvolved)
+		if (item->bLocalPlayerInvolved)
 		{
 			displayTime *= 2;
 		}
@@ -101,35 +105,59 @@ bool CHudDeathNotice::Draw(float flTime)
 		if (deltaTime >= displayTime)
 		{ // display time has expired
 			// remove the current item from the list
-			memmove(&rgDeathNoticeList[i], &rgDeathNoticeList[i + 1], sizeof(DeathNoticeItem) * (MAX_DEATHNOTICES - i));
+			memmove(rgDeathNoticeList + i, rgDeathNoticeList + i + 1, sizeof(DeathNoticeItem) * (MAX_DEATHNOTICES - i));
 			i--; // continue on the next item;  stop the counter getting incremented
 			continue;
 		}
 
 		// Draw the death notice
-		y = DEATHNOTICE_TOP + 2 + (20 * i); //!!!
+		y = DEATHNOTICE_TOP + 2 + (20 * i);
 
-		int id = (rgDeathNoticeList[i].iId == -1) ? m_HUD_d_skull : rgDeathNoticeList[i].iId;
+		int id = (item->iId == -1) ? m_HUD_d_skull : item->iId;
 
 		auto rect = gHUD.GetSpriteRect(id);
 		int weaponWidth = rect.right - rect.left;
 		int weaponHeight = rect.bottom - rect.top;
-		
-		int w = gHUD.HudStringLen(rgDeathNoticeList[i].szVictim) + weaponWidth;
 
-		if (rgDeathNoticeList[i].bHeadshot)
+#if 0
+		if (item->KillerColor)
+		{
+			r = 255 * item->KillerColor[0];
+			g = 255 * item->KillerColor[1];
+			b = 255 * item->KillerColor[2];
+		}
+		else
+#endif
+		{
+			r = 255;
+			g = 80;
+			b = 0;
+		}
+		
+		int w = gHUD.HudStringLen(item->szVictim) + weaponWidth;
+
+		if (item->bHeadshot)
 		{
 			w += m_headshot_width;
 		}
 
-		if (!rgDeathNoticeList[i].bSuicide)
+		if (!item->bSuicide)
 		{
-			w += 5 + gHUD.HudStringLen(rgDeathNoticeList[i].szKiller);
+			w +=
+				gHUD.HudStringLen(item->szKiller)
+				+ gHUD.HudStringLen(" + ")
+				+ gHUD.HudStringLen(item->szAccomplice);
+		}
+		else if (item->szAccomplice[0] != '\0')
+		{
+			w +=
+				gHUD.HudStringLen(item->szAccomplice)
+				+ gHUD.HudStringLen(" finished off ");
 		}
 
-		x = gHUD.GetWidth() - 5 - w;
+		x = gHUD.GetWidth() - 6 - w;
 
-		if (rgDeathNoticeList[i].bLocalPlayerInvolved)
+		if (item->bLocalPlayerInvolved)
 		{
 			gHUD.DrawHudFill(
 				x - 2,
@@ -140,52 +168,71 @@ bool CHudDeathNotice::Draw(float flTime)
 				MIN_ALPHA * (1.0F - (deltaTime / displayTime)));
 		}
 
-		if (!rgDeathNoticeList[i].bSuicide)
+		if (!item->bSuicide)
 		{
 			// Draw killers name
-			if (rgDeathNoticeList[i].KillerColor)
-				gEngfuncs.pfnDrawSetTextColor(rgDeathNoticeList[i].KillerColor[0], rgDeathNoticeList[i].KillerColor[1], rgDeathNoticeList[i].KillerColor[2]);
-			x = 5 + gHUD.DrawHudString(rgDeathNoticeList[i].szKiller, x, y);
-		}
+			if (item->KillerColor)
+			{
+				gEngfuncs.pfnDrawSetTextColor(
+					item->KillerColor[0],
+					item->KillerColor[1],
+					item->KillerColor[2]);
+			}
+			x = gHUD.DrawHudString(item->szKiller, x, y);
 
-		if (rgDeathNoticeList[i].bTeamKill)
-		{
-			r = 10;
-			g = 240;
-			b = 10; // display it in sickly green
-		}
-#if 0
-		else if (rgDeathNoticeList[i].KillerColor)
-		{
-			r = 255 * rgDeathNoticeList[i].KillerColor[0];
-			g = 255 * rgDeathNoticeList[i].KillerColor[1];
-			b = 255 * rgDeathNoticeList[i].KillerColor[2];
-		}
-#endif
-		else
-		{
-			r = 255;
-			g = 80;
-			b = 0;
+			// Draw accomplices name, if any
+			if (item->szAccomplice[0] != '\0')
+			{
+				gEngfuncs.pfnDrawSetTextColor(r / 255.0F, g / 255.0F, b / 255.0F);
+				x = gHUD.DrawHudString(" + ", x, y);
+
+				if (item->AccompliceColor)
+				{
+					gEngfuncs.pfnDrawSetTextColor(
+						item->AccompliceColor[0],
+						item->AccompliceColor[1],
+						item->AccompliceColor[2]);
+				}
+				x = gHUD.DrawHudString(item->szAccomplice, x, y);
+			}
 		}
 
 		// Draw death weapon
 		gHUD.DrawHudSpriteIndex(id, x, y, r, g, b);
 		x += weaponWidth;
 
-		if (rgDeathNoticeList[i].bHeadshot)
+		if (item->bHeadshot)
 		{
 			gHUD.DrawHudSpriteIndex(m_HUD_d_headshot, x, y, r, g, b);
 			x += m_headshot_width;
 		}
 
-		// Draw victims name (if it was a player that was killed)
-		if (!rgDeathNoticeList[i].bNonPlayerKill)
+		// Someone attacked the player before they fell or something
+		if (item->bSuicide
+		 && item->szAccomplice[0] != '\0')
 		{
-			if (rgDeathNoticeList[i].VictimColor)
-				gEngfuncs.pfnDrawSetTextColor(rgDeathNoticeList[i].VictimColor[0], rgDeathNoticeList[i].VictimColor[1], rgDeathNoticeList[i].VictimColor[2]);
-			x = gHUD.DrawHudString(rgDeathNoticeList[i].szVictim, x, y);
+			if (item->AccompliceColor)
+			{
+				gEngfuncs.pfnDrawSetTextColor(
+					item->AccompliceColor[0],
+					item->AccompliceColor[1],
+					item->AccompliceColor[2]);
+			}
+			x = gHUD.DrawHudString(item->szAccomplice, x, y);
+
+			gEngfuncs.pfnDrawSetTextColor(r / 255.0F, g / 255.0F, b / 255.0F);
+			x = gHUD.DrawHudString(" finished off ", x, y);
 		}
+
+		// Draw victims name
+		if (item->VictimColor)
+		{
+			gEngfuncs.pfnDrawSetTextColor(
+				item->VictimColor[0],
+				item->VictimColor[1],
+				item->VictimColor[2]);
+		}
+		x = gHUD.DrawHudString(item->szVictim, x, y);
 	}
 
 	return true;
@@ -199,11 +246,17 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 	BEGIN_READ(pbuf, iSize);
 
 	int killer = READ_BYTE();
+	int accomplice = READ_BYTE();
 	int victim = READ_BYTE();
 	int flags = READ_BYTE();
 	
 	auto localPlayerInvolved =
 		g_PlayerInfoList[killer].thisplayer || g_PlayerInfoList[victim].thisplayer;
+
+	if (accomplice != 0)
+	{
+		localPlayerInvolved |= g_PlayerInfoList[accomplice].thisplayer;
+	}
 
 	char killedwith[32];
 	strcpy(killedwith, "d_");
@@ -214,99 +267,135 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 
 	gHUD.m_Spectator.DeathMessage(victim);
 	int i, j;
+	DeathNoticeItem* item;
 	for (i = 0; i < MAX_DEATHNOTICES; i++)
 	{
-		if (rgDeathNoticeList[i].iId == 0)
+		item = rgDeathNoticeList + i;
+		if (item->iId == 0)
 			break;
 	}
 	if (i == MAX_DEATHNOTICES)
 	{
-		// move the rest of the list forward to make room for this item
-		memmove(rgDeathNoticeList, rgDeathNoticeList + 1, sizeof(DeathNoticeItem) * MAX_DEATHNOTICES);
-		i = MAX_DEATHNOTICES - 1;
+		/* Move the rest of the list forward to make room for this item */
+		if (localPlayerInvolved)
+		{
+			/* See if we can find a less important one to discard */
+			for (int j = 0; j < MAX_DEATHNOTICES; j++)
+			{
+				if (rgDeathNoticeList[j].bLocalPlayerInvolved)
+				{
+					continue;
+				}
+				memmove(
+					rgDeathNoticeList + j,
+					rgDeathNoticeList + j + 1,
+					sizeof(DeathNoticeItem) * (MAX_DEATHNOTICES - j));
+				i = MAX_DEATHNOTICES - 1;
+			}
+		}
+
+		if (i == MAX_DEATHNOTICES)
+		{
+			memmove(
+				rgDeathNoticeList,
+				rgDeathNoticeList + 1,
+				sizeof(DeathNoticeItem) * MAX_DEATHNOTICES);
+			i = MAX_DEATHNOTICES - 1;
+		}
 	}
 
 	if (gViewPort)
 		gViewPort->GetAllPlayersInfo();
 
 	// Get the Killer's name
-	const char* killer_name = g_PlayerInfoList[killer].name;
-	if (!killer_name)
+	const char* killerName = g_PlayerInfoList[killer].name;
+	if (!killerName)
 	{
-		killer_name = "";
-		rgDeathNoticeList[i].szKiller[0] = 0;
+		item->szKiller[0] = '\0';
 	}
 	else
 	{
-		rgDeathNoticeList[i].KillerColor = gHUD.GetClientColor(killer);
-		strncpy(rgDeathNoticeList[i].szKiller, killer_name, MAX_PLAYER_NAME_LENGTH);
-		rgDeathNoticeList[i].szKiller[MAX_PLAYER_NAME_LENGTH - 1] = 0;
+		item->KillerColor = gHUD.GetClientColor(killer);
+		strncpy(item->szKiller, killerName, MAX_PLAYER_NAME_LENGTH);
+		item->szKiller[MAX_PLAYER_NAME_LENGTH - 1] = '\0';
+	}
+
+	if (accomplice != 0)
+	{
+		const char* accompliceName = g_PlayerInfoList[accomplice].name;
+		if (!accompliceName)
+		{
+			item->szAccomplice[0] = '\0';
+		}
+		else
+		{
+			item->AccompliceColor = gHUD.GetClientColor(accomplice);
+			strncpy(item->szAccomplice, accompliceName, MAX_PLAYER_NAME_LENGTH);
+			item->szAccomplice[MAX_PLAYER_NAME_LENGTH - 1] = '\0';
+		}
+	}
+	else
+	{
+		item->szAccomplice[0] = '\0';
 	}
 
 	// Get the Victim's name
-	const char* victim_name = NULL;
-	// If victim is -1, the killer killed a specific, non-player object (like a sentrygun)
-	if (((char)victim) != -1)
-		victim_name = g_PlayerInfoList[victim].name;
-	if (!victim_name)
+	const char* victimName = g_PlayerInfoList[victim].name;
+	if (!victimName)
 	{
-		victim_name = "";
-		rgDeathNoticeList[i].szVictim[0] = 0;
+		item->szVictim[0] = '\0';
 	}
 	else
 	{
-		rgDeathNoticeList[i].VictimColor = gHUD.GetClientColor(victim);
-		strncpy(rgDeathNoticeList[i].szVictim, victim_name, MAX_PLAYER_NAME_LENGTH);
-		rgDeathNoticeList[i].szVictim[MAX_PLAYER_NAME_LENGTH - 1] = 0;
+		item->VictimColor = gHUD.GetClientColor(victim);
+		strncpy(item->szVictim, victimName, MAX_PLAYER_NAME_LENGTH);
+		item->szVictim[MAX_PLAYER_NAME_LENGTH - 1] = '\0';
 	}
 
-	// Is it a non-player object kill?
-	if (((char)victim) == -1)
+	if (killer == victim || killer == 0)
 	{
-		rgDeathNoticeList[i].bNonPlayerKill = true;
-
-		// Store the object's name in the Victim slot (skip the d_ bit)
-		strcpy(rgDeathNoticeList[i].szVictim, killedwith + 2);
+		item->bSuicide = true;
 	}
-	else
+	else if ((flags & kDamageFlagFriendlyFire) != 0)
 	{
-		if (killer == victim || killer == 0)
-		{
-			rgDeathNoticeList[i].bSuicide = true;
-		}
-		else if ((flags & kDamageFlagFriendlyFire) != 0)
-		{
-			rgDeathNoticeList[i].bTeamKill = true;
-		}
+		item->bTeamKill = true;
 	}
 
 	if ((flags & kDamageFlagHeadshot) != 0)
 	{
-		rgDeathNoticeList[i].bHeadshot = true;
+		item->bHeadshot = true;
 	}
 
 	// Find the sprite in the list
 	int spr = gHUD.GetSpriteIndex(killedwith);
 
-	rgDeathNoticeList[i].iId = spr;
-	rgDeathNoticeList[i].flDisplayTime = gHUD.m_flTime;
-	rgDeathNoticeList[i].bLocalPlayerInvolved = localPlayerInvolved;
+	item->iId = spr;
+	item->flDisplayTime = gHUD.m_flTime;
+	item->bLocalPlayerInvolved = localPlayerInvolved;
 
-	if (rgDeathNoticeList[i].bNonPlayerKill)
+#if 0
+	PrintDeathMsg(item, killedwith);
+#endif
+
+	return true;
+}
+
+#if 0
+void CHudDeathNotice::PrintDeathMsg(const DeathNoticeItem* item, const char* weapon)
+{
+	if (item->bSuicide)
 	{
-		ConsolePrint(rgDeathNoticeList[i].szKiller);
-		ConsolePrint(" killed a ");
-		ConsolePrint(rgDeathNoticeList[i].szVictim);
-		ConsolePrint("\n");
-	}
-	else
-	{
-		// record the death notice in the console
-		if (rgDeathNoticeList[i].bSuicide)
+		if (item->szAccomplice[0] != '\0')
 		{
-			ConsolePrint(rgDeathNoticeList[i].szVictim);
+			ConsolePrint(item->szAccomplice);
+			ConsolePrint(" finished off ");
+			ConsolePrint(item->szVictim);
+		}
+		else
+		{
+			ConsolePrint(item->szVictim);
 
-			if (0 == strcmp(killedwith, "d_world"))
+			if (strcmp(weapon, "d_world") == 0)
 			{
 				ConsolePrint(" died");
 			}
@@ -315,34 +404,32 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 				ConsolePrint(" killed self");
 			}
 		}
-		else if (rgDeathNoticeList[i].bTeamKill)
+	}
+	else
+	{
+		ConsolePrint(item->szKiller);
+		if (item->szAccomplice[0] != '\0')
 		{
-			ConsolePrint(rgDeathNoticeList[i].szKiller);
+			ConsolePrint(" + ");
+			ConsolePrint(item->szAccomplice);
+		}
+		if (item->bTeamKill)
+		{
 			ConsolePrint(" killed their teammate ");
-			ConsolePrint(rgDeathNoticeList[i].szVictim);
 		}
 		else
 		{
-			ConsolePrint(rgDeathNoticeList[i].szKiller);
 			ConsolePrint(" killed ");
-			ConsolePrint(rgDeathNoticeList[i].szVictim);
 		}
-
-		if (killedwith && '\0' != *killedwith && (*killedwith > 13) && 0 != strcmp(killedwith, "d_world") && !rgDeathNoticeList[i].bTeamKill)
-		{
-			ConsolePrint(" with ");
-
-			// replace the code names with the 'real' names
-			if (0 == strcmp(killedwith + 2, "egon"))
-				strcpy(killedwith, "d_gluon gun");
-			if (0 == strcmp(killedwith + 2, "gauss"))
-				strcpy(killedwith, "d_tau cannon");
-
-			ConsolePrint(killedwith + 2); // skip over the "d_" part
-		}
-
-		ConsolePrint("\n");
+		ConsolePrint(item->szVictim);
 	}
 
-	return true;
+	if (weapon[0] != '\0' && strcmp(weapon, "d_world") != 0)
+	{
+		ConsolePrint(" with ");
+		ConsolePrint(weapon + 2);
+	}
+
+	ConsolePrint("\n");
 }
+#endif

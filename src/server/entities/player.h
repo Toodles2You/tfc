@@ -187,8 +187,8 @@ public:
 
 	void StartObserver();
 
-	void AddPoints(int score, bool bAllowNegativeScore) override;
-	void AddPointsToTeam(int score, bool bAllowNegativeScore) override;
+	void AddPoints(float score, bool bAllowNegativeScore) override;
+	void AddPointsToTeam(float score, bool bAllowNegativeScore) override;
 	bool AddPlayerWeapon(CBasePlayerWeapon* pWeapon) override;
 	bool RemovePlayerWeapon(CBasePlayerWeapon* pWeapon) override;
 	void DropPlayerWeapon(char* pszWeaponName);
@@ -275,6 +275,7 @@ public:
 
 protected:
 	CGameMovement* m_gameMovement = nullptr;
+	EHANDLE m_hLastAttacker[2];
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

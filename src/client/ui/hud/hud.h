@@ -276,6 +276,10 @@ public:
 	bool MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbuf);
 
 private:
+#if 0
+	void PrintDeathMsg(const DeathNoticeItem* item, const char* weapon);
+#endif
+
 	int m_HUD_d_skull; // sprite index of skull icon
 	int m_HUD_d_headshot;
 	int m_headshot_width;

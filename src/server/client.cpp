@@ -121,6 +121,11 @@ void ClientKill(edict_t* pEntity)
 	entvars_t* pev = &pEntity->v;
 	CBasePlayer* pl = (CBasePlayer*)CBasePlayer::Instance(pev);
 
+	if (!pl->IsPlayer() || !pl->IsAlive())
+	{
+		return;
+	}
+
 	if (!g_pGameRules->FPlayerCanSuicide(pl))
 	{
 		return;

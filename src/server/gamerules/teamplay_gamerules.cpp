@@ -345,11 +345,15 @@ bool CHalfLifeTeamplay::ShouldAutoAim(CBasePlayer* pPlayer, edict_t* target)
 
 //=========================================================
 //=========================================================
-int CHalfLifeTeamplay::IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled)
+float CHalfLifeTeamplay::GetPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled, bool assist)
 {
 	if (pAttacker != pKilled && PlayerRelationship(pAttacker, pKilled) >= GR_ALLY)
 	{
+		if (assist)
+		{
+			return -0.5F;
+		}
 		return -1;
 	}
-	return CHalfLifeMultiplay::IPointsForKill(pAttacker, pKilled);
+	return CHalfLifeMultiplay::GetPointsForKill(pAttacker, pKilled, assist);
 }
