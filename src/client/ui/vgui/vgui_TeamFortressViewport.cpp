@@ -1671,9 +1671,6 @@ void TeamFortressViewport::GetAllPlayersInfo()
 	for (int i = 1; i < MAX_PLAYERS_HUD; i++)
 	{
 		gEngfuncs.pfnGetPlayerInfo(i, &g_PlayerInfoList[i]);
-
-		if (0 != g_PlayerInfoList[i].thisplayer)
-			m_pScoreBoard->m_iPlayerNum = i; // !!!HACK: this should be initialized elsewhere... maybe gotten from the engine
 	}
 }
 

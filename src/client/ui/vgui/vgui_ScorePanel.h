@@ -27,7 +27,6 @@ enum
 	COLUMN_NAME,
 	COLUMN_CLASS,
 	COLUMN_SCORE,
-	COLUMN_DEATHS,
 	COLUMN_LATENCY,
 	COLUMN_VOICE,
 	COLUMN_BLANK,
@@ -233,20 +232,21 @@ class ScorePanel : public Panel, public vgui::CDefaultInputSignal
 {
 private:
 	CGrid m_HeaderGrid;
-	CLabelHeader m_HeaderLabels[NUM_COLUMNS]; // Labels above the
+	CLabelHeader m_HeaderLabels[NUM_COLUMNS];
 	CLabelHeader* m_pCurrentHighlightLabel;
 	int m_iHighlightRow;
 
 	vgui::CListBox m_PlayerList;
 	CGrid m_PlayerGrids[MAX_PLAYERS_HUD];
 	CLabelHeader m_PlayerEntries[NUM_COLUMNS][MAX_PLAYERS_HUD];
+	int m_iTeamNumber;
 
 public:
 	int m_iRows;
 	int m_iSortedRows[MAX_PLAYERS_HUD];
 
 public:
-	ScorePanel(int x, int y, int wide, int tall);
+	ScorePanel(int x, int y, int wide, int tall, int team);
 
 	void Update();
 
@@ -270,13 +270,11 @@ class ScoreBoard : public Panel, public vgui::CDefaultInputSignal
 private:
 	Label m_TitleLabel;
 
-	ScorePanel* m_pScorePanel;
+	ScorePanel* m_pScorePanels[TEAM_SPECTATORS];
 
 	CommandButton* m_pCloseButton;
 
 public:
-	int m_iPlayerNum;
-
 	bool m_bHasBeenSorted[MAX_PLAYERS_HUD];
 
 public:

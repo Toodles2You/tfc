@@ -53,26 +53,27 @@ public:
 // grid size is marked out for 640x480 screen
 static SBColumnInfo g_ColumnInfo[NUM_COLUMNS] =
 {
-	{nullptr,		24,		Label::a_east}, // tracker column
-	{nullptr,		140,	Label::a_east}, // name
-	{nullptr,		56,		Label::a_east}, // class
-	{"#SCORE",		40,		Label::a_east}, // score
-	{nullptr,		46,		Label::a_east}, // deaths
-	{"#LATENCY",	46,		Label::a_east}, // ping
-	{"#VOICE",		40,		Label::a_east}, // voice
-	{nullptr,		2,		Label::a_east}, // blank column to take up the slack
+	{nullptr,		24,		Label::a_east},		// tracker column
+	{nullptr,		140,	Label::a_west},		// name
+	{nullptr,		102,	Label::a_east},		// class
+	{"#SCORE",		40,		Label::a_east},		// score
+	{"#LATENCY",	46,		Label::a_east},		// ping
+	{nullptr,		40,		Label::a_east},		// voice
+	{nullptr,		2,		Label::a_east},		// blank column to take up the slack
 };
 
 //-----------------------------------------------------------------------------
 // Purpose: Create the ScoreBoard panel
 //-----------------------------------------------------------------------------
-ScorePanel::ScorePanel(int x, int y, int wide, int tall) : Panel(x, y, wide, tall)
+ScorePanel::ScorePanel(int x, int y, int wide, int tall, int team) : Panel(x, y, wide, tall)
 {
 	CSchemeManager* pSchemes = gViewPort->GetSchemeManager();
 	SchemeHandle_t hTitleScheme = pSchemes->getSchemeHandle("Scoreboard Title Text");
 	SchemeHandle_t hSmallScheme = pSchemes->getSchemeHandle("Scoreboard Small Text");
 	Font* tfont = pSchemes->getFont(hTitleScheme);
 	Font* smallfont = pSchemes->getFont(hSmallScheme);
+
+	m_iTeamNumber = team;
 
 	setPaintBackgroundEnabled(false);
 	m_pCurrentHighlightLabel = nullptr;
@@ -90,6 +91,10 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 			m_HeaderLabels[i].setText(g_ColumnInfo[i].m_pTitle);
 
 		int xwide = g_ColumnInfo[i].m_Width;
+		if (m_iTeamNumber != TEAM_UNASSIGNED)
+		{
+			xwide /= 2;
+		}
 		if (ScreenWidth >= 640)
 		{
 			xwide = XRES(xwide);
@@ -116,6 +121,11 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 		m_HeaderLabels[i].setFgColor(Scheme::sc_primary1);
 		m_HeaderLabels[i].setFont(smallfont);
 		m_HeaderLabels[i].setContentAlignment(g_ColumnInfo[i].m_Alignment);
+
+		if (i == COLUMN_NAME)
+		{
+			m_HeaderLabels[i].setFont(tfont);
+		}
 
 		int yres = 12;
 		if (ScreenHeight >= 480)
@@ -180,6 +190,18 @@ void ScorePanel::Update()
 {
 	int i;
 
+	if (m_iTeamNumber != TEAM_UNASSIGNED)
+	{
+		m_HeaderLabels[COLUMN_NAME].setText(gViewPort->GetTeamName(m_iTeamNumber));
+
+		auto color = gHUD.GetTeamColor(m_iTeamNumber);
+		m_HeaderLabels[COLUMN_NAME].setFgColor(
+			color[0] * 255,
+			color[1] * 255,
+			color[2] * 255,
+			0);
+	}
+
 	m_iRows = 0;
 	gViewPort->GetAllPlayersInfo();
 
@@ -218,9 +240,8 @@ void ScorePanel::SortPlayers()
 			 && g_PlayerInfoList[i].name
 			 && g_PlayerExtraInfo[i].score >= highest_score)
 			{
-				cl_entity_t* ent = gEngfuncs.GetEntityByIndex(i);
-
-				if (ent)
+				if (m_iTeamNumber == TEAM_UNASSIGNED
+				 || m_iTeamNumber == g_PlayerExtraInfo[i].teamnumber)
 				{
 					extra_player_info_t* pl_info = &g_PlayerExtraInfo[i];
 					if (pl_info->score > highest_score || pl_info->deaths < lowest_deaths)
@@ -350,6 +371,8 @@ void ScorePanel::FillGrid()
 
 			switch (col)
 			{
+			case COLUMN_TRACKER:
+				break;
 			case COLUMN_NAME:
 				sprintf(sz, "%s  ", pl_info->name);
 				break;
@@ -364,14 +387,8 @@ void ScorePanel::FillGrid()
 					sprintf(sz, "*%s*", CHudTextMessage::BufferedLocaliseTextString("#DEAD"));
 				}
 				break;
-
-			case COLUMN_TRACKER:
-				break;
-
 			case COLUMN_SCORE:
 				sprintf(sz, "%d", g_PlayerExtraInfo[m_iSortedRows[row]].score);
-				break;
-			case COLUMN_DEATHS:
 				break;
 			case COLUMN_LATENCY:
 				if (g_PlayerInfoList[m_iSortedRows[row]].m_nSteamID == 0)
@@ -699,6 +716,26 @@ ScoreBoard::ScoreBoard(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 	m_TitleLabel.setContentFitted(false);
 	m_TitleLabel.setParent(this);
 
+	m_pScorePanels[TEAM_UNASSIGNED] = new ScorePanel(0, 0, wide, tall, TEAM_UNASSIGNED);
+	m_pScorePanels[TEAM_UNASSIGNED]->setParent(this);
+	m_pScorePanels[TEAM_UNASSIGNED]->setVisible(false);
+
+	int panelTall = tall;
+
+	for (int i = TEAM_DEFAULT; i < TEAM_SPECTATORS; i++)
+	{
+		m_pScorePanels[i] =
+			new ScorePanel(
+				((i - 1) % 2) * (wide / 2),
+				((i - 1) / 2) * (panelTall / 2),
+				wide / 2,
+				panelTall,
+				i);
+
+		m_pScorePanels[i]->setParent(this);
+		m_pScorePanels[i]->setVisible(false);
+	}
+
 	m_pCloseButton = new CommandButton("x", wide - XRES(12 + 4), YRES(2), XRES(12), YRES(12));
 	m_pCloseButton->setParent(this);
 	m_pCloseButton->addActionSignal(new CMenuHandler_StringCommandWatch("-showscores", true));
@@ -708,9 +745,6 @@ ScoreBoard::ScoreBoard(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 	m_pCloseButton->setBoundKey((char)255);
 	m_pCloseButton->setContentAlignment(Label::a_center);
 
-	m_pScorePanel = new ScorePanel(0, 0, wide, tall);
-	m_pScorePanel->setParent(this);
-
 	Initialize();
 }
 
@@ -718,7 +752,6 @@ ScoreBoard::ScoreBoard(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 void ScoreBoard::Initialize()
 {
 	// Clear out scoreboard data
-	m_iPlayerNum = 0;
 	memset(g_PlayerExtraInfo, 0, sizeof g_PlayerExtraInfo);
 	memset(g_TeamInfo, 0, sizeof g_TeamInfo);
 }
@@ -726,6 +759,25 @@ void ScoreBoard::Initialize()
 
 void ScoreBoard::Open()
 {
+	if (util::GetGameMode() < kGamemodeTeamplay)
+	{
+		m_pScorePanels[TEAM_UNASSIGNED]->setVisible(true);
+
+		for (int i = TEAM_DEFAULT; i < TEAM_SPECTATORS; i++)
+		{
+			m_pScorePanels[i]->setVisible(false);
+		}
+	}
+	else
+	{
+		m_pScorePanels[TEAM_UNASSIGNED]->setVisible(false);
+
+		for (int i = TEAM_DEFAULT; i < TEAM_SPECTATORS; i++)
+		{
+			m_pScorePanels[i]->setVisible(i <= gViewPort->GetNumberOfTeams());
+		}
+	}
+
 	Update();
 	setVisible(true);
 }
@@ -744,7 +796,17 @@ void ScoreBoard::Update()
 
 	memset(m_bHasBeenSorted, 0, sizeof(m_bHasBeenSorted));
 
-	m_pScorePanel->Update();
+	if (util::GetGameMode() < kGamemodeTeamplay)
+	{
+		m_pScorePanels[TEAM_UNASSIGNED]->Update();
+	}
+	else
+	{
+		for (int i = TEAM_DEFAULT; i <= gViewPort->GetNumberOfTeams(); i++)
+		{
+			m_pScorePanels[i]->Update();
+		}
+	}
 
 	m_pCloseButton->setVisible(gViewPort->m_pSpectatorPanel->m_menuVisible);
 }
