@@ -79,12 +79,7 @@ enum
 #define DMG_NEVERGIB (1 << 12)	 // with this bit OR'd in, no damage type will be able to gib victims upon death
 #define DMG_ALWAYSGIB (1 << 13)	 // with this bit OR'd in, any damage type can be made to gib victims upon death.
 
-// time-based damage
-//mask off TF-specific stuff too
-#define DMG_TIMEBASED (~(0xff003fff)) // mask for time-based damage
-
 #define DMG_DROWN (1 << 14) // Drowning
-#define DMG_FIRSTTIMEBASED DMG_DROWN
 
 #define DMG_PARALYZE (1 << 15)	   // slows affected creature down
 #define DMG_NERVEGAS (1 << 16)	   // nerve toxins, very bad
@@ -145,18 +140,6 @@ enum
 
 #define SLOWFREEZE_DURATION 2
 #define SLOWFREEZE_DAMAGE 1.0
-
-enum {
-	itbd_Paralyze,
-	itbd_NerveGas,
-	itbd_Poison,
-	itbd_Radiation,
-	itbd_DrownRecover,
-	itbd_Acid,
-	itbd_SlowBurn,
-	itbd_SlowFreeze,
-	CDMG_TIMEBASED,
-};
 
 constexpr Vector VEC_HULL_MIN(-16, -16, -36);
 constexpr Vector VEC_HULL_MAX(16, 16, 36);

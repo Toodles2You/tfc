@@ -139,7 +139,6 @@ protected:
 	float m_fFade;
 	RGBA m_rgba;
 	WEAPON* m_pWeapon;
-	bool m_fOnTarget;
 	int m_HUD_bucket0;
 	int m_HUD_selection;
 	cvar_t* hud_fastswitch;

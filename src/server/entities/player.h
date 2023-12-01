@@ -91,11 +91,6 @@ public:
 
 	// these are time-sensitive things that we keep track of
 
-	float m_tbdPrev;							 // Time-based damage timer
-
-	int m_idrowndmg;	  // track drowning damage taken
-	int m_idrownrestored; // track drowning damage restored
-
 	int m_bitsHUDDamage; // Damage bits for the current fame. These get sent to
 						 // the hude via the DAMAGE message
 	bool m_fInitHUD;	 // True when deferred HUD restart msg needs to be sent
@@ -122,8 +117,6 @@ public:
 	int m_rgAmmo[AMMO_LAST];
 	int m_rgAmmoLast[AMMO_LAST];
 
-	Vector m_vecAutoAim;
-	bool m_fOnTarget;
 	int m_iDeaths;
 
 	int m_nCustomSprayFrames = -1; // Custom clan logo frames for this player
@@ -217,11 +210,8 @@ public:
 		unsigned int flags = FEV_NOTHOST);
 
 public:
-	void WaterMove();
 	void PlayerDeathFrame();
 	void PlayerUse();
-
-	void CheckTimeBasedDamage();
 
 	int AmmoInventory(int iAmmoIndex);
 
@@ -244,7 +234,6 @@ public:
 	bool m_bIsSpawning = false;
 
 	int m_bitsDamageType; // what types of damage has monster (player) taken
-	byte m_rgbTimeBasedDamage[CDMG_TIMEBASED];
 
 	Activity m_Activity;	  // what the monster is doing (animation)
 	Activity m_IdealActivity; // monster should switch to this activity

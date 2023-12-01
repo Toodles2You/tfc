@@ -118,11 +118,9 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 void CBasePlayer::PackDeadPlayerWeapons() {}
 void CBasePlayer::RemoveAllWeapons() {}
 void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim) {}
-void CBasePlayer::WaterMove() {}
 void CBasePlayer::PlayerDeathFrame() {}
 void CBasePlayer::StartObserver() {}
 void CBasePlayer::PlayerUse() {}
-void CBasePlayer::CheckTimeBasedDamage() {}
 void CBasePlayer::Precache() {}
 bool CBasePlayer::Save(CSave& save) { return false; }
 bool CBasePlayer::Restore(CRestore& restore) { return false; }

@@ -1034,7 +1034,7 @@ bool CHudAmmo::Draw(float flTime)
 
 	if (gHUD.m_pCvarCrosshair->value != 0)
 	{
-		DrawCrosshair(pw, 255, gHUD.m_iFOV >= 90, m_fOnTarget || flTime - m_flHitFeedbackTime < 0.2);
+		DrawCrosshair(pw, 255, gHUD.m_iFOV >= 90, flTime - m_flHitFeedbackTime < 0.2);
 	}
 
 	// SPR_Draw Ammo

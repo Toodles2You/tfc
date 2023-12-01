@@ -69,14 +69,11 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 		DEFINE_FIELD(CBasePlayer, m_WeaponBits, FIELD_INT64),
 
 		DEFINE_ARRAY(CBasePlayer, m_rgAmmo, FIELD_INTEGER, AMMO_LAST),
-		DEFINE_FIELD(CBasePlayer, m_idrowndmg, FIELD_INTEGER),
-		DEFINE_FIELD(CBasePlayer, m_idrownrestored, FIELD_INTEGER),
 
 		DEFINE_FIELD(CBasePlayer, m_iTrain, FIELD_INTEGER),
 		DEFINE_FIELD(CBasePlayer, m_bitsHUDDamage, FIELD_INTEGER),
 		DEFINE_FIELD(CBasePlayer, m_flFallVelocity, FIELD_FLOAT),
 		DEFINE_FIELD(CBasePlayer, m_fInitHUD, FIELD_BOOLEAN),
-		DEFINE_FIELD(CBasePlayer, m_tbdPrev, FIELD_TIME),
 
 		DEFINE_FIELD(CBasePlayer, m_pTank, FIELD_EHANDLE),
 		DEFINE_FIELD(CBasePlayer, m_iHideHUD, FIELD_INTEGER),
@@ -156,8 +153,6 @@ bool CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
 	{
 		return false;
 	}
-	
-	m_bitsDamageType &= ~(bitsDamageType & ~DMG_TIMEBASED);
 
 	return CBaseAnimating::TakeHealth(flHealth, bitsDamageType);
 }
@@ -315,15 +310,6 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	{
 		Killed(inflictor, attacker, bitsDamageType);
 		return false;
-	}
-
-	// Reset damage time countdown for each type of time based damage player just sustained.
-	for (int i = 0; i < CDMG_TIMEBASED; i++)
-	{
-		if ((bitsDamageType & (DMG_PARALYZE << i)) != 0)
-		{
-			m_rgbTimeBasedDamage[i] = 0;
-		}
 	}
 
 	MessageBegin(MSG_SPEC, SVC_DIRECTOR);
@@ -912,136 +898,6 @@ Activity CBasePlayer::GetSmallFlinchActivity()
 	return flinchActivity;
 }
 
-
-/*
-===========
-WaterMove
-============
-*/
-#define AIRTIME 12 // lung full of air lasts this many seconds
-
-void CBasePlayer::WaterMove()
-{
-	int air;
-
-	if (pev->movetype == MOVETYPE_NOCLIP)
-		return;
-
-	if (pev->health < 0)
-		return;
-
-	// waterlevel 0 - not in water
-	// waterlevel 1 - feet in water
-	// waterlevel 2 - waist in water
-	// waterlevel 3 - head in water
-
-	if (pev->waterlevel != 3)
-	{
-		// not underwater
-
-		// play 'up for air' sound
-		if (pev->air_finished < gpGlobals->time)
-			EmitSound("player/pl_wade1.wav", CHAN_VOICE);
-		else if (pev->air_finished < gpGlobals->time + 9)
-			EmitSound("player/pl_wade2.wav", CHAN_VOICE);
-
-		pev->air_finished = gpGlobals->time + AIRTIME;
-		pev->dmg = 2;
-
-		// if we took drowning damage, give it back slowly
-		if (m_idrowndmg > m_idrownrestored)
-		{
-			// set drowning damage bit.  hack - dmg_drownrecover actually
-			// makes the time based damage code 'give back' health over time.
-			// make sure counter is cleared so we start count correctly.
-
-			// NOTE: this actually causes the count to continue restarting
-			// until all drowning damage is healed.
-
-			m_bitsDamageType |= DMG_DROWNRECOVER;
-			m_bitsDamageType &= ~DMG_DROWN;
-			m_rgbTimeBasedDamage[itbd_DrownRecover] = 0;
-		}
-	}
-	else
-	{ // fully under water
-		// stop restoring damage while underwater
-		m_bitsDamageType &= ~DMG_DROWNRECOVER;
-		m_rgbTimeBasedDamage[itbd_DrownRecover] = 0;
-
-		if (pev->air_finished < gpGlobals->time) // drown!
-		{
-			if (pev->pain_finished < gpGlobals->time)
-			{
-				// take drowning damage
-				pev->dmg += 1;
-				if (pev->dmg > 5)
-					pev->dmg = 5;
-
-				const float oldHealth = pev->health;
-
-				TakeDamage(CWorld::World, CWorld::World, pev->dmg, DMG_DROWN);
-				pev->pain_finished = gpGlobals->time + 1;
-
-				// track drowning damage, give it back when
-				// player finally takes a breath
-
-				// Account for god mode, the unkillable flag, potential damage mitigation
-				// and gaining health from drowning to avoid counting damage not actually taken.
-				const float drownDamageTaken = std::max(0.f, std::floor(oldHealth - pev->health));
-
-				m_idrowndmg += drownDamageTaken;
-			}
-		}
-		else
-		{
-			m_bitsDamageType &= ~DMG_DROWN;
-		}
-	}
-
-	if (0 == pev->waterlevel)
-	{
-		pev->dmgtime = 0;
-		return;
-	}
-
-	// make bubbles
-
-	if (pev->waterlevel == 3)
-	{
-		air = (int)(pev->air_finished - gpGlobals->time);
-		if (!RANDOM_LONG(0, 0x1f) && RANDOM_LONG(0, AIRTIME - 1) >= air)
-		{
-			switch (RANDOM_LONG(0, 3))
-			{
-			case 0:
-				EmitSound("player/pl_swim1.wav", CHAN_VOICE, 0.8F);
-				break;
-			case 1:
-				EmitSound("player/pl_swim2.wav", CHAN_VOICE, 0.8F);
-				break;
-			case 2:
-				EmitSound("player/pl_swim3.wav", CHAN_VOICE, 0.8F);
-				break;
-			case 3:
-				EmitSound("player/pl_swim4.wav", CHAN_VOICE, 0.8F);
-				break;
-			}
-		}
-	}
-
-	if (pev->watertype == CONTENT_LAVA) // do damage
-	{
-		if (pev->dmgtime < gpGlobals->time)
-			TakeDamage(CWorld::World, CWorld::World, 10 * pev->waterlevel, DMG_BURN);
-	}
-	else if (pev->watertype == CONTENT_SLIME) // do damage
-	{
-		pev->dmgtime = gpGlobals->time + 1;
-		TakeDamage(CWorld::World, CWorld::World, 4 * pev->waterlevel, DMG_ACID);
-	}
-}
-
 void CBasePlayer::PlayerDeathFrame()
 {
 	const auto bIsMultiplayer = util::IsMultiplayer();
@@ -1318,12 +1174,8 @@ void CBasePlayer::PreThink()
 	if (g_fGameOver)
 		return; // intermission or finale
 
-	WaterMove();
-
 	// JOHN: checks if new client data (for HUD and view control) needs to be sent to the client
 	UpdateClientData();
-
-	CheckTimeBasedDamage();
 
 	// Observer Button Handling
 	if (IsObserver())
@@ -1410,85 +1262,6 @@ void CBasePlayer::PreThink()
 	if ((pev->flags & FL_ONGROUND) == 0)
 	{
 		m_flFallVelocity = -pev->velocity.z;
-	}
-}
-
-
-void CBasePlayer::CheckTimeBasedDamage()
-{
-	int i;
-	byte bDuration = 0;
-
-	static float gtbdPrev = 0.0;
-
-	if ((m_bitsDamageType & DMG_TIMEBASED) == 0)
-		return;
-
-	// only check for time based damage approx. every 2 seconds
-	if (fabs(gpGlobals->time - m_tbdPrev) < 2.0)
-		return;
-
-	m_tbdPrev = gpGlobals->time;
-
-	for (i = 0; i < CDMG_TIMEBASED; i++)
-	{
-		// make sure bit is set for damage type
-		if ((m_bitsDamageType & (DMG_PARALYZE << i)) != 0)
-		{
-			switch (i)
-			{
-			case itbd_Paralyze:
-				bDuration = PARALYZE_DURATION;
-				break;
-			case itbd_NerveGas:
-				bDuration = NERVEGAS_DURATION;
-				break;
-			case itbd_Poison:
-				TakeDamage(CWorld::World, CWorld::World, POISON_DAMAGE, DMG_GENERIC);
-				bDuration = POISON_DURATION;
-				break;
-			case itbd_Radiation:
-				bDuration = RADIATION_DURATION;
-				break;
-			case itbd_DrownRecover:
-				// NOTE: this hack is actually used to RESTORE health
-				// after the player has been drowning and finally takes a breath
-				if (m_idrowndmg > m_idrownrestored)
-				{
-					int idif = std::min(m_idrowndmg - m_idrownrestored, 10);
-
-					TakeHealth(idif, DMG_GENERIC);
-					m_idrownrestored += idif;
-				}
-				bDuration = 4; // get up to 5*10 = 50 points back
-				break;
-			case itbd_Acid:
-				bDuration = ACID_DURATION;
-				break;
-			case itbd_SlowBurn:
-				bDuration = SLOWBURN_DURATION;
-				break;
-			case itbd_SlowFreeze:
-				bDuration = SLOWFREEZE_DURATION;
-				break;
-			default:
-				bDuration = 0;
-			}
-
-			if (0 != m_rgbTimeBasedDamage[i])
-			{
-				// decrement damage duration, detect when done.
-				if (0 == m_rgbTimeBasedDamage[i] || --m_rgbTimeBasedDamage[i] == 0)
-				{
-					m_rgbTimeBasedDamage[i] = 0;
-					// if we're done, clear damage bits
-					m_bitsDamageType &= ~(DMG_PARALYZE << i);
-				}
-			}
-			else
-				// first time taking this damage type - init damage duration
-				m_rgbTimeBasedDamage[i] = bDuration;
-		}
 	}
 }
 
@@ -1844,7 +1617,6 @@ void CBasePlayer::ForceClientDllUpdate()
 	}
 
 	m_iTrain |= TRAIN_NEW; // Force new train message.
-	m_fKnownItem = false;  // Force weaponinit messages.
 	m_fInitHUD = true;	   // Force HUD gmsgResetHUD message
 
 	// Now force all the necessary messages
@@ -2246,9 +2018,6 @@ void CBasePlayer::UpdateClientData()
 		pev->dmg_take = 0;
 		pev->dmg_save = 0;
 		m_bitsHUDDamage = m_bitsDamageType;
-
-		// Clear off non-time-based damage indicators
-		m_bitsDamageType &= DMG_TIMEBASED;
 	}
 
 
