@@ -149,14 +149,35 @@ char* GetVGUITGAName(const char* pszName)
 	return gd;
 }
 
-void Viewport_ServerMOTD()
+static void Viewport_VGUIMenu(const int menu)
 {
-	if (g_iTeamNumber == TEAM_UNASSIGNED)
+	if (g_iTeamNumber == TEAM_UNASSIGNED
+	 || (g_iPlayerClass == PC_UNDEFINED
+	 && gViewPort->GetValidClasses(g_iTeamNumber) != 0))
 	{
 		return;
 	}
 
-	gViewPort->ShowVGUIMenu(MENU_INTRO);
+	if (gViewPort->m_pCurrentMenu != nullptr
+	 && gViewPort->m_pCurrentMenu->GetMenuID() == menu)
+	{
+		gViewPort->HideTopMenu();
+		return;
+	}
+
+	gViewPort->HideVGUIMenu();
+	gViewPort->HideCommandMenu();
+	gViewPort->ShowVGUIMenu(menu);
+}
+
+void Viewport_ServerMOTD()
+{
+	Viewport_VGUIMenu(MENU_INTRO);
+}
+
+void Viewport_MapBriefing()
+{
+	Viewport_VGUIMenu(MENU_MAPBRIEFING);
 }
 
 void Viewport_ChangeTeam()
@@ -165,8 +186,7 @@ void Viewport_ChangeTeam()
 	{
 		return;
 	}
-
-	gViewPort->ShowVGUIMenu(MENU_TEAM);
+	Viewport_VGUIMenu(MENU_TEAM);
 }
 
 //================================================================
@@ -607,6 +627,7 @@ TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : P
 	UpdatePlayerMenu(m_PlayerMenu);
 
 	gEngfuncs.pfnAddCommand("servermotd", Viewport_ServerMOTD);
+	gEngfuncs.pfnAddCommand("missionbriefing", Viewport_MapBriefing);
 	gEngfuncs.pfnAddCommand("changeteam", Viewport_ChangeTeam);
 }
 
@@ -1533,6 +1554,7 @@ void TeamFortressViewport::ShowVGUIMenu(int iMenu)
 		}
 		else
 		{
+			pNewMenu->setVisible(false);
 			m_pCurrentMenu->SetNextMenu(pNewMenu);
 		}
 	}

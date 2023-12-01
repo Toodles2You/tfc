@@ -1505,9 +1505,7 @@ public:
 		setVisible( false );
 		m_iIsActive = false;
 
-		if (m_iMenuID == MENU_INTRO
-		 && GetNextMenu() == nullptr
-		 && g_iTeamNumber == TEAM_UNASSIGNED)
+		if (g_iTeamNumber == TEAM_UNASSIGNED && GetNextMenu() == nullptr)
 		{
 			gEngfuncs.pfnClientCmd("jointeam 5\n");
 		}

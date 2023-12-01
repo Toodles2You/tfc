@@ -465,6 +465,13 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 		MessageBegin(MSG_ONE, SVC_INTERMISSION, pl);
 		MessageEnd();
 	}
+
+	if (!IsTeamplay())
+	{
+		MessageBegin(MSG_ONE, gmsgVGUIMenu, pl);
+		WriteByte(MENU_MAPBRIEFING);
+		MessageEnd();
+	}
 }
 
 //=========================================================
