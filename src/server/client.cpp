@@ -44,7 +44,9 @@
 #include "pm_shared.h"
 #include "pm_defs.h"
 #include "UserMessages.h"
+#ifdef HALFLIFE_BOTS
 #include "bot/hl_bot_manager.h"
+#endif
 
 void LinkUserMessages();
 
@@ -102,10 +104,12 @@ void ClientDisconnect(edict_t* pEntity)
 
 	g_pGameRules->ClientDisconnected(pEntity);
 
+#ifdef HALFLIFE_BOTS
 	if (g_pBotMan)
 	{
 		g_pBotMan->ClientDisconnect(pPlayer);
 	}
+#endif
 }
 
 
@@ -508,16 +512,15 @@ void ClientCommand(edict_t* pEntity)
 	}
 	else if (FStrEq(pcmd, "closemenus"))
 	{
-		// just ignore it
 	}
 	else if (g_pGameRules->ClientCommand(player, pcmd))
 	{
-		// MenuSelect returns true only if the command is properly handled,  so don't print a warning
 	}
+#ifdef HALFLIFE_BOTS
 	else if (g_pBotMan->ClientCommand(player, pcmd))
 	{
-
 	}
+#endif
 	else
 	{
 		// tell the user they entered an unknown command
@@ -615,12 +618,12 @@ void ServerDeactivate()
 
 	g_serveractive = 0;
 
-	// Peform any shutdown operations here...
-	//
+#ifdef HALFLIFE_BOTS
 	if (g_pBotMan)
 	{
 		g_pBotMan->ServerDeactivate();
 	}
+#endif
 }
 
 void ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
@@ -656,10 +659,12 @@ void ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
 	// Link user messages here to make sure first client can get them...
 	LinkUserMessages();
 
+#ifdef HALFLIFE_BOTS
 	if (g_pBotMan)
 	{
 		g_pBotMan->ServerActivate();
 	}
+#endif
 }
 
 
@@ -827,10 +832,12 @@ void StartFrame()
 		g_pGameRules->Think();
 	}
 	
+#ifdef HALFLIFE_BOTS
 	if (g_pBotMan)
 	{
 		g_pBotMan->StartFrame();
 	}
+#endif
 
 	if (g_fGameOver)
 		return;

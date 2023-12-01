@@ -18,6 +18,8 @@ project(halflife
     LANGUAGES CXX
 )
 
+option(HALFLIFE_BOTS "Enable multiplayer bots" ON)
+
 set(HL_SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 set(SHARED_SRC_DIR ${HL_SRC_DIR}/shared)
 set(SERVER_SRC_DIR ${HL_SRC_DIR}/server)
@@ -85,17 +87,6 @@ set(SERVER_SRC
     ${SERVER_SRC_DIR}/UserMessages.cpp
     ${SERVER_SRC_DIR}/util.cpp
     ${SERVER_SRC_DIR}/voice_gamemgr.cpp
-
-    ${SERVER_SRC_DIR}/bot/bot_manager.cpp
-    ${SERVER_SRC_DIR}/bot/bot_profile.cpp
-    ${SERVER_SRC_DIR}/bot/bot_util.cpp
-    ${SERVER_SRC_DIR}/bot/bot.cpp
-    ${SERVER_SRC_DIR}/bot/hl_bot_manager.cpp
-    ${SERVER_SRC_DIR}/bot/hl_bot.cpp
-    ${SERVER_SRC_DIR}/bot/nav_area.cpp
-    ${SERVER_SRC_DIR}/bot/nav_file.cpp
-    ${SERVER_SRC_DIR}/bot/nav_node.cpp
-    ${SERVER_SRC_DIR}/bot/nav_path.cpp
 
     ${SHARED_SRC}
 )
@@ -180,6 +171,25 @@ set(CLIENT_SRC
 set(HL_COMPILE_DEFS)
 set(HL_COMPILE_OPTIONS)
 set(HL_LINK_OPTIONS)
+
+if(HALFLIFE_BOTS)
+
+    list(APPEND HL_COMPILE_DEFS HALFLIFE_BOTS)
+
+    list(APPEND SERVER_SRC
+        ${SERVER_SRC_DIR}/bot/bot_manager.cpp
+        ${SERVER_SRC_DIR}/bot/bot_profile.cpp
+        ${SERVER_SRC_DIR}/bot/bot_util.cpp
+        ${SERVER_SRC_DIR}/bot/bot.cpp
+        ${SERVER_SRC_DIR}/bot/hl_bot_manager.cpp
+        ${SERVER_SRC_DIR}/bot/hl_bot.cpp
+        ${SERVER_SRC_DIR}/bot/nav_area.cpp
+        ${SERVER_SRC_DIR}/bot/nav_file.cpp
+        ${SERVER_SRC_DIR}/bot/nav_node.cpp
+        ${SERVER_SRC_DIR}/bot/nav_path.cpp
+    )
+
+endif()
 
 if(UNIX)
 

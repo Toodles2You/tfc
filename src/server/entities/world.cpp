@@ -30,8 +30,10 @@
 #include "weapons.h"
 #include "gamerules.h"
 #include "teamplay_gamerules.h"
+#ifdef HALFLIFE_BOTS
 #include "bot/hl_bot.h"
 #include "bot/hl_bot_manager.h"
+#endif
 
 CGlobalState gGlobalState;
 
@@ -390,9 +392,11 @@ void CWorld::Precache()
 
 	g_pGameRules = InstallGameRules();
 
+#ifdef HALFLIFE_BOTS
 	delete g_pBotMan;
 
 	g_pBotMan = new CGameBotManager();
+#endif
 
 	// init sentence group playback stuff from sentences.txt.
 	// ok to call this multiple times, calls after first are ignored.
@@ -401,10 +405,12 @@ void CWorld::Precache()
 	// player precaches
 	W_Precache();
 	ClientPrecache();
-	BotPrecache();
 
-	// sounds used from C physics code
-	PRECACHE_SOUND("common/null.wav"); // clears sound channels
+#ifdef HALFLIFE_BOTS
+	BotPrecache();
+#endif
+
+	PRECACHE_SOUND("common/null.wav");
 
 	PRECACHE_SOUND("items/itembk2.wav");
 	PRECACHE_SOUND("items/gunpickup2.wav");

@@ -18,7 +18,9 @@
 #include "client.h"
 #include "game.h"
 #include "filesystem_utils.h"
+#ifdef HALFLIFE_BOTS
 #include "bot/hl_bot.h"
+#endif
 
 // multiplayer server rules
 cvar_t teamplay = {"mp_teamplay", "0", FCVAR_SERVER};
@@ -80,7 +82,9 @@ void GameDLLInit()
 
 	CVAR_REGISTER(&sv_allowbunnyhopping);
 
+#ifdef HALFLIFE_BOTS
 	Bot_RegisterCvars();
+#endif
 	
 	InitMapLoadingUtils();
 }
