@@ -346,11 +346,11 @@ void ScorePanel::FillGrid()
 			}
 
 			// Align
-			if (col == COLUMN_NAME || col == COLUMN_CLASS)
+			if (col == COLUMN_NAME)
 			{
 				pLabel->setContentAlignment(vgui::Label::a_west);
 			}
-			else if (col == COLUMN_TRACKER)
+			else if (col == COLUMN_TRACKER || col == COLUMN_CLASS)
 			{
 				pLabel->setContentAlignment(vgui::Label::a_center);
 			}

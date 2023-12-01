@@ -853,7 +853,14 @@ void CBaseEntity::SetEntityState(entity_state_t& state)
 	state.impacttime = pev->impacttime;
 	state.starttime = pev->starttime;
 
-	state.modelindex = pev->modelindex;
+	if ((pev->flags & EF_NODRAW) != 0)
+	{
+		state.modelindex = 0;
+	}
+	else
+	{
+		state.modelindex = pev->modelindex;
+	}
 
 	state.frame = pev->frame;
 

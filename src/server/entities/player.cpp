@@ -928,9 +928,9 @@ void CBasePlayer::PlayerDeathFrame()
 
 	if (bIsMultiplayer)
 	{
-		if (forcerespawn.value > 0.0f
+		if ((int)forcerespawn.value != 0
 		 || m_afButtonPressed != 0
-		 || !IsNetClient())
+		 || IsBot())
 		{
 			m_afButtonPressed = 0;
 			pev->button = 0;
@@ -976,7 +976,7 @@ void CBasePlayer::StartObserver()
 
 	// Setup flags
 	m_iHideHUD = (HIDEHUD_HEALTH | HIDEHUD_WEAPONS);
-	pev->effects = EF_NODRAW;
+	pev->effects = EF_NOINTERP | EF_NODRAW;
 	pev->view_ofs = g_vecZero;
 	pev->fixangle = 1;
 	pev->solid = SOLID_NOT;
@@ -1287,7 +1287,7 @@ bool CBasePlayer::Spawn()
 	pev->flags |= FL_CLIENT;
 	pev->air_finished = gpGlobals->time + 12;
 	pev->dmg = 2; // initial water damage
-	pev->effects = 0;
+	pev->effects = EF_NOINTERP;
 	pev->deadflag = DEAD_NO;
 	pev->dmg_take = 0;
 	pev->dmg_save = 0;
@@ -2277,7 +2277,7 @@ void CBasePlayer::SetEntityState(entity_state_t& state)
 
 	state.usehull = (pev->flags & FL_DUCKING) != 0 ? 1 : 0;
 
-	if (pev->health > 0.0F)
+	if (IsSpectator() || IsAlive())
 	{
 		state.health = std::max(pev->health, 1.0F);
 	}

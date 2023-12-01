@@ -151,7 +151,7 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 	data.flags = pev->flags;
     data.deadflag = pev->deadflag;
 
-	if (pev->health > 0.0F)
+	if (IsSpectator() || IsAlive())
 	{
 		data.health = std::max(pev->health, 1.0F);
 	}
