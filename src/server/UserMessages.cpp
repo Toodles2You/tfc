@@ -47,7 +47,7 @@ void LinkUserMessages()
 	gmsgTeamScore = REG_USER_MSG("TeamScore", 3); // sets the score of a team on the scoreboard
 	gmsgGameMode = REG_USER_MSG("GameMode", 1);
 	gmsgMOTD = REG_USER_MSG("MOTD", -1);
-	gmsgVGUIMenu = REG_USER_MSG("VGUIMenu", -1);
+	gmsgVGUIMenu = REG_USER_MSG("VGUIMenu", 1);
 	gmsgServerName = REG_USER_MSG("ServerName", -1);
 	gmsgAmmoPickup = REG_USER_MSG("AmmoPickup", 2);
 	gmsgWeapPickup = REG_USER_MSG("WeapPickup", 1);

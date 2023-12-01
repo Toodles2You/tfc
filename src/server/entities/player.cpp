@@ -975,7 +975,7 @@ void CBasePlayer::StartObserver()
 	m_iFOV = 0;
 
 	// Setup flags
-	m_iHideHUD = (HIDEHUD_HEALTH | HIDEHUD_WEAPONS);
+	m_iHideHUD = HIDEHUD_WEAPONS | HIDEHUD_FLASHLIGHT | HIDEHUD_HEALTH;
 	pev->effects = EF_NOINTERP | EF_NODRAW;
 	pev->view_ofs = g_vecZero;
 	pev->fixangle = 1;

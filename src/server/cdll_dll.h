@@ -161,3 +161,14 @@ enum {
 	kDamageFlagSelf = 4,
 	kDamageFlagFriendlyFire = 8,
 };
+
+enum
+{
+	MENU_DEFAULT = 1,
+	MENU_TEAM,
+	MENU_CLASS,
+	MENU_MAPBRIEFING,
+	MENU_INTRO,
+	MENU_CLASSHELP,
+	MENU_SPECHELP,
+};

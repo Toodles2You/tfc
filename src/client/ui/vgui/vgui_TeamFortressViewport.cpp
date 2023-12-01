@@ -159,6 +159,16 @@ void Viewport_ServerMOTD()
 	gViewPort->ShowVGUIMenu(MENU_INTRO);
 }
 
+void Viewport_ChangeTeam()
+{
+	if (gHUD.m_GameMode < kGamemodeTeamplay)
+	{
+		return;
+	}
+
+	gViewPort->ShowVGUIMenu(MENU_TEAM);
+}
+
 //================================================================
 // COMMAND MENU
 //================================================================
@@ -597,6 +607,7 @@ TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : P
 	UpdatePlayerMenu(m_PlayerMenu);
 
 	gEngfuncs.pfnAddCommand("servermotd", Viewport_ServerMOTD);
+	gEngfuncs.pfnAddCommand("changeteam", Viewport_ChangeTeam);
 }
 
 //-----------------------------------------------------------------------------
@@ -1926,14 +1937,6 @@ bool TeamFortressViewport::MsgFunc_VGUIMenu(const char* pszName, int iSize, void
 
 	int iMenu = READ_BYTE();
 
-	// Map briefing includes the name of the map (because it's sent down before the client knows what map it is)
-	if (iMenu == MENU_MAPBRIEFING)
-	{
-		strncpy(m_sMapName, READ_STRING(), sizeof(m_sMapName));
-		m_sMapName[sizeof(m_sMapName) - 1] = '\0';
-	}
-
-	// Bring up the menu6
 	ShowVGUIMenu(iMenu);
 
 	return true;
@@ -1989,6 +1992,9 @@ bool TeamFortressViewport::MsgFunc_ServerName(const char* pszName, int iSize, vo
 
 	strncpy(m_szServerName, READ_STRING(), sizeof(m_szServerName));
 	m_szServerName[sizeof(m_szServerName) - 1] = 0;
+
+	strncpy(m_sMapName, READ_STRING(), sizeof(m_sMapName));
+	m_sMapName[sizeof(m_sMapName) - 1] = '\0';
 
 	return true;
 }

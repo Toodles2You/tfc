@@ -309,9 +309,9 @@ public:
 	bool FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) override;
 
 	// Functions to verify the single/multiplayer status of a game
-	bool IsMultiplayer() override;
-	bool IsDeathmatch() override;
-	bool IsCoOp() override;
+	bool IsMultiplayer() override { return true; }
+	bool IsDeathmatch() override { return m_deathmatch; }
+	bool IsCoOp() override { return m_coop; }
 
 	// Client connection/disconnection
 	// If ClientConnected returns false, the connection is rejected and the user is provided the reason specified in

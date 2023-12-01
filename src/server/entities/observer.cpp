@@ -22,6 +22,7 @@
 #include "weapons.h"
 #include "pm_shared.h"
 #include "UserMessages.h"
+#include "gamerules.h"
 
 // Find the next client in the game for this player to spectate
 void CBasePlayer::Observer_FindNextPlayer(bool bReverse)
@@ -58,6 +59,10 @@ void CBasePlayer::Observer_FindNextPlayer(bool bReverse)
 			continue;
 
 		// MOD AUTHORS: Add checks on target here.
+		if (g_pGameRules->IsDeathmatch()
+		 && g_pGameRules->IsTeamplay()
+		 && g_pGameRules->PlayerRelationship(this, pEnt) < GR_ALLY)
+			continue;
 
 		m_hObserverTarget = pEnt;
 		break;
@@ -147,6 +152,14 @@ void CBasePlayer::Observer_CheckTarget()
 	CBasePlayer* target = (CBasePlayer*)(util::PlayerByIndex(ENTINDEX(m_hObserverTarget->edict())));
 
 	if (!target)
+	{
+		Observer_FindNextPlayer(false);
+		return;
+	}
+
+	if (g_pGameRules->IsDeathmatch()
+	 && g_pGameRules->IsTeamplay()
+	 && g_pGameRules->PlayerRelationship(this, target) < GR_ALLY)
 	{
 		Observer_FindNextPlayer(false);
 		return;

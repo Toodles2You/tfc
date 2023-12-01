@@ -329,28 +329,6 @@ void CHalfLifeMultiplay::Think()
 	last_time = time_remaining;
 }
 
-
-//=========================================================
-//=========================================================
-bool CHalfLifeMultiplay::IsMultiplayer()
-{
-	return true;
-}
-
-//=========================================================
-//=========================================================
-bool CHalfLifeMultiplay::IsDeathmatch()
-{
-	return m_deathmatch;
-}
-
-//=========================================================
-//=========================================================
-bool CHalfLifeMultiplay::IsCoOp()
-{
-	return m_coop;
-}
-
 //=========================================================
 //=========================================================
 bool CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon)
@@ -588,11 +566,11 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 		pPlayer->pev->solid = SOLID_NOT;
 		pPlayer->pev->takedamage = DAMAGE_NO;
 		pPlayer->pev->movetype = MOVETYPE_NONE;
-		pPlayer->m_iHideHUD |= (HIDEHUD_WEAPONS | HIDEHUD_HEALTH);
+		pPlayer->m_iHideHUD |= HIDEHUD_WEAPONS | HIDEHUD_FLASHLIGHT | HIDEHUD_HEALTH;
 		return;
 	}
 
-	pPlayer->m_iHideHUD &= ~(HIDEHUD_WEAPONS | HIDEHUD_HEALTH);
+	pPlayer->m_iHideHUD &= ~(HIDEHUD_WEAPONS | HIDEHUD_FLASHLIGHT | HIDEHUD_HEALTH);
 
 	bool addDefault;
 	CBaseEntity* pWeaponEntity = NULL;
@@ -1875,6 +1853,7 @@ void CHalfLifeMultiplay::SendMOTDToClient(CBasePlayer* player)
 	// send the server name
 	MessageBegin(MSG_ONE, gmsgServerName, player);
 	WriteString(CVAR_GET_STRING("hostname"));
+	WriteString(STRING(gpGlobals->mapname));
 	MessageEnd();
 
 	// Send the message of the day
