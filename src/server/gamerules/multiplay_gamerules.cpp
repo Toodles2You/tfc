@@ -335,30 +335,26 @@ bool CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWe
 {
 	if (!pWeapon->CanDeploy())
 	{
-		// that weapon can't deploy anyway.
 		return false;
 	}
 
-	if (!pPlayer->m_pActiveWeapon)
+	if (pPlayer->m_pActiveWeapon == nullptr)
 	{
-		// player doesn't have an active item!
 		return true;
 	}
 
 	if (!pPlayer->m_pActiveWeapon->CanHolster())
 	{
-		// can't put away the active item.
 		return false;
 	}
 
-	//Never switch
 	if (pPlayer->m_iAutoWepSwitch == 0)
 	{
 		return false;
 	}
 
-	//Only switch if not attacking
-	if (pPlayer->m_iAutoWepSwitch == 2 && ((pPlayer->m_afButtonLast & (IN_ATTACK | IN_ATTACK2)) != 0 || pPlayer->m_pActiveWeapon->IsReloading()))
+	if (pPlayer->m_iAutoWepSwitch == 2
+	 && (pPlayer->m_afButtonLast & (IN_ATTACK | IN_ATTACK2)) != 0)
 	{
 		return false;
 	}

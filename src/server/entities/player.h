@@ -148,8 +148,6 @@ public:
 	bool Restore(CRestore& restore) override;
 	void PackDeadPlayerWeapons();
 	void RemoveAllWeapons();
-	bool SwitchWeapon(CBasePlayerWeapon* pWeapon);
-
 	/**
 	*	@brief Equips an appropriate weapon for the player if they don't have one equipped already.
 	*/

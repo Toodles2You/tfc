@@ -269,18 +269,17 @@ void CBasePlayer::SelectWeapon(int id)
 
 	auto weapon = m_rgpPlayerWeapons[id];
 
-	if (weapon == nullptr
-	 || weapon == m_pActiveWeapon
-	 || (m_pActiveWeapon != nullptr
-	 && !m_pActiveWeapon->Holster()))
+	if (weapon == nullptr || weapon == m_pActiveWeapon)
 	{
 		return;
 	}
 
-	if (weapon->Deploy())
+	if (m_pActiveWeapon != nullptr)
 	{
-		m_pActiveWeapon = weapon;
+		m_pActiveWeapon->Holster();
 	}
+	m_pActiveWeapon = weapon;
+	m_pActiveWeapon->Deploy();
 }
 
 

@@ -1817,7 +1817,7 @@ bool CBasePlayer::AddPlayerWeapon(CBasePlayerWeapon* pWeapon)
 		// Should we switch to this weapon?
 		if (g_pGameRules->FShouldSwitchWeapon(this, pWeapon))
 		{
-			SwitchWeapon(pWeapon);
+			SelectWeapon(pWeapon->m_iId);
 		}
 
 		return true;
@@ -2114,17 +2114,9 @@ void CBasePlayer::DropPlayerWeapon(char* pszWeaponName)
 		pWeapon = m_pActiveWeapon;
 	}
 
-	if (pWeapon == nullptr)
+	if (pWeapon == nullptr || !pWeapon->CanHolster())
 	{
 		return;
-	}
-
-	// if we land here with a valid pWeapon pointer, that's because we found the
-	// weapon we want to drop and hit a BREAK;  pWeapon is the weapon.
-
-	if (!g_pGameRules->GetNextBestWeapon(this, pWeapon))
-	{
-		return; // can't drop the weapon they asked for, may be our last weapon or something we can't holster
 	}
 
 	ClearWeaponBit(pWeapon->m_iId); // take weapon off hud
@@ -2186,52 +2178,19 @@ bool CBasePlayer::HasNamedPlayerWeapon(const char* pszWeaponName)
 	return false;
 }
 
-//=========================================================
-//
-//=========================================================
-bool CBasePlayer::SwitchWeapon(CBasePlayerWeapon* pWeapon)
-{
-	if (pWeapon && !pWeapon->CanDeploy())
-	{
-		return false;
-	}
-
-	if (m_pActiveWeapon)
-	{
-		m_pActiveWeapon->Holster();
-	}
-
-	m_pActiveWeapon = pWeapon;
-
-	if (pWeapon)
-	{
-		pWeapon->m_ForceSendAnimations = true;
-		pWeapon->Deploy();
-		pWeapon->m_ForceSendAnimations = false;
-	}
-
-	return true;
-}
-
 void CBasePlayer::EquipWeapon()
 {
-	if (m_pActiveWeapon)
+	if (m_pActiveWeapon == nullptr)
 	{
-		if ((!FStringNull(pev->viewmodel) || !FStringNull(pev->weaponmodel)))
-		{
-			//Already have a weapon equipped and deployed.
-			return;
-		}
-
-		//Have a weapon equipped, but not deployed.
-		if (m_pActiveWeapon->CanDeploy() && m_pActiveWeapon->Deploy())
-		{
-			return;
-		}
+		return;
 	}
 
-	//No weapon equipped or couldn't deploy it, find a suitable alternative.
-	g_pGameRules->GetNextBestWeapon(this, m_pActiveWeapon, true);
+	if ((!FStringNull(pev->viewmodel) || !FStringNull(pev->weaponmodel)))
+	{
+		return;
+	}
+
+	m_pActiveWeapon->Deploy();
 }
 
 void CBasePlayer::SetPrefsFromUserinfo(char* infobuffer)

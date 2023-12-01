@@ -383,7 +383,6 @@ bool CFuncTank::StartControl(CBasePlayer* pController)
 
 void CFuncTank::StopControl()
 {
-	// TODO: bring back the controllers current weapon
 	if (!m_pController)
 		return;
 

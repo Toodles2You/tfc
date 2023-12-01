@@ -83,7 +83,6 @@ public:
 	virtual bool IsAllowedToSpawn(CBaseEntity* pEntity) = 0; // Can this item spawn (eg monsters don't spawn in deathmatch).
 
 	virtual bool FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) = 0;							  // should the player switch to this weapon?
-	virtual bool GetNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pCurrentWeapon, bool alwaysSearch = false); // I can't use this weapon anymore, get me the next best one.
 
 	// Functions to verify the single/multiplayer status of a game
 	virtual bool IsMultiplayer() = 0;								 // is this a multiplayer game? (either coop or deathmatch)
@@ -180,8 +179,6 @@ public:
 	virtual bool IsPlayerPrivileged(CBasePlayer* pPlayer);
 
 protected:
-	CBasePlayerWeapon* FindNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pCurrentWeapon);
-
 	CSpawnPoint m_startPoint;
 };
 
@@ -202,7 +199,6 @@ public:
 	bool IsAllowedToSpawn(CBaseEntity* pEntity) override;
 
 	bool FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) override;
-	bool GetNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pCurrentWeapon, bool alwaysSearch = false) override;
 
 	// Functions to verify the single/multiplayer status of a game
 	bool IsMultiplayer() override;

@@ -70,6 +70,15 @@ public:
 
 #define WEAPON_NOCLIP -1
 
+enum WeaponAnim
+{
+	kWeaponAnimIdle = 0,
+	kWeaponAnimDeploy,
+	kWeaponAnimHolster,
+
+	kWeaponAnimLast
+};
+
 typedef struct
 {
 	int iSlot;
@@ -83,6 +92,10 @@ typedef struct
 	int iId;
 	int iFlags;
 	int iWeight; // this value used to determine this weapon's importance in autoselection.
+	const char* pszView;
+	const char* pszPlayer;
+	const char* pszAnimExt;
+	int iAnims[kWeaponAnimLast];
 } WeaponInfo;
 
 // inventory items that commit war crimes
@@ -117,55 +130,33 @@ public:
 	bool AddPrimaryAmmo(CBasePlayerWeapon* origin, int iCount, int iType, int iMaxClip, int iMaxCarry);
 	bool AddSecondaryAmmo(int iCount, int iType, int iMaxCarry);
 
-	virtual void PlayEmptySound();
-
-	virtual void SendWeaponAnim(int iAnim, int body = 0);
+	virtual void SendWeaponAnim(int iAnim);
 	virtual void PlayWeaponSound(int iChannel, const char* szSound, float flVolume = VOL_NORM, float flAttn = ATTN_IDLE, int iFlags = 0, float flPitch = PITCH_NORM);
 
-	virtual bool GetWeaponInfo(WeaponInfo* p) { return false; } // returns false if struct not filled out
-	virtual bool CanDeploy();
-	virtual bool Deploy() { return true; } // returns is deploy was successful
-	virtual bool IsUseable();
-	bool DefaultDeploy(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, int body = 0);
-	bool DefaultHolster(int iAnim, int body = 0);
-	bool DefaultReload(int iClipSize, int iAnim, int fDelay, int body = 0);
+	virtual bool GetWeaponInfo(WeaponInfo* p) = 0;
+	virtual bool CanDeploy() { return true; }
+	virtual void Deploy();
 
-	virtual void WeaponPostFrame(); // called each frame by the player PostThink
-	// called by CBasePlayerWeapons WeaponPostFrame()
-	virtual void PrimaryAttack() {}						  // do "+ATTACK"
-	virtual void SecondaryAttack() {}					  // do "+ATTACK2"
-	virtual void Reload() {}							  // do "+RELOAD"
-	virtual void WeaponIdle() {}						  // called when no buttons pressed
-	void RetireWeapon();
+	virtual void WeaponPostFrame() = 0;
 
-	// Can't use virtual functions as think functions so this wrapper is needed.
-	void EXPORT CallDoRetireWeapon()
-	{
-		DoRetireWeapon();
-	}
-
-	virtual void DoRetireWeapon();
 	virtual bool ShouldWeaponIdle() { return false; }
 	virtual bool CanHolster() { return true; } // can this weapon be put away right now?
-	virtual bool Holster() {}
+	virtual void Holster();
 
 	virtual void Drop();
 	virtual void Kill();
 	virtual void AttachToPlayer(CBasePlayer* pPlayer);
 
 	virtual void GetWeaponData(weapon_data_t& data);
-
 	virtual void SetWeaponData(const weapon_data_t& data);
-
 	virtual void DecrementTimers(const int msec);
-
-	virtual bool IsReloading() { return m_fInReload; }
 
 	static inline WeaponInfo WeaponInfoArray[WEAPON_LAST];
 
 	CBasePlayer* m_pPlayer;
 	int m_iId;
 
+	WeaponInfo& GetInfo() { return WeaponInfoArray[m_iId]; }
 	int iItemPosition() { return WeaponInfoArray[m_iId].iPosition; }
 	int iAmmo1() { return WeaponInfoArray[m_iId].iAmmo1; }
 	int iMaxAmmo1() { return WeaponInfoArray[m_iId].iMaxAmmo1; }
@@ -179,19 +170,11 @@ public:
 	//Hack so deploy animations work when weapon prediction is enabled.
 	bool m_ForceSendAnimations = false;
 
-	float m_flPumpTime;
-	int m_fInSpecialReload;		   // Are we in the middle of a reload for the shotguns
 	int m_iNextPrimaryAttack;   // soonest time WeaponPostFrame will call PrimaryAttack
-	int m_iNextSecondaryAttack; // soonest time WeaponPostFrame will call SecondaryAttack
-	int m_iTimeWeaponIdle;	   // soonest time WeaponPostFrame will call WeaponIdle
 	int m_iClip;				   // number of shots left in the primary weapon clip, -1 it not used
-	int m_iClientClip;			   // the last version of m_iClip sent to hud dll
-	int m_iClientWeaponState;	   // the last version of the weapon state sent to hud dll (is current weapon, is on target)
 	bool m_fInReload;			   // Are we in the middle of a reload;
 
 	int m_iDefaultAmmo; // how much ammo you get when you pick up this weapon as placed by a level designer.
-
-	bool m_bPlayEmptySound;
 };
 
 
@@ -270,7 +253,7 @@ public:
 	enum
 	{
 		kAnimIdle = 0,
-		kAnimDraw,
+		kAnimDeploy,
 		kAnimHolster,
 		kAnimAttack1Hit,
 		kAnimAttack1Miss,
@@ -289,11 +272,9 @@ public:
 
 	bool Spawn() override;
 	void Precache() override;
-	bool GetWeaponInfo(WeaponInfo* p) override;
+	bool GetWeaponInfo(WeaponInfo* i) override;
 
-	void PrimaryAttack() override;
-	bool Deploy() override;
-	bool Holster() override;
+	void PrimaryAttack();
 	void WeaponPostFrame() override;
 
 private:
@@ -319,13 +300,10 @@ public:
 	bool Spawn() override;
 	void Precache() override;
 	bool GetWeaponInfo(WeaponInfo* i) override;
-	bool AddDuplicate(CBasePlayerWeapon* original) override;
 
-	void PrimaryAttack() override;
-	void SecondaryAttack() override;
-	bool Deploy() override;
-	bool Holster() override;
-	void Reload() override;
+	void PrimaryAttack();
+	void SecondaryAttack();
+	void WeaponPostFrame() override;
 
 private:
 	unsigned short m_usMP5;

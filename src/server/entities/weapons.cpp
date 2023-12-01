@@ -201,17 +201,9 @@ void W_Precache()
 TYPEDESCRIPTION CBasePlayerWeapon::m_SaveData[] =
 {
 	DEFINE_FIELD(CBasePlayerWeapon, m_pPlayer, FIELD_CLASSPTR),
-	//DEFINE_FIELD( CBasePlayerWeapon, m_fKnown, FIELD_INTEGER ),Reset to zero on load
 	DEFINE_FIELD(CBasePlayerWeapon, m_iId, FIELD_INTEGER),
-	// DEFINE_FIELD( CBasePlayerWeapon, m_iIdPrimary, FIELD_INTEGER ),
-	// DEFINE_FIELD( CBasePlayerWeapon, m_iIdSecondary, FIELD_INTEGER ),
-	DEFINE_FIELD(CBasePlayerWeapon, m_iNextPrimaryAttack, FIELD_INTEGER),
-	DEFINE_FIELD(CBasePlayerWeapon, m_iNextSecondaryAttack, FIELD_INTEGER),
-	DEFINE_FIELD(CBasePlayerWeapon, m_iTimeWeaponIdle, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayerWeapon, m_iClip, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayerWeapon, m_iDefaultAmmo, FIELD_INTEGER),
-	//	DEFINE_FIELD( CBasePlayerWeapon, m_iClientClip, FIELD_INTEGER )	 , reset to zero on load so hud gets updated correctly
-	//  DEFINE_FIELD( CBasePlayerWeapon, m_iClientWeaponState, FIELD_INTEGER ), reset to zero on load so hud gets updated correctly
 };
 
 IMPLEMENT_SAVERESTORE(CBasePlayerWeapon, CBaseAnimating);
@@ -435,23 +427,12 @@ bool CBasePlayerWeapon::AddDuplicate(CBasePlayerWeapon* pOriginal)
 
 void CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer)
 {
-	/*
-	if ((iFlags() & WEAPON_FLAG_EXHAUSTIBLE) != 0 && m_iDefaultAmmo == 0 && m_iClip <= 0)
-	{
-		//This is an exhaustible weapon that has no ammo left. Don't add it, queue it up for destruction instead.
-		SetThink(&CSatchel::DestroyWeapon);
-		pev->nextthink = gpGlobals->time + 0.1;
-		return false;
-	}
-	*/
-
 	m_pPlayer = pPlayer;
-
 	pPlayer->SetWeaponBit(m_iId);
 }
 
 
-void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int body)
+void CBasePlayerWeapon::SendWeaponAnim(int iAnim)
 {
 	const bool skiplocal = !m_ForceSendAnimations;
 
@@ -461,8 +442,8 @@ void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int body)
 		return;
 
 	MessageBegin(MSG_ONE, SVC_WEAPONANIM, m_pPlayer);
-	WriteByte(iAnim);	   // sequence number
-	WriteByte(pev->body); // weaponmodel bodygroup.
+	WriteByte(iAnim);
+	WriteByte(pev->body);
 	MessageEnd();
 }
 
@@ -521,93 +502,28 @@ bool CBasePlayerWeapon::AddSecondaryAmmo(int iCount, int iType, int iMax)
 	return iIdAmmo > 0 ? true : false;
 }
 
-//=========================================================
-// IsUseable - this function determines whether or not a
-// weapon is useable by the player in its current state.
-// (does it have ammo loaded? do I have any ammo for the
-// weapon?, etc)
-//=========================================================
-bool CBasePlayerWeapon::IsUseable()
+void CBasePlayerWeapon::Deploy()
 {
-	if (m_iClip > 0)
-	{
-		return true;
-	}
+	const auto info = GetInfo();
 
-	//Player has unlimited ammo for this weapon or does not use magazines
-	if (iMaxAmmo1() == WEAPON_NOCLIP)
-	{
-		return true;
-	}
+	m_pPlayer->pev->viewmodel = g_engfuncs.pfnModelIndex(info.pszView);
+	m_pPlayer->pev->weaponmodel = g_engfuncs.pfnModelIndex(info.pszPlayer);
+	strcpy(m_pPlayer->m_szAnimExtention, info.pszAnimExt);
 
-	if (m_pPlayer->m_rgAmmo[iAmmo1()] > 0)
-	{
-		return true;
-	}
+	SendWeaponAnim(info.iAnims[kWeaponAnimDeploy]);
 
-	if (iAmmo2() > AMMO_NONE)
-	{
-		//Player has unlimited ammo for this weapon or does not use magazines
-		if (iMaxAmmo2() == WEAPON_NOCLIP)
-		{
-			return true;
-		}
-
-		if (m_pPlayer->m_rgAmmo[iAmmo2()] > 0)
-		{
-			return true;
-		}
-	}
-
-	// clip is empty (or nonexistant) and the player has no more ammo of this type.
-	return false;
+	m_iNextPrimaryAttack = std::max(m_iNextPrimaryAttack, 500);
 }
 
-bool CBasePlayerWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, int body)
+void CBasePlayerWeapon::Holster()
 {
-	if (!CanDeploy())
-		return false;
+	const auto info = GetInfo();
 
-	m_pPlayer->pev->viewmodel = g_engfuncs.pfnModelIndex(szViewModel);
-	m_pPlayer->pev->weaponmodel = g_engfuncs.pfnModelIndex(szWeaponModel);
-	strcpy(m_pPlayer->m_szAnimExtention, szAnimExt);
-	SendWeaponAnim(iAnim, body);
+	SendWeaponAnim(info.iAnims[kWeaponAnimHolster]);
 
-	m_pPlayer->m_iNextAttack = 500;
 	m_iNextPrimaryAttack = std::max(m_iNextPrimaryAttack, 500);
-	m_iNextSecondaryAttack = std::max(m_iNextSecondaryAttack, 500);
-	m_iTimeWeaponIdle = 1000;
-	m_bPlayEmptySound = true;
-
-	return true;
-}
-
-bool CBasePlayerWeapon::DefaultHolster(int iAnim, int body)
-{
-	if (!CanHolster())
-		return false;
-
-	if (iAnim >= 0)
-		SendWeaponAnim(iAnim, body);
-
-	m_pPlayer->m_iNextAttack = 500;
-	m_iNextPrimaryAttack = std::max(m_iNextPrimaryAttack, 500);
-	m_iNextSecondaryAttack = std::max(m_iNextSecondaryAttack, 500);
-	m_iTimeWeaponIdle = 1000;
-	m_fInReload = false; // Cancel any reload in progress.
-	m_fInSpecialReload = 0;
+	m_fInReload = false;
 	m_pPlayer->m_iFOV = 0;
-
-	return true;
-}
-
-void CBasePlayerWeapon::PlayEmptySound()
-{
-	if (m_bPlayEmptySound)
-	{
-		PlayWeaponSound(CHAN_ITEM, "weapons/357_cock1.wav", 0.8);
-		m_bPlayEmptySound = false;
-	}
 }
 
 bool CBasePlayerAmmo::Spawn()
@@ -723,36 +639,6 @@ bool CBasePlayerWeapon::ExtractClipAmmo(CBasePlayerWeapon* pWeapon)
 
 	//TODO: should handle -1 return as well (only return true if ammo was taken)
 	return pWeapon->m_pPlayer->GiveAmmo(iAmmo, iAmmo1(), iMaxAmmo1()) != 0; // , &m_iPrimaryAmmoType
-}
-
-//=========================================================
-// RetireWeapon - no more ammo for this gun, put it away.
-//=========================================================
-void CBasePlayerWeapon::RetireWeapon()
-{
-	SetThink(&CBasePlayerWeapon::CallDoRetireWeapon);
-	pev->nextthink = gpGlobals->time + 0.01f;
-}
-
-void CBasePlayerWeapon::DoRetireWeapon()
-{
-	if (!m_pPlayer || m_pPlayer->m_pActiveWeapon != this)
-	{
-		// Already retired?
-		return;
-	}
-
-	// first, no viewmodel at all.
-	m_pPlayer->pev->viewmodel = 0;
-	m_pPlayer->pev->weaponmodel = 0;
-
-	g_pGameRules->GetNextBestWeapon(m_pPlayer, this);
-
-	//If we're still equipped and we couldn't switch to another weapon, dequip this one
-	if (CanHolster() && m_pPlayer->m_pActiveWeapon == this)
-	{
-		m_pPlayer->SwitchWeapon(nullptr);
-	}
 }
 
 

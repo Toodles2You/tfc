@@ -47,10 +47,6 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 
 bool CBasePlayer::Spawn()
 {
-	if (m_pActiveWeapon != nullptr)
-    {
-		m_pActiveWeapon->Deploy();
-    }
 	return true;
 }
 

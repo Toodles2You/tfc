@@ -22,18 +22,8 @@ bool CMP5::Spawn()
 	SetModel("models/w_9mmAR.mdl");
 	FallInit();
 	m_iId = WEAPON_MP5;
-	m_iDefaultAmmo = 50;
+	m_iDefaultAmmo = 30;
 	return true;
-}
-
-
-bool CMP5::AddDuplicate(CBasePlayerWeapon* original)
-{
-	if (m_iDefaultAmmo == 50)
-	{
-		m_iDefaultAmmo = 25;
-	}
-	return CBasePlayerWeapon::AddDuplicate(original);
 }
 
 
@@ -75,19 +65,15 @@ bool CMP5::GetWeaponInfo(WeaponInfo* i)
 	i->iId = m_iId = WEAPON_MP5;
 	i->iWeight = 15;
 
+	i->pszView = "models/v_9mmAR.mdl";
+	i->pszPlayer = "models/p_9mmAR.mdl";
+	i->pszAnimExt = "mp5";
+
+	i->iAnims[kWeaponAnimIdle] = kAnimIdle1;
+	i->iAnims[kWeaponAnimDeploy] = kAnimDeploy;
+	i->iAnims[kWeaponAnimHolster] = kAnimHolster;
+
 	return true;
-}
-
-
-bool CMP5::Deploy()
-{
-	return DefaultDeploy("models/v_9mmAR.mdl", "models/p_9mmAR.mdl", kAnimDeploy, "mp5");
-}
-
-
-bool CMP5::Holster()
-{
-	return DefaultHolster(kAnimHolster);
 }
 
 
@@ -95,7 +81,6 @@ void CMP5::PrimaryAttack()
 {
 	if (m_pPlayer->pev->waterlevel == 3 || m_iClip == 0)
 	{
-		PlayEmptySound();
 		m_iNextPrimaryAttack = 150;
 		return;
 	}
@@ -111,10 +96,9 @@ void CMP5::PrimaryAttack()
 	if (shots > m_iClip)
 	{
 		shots = m_iClip;
-		PlayEmptySound();
 	}
 
-	m_iClip -= shots;
+	// m_iClip -= shots;
 
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
@@ -131,12 +115,11 @@ void CMP5::SecondaryAttack()
 {
 	if (m_pPlayer->pev->waterlevel == 3 || m_pPlayer->m_rgAmmo[iAmmo2()] == 0)
 	{
-		PlayEmptySound();
 		m_iNextPrimaryAttack = 150;
 		return;
 	}
 
-	m_pPlayer->m_rgAmmo[iAmmo2()]--;
+	// m_pPlayer->m_rgAmmo[iAmmo2()]--;
 
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
@@ -150,12 +133,23 @@ void CMP5::SecondaryAttack()
 
 	m_pPlayer->PlaybackEvent(m_usMP52);
 
-	m_iNextPrimaryAttack = m_iNextSecondaryAttack = 1000;
+	m_iNextPrimaryAttack = 1000;
 }
 
 
-void CMP5::Reload()
+
+void CMP5::WeaponPostFrame()
 {
-	DefaultReload(iMaxClip(), kAnimReload, 1500);
+	if (m_iNextPrimaryAttack <= 0)
+	{
+		if ((m_pPlayer->pev->button & IN_ATTACK2) != 0)
+		{
+			SecondaryAttack();
+		}
+		else if ((m_pPlayer->pev->button & IN_ATTACK) != 0)
+		{
+			PrimaryAttack();
+		}
+	}
 }
 

@@ -26,68 +26,36 @@
 #include "hud.h"
 
 
-bool CBasePlayerWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, int body)
+void CBasePlayerWeapon::Deploy()
 {
-	if (!CanDeploy())
-    {
-		return false;
-    }
+	const auto info = GetInfo();
 
-	gEngfuncs.CL_LoadModel(szViewModel, &m_pPlayer->pev->viewmodel);
+	gEngfuncs.CL_LoadModel(info.pszView, &m_pPlayer->pev->viewmodel);
+	gEngfuncs.CL_LoadModel(info.pszPlayer, &m_pPlayer->pev->weaponmodel);
+	strcpy(m_pPlayer->m_szAnimExtention, info.pszAnimExt);
 
-	SendWeaponAnim(iAnim, body);
+	SendWeaponAnim(info.iAnims[kWeaponAnimDeploy]);
 
-	m_pPlayer->m_iNextAttack = 500;
 	m_iNextPrimaryAttack = std::max(m_iNextPrimaryAttack, 500);
-	m_iNextSecondaryAttack = std::max(m_iNextSecondaryAttack, 500);
-	m_iTimeWeaponIdle = 1000;
-	m_bPlayEmptySound = true;
-	return true;
 }
 
 
-bool CBasePlayerWeapon::DefaultHolster(int iAnim, int body)
+void CBasePlayerWeapon::Holster()
 {
-	if (!CanHolster())
-    {
-		return false;
-    }
+	const auto info = GetInfo();
 
-	if (iAnim >= 0)
-    {
-		SendWeaponAnim(iAnim, body);
-    }
+	SendWeaponAnim(info.iAnims[kWeaponAnimHolster]);
 
-	m_pPlayer->m_iNextAttack = 500;
 	m_iNextPrimaryAttack = std::max(m_iNextPrimaryAttack, 500);
-	m_iNextSecondaryAttack = std::max(m_iNextSecondaryAttack, 500);
-	m_iTimeWeaponIdle = 1000;
 	m_fInReload = false;
-	m_fInSpecialReload = 0;
 	m_pPlayer->m_iFOV = 0;
-	return true;
 }
 
 
-void CBasePlayerWeapon::PlayEmptySound()
-{
-	if (!HUD_FirstTimePredicting())
-    {
-		return;
-    }
-
-	if (m_bPlayEmptySound)
-	{
-		PlayWeaponSound(CHAN_ITEM, "weapons/357_cock1.wav", 0.8);
-		m_bPlayEmptySound = false;
-	}
-}
-
-
-void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int body)
+void CBasePlayerWeapon::SendWeaponAnim(int iAnim)
 {
 	m_pPlayer->pev->weaponanim = iAnim;
-	HUD_SendWeaponAnim(iAnim, body, false);
+	HUD_SendWeaponAnim(iAnim, pev->body, false);
 }
 
 

@@ -139,7 +139,6 @@ void CBasePlayer::SetCustomDecalFrames(int nFrames) {}
 int CBasePlayer::GetCustomDecalFrames() { return -1; }
 void CBasePlayer::DropPlayerWeapon(char* pszWeaponName) {}
 bool CBasePlayer::HasPlayerWeapon(CBasePlayerWeapon* pCheckWeapon) { return false; }
-bool CBasePlayer::SwitchWeapon(CBasePlayerWeapon* pWeapon) { return false; }
 const char* CBasePlayer::TeamID() { return ""; }
 int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax) { return 0; }
 void CBasePlayer::AddPoints(float score, bool bAllowNegativeScore) {}
@@ -164,15 +163,12 @@ void CBasePlayerWeapon::Kill() {}
 void CBasePlayerWeapon::AttachToPlayer(CBasePlayer* pPlayer) {}
 bool CBasePlayerWeapon::AddDuplicate(CBasePlayerWeapon* pOriginal) { return false; }
 void CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer) {}
-bool CBasePlayerWeapon::IsUseable() { return true; }
 bool CBasePlayerAmmo::Spawn() { return false; }
 CBaseEntity* CBasePlayerAmmo::Respawn() { return this; }
 void CBasePlayerAmmo::Materialize() {}
 void CBasePlayerAmmo::DefaultTouch(CBaseEntity* pOther) {}
 bool CBasePlayerWeapon::ExtractAmmo(CBasePlayerWeapon* pWeapon) { return false; }
 bool CBasePlayerWeapon::ExtractClipAmmo(CBasePlayerWeapon* pWeapon) { return false; }
-void CBasePlayerWeapon::RetireWeapon() {}
-void CBasePlayerWeapon::DoRetireWeapon() {}
 void RadiusDamage(Vector vecSrc, CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, float flRadius, int bitsDamageType) {}
 
 

@@ -46,35 +46,32 @@ void CCrowbar::Precache()
 }
 
 
-bool CCrowbar::GetWeaponInfo(WeaponInfo* p)
+bool CCrowbar::GetWeaponInfo(WeaponInfo* i)
 {
 #ifdef GAME_DLL
-	p->pszName = STRING(pev->classname);
+	i->pszName = STRING(pev->classname);
 #else
-	p->pszName = "weapon_crowbar";
+	i->pszName = "weapon_crowbar";
 #endif
-	p->iAmmo1 = AMMO_NONE;
-	p->iMaxAmmo1 = -1;
-	p->iAmmo2 = AMMO_NONE;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = WEAPON_NOCLIP;
-	p->iSlot = 0;
-	p->iPosition = 0;
-	p->iId = WEAPON_CROWBAR;
-	p->iWeight = 0;
+	i->iAmmo1 = AMMO_NONE;
+	i->iMaxAmmo1 = -1;
+	i->iAmmo2 = AMMO_NONE;
+	i->iMaxAmmo2 = -1;
+	i->iMaxClip = WEAPON_NOCLIP;
+	i->iSlot = 0;
+	i->iPosition = 0;
+	i->iId = WEAPON_CROWBAR;
+	i->iWeight = 0;
+
+	i->pszView = "models/v_crowbar.mdl";
+	i->pszPlayer = "models/p_crowbar.mdl";
+	i->pszAnimExt = "crowbar";
+
+	i->iAnims[kWeaponAnimIdle] = kAnimIdle;
+	i->iAnims[kWeaponAnimDeploy] = kAnimDeploy;
+	i->iAnims[kWeaponAnimHolster] = kAnimHolster;
+
 	return true;
-}
-
-
-bool CCrowbar::Deploy()
-{
-	return DefaultDeploy("models/v_crowbar.mdl", "models/p_crowbar.mdl", kAnimDraw, "crowbar");
-}
-
-
-bool CCrowbar::Holster()
-{
-	return DefaultHolster(kAnimHolster);
 }
 
 

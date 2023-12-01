@@ -286,7 +286,7 @@ inline bool CBot::IsActiveWeaponReloading( void ) const
 	if (gun == NULL)
 		return false;
 
-	return (gun->m_fInReload || gun->m_fInSpecialReload) ? true : false;
+	return gun->m_fInReload;
 }
 
 //-----------------------------------------------------------------------------------------------------------
