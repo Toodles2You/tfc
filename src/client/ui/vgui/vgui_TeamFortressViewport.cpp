@@ -1421,10 +1421,10 @@ CMenuPanel* TeamFortressViewport::CreateTextWindow(int iTextToShow)
 
 		pfile = (char*)gEngfuncs.COM_LoadFile(sz, 5, NULL);
 
-		if (!pfile)
-			return NULL;
-
-		cText = pfile;
+		if (pfile != nullptr)
+			cText = pfile;
+		else
+			cText = gHUD.m_TextMessage.BufferedLocaliseTextString("#Map_Description_not_available");
 
 		strncpy(cTitle, m_sMapName, MAX_TITLE_LENGTH);
 		cTitle[MAX_TITLE_LENGTH - 1] = 0;
@@ -1949,7 +1949,27 @@ bool TeamFortressViewport::MsgFunc_MOTD(const char* pszName, int iSize, void* pb
 
 	BEGIN_READ(pbuf, iSize);
 
-	m_iGotAllMOTD = READ_BYTE() != 0;
+	int gotAllMOTD = READ_BYTE();
+
+	m_iGotAllMOTD = gotAllMOTD != 0;
+
+	if (gotAllMOTD == 2)
+	{
+		char* motd = (char*)gEngfuncs.COM_LoadFile("motd.txt", 5, nullptr);
+		if (motd != nullptr)
+		{
+			strncpy(m_szMOTD, motd, sizeof(m_szMOTD) - 1);
+			m_szMOTD[sizeof(m_szMOTD) - 1] = '\0';
+
+			gEngfuncs.COM_FreeFile(motd);
+		}
+
+		if (0 == gEngfuncs.IsSpectateOnly())
+		{
+			ShowVGUIMenu(MENU_INTRO);
+		}
+		return;
+	}
 
 	int roomInArray = sizeof(m_szMOTD) - strlen(m_szMOTD) - 1;
 

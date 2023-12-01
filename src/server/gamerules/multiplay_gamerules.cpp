@@ -1856,6 +1856,13 @@ void CHalfLifeMultiplay::SendMOTDToClient(CBasePlayer* player)
 	WriteString(STRING(gpGlobals->mapname));
 	MessageEnd();
 
+	if (pFileList == nullptr)
+	{
+		MessageBegin(MSG_ONE, gmsgMOTD, player);
+		WriteByte(2);
+		MessageEnd();
+	}
+
 	// Send the message of the day
 	// read it chunk-by-chunk,  and send it in parts
 
