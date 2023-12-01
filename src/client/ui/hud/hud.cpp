@@ -687,7 +687,10 @@ bool CHud::ImpulseCommands(int impulse)
 	switch (impulse)
 	{
 	case 100:
-		m_Flash.Update_Flashlight(!m_Flash.IsFlashlightOn());
+		if (IsAlive())
+		{
+			m_Flash.Update_Flashlight(!m_Flash.IsFlashlightOn());
+		}
 		return true;
 	}
 
@@ -702,7 +705,7 @@ static float g_ColorGrey[3] = {0.8, 0.8, 0.8};
 
 float* CHud::GetTeamColor(int teamNumber)
 {
-	if (gHUD.m_GameMode != kGamemodeTeamplay)
+	if (m_GameMode != kGamemodeTeamplay)
 	{
 		switch (teamNumber)
 		{
@@ -735,6 +738,11 @@ float* CHud::GetTeamColor(int teamNumber)
 float* CHud::GetClientColor(int clientIndex)
 {
 	return GetTeamColor(g_PlayerExtraInfo[clientIndex].teamnumber);
+}
+
+bool CHud::IsAlive()
+{
+	return !g_PlayerExtraInfo[gEngfuncs.GetLocalPlayer()->index].dead;
 }
 
 int CHud::GetObserverMode()

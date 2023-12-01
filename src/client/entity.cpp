@@ -22,8 +22,6 @@ void Game_AddObjects();
 
 extern Vector v_origin;
 
-bool g_iAlive = true;
-
 extern int g_iObserverMode;
 extern int g_iObserverTarget;
 extern int g_iObserverTarget2;
@@ -190,9 +188,6 @@ void HUD_TxferPredictionData(struct entity_state_s* ps, const struct entity_stat
 	pcd->maxspeed = ppcd->maxspeed;
 
 	pcd->deadflag = ppcd->deadflag;
-
-	// Spectating or not dead == get control over view angles.
-	g_iAlive = (0 != ppcd->iuser1 || (pcd->deadflag == DEAD_NO));
 
 	pcd->iuser1 = ppcd->iuser1;
 	pcd->iuser2 = ppcd->iuser2;

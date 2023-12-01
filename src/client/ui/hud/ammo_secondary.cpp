@@ -55,7 +55,7 @@ bool CHudAmmoSecondary::VidInit()
 
 bool CHudAmmoSecondary::Draw(float flTime)
 {
-	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
+	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_WEAPONS) != 0)
 		return true;
 
 	// draw secondary ammo icons above normal ammo readout

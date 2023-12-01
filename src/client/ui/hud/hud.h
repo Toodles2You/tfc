@@ -69,6 +69,7 @@ public:
 	POSITION m_pos;
 	int m_type;
 	int m_iFlags; // active, moving,
+	int m_iHideFlags;
 	virtual ~CHudBase() {}
 	virtual bool Init() { return false; }
 	virtual bool VidInit() { return false; }
@@ -667,7 +668,6 @@ public:
 	SCREENINFO m_scrinfo;
 
 	std::uint64_t m_iWeaponBits;
-	bool m_fPlayerDead;
 	bool m_iIntermission;
 	RGBA m_cColors[CHud::COLOR_COUNT];
 
@@ -684,6 +684,7 @@ public:
 	float* GetTeamColor(int teamNumber);
 	float* GetClientColor(int clientIndex);
 
+	bool IsAlive();
 	int GetObserverMode();
 	int GetObserverTarget();
 	int GetObserverTarget2();

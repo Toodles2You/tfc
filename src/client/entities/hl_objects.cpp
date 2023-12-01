@@ -122,33 +122,36 @@ void Game_AddObjects()
 		UpdateLaserDot(time, &trLong);
 	}
 	
-	if (gHUD.m_Flash.IsFlashlightOn())
+	if (!gHUD.IsObserver())
 	{
-		auto light = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
-
-		if (light)
+		if (gHUD.IsAlive() && gHUD.m_Flash.IsFlashlightOn())
 		{
-			light->origin = trShort.endpos;
-			light->color.r = 255;
-			light->color.g = 255;
-			light->color.b = 255;
-			light->die = time + 0.001;
-			light->radius = 96 * (1.0f - trShort.fraction);
+			auto light = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
+
+			if (light)
+			{
+				light->origin = trShort.endpos;
+				light->color.r = 255;
+				light->color.g = 255;
+				light->color.b = 255;
+				light->die = time + 0.001;
+				light->radius = 96 * (1.0f - trShort.fraction);
+			}
 		}
-	}
 
-	cl_entity_t* target = nullptr;
+		cl_entity_t* target = nullptr;
 
-	if (trLong.fraction != 1.0f)
-	{
-		auto entIndex = gEngfuncs.pEventAPI->EV_IndexFromTrace(&trLong);
-		if (entIndex >= 1 && entIndex <= gEngfuncs.GetMaxClients())
+		if (gHUD.IsAlive() && trLong.fraction != 1.0f)
 		{
-			target = gEngfuncs.GetEntityByIndex(entIndex);
+			auto entIndex = gEngfuncs.pEventAPI->EV_IndexFromTrace(&trLong);
+			if (entIndex >= 1 && entIndex <= gEngfuncs.GetMaxClients())
+			{
+				target = gEngfuncs.GetEntityByIndex(entIndex);
+			}
 		}
-	}
 
-	gHUD.m_StatusBar.UpdateStatusBar(target);
+		gHUD.m_StatusBar.UpdateStatusBar(target);
+	}
 
 	gEngfuncs.pEventAPI->EV_PopPMStates();
 }

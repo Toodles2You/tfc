@@ -22,8 +22,6 @@
 #include "filesystem_utils.h"
 
 
-extern bool g_iAlive;
-
 extern int g_weaponselect;
 extern cl_enginefunc_t gEngfuncs;
 
@@ -653,7 +651,6 @@ void CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 {
 	float spd;
 	Vector viewangles;
-	static Vector oldangles;
 
 	if (0 != active)
 	{
@@ -739,27 +736,7 @@ void CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 	gEngfuncs.GetViewAngles((float*)viewangles);
 	// Set current view angles.
 
-	if (g_iAlive)
-	{
-		VectorCopy(viewangles, cmd->viewangles);
-		VectorCopy(viewangles, oldangles);
-	}
-	else
-	{
-		VectorCopy(oldangles, cmd->viewangles);
-	}
-}
-
-/*
-============
-CL_IsDead
-
-Returns 1 if health is <= 0
-============
-*/
-bool CL_IsDead()
-{
-	return gHUD.m_Health.m_iHealth <= 0;
+	VectorCopy(viewangles, cmd->viewangles);
 }
 
 /*

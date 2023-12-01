@@ -353,9 +353,6 @@ bool CHudAmmo::VidInit()
 //
 void CHudAmmo::Think()
 {
-	if (gHUD.m_fPlayerDead)
-		return;
-
 	if (gHUD.m_iWeaponBits != gWR.iOldWeaponBits)
 	{
 		gWR.iOldWeaponBits = gHUD.m_iWeaponBits;
@@ -431,7 +428,7 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 	if (iSlot > MAX_WEAPON_SLOTS)
 		return;
 
-	if (gHUD.m_fPlayerDead || (gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
+	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
 		return;
 
 	if (!gHUD.HasAnyWeapons())
@@ -527,14 +524,11 @@ void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip)
 
 	if (gHUD.GetObserverMode() != OBS_IN_EYE)
 	{
-		// Is player dead???
-		if ((iId == -1) && (iClip == -1))
+		if (iId == -1 && iClip == -1)
 		{
-			gHUD.m_fPlayerDead = true;
-			gpActiveSel = NULL;
+			gpActiveSel = nullptr;
 			return;
 		}
-		gHUD.m_fPlayerDead = false;
 	}
 
 	WEAPON* pWeapon = gWR.GetWeapon(iId);
@@ -774,7 +768,7 @@ void CHudAmmo::UserCmd_Close()
 // Selects the next item in the weapon menu
 void CHudAmmo::UserCmd_NextWeapon()
 {
-	if (gHUD.m_fPlayerDead || (gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
+	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
 		return;
 
 	bool open = false;
@@ -837,7 +831,7 @@ void CHudAmmo::UserCmd_NextWeapon()
 // Selects the previous item in the menu
 void CHudAmmo::UserCmd_PrevWeapon()
 {
-	if (gHUD.m_fPlayerDead || (gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
+	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
 		return;
 
 	bool open = false;
@@ -976,7 +970,7 @@ bool CHudAmmo::Draw(float flTime)
 	int a, x, y;
 	int AmmoWidth;
 
-	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
+	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_WEAPONS) != 0)
 		return true;
 
 	// Draw Weapon Menu
