@@ -196,9 +196,9 @@ void CHalfLifeTeamplay::InitHUD(CBasePlayer* pPlayer)
 }
 
 
-bool CHalfLifeTeamplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib)
+bool CHalfLifeTeamplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib)
 {
-	if (!CHalfLifeMultiplay::ChangePlayerTeam(pPlayer, pTeamName, bKill, bGib))
+	if (!CHalfLifeMultiplay::ChangePlayerTeam(pPlayer, teamIndex, bKill, bGib))
 	{
 		return false;
 	}
