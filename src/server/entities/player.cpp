@@ -530,7 +530,8 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 	pev->iuser3 = attacker->entindex();
 
 	pev->solid = SOLID_NOT;
-	pev->effects |= EF_NODRAW;
+	pev->movetype = MOVETYPE_NONE;
+	pev->effects |= EF_NODRAW | EF_NOINTERP;
 
 	DeathSound();
 
