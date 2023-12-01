@@ -42,7 +42,6 @@ set(SHARED_SRC
 )
 
 set(SERVER_SRC
-    ${SERVER_SRC_DIR}/entities/airtank.cpp
     ${SERVER_SRC_DIR}/entities/animating.cpp
     ${SERVER_SRC_DIR}/entities/animation.cpp
     ${SERVER_SRC_DIR}/entities/bmodels.cpp
@@ -55,9 +54,7 @@ set(SERVER_SRC
     ${SERVER_SRC_DIR}/entities/func_break.cpp
     ${SERVER_SRC_DIR}/entities/func_tank.cpp
     ${SERVER_SRC_DIR}/entities/ggrenade.cpp
-    ${SERVER_SRC_DIR}/entities/h_battery.cpp
     ${SERVER_SRC_DIR}/entities/h_cycler.cpp
-    ${SERVER_SRC_DIR}/entities/healthkit.cpp
     ${SERVER_SRC_DIR}/entities/items.cpp
     ${SERVER_SRC_DIR}/entities/lights.cpp
     ${SERVER_SRC_DIR}/entities/maprules.cpp
@@ -83,7 +80,6 @@ set(SERVER_SRC
     ${SERVER_SRC_DIR}/game.cpp
     ${SERVER_SRC_DIR}/h_export.cpp
     ${SERVER_SRC_DIR}/nodes.cpp
-    ${SERVER_SRC_DIR}/plane.cpp
     ${SERVER_SRC_DIR}/saverestore.cpp
     ${SERVER_SRC_DIR}/tent.cpp
     ${SERVER_SRC_DIR}/UserMessages.cpp

@@ -29,61 +29,6 @@
 #include "gamerules.h"
 #include "UserMessages.h"
 
-class CWorldItem : public CBaseEntity
-{
-public:
-	bool KeyValue(KeyValueData* pkvd) override;
-	bool Spawn() override;
-	int m_iType;
-};
-
-LINK_ENTITY_TO_CLASS(world_items, CWorldItem);
-
-bool CWorldItem::KeyValue(KeyValueData* pkvd)
-{
-	if (FStrEq(pkvd->szKeyName, "type"))
-	{
-		m_iType = atoi(pkvd->szValue);
-		return true;
-	}
-
-	return CBaseEntity::KeyValue(pkvd);
-}
-
-bool CWorldItem::Spawn()
-{
-	CBaseEntity* pEntity = NULL;
-
-	switch (m_iType)
-	{
-	case 44: // ITEM_BATTERY:
-		pEntity = CBaseEntity::Create("item_battery", pev->origin, pev->angles);
-		break;
-	case 42: // ITEM_ANTIDOTE:
-		pEntity = CBaseEntity::Create("item_antidote", pev->origin, pev->angles);
-		break;
-	case 43: // ITEM_SECURITY:
-		pEntity = CBaseEntity::Create("item_security", pev->origin, pev->angles);
-		break;
-	case 45: // ITEM_SUIT:
-		pEntity = CBaseEntity::Create("item_suit", pev->origin, pev->angles);
-		break;
-	}
-
-	if (!pEntity)
-	{
-		ALERT(at_console, "unable to create world_item %d\n", m_iType);
-	}
-	else
-	{
-		pEntity->pev->target = pev->target;
-		pEntity->pev->targetname = pev->targetname;
-		pEntity->pev->spawnflags = pev->spawnflags;
-	}
-
-	return false;
-}
-
 
 bool CItem::Spawn()
 {
@@ -166,30 +111,6 @@ void CItem::Materialize()
 	SetTouch(&CItem::ItemTouch);
 }
 
-#define SF_SUIT_SHORTLOGON 0x0001
-
-class CItemSuit : public CItem
-{
-	bool Spawn() override
-	{
-		Precache();
-		SetModel("models/w_suit.mdl");
-		return CItem::Spawn();
-	}
-	void Precache() override
-	{
-		PRECACHE_MODEL("models/w_suit.mdl");
-	}
-	bool MyTouch(CBasePlayer* pPlayer) override
-	{
-		return true;
-	}
-};
-
-LINK_ENTITY_TO_CLASS(item_suit, CItemSuit);
-
-
-
 class CItemBattery : public CItem
 {
 	bool Spawn() override
@@ -232,66 +153,45 @@ class CItemBattery : public CItem
 LINK_ENTITY_TO_CLASS(item_battery, CItemBattery);
 
 
-class CItemAntidote : public CItem
+class CHealthKit : public CItem
 {
-	bool Spawn() override
-	{
-		Precache();
-		SetModel("models/w_antidote.mdl");
-		return CItem::Spawn();
-	}
-	void Precache() override
-	{
-		PRECACHE_MODEL("models/w_antidote.mdl");
-	}
-	bool MyTouch(CBasePlayer* pPlayer) override
-	{
-		return true;
-	}
+	bool Spawn() override;
+	void Precache() override;
+	bool MyTouch(CBasePlayer* pPlayer) override;
 };
 
-LINK_ENTITY_TO_CLASS(item_antidote, CItemAntidote);
+LINK_ENTITY_TO_CLASS(item_healthkit, CHealthKit);
 
-
-class CItemSecurity : public CItem
+bool CHealthKit::Spawn()
 {
-	bool Spawn() override
-	{
-		Precache();
-		SetModel("models/w_security.mdl");
-		return CItem::Spawn();
-	}
-	void Precache() override
-	{
-		PRECACHE_MODEL("models/w_security.mdl");
-	}
-	bool MyTouch(CBasePlayer* pPlayer) override
-	{
-		return true;
-	}
-};
+	Precache();
+	SetModel("models/w_medkit.mdl");
 
-LINK_ENTITY_TO_CLASS(item_security, CItemSecurity);
+	return CItem::Spawn();
+}
 
-class CItemLongJump : public CItem
+void CHealthKit::Precache()
 {
-	bool Spawn() override
+	PRECACHE_MODEL("models/w_medkit.mdl");
+	PRECACHE_SOUND("items/smallmedkit1.wav");
+}
+
+bool CHealthKit::MyTouch(CBasePlayer* pPlayer)
+{
+	if (pPlayer->pev->deadflag != DEAD_NO)
 	{
-		Precache();
-		SetModel("models/w_longjump.mdl");
-		return CItem::Spawn();
+		return false;
 	}
-	void Precache() override
-	{
-		PRECACHE_MODEL("models/w_longjump.mdl");
-	}
-	bool MyTouch(CBasePlayer* pPlayer) override
+
+	if (pPlayer->TakeHealth(15, DMG_GENERIC))
 	{
 		MessageBegin(MSG_ONE, gmsgItemPickup, pPlayer);
 		WriteString(STRING(pev->classname));
 		MessageEnd();
+
+		pPlayer->EmitSound("items/smallmedkit1.wav", CHAN_ITEM);
 		return true;
 	}
-};
 
-LINK_ENTITY_TO_CLASS(item_longjump, CItemLongJump);
+	return false;
+}

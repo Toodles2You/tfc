@@ -22,7 +22,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "weapons.h"
-#include "decals.h"
 
 LINK_ENTITY_TO_CLASS(grenade, CGrenade);
 

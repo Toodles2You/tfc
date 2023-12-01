@@ -9,7 +9,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "shake.h"
-#include "decals.h"
 #include "player.h"
 #include "weapons.h"
 #include "gamerules.h"
@@ -85,131 +84,6 @@ void tent::Explosion(
 }
 
 
-void tent::BloodStream(const Vector& origin, const Vector& direction, int color, int amount)
-{
-	if (color == DONT_BLEED || amount == 0)
-	{
-		return;
-	}
-
-	MessageBegin(MSG_PVS, SVC_TEMPENTITY, origin);
-	WriteByte(TE_BLOODSTREAM);
-	WriteCoord(origin.x);
-	WriteCoord(origin.y);
-	WriteCoord(origin.z);
-	WriteCoord(direction.x);
-	WriteCoord(direction.y);
-	WriteCoord(direction.z);
-	WriteByte(color);
-	WriteByte(std::min(amount, 255));
-	MessageEnd();
-}
-
-
-void tent::BloodDrips(const Vector& origin, const Vector& direction, int color, int amount)
-{
-	if (color == DONT_BLEED || amount == 0)
-	{
-		return;
-	}
-
-	if (util::IsDeathmatch())
-	{
-		// scale up blood effect in multiplayer for better visibility
-		amount *= 2;
-	}
-
-	amount = std::min(amount, 255);
-
-	MessageBegin(MSG_PVS, SVC_TEMPENTITY, origin);
-	WriteByte(TE_BLOODSPRITE);
-	WriteCoord(origin.x); // pos
-	WriteCoord(origin.y);
-	WriteCoord(origin.z);
-	WriteShort(g_sModelIndexBloodSpray);		  // initial sprite model
-	WriteShort(g_sModelIndexBloodDrop);		  // droplet sprite models
-	WriteByte(color);							  // color index into host_basepal
-	WriteByte(std::min(std::max(3, amount / 10), 16)); // size
-	MessageEnd();
-}
-
-
-void tent::BloodDecalTrace(TraceResult* pTrace, int bloodColor)
-{
-	if (bloodColor == DONT_BLEED)
-	{
-		return;
-	}
-	if (bloodColor == BLOOD_COLOR_RED)
-	{
-		tent::DecalTrace(pTrace, DECAL_BLOOD1 + RANDOM_LONG(0, 5));
-	}
-	else
-	{
-		tent::DecalTrace(pTrace, DECAL_YBLOOD1 + RANDOM_LONG(0, 5));
-	}
-}
-
-
-void tent::DecalTrace(TraceResult* pTrace, int decalNumber)
-{
-	short entityIndex;
-	int index;
-	int message;
-
-	if (decalNumber < 0)
-		return;
-
-	index = gDecals[decalNumber].index;
-
-	if (index < 0)
-		return;
-
-	if (pTrace->flFraction == 1.0)
-		return;
-
-	// Only decal BSP models
-	if (pTrace->pHit)
-	{
-		CBaseEntity* pEntity = CBaseEntity::Instance(pTrace->pHit);
-		if (pEntity && !pEntity->IsBSPModel())
-			return;
-		entityIndex = ENTINDEX(pTrace->pHit);
-	}
-	else
-		entityIndex = 0;
-
-	message = TE_DECAL;
-	if (entityIndex != 0)
-	{
-		if (index > 255)
-		{
-			message = TE_DECALHIGH;
-			index -= 256;
-		}
-	}
-	else
-	{
-		message = TE_WORLDDECAL;
-		if (index > 255)
-		{
-			message = TE_WORLDDECALHIGH;
-			index -= 256;
-		}
-	}
-
-	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
-	WriteByte(message);
-	WriteCoord(pTrace->vecEndPos.x);
-	WriteCoord(pTrace->vecEndPos.y);
-	WriteCoord(pTrace->vecEndPos.z);
-	WriteByte(index);
-	if (0 != entityIndex)
-		WriteShort(entityIndex);
-	MessageEnd();
-}
-
-
 /*
 ==============
 tent::PlayerDecalTrace
@@ -219,22 +93,8 @@ Tell connected clients to display it, or use the default spray can decal
 if the custom can't be loaded.
 ==============
 */
-void tent::PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber, bool bIsCustom)
+void tent::PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber)
 {
-	int index;
-
-	if (!bIsCustom)
-	{
-		if (decalNumber < 0)
-			return;
-
-		index = gDecals[decalNumber].index;
-		if (index < 0)
-			return;
-	}
-	else
-		index = decalNumber;
-
 	if (pTrace->flFraction == 1.0)
 		return;
 
@@ -245,7 +105,7 @@ void tent::PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber,
 	WriteCoord(pTrace->vecEndPos.y);
 	WriteCoord(pTrace->vecEndPos.z);
 	WriteShort((short)ENTINDEX(pTrace->pHit));
-	WriteByte(index);
+	WriteByte(decalNumber);
 	MessageEnd();
 }
 

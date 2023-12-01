@@ -24,7 +24,6 @@
 #include "cbase.h"
 #include "saverestore.h"
 #include "func_break.h"
-#include "decals.h"
 #include "explode.h"
 
 // func breakable

@@ -25,6 +25,11 @@
 #include "cbase.h"
 #include "doors.h"
 
+#define SF_BRUSH_ROTATE_Y_AXIS 0
+#define SF_BRUSH_ROTATE_INSTANT 1
+#define SF_BRUSH_ROTATE_BACKWARDS 2
+#define SF_BRUSH_ROTATE_Z_AXIS 4
+#define SF_BRUSH_ROTATE_X_AXIS 8
 #define SF_BRUSH_ROTATE_SMALLRADIUS 128
 #define SF_BRUSH_ROTATE_MEDIUMRADIUS 256
 #define SF_BRUSH_ROTATE_LARGERADIUS 512
@@ -39,6 +44,8 @@
 #define noiseRunning noise3
 
 #define SF_PENDULUM_SWING 2 // spawnflag that makes a pendulum a rope swing.
+#define SF_PENDULUM_AUTO_RETURN 16
+#define SF_PENDULUM_PASSABLE 32
 
 // =================== FUNC_WALL ==============================================
 

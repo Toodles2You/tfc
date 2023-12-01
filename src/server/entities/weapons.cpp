@@ -25,7 +25,6 @@
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
-#include "decals.h"
 #include "gamerules.h"
 #include "UserMessages.h"
 
@@ -152,9 +151,6 @@ void W_Precache()
 	// common world objects
 	util::PrecacheOther("item_battery");
 	util::PrecacheOther("item_healthkit");
-	util::PrecacheOther("item_antidote");
-	util::PrecacheOther("item_security");
-	util::PrecacheOther("item_longjump");
 
 	if (util::IsMultiplayer())
 	{

@@ -17,7 +17,6 @@
 #include "cbase.h"
 #include "saverestore.h"
 #include "client.h"
-#include "decals.h"
 #include "gamerules.h"
 #include "game.h"
 #include "pm_shared.h"

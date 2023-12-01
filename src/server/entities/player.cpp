@@ -32,7 +32,6 @@
 #include "nodes.h"
 #include "weapons.h"
 #include "shake.h"
-#include "decals.h"
 #include "gamerules.h"
 #include "game.h"
 #include "pm_shared.h"
@@ -1521,19 +1520,10 @@ void CSprayCan::Think()
 	util::MakeVectors(pev->angles);
 	util::TraceLine(pev->origin, pev->origin + gpGlobals->v_forward * 128, util::ignore_monsters, pPlayer, &tr);
 
-	// No customization present.
-	if (nFrames == -1)
-	{
-		tent::DecalTrace(&tr, DECAL_LAMBDA6);
+	tent::PlayerDecalTrace(&tr, playernum, pev->frame);
+	// Just painted last custom frame.
+	if (pev->frame++ >= (nFrames - 1))
 		Remove();
-	}
-	else
-	{
-		tent::PlayerDecalTrace(&tr, playernum, pev->frame, true);
-		// Just painted last custom frame.
-		if (pev->frame++ >= (nFrames - 1))
-			Remove();
-	}
 
 	pev->nextthink = gpGlobals->time + 0.1;
 }
@@ -1641,7 +1631,8 @@ void CBasePlayer::ImpulseCommands()
 	{
 	case 201: // paint decal
 
-		if (gpGlobals->time - m_flNextDecalTime < decalfrequency.value)
+		if (gpGlobals->time - m_flNextDecalTime < decalfrequency.value
+		 || GetCustomDecalFrames() == -1)
 		{
 			// too early!
 			break;

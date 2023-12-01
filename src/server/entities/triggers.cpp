@@ -1628,41 +1628,6 @@ int CChangeLevel::ChangeList(LEVELLIST* pLevelList, int maxList)
 }
 
 
-// ============================== LADDER =======================================
-
-class CLadder : public CBaseTrigger
-{
-public:
-	bool Spawn() override;
-	void Precache() override;
-};
-LINK_ENTITY_TO_CLASS(func_ladder, CLadder);
-
-//=========================================================
-// func_ladder - makes an area vertically negotiable
-//=========================================================
-void CLadder::Precache()
-{
-	// Do all of this in here because we need to 'convert' old saved games
-	pev->solid = SOLID_NOT;
-	pev->skin = CONTENTS_LADDER;
-	pev->rendermode = kRenderTransTexture;
-	pev->renderamt = 0;
-	pev->effects &= ~EF_NODRAW;
-}
-
-
-bool CLadder::Spawn()
-{
-	Precache();
-
-	SetModel(STRING(pev->model)); // set size and link into world
-	pev->movetype = MOVETYPE_PUSH;
-
-	return true;
-}
-
-
 // ========================== A TRIGGER THAT PUSHES YOU ===============================
 
 class CTriggerPush : public CBaseTrigger

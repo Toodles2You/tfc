@@ -938,6 +938,7 @@ bool CRotButton::Spawn()
 // rotating buttons were made SOLID_NOT by default since their were some
 // collision problems with them...
 #define SF_MOMENTARY_DOOR 0x0001
+#define SF_MOMENTARY_AUTO_RETURN 16
 
 class CMomentaryRotButton : public CBaseToggle
 {
@@ -1148,7 +1149,7 @@ void CMomentaryRotButton::Off()
 {
 	pev->avelocity = g_vecZero;
 	m_lastUsed = false;
-	if (FBitSet(pev->spawnflags, SF_PENDULUM_AUTO_RETURN) && m_returnSpeed > 0)
+	if (FBitSet(pev->spawnflags, SF_MOMENTARY_AUTO_RETURN) && m_returnSpeed > 0)
 	{
 		SetThink(&CMomentaryRotButton::Return);
 		pev->nextthink = pev->ltime + 0.1;
@@ -1216,7 +1217,6 @@ TYPEDESCRIPTION CEnvSpark::m_SaveData[] =
 IMPLEMENT_SAVERESTORE(CEnvSpark, CBaseEntity);
 
 LINK_ENTITY_TO_CLASS(env_spark, CEnvSpark);
-LINK_ENTITY_TO_CLASS(env_debris, CEnvSpark);
 
 bool CEnvSpark::Spawn()
 {

@@ -239,25 +239,10 @@ inline bool FClassnameIs(entvars_t* pev, const char* szClassname)
 	return FStrEq(STRING(pev->classname), szClassname);
 }
 
-//
-// Constants that were used only by QC (maybe not used at all now)
-//
-// Un-comment only as needed
-//
-
-#define SND_SPAWNING (1 << 8)	  // duplicated in protocol.h we're spawing, used in some cases for ambients
-#define SND_STOP (1 << 5)		  // duplicated in protocol.h stop sound
-#define SND_CHANGE_VOL (1 << 6)	  // duplicated in protocol.h change sound vol
-#define SND_CHANGE_PITCH (1 << 7) // duplicated in protocol.h change sound pitch
-
-// func_rotating
-#define SF_BRUSH_ROTATE_Y_AXIS 0
-#define SF_BRUSH_ROTATE_INSTANT 1
-#define SF_BRUSH_ROTATE_BACKWARDS 2
-#define SF_BRUSH_ROTATE_Z_AXIS 4
-#define SF_BRUSH_ROTATE_X_AXIS 8
-#define SF_PENDULUM_AUTO_RETURN 16
-#define SF_PENDULUM_PASSABLE 32
+#define SND_SPAWNING (1 << 8)
+#define SND_STOP (1 << 5)
+#define SND_CHANGE_VOL (1 << 6)
+#define SND_CHANGE_PITCH (1 << 7)
 
 #define SVC_STUFFTEXT 9
 #define SVC_TEMPENTITY 23
@@ -523,10 +508,5 @@ void Ricochet(const Vector& position, float scale);
 void TeleportSplash(CBaseEntity* entity);
 void Explosion(const Vector& origin, const Vector& velocity, float damage = 100.0F, bool smoke = true, bool sparks = true);
 
-void BloodStream(const Vector& origin, const Vector& direction, int color, int amount);
-void BloodDrips(const Vector& origin, const Vector& direction, int color, int amount);
-void BloodDecalTrace(TraceResult* pTrace, int bloodColor);
-
-void DecalTrace(TraceResult* pTrace, int decalNumber);
-void PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber, bool bIsCustom);
+void PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber);
 } // namespace tent

@@ -22,7 +22,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "decals.h"
 #include "explode.h"
 #include "weapons.h"
 
@@ -102,19 +101,6 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	else
 	{
 		pev->origin = pev->origin;
-	}
-
-	// draw decal
-	if ((pev->spawnflags & SF_ENVEXPLOSION_NODECAL) == 0)
-	{
-		if (RANDOM_FLOAT(0, 1) < 0.5)
-		{
-			tent::DecalTrace(&tr, DECAL_SCORCH1);
-		}
-		else
-		{
-			tent::DecalTrace(&tr, DECAL_SCORCH2);
-		}
 	}
 
 	// draw fireball
