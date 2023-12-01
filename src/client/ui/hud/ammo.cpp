@@ -236,7 +236,6 @@ int giBucketHeight, giBucketWidth, giABHeight, giABWidth; // Ammo Bar width and 
 HSPRITE ghsprBuckets; // Sprite for top row of weapons menu
 
 DECLARE_MESSAGE(m_Ammo, CurWeapon);	 // Current weapon and clip
-DECLARE_MESSAGE(m_Ammo, WeaponList); // new weapon type
 DECLARE_MESSAGE(m_Ammo, AmmoX);		 // update known ammo type's count
 DECLARE_MESSAGE(m_Ammo, AmmoPickup); // flashes an ammo pickup record
 DECLARE_MESSAGE(m_Ammo, WeapPickup); // flashes a weapon pickup record
@@ -270,7 +269,6 @@ bool CHudAmmo::Init()
 	gHUD.AddHudElem(this);
 
 	HOOK_MESSAGE(CurWeapon);
-	HOOK_MESSAGE(WeaponList);
 	HOOK_MESSAGE(AmmoPickup);
 	HOOK_MESSAGE(WeapPickup);
 	HOOK_MESSAGE(ItemPickup);
@@ -651,38 +649,6 @@ bool CHudAmmo::MsgFunc_CurWeapon(const char* pszName, int iSize, void* pbuf)
 	int iClip = READ_CHAR();
 
 	Update_CurWeapon(iState, iId, iClip);
-
-	return true;
-}
-
-//
-// WeaponList -- Tells the hud about a new weapon type.
-//
-bool CHudAmmo::MsgFunc_WeaponList(const char* pszName, int iSize, void* pbuf)
-{
-	BEGIN_READ(pbuf, iSize);
-
-	WEAPON Weapon;
-
-	strcpy(Weapon.szName, READ_STRING());
-	Weapon.iAmmoType = (int)READ_CHAR();
-
-	Weapon.iMax1 = READ_BYTE();
-	if (Weapon.iMax1 == 255)
-		Weapon.iMax1 = -1;
-
-	Weapon.iAmmo2Type = (int)READ_CHAR();
-	Weapon.iMax2 = READ_BYTE();
-	if (Weapon.iMax2 == 255)
-		Weapon.iMax2 = -1;
-
-	Weapon.iSlot = READ_CHAR();
-	Weapon.iSlotPos = READ_CHAR();
-	Weapon.iId = READ_CHAR();
-	Weapon.iFlags = READ_BYTE();
-	Weapon.iClip = 0;
-
-	gWR.AddWeapon(&Weapon);
 
 	return true;
 }

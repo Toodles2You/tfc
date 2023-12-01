@@ -32,11 +32,7 @@ private:
 	int riAmmo[AMMO_LAST];										 // count of each ammo type
 
 public:
-	void Init()
-	{
-		memset(rgWeapons, 0, sizeof rgWeapons);
-		Reset();
-	}
+	void Init();
 
 	void Reset()
 	{

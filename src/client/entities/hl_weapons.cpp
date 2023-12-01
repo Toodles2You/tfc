@@ -31,6 +31,7 @@
 #include "com_weapons.h"
 #include "demo.h"
 #include "hud.h"
+#include "ammohistory.h"
 
 extern struct local_state_s g_finalstate;
 
@@ -362,4 +363,34 @@ void HUD_PlayerMove(struct playermove_s* ppmove, int server)
 bool HUD_FirstTimePredicting()
 {
 	return firstTimePredicting;
+}
+
+/*! Toodles FIXME: Lots-a spaghetti */
+void WeaponsResource::Init()
+{
+	memset(rgWeapons, 0, sizeof(rgWeapons));
+	Reset();
+
+	for (auto i = 0; i < ARRAYSIZE(weapons); i++)
+	{
+		WeaponInfo info;
+		memset(&info, 0, sizeof(info));
+
+		weapons[i]->GetWeaponInfo(&info);
+
+		WEAPON w;
+		memset(&w, 0, sizeof(w));
+
+		strcpy(w.szName, info.pszName);
+		w.iAmmoType = info.iAmmo1;
+		w.iAmmo2Type = info.iAmmo2;
+		w.iMax1 = info.iMaxAmmo1;
+		w.iMax2 = info.iMaxAmmo2;
+		w.iSlot = info.iSlot;
+		w.iSlotPos = info.iPosition;
+		w.iFlags = info.iFlags;
+		w.iId = info.iId;
+
+		rgWeapons[w.iId] = w;
+	}
 }

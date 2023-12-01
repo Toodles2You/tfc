@@ -48,7 +48,11 @@ void CCrowbar::Precache()
 
 bool CCrowbar::GetWeaponInfo(WeaponInfo* p)
 {
+#ifdef GAME_DLL
 	p->pszName = STRING(pev->classname);
+#else
+	p->pszName = "weapon_crowbar";
+#endif
 	p->iAmmo1 = AMMO_NONE;
 	p->iMaxAmmo1 = -1;
 	p->iAmmo2 = AMMO_NONE;

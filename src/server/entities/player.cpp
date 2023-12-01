@@ -2031,56 +2031,6 @@ void CBasePlayer::UpdateClientData()
 		m_iTrain &= ~TRAIN_NEW;
 	}
 
-	//
-	// New Weapon?
-	//
-	if (!m_fKnownItem)
-	{
-		m_fKnownItem = true;
-
-		// WeaponInit Message
-		// byte  = # of weapons
-		//
-		// for each weapon:
-		// byte		name str length (not including null)
-		// bytes... name
-		// byte		Ammo Type
-		// byte		Ammo2 Type
-		// byte		bucket
-		// byte		bucket pos
-		// byte		flags
-		// ????		Icons
-
-		// Send ALL the weapon info now
-		int i;
-
-		for (i = 0; i < WEAPON_LAST; i++)
-		{
-			WeaponInfo& II = CBasePlayerWeapon::WeaponInfoArray[i];
-
-			if (WEAPON_NONE == II.iId)
-				continue;
-
-			const char* pszName;
-			if (!II.pszName)
-				pszName = "Empty";
-			else
-				pszName = II.pszName;
-
-			MessageBegin(MSG_ONE, gmsgWeaponList, this);
-			WriteString(pszName);				   // string	weapon name
-			WriteByte(II.iAmmo1); // byte		Ammo Type
-			WriteByte(II.iMaxAmmo1);			   // byte     Max Ammo 1
-			WriteByte(II.iAmmo2); // byte		Ammo2 Type
-			WriteByte(II.iMaxAmmo2);			   // byte     Max Ammo 2
-			WriteByte(II.iSlot);				   // byte		bucket
-			WriteByte(II.iPosition);			   // byte		bucket pos
-			WriteByte(II.iId);					   // byte		id (bit index into m_WeaponBits)
-			WriteByte(II.iFlags);				   // byte		Flags
-			MessageEnd();
-		}
-	}
-
 	// Send new room type to client.
 	if (m_ClientSndRoomtype != m_SndRoomtype)
 	{

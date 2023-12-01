@@ -59,12 +59,16 @@ void CMP5::Precache()
 
 bool CMP5::GetWeaponInfo(WeaponInfo* i)
 {
+#ifdef GAME_DLL
 	i->pszName = STRING(pev->classname);
+#else
+	i->pszName = "weapon_9mmAR";
+#endif
 	i->iAmmo1 = AMMO_9MM;
 	i->iMaxAmmo1 = 250;
 	i->iAmmo2 = AMMO_ARGRENADES;
 	i->iMaxAmmo2 = 10;
-	i->iMaxClip = 50;
+	i->iMaxClip = 30;
 	i->iSlot = 2;
 	i->iPosition = 0;
 	i->iFlags = 0;
@@ -100,7 +104,7 @@ void CMP5::PrimaryAttack()
 
 	while (m_iNextPrimaryAttack <= 0)
 	{
-		m_iNextPrimaryAttack += 100;
+		m_iNextPrimaryAttack += 80;
 		shots++;
 	}
 
@@ -115,7 +119,7 @@ void CMP5::PrimaryAttack()
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
 #ifdef GAME_DLL
-	m_pPlayer->FireBullets(12, Vector2D(6, 6), shots);
+	m_pPlayer->FireBullets(8, Vector2D(3, 3), shots);
 #endif
 
 	m_pPlayer->PlaybackEvent(m_usMP5, 0.0F, 0.0F, m_pPlayer->m_randomSeed, shots);
