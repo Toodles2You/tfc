@@ -43,10 +43,10 @@ void CMP5::Precache()
 bool CMP5::GetWeaponInfo(WeaponInfo* i)
 {
 	i->pszName = "weapon_9mmAR";
-	i->iAmmo1 = AMMO_9MM;
-	i->iMaxAmmo1 = 250;
-	i->iAmmo2 = AMMO_ARGRENADES;
-	i->iMaxAmmo2 = 10;
+	i->iAmmo1 = AMMO_NONE;
+	i->iMaxAmmo1 = -1;
+	i->iAmmo2 = AMMO_NONE;
+	i->iMaxAmmo2 = -1;
 	i->iMaxClip = 30;
 	i->iSlot = 2;
 	i->iPosition = 0;
@@ -76,6 +76,13 @@ void CMP5::PrimaryAttack()
 		shots++;
 	}
 
+	if (shots > m_iClip)
+	{
+		shots = m_iClip;
+	}
+
+	m_iClip -= shots;
+
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
 #ifdef GAME_DLL
@@ -84,7 +91,6 @@ void CMP5::PrimaryAttack()
 
 	m_pPlayer->PlaybackEvent(m_usMP5, 0.0F, 0.0F, m_pPlayer->m_randomSeed, shots);
 }
-
 
 
 void CMP5::SecondaryAttack()
@@ -105,16 +111,35 @@ void CMP5::SecondaryAttack()
 }
 
 
-
 void CMP5::WeaponPostFrame()
 {
-	if (m_iNextPrimaryAttack <= 0)
+	if ((m_pPlayer->pev->button & IN_ATTACK2) != 0)
 	{
-		if ((m_pPlayer->pev->button & IN_ATTACK2) != 0)
+		if (m_iNextPrimaryAttack <= 0 || m_fInReload)
 		{
 			SecondaryAttack();
+			m_fInReload = false;
+			return;
 		}
-		else if ((m_pPlayer->pev->button & IN_ATTACK) != 0)
+	}
+
+	if (m_iNextPrimaryAttack <= 0)
+	{
+		if (m_fInReload)
+		{
+			m_iClip = iMaxClip();
+			m_fInReload = false;
+		}
+		else if (m_iClip == 0
+		 || ((m_pPlayer->pev->button & IN_RELOAD) != 0 && m_iClip < iMaxClip()))
+		{
+			SendWeaponAnim(kAnimReload);
+			m_fInReload = true;
+			m_iNextPrimaryAttack = 1500;
+			return;
+		}
+
+		if ((m_pPlayer->pev->button & IN_ATTACK) != 0 && m_iClip != 0)
 		{
 			PrimaryAttack();
 		}

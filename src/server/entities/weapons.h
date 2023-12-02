@@ -82,10 +82,10 @@ public:
 #ifndef CLIENT_DLL
 	virtual void UpdateOnRemove() override;
 #endif
-	void EXPORT DefaultTouch(CBaseEntity* pOther); // default weapon touch
-	void EXPORT Materialize(); // make a weapon visible and tangible
-	void EXPORT AttemptToMaterialize(); // the weapon desires to become visible and tangible, if the game rules allow for it
-	CBaseEntity* Respawn() override; // copy a weapon
+	void EXPORT DefaultTouch(CBaseEntity* pOther);
+	void EXPORT Materialize();
+	void EXPORT AttemptToMaterialize();
+	CBaseEntity* Respawn() override;
 	void CheckRespawn();
 
 	virtual void SendWeaponAnim(int iAnim);
@@ -96,7 +96,7 @@ public:
 
 	virtual void WeaponPostFrame() = 0;
 
-	virtual bool CanHolster() { return true; } // can this weapon be put away right now?
+	virtual bool CanHolster() { return true; }
 	virtual void Holster();
 
 	virtual void GetWeaponData(weapon_data_t& data);
@@ -131,14 +131,14 @@ public:
 inline short g_sModelIndexPlayer;
 inline short g_sModelIndexGibs;
 inline short g_sModelIndexShell;
-inline short g_sModelIndexLaser; // holds the index for the laser beam
-inline short g_sModelIndexLaserDot;	 // holds the index for the laser beam dot
-inline short g_sModelIndexFireball;	 // holds the index for the fireball
-inline short g_sModelIndexSmoke;		 // holds the index for the smoke cloud
-inline short g_sModelIndexWExplosion; // holds the index for the underwater explosion
-inline short g_sModelIndexBubbles;	 // holds the index for the bubbles model
-inline short g_sModelIndexBloodDrop;	 // holds the sprite index for blood drops
-inline short g_sModelIndexBloodSpray; // holds the sprite index for blood spray (bigger)
+inline short g_sModelIndexLaser;
+inline short g_sModelIndexLaserDot;
+inline short g_sModelIndexFireball;
+inline short g_sModelIndexSmoke;
+inline short g_sModelIndexWExplosion;
+inline short g_sModelIndexBubbles;
+inline short g_sModelIndexBloodDrop;
+inline short g_sModelIndexBloodSpray;
 
 class CCrowbar : public CBasePlayerWeapon
 {

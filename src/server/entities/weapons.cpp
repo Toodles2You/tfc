@@ -218,6 +218,8 @@ bool CBasePlayerWeapon::Spawn()
 
 	g_engfuncs.pfnDropToFloor(edict());
 
+	m_iClip = iMaxClip();
+
 	Materialize();
 
 	return true;
