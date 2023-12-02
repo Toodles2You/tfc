@@ -1724,7 +1724,7 @@ void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* weapon)
 	m_lpPlayerWeapons.remove(weapon);
 	ClearWeaponBit(weapon->GetID());
 
-	auto best = g_pGameRules->GetNextBestWeapon(this, weapon);
+	auto best = GetNextBestWeapon(weapon);
 	if (best != nullptr)
 	{
 		best->m_ForceSendAnimations = true;

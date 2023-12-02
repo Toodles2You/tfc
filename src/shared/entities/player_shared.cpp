@@ -287,3 +287,39 @@ void CBasePlayer::CmdStart(const usercmd_t& cmd, unsigned int randomSeed)
 	m_randomSeed = randomSeed;
 }
 
+
+CBasePlayerWeapon* CBasePlayer::GetNextBestWeapon(CBasePlayerWeapon* current)
+{
+	const int currentID = (current != nullptr) ? current->GetID() : WEAPON_NONE;
+	const int currentWeight = (current != nullptr) ? current->iWeight() : -1;
+
+	CBasePlayerWeapon* best = nullptr;
+	int bestWeight = -1;
+
+	for (auto weapon : m_lpPlayerWeapons)
+	{
+		if (weapon->GetID() == currentID)
+		{
+			continue;
+		}
+
+		if (weapon->iWeight() > -1 && weapon->iWeight() == currentWeight)
+		{
+			if (weapon->CanDeploy())
+			{
+				return weapon;
+			}
+		}
+		else if (weapon->iWeight() > bestWeight)
+		{
+			if (weapon->CanDeploy())
+			{
+				bestWeight = weapon->iWeight();
+				best = weapon;
+			}
+		}
+	}
+
+	return best;
+}
+

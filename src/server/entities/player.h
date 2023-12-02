@@ -257,6 +257,8 @@ public:
 
 	CGameMovement* GetGameMovement() { return m_gameMovement; }
 
+	CBasePlayerWeapon* GetNextBestWeapon(CBasePlayerWeapon* current);
+
 protected:
 	CGameMovement* m_gameMovement = nullptr;
 	EHANDLE m_hLastAttacker[2];

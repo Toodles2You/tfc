@@ -123,41 +123,6 @@ bool CGameRules::CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pW
 	return true;
 }
 
-CBasePlayerWeapon* CGameRules::GetNextBestWeapon(CBasePlayer* player, CBasePlayerWeapon* current)
-{
-	const int currentID = (current != nullptr) ? current->GetID() : WEAPON_NONE;
-	const int currentWeight = (current != nullptr) ? current->iWeight() : -1;
-
-	CBasePlayerWeapon* best = nullptr;
-	int bestWeight = -1;
-
-	for (auto weapon : player->m_lpPlayerWeapons)
-	{
-		if (weapon->GetID() == currentID)
-		{
-			continue;
-		}
-
-		if (weapon->iWeight() > -1 && weapon->iWeight() == currentWeight)
-		{
-			if (weapon->CanDeploy())
-			{
-				return weapon;
-			}
-		}
-		else if (weapon->iWeight() > bestWeight)
-		{
-			if (weapon->CanDeploy())
-			{
-				bestWeight = weapon->iWeight();
-				best = weapon;
-			}
-		}
-	}
-
-	return best;
-}
-
 //=========================================================
 // load the SkillData struct with the proper values based on the skill level.
 //=========================================================
