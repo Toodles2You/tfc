@@ -996,8 +996,12 @@ bool CHudAmmo::Draw(float flTime)
 	}
 
 	// SPR_Draw Ammo
-	if ((pw->iAmmoType <= AMMO_NONE) && (pw->iAmmo2Type <= AMMO_NONE))
+	if (pw->iClip < 0
+	 && pw->iAmmoType <= AMMO_NONE
+	 && pw->iAmmo2Type <= AMMO_NONE)
+	{
 		return false;
+	}
 
 
 	int iFlags = DHN_DRAWZERO; // draw 0 values
@@ -1008,11 +1012,11 @@ bool CHudAmmo::Draw(float flTime)
 	y = gHUD.GetHeight() - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
 
 	// Does weapon have any ammo at all?
-	if (m_pWeapon->iAmmoType > AMMO_NONE)
+	if (pw->iClip >= 0 || m_pWeapon->iAmmoType > AMMO_NONE)
 	{
 		int iIconWidth = m_pWeapon->rcAmmo.right - m_pWeapon->rcAmmo.left;
 
-		if (pw->iClip >= 0)
+		if (pw->iClip >= 0 && m_pWeapon->iAmmoType > AMMO_NONE)
 		{
 			// room for the number and the '|' and the current ammo
 
@@ -1033,9 +1037,12 @@ bool CHudAmmo::Draw(float flTime)
 		}
 		else
 		{
+			auto ammoCount =
+				(pw->iClip >= 0) ? pw->iClip : gWR.CountAmmo(pw->iAmmoType);
+
 			// SPR_Draw a bullets only line
 			x = gHUD.GetWidth() - 4 * AmmoWidth - iIconWidth;
-			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, gWR.CountAmmo(pw->iAmmoType), CHud::COLOR_PRIMARY, a);
+			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, ammoCount, CHud::COLOR_PRIMARY, a);
 		}
 
 		// Draw the ammo Icon
