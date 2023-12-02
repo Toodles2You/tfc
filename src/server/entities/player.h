@@ -180,8 +180,8 @@ public:
 
 	void AddPoints(float score, bool bAllowNegativeScore) override;
 	void AddPointsToTeam(float score, bool bAllowNegativeScore) override;
-	bool AddPlayerWeapon(CBasePlayerWeapon* pWeapon) override;
-	void RemovePlayerWeapon(CBasePlayerWeapon* pWeapon) override;
+	void AddPlayerWeapon(CBasePlayerWeapon* weapon);
+	void RemovePlayerWeapon(CBasePlayerWeapon* weapon);
 	void DropPlayerWeapon(char* pszWeaponName);
 	bool HasPlayerWeapon(int iId) { return (m_WeaponBits & (1ULL << iId)) != 0; }
 	bool HasWeapons() { return m_WeaponBits != 0; }

@@ -317,23 +317,14 @@ CBaseEntity* CBasePlayerWeapon::Respawn()
 
 void CBasePlayerWeapon::DefaultTouch(CBaseEntity* pOther)
 {
-	if (!pOther->IsPlayer())
+	if (!pOther->IsPlayer() || !pOther->IsAlive())
 	{
 		return;
 	}
 
 	CBasePlayer* pPlayer = (CBasePlayer*)pOther;
 
-	if (!g_pGameRules->CanHavePlayerWeapon(pPlayer, this))
-	{
-		if (gEvilImpulse101)
-		{
-			Remove();
-		}
-		return;
-	}
-
-	if (pOther->AddPlayerWeapon(this))
+	if (AddToPlayer(pPlayer))
 	{
 		if (!pPlayer->m_bIsSpawning)
 		{
@@ -352,8 +343,18 @@ void CBasePlayerWeapon::UpdateOnRemove()
 }
 
 
-void CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer)
+bool CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer)
 {
+	if (!g_pGameRules->CanHavePlayerWeapon(pPlayer, this))
+	{
+		return false;
+	}
+
+	if (pPlayer->HasPlayerWeapon(GetID()))
+	{
+		return AddDuplicate(pPlayer->m_rgpPlayerWeapons[GetID()]);
+	}
+
 	m_pPlayer = pPlayer;
 
 	pev->owner = pev->aiment = pPlayer->edict();
@@ -364,6 +365,17 @@ void CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer)
 
 	SetTouch(nullptr);
 	SetThink(nullptr);
+
+	pPlayer->AddPlayerWeapon(this);
+
+	CheckRespawn();
+
+	if (gEvilImpulse101)
+	{
+		Remove();
+	}
+
+	return true;
 }
 
 
@@ -372,14 +384,6 @@ void CBasePlayerWeapon::RemoveFromPlayer()
 	if (m_pPlayer == nullptr)
 	{
 		return;
-	}
-
-	if (m_pPlayer->m_pActiveWeapon == this)
-	{
-		m_ForceSendAnimations = true;
-		Holster();
-		m_ForceSendAnimations = false;
-		m_pPlayer->m_pActiveWeapon = nullptr;
 	}
 
 	m_pPlayer->RemovePlayerWeapon(this);
@@ -636,7 +640,7 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 
 		//ALERT ( at_console, "trying to give %s\n", STRING( pWeapon[ i ]->pev->classname ) );
 
-		pPlayer->AddPlayerWeapon(pWeapon);
+		pWeapon->AddToPlayer(pPlayer);
 	}
 
 	pOther->EmitSound("items/gunpickup2.wav", CHAN_ITEM);

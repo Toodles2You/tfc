@@ -152,8 +152,6 @@ public:
 	virtual int GetToggleState() { return TS_AT_TOP; }
 	virtual void AddPoints(float score, bool bAllowNegativeScore) {}
 	virtual void AddPointsToTeam(float score, bool bAllowNegativeScore) {}
-	virtual bool AddPlayerWeapon(CBasePlayerWeapon* pWeapon) { return 0; }
-	virtual void RemovePlayerWeapon(CBasePlayerWeapon* pWeapon) {}
 	virtual int GiveAmmo(int iAmount, int iType, int iMax) { return -1; }
 	virtual float GetDelay() { return 0; }
 	virtual bool IsMoving() { return pev->velocity != g_vecZero; }

@@ -117,8 +117,8 @@ bool CBasePlayer::Restore(CRestore& restore) { return false; }
 void CBasePlayer::ForceClientDllUpdate() {}
 void CBasePlayer::ImpulseCommands() {}
 void CBasePlayer::CheatImpulseCommands(int iImpulse) {}
-bool CBasePlayer::AddPlayerWeapon(CBasePlayerWeapon* pWeapon) { return false; }
-void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* pWeapon) {}
+void CBasePlayer::AddPlayerWeapon(CBasePlayerWeapon* weapon) {}
+void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* weapon) {}
 void CBasePlayer::UpdateClientData() {}
 void CBasePlayer::EnableControl(bool fControl) {}
 Vector CBasePlayer::GetAimVector() { return g_vecZero; }
@@ -139,7 +139,7 @@ void CBasePlayerWeapon::AttemptToMaterialize() {}
 void CBasePlayerWeapon::CheckRespawn() {}
 CBaseEntity* CBasePlayerWeapon::Respawn() { return nullptr; }
 void CBasePlayerWeapon::DefaultTouch(CBaseEntity* pOther) {}
-void CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer) {}
+bool CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer) { return false; }
 void CBasePlayerWeapon::RemoveFromPlayer() {}
 
 void CBaseEntity::EmitSound(const char* sample, int channel, float volume, float attenuation, int pitch, int flags) {}

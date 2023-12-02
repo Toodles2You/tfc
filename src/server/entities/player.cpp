@@ -1703,64 +1703,43 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 //
 // Add a weapon to the player
 //
-bool CBasePlayer::AddPlayerWeapon(CBasePlayerWeapon* pWeapon)
+void CBasePlayer::AddPlayerWeapon(CBasePlayerWeapon* weapon)
 {
-	if (HasPlayerWeapon(pWeapon->GetID()))
-	{
-		if (pWeapon->AddDuplicate(m_rgpPlayerWeapons[pWeapon->GetID()]))
-		{
-			g_pGameRules->PlayerGotWeapon(this, pWeapon);
-			pWeapon->CheckRespawn();
+	m_rgpPlayerWeapons[weapon->GetID()] = weapon;
+	m_lpPlayerWeapons.push_front(weapon);
+	SetWeaponBit(weapon->GetID());
 
-			pWeapon->Remove();
-		}
-		else if (gEvilImpulse101)
-		{
-			pWeapon->Remove();
-		}
-		return false;
+	g_pGameRules->PlayerGotWeapon(this, weapon);
+
+	if (!m_bIsSpawning && (weapon->iFlags() & WEAPON_FLAG_EXHAUSTIBLE) == 0)
+	{
+		MessageBegin(MSG_ONE, gmsgWeapPickup, this);
+		WriteByte(weapon->GetID());
+		MessageEnd();
 	}
 
-	if (pWeapon->CanAddToPlayer(this))
+	if (g_pGameRules->FShouldSwitchWeapon(this, weapon))
 	{
-		pWeapon->AddToPlayer(this);
-
-		g_pGameRules->PlayerGotWeapon(this, pWeapon);
-		pWeapon->CheckRespawn();
-
-		m_rgpPlayerWeapons[pWeapon->GetID()] = pWeapon;
-		m_lpPlayerWeapons.push_front(pWeapon);
-		SetWeaponBit(pWeapon->GetID());
-
-		if (!m_bIsSpawning && (pWeapon->iFlags() & WEAPON_FLAG_EXHAUSTIBLE) == 0)
-		{
-			MessageBegin(MSG_ONE, gmsgWeapPickup, this);
-			WriteByte(pWeapon->GetID());
-			MessageEnd();
-		}
-
-		if (g_pGameRules->FShouldSwitchWeapon(this, pWeapon))
-		{
-			pWeapon->m_ForceSendAnimations = true;
-			SelectWeapon(pWeapon->GetID());
-			pWeapon->m_ForceSendAnimations = false;
-		}
-
-		return true;
+		weapon->m_ForceSendAnimations = true;
+		SelectWeapon(weapon->GetID());
+		weapon->m_ForceSendAnimations = false;
 	}
-	else if (gEvilImpulse101)
-	{
-		pWeapon->Remove();
-	}
-	return false;
 }
 
 
-void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* pWeapon)
+void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* weapon)
 {
-	m_rgpPlayerWeapons[pWeapon->GetID()] = nullptr;
-	m_lpPlayerWeapons.remove(pWeapon);
-	ClearWeaponBit(pWeapon->GetID());
+	if (m_pActiveWeapon == weapon)
+	{
+		weapon->m_ForceSendAnimations = true;
+		weapon->Holster();
+		weapon->m_ForceSendAnimations = false;
+		m_pActiveWeapon = nullptr;
+	}
+
+	m_rgpPlayerWeapons[weapon->GetID()] = nullptr;
+	m_lpPlayerWeapons.remove(weapon);
+	ClearWeaponBit(weapon->GetID());
 }
 
 
@@ -2011,8 +1990,6 @@ void CBasePlayer::DropPlayerWeapon(char* pszWeaponName)
 	{
 		return;
 	}
-
-	ClearWeaponBit(pWeapon->GetID());
 
 	util::MakeVectors(pev->angles);
 

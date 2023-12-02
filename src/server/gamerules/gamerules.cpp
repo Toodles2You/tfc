@@ -120,32 +120,6 @@ void CGameRules::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 //=========================================================
 bool CGameRules::CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon)
 {
-	// only living players can have weapons
-	if (pPlayer->pev->deadflag != DEAD_NO)
-		return false;
-
-	if (pWeapon->iAmmo1() > AMMO_NONE)
-	{
-		if (!CanHaveAmmo(pPlayer, pWeapon->iAmmo1(), pWeapon->iMaxAmmo1()))
-		{
-			// we can't carry anymore ammo for this gun. We can only
-			// have the gun if we aren't already carrying one of this type
-			if (pPlayer->HasPlayerWeapon(pWeapon->GetID()))
-			{
-				return false;
-			}
-		}
-	}
-	else
-	{
-		// weapon doesn't use ammo, don't take another if you already have it.
-		if (pPlayer->HasPlayerWeapon(pWeapon->GetID()))
-		{
-			return false;
-		}
-	}
-
-	// note: will fall through to here if GetWeaponInfo doesn't fill the struct!
 	return true;
 }
 

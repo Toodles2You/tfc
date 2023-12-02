@@ -75,10 +75,8 @@ public:
 
 	virtual bool Spawn() override;
 
-	virtual bool CanAddToPlayer(CBasePlayer* player) { return true; } // return true if the weapon you want the weapon added to the player inventory
-
 	// generic weapon versions of CBasePlayerWeapon calls
-	virtual void AddToPlayer(CBasePlayer* pPlayer);
+	virtual bool AddToPlayer(CBasePlayer* pPlayer);
 	virtual void RemoveFromPlayer();
 	virtual bool AddDuplicate(CBasePlayerWeapon* pOriginal) { return false; }
 #ifndef CLIENT_DLL
