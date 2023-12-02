@@ -450,30 +450,19 @@ void CBasePlayer::PackDeadPlayerWeapons()
 
 void CBasePlayer::RemoveAllWeapons()
 {
-	if (m_pActiveWeapon)
-	{
-		m_pActiveWeapon->Holster();
-		m_pActiveWeapon = NULL;
-	}
-
 	if (m_pTank != NULL)
 	{
 		m_pTank->Use(this, this, USE_OFF, 0);
 		m_pTank = NULL;
 	}
 
-	for (auto gun : m_lpPlayerWeapons)
+	for (int i = 0; i < WEAPON_LAST; i++)
 	{
-		gun->Remove();
+		if (m_rgpPlayerWeapons[i] != nullptr)
+		{
+			m_rgpPlayerWeapons[i]->Remove();
+		}
 	}
-	m_pActiveWeapon = nullptr;
-	memset(m_rgpPlayerWeapons, 0, sizeof(m_rgpPlayerWeapons));
-	m_lpPlayerWeapons.clear();
-
-	pev->viewmodel = 0;
-	pev->weaponmodel = 0;
-
-	m_WeaponBits = 0ULL;
 
 	for (int i = 0; i < AMMO_LAST; i++)
 	{
@@ -486,12 +475,6 @@ void CBasePlayer::RemoveAllWeapons()
 
 void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType)
 {
-	// Holster weapon immediately, to allow it to cleanup
-	if (m_pActiveWeapon)
-	{
-		m_pActiveWeapon->Holster();
-	}
-
 	CBaseEntity* accomplice = m_hLastAttacker[1];
 
 	if (accomplice == nullptr && m_hLastAttacker[0] != attacker)

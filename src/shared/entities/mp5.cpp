@@ -76,11 +76,6 @@ void CMP5::PrimaryAttack()
 		shots++;
 	}
 
-	if (shots > m_iClip)
-	{
-		shots = m_iClip;
-	}
-
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
 #ifdef GAME_DLL
