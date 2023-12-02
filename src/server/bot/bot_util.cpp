@@ -737,7 +737,7 @@ bool IsGameEventAudible( GameEventType event, CBaseEntity *entity, CBaseEntity *
 				return false;
 
 #if 0
-			switch( player->m_pActiveWeapon->m_iId )
+			switch( player->m_pActiveWeapon->GetID() )
 			{
 				// silent "firing"
 				case WEAPON_HEGRENADE:

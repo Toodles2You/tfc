@@ -206,7 +206,7 @@ WEAPON* WeaponsResource::GetFirstPos(int iSlot)
 
 	for (int i = 0; i < MAX_WEAPON_POSITIONS; i++)
 	{
-		if (rgSlots[iSlot][i] && HasAmmo(rgSlots[iSlot][i]))
+		if (rgSlots[iSlot][i] != nullptr)
 		{
 			pret = rgSlots[iSlot][i];
 			break;
@@ -220,11 +220,11 @@ WEAPON* WeaponsResource::GetFirstPos(int iSlot)
 WEAPON* WeaponsResource::GetNextActivePos(int iSlot, int iSlotPos)
 {
 	if (iSlotPos >= MAX_WEAPON_POSITIONS || iSlot >= MAX_WEAPON_SLOTS)
-		return NULL;
+		return nullptr;
 
 	WEAPON* p = gWR.rgSlots[iSlot][iSlotPos + 1];
 
-	if (!p || !gWR.HasAmmo(p))
+	if (p == nullptr)
 		return GetNextActivePos(iSlot, iSlotPos + 1);
 
 	return p;
@@ -379,7 +379,6 @@ void CHudAmmo::Think()
 	{
 		if (gpActiveSel != (WEAPON*)1)
 		{
-			// ServerCmd(gpActiveSel->szName);
 			g_weaponselect = gpActiveSel->iId;
 		}
 
@@ -795,7 +794,7 @@ void CHudAmmo::UserCmd_NextWeapon()
 			{
 				WEAPON* wsp = gWR.GetWeaponSlot(slot, pos);
 
-				if (wsp && gWR.HasAmmo(wsp))
+				if (wsp != nullptr)
 				{
 					if (hud_fastswitch->value != 0)
 					{
@@ -858,7 +857,7 @@ void CHudAmmo::UserCmd_PrevWeapon()
 			{
 				WEAPON* wsp = gWR.GetWeaponSlot(slot, pos);
 
-				if (wsp && gWR.HasAmmo(wsp))
+				if (wsp != nullptr)
 				{
 					if (hud_fastswitch->value != 0)
 					{
@@ -899,9 +898,8 @@ void CHudAmmo::UserCmd_LastWeapon()
 
 	auto pWeapon = gWR.GetWeapon(g_lastselect);
 
-	if (pWeapon && gHUD.HasWeapon(g_lastselect) && gWR.HasAmmo(pWeapon))
+	if (pWeapon && gHUD.HasWeapon(g_lastselect))
 	{
-		// ServerCmd(gpActiveSel->szName);
 		g_weaponselect = g_lastselect;
 		gHUD.m_iKeyBits &= ~IN_ATTACK;
 	}
@@ -1226,29 +1224,24 @@ bool CHudAmmo::DrawWList(float flTime)
 				if (!p || 0 == p->iId)
 					continue;
 
-				// if active, then we must have ammo.
+				// Draw Weapon if Red if no ammo
 				auto ammo = gWR.HasAmmo(p);
-				auto color = CHud::COLOR_PRIMARY;
-				auto a = 255;
+				auto color = ammo ? CHud::COLOR_PRIMARY : CHud::COLOR_WARNING;
 
 				if (gpActiveSel == p)
 				{
-					gHUD.DrawHudSprite(p->hActive, 0, &p->rcActive, x, y, color, a);
-					gHUD.DrawHudSpriteIndex(m_HUD_selection, x, y, color, a);
+					gHUD.DrawHudSprite(p->hActive, 0, &p->rcActive, x, y, color, 255);
+					gHUD.DrawHudSpriteIndex(m_HUD_selection, x, y, color, 255);
 				}
 				else
 				{
-					// Draw Weapon if Red if no ammo
-					color = ammo ? CHud::COLOR_PRIMARY : CHud::COLOR_WARNING;
-					a = ammo ? 192 : 128;
-
-					gHUD.DrawHudSprite(p->hInactive, 0, &p->rcInactive, x, y, color, a);
+					gHUD.DrawHudSprite(p->hInactive, 0, &p->rcInactive, x, y, color, ammo ? 192 : 128);
 				}
 
 				// Draw Ammo Bar
 				if (ammo)
 				{
-					DrawAmmoBar(p, x + giABWidth / 2, y, giABWidth, giABHeight, color, a);
+					DrawAmmoBar(p, x + giABWidth / 2, y, giABWidth, giABHeight, color, 192);
 				}
 
 				y += p->rcActive.bottom - p->rcActive.top + 5;

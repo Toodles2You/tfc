@@ -502,14 +502,6 @@ void ClientCommand(edict_t* pEntity)
 			}
 		}
 	}
-	else if (FStrEq(pcmd, "use"))
-	{
-		player->SelectWeapon((char*)CMD_ARGV(1));
-	}
-	else if (((pstr = strstr(pcmd, "weapon_")) != NULL) && (pstr == pcmd))
-	{
-		player->SelectWeapon(pcmd);
-	}
 	else if (FStrEq(pcmd, "closemenus"))
 	{
 	}
@@ -1534,7 +1526,7 @@ int GetWeaponData(struct edict_s* player, struct weapon_data_s* info)
 
 	for (auto gun : pl->m_lpPlayerWeapons)
 	{
-		gun->GetWeaponData(info[gun->m_iId]);
+		gun->GetWeaponData(info[gun->GetID()]);
 	}
 	return 1;
 }

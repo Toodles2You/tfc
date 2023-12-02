@@ -16,19 +16,9 @@
 LINK_ENTITY_TO_CLASS(weapon_crowbar, CCrowbar);
 
 
-bool CCrowbar::Spawn()
-{
-	Precache();
-	SetModel("models/w_crowbar.mdl");
-	FallInit();
-	m_iId = WEAPON_CROWBAR;
-	m_iClip = WEAPON_NOCLIP;
-	return true;
-}
-
-
 void CCrowbar::Precache()
 {
+#ifdef GAME_DLL
 	PRECACHE_MODEL("models/v_crowbar.mdl");
 	PRECACHE_MODEL("models/w_crowbar.mdl");
 	PRECACHE_MODEL("models/p_crowbar.mdl");
@@ -41,6 +31,7 @@ void CCrowbar::Precache()
 	PRECACHE_SOUND("weapons/cbar_hitbod3.wav");
 
 	PRECACHE_SOUND("weapons/cbar_miss1.wav");
+#endif
 
 	m_usCrowbar = PRECACHE_EVENT(1, "events/crowbar.sc");
 }
@@ -48,21 +39,17 @@ void CCrowbar::Precache()
 
 bool CCrowbar::GetWeaponInfo(WeaponInfo* i)
 {
-#ifdef GAME_DLL
-	i->pszName = STRING(pev->classname);
-#else
 	i->pszName = "weapon_crowbar";
-#endif
 	i->iAmmo1 = AMMO_NONE;
 	i->iMaxAmmo1 = -1;
 	i->iAmmo2 = AMMO_NONE;
 	i->iMaxAmmo2 = -1;
-	i->iMaxClip = WEAPON_NOCLIP;
+	i->iMaxClip = -1;
 	i->iSlot = 0;
 	i->iPosition = 0;
-	i->iId = WEAPON_CROWBAR;
 	i->iWeight = 0;
 
+	i->pszWorld = "models/w_crowbar.mdl";
 	i->pszView = "models/v_crowbar.mdl";
 	i->pszPlayer = "models/p_crowbar.mdl";
 	i->pszAnimExt = "crowbar";
@@ -79,7 +66,11 @@ void CCrowbar::PrimaryAttack()
 {
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
+#ifdef CLIENT_DLL
+	m_pPlayer->PlaybackEvent(m_usCrowbar);
+#else
 	util::MakeVectors(m_pPlayer->pev->v_angle);
+
 
 	Vector gun = m_pPlayer->GetGunPosition();
 
@@ -91,9 +82,6 @@ void CCrowbar::PrimaryAttack()
 		m_pPlayer,
 		util::kTraceBox);
 
-#ifdef CLIENT_DLL
-	m_pPlayer->PlaybackEvent(m_usCrowbar);
-#else
 	auto hit = kCrowbarMiss;
 	if (tr.flFraction != 1.0F)
 	{
@@ -113,7 +101,6 @@ void CCrowbar::PrimaryAttack()
 		true,
 		false,
 		FEV_RELIABLE | FEV_NOTHOST);
-#endif
 
 	if (tr.flFraction == 1.0F)
 	{
@@ -133,6 +120,7 @@ void CCrowbar::PrimaryAttack()
 		DMG_CLUB);
 
 	ApplyMultiDamage(m_pPlayer, m_pPlayer);
+#endif
 
 	m_iNextPrimaryAttack = 250;
 }

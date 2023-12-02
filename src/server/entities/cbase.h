@@ -153,7 +153,7 @@ public:
 	virtual void AddPoints(float score, bool bAllowNegativeScore) {}
 	virtual void AddPointsToTeam(float score, bool bAllowNegativeScore) {}
 	virtual bool AddPlayerWeapon(CBasePlayerWeapon* pWeapon) { return 0; }
-	virtual bool RemovePlayerWeapon(CBasePlayerWeapon* pWeapon) { return 0; }
+	virtual void RemovePlayerWeapon(CBasePlayerWeapon* pWeapon) {}
 	virtual int GiveAmmo(int iAmount, int iType, int iMax) { return -1; }
 	virtual float GetDelay() { return 0; }
 	virtual bool IsMoving() { return pev->velocity != g_vecZero; }
@@ -216,7 +216,9 @@ public:
 		::operator delete(pMem);
 	}
 
-	void UpdateOnRemove();
+#ifndef CLIENT_DLL
+	virtual void UpdateOnRemove();
+#endif
 
 	// common member functions
 	void EXPORT Remove();
@@ -257,8 +259,6 @@ public:
 
 	virtual void Look(int iDistance); // basic sight function for monsters
 	virtual CBaseEntity* BestVisibleEnemy();		// finds best visible enemy for attack
-
-	int m_iNextAttack;
 
 	float m_flFieldOfView;
 

@@ -95,16 +95,7 @@ void CGameRules::InitHUD(CBasePlayer* pl)
 //=========================================================
 bool CGameRules::CanHaveAmmo(CBasePlayer* pPlayer, int iAmmoType, int iMaxCarry)
 {
-	if (iAmmoType > AMMO_NONE)
-	{
-		if (pPlayer->AmmoInventory(iAmmoType) < iMaxCarry)
-		{
-			// player has room for more of this type of ammo
-			return true;
-		}
-	}
-
-	return false;
+	return pPlayer->AmmoInventory(iAmmoType) < iMaxCarry;
 }
 
 //=========================================================
@@ -139,7 +130,7 @@ bool CGameRules::CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pW
 		{
 			// we can't carry anymore ammo for this gun. We can only
 			// have the gun if we aren't already carrying one of this type
-			if (pPlayer->HasPlayerWeapon(pWeapon))
+			if (pPlayer->HasPlayerWeapon(pWeapon->GetID()))
 			{
 				return false;
 			}
@@ -148,7 +139,7 @@ bool CGameRules::CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pW
 	else
 	{
 		// weapon doesn't use ammo, don't take another if you already have it.
-		if (pPlayer->HasPlayerWeapon(pWeapon))
+		if (pPlayer->HasPlayerWeapon(pWeapon->GetID()))
 		{
 			return false;
 		}

@@ -65,7 +65,7 @@ void CBasePlayer::UpdateHudData()
 	if (IsAlive() && m_pActiveWeapon != nullptr)
 	{
 		gHUD.m_Ammo.Update_CurWeapon(
-			true, m_pActiveWeapon->m_iId, m_pActiveWeapon->m_iClip);
+			true, m_pActiveWeapon->GetID(), m_pActiveWeapon->m_iClip);
 	}
 	else
 	{

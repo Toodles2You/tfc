@@ -181,16 +181,13 @@ public:
 	void AddPoints(float score, bool bAllowNegativeScore) override;
 	void AddPointsToTeam(float score, bool bAllowNegativeScore) override;
 	bool AddPlayerWeapon(CBasePlayerWeapon* pWeapon) override;
-	bool RemovePlayerWeapon(CBasePlayerWeapon* pWeapon) override;
+	void RemovePlayerWeapon(CBasePlayerWeapon* pWeapon) override;
 	void DropPlayerWeapon(char* pszWeaponName);
-	bool HasPlayerWeapon(CBasePlayerWeapon* pCheckWeapon);
-	bool HasNamedPlayerWeapon(const char* pszWeaponName);
-	bool HasWeapons(); // do I have ANY weapons?
-	void SelectWeapon(const char* pstr);
+	bool HasPlayerWeapon(int iId) { return (m_WeaponBits & (1ULL << iId)) != 0; }
+	bool HasWeapons() { return m_WeaponBits != 0; }
 	void SelectWeapon(int id);
 	void WeaponPostFrame();
 	void GiveNamedItem(const char* szName);
-	void GiveNamedItem(const char* szName, int defaultAmmo);
 	void EnableControl(bool fControl);
 
 	int GiveAmmo(int iAmount, int iType, int iMax) override;
@@ -209,7 +206,7 @@ public:
 	void PlayerDeathFrame();
 	void PlayerUse();
 
-	int AmmoInventory(int iAmmoIndex);
+	int AmmoInventory(int iAmmoIndex) { return m_rgAmmo[iAmmoIndex]; }
 
 	Vector GetAimVector();
 

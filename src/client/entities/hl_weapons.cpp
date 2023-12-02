@@ -104,17 +104,19 @@ void HUD_PrepEntity(CBaseEntity* pEntity, CBasePlayer* pWeaponOwner)
 
 	if (pWeaponOwner)
 	{
+		const auto weapon = dynamic_cast<CBasePlayerWeapon*>(pEntity);
+
 		WeaponInfo info;
 
 		memset(&info, 0, sizeof(info));
 
-		((CBasePlayerWeapon*)pEntity)->m_pPlayer = pWeaponOwner;
+		weapon->m_pPlayer = pWeaponOwner;
 
-		((CBasePlayerWeapon*)pEntity)->GetWeaponInfo(&info);
+		weapon->GetWeaponInfo(&info);
 
-		CBasePlayerWeapon::WeaponInfoArray[info.iId] = info;
+		CBasePlayerWeapon::WeaponInfoArray[weapon->GetID()] = info;
 
-		pWeaponOwner->m_rgpPlayerWeapons[info.iId] = (CBasePlayerWeapon*)pEntity;
+		pWeaponOwner->m_rgpPlayerWeapons[weapon->GetID()] = (CBasePlayerWeapon*)pEntity;
 	}
 }
 
@@ -320,7 +322,7 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 	for (i = 0; i < ARRAYSIZE(weapons); i++)
 	{
 		auto weapon = weapons[i];
-		weapon->SetWeaponData(from->weapondata[weapon->m_iId]);
+		weapon->SetWeaponData(from->weapondata[weapon->GetID()]);
 	}
 
 	player.CmdStart(*cmd, random_seed);
@@ -332,7 +334,7 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 	{
 		auto weapon = weapons[i];
 		weapon->DecrementTimers(cmd->msec);
-		weapon->GetWeaponData(to->weapondata[weapon->m_iId]);
+		weapon->GetWeaponData(to->weapondata[weapon->GetID()]);
 	}
 
 	player.UpdateHudData();
@@ -389,8 +391,8 @@ void WeaponsResource::Init()
 		w.iSlot = info.iSlot;
 		w.iSlotPos = info.iPosition;
 		w.iFlags = info.iFlags;
-		w.iId = info.iId;
+		w.iId = weapons[i]->GetID();
 
-		rgWeapons[w.iId] = w;
+		rgWeapons[weapons[i]->GetID()] = w;
 	}
 }

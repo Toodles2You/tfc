@@ -67,16 +67,6 @@ bool CBaseToggle::Restore(class CRestore&) { return true; }
 bool CBaseToggle::Save(class CSave&) { return true; }
 bool CBaseToggle::KeyValue(struct KeyValueData_s*) { return false; }
 
-// CGrenade Stubs
-void CGrenade::BounceSound() {}
-void CGrenade::Explode(Vector, Vector) {}
-void CGrenade::Explode(TraceResult*, int) {}
-void CGrenade::Killed(CBaseEntity*, CBaseEntity*, int) {}
-bool CGrenade::Spawn() { return false; }
-CGrenade* CGrenade::ShootTimed(CBaseEntity* owner, Vector vecStart, Vector vecVelocity, float time) { return 0; }
-CGrenade* CGrenade::ShootContact(CBaseEntity* owner, Vector vecStart, Vector vecVelocity) { return 0; }
-void CGrenade::DetonateUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) {}
-
 CBaseEntity* util::FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius) { return 0; }
 
 Vector util::VecToAngles(const Vector& vec) { return 0; }
@@ -124,53 +114,33 @@ void CBasePlayer::PlayerUse() {}
 void CBasePlayer::Precache() {}
 bool CBasePlayer::Save(CSave& save) { return false; }
 bool CBasePlayer::Restore(CRestore& restore) { return false; }
-bool CBasePlayer::HasWeapons() { return false; }
-void CBasePlayer::SelectWeapon(const char* pstr) {}
 void CBasePlayer::ForceClientDllUpdate() {}
 void CBasePlayer::ImpulseCommands() {}
 void CBasePlayer::CheatImpulseCommands(int iImpulse) {}
 bool CBasePlayer::AddPlayerWeapon(CBasePlayerWeapon* pWeapon) { return false; }
-bool CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* pWeapon) { return false; }
-int CBasePlayer::AmmoInventory(int iAmmoIndex) { return -1; }
+void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* pWeapon) {}
 void CBasePlayer::UpdateClientData() {}
 void CBasePlayer::EnableControl(bool fControl) {}
 Vector CBasePlayer::GetAimVector() { return g_vecZero; }
 void CBasePlayer::SetCustomDecalFrames(int nFrames) {}
 int CBasePlayer::GetCustomDecalFrames() { return -1; }
 void CBasePlayer::DropPlayerWeapon(char* pszWeaponName) {}
-bool CBasePlayer::HasPlayerWeapon(CBasePlayerWeapon* pCheckWeapon) { return false; }
 const char* CBasePlayer::TeamID() { return ""; }
 int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax) { return 0; }
 void CBasePlayer::AddPoints(float score, bool bAllowNegativeScore) {}
 void CBasePlayer::AddPointsToTeam(float score, bool bAllowNegativeScore) {}
 
-void ClearMultiDamage() {}
-void ApplyMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker) {}
-void AddMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker, CBaseEntity* pEntity, float flDamage, int bitsDamageType) {}
 bool CBasePlayerWeapon::Restore(class CRestore&) { return true; }
 bool CBasePlayerWeapon::Save(class CSave&) { return true; }
+bool CBasePlayerWeapon::Spawn() { return false; }
 void CBasePlayerWeapon::SetObjectCollisionBox() {}
-void CBasePlayerWeapon::FallInit() {}
-void CBasePlayerWeapon::FallThink() {}
 void CBasePlayerWeapon::Materialize() {}
 void CBasePlayerWeapon::AttemptToMaterialize() {}
 void CBasePlayerWeapon::CheckRespawn() {}
 CBaseEntity* CBasePlayerWeapon::Respawn() { return nullptr; }
 void CBasePlayerWeapon::DefaultTouch(CBaseEntity* pOther) {}
-void CBasePlayerWeapon::DestroyWeapon() {}
-void CBasePlayerWeapon::Drop() {}
-void CBasePlayerWeapon::Kill() {}
-void CBasePlayerWeapon::AttachToPlayer(CBasePlayer* pPlayer) {}
-bool CBasePlayerWeapon::AddDuplicate(CBasePlayerWeapon* pOriginal) { return false; }
 void CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer) {}
-bool CBasePlayerAmmo::Spawn() { return false; }
-CBaseEntity* CBasePlayerAmmo::Respawn() { return this; }
-void CBasePlayerAmmo::Materialize() {}
-void CBasePlayerAmmo::DefaultTouch(CBaseEntity* pOther) {}
-bool CBasePlayerWeapon::ExtractAmmo(CBasePlayerWeapon* pWeapon) { return false; }
-bool CBasePlayerWeapon::ExtractClipAmmo(CBasePlayerWeapon* pWeapon) { return false; }
-void RadiusDamage(Vector vecSrc, CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, float flRadius, int bitsDamageType) {}
-
+void CBasePlayerWeapon::RemoveFromPlayer() {}
 
 void CBaseEntity::EmitSound(const char* sample, int channel, float volume, float attenuation, int pitch, int flags) {}
 void CBaseEntity::EmitSoundPredicted(const char* sample, int channel, float volume, float attenuation, int pitch, int flags) {}

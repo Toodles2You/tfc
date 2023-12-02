@@ -102,10 +102,8 @@ void CItem::Materialize()
 {
 	if ((pev->effects & EF_NODRAW) != 0)
 	{
-		// changing from invisible state to visible.
 		EmitSound("items/itembk2.wav", CHAN_WEAPON);
 		pev->effects &= ~EF_NODRAW;
-		pev->effects |= EF_MUZZLEFLASH;
 	}
 
 	SetTouch(&CItem::ItemTouch);
@@ -131,13 +129,13 @@ class CItemBattery : public CItem
 			return false;
 		}
 
-		if (pPlayer->pev->armorvalue < MAX_NORMAL_BATTERY)
+		if (pPlayer->pev->armorvalue < 100.0F)
 		{
 			int pct;
 			char szcharge[64];
 
 			pPlayer->pev->armorvalue += 15;
-			pPlayer->pev->armorvalue = std::min(pPlayer->pev->armorvalue, MAX_NORMAL_BATTERY);
+			pPlayer->pev->armorvalue = std::min(pPlayer->pev->armorvalue, 100.0F);
 
 			pPlayer->EmitSound("items/gunpickup2.wav", CHAN_ITEM);
 

@@ -16,19 +16,9 @@
 LINK_ENTITY_TO_CLASS(weapon_9mmAR, CMP5);
 
 
-bool CMP5::Spawn()
-{
-	Precache();
-	SetModel("models/w_9mmAR.mdl");
-	FallInit();
-	m_iId = WEAPON_MP5;
-	m_iDefaultAmmo = 30;
-	return true;
-}
-
-
 void CMP5::Precache()
 {
+#ifdef GAME_DLL
 	PRECACHE_MODEL("models/v_9mmAR.mdl");
 	PRECACHE_MODEL("models/w_9mmAR.mdl");
 	PRECACHE_MODEL("models/p_9mmAR.mdl");
@@ -41,6 +31,7 @@ void CMP5::Precache()
 
 	PRECACHE_SOUND("weapons/glauncher.wav");
 	PRECACHE_SOUND("weapons/glauncher2.wav");
+#endif
 
 	m_usMP5 = PRECACHE_EVENT(1, "events/mp5.sc");
 	m_usMP52 = PRECACHE_EVENT(1, "events/mp52.sc");
@@ -49,11 +40,7 @@ void CMP5::Precache()
 
 bool CMP5::GetWeaponInfo(WeaponInfo* i)
 {
-#ifdef GAME_DLL
-	i->pszName = STRING(pev->classname);
-#else
 	i->pszName = "weapon_9mmAR";
-#endif
 	i->iAmmo1 = AMMO_9MM;
 	i->iMaxAmmo1 = 250;
 	i->iAmmo2 = AMMO_ARGRENADES;
@@ -62,9 +49,9 @@ bool CMP5::GetWeaponInfo(WeaponInfo* i)
 	i->iSlot = 2;
 	i->iPosition = 0;
 	i->iFlags = 0;
-	i->iId = m_iId = WEAPON_MP5;
 	i->iWeight = 15;
 
+	i->pszWorld = "models/w_9mmAR.mdl";
 	i->pszView = "models/v_9mmAR.mdl";
 	i->pszPlayer = "models/p_9mmAR.mdl";
 	i->pszAnimExt = "mp5";
@@ -79,12 +66,6 @@ bool CMP5::GetWeaponInfo(WeaponInfo* i)
 
 void CMP5::PrimaryAttack()
 {
-	if (m_pPlayer->pev->waterlevel == 3 || m_iClip == 0)
-	{
-		m_iNextPrimaryAttack = 150;
-		return;
-	}
-
 	auto shots = 0;
 
 	while (m_iNextPrimaryAttack <= 0)
@@ -97,8 +78,6 @@ void CMP5::PrimaryAttack()
 	{
 		shots = m_iClip;
 	}
-
-	// m_iClip -= shots;
 
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
@@ -113,14 +92,6 @@ void CMP5::PrimaryAttack()
 
 void CMP5::SecondaryAttack()
 {
-	if (m_pPlayer->pev->waterlevel == 3 || m_pPlayer->m_rgAmmo[iAmmo2()] == 0)
-	{
-		m_iNextPrimaryAttack = 150;
-		return;
-	}
-
-	// m_pPlayer->m_rgAmmo[iAmmo2()]--;
-
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
 #ifndef CLIENT_DLL
@@ -149,6 +120,10 @@ void CMP5::WeaponPostFrame()
 		else if ((m_pPlayer->pev->button & IN_ATTACK) != 0)
 		{
 			PrimaryAttack();
+		}
+		else
+		{
+			m_iNextPrimaryAttack = std::max(m_iNextPrimaryAttack, 0);
 		}
 	}
 }

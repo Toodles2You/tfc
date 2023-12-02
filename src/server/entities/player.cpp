@@ -464,7 +464,7 @@ void CBasePlayer::RemoveAllWeapons()
 
 	for (auto gun : m_lpPlayerWeapons)
 	{
-		gun->Drop();
+		gun->Remove();
 	}
 	m_pActiveWeapon = nullptr;
 	memset(m_rgpPlayerWeapons, 0, sizeof(m_rgpPlayerWeapons));
@@ -1305,8 +1305,6 @@ bool CBasePlayer::Spawn()
 
 	m_flNextDecalTime = -decalfrequency.value; // let this player decal as soon as they spawn
 
-	m_iNextAttack = 0;
-
 	// dont let uninitialized value here hurt the player
 	m_flFallVelocity = 0;
 
@@ -1413,49 +1411,9 @@ bool CBasePlayer::Restore(CRestore& restore)
 		SetSize(mins, maxs);
 	}
 
-	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "hl", "1");
-
-	m_iNextAttack = 0;
-
 	m_bRestored = true;
 
 	return status;
-}
-
-
-void CBasePlayer::SelectWeapon(const char* pstr)
-{
-	if (pstr == nullptr || pstr[0] == '\0')
-	{
-		return;
-	}
-
-	int iId = WEAPON_NONE;
-
-	for (auto it : m_lpPlayerWeapons)
-	{
-		if (FClassnameIs(it->pev, pstr))
-		{
-			iId = it->m_iId;
-			break;
-		}
-	}
-
-	if (iId == WEAPON_NONE)
-	{
-		return;
-	}
-
-	SelectWeapon(iId);
-}
-
-
-//==============================================
-// HasWeapons - do I have any weapons at all?
-//==============================================
-bool CBasePlayer::HasWeapons()
-{
-	return m_WeaponBits != 0;
 }
 
 
@@ -1559,31 +1517,6 @@ void CBasePlayer::GiveNamedItem(const char* szName)
 	DispatchTouch(pent, ENT(pev));
 }
 
-void CBasePlayer::GiveNamedItem(const char* szName, int defaultAmmo)
-{
-	auto pent = GiveNamedItem_Common(pev, szName);
-
-	if (!pent)
-	{
-		return;
-	}
-
-	auto entity = CBaseEntity::Instance(pent);
-
-	if (!entity)
-	{
-		return;
-	}
-
-	if (auto weapon = dynamic_cast<CBasePlayerWeapon*>(entity); weapon)
-	{
-		weapon->m_iDefaultAmmo = defaultAmmo;
-	}
-
-	DispatchTouch(pent, ENT(pev));
-}
-
-
 /*
 ===============
 ForceClientDllUpdate
@@ -1673,8 +1606,8 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 		gEvilImpulse101 = true;
 		GiveNamedItem("weapon_crowbar");
 		GiveNamedItem("weapon_9mmAR");
-		GiveAmmo(250, AMMO_9MM, 250);
-		GiveAmmo(10, AMMO_ARGRENADES, 10);
+		// GiveAmmo(250, AMMO_9MM, 250);
+		// GiveAmmo(10, AMMO_ARGRENADES, 10);
 		gEvilImpulse101 = false;
 		break;
 
@@ -1772,23 +1705,18 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 //
 bool CBasePlayer::AddPlayerWeapon(CBasePlayerWeapon* pWeapon)
 {
-	if (pWeapon->m_iId <= WEAPON_NONE || pWeapon->m_iId >= WEAPON_LAST)
+	if (HasPlayerWeapon(pWeapon->GetID()))
 	{
-		return false;
-	}
-
-	if (HasPlayerWeapon(pWeapon))
-	{
-		if (pWeapon->AddDuplicate(m_rgpPlayerWeapons[pWeapon->m_iId]))
+		if (pWeapon->AddDuplicate(m_rgpPlayerWeapons[pWeapon->GetID()]))
 		{
 			g_pGameRules->PlayerGotWeapon(this, pWeapon);
 			pWeapon->CheckRespawn();
 
-			pWeapon->Kill();
+			pWeapon->Remove();
 		}
 		else if (gEvilImpulse101)
 		{
-			pWeapon->Kill();
+			pWeapon->Remove();
 		}
 		return false;
 	}
@@ -1800,55 +1728,39 @@ bool CBasePlayer::AddPlayerWeapon(CBasePlayerWeapon* pWeapon)
 		g_pGameRules->PlayerGotWeapon(this, pWeapon);
 		pWeapon->CheckRespawn();
 
-		// Add to the list before extracting ammo so weapon ownership checks work properly.
-		m_rgpPlayerWeapons[pWeapon->m_iId] = pWeapon;
+		m_rgpPlayerWeapons[pWeapon->GetID()] = pWeapon;
 		m_lpPlayerWeapons.push_front(pWeapon);
+		SetWeaponBit(pWeapon->GetID());
 
-		pWeapon->ExtractAmmo(pWeapon);
-
-		// Don't show weapon pickup if we're spawning or if it's an exhaustible weapon (will show ammo pickup instead).
 		if (!m_bIsSpawning && (pWeapon->iFlags() & WEAPON_FLAG_EXHAUSTIBLE) == 0)
 		{
 			MessageBegin(MSG_ONE, gmsgWeapPickup, this);
-			WriteByte(pWeapon->m_iId);
+			WriteByte(pWeapon->GetID());
 			MessageEnd();
 		}
 
-		// Should we switch to this weapon?
 		if (g_pGameRules->FShouldSwitchWeapon(this, pWeapon))
 		{
-			SelectWeapon(pWeapon->m_iId);
+			pWeapon->m_ForceSendAnimations = true;
+			SelectWeapon(pWeapon->GetID());
+			pWeapon->m_ForceSendAnimations = false;
 		}
 
 		return true;
 	}
 	else if (gEvilImpulse101)
 	{
-		// FIXME: Remove anyway for deathmatch testing.
-		pWeapon->Kill();
+		pWeapon->Remove();
 	}
 	return false;
 }
 
 
-bool CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* pWeapon)
+void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* pWeapon)
 {
-	if (pWeapon->m_iId <= WEAPON_NONE || pWeapon->m_iId >= WEAPON_LAST)
-	{
-		return false;
-	}
-	if (m_pActiveWeapon == pWeapon)
-	{
-		pWeapon->Holster();
-		pWeapon->pev->nextthink = 0;
-		pWeapon->SetThink(nullptr);
-		m_pActiveWeapon = nullptr;
-		pev->viewmodel = 0;
-		pev->weaponmodel = 0;
-	}
-	m_rgpPlayerWeapons[pWeapon->m_iId] = nullptr;
+	m_rgpPlayerWeapons[pWeapon->GetID()] = nullptr;
 	m_lpPlayerWeapons.remove(pWeapon);
-	return true;
+	ClearWeaponBit(pWeapon->GetID());
 }
 
 
@@ -1857,20 +1769,11 @@ bool CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* pWeapon)
 //
 int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax)
 {
-	if (iType <= AMMO_NONE)
-	{
-		// no ammo.
-		return -1;
-	}
-
 	if (!g_pGameRules->CanHaveAmmo(this, iType, iMax))
 	{
 		// game rules say I can't have any more of this ammo type.
 		return -1;
 	}
-
-	if (iType <= AMMO_NONE || iType >= AMMO_LAST)
-		return -1;
 
 	int iAdd = std::min(iCount, iMax - m_rgAmmo[iType]);
 	if (iAdd < 1)
@@ -1901,16 +1804,6 @@ int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax)
 	}
 
 	return iType;
-}
-
-int CBasePlayer::AmmoInventory(int iAmmoIndex)
-{
-	if (iAmmoIndex <= AMMO_NONE)
-	{
-		return -1;
-	}
-
-	return m_rgAmmo[iAmmoIndex];
 }
 
 /*
@@ -2119,7 +2012,7 @@ void CBasePlayer::DropPlayerWeapon(char* pszWeaponName)
 		return;
 	}
 
-	ClearWeaponBit(pWeapon->m_iId); // take weapon off hud
+	ClearWeaponBit(pWeapon->GetID());
 
 	util::MakeVectors(pev->angles);
 
@@ -2151,33 +2044,6 @@ void CBasePlayer::DropPlayerWeapon(char* pszWeaponName)
 	}
 }
 
-//=========================================================
-// HasPlayerWeapon Does the player already have this weapon?
-//=========================================================
-bool CBasePlayer::HasPlayerWeapon(CBasePlayerWeapon* pCheckWeapon)
-{
-	if (pCheckWeapon->m_iId <= WEAPON_NONE || pCheckWeapon->m_iId >= WEAPON_LAST)
-	{
-		return false;
-	}
-	return (m_WeaponBits & (1ULL << pCheckWeapon->m_iId)) != 0;
-}
-
-//=========================================================
-// HasNamedPlayerWeapon Does the player already have this weapon?
-//=========================================================
-bool CBasePlayer::HasNamedPlayerWeapon(const char* pszWeaponName)
-{
-	for (auto pWeapon : m_lpPlayerWeapons)
-	{
-		if (FClassnameIs(pWeapon->pev, pszWeaponName))
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
 void CBasePlayer::EquipWeapon()
 {
 	if (m_pActiveWeapon == nullptr)
@@ -2190,7 +2056,9 @@ void CBasePlayer::EquipWeapon()
 		return;
 	}
 
+	m_pActiveWeapon->m_ForceSendAnimations = true;
 	m_pActiveWeapon->Deploy();
+	m_pActiveWeapon->m_ForceSendAnimations = false;
 }
 
 void CBasePlayer::SetPrefsFromUserinfo(char* infobuffer)

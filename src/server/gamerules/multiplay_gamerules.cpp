@@ -594,8 +594,8 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 	{
 		pPlayer->GiveNamedItem("weapon_crowbar");
 		pPlayer->GiveNamedItem("weapon_9mmAR");
-		pPlayer->GiveAmmo(250, AMMO_9MM, 250);
-		pPlayer->GiveAmmo(10, AMMO_ARGRENADES, 10);
+		// pPlayer->GiveAmmo(250, AMMO_9MM, 250);
+		// pPlayer->GiveAmmo(10, AMMO_ARGRENADES, 10);
 	}
 
 	pPlayer->m_iAutoWepSwitch = originalAutoWepSwitch;
@@ -889,7 +889,7 @@ float CHalfLifeMultiplay::FlWeaponRespawnTime(CBasePlayerWeapon* pWeapon)
 //=========================================================
 float CHalfLifeMultiplay::FlWeaponTryRespawn(CBasePlayerWeapon* pWeapon)
 {
-	if (pWeapon && WEAPON_NONE != pWeapon->m_iId && (pWeapon->iFlags() & WEAPON_FLAG_LIMITINWORLD) != 0)
+	if (pWeapon && (pWeapon->iFlags() & WEAPON_FLAG_LIMITINWORLD) != 0)
 	{
 		if (NUMBER_OF_ENTITIES() < (gpGlobals->maxEntities - ENTITY_INTOLERANCE))
 			return 0;
@@ -937,7 +937,7 @@ bool CHalfLifeMultiplay::CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWe
 			return CGameRules::CanHavePlayerWeapon(pPlayer, pWeapon);
 		}
 
-		if (pPlayer->HasPlayerWeapon(pWeapon))
+		if (pPlayer->HasPlayerWeapon(pWeapon->GetID()))
 		{
 			return false;
 		}

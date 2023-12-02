@@ -52,11 +52,6 @@ void CBasePlayer::WeaponPostFrame()
 	}
 #endif
 
-	if (m_iNextAttack > 0)
-	{
-		return;
-	}
-
 	if (m_pActiveWeapon == nullptr)
 	{
 		return;
@@ -180,7 +175,7 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 	data.iuser3 = pev->iuser3;
 #endif
 
-	data.m_iId = (m_pActiveWeapon != nullptr) ? m_pActiveWeapon->m_iId : WEAPON_NONE;
+	data.m_iId = (m_pActiveWeapon != nullptr) ? m_pActiveWeapon->GetID() : WEAPON_NONE;
 
 	byte* ammo = reinterpret_cast<byte*>(&data.ammo_shells);
 	ammo[0] = m_rgAmmo[AMMO_9MM];
@@ -192,7 +187,6 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 	data.punchangle = pev->punchangle;
 
 	data.fov = m_iFOV;
-    *reinterpret_cast<int*>(&data.m_flNextAttack) = m_iNextAttack;
 }
 
 
@@ -227,7 +221,7 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 			m_pActiveWeapon = m_rgpPlayerWeapons[data.m_iId];
 		}
 	}
-	else if (data.m_iId != m_pActiveWeapon->m_iId)
+	else if (data.m_iId != m_pActiveWeapon->GetID())
 	{
 		m_pActiveWeapon = m_rgpPlayerWeapons[data.m_iId];
 	}
@@ -242,7 +236,6 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 	pev->punchangle = data.punchangle;
 
 	m_iFOV = data.fov;
-    m_iNextAttack = *reinterpret_cast<const int*>(&data.m_flNextAttack);
 }
 
 
@@ -255,18 +248,11 @@ void CBasePlayer::DecrementTimers(const int msec)
 		len = std::max(len, 0.0F);
 		pev->punchangle = pev->punchangle * len;
 	}
-
-	m_iNextAttack = std::max(m_iNextAttack - msec, -1);
 }
 
 
 void CBasePlayer::SelectWeapon(int id)
 {
-	if (id <= WEAPON_NONE || id >= WEAPON_LAST)
-	{
-		return;
-	}
-
 	auto weapon = m_rgpPlayerWeapons[id];
 
 	if (weapon == nullptr || weapon == m_pActiveWeapon)
