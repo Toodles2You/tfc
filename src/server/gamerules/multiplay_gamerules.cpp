@@ -20,6 +20,7 @@
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
+#include "weaponbox.h"
 #include "gamerules.h"
 
 #include "game.h"

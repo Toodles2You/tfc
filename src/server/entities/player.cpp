@@ -39,6 +39,7 @@
 #include "UserMessages.h"
 #include "client.h"
 #include "animation.h"
+#include "weaponbox.h"
 
 unsigned short g_usGibbed;
 

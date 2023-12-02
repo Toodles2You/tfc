@@ -13,6 +13,7 @@
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
+#include "weaponbox.h"
 
 #include "bot_manager.h"
 #include "bot_util.h"

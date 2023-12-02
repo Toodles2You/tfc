@@ -28,6 +28,51 @@
 #include "func_break.h"
 #include "player.h"
 #include "UserMessages.h"
+/*
+==============================================================================
+
+MULTI-DAMAGE
+
+Collects multiple small damages into a single damage
+
+==============================================================================
+*/
+
+
+void ClearMultiDamage()
+{
+	gMultiDamage.pEntity = nullptr;
+	gMultiDamage.amount = 0;
+	gMultiDamage.type = 0;
+}
+
+
+void ApplyMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker)
+{
+	if (gMultiDamage.pEntity == nullptr)
+		return;
+
+	gMultiDamage.pEntity->TakeDamage(inflictor, attacker, gMultiDamage.amount, gMultiDamage.type);
+}
+
+
+void AddMultiDamage(CBaseEntity *inflictor, CBaseEntity *attacker, CBaseEntity* pEntity, float flDamage, int bitsDamageType)
+{
+	if (!pEntity)
+		return;
+
+	gMultiDamage.type |= bitsDamageType;
+
+	if (pEntity != gMultiDamage.pEntity)
+	{
+		ApplyMultiDamage(inflictor, attacker);
+		gMultiDamage.pEntity = pEntity;
+		gMultiDamage.amount = 0;
+	}
+
+	gMultiDamage.amount += flDamage;
+}
+
 
 //
 // RadiusDamage - this entity is exploding, or otherwise needs to inflict damage upon entities within a certain range.

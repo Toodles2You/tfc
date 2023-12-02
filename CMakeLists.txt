@@ -70,6 +70,7 @@ set(SERVER_SRC
     ${SERVER_SRC_DIR}/entities/spectator.cpp
     ${SERVER_SRC_DIR}/entities/subs.cpp
     ${SERVER_SRC_DIR}/entities/triggers.cpp
+    ${SERVER_SRC_DIR}/entities/weaponbox.cpp
     ${SERVER_SRC_DIR}/entities/weapons.cpp
     ${SERVER_SRC_DIR}/entities/world.cpp
 
