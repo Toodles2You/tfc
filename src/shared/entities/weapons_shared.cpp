@@ -17,7 +17,9 @@
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
+#ifdef GAME_DLL
 #include "gamerules.h"
+#endif
 
 
 void CBasePlayerWeapon::GetWeaponData(weapon_data_t& data)

@@ -10,7 +10,9 @@
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
+#ifdef GAME_DLL
 #include "gamerules.h"
+#endif
 
 
 void
@@ -253,9 +255,14 @@ void CBasePlayer::DecrementTimers(const int msec)
 
 void CBasePlayer::SelectWeapon(int id)
 {
+	if (!HasPlayerWeapon(id))
+	{
+		return;
+	}
+
 	auto weapon = m_rgpPlayerWeapons[id];
 
-	if (weapon == nullptr || weapon == m_pActiveWeapon)
+	if (weapon == m_pActiveWeapon)
 	{
 		return;
 	}

@@ -124,6 +124,7 @@ public:
 	virtual void DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, CBaseEntity* accomplice, int bitsDamageType) = 0;	// Call this from within a GameRules class to report an obituary.
 																									// Weapon retrieval
 	virtual bool CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon);					// The player is touching an CBasePlayerWeapon, do I give it to him?
+	virtual CBasePlayerWeapon* GetNextBestWeapon(CBasePlayer* player, CBasePlayerWeapon* weapon);
 	virtual void PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) = 0;				// Called each time a player picks up a weapon from the ground
 
 	// Weapon spawn/respawn control

@@ -10,7 +10,9 @@
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
+#ifdef GAME_DLL
 #include "gamerules.h"
+#endif
 
 
 LINK_ENTITY_TO_CLASS(weapon_9mmAR, CMP5);
