@@ -1300,10 +1300,7 @@ bool CBasePlayer::Spawn()
 	pev->iuser2 = pev->iuser3 = 0;
 	m_hLastAttacker[0] = m_hLastAttacker[1] = nullptr;
 
-	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "hl", "1");
-	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "bj", util::dtos1(sv_allowbunnyhopping.value != 0 ? 1 : 0));
-
-	m_iFOV = 0;		   // init field of view.
+	m_iFOV = 0;
 	m_ClientSndRoomtype = -1;
 
 	m_flNextDecalTime = -decalfrequency.value; // let this player decal as soon as they spawn

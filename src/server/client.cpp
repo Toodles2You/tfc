@@ -823,8 +823,6 @@ void InitMapLoadingUtils()
 		{ g_MapsToLoad.clear(); });
 }
 
-static bool g_LastAllowBunnyHoppingState = false;
-
 void StartFrame()
 {
 	if (g_pGameRules)
@@ -841,25 +839,6 @@ void StartFrame()
 
 	if (g_fGameOver)
 		return;
-
-	const bool allowBunnyHopping = sv_allowbunnyhopping.value != 0;
-
-	if (allowBunnyHopping != g_LastAllowBunnyHoppingState)
-	{
-		g_LastAllowBunnyHoppingState = allowBunnyHopping;
-
-		for (int i = 1; i <= gpGlobals->maxClients; ++i)
-		{
-			auto player = util::PlayerByIndex(i);
-
-			if (!player)
-			{
-				continue;
-			}
-
-			g_engfuncs.pfnSetPhysicsKeyValue(player->edict(), "bj", util::dtos1(allowBunnyHopping ? 1 : 0));
-		}
-	}
 
 	// If we're loading all maps then change maps after 3 seconds (time starts at 1)
 	// to give the game time to generate files.

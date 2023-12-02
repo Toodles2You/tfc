@@ -41,8 +41,6 @@ cvar_t allow_spectators = {"allow_spectators", "1", FCVAR_SERVER};
 
 cvar_t mp_chattime = {"mp_chattime", "10", FCVAR_SERVER};
 
-cvar_t sv_allowbunnyhopping = {"sv_allowbunnyhopping", "0", FCVAR_SERVER};
-
 // Register your console variables here
 // This gets called one time when the game is initialied
 void GameDLLInit()
@@ -79,8 +77,6 @@ void GameDLLInit()
 	CVAR_REGISTER(&allowmonsters);
 
 	CVAR_REGISTER(&mp_chattime);
-
-	CVAR_REGISTER(&sv_allowbunnyhopping);
 
 #ifdef HALFLIFE_BOTS
 	Bot_RegisterCvars();
