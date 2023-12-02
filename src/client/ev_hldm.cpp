@@ -462,7 +462,7 @@ static void EV_FireBullets(
 	gEngfuncs.pEventAPI->EV_PopPMStates();
 }
 
-void EV_FireMP5(event_args_t* args)
+void CMP5::EV_PrimaryAttack(event_args_t* args)
 {
 	Vector up, right, forward;
 	AngleVectors(args->angles, forward, right, up);
@@ -472,7 +472,7 @@ void EV_FireMP5(event_args_t* args)
 		EV_MuzzleFlash();
 
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(
-			CMP5::kAnimFire1 + gEngfuncs.pfnRandomLong(0, 2), 0);
+			kAnimFire1 + gEngfuncs.pfnRandomLong(0, 2), 0);
 
 		V_PunchAxis(0, gEngfuncs.pfnRandomFloat(-2, 2));
 	}
@@ -501,11 +501,11 @@ void EV_FireMP5(event_args_t* args)
 	EV_FireBullets(args, args->iparam1, Vector2D(6, 6), args->iparam2, 8192, false, 2);
 }
 
-void EV_FireMP52(event_args_t* args)
+void CMP5::EV_SecondaryAttack(event_args_t* args)
 {
 	if (EV_IsLocal(args->entindex))
 	{
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(CMP5::kAnimLaunch, 0);
+		gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimLaunch, 0);
 
 		V_PunchAxis(0, -10);
 	}
@@ -530,7 +530,7 @@ void EV_FireMP52(event_args_t* args)
 
 static int g_iSwing;
 
-void EV_Crowbar(event_args_t* args)
+void CCrowbar::EV_PrimaryAttack(event_args_t* args)
 {
 	Vector gun;
 	EV_GetGunPosition(args, gun, args->origin);
@@ -562,28 +562,28 @@ void EV_Crowbar(event_args_t* args)
 
 			if (ent->solid != SOLID_BSP && ent->movetype != MOVETYPE_PUSHSTEP)
 			{
-				hit = CCrowbar::kCrowbarHitPlayer;
+				hit = kCrowbarHitPlayer;
 			}
 			else
 			{
-				hit = CCrowbar::kCrowbarHitWorld;
+				hit = kCrowbarHitWorld;
 			}
 		}
 		else
 		{
-			hit = CCrowbar::kCrowbarMiss;
+			hit = kCrowbarMiss;
 		}
 	}
 
-	if (hit == CCrowbar::kCrowbarMiss)
+	if (hit == kCrowbarMiss)
 	{
 		if (EV_IsLocal(args->entindex))
 		{
 			switch (g_iSwing % 3)
 			{
-			case 0: gEngfuncs.pEventAPI->EV_WeaponAnimation(CCrowbar::kAnimAttack1Miss, 0); break;
-			case 1: gEngfuncs.pEventAPI->EV_WeaponAnimation(CCrowbar::kAnimAttack2Miss, 0); break;
-			case 2: gEngfuncs.pEventAPI->EV_WeaponAnimation(CCrowbar::kAnimAttack3Miss, 0); break;
+			case 0: gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimAttack1Miss, 0); break;
+			case 1: gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimAttack2Miss, 0); break;
+			case 2: gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimAttack3Miss, 0); break;
 			}
 		}
 
@@ -604,15 +604,15 @@ void EV_Crowbar(event_args_t* args)
 		{
 			switch (g_iSwing % 3)
 			{
-			case 0: gEngfuncs.pEventAPI->EV_WeaponAnimation(CCrowbar::kAnimAttack1Hit, 0); break;
-			case 1: gEngfuncs.pEventAPI->EV_WeaponAnimation(CCrowbar::kAnimAttack2Hit, 0); break;
-			case 2: gEngfuncs.pEventAPI->EV_WeaponAnimation(CCrowbar::kAnimAttack3Hit, 0); break;
+			case 0: gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimAttack1Hit, 0); break;
+			case 1: gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimAttack2Hit, 0); break;
+			case 2: gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimAttack3Hit, 0); break;
 			}
 		}
 
 		const char* sample;
 
-		if (hit == CCrowbar::kCrowbarHitWorld)
+		if (hit == kCrowbarHitWorld)
 		{
 			switch (gEngfuncs.pfnRandomLong(0, 1))
 			{
@@ -1111,9 +1111,9 @@ Associate script file name with callback functions.
 */
 void EV_HookEvents()
 {
-	gEngfuncs.pfnHookEvent("events/mp5.sc", EV_FireMP5);
-	gEngfuncs.pfnHookEvent("events/mp52.sc", EV_FireMP52);
-	gEngfuncs.pfnHookEvent("events/crowbar.sc", EV_Crowbar);
+	gEngfuncs.pfnHookEvent("events/mp5.sc", CMP5::EV_PrimaryAttack);
+	gEngfuncs.pfnHookEvent("events/mp52.sc", CMP5::EV_SecondaryAttack);
+	gEngfuncs.pfnHookEvent("events/crowbar.sc", CCrowbar::EV_PrimaryAttack);
 	gEngfuncs.pfnHookEvent("events/laser_on.sc", EV_LaserDotOn);
 	gEngfuncs.pfnHookEvent("events/laser_off.sc", EV_LaserDotOff);
 	gEngfuncs.pfnHookEvent("events/gibs.sc", EV_Gibbed);

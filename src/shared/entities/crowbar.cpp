@@ -35,7 +35,7 @@ void CCrowbar::Precache()
 	PRECACHE_SOUND("weapons/cbar_miss1.wav");
 #endif
 
-	m_usCrowbar = PRECACHE_EVENT(1, "events/crowbar.sc");
+	m_usPrimaryAttack = g_engfuncs.pfnPrecacheEvent(1, "events/crowbar.sc");
 }
 
 
@@ -69,7 +69,7 @@ void CCrowbar::PrimaryAttack()
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
 #ifdef CLIENT_DLL
-	m_pPlayer->PlaybackEvent(m_usCrowbar);
+	m_pPlayer->PlaybackEvent(m_usPrimaryAttack);
 #else
 	util::MakeVectors(m_pPlayer->pev->v_angle);
 
@@ -95,7 +95,7 @@ void CCrowbar::PrimaryAttack()
 	}
 
 	m_pPlayer->PlaybackEvent(
-		m_usCrowbar,
+		m_usPrimaryAttack,
 		0.0F,
 		0.0F,
 		hit,

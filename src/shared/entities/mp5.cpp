@@ -35,8 +35,8 @@ void CMP5::Precache()
 	PRECACHE_SOUND("weapons/glauncher2.wav");
 #endif
 
-	m_usMP5 = PRECACHE_EVENT(1, "events/mp5.sc");
-	m_usMP52 = PRECACHE_EVENT(1, "events/mp52.sc");
+	m_usPrimaryAttack = g_engfuncs.pfnPrecacheEvent(1, "events/mp5.sc");
+	m_usSecondaryAttack = g_engfuncs.pfnPrecacheEvent(1, "events/mp52.sc");
 }
 
 
@@ -89,7 +89,7 @@ void CMP5::PrimaryAttack()
 	m_pPlayer->FireBullets(8, Vector2D(3, 3), shots);
 #endif
 
-	m_pPlayer->PlaybackEvent(m_usMP5, 0.0F, 0.0F, m_pPlayer->m_randomSeed, shots);
+	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, 0.0F, 0.0F, m_pPlayer->m_randomSeed, shots);
 }
 
 
@@ -105,7 +105,7 @@ void CMP5::SecondaryAttack()
 		gpGlobals->v_forward * 800);
 #endif
 
-	m_pPlayer->PlaybackEvent(m_usMP52);
+	m_pPlayer->PlaybackEvent(m_usSecondaryAttack);
 
 	m_iNextPrimaryAttack = 1000;
 }

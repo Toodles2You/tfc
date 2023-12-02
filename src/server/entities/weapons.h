@@ -17,6 +17,9 @@
 
 #include "effects.h"
 #include "weaponinfo.h"
+#ifdef CLIENT_DLL
+#include "event_args.h"
+#endif
 
 class CBasePlayer;
 class CBasePlayerWeapon;
@@ -171,8 +174,12 @@ public:
 	void PrimaryAttack();
 	void WeaponPostFrame() override;
 
+#ifdef CLIENT_DLL
+	static void EV_PrimaryAttack(event_args_t* args);
+#endif
+
 private:
-	unsigned short m_usCrowbar;
+	unsigned short m_usPrimaryAttack;
 };
 
 class CMP5 : public CBasePlayerWeapon
@@ -200,9 +207,14 @@ public:
 	void SecondaryAttack();
 	void WeaponPostFrame() override;
 
+#ifdef CLIENT_DLL
+	static void EV_PrimaryAttack(event_args_t* args);
+	static void EV_SecondaryAttack(event_args_t* args);
+#endif
+
 private:
-	unsigned short m_usMP5;
-	unsigned short m_usMP52;
+	unsigned short m_usPrimaryAttack;
+	unsigned short m_usSecondaryAttack;
 };
 
 #ifndef CLIENT_DLL
