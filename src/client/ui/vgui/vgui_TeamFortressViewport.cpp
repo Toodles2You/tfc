@@ -1215,7 +1215,10 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 	if (!m_pSpectatorPanel)
 		return;
 
-	if (gHUD.IsSpectator() && 0 != gHUD.m_pCvarDraw->value && !gHUD.m_iIntermission) // don't draw in dev_overview mode
+	if (gHUD.IsObserver()
+	 && gHUD.GetObserverMode() != OBS_DEATHCAM
+	 && 0 != gHUD.m_pCvarDraw->value
+	 && !gHUD.m_iIntermission) // don't draw in dev_overview mode
 	{
 		char bottomText[128];
 		char helpString2[128];
@@ -1232,10 +1235,13 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 			m_pSpectatorPanel->setVisible(true); // show spectator panel, but
 			m_pSpectatorPanel->ShowMenu(false);	 // dsiable all menus/buttons
 
-			snprintf(tempString, sizeof(tempString) - 1, "%c%s", HUD_PRINTCENTER, CHudTextMessage::BufferedLocaliseTextString("#Spec_Duck"));
-			tempString[sizeof(tempString) - 1] = '\0';
+			if (gHUD.IsSpectator())
+			{
+				snprintf(tempString, sizeof(tempString) - 1, "%c%s", HUD_PRINTCENTER, CHudTextMessage::BufferedLocaliseTextString("#Spec_Duck"));
+				tempString[sizeof(tempString) - 1] = '\0';
 
-			gHUD.m_TextMessage.MsgFunc_TextMsg(NULL, strlen(tempString) + 1, tempString);
+				gHUD.m_TextMessage.MsgFunc_TextMsg(NULL, strlen(tempString) + 1, tempString);
+			}
 		}
 
 		sprintf(bottomText, "#Spec_Mode%d", gHUD.GetObserverMode());
