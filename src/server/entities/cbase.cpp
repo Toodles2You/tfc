@@ -175,15 +175,16 @@ int DispatchSpawn(edict_t* pent)
 				// Already dead? delete
 				if (pGlobal->state == GLOBAL_DEAD)
 					return -1;
+#ifdef HALFLIFE_SAVERESTORE
 				else if (!FStrEq(STRING(gpGlobals->mapname), pGlobal->levelName))
 					pEntity->MakeDormant(); // Hasn't been moved to this level yet, wait but stay alive
 											// In this level & not dead, continue on as normal
+#endif
 			}
 			else
 			{
 				// Spawned entities default to 'On'
 				gGlobalState.EntityAdd(pEntity->pev->globalname, gpGlobals->mapname, GLOBAL_ON);
-				//				ALERT( at_console, "Added global entity %s (%s)\n", STRING(pEntity->pev->classname), STRING(pEntity->pev->globalname) );
 			}
 		}
 	}
@@ -214,8 +215,10 @@ void DispatchKeyValue(edict_t* pentKeyvalue, KeyValueData* pkvd)
 
 void DispatchTouch(edict_t* pentTouched, edict_t* pentOther)
 {
+#ifdef HALFLIFE_NODEGRAPH
 	if (gTouchDisabled)
 		return;
+#endif
 
 	CBaseEntity* pEntity = (CBaseEntity*)GET_PRIVATE(pentTouched);
 	CBaseEntity* pOther = (CBaseEntity*)GET_PRIVATE(pentOther);
@@ -239,8 +242,10 @@ void DispatchThink(edict_t* pent)
 	CBaseEntity* pEntity = (CBaseEntity*)GET_PRIVATE(pent);
 	if (pEntity)
 	{
+#ifdef HALFLIFE_SAVERESTORE
 		if (FBitSet(pEntity->pev->flags, FL_DORMANT))
 			ALERT(at_error, "Dormant entity %s is thinking!!\n", STRING(pEntity->pev->classname));
+#endif
 
 		pEntity->Think();
 	}
@@ -259,6 +264,7 @@ void DispatchSave(edict_t* pent, SAVERESTOREDATA* pSaveData)
 {
 	gpGlobals->time = pSaveData->time;
 
+#ifdef HALFLIFE_SAVERESTORE
 	CBaseEntity* pEntity = (CBaseEntity*)GET_PRIVATE(pent);
 
 	if (pEntity && CSaveRestoreBuffer::IsValidSaveRestoreData(pSaveData))
@@ -287,6 +293,7 @@ void DispatchSave(edict_t* pent, SAVERESTOREDATA* pSaveData)
 
 		pTable->size = pSaveData->size - pTable->location; // Size of entity block is data size written to block
 	}
+#endif
 }
 
 void OnFreeEntPrivateData(edict_s* pEdict)
@@ -330,6 +337,9 @@ int DispatchRestore(edict_t* pent, SAVERESTOREDATA* pSaveData, int globalEntity)
 {
 	gpGlobals->time = pSaveData->time;
 
+#ifndef HALFLIFE_SAVERESTORE
+	return -1;
+#else
 	CBaseEntity* pEntity = (CBaseEntity*)GET_PRIVATE(pent);
 
 	if (pEntity && CSaveRestoreBuffer::IsValidSaveRestoreData(pSaveData))
@@ -436,6 +446,7 @@ int DispatchRestore(edict_t* pent, SAVERESTOREDATA* pSaveData, int globalEntity)
 		}
 	}
 	return 0;
+#endif
 }
 
 
@@ -453,6 +464,7 @@ void DispatchObjectCollsionBox(edict_t* pent)
 
 void SaveWriteFields(SAVERESTOREDATA* pSaveData, const char* pname, void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCount)
 {
+#ifdef HALFLIFE_SAVERESTORE
 	if (!CSaveRestoreBuffer::IsValidSaveRestoreData(pSaveData))
 	{
 		return;
@@ -460,11 +472,13 @@ void SaveWriteFields(SAVERESTOREDATA* pSaveData, const char* pname, void* pBaseD
 
 	CSave saveHelper(*pSaveData);
 	saveHelper.WriteFields(pname, pBaseData, pFields, fieldCount);
+#endif
 }
 
 
 void SaveReadFields(SAVERESTOREDATA* pSaveData, const char* pname, void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCount)
 {
+#ifdef HALFLIFE_SAVERESTORE
 	if (!CSaveRestoreBuffer::IsValidSaveRestoreData(pSaveData))
 	{
 		return;
@@ -475,6 +489,7 @@ void SaveReadFields(SAVERESTOREDATA* pSaveData, const char* pname, void* pBaseDa
 
 	CRestore restoreHelper(*pSaveData);
 	restoreHelper.ReadFields(pname, pBaseData, pFields, fieldCount);
+#endif
 }
 
 
@@ -620,15 +635,16 @@ CBaseEntity* CBaseEntity::GetNextTarget()
 }
 
 // Global Savedata for Delay
+#ifdef HALFLIFE_SAVERESTORE
 TYPEDESCRIPTION CBaseEntity::m_SaveData[] =
-	{
-		DEFINE_FIELD(CBaseEntity, m_pGoalEnt, FIELD_CLASSPTR),
-		DEFINE_FIELD(CBaseEntity, m_EFlags, FIELD_CHARACTER),
+{
+	DEFINE_FIELD(CBaseEntity, m_pGoalEnt, FIELD_CLASSPTR),
+	DEFINE_FIELD(CBaseEntity, m_EFlags, FIELD_CHARACTER),
 
-		DEFINE_FIELD(CBaseEntity, m_pfnThink, FIELD_FUNCTION), // UNDONE: Build table of these!!!
-		DEFINE_FIELD(CBaseEntity, m_pfnTouch, FIELD_FUNCTION),
-		DEFINE_FIELD(CBaseEntity, m_pfnUse, FIELD_FUNCTION),
-		DEFINE_FIELD(CBaseEntity, m_pfnBlocked, FIELD_FUNCTION),
+	DEFINE_FIELD(CBaseEntity, m_pfnThink, FIELD_FUNCTION),
+	DEFINE_FIELD(CBaseEntity, m_pfnTouch, FIELD_FUNCTION),
+	DEFINE_FIELD(CBaseEntity, m_pfnUse, FIELD_FUNCTION),
+	DEFINE_FIELD(CBaseEntity, m_pfnBlocked, FIELD_FUNCTION),
 };
 
 
@@ -662,6 +678,7 @@ bool CBaseEntity::Restore(CRestore& restore)
 
 	return status;
 }
+#endif
 
 
 // Initialize absmin & absmax to the appropriate box
@@ -741,6 +758,7 @@ bool CBaseEntity::Intersects(CBaseEntity* pOther)
 	return true;
 }
 
+#ifdef HALFLIFE_SAVERESTORE
 void CBaseEntity::MakeDormant()
 {
 	SetBits(pev->flags, FL_DORMANT);
@@ -761,6 +779,7 @@ bool CBaseEntity::IsDormant()
 {
 	return FBitSet(pev->flags, FL_DORMANT);
 }
+#endif
 
 bool CBaseEntity::IsInWorld()
 {

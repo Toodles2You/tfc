@@ -638,7 +638,11 @@ void ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
 
 		pClass = CBaseEntity::Instance(&pEdictList[i]);
 		// Activate this entity if it's got a class & isn't dormant
-		if (pClass && (pClass->pev->flags & FL_DORMANT) == 0)
+#ifdef HALFLIFE_SAVERESTORE
+		if (pClass != nullptr && (pClass->pev->flags & FL_DORMANT) == 0)
+#else
+		if (pClass != nullptr)
+#endif
 		{
 			pClass->Activate();
 		}
@@ -713,11 +717,13 @@ void ParmsNewLevel()
 
 void ParmsChangeLevel()
 {
+#ifdef HALFLIFE_SAVERESTORE
 	// retrieve the pointer to the save data
 	SAVERESTOREDATA* pSaveData = (SAVERESTOREDATA*)gpGlobals->pSaveData;
 
 	if (pSaveData)
 		pSaveData->connectionCount = util::BuildChangeList(pSaveData->levelList, MAX_LEVEL_CONNECTIONS);
+#endif
 }
 
 static std::vector<std::string> g_MapsToLoad;
@@ -844,7 +850,7 @@ void StartFrame()
 void ClientPrecache()
 {
 	// setup precaches always needed
-	PRECACHE_SOUND("player/sprayer.wav"); // spray paint sound for PreAlpha
+	PRECACHE_SOUND("player/sprayer.wav"); // spray paint sound
 
 	PRECACHE_SOUND("player/pl_jumpland2.wav");
 	PRECACHE_SOUND("player/pl_fallpain3.wav");
@@ -939,6 +945,8 @@ void ClientPrecache()
 	PRECACHE_SOUND("common/wpn_denyselect.wav");
 
 	PRECACHE_SOUND("misc/r_tele1.wav");
+
+	PRECACHE_SOUND("common/null.wav");
 
 	g_usGibbed = PRECACHE_EVENT(1, "events/gibs.sc");
 	g_usTeleport = PRECACHE_EVENT(1, "events/teleport.sc");

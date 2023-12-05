@@ -112,16 +112,24 @@ void W_Precache()
 
 	PRECACHE_SOUND("weapons/desert_eagle_sight.wav");
 	PRECACHE_SOUND("weapons/desert_eagle_sight2.wav");
+
+	PRECACHE_SOUND("items/itembk2.wav");
+	PRECACHE_SOUND("items/gunpickup2.wav");
+
+	PRECACHE_SOUND("weapons/ric1.wav");
+	PRECACHE_SOUND("weapons/ric2.wav");
+	PRECACHE_SOUND("weapons/ric3.wav");
+	PRECACHE_SOUND("weapons/ric4.wav");
+	PRECACHE_SOUND("weapons/ric5.wav");
 }
 
 
-TYPEDESCRIPTION CBasePlayerWeapon::m_SaveData[] =
-{
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CBasePlayerWeapon)
 	DEFINE_FIELD(CBasePlayerWeapon, m_pPlayer, FIELD_CLASSPTR),
 	DEFINE_FIELD(CBasePlayerWeapon, m_iClip, FIELD_INTEGER),
-};
-
-IMPLEMENT_SAVERESTORE(CBasePlayerWeapon, CBaseAnimating);
+END_SAVERESTORE(CBasePlayerWeapon, CBaseAnimating)
+#endif
 
 
 bool CBasePlayerWeapon::Spawn()

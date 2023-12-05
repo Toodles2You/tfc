@@ -100,14 +100,13 @@ void CBasePlayerAmmo::DefaultTouch(CBaseEntity* pOther)
 
 LINK_ENTITY_TO_CLASS(weaponbox, CWeaponBox);
 
-TYPEDESCRIPTION CWeaponBox::m_SaveData[] =
-	{
-		DEFINE_ARRAY(CWeaponBox, m_rgAmmo, FIELD_INTEGER, AMMO_LAST),
-		DEFINE_ARRAY(CWeaponBox, m_rgpPlayerWeapons, FIELD_CLASSPTR, WEAPON_LAST),
-		DEFINE_FIELD(CWeaponBox, m_cAmmoTypes, FIELD_INTEGER),
-};
-
-IMPLEMENT_SAVERESTORE(CWeaponBox, CBaseEntity);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CWeaponBox)
+	DEFINE_ARRAY(CWeaponBox, m_rgAmmo, FIELD_INTEGER, AMMO_LAST),
+	DEFINE_ARRAY(CWeaponBox, m_rgpPlayerWeapons, FIELD_CLASSPTR, WEAPON_LAST),
+	DEFINE_FIELD(CWeaponBox, m_cAmmoTypes, FIELD_INTEGER),
+END_SAVERESTORE(CWeaponBox, CBaseEntity)
+#endif
 
 //=========================================================
 //

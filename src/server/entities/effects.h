@@ -33,14 +33,18 @@
 class CSprite : public CPointEntity
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	void Precache() override;
 
 	int ObjectCaps() override
 	{
 		int flags = 0;
+#ifdef HALFLIFE_SAVERESTORE
 		if (pev->spawnflags & SF_SPRITE_TEMPORARY)
 			flags = FCAP_DONT_SAVE;
+#endif
 		return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | flags;
 	}
 	void EXPORT AnimateThink();
@@ -92,9 +96,6 @@ public:
 
 	void EXPORT AnimateUntilDead();
 
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
 	static CSprite* SpriteCreate(const char* pSpriteName, const Vector& origin, bool animate);
 
 private:
@@ -111,8 +112,10 @@ public:
 	int ObjectCaps() override
 	{
 		int flags = 0;
+#ifdef HALFLIFE_SAVERESTORE
 		if (pev->spawnflags & SF_BEAM_TEMPORARY)
 			flags = FCAP_DONT_SAVE;
+#endif
 		return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | flags;
 	}
 
@@ -198,6 +201,8 @@ public:
 class CLaser : public CBeam
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	void Precache() override;
 	bool KeyValue(KeyValueData* pkvd) override;
@@ -210,9 +215,6 @@ public:
 
 	void EXPORT StrikeThink();
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
 
 	CSprite* m_pSprite;
 	int m_iszSpriteName;

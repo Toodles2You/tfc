@@ -24,9 +24,11 @@
 #include "util.h"
 #include "cbase.h"
 #include "saverestore.h"
-#include "nodes.h"
 #include "doors.h"
 #include "gamerules.h"
+#ifdef HALFLIFE_NODEGRAPH
+#include "nodes.h"
+#endif
 
 // Landmark class
 bool CPointEntity::Spawn()
@@ -68,6 +70,7 @@ bool CBaseDMStart::Spawn()
 // This updates global tables that need to know about entities being removed
 void CBaseEntity::UpdateOnRemove()
 {
+#ifdef HALFLIFE_NODEGRAPH
 	int i;
 
 	if (FBitSet(pev->flags, FL_GRAPHED) && WorldGraph.IsAvailable())
@@ -83,6 +86,8 @@ void CBaseEntity::UpdateOnRemove()
 			}
 		}
 	}
+#endif
+
 	if (!FStringNull(pev->globalname))
 		gGlobalState.EntitySetState(pev->globalname, GLOBAL_DEAD);
 }
@@ -114,13 +119,12 @@ void CBaseEntity::Remove()
 
 
 // Global Savedata for Delay
-TYPEDESCRIPTION CBaseDelay::m_SaveData[] =
-	{
-		DEFINE_FIELD(CBaseDelay, m_flDelay, FIELD_FLOAT),
-		DEFINE_FIELD(CBaseDelay, m_iszKillTarget, FIELD_STRING),
-};
-
-IMPLEMENT_SAVERESTORE(CBaseDelay, CBaseEntity);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CBaseDelay)
+	DEFINE_FIELD(CBaseDelay, m_flDelay, FIELD_FLOAT),
+	DEFINE_FIELD(CBaseDelay, m_iszKillTarget, FIELD_STRING),
+END_SAVERESTORE(CBaseDelay, CBaseEntity)
+#endif
 
 bool CBaseDelay::KeyValue(KeyValueData* pkvd)
 {
@@ -306,29 +310,29 @@ void CBaseDelay::DelayThink()
 
 
 // Global Savedata for Toggle
-TYPEDESCRIPTION CBaseToggle::m_SaveData[] =
-	{
-		DEFINE_FIELD(CBaseToggle, m_toggle_state, FIELD_INTEGER),
-		DEFINE_FIELD(CBaseToggle, m_flActivateFinished, FIELD_TIME),
-		DEFINE_FIELD(CBaseToggle, m_flMoveDistance, FIELD_FLOAT),
-		DEFINE_FIELD(CBaseToggle, m_flWait, FIELD_FLOAT),
-		DEFINE_FIELD(CBaseToggle, m_flLip, FIELD_FLOAT),
-		DEFINE_FIELD(CBaseToggle, m_flTWidth, FIELD_FLOAT),
-		DEFINE_FIELD(CBaseToggle, m_flTLength, FIELD_FLOAT),
-		DEFINE_FIELD(CBaseToggle, m_vecPosition1, FIELD_POSITION_VECTOR),
-		DEFINE_FIELD(CBaseToggle, m_vecPosition2, FIELD_POSITION_VECTOR),
-		DEFINE_FIELD(CBaseToggle, m_vecAngle1, FIELD_VECTOR),
-		DEFINE_FIELD(CBaseToggle, m_vecAngle2, FIELD_VECTOR),
-		DEFINE_FIELD(CBaseToggle, m_cTriggersLeft, FIELD_INTEGER),
-		DEFINE_FIELD(CBaseToggle, m_flHeight, FIELD_FLOAT),
-		DEFINE_FIELD(CBaseToggle, m_hActivator, FIELD_EHANDLE),
-		DEFINE_FIELD(CBaseToggle, m_pfnCallWhenMoveDone, FIELD_FUNCTION),
-		DEFINE_FIELD(CBaseToggle, m_vecFinalDest, FIELD_POSITION_VECTOR),
-		DEFINE_FIELD(CBaseToggle, m_vecFinalAngle, FIELD_VECTOR),
-		DEFINE_FIELD(CBaseToggle, m_sMaster, FIELD_STRING),
-		DEFINE_FIELD(CBaseToggle, m_bitsDamageInflict, FIELD_INTEGER), // damage type inflicted
-};
-IMPLEMENT_SAVERESTORE(CBaseToggle, CBaseDelay);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CBaseToggle)
+	DEFINE_FIELD(CBaseToggle, m_toggle_state, FIELD_INTEGER),
+	DEFINE_FIELD(CBaseToggle, m_flActivateFinished, FIELD_TIME),
+	DEFINE_FIELD(CBaseToggle, m_flMoveDistance, FIELD_FLOAT),
+	DEFINE_FIELD(CBaseToggle, m_flWait, FIELD_FLOAT),
+	DEFINE_FIELD(CBaseToggle, m_flLip, FIELD_FLOAT),
+	DEFINE_FIELD(CBaseToggle, m_flTWidth, FIELD_FLOAT),
+	DEFINE_FIELD(CBaseToggle, m_flTLength, FIELD_FLOAT),
+	DEFINE_FIELD(CBaseToggle, m_vecPosition1, FIELD_POSITION_VECTOR),
+	DEFINE_FIELD(CBaseToggle, m_vecPosition2, FIELD_POSITION_VECTOR),
+	DEFINE_FIELD(CBaseToggle, m_vecAngle1, FIELD_VECTOR),
+	DEFINE_FIELD(CBaseToggle, m_vecAngle2, FIELD_VECTOR),
+	DEFINE_FIELD(CBaseToggle, m_cTriggersLeft, FIELD_INTEGER),
+	DEFINE_FIELD(CBaseToggle, m_flHeight, FIELD_FLOAT),
+	DEFINE_FIELD(CBaseToggle, m_hActivator, FIELD_EHANDLE),
+	DEFINE_FIELD(CBaseToggle, m_pfnCallWhenMoveDone, FIELD_FUNCTION),
+	DEFINE_FIELD(CBaseToggle, m_vecFinalDest, FIELD_POSITION_VECTOR),
+	DEFINE_FIELD(CBaseToggle, m_vecFinalAngle, FIELD_VECTOR),
+	DEFINE_FIELD(CBaseToggle, m_sMaster, FIELD_STRING),
+	DEFINE_FIELD(CBaseToggle, m_bitsDamageInflict, FIELD_INTEGER),
+END_SAVERESTORE(CBaseToggle, CBaseDelay)
+#endif
 
 
 bool CBaseToggle::KeyValue(KeyValueData* pkvd)

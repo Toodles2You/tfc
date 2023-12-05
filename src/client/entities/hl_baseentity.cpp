@@ -26,21 +26,24 @@ This file contains "stubs" of class member implementations so that we can predic
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
-#include "nodes.h"
 
 // CBaseEntity Stubs
 bool CBaseEntity::TakeHealth(float flHealth, int bitsDamageType) { return true; }
 bool CBaseEntity::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) { return true; }
 CBaseEntity* CBaseEntity::GetNextTarget() { return NULL; }
+#ifdef HALFLIFE_SAVERESTORE
 bool CBaseEntity::Save(CSave& save) { return true; }
 bool CBaseEntity::Restore(CRestore& restore) { return true; }
+#endif
 void CBaseEntity::SetObjectCollisionBox() {}
 void CBaseEntity::SetOrigin(const Vector& org) {}
 void CBaseEntity::SetModel(const char* name) {}
 void CBaseEntity::SetSize(const Vector& mins, const Vector& maxs) {}
 bool CBaseEntity::Intersects(CBaseEntity* pOther) { return false; }
+#ifdef HALFLIFE_SAVERESTORE
 void CBaseEntity::MakeDormant() {}
 bool CBaseEntity::IsDormant() { return false; }
+#endif
 bool CBaseEntity::IsInWorld() { return true; }
 bool CBaseEntity::ShouldToggle(USE_TYPE useType, bool currentState) { return false; }
 CBaseEntity* CBaseEntity::Create(const char* szName, const Vector& vecOrigin, const Vector& vecAngles, edict_t* pentOwner) { return NULL; }
@@ -48,12 +51,16 @@ void CBaseEntity::Remove() {}
 
 // CBaseDelay Stubs
 bool CBaseDelay::KeyValue(struct KeyValueData_s*) { return false; }
+#ifdef HALFLIFE_SAVERESTORE
 bool CBaseDelay::Restore(class CRestore&) { return true; }
 bool CBaseDelay::Save(class CSave&) { return true; }
+#endif
 
 // CBaseAnimating Stubs
+#ifdef HALFLIFE_SAVERESTORE
 bool CBaseAnimating::Restore(class CRestore&) { return true; }
 bool CBaseAnimating::Save(class CSave&) { return true; }
+#endif
 
 // util Stubs
 void util::PrecacheOther(const char* szClassname) {}
@@ -63,8 +70,10 @@ void util::ClientPrintAll(int, char const*, char const*, char const*, char const
 void util::ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4) {}
 
 // CBaseToggle Stubs
+#ifdef HALFLIFE_SAVERESTORE
 bool CBaseToggle::Restore(class CRestore&) { return true; }
 bool CBaseToggle::Save(class CSave&) { return true; }
+#endif
 bool CBaseToggle::KeyValue(struct KeyValueData_s*) { return false; }
 
 CBaseEntity* util::FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius) { return 0; }
@@ -112,8 +121,10 @@ void CBasePlayer::PlayerDeathFrame() {}
 void CBasePlayer::StartObserver() {}
 void CBasePlayer::PlayerUse() {}
 void CBasePlayer::Precache() {}
+#ifdef HALFLIFE_SAVERESTORE
 bool CBasePlayer::Save(CSave& save) { return false; }
 bool CBasePlayer::Restore(CRestore& restore) { return false; }
+#endif
 void CBasePlayer::ForceClientDllUpdate() {}
 void CBasePlayer::ImpulseCommands() {}
 void CBasePlayer::CheatImpulseCommands(int iImpulse) {}
@@ -130,8 +141,10 @@ int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax) { return 0; }
 void CBasePlayer::AddPoints(float score, bool bAllowNegativeScore) {}
 void CBasePlayer::AddPointsToTeam(float score, bool bAllowNegativeScore) {}
 
+#ifdef HALFLIFE_SAVERESTORE
 bool CBasePlayerWeapon::Restore(class CRestore&) { return true; }
 bool CBasePlayerWeapon::Save(class CSave&) { return true; }
+#endif
 bool CBasePlayerWeapon::Spawn() { return false; }
 void CBasePlayerWeapon::SetObjectCollisionBox() {}
 void CBasePlayerWeapon::Materialize() {}

@@ -37,11 +37,10 @@
 #define FL_FAKECLIENT (1 << 13)	   // JAC: fake client, simulated server side; don't send network messages to them
 #define FL_DUCKING (1 << 14)	   // Player flag -- Player is fully crouched
 #define FL_FLOAT (1 << 15)		   // Apply floating force to this entity when in water
-#define FL_GRAPHED (1 << 16)	   // worldgraph has this ent listed as something that blocks a connection
 
-#define FL_IMMUNE_WATER (1 << 17)
-#define FL_IMMUNE_SLIME (1 << 18)
-#define FL_IMMUNE_LAVA (1 << 19)
+#ifdef HALFLIFE_NODEGRAPH
+#define FL_GRAPHED (1 << 16)	   // worldgraph has this ent listed as something that blocks a connection
+#endif
 
 #define FL_PROXY (1 << 20)		  // This is a spectator proxy
 #define FL_ALWAYSTHINK (1 << 21)  // Brush model flag -- call think every frame regardless of nextthink - ltime (for constantly changing velocity/path)
@@ -52,7 +51,10 @@
 #define FL_SPECTATOR (1 << 26)	  // This client is a spectator, don't run touch functions, etc.
 #define FL_CUSTOMENTITY (1 << 29) // This is a custom entity
 #define FL_KILLME (1 << 30)		  // This entity is marked for death -- This allows the engine to kill ents at the appropriate time
+
+#ifdef HALFLIFE_SAVERESTORE
 #define FL_DORMANT (1 << 31)	  // Entity is dormant, no updates to client
+#endif
 
 
 // Goes into globalvars_t.trace_flags
@@ -652,14 +654,6 @@ enum {
 	kHullLarge,
 	kHullCount,
 };
-
-// plats
-#define PLAT_LOW_TRIGGER 1
-
-// Trains
-#define SF_TRAIN_WAIT_RETRIGGER 1
-#define SF_TRAIN_START_ON 4 // Train is initially moving
-#define SF_TRAIN_PASSABLE 8 // Train is not solid -- used to make water trains
 
 // buttons
 #include "in_buttons.h"

@@ -33,6 +33,8 @@
 class CMonsterMaker : public CBaseToggle
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	void Precache() override;
 	bool KeyValue(KeyValueData* pkvd) override;
@@ -41,11 +43,6 @@ public:
 	void EXPORT MakerThink();
 	void DeathNotice(entvars_t* pevChild) override; // monster maker children use this to tell the monster maker that they have died.
 	void MakeMonster();
-
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-
-	static TYPEDESCRIPTION m_SaveData[];
 
 	string_t m_iszMonsterClassname; // classname of the monster(s) that will be created.
 
@@ -63,19 +60,17 @@ public:
 
 LINK_ENTITY_TO_CLASS(monstermaker, CMonsterMaker);
 
-TYPEDESCRIPTION CMonsterMaker::m_SaveData[] =
-	{
-		DEFINE_FIELD(CMonsterMaker, m_iszMonsterClassname, FIELD_STRING),
-		DEFINE_FIELD(CMonsterMaker, m_cNumMonsters, FIELD_INTEGER),
-		DEFINE_FIELD(CMonsterMaker, m_cLiveChildren, FIELD_INTEGER),
-		DEFINE_FIELD(CMonsterMaker, m_flGround, FIELD_FLOAT),
-		DEFINE_FIELD(CMonsterMaker, m_iMaxLiveChildren, FIELD_INTEGER),
-		DEFINE_FIELD(CMonsterMaker, m_fActive, FIELD_BOOLEAN),
-		DEFINE_FIELD(CMonsterMaker, m_fFadeChildren, FIELD_BOOLEAN),
-};
-
-
-IMPLEMENT_SAVERESTORE(CMonsterMaker, CBaseToggle);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CMonsterMaker)
+	DEFINE_FIELD(CMonsterMaker, m_iszMonsterClassname, FIELD_STRING),
+	DEFINE_FIELD(CMonsterMaker, m_cNumMonsters, FIELD_INTEGER),
+	DEFINE_FIELD(CMonsterMaker, m_cLiveChildren, FIELD_INTEGER),
+	DEFINE_FIELD(CMonsterMaker, m_flGround, FIELD_FLOAT),
+	DEFINE_FIELD(CMonsterMaker, m_iMaxLiveChildren, FIELD_INTEGER),
+	DEFINE_FIELD(CMonsterMaker, m_fActive, FIELD_BOOLEAN),
+	DEFINE_FIELD(CMonsterMaker, m_fFadeChildren, FIELD_BOOLEAN),
+END_SAVERESTORE(CMonsterMaker, CBaseToggle)
+#endif
 
 bool CMonsterMaker::KeyValue(KeyValueData* pkvd)
 {

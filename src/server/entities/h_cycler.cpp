@@ -30,6 +30,8 @@
 class CCycler : public CBaseAnimating
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool GenericCyclerSpawn(const char* szModel, Vector vecMin, Vector vecMax);
 	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE); }
 	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
@@ -41,19 +43,14 @@ public:
 	// Don't treat as a live target
 	bool IsAlive() override { return false; }
 
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
-
 	bool m_animate;
 };
 
-TYPEDESCRIPTION CCycler::m_SaveData[] =
-	{
-		DEFINE_FIELD(CCycler, m_animate, FIELD_BOOLEAN),
-};
-
-IMPLEMENT_SAVERESTORE(CCycler, CBaseAnimating);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CCycler)
+	DEFINE_FIELD(CCycler, m_animate, FIELD_BOOLEAN),
+END_SAVERESTORE(CCycler, CBaseAnimating)
+#endif
 
 
 //
@@ -196,16 +193,14 @@ bool CCycler::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float fl
 class CCyclerSprite : public CBaseEntity
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	void Think() override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE); }
 	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
 	void Animate(float frames);
-
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
 
 	inline bool ShouldAnimate() { return m_animate && m_maxFrame > 1.0; }
 	bool m_animate;
@@ -215,14 +210,13 @@ public:
 
 LINK_ENTITY_TO_CLASS(cycler_sprite, CCyclerSprite);
 
-TYPEDESCRIPTION CCyclerSprite::m_SaveData[] =
-	{
-		DEFINE_FIELD(CCyclerSprite, m_animate, FIELD_BOOLEAN),
-		DEFINE_FIELD(CCyclerSprite, m_lastTime, FIELD_TIME),
-		DEFINE_FIELD(CCyclerSprite, m_maxFrame, FIELD_FLOAT),
-};
-
-IMPLEMENT_SAVERESTORE(CCyclerSprite, CBaseEntity);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CCyclerSprite)
+	DEFINE_FIELD(CCyclerSprite, m_animate, FIELD_BOOLEAN),
+	DEFINE_FIELD(CCyclerSprite, m_lastTime, FIELD_TIME),
+	DEFINE_FIELD(CCyclerSprite, m_maxFrame, FIELD_FLOAT),
+END_SAVERESTORE(CCyclerSprite, CBaseEntity)
+#endif
 
 
 bool CCyclerSprite::Spawn()

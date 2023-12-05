@@ -25,14 +25,11 @@
 class CPathCorner : public CPointEntity
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 	float GetDelay() override { return m_flWait; }
-	//	void Touch( CBaseEntity *pOther ) override;
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-
-	static TYPEDESCRIPTION m_SaveData[];
 
 private:
 	float m_flWait;
@@ -41,12 +38,11 @@ private:
 LINK_ENTITY_TO_CLASS(path_corner, CPathCorner);
 
 // Global Savedata for Delay
-TYPEDESCRIPTION CPathCorner::m_SaveData[] =
-	{
-		DEFINE_FIELD(CPathCorner, m_flWait, FIELD_FLOAT),
-};
-
-IMPLEMENT_SAVERESTORE(CPathCorner, CPointEntity);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CPathCorner)
+	DEFINE_FIELD(CPathCorner, m_flWait, FIELD_FLOAT),
+END_SAVERESTORE(CPathCorner, CPointEntity)
+#endif
 
 //
 // Cache user-entity-field values until spawn is called.
@@ -74,16 +70,16 @@ bool CPathCorner::Spawn()
 }
 
 
-TYPEDESCRIPTION CPathTrack::m_SaveData[] =
-	{
-		DEFINE_FIELD(CPathTrack, m_length, FIELD_FLOAT),
-		DEFINE_FIELD(CPathTrack, m_pnext, FIELD_CLASSPTR),
-		DEFINE_FIELD(CPathTrack, m_paltpath, FIELD_CLASSPTR),
-		DEFINE_FIELD(CPathTrack, m_pprevious, FIELD_CLASSPTR),
-		DEFINE_FIELD(CPathTrack, m_altName, FIELD_STRING),
-};
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CPathTrack)
+	DEFINE_FIELD(CPathTrack, m_length, FIELD_FLOAT),
+	DEFINE_FIELD(CPathTrack, m_pnext, FIELD_CLASSPTR),
+	DEFINE_FIELD(CPathTrack, m_paltpath, FIELD_CLASSPTR),
+	DEFINE_FIELD(CPathTrack, m_pprevious, FIELD_CLASSPTR),
+	DEFINE_FIELD(CPathTrack, m_altName, FIELD_STRING),
+END_SAVERESTORE(CPathTrack, CBaseEntity)
+#endif
 
-IMPLEMENT_SAVERESTORE(CPathTrack, CBaseEntity);
 LINK_ENTITY_TO_CLASS(path_track, CPathTrack);
 
 //

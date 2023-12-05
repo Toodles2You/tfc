@@ -23,13 +23,15 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "nodes.h"
 #include "client.h"
 #include "effects.h"
 #include "player.h"
 #include "weapons.h"
 #include "gamerules.h"
 #include "teamplay_gamerules.h"
+#ifdef HALFLIFE_NODEGRAPH
+#include "nodes.h"
+#endif
 #ifdef HALFLIFE_BOTS
 #include "bot/hl_bot.h"
 #include "bot/hl_bot_manager.h"
@@ -171,8 +173,6 @@ globalentity_t* CGlobalState::Find(string_t globalname)
 }
 
 
-// This is available all the time now on impulse 104, remove later
-//#ifndef NDEBUG
 void CGlobalState::DumpGlobals()
 {
 	static const char* estates[] = {"Off", "On", "Dead"};
@@ -186,7 +186,6 @@ void CGlobalState::DumpGlobals()
 		pTest = pTest->pNext;
 	}
 }
-//#endif
 
 
 void CGlobalState::EntityAdd(string_t globalname, string_t mapName, GLOBALESTATE state)
@@ -229,17 +228,18 @@ GLOBALESTATE CGlobalState::EntityGetState(string_t globalname)
 
 
 // Global Savedata for Delay
+#ifdef HALFLIFE_SAVERESTORE
 TYPEDESCRIPTION CGlobalState::m_SaveData[] =
-	{
-		DEFINE_FIELD(CGlobalState, m_listCount, FIELD_INTEGER),
+{
+	DEFINE_FIELD(CGlobalState, m_listCount, FIELD_INTEGER),
 };
 
 // Global Savedata for Delay
 TYPEDESCRIPTION gGlobalEntitySaveData[] =
-	{
-		DEFINE_ARRAY(globalentity_t, name, FIELD_CHARACTER, 64),
-		DEFINE_ARRAY(globalentity_t, levelName, FIELD_CHARACTER, 32),
-		DEFINE_FIELD(globalentity_t, state, FIELD_INTEGER),
+{
+	DEFINE_ARRAY(globalentity_t, name, FIELD_CHARACTER, 64),
+	DEFINE_ARRAY(globalentity_t, levelName, FIELD_CHARACTER, 32),
+	DEFINE_FIELD(globalentity_t, state, FIELD_INTEGER),
 };
 
 
@@ -284,6 +284,7 @@ bool CGlobalState::Restore(CRestore& restore)
 	}
 	return true;
 }
+#endif
 
 void CGlobalState::EntityUpdate(string_t globalname, string_t mapname)
 {
@@ -309,6 +310,7 @@ void CGlobalState::ClearStates()
 
 void SaveGlobalState(SAVERESTOREDATA* pSaveData)
 {
+#ifdef HALFLIFE_SAVERESTORE
 	if (!CSaveRestoreBuffer::IsValidSaveRestoreData(pSaveData))
 	{
 		return;
@@ -316,11 +318,13 @@ void SaveGlobalState(SAVERESTOREDATA* pSaveData)
 
 	CSave saveHelper(*pSaveData);
 	gGlobalState.Save(saveHelper);
+#endif
 }
 
 
 void RestoreGlobalState(SAVERESTOREDATA* pSaveData)
 {
+#ifdef HALFLIFE_SAVERESTORE
 	if (!CSaveRestoreBuffer::IsValidSaveRestoreData(pSaveData))
 	{
 		return;
@@ -328,6 +332,7 @@ void RestoreGlobalState(SAVERESTOREDATA* pSaveData)
 
 	CRestore restoreHelper(*pSaveData);
 	gGlobalState.Restore(restoreHelper);
+#endif
 }
 
 
@@ -410,20 +415,6 @@ void CWorld::Precache()
 	BotPrecache();
 #endif
 
-	PRECACHE_SOUND("common/null.wav");
-
-	PRECACHE_SOUND("items/itembk2.wav");
-	PRECACHE_SOUND("items/gunpickup2.wav");
-
-	PRECACHE_SOUND("common/bodydrop3.wav");
-	PRECACHE_SOUND("common/bodydrop4.wav");
-
-	PRECACHE_SOUND("weapons/ric1.wav");
-	PRECACHE_SOUND("weapons/ric2.wav");
-	PRECACHE_SOUND("weapons/ric3.wav");
-	PRECACHE_SOUND("weapons/ric4.wav");
-	PRECACHE_SOUND("weapons/ric5.wav");
-
 	LIGHT_STYLE(0, "m");
 	LIGHT_STYLE(1, "mmnmmommommnonmmonqnmmo");
 	LIGHT_STYLE(2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
@@ -439,7 +430,7 @@ void CWorld::Precache()
 	LIGHT_STYLE(12, "mmnnmmnnnmmnn");
 	LIGHT_STYLE(63, "a");
 
-	// init the WorldGraph.
+#ifdef HALFLIFE_NODEGRAPH
 	WorldGraph.InitGraph();
 
 	if (g_pGameRules->FAllowMonsters())
@@ -465,6 +456,7 @@ void CWorld::Precache()
 		SetThink(&CWorld::PostSpawn);
 		pev->nextthink = gpGlobals->time + 0.5f;
 	}
+#endif
 
 	CVAR_SET_FLOAT("sv_zmax", (pev->speed > 0) ? pev->speed : 4096);
 
@@ -545,6 +537,7 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 }
 
 
+#ifdef HALFLIFE_NODEGRAPH
 void CWorld::PostSpawn()
 {
 	if (0 != WorldGraph.m_fGraphPresent)
@@ -564,3 +557,4 @@ void CWorld::PostSpawn()
 	}
 	SetThink(nullptr);
 }
+#endif

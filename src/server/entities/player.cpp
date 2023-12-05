@@ -29,7 +29,6 @@
 #include "cbase.h"
 #include "player.h"
 #include "trains.h"
-#include "nodes.h"
 #include "weapons.h"
 #include "shake.h"
 #include "gamerules.h"
@@ -40,6 +39,9 @@
 #include "client.h"
 #include "animation.h"
 #include "weaponbox.h"
+#ifdef HALFLIFE_NODEGRAPH
+#include "nodes.h"
+#endif
 
 unsigned short g_usGibbed;
 
@@ -56,31 +58,33 @@ unsigned short g_usGibbed;
 #define FLASH_CHARGE_TIME 0.2 // 100 units/20 seconds  (seconds per unit)
 
 // Global Savedata for player
+#ifdef HALFLIFE_SAVERESTORE
 TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 {
-		DEFINE_FIELD(CBasePlayer, m_afButtonLast, FIELD_INTEGER),
-		DEFINE_FIELD(CBasePlayer, m_afButtonPressed, FIELD_INTEGER),
-		DEFINE_FIELD(CBasePlayer, m_afButtonReleased, FIELD_INTEGER),
+	DEFINE_FIELD(CBasePlayer, m_afButtonLast, FIELD_INTEGER),
+	DEFINE_FIELD(CBasePlayer, m_afButtonPressed, FIELD_INTEGER),
+	DEFINE_FIELD(CBasePlayer, m_afButtonReleased, FIELD_INTEGER),
 
-		DEFINE_FIELD(CBasePlayer, m_afPhysicsFlags, FIELD_INTEGER),
+	DEFINE_FIELD(CBasePlayer, m_afPhysicsFlags, FIELD_INTEGER),
 
-		DEFINE_ARRAY(CBasePlayer, m_rgpPlayerWeapons, FIELD_CLASSPTR, WEAPON_LAST),
-		DEFINE_FIELD(CBasePlayer, m_pActiveWeapon, FIELD_CLASSPTR),
-		DEFINE_FIELD(CBasePlayer, m_WeaponBits, FIELD_INT64),
+	DEFINE_ARRAY(CBasePlayer, m_rgpPlayerWeapons, FIELD_CLASSPTR, WEAPON_LAST),
+	DEFINE_FIELD(CBasePlayer, m_pActiveWeapon, FIELD_CLASSPTR),
+	DEFINE_FIELD(CBasePlayer, m_WeaponBits, FIELD_INT64),
 
-		DEFINE_ARRAY(CBasePlayer, m_rgAmmo, FIELD_INTEGER, AMMO_LAST),
+	DEFINE_ARRAY(CBasePlayer, m_rgAmmo, FIELD_INTEGER, AMMO_LAST),
 
-		DEFINE_FIELD(CBasePlayer, m_iTrain, FIELD_INTEGER),
-		DEFINE_FIELD(CBasePlayer, m_bitsHUDDamage, FIELD_INTEGER),
-		DEFINE_FIELD(CBasePlayer, m_flFallVelocity, FIELD_FLOAT),
-		DEFINE_FIELD(CBasePlayer, m_fInitHUD, FIELD_BOOLEAN),
+	DEFINE_FIELD(CBasePlayer, m_iTrain, FIELD_INTEGER),
+	DEFINE_FIELD(CBasePlayer, m_bitsHUDDamage, FIELD_INTEGER),
+	DEFINE_FIELD(CBasePlayer, m_flFallVelocity, FIELD_FLOAT),
+	DEFINE_FIELD(CBasePlayer, m_fInitHUD, FIELD_BOOLEAN),
 
-		DEFINE_FIELD(CBasePlayer, m_pTank, FIELD_EHANDLE),
-		DEFINE_FIELD(CBasePlayer, m_iHideHUD, FIELD_INTEGER),
-		DEFINE_FIELD(CBasePlayer, m_iFOV, FIELD_INTEGER),
+	DEFINE_FIELD(CBasePlayer, m_pTank, FIELD_EHANDLE),
+	DEFINE_FIELD(CBasePlayer, m_iHideHUD, FIELD_INTEGER),
+	DEFINE_FIELD(CBasePlayer, m_iFOV, FIELD_INTEGER),
 
-		DEFINE_FIELD(CBasePlayer, m_SndRoomtype, FIELD_INTEGER),
+	DEFINE_FIELD(CBasePlayer, m_SndRoomtype, FIELD_INTEGER),
 };
+#endif
 
 LINK_ENTITY_TO_CLASS(player, CBasePlayer);
 
@@ -1038,7 +1042,7 @@ void CBasePlayer::PlayerUse()
 	while ((pObject = util::FindEntityInSphere(pObject, pev->origin, PLAYER_SEARCH_RADIUS)) != NULL)
 	{
 
-		if ((pObject->ObjectCaps() & (FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE)) != 0)
+		if ((pObject->ObjectCaps() & FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE) != 0)
 		{
 			// !!!PERFORMANCE- should this check be done on a per case basis AFTER we've determined that
 			// this object is actually usable? This dot is being done for every object within PLAYER_SEARCH_RADIUS
@@ -1071,17 +1075,12 @@ void CBasePlayer::PlayerUse()
 			EmitSound("common/wpn_select.wav", CHAN_VOICE);
 
 		if (((pev->button & IN_USE) != 0 && (caps & FCAP_CONTINUOUS_USE) != 0) ||
-			((m_afButtonPressed & IN_USE) != 0 && (caps & (FCAP_IMPULSE_USE | FCAP_ONOFF_USE)) != 0))
+			((m_afButtonPressed & IN_USE) != 0 && (caps & FCAP_IMPULSE_USE) != 0))
 		{
 			if ((caps & FCAP_CONTINUOUS_USE) != 0)
 				m_afPhysicsFlags |= PFLAG_USING;
 
 			pObject->Use(this, this, USE_SET, 1);
-		}
-		// UNDONE: Send different USE codes for ON/OFF.  Cache last ONOFF_USE object to send 'off' if you turn away
-		else if ((m_afButtonReleased & IN_USE) != 0 && (pObject->ObjectCaps() & FCAP_ONOFF_USE) != 0) // BUGBUG This is an "off" use
-		{
-			pObject->Use(this, this, USE_SET, 0);
 		}
 	}
 	else
@@ -1348,6 +1347,7 @@ void CBasePlayer::Precache()
 }
 
 
+#ifdef HALFLIFE_SAVERESTORE
 bool CBasePlayer::Save(CSave& save)
 {
 	if (!CBaseAnimating::Save(save))
@@ -1399,6 +1399,7 @@ bool CBasePlayer::Restore(CRestore& restore)
 
 	return status;
 }
+#endif
 
 
 const char* CBasePlayer::TeamID()
@@ -1423,7 +1424,9 @@ public:
 	bool Spawn(CBaseEntity* owner);
 	void Think() override;
 
+#ifdef HALFLIFE_SAVERESTORE
 	int ObjectCaps() override { return FCAP_DONT_SAVE; }
+#endif
 };
 
 bool CSprayCan::Spawn(CBaseEntity* owner)
@@ -1638,6 +1641,8 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 			ALERT(at_console, "Texture: %s (%c)\n", pTextureName, PM_FindTextureType(pTextureName));
 	}
 	break;
+
+#ifdef HALFLIFE_NODEGRAPH
 	case 195: // show shortest paths for entire level to nearest node
 	{
 		if (WorldGraph.IsAvailable())
@@ -1671,6 +1676,8 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 		}
 	}
 	break;
+#endif
+
 	case 203: // remove creature.
 		pEntity = util::FindEntityForward(this);
 		if (pEntity)
@@ -2104,14 +2111,12 @@ void CStripWeapons::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 class CRevertSaved : public CPointEntity
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 	void EXPORT MessageThink();
 	void EXPORT LoadThink();
 	bool KeyValue(KeyValueData* pkvd) override;
-
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
 
 	inline float Duration() { return pev->dmg_take; }
 	inline float HoldTime() { return pev->dmg_save; }
@@ -2130,13 +2135,12 @@ private:
 
 LINK_ENTITY_TO_CLASS(player_loadsaved, CRevertSaved);
 
-TYPEDESCRIPTION CRevertSaved::m_SaveData[] =
-	{
-		DEFINE_FIELD(CRevertSaved, m_messageTime, FIELD_FLOAT), // These are not actual times, but durations, so save as floats
-		DEFINE_FIELD(CRevertSaved, m_loadTime, FIELD_FLOAT),
-};
-
-IMPLEMENT_SAVERESTORE(CRevertSaved, CPointEntity);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CRevertSaved)
+	DEFINE_FIELD(CRevertSaved, m_messageTime, FIELD_FLOAT),
+	DEFINE_FIELD(CRevertSaved, m_loadTime, FIELD_FLOAT),
+END_SAVERESTORE(CRevertSaved, CPointEntity)
+#endif
 
 bool CRevertSaved::KeyValue(KeyValueData* pkvd)
 {

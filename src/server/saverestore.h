@@ -16,6 +16,7 @@
 
 #pragma once
 
+#ifdef HALFLIFE_SAVERESTORE
 class CBaseEntity;
 
 class CSaveRestoreBuffer
@@ -124,9 +125,16 @@ private:
 
 #define MAX_ENTITYARRAY 64
 
-//#define ARRAYSIZE(p)		(sizeof(p)/sizeof(p[0]))
+#define DECLARE_SAVERESTORE()                 \
+	bool Save(CSave& save) override;          \
+	bool Restore(CRestore& restore) override; \
+	static TYPEDESCRIPTION m_SaveData[];
 
-#define IMPLEMENT_SAVERESTORE(derivedClass, baseClass)                                     \
+#define IMPLEMENT_SAVERESTORE(derivedClass) \
+	TYPEDESCRIPTION derivedClass::m_SaveData[] = {
+
+#define END_SAVERESTORE(derivedClass, baseClass)                                           \
+	};                                                                                     \
 	bool derivedClass::Save(CSave& save)                                                   \
 	{                                                                                      \
 		if (!baseClass::Save(save))                                                        \
@@ -139,6 +147,9 @@ private:
 			return false;                                                                  \
 		return restore.ReadFields(#derivedClass, this, m_SaveData, ARRAYSIZE(m_SaveData)); \
 	}
+#else
+#define DECLARE_SAVERESTORE()
+#endif
 
 
 typedef enum
@@ -170,13 +181,15 @@ public:
 	const globalentity_t* EntityFromTable(string_t globalname);
 	GLOBALESTATE EntityGetState(string_t globalname);
 	bool EntityInTable(string_t globalname) { return Find(globalname) != NULL; }
+
+#ifdef HALFLIFE_SAVERESTORE
 	bool Save(CSave& save);
 	bool Restore(CRestore& restore);
-	static TYPEDESCRIPTION m_SaveData[];
 
-	//#ifndef NDEBUG
+	static TYPEDESCRIPTION m_SaveData[];
+#endif
+
 	void DumpGlobals();
-	//#endif
 
 private:
 	globalentity_t* Find(string_t globalname);

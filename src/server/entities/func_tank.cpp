@@ -46,6 +46,8 @@ enum TANKBULLET
 class CFuncTank : public CBaseEntity
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	void Precache() override;
 	bool KeyValue(KeyValueData* pkvd) override;
@@ -95,10 +97,6 @@ public:
 
 	void AdjustAnglesForBarrel(Vector& angles, float distance);
 
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
-
 	bool OnControls(entvars_t* pevTest) override;
 	bool StartControl(CBasePlayer* pController);
 	void StopControl();
@@ -141,37 +139,36 @@ protected:
 };
 
 
-TYPEDESCRIPTION CFuncTank::m_SaveData[] =
-	{
-		DEFINE_FIELD(CFuncTank, m_yawCenter, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTank, m_yawRate, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTank, m_yawRange, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTank, m_yawTolerance, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTank, m_pitchCenter, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTank, m_pitchRate, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTank, m_pitchRange, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTank, m_pitchTolerance, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTank, m_fireLast, FIELD_TIME),
-		DEFINE_FIELD(CFuncTank, m_fireRate, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTank, m_lastSightTime, FIELD_TIME),
-		DEFINE_FIELD(CFuncTank, m_persist, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTank, m_minRange, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTank, m_maxRange, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTank, m_barrelPos, FIELD_VECTOR),
-		DEFINE_FIELD(CFuncTank, m_spriteScale, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTank, m_iszSpriteSmoke, FIELD_STRING),
-		DEFINE_FIELD(CFuncTank, m_iszSpriteFlash, FIELD_STRING),
-		DEFINE_FIELD(CFuncTank, m_bulletType, FIELD_INTEGER),
-		DEFINE_FIELD(CFuncTank, m_sightOrigin, FIELD_VECTOR),
-		DEFINE_FIELD(CFuncTank, m_spread, FIELD_INTEGER),
-		DEFINE_FIELD(CFuncTank, m_pController, FIELD_CLASSPTR),
-		DEFINE_FIELD(CFuncTank, m_vecControllerUsePos, FIELD_VECTOR),
-		DEFINE_FIELD(CFuncTank, m_flNextAttack, FIELD_TIME),
-		DEFINE_FIELD(CFuncTank, m_iBulletDamage, FIELD_INTEGER),
-		DEFINE_FIELD(CFuncTank, m_iszMaster, FIELD_STRING),
-};
-
-IMPLEMENT_SAVERESTORE(CFuncTank, CBaseEntity);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CFuncTank)
+	DEFINE_FIELD(CFuncTank, m_yawCenter, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTank, m_yawRate, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTank, m_yawRange, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTank, m_yawTolerance, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTank, m_pitchCenter, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTank, m_pitchRate, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTank, m_pitchRange, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTank, m_pitchTolerance, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTank, m_fireLast, FIELD_TIME),
+	DEFINE_FIELD(CFuncTank, m_fireRate, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTank, m_lastSightTime, FIELD_TIME),
+	DEFINE_FIELD(CFuncTank, m_persist, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTank, m_minRange, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTank, m_maxRange, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTank, m_barrelPos, FIELD_VECTOR),
+	DEFINE_FIELD(CFuncTank, m_spriteScale, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTank, m_iszSpriteSmoke, FIELD_STRING),
+	DEFINE_FIELD(CFuncTank, m_iszSpriteFlash, FIELD_STRING),
+	DEFINE_FIELD(CFuncTank, m_bulletType, FIELD_INTEGER),
+	DEFINE_FIELD(CFuncTank, m_sightOrigin, FIELD_VECTOR),
+	DEFINE_FIELD(CFuncTank, m_spread, FIELD_INTEGER),
+	DEFINE_FIELD(CFuncTank, m_pController, FIELD_CLASSPTR),
+	DEFINE_FIELD(CFuncTank, m_vecControllerUsePos, FIELD_VECTOR),
+	DEFINE_FIELD(CFuncTank, m_flNextAttack, FIELD_TIME),
+	DEFINE_FIELD(CFuncTank, m_iBulletDamage, FIELD_INTEGER),
+	DEFINE_FIELD(CFuncTank, m_iszMaster, FIELD_STRING),
+END_SAVERESTORE(CFuncTank, CBaseEntity)
+#endif
 
 static Vector gTankSpread[] =
 	{
@@ -764,15 +761,13 @@ void CFuncTankGun::Fire(const Vector& barrelEnd, const Vector& forward, CBaseEnt
 class CFuncTankLaser : public CFuncTank
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	void Activate() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 	void Fire(const Vector& barrelEnd, const Vector& forward, CBaseEntity* attacker) override;
 	void Think() override;
 	CLaser* GetLaser();
-
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
 
 private:
 	CLaser* m_pLaser;
@@ -780,13 +775,12 @@ private:
 };
 LINK_ENTITY_TO_CLASS(func_tanklaser, CFuncTankLaser);
 
-TYPEDESCRIPTION CFuncTankLaser::m_SaveData[] =
-	{
-		DEFINE_FIELD(CFuncTankLaser, m_pLaser, FIELD_CLASSPTR),
-		DEFINE_FIELD(CFuncTankLaser, m_laserTime, FIELD_TIME),
-};
-
-IMPLEMENT_SAVERESTORE(CFuncTankLaser, CFuncTank);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CFuncTankLaser)
+	DEFINE_FIELD(CFuncTankLaser, m_pLaser, FIELD_CLASSPTR),
+	DEFINE_FIELD(CFuncTankLaser, m_laserTime, FIELD_TIME),
+END_SAVERESTORE(CFuncTankLaser, CFuncTank)
+#endif
 
 void CFuncTankLaser::Activate()
 {
@@ -970,25 +964,22 @@ void CFuncTankMortar::Fire(const Vector& barrelEnd, const Vector& forward, CBase
 class CFuncTankControls : public CBaseEntity
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	int ObjectCaps() override;
 	bool Spawn() override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 	void Think() override;
 
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
-
 	CFuncTank* m_pTank;
 };
 LINK_ENTITY_TO_CLASS(func_tankcontrols, CFuncTankControls);
 
-TYPEDESCRIPTION CFuncTankControls::m_SaveData[] =
-	{
-		DEFINE_FIELD(CFuncTankControls, m_pTank, FIELD_CLASSPTR),
-};
-
-IMPLEMENT_SAVERESTORE(CFuncTankControls, CBaseEntity);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CFuncTankControls)
+	DEFINE_FIELD(CFuncTankControls, m_pTank, FIELD_CLASSPTR),
+END_SAVERESTORE(CFuncTankControls, CBaseEntity)
+#endif
 
 int CFuncTankControls::ObjectCaps()
 {

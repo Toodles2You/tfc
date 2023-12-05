@@ -36,6 +36,7 @@
 // any given node is allowed to 'see' in the first stage of graph creation "LinkVisibleNodes()".
 #define MAX_NODE_INITIAL_LINKS 128
 #define MAX_NODES 1024
+#define MAX_PATH_SIZE 10 // max number of nodes available for a path.
 
 CGraph WorldGraph;
 

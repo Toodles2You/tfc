@@ -234,8 +234,10 @@ inline bool IsEntityValid( CBaseEntity *entity )
 	if (FStrEq( STRING( entity->pev->netname ), "" ))
 		return false;
 
+#ifdef HALFLIFE_SAVERESTORE
 	if (entity->pev->flags & FL_DORMANT)
 		return false;
+#endif
 
 	return true;
 }

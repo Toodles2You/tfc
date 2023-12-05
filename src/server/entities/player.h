@@ -144,8 +144,6 @@ public:
 												 // Spectators should return true for this
 	const char* TeamID() override;
 
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
 	void PackDeadPlayerWeapons();
 	void RemoveAllWeapons();
 	/**
@@ -159,7 +157,12 @@ public:
 	// JOHN:  sends custom messages if player HUD data has changed  (eg health, ammo)
 	virtual void UpdateClientData();
 
+#ifdef HALFLIFE_SAVERESTORE
 	static TYPEDESCRIPTION m_playerSaveData[];
+
+	bool Save(CSave& save) override;
+	bool Restore(CRestore& restore) override;
+#endif
 
 	// Player is moved across the transition by other means
 	int ObjectCaps() override { return (CBaseAnimating::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_NET_ALWAYS_SEND; }
