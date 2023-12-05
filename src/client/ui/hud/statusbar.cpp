@@ -32,7 +32,6 @@ bool CHudStatusBar::Init()
 
 	Reset();
 
-	hud_centerid = CVAR_CREATE("hud_centerid", "0", FCVAR_ARCHIVE);
 	hud_expireid = CVAR_CREATE("hud_expireid", "0.2", FCVAR_ARCHIVE);
 
 	return true;
@@ -84,7 +83,7 @@ bool CHudStatusBar::Draw(float fTime)
 	gEngfuncs.pfnDrawSetTextColor(color[0], color[1], color[2]);
 
 	int x = std::max(0, std::max(2, ((int)gHUD.GetWidth() - textWidth)) >> 1);
-	int y = (gHUD.GetHeight() >> 1) + textHeight * hud_centerid->value;
+	int y = (gHUD.GetHeight() >> 1) + textHeight * 4;
 
 	gHUD.DrawHudString(m_szStatusBar, x, y);
 
