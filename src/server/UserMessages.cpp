@@ -22,12 +22,11 @@
 void LinkUserMessages()
 {
 	// Already taken care of?
-	if (0 != gmsgCurWeapon)
+	if (0 != gmsgInitHUD)
 	{
 		return;
 	}
 
-	gmsgCurWeapon = REG_USER_MSG("CurWeapon", 3);
 	gmsgGeigerRange = REG_USER_MSG("Geiger", 1);
 	gmsgFlashlight = REG_USER_MSG("Flashlight", 2);
 	gmsgFlashBattery = REG_USER_MSG("FlashBat", 1);

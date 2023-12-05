@@ -1165,7 +1165,6 @@ void CBasePlayer::PreThink()
 	{
 		Observer_HandleButtons();
 		Observer_CheckTarget();
-		Observer_CheckProperties();
 		pev->impulse = 0;
 
 		if (IsSpectator())

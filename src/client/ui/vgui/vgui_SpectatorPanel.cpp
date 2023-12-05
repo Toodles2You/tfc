@@ -308,9 +308,6 @@ const char* GetSpectatorLabel(int iMode)
 	case OBS_CHASE_FREE:
 		return "#OBS_CHASE_FREE";
 
-	case OBS_IN_EYE:
-		return "#OBS_IN_EYE";
-
 	case OBS_ROAMING:
 		return "#OBS_ROAMING";
 

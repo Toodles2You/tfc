@@ -59,7 +59,8 @@ void CBasePlayer::Observer_FindNextPlayer(bool bReverse)
 			continue;
 
 		// MOD AUTHORS: Add checks on target here.
-		if (g_pGameRules->IsDeathmatch()
+		if (!IsSpectator()
+		 && g_pGameRules->IsDeathmatch()
 		 && g_pGameRules->IsTeamplay()
 		 && g_pGameRules->PlayerRelationship(this, pEnt) < GR_ALLY)
 			continue;
@@ -157,7 +158,8 @@ void CBasePlayer::Observer_CheckTarget()
 		return;
 	}
 
-	if (g_pGameRules->IsDeathmatch()
+	if (!IsSpectator()
+	 && g_pGameRules->IsDeathmatch()
 	 && g_pGameRules->IsTeamplay()
 	 && g_pGameRules->PlayerRelationship(this, target) < GR_ALLY)
 	{
@@ -168,57 +170,11 @@ void CBasePlayer::Observer_CheckTarget()
 	// check taget
 	if (!target->IsAlive())
 	{
-		if (pev->iuser1 == OBS_IN_EYE)
-		{
-			Observer_SetMode(OBS_CHASE_FREE);
-		}
 		if ((target->m_fDeadTime + 3.0f) < gpGlobals->time)
 		{
 			// 3 secs after death change target
 			Observer_FindNextPlayer(false);
 			return;
-		}
-	}
-}
-
-void CBasePlayer::Observer_CheckProperties()
-{
-	// try to find a traget if we have no current one
-	if (pev->iuser1 == OBS_IN_EYE && m_hObserverTarget != NULL)
-	{
-		CBasePlayer* target = (CBasePlayer*)(util::PlayerByIndex(ENTINDEX(m_hObserverTarget->edict())));
-
-		if (!target)
-			return;
-
-		int weapon = (target->m_pActiveWeapon != NULL) ? target->m_pActiveWeapon->GetID() : 0;
-		// use fov of tracked client
-		if (m_iFOV != target->m_iFOV || m_iObserverWeapon != weapon)
-		{
-			m_iFOV = target->m_iFOV;
-
-			m_iObserverWeapon = weapon;
-			//send weapon update
-			MessageBegin(MSG_ONE, gmsgCurWeapon, this);
-			WriteByte(1); // 1 = current weapon, not on target
-			WriteByte(m_iObserverWeapon);
-			WriteByte(0); // clip
-			MessageEnd();
-		}
-	}
-	else
-	{
-		m_iFOV = 0;
-
-		if (m_iObserverWeapon != 0)
-		{
-			m_iObserverWeapon = 0;
-
-			MessageBegin(MSG_ONE, gmsgCurWeapon, this);
-			WriteByte(1); // 1 = current weapon
-			WriteByte(m_iObserverWeapon);
-			WriteByte(0); // clip
-			MessageEnd();
 		}
 	}
 }
@@ -238,7 +194,7 @@ void CBasePlayer::Observer_SetMode(int iMode)
 	}
 	else
 	{
-		if (iMode != OBS_CHASE_FREE && iMode != OBS_IN_EYE)
+		if (iMode != OBS_CHASE_FREE)
 			iMode = OBS_CHASE_FREE;
 	}
 	// verify observer target again

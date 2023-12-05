@@ -521,13 +521,10 @@ void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip)
 		return;
 	}
 
-	if (gHUD.GetObserverMode() != OBS_IN_EYE)
+	if (iId == -1 && iClip == -1)
 	{
-		if (iId == -1 && iClip == -1)
-		{
-			gpActiveSel = nullptr;
-			return;
-		}
+		gpActiveSel = nullptr;
+		return;
 	}
 
 	WEAPON* pWeapon = gWR.GetWeapon(iId);

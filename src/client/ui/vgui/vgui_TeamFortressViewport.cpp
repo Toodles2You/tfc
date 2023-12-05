@@ -1269,7 +1269,7 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 		}
 
 		// in first person mode colorize player names
-		if ((gHUD.GetObserverMode() == OBS_IN_EYE) && 0 != player)
+		if (0 != player && name)
 		{
 			float* color = gHUD.GetClientColor(player);
 			int r = color[0] * 255;

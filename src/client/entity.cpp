@@ -50,15 +50,6 @@ int HUD_AddEntity(int type, struct cl_entity_s* ent, const char* modelname)
 	// each frame every entity passes this function, so the overview hooks
 	// it to filter the overview entities
 
-	if (gHUD.IsObserver())
-	{
-		gHUD.m_Spectator.AddOverviewEntity(type, ent, modelname);
-
-		if ((g_iObserverMode == OBS_IN_EYE || gHUD.m_Spectator.m_pip->value == INSET_IN_EYE) &&
-			ent->index == g_iObserverTarget)
-			return 0; // don't draw the player we are following in eye
-	}
-
 	return 1;
 }
 

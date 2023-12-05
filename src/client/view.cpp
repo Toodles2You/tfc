@@ -1295,72 +1295,6 @@ void V_CalcSpectatorRefdef(struct ref_params_s* pparams)
 	VectorCopy(pparams->viewangles, v_angles);
 	VectorCopy(pparams->vieworg, v_origin);
 
-	if ((gHUD.GetObserverMode() == OBS_IN_EYE || gHUD.m_Spectator.m_pip->value == INSET_IN_EYE) && ent)
-	{
-		// calculate player velocity
-		float timeDiff = ent->curstate.msg_time - ent->prevstate.msg_time;
-
-		if (timeDiff > 0)
-		{
-			Vector distance;
-			VectorSubtract(ent->prevstate.origin, ent->curstate.origin, distance);
-			VectorScale(distance, 1 / timeDiff, distance);
-
-			velocity[0] = velocity[0] * 0.9f + distance[0] * 0.1f;
-			velocity[1] = velocity[1] * 0.9f + distance[1] * 0.1f;
-			velocity[2] = velocity[2] * 0.9f + distance[2] * 0.1f;
-
-			VectorCopy(velocity, pparams->simvel);
-		}
-
-		// predict missing client data and set weapon model ( in HLTV mode or inset in eye mode )
-		if (0 != gEngfuncs.IsSpectateOnly())
-		{
-			V_GetInEyePos(gHUD.GetObserverTarget(), pparams->simorg, pparams->cl_viewangles);
-
-			pparams->health = 1;
-
-			cl_entity_t* gunModel = gEngfuncs.GetViewModel();
-
-			if (lastWeaponModelIndex != ent->curstate.weaponmodel)
-			{
-				// weapon model changed
-
-				lastWeaponModelIndex = ent->curstate.weaponmodel;
-				lastViewModelIndex = V_FindViewModelByWeaponModel(lastWeaponModelIndex);
-				if (0 != lastViewModelIndex)
-				{
-					gEngfuncs.pfnWeaponAnim(0, 0); // reset weapon animation
-				}
-				else
-				{
-					// model not found
-					gunModel->model = NULL; // disable weapon model
-					lastWeaponModelIndex = lastViewModelIndex = 0;
-				}
-			}
-
-			if (0 != lastViewModelIndex)
-			{
-				gunModel->model = IEngineStudio.GetModelByIndex(lastViewModelIndex);
-				gunModel->curstate.modelindex = lastViewModelIndex;
-				gunModel->curstate.frame = 0;
-				gunModel->curstate.colormap = 0;
-				gunModel->index = gHUD.GetObserverTarget();
-			}
-			else
-			{
-				gunModel->model = NULL; // disable weaopn model
-			}
-		}
-		else
-		{
-			// only get viewangles from entity
-			VectorCopy(ent->angles, pparams->cl_viewangles);
-			pparams->cl_viewangles[PITCH] *= -3.0f; // see CL_ProcessEntityUpdate()
-		}
-	}
-
 	v_frametime = pparams->frametime;
 
 	if (pparams->nextView == 0)
@@ -1371,10 +1305,6 @@ void V_CalcSpectatorRefdef(struct ref_params_s* pparams)
 		{
 		case OBS_CHASE_FREE:
 			V_GetChasePos(gHUD.GetObserverTarget(), v_cl_angles, v_origin, v_angles);
-			break;
-
-		case OBS_IN_EYE:
-			V_CalcNormalRefdef(pparams);
 			break;
 
 		case OBS_ROAMING:
@@ -1425,10 +1355,6 @@ void V_CalcSpectatorRefdef(struct ref_params_s* pparams)
 		{
 		case INSET_CHASE_FREE:
 			V_GetChasePos(gHUD.GetObserverTarget(), v_cl_angles, v_origin, v_angles);
-			break;
-
-		case INSET_IN_EYE:
-			V_CalcNormalRefdef(pparams);
 			break;
 
 		case INSET_MAP_FREE:

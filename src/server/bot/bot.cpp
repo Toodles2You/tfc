@@ -536,7 +536,6 @@ bool CBot::IsLocalPlayerWatchingMe( void ) const
 			switch( player->pev->iuser1 )
 			{
 				case OBS_CHASE_FREE:
-				case OBS_IN_EYE:
 					return true;
 			}
 		}

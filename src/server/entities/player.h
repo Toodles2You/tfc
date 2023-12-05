@@ -62,10 +62,8 @@ public:
 	void Observer_HandleButtons();
 	void Observer_SetMode(int iMode);
 	void Observer_CheckTarget();
-	void Observer_CheckProperties();
 	EHANDLE m_hObserverTarget;
 	float m_flNextObserverInput;
-	int m_iObserverWeapon;	 // weapon of current tracked target
 	int m_iObserverLastMode; // last used observer mode
 	bool IsObserver() { return pev->iuser1 != OBS_NONE; }
 	bool IsSpectator() { return TeamNumber() == TEAM_SPECTATORS; }

@@ -11,11 +11,13 @@
 #include "interpolation.h"
 
 
-#define INSET_OFF 0
-#define INSET_CHASE_FREE 1
-#define INSET_IN_EYE 2
-#define INSET_MAP_FREE 3
-#define INSET_MAP_CHASE 4
+enum
+{
+	INSET_OFF = 0,
+	INSET_CHASE_FREE,
+	INSET_MAP_FREE,
+	INSET_MAP_CHASE,
+};
 
 #define MAX_SPEC_HUD_MESSAGES 8
 

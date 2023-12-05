@@ -1125,10 +1125,6 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 			g_iObserverMode = OBS_CHASE_FREE;
 			break;
 
-		case OBS_IN_EYE:
-			g_iObserverMode = OBS_IN_EYE;
-			break;
-
 		case OBS_ROAMING: // jump to current vJumpOrigin/angle
 			g_iObserverMode = OBS_ROAMING;
 			if (0 != g_iObserverTarget)
@@ -1608,11 +1604,7 @@ void CHudSpectator::DrawOverviewEntities()
 
 	// get current camera position and angle
 
-	if (m_pip->value == INSET_IN_EYE || g_iObserverMode == OBS_IN_EYE)
-	{
-		V_GetInEyePos(g_iObserverTarget, origin, angles);
-	}
-	else if (m_pip->value == INSET_CHASE_FREE || g_iObserverMode == OBS_CHASE_FREE)
+	if (m_pip->value == INSET_CHASE_FREE || g_iObserverMode == OBS_CHASE_FREE)
 	{
 		V_GetChasePos(g_iObserverTarget, v_cl_angles, origin, angles);
 	}
@@ -1770,7 +1762,7 @@ void CHudSpectator::CheckSettings()
 
 	m_pip->value = (int)m_pip->value;
 
-	if ((g_iObserverMode < OBS_MAP_FREE) && (m_pip->value == INSET_CHASE_FREE || m_pip->value == INSET_IN_EYE))
+	if ((g_iObserverMode < OBS_MAP_FREE) && m_pip->value == INSET_CHASE_FREE)
 	{
 		// otherwise both would show in World picures
 		m_pip->value = INSET_MAP_FREE;
@@ -1801,13 +1793,6 @@ void CHudSpectator::CheckSettings()
 		}
 	}
 
-	// if we are a real player on server don't allow inset window
-	// in First Person mode since this is our resticted forcecamera mode 2
-	// team number 3 = SPECTATOR see player.h
-
-	if (!gHUD.IsSpectator() && (g_iObserverMode == OBS_IN_EYE))
-		m_pip->value = INSET_OFF;
-
 	// draw small border around inset view, adjust upper black bar
 	gViewPort->m_pSpectatorPanel->EnableInsetView(m_pip->value != INSET_OFF);
 }
@@ -1831,7 +1816,7 @@ int CHudSpectator::ToggleInset(bool allowOff)
 	}
 	else
 	{
-		if (newInsetMode > INSET_IN_EYE)
+		if (newInsetMode > INSET_CHASE_FREE)
 		{
 			if (allowOff)
 				newInsetMode = INSET_OFF;
