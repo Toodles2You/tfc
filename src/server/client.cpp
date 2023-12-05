@@ -638,7 +638,11 @@ void ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
 
 		pClass = CBaseEntity::Instance(&pEdictList[i]);
 		// Activate this entity if it's got a class & isn't dormant
-		if (pClass && (pClass->pev->flags & FL_DORMANT) == 0)
+#ifdef HALFLIFE_SAVERESTORE
+		if (pClass != nullptr && (pClass->pev->flags & FL_DORMANT) == 0)
+#else
+		if (pClass != nullptr)
+#endif
 		{
 			pClass->Activate();
 		}
@@ -713,11 +717,13 @@ void ParmsNewLevel()
 
 void ParmsChangeLevel()
 {
+#ifdef HALFLIFE_SAVERESTORE
 	// retrieve the pointer to the save data
 	SAVERESTOREDATA* pSaveData = (SAVERESTOREDATA*)gpGlobals->pSaveData;
 
 	if (pSaveData)
 		pSaveData->connectionCount = util::BuildChangeList(pSaveData->levelList, MAX_LEVEL_CONNECTIONS);
+#endif
 }
 
 static std::vector<std::string> g_MapsToLoad;

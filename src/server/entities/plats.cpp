@@ -33,6 +33,8 @@ static void PlatSpawnInsideTrigger(entvars_t* pevPlatform);
 class CBasePlatTrain : public CBaseToggle
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	bool KeyValue(KeyValueData* pkvd) override;
 	void Precache() override;
@@ -40,23 +42,18 @@ public:
 	// This is done to fix spawn flag collisions between this class and a derived class
 	virtual bool IsTogglePlat() { return (pev->spawnflags & SF_PLAT_TOGGLE) != 0; }
 
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
-
 	byte m_bMoveSnd; // sound a plat makes while moving
 	byte m_bStopSnd; // sound a plat makes when it stops
 	float m_volume;	 // Sound volume
 };
 
-TYPEDESCRIPTION CBasePlatTrain::m_SaveData[] =
-	{
-		DEFINE_FIELD(CBasePlatTrain, m_bMoveSnd, FIELD_CHARACTER),
-		DEFINE_FIELD(CBasePlatTrain, m_bStopSnd, FIELD_CHARACTER),
-		DEFINE_FIELD(CBasePlatTrain, m_volume, FIELD_FLOAT),
-};
-
-IMPLEMENT_SAVERESTORE(CBasePlatTrain, CBaseToggle);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CBasePlatTrain)
+	DEFINE_FIELD(CBasePlatTrain, m_bMoveSnd, FIELD_CHARACTER),
+	DEFINE_FIELD(CBasePlatTrain, m_bStopSnd, FIELD_CHARACTER),
+	DEFINE_FIELD(CBasePlatTrain, m_volume, FIELD_FLOAT),
+END_SAVERESTORE(CBasePlatTrain, CBaseToggle)
+#endif
 
 bool CBasePlatTrain::KeyValue(KeyValueData* pkvd)
 {
@@ -503,6 +500,8 @@ void CFuncPlat::Blocked(CBaseEntity* pOther)
 class CFuncPlatRot : public CFuncPlat
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	void SetupRotation();
 
@@ -512,20 +511,17 @@ public:
 	void HitBottom() override;
 
 	void RotMove(Vector& destAngle, float time);
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
 
 	Vector m_end, m_start;
 };
 LINK_ENTITY_TO_CLASS(func_platrot, CFuncPlatRot);
-TYPEDESCRIPTION CFuncPlatRot::m_SaveData[] =
-	{
-		DEFINE_FIELD(CFuncPlatRot, m_end, FIELD_VECTOR),
-		DEFINE_FIELD(CFuncPlatRot, m_start, FIELD_VECTOR),
-};
 
-IMPLEMENT_SAVERESTORE(CFuncPlatRot, CFuncPlat);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CFuncPlatRot)
+	DEFINE_FIELD(CFuncPlatRot, m_end, FIELD_VECTOR),
+	DEFINE_FIELD(CFuncPlatRot, m_start, FIELD_VECTOR),
+END_SAVERESTORE(CFuncPlatRot, CFuncPlat)
+#endif
 
 
 void CFuncPlatRot::SetupRotation()
@@ -620,6 +616,8 @@ void CFuncPlatRot::RotMove(Vector& destAngle, float time)
 class CFuncTrain : public CBasePlatTrain
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	void Precache() override;
 	void Activate() override;
@@ -632,9 +630,6 @@ public:
 
 	void EXPORT Wait();
 	void EXPORT Next();
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
 
 	entvars_t* m_pevCurrentTarget;
 	int m_sounds;
@@ -642,14 +637,14 @@ public:
 };
 
 LINK_ENTITY_TO_CLASS(func_train, CFuncTrain);
-TYPEDESCRIPTION CFuncTrain::m_SaveData[] =
-	{
-		DEFINE_FIELD(CFuncTrain, m_sounds, FIELD_INTEGER),
-		DEFINE_FIELD(CFuncTrain, m_pevCurrentTarget, FIELD_EVARS),
-		DEFINE_FIELD(CFuncTrain, m_activated, FIELD_BOOLEAN),
-};
 
-IMPLEMENT_SAVERESTORE(CFuncTrain, CBasePlatTrain);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CFuncTrain)
+	DEFINE_FIELD(CFuncTrain, m_sounds, FIELD_INTEGER),
+	DEFINE_FIELD(CFuncTrain, m_pevCurrentTarget, FIELD_EVARS),
+	DEFINE_FIELD(CFuncTrain, m_activated, FIELD_BOOLEAN),
+END_SAVERESTORE(CFuncTrain, CBasePlatTrain)
+#endif
 
 
 bool CFuncTrain::KeyValue(KeyValueData* pkvd)
@@ -919,23 +914,23 @@ void CFuncTrain::OverrideReset()
 //
 // ---------------------------------------------------------------------
 
-TYPEDESCRIPTION CFuncTrackTrain::m_SaveData[] =
-	{
-		DEFINE_FIELD(CFuncTrackTrain, m_ppath, FIELD_CLASSPTR),
-		DEFINE_FIELD(CFuncTrackTrain, m_length, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTrackTrain, m_height, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTrackTrain, m_speed, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTrackTrain, m_dir, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTrackTrain, m_startSpeed, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTrackTrain, m_controlMins, FIELD_VECTOR),
-		DEFINE_FIELD(CFuncTrackTrain, m_controlMaxs, FIELD_VECTOR),
-		DEFINE_FIELD(CFuncTrackTrain, m_sounds, FIELD_INTEGER),
-		DEFINE_FIELD(CFuncTrackTrain, m_flVolume, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTrackTrain, m_flBank, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncTrackTrain, m_oldSpeed, FIELD_FLOAT),
-};
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CFuncTrackTrain)
+	DEFINE_FIELD(CFuncTrackTrain, m_ppath, FIELD_CLASSPTR),
+	DEFINE_FIELD(CFuncTrackTrain, m_length, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTrackTrain, m_height, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTrackTrain, m_speed, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTrackTrain, m_dir, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTrackTrain, m_startSpeed, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTrackTrain, m_controlMins, FIELD_VECTOR),
+	DEFINE_FIELD(CFuncTrackTrain, m_controlMaxs, FIELD_VECTOR),
+	DEFINE_FIELD(CFuncTrackTrain, m_sounds, FIELD_INTEGER),
+	DEFINE_FIELD(CFuncTrackTrain, m_flVolume, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTrackTrain, m_flBank, FIELD_FLOAT),
+	DEFINE_FIELD(CFuncTrackTrain, m_oldSpeed, FIELD_FLOAT),
+END_SAVERESTORE(CFuncTrackTrain, CBaseEntity)
+#endif
 
-IMPLEMENT_SAVERESTORE(CFuncTrackTrain, CBaseEntity);
 LINK_ENTITY_TO_CLASS(func_tracktrain, CFuncTrackTrain);
 
 bool CFuncTrackTrain::KeyValue(KeyValueData* pkvd)
@@ -1611,6 +1606,8 @@ typedef enum
 class CFuncTrackChange : public CFuncPlatRot
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	void Precache() override;
 
@@ -1633,10 +1630,6 @@ public:
 	void EnableUse() { m_use = true; }
 	bool UseEnabled() { return m_use; }
 
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
-
 	void OverrideReset() override;
 
 
@@ -1654,20 +1647,19 @@ public:
 };
 LINK_ENTITY_TO_CLASS(func_trackchange, CFuncTrackChange);
 
-TYPEDESCRIPTION CFuncTrackChange::m_SaveData[] =
-	{
-		DEFINE_GLOBAL_FIELD(CFuncTrackChange, m_trackTop, FIELD_CLASSPTR),
-		DEFINE_GLOBAL_FIELD(CFuncTrackChange, m_trackBottom, FIELD_CLASSPTR),
-		DEFINE_GLOBAL_FIELD(CFuncTrackChange, m_train, FIELD_CLASSPTR),
-		DEFINE_GLOBAL_FIELD(CFuncTrackChange, m_trackTopName, FIELD_STRING),
-		DEFINE_GLOBAL_FIELD(CFuncTrackChange, m_trackBottomName, FIELD_STRING),
-		DEFINE_GLOBAL_FIELD(CFuncTrackChange, m_trainName, FIELD_STRING),
-		DEFINE_FIELD(CFuncTrackChange, m_code, FIELD_INTEGER),
-		DEFINE_FIELD(CFuncTrackChange, m_targetState, FIELD_INTEGER),
-		DEFINE_FIELD(CFuncTrackChange, m_use, FIELD_BOOLEAN),
-};
-
-IMPLEMENT_SAVERESTORE(CFuncTrackChange, CFuncPlatRot);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CFuncTrackChange)
+	DEFINE_GLOBAL_FIELD(CFuncTrackChange, m_trackTop, FIELD_CLASSPTR),
+	DEFINE_GLOBAL_FIELD(CFuncTrackChange, m_trackBottom, FIELD_CLASSPTR),
+	DEFINE_GLOBAL_FIELD(CFuncTrackChange, m_train, FIELD_CLASSPTR),
+	DEFINE_GLOBAL_FIELD(CFuncTrackChange, m_trackTopName, FIELD_STRING),
+	DEFINE_GLOBAL_FIELD(CFuncTrackChange, m_trackBottomName, FIELD_STRING),
+	DEFINE_GLOBAL_FIELD(CFuncTrackChange, m_trainName, FIELD_STRING),
+	DEFINE_FIELD(CFuncTrackChange, m_code, FIELD_INTEGER),
+	DEFINE_FIELD(CFuncTrackChange, m_targetState, FIELD_INTEGER),
+	DEFINE_FIELD(CFuncTrackChange, m_use, FIELD_BOOLEAN),
+END_SAVERESTORE(CFuncTrackChange, CFuncPlatRot)
+#endif
 
 bool CFuncTrackChange::Spawn()
 {
@@ -2097,6 +2089,8 @@ void CFuncTrackAuto::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE
 class CGunTarget : public CBaseToggle
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	void Activate() override;
 	void EXPORT Next();
@@ -2109,10 +2103,6 @@ public:
 	Vector BodyTarget(const Vector& posSrc) override { return pev->origin; }
 
 	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-
-	static TYPEDESCRIPTION m_SaveData[];
 
 private:
 	bool m_on;
@@ -2122,12 +2112,11 @@ private:
 
 LINK_ENTITY_TO_CLASS(func_guntarget, CGunTarget);
 
-TYPEDESCRIPTION CGunTarget::m_SaveData[] =
-	{
-		DEFINE_FIELD(CGunTarget, m_on, FIELD_BOOLEAN),
-};
-
-IMPLEMENT_SAVERESTORE(CGunTarget, CBaseToggle);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CGunTarget)
+	DEFINE_FIELD(CGunTarget, m_on, FIELD_BOOLEAN),
+END_SAVERESTORE(CGunTarget, CBaseToggle)
+#endif
 
 
 bool CGunTarget::Spawn()

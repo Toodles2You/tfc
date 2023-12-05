@@ -33,6 +33,8 @@
 class CSprite : public CPointEntity
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	void Precache() override;
 
@@ -92,9 +94,6 @@ public:
 
 	void EXPORT AnimateUntilDead();
 
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
 	static CSprite* SpriteCreate(const char* pSpriteName, const Vector& origin, bool animate);
 
 private:
@@ -198,6 +197,8 @@ public:
 class CLaser : public CBeam
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	void Precache() override;
 	bool KeyValue(KeyValueData* pkvd) override;
@@ -210,9 +211,6 @@ public:
 
 	void EXPORT StrikeThink();
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
 
 	CSprite* m_pSprite;
 	int m_iszSpriteName;

@@ -318,7 +318,9 @@ CBaseEntity* GetLocalPlayer();
 // Misc functions
 Vector SetMovedir(Vector& angles);
 void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
+#ifdef HALFLIFE_SAVERESTORE
 int BuildChangeList(LEVELLIST* pLevelList, int maxList);
+#endif
 
 float VecToYaw(const Vector& vec);
 Vector VecToAngles(const Vector& vec);

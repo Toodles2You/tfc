@@ -69,12 +69,9 @@ typedef struct
 class CBasePlayerWeapon : public CBaseAnimating
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	void SetObjectCollisionBox() override;
-
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-
-	static TYPEDESCRIPTION m_SaveData[];
 
 	virtual bool Spawn() override;
 

@@ -44,15 +44,13 @@
 class CFrictionModifier : public CBaseEntity
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 	void EXPORT ChangeFriction(CBaseEntity* pOther);
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
 
 	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
-
-	static TYPEDESCRIPTION m_SaveData[];
 
 	float m_frictionFraction; // Sorry, couldn't resist this name :)
 };
@@ -60,12 +58,11 @@ public:
 LINK_ENTITY_TO_CLASS(func_friction, CFrictionModifier);
 
 // Global Savedata for changelevel friction modifier
-TYPEDESCRIPTION CFrictionModifier::m_SaveData[] =
-	{
-		DEFINE_FIELD(CFrictionModifier, m_frictionFraction, FIELD_FLOAT),
-};
-
-IMPLEMENT_SAVERESTORE(CFrictionModifier, CBaseEntity);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CFrictionModifier)
+	DEFINE_FIELD(CFrictionModifier, m_frictionFraction, FIELD_FLOAT),
+END_SAVERESTORE(CFrictionModifier, CBaseEntity)
+#endif
 
 
 // Modify an entity's friction
@@ -109,16 +106,14 @@ bool CFrictionModifier::KeyValue(KeyValueData* pkvd)
 class CAutoTrigger : public CBaseDelay
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool KeyValue(KeyValueData* pkvd) override;
 	bool Spawn() override;
 	void Precache() override;
 	void Think() override;
 
 	int ObjectCaps() override { return CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-
-	static TYPEDESCRIPTION m_SaveData[];
 
 private:
 	int m_globalstate;
@@ -126,13 +121,12 @@ private:
 };
 LINK_ENTITY_TO_CLASS(trigger_auto, CAutoTrigger);
 
-TYPEDESCRIPTION CAutoTrigger::m_SaveData[] =
-	{
-		DEFINE_FIELD(CAutoTrigger, m_globalstate, FIELD_STRING),
-		DEFINE_FIELD(CAutoTrigger, triggerType, FIELD_INTEGER),
-};
-
-IMPLEMENT_SAVERESTORE(CAutoTrigger, CBaseDelay);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CAutoTrigger)
+	DEFINE_FIELD(CAutoTrigger, m_globalstate, FIELD_STRING),
+	DEFINE_FIELD(CAutoTrigger, triggerType, FIELD_INTEGER),
+END_SAVERESTORE(CAutoTrigger, CBaseDelay)
+#endif
 
 bool CAutoTrigger::KeyValue(KeyValueData* pkvd)
 {
@@ -193,27 +187,24 @@ void CAutoTrigger::Think()
 class CTriggerRelay : public CBaseDelay
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool KeyValue(KeyValueData* pkvd) override;
 	bool Spawn() override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 
 	int ObjectCaps() override { return CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-
-	static TYPEDESCRIPTION m_SaveData[];
 
 private:
 	USE_TYPE triggerType;
 };
 LINK_ENTITY_TO_CLASS(trigger_relay, CTriggerRelay);
 
-TYPEDESCRIPTION CTriggerRelay::m_SaveData[] =
-	{
-		DEFINE_FIELD(CTriggerRelay, triggerType, FIELD_INTEGER),
-};
-
-IMPLEMENT_SAVERESTORE(CTriggerRelay, CBaseDelay);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CTriggerRelay)
+	DEFINE_FIELD(CTriggerRelay, triggerType, FIELD_INTEGER),
+END_SAVERESTORE(CTriggerRelay, CBaseDelay)
+#endif
 
 bool CTriggerRelay::KeyValue(KeyValueData* pkvd)
 {
@@ -267,6 +258,8 @@ void CTriggerRelay::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 class CMultiManager : public CBaseToggle
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool KeyValue(KeyValueData* pkvd) override;
 	bool Spawn() override;
 	void EXPORT ManagerThink();
@@ -279,11 +272,6 @@ public:
 	bool HasTarget(string_t targetname) override;
 
 	int ObjectCaps() override { return CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
-
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-
-	static TYPEDESCRIPTION m_SaveData[];
 
 	int m_cTargets;							  // the total number of targets in this manager's fire list.
 	int m_index;							  // Current target
@@ -305,16 +293,15 @@ private:
 LINK_ENTITY_TO_CLASS(multi_manager, CMultiManager);
 
 // Global Savedata for multi_manager
-TYPEDESCRIPTION CMultiManager::m_SaveData[] =
-	{
-		DEFINE_FIELD(CMultiManager, m_cTargets, FIELD_INTEGER),
-		DEFINE_FIELD(CMultiManager, m_index, FIELD_INTEGER),
-		DEFINE_FIELD(CMultiManager, m_startTime, FIELD_TIME),
-		DEFINE_ARRAY(CMultiManager, m_iTargetName, FIELD_STRING, MAX_MULTI_TARGETS),
-		DEFINE_ARRAY(CMultiManager, m_flTargetDelay, FIELD_FLOAT, MAX_MULTI_TARGETS),
-};
-
-IMPLEMENT_SAVERESTORE(CMultiManager, CBaseToggle);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CMultiManager)
+	DEFINE_FIELD(CMultiManager, m_cTargets, FIELD_INTEGER),
+	DEFINE_FIELD(CMultiManager, m_index, FIELD_INTEGER),
+	DEFINE_FIELD(CMultiManager, m_startTime, FIELD_TIME),
+	DEFINE_ARRAY(CMultiManager, m_iTargetName, FIELD_STRING, MAX_MULTI_TARGETS),
+	DEFINE_ARRAY(CMultiManager, m_flTargetDelay, FIELD_FLOAT, MAX_MULTI_TARGETS),
+END_SAVERESTORE(CMultiManager, CBaseToggle)
+#endif
 
 bool CMultiManager::KeyValue(KeyValueData* pkvd)
 {
@@ -1242,6 +1229,8 @@ static char st_szNextSpot[kMapNameMost];
 class CChangeLevel : public CBaseTrigger
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 	void EXPORT UseChangeLevel(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
@@ -1251,14 +1240,11 @@ public:
 	void ChangeLevelNow(CBaseEntity* pActivator);
 
 	static edict_t* FindLandmark(const char* pLandmarkName);
+#ifdef HALFLIFE_SAVERESTORE
 	static int ChangeList(LEVELLIST* pLevelList, int maxList);
 	static bool AddTransitionToList(LEVELLIST* pLevelList, int listCount, const char* pMapName, const char* pLandmarkName, edict_t* pentLandmark);
+#endif
 	static bool InTransitionVolume(CBaseEntity* pEntity, char* pVolumeName);
-
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-
-	static TYPEDESCRIPTION m_SaveData[];
 
 	char m_szMapName[kMapNameMost];	   // trigger_changelevel only:  next map
 	char m_szLandmarkName[kMapNameMost]; // trigger_changelevel only:  landmark on next map
@@ -1268,15 +1254,14 @@ public:
 LINK_ENTITY_TO_CLASS(trigger_changelevel, CChangeLevel);
 
 // Global Savedata for changelevel trigger
-TYPEDESCRIPTION CChangeLevel::m_SaveData[] =
-	{
-		DEFINE_ARRAY(CChangeLevel, m_szMapName, FIELD_CHARACTER, kMapNameMost),
-		DEFINE_ARRAY(CChangeLevel, m_szLandmarkName, FIELD_CHARACTER, kMapNameMost),
-		DEFINE_FIELD(CChangeLevel, m_changeTarget, FIELD_STRING),
-		DEFINE_FIELD(CChangeLevel, m_changeTargetDelay, FIELD_FLOAT),
-};
-
-IMPLEMENT_SAVERESTORE(CChangeLevel, CBaseTrigger);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CChangeLevel)
+	DEFINE_ARRAY(CChangeLevel, m_szMapName, FIELD_CHARACTER, kMapNameMost),
+	DEFINE_ARRAY(CChangeLevel, m_szLandmarkName, FIELD_CHARACTER, kMapNameMost),
+	DEFINE_FIELD(CChangeLevel, m_changeTarget, FIELD_STRING),
+	DEFINE_FIELD(CChangeLevel, m_changeTargetDelay, FIELD_FLOAT),
+END_SAVERESTORE(CChangeLevel, CBaseTrigger)
+#endif
 
 //
 // Cache user-entity-field values until spawn is called.
@@ -1454,34 +1439,6 @@ void CChangeLevel::TouchChangeLevel(CBaseEntity* pOther)
 }
 
 
-// Add a transition to the list, but ignore duplicates
-// (a designer may have placed multiple trigger_changelevels with the same landmark)
-bool CChangeLevel::AddTransitionToList(LEVELLIST* pLevelList, int listCount, const char* pMapName, const char* pLandmarkName, edict_t* pentLandmark)
-{
-	int i;
-
-	if (!pLevelList || !pMapName || !pLandmarkName || !pentLandmark)
-		return false;
-
-	for (i = 0; i < listCount; i++)
-	{
-		if (pLevelList[i].pentLandmark == pentLandmark && strcmp(pLevelList[i].mapName, pMapName) == 0)
-			return false;
-	}
-	strcpy(pLevelList[listCount].mapName, pMapName);
-	strcpy(pLevelList[listCount].landmarkName, pLandmarkName);
-	pLevelList[listCount].pentLandmark = pentLandmark;
-	pLevelList[listCount].vecLandmarkOrigin = VARS(pentLandmark)->origin;
-
-	return true;
-}
-
-int util::BuildChangeList(LEVELLIST* pLevelList, int maxList)
-{
-	return CChangeLevel::ChangeList(pLevelList, maxList);
-}
-
-
 bool CChangeLevel::InTransitionVolume(CBaseEntity* pEntity, char* pVolumeName)
 {
 	edict_t* pentVolume;
@@ -1517,6 +1474,34 @@ bool CChangeLevel::InTransitionVolume(CBaseEntity* pEntity, char* pVolumeName)
 	return inVolume;
 }
 
+
+#ifdef HALFLIFE_SAVERESTORE
+// Add a transition to the list, but ignore duplicates
+// (a designer may have placed multiple trigger_changelevels with the same landmark)
+bool CChangeLevel::AddTransitionToList(LEVELLIST* pLevelList, int listCount, const char* pMapName, const char* pLandmarkName, edict_t* pentLandmark)
+{
+	int i;
+
+	if (!pLevelList || !pMapName || !pLandmarkName || !pentLandmark)
+		return false;
+
+	for (i = 0; i < listCount; i++)
+	{
+		if (pLevelList[i].pentLandmark == pentLandmark && strcmp(pLevelList[i].mapName, pMapName) == 0)
+			return false;
+	}
+	strcpy(pLevelList[listCount].mapName, pMapName);
+	strcpy(pLevelList[listCount].landmarkName, pLandmarkName);
+	pLevelList[listCount].pentLandmark = pentLandmark;
+	pLevelList[listCount].vecLandmarkOrigin = VARS(pentLandmark)->origin;
+
+	return true;
+}
+
+int util::BuildChangeList(LEVELLIST* pLevelList, int maxList)
+{
+	return CChangeLevel::ChangeList(pLevelList, maxList);
+}
 
 // We can only ever move 512 entities across a transition
 #define MAX_ENTITY 512
@@ -1626,6 +1611,7 @@ int CChangeLevel::ChangeList(LEVELLIST* pLevelList, int maxList)
 
 	return count;
 }
+#endif
 
 
 // ========================== A TRIGGER THAT PUSHES YOU ===============================
@@ -1922,27 +1908,24 @@ void CTriggerGravity::GravityTouch(CBaseEntity* pOther)
 class CTriggerChangeTarget : public CBaseDelay
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool KeyValue(KeyValueData* pkvd) override;
 	bool Spawn() override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 
 	int ObjectCaps() override { return CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-
-	static TYPEDESCRIPTION m_SaveData[];
 
 private:
 	int m_iszNewTarget;
 };
 LINK_ENTITY_TO_CLASS(trigger_changetarget, CTriggerChangeTarget);
 
-TYPEDESCRIPTION CTriggerChangeTarget::m_SaveData[] =
-	{
-		DEFINE_FIELD(CTriggerChangeTarget, m_iszNewTarget, FIELD_STRING),
-};
-
-IMPLEMENT_SAVERESTORE(CTriggerChangeTarget, CBaseDelay);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CTriggerChangeTarget)
+	DEFINE_FIELD(CTriggerChangeTarget, m_iszNewTarget, FIELD_STRING),
+END_SAVERESTORE(CTriggerChangeTarget, CBaseDelay)
+#endif
 
 bool CTriggerChangeTarget::KeyValue(KeyValueData* pkvd)
 {

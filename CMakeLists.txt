@@ -18,6 +18,7 @@ project(halflife
     LANGUAGES CXX
 )
 
+option(HALFLIFE_SAVERESTORE "Enable singleplayer game save system" OFF)
 option(HALFLIFE_BOTS "Enable multiplayer bots" ON)
 
 set(HL_SRC_DIR ${CMAKE_SOURCE_DIR}/src)
@@ -83,7 +84,6 @@ set(SERVER_SRC
     ${SERVER_SRC_DIR}/game.cpp
     ${SERVER_SRC_DIR}/h_export.cpp
     ${SERVER_SRC_DIR}/nodes.cpp
-    ${SERVER_SRC_DIR}/saverestore.cpp
     ${SERVER_SRC_DIR}/tent.cpp
     ${SERVER_SRC_DIR}/UserMessages.cpp
     ${SERVER_SRC_DIR}/util.cpp
@@ -188,6 +188,16 @@ if(HALFLIFE_BOTS)
         ${SERVER_SRC_DIR}/bot/nav_file.cpp
         ${SERVER_SRC_DIR}/bot/nav_node.cpp
         ${SERVER_SRC_DIR}/bot/nav_path.cpp
+    )
+
+endif()
+
+if(HALFLIFE_SAVERESTORE)
+
+    list(APPEND HL_COMPILE_DEFS HALFLIFE_SAVERESTORE)
+
+    list(APPEND SERVER_SRC
+        ${SERVER_SRC_DIR}/saverestore.cpp
     )
 
 endif()

@@ -115,13 +115,12 @@ void W_Precache()
 }
 
 
-TYPEDESCRIPTION CBasePlayerWeapon::m_SaveData[] =
-{
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CBasePlayerWeapon)
 	DEFINE_FIELD(CBasePlayerWeapon, m_pPlayer, FIELD_CLASSPTR),
 	DEFINE_FIELD(CBasePlayerWeapon, m_iClip, FIELD_INTEGER),
-};
-
-IMPLEMENT_SAVERESTORE(CBasePlayerWeapon, CBaseAnimating);
+END_SAVERESTORE(CBasePlayerWeapon, CBaseAnimating)
+#endif
 
 
 bool CBasePlayerWeapon::Spawn()

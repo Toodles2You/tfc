@@ -127,8 +127,14 @@ public:
 	virtual bool Spawn() { return false; }
 	virtual void Precache() {}
 	virtual bool KeyValue(KeyValueData* pkvd) { return false; }
+
+#ifdef HALFLIFE_SAVERESTORE
+	static TYPEDESCRIPTION m_SaveData[];
+
 	virtual bool Save(CSave& save);
 	virtual bool Restore(CRestore& restore);
+#endif
+
 	virtual int ObjectCaps() { return FCAP_ACROSS_TRANSITION; }
 	virtual void Activate() {}
 
@@ -140,9 +146,6 @@ public:
 	void SetModel(const char* name);
 
 	virtual void DeathNotice(entvars_t* pevChild) {} // monster maker children use this to tell the monster maker that they have died.
-
-
-	static TYPEDESCRIPTION m_SaveData[];
 
 	virtual void TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType);
 	virtual bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType);
@@ -228,8 +231,12 @@ public:
 	void UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value);
 	// Do the bounding boxes of these two intersect?
 	bool Intersects(CBaseEntity* pOther);
+
+#ifdef HALFLIFE_SAVERESTORE
 	void MakeDormant();
 	bool IsDormant();
+#endif
+
 	bool IsLockedByMaster() { return false; }
 
 	static CBaseEntity* Instance(edict_t* pent);
@@ -330,16 +337,14 @@ void PlayLockSounds(CBaseEntity* entity, locksound_t* pls, bool flocked, bool fb
 class CMultiSource : public CPointEntity
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 	int ObjectCaps() override { return (CPointEntity::ObjectCaps() | FCAP_MASTER); }
 	bool IsTriggered(CBaseEntity* pActivator) override;
 	void EXPORT Register();
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-
-	static TYPEDESCRIPTION m_SaveData[];
 
 	EHANDLE m_rgEntities[MS_MAX_TARGETS];
 	int m_rgTriggered[MS_MAX_TARGETS];
@@ -355,14 +360,13 @@ public:
 class CBaseDelay : public CBaseEntity
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	float m_flDelay;
 	int m_iszKillTarget;
 
 	bool KeyValue(KeyValueData* pkvd) override;
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
 
-	static TYPEDESCRIPTION m_SaveData[];
 	// common member functions
 	void UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value);
 	void EXPORT DelayThink();
@@ -372,10 +376,7 @@ public:
 class CBaseAnimating : public CBaseDelay
 {
 public:
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-
-	static TYPEDESCRIPTION m_SaveData[];
+	DECLARE_SAVERESTORE()
 
 	// Basic Monster Animation functions
 	float StudioFrameAdvance(float flInterval = 0.0); // accumulate animation frame time from last time called until now
@@ -415,6 +416,8 @@ public:
 class CBaseToggle : public CBaseDelay
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool KeyValue(KeyValueData* pkvd) override;
 
 	TOGGLE_STATE m_toggle_state;
@@ -438,11 +441,6 @@ public:
 	Vector m_vecFinalAngle;
 
 	int m_bitsDamageInflict; // DMG_ damage type that the door or tigger does
-
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-
-	static TYPEDESCRIPTION m_SaveData[];
 
 	int GetToggleState() override { return m_toggle_state; }
 	float GetDelay() override { return m_flWait; }
@@ -509,6 +507,8 @@ const char* ButtonSound(int sound); // get string of button sound number
 class CBaseButton : public CBaseToggle
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	void Precache() override;
 	bool KeyValue(KeyValueData* pkvd) override;
@@ -522,8 +522,6 @@ public:
 	void EXPORT ButtonBackHome();
 	void EXPORT ButtonUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
 	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
 
 	enum BUTTON_CODE
 	{
@@ -533,7 +531,6 @@ public:
 	};
 	BUTTON_CODE ButtonResponseToTouch();
 
-	static TYPEDESCRIPTION m_SaveData[];
 	// Buttons that don't take damage can be IMPULSE used
 	int ObjectCaps() override { return (CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | (pev->takedamage ? 0 : FCAP_IMPULSE_USE); }
 

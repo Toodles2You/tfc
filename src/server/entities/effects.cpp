@@ -33,6 +33,8 @@ LINK_ENTITY_TO_CLASS(info_target, CPointEntity);
 class CBubbling : public CBaseEntity
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	void Precache() override;
 	bool KeyValue(KeyValueData* pkvd) override;
@@ -40,10 +42,7 @@ public:
 	void EXPORT FizzThink();
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
 	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
-	static TYPEDESCRIPTION m_SaveData[];
 
 	int m_density;
 	int m_frequency;
@@ -53,16 +52,13 @@ public:
 
 LINK_ENTITY_TO_CLASS(env_bubbles, CBubbling);
 
-TYPEDESCRIPTION CBubbling::m_SaveData[] =
-	{
-		DEFINE_FIELD(CBubbling, m_density, FIELD_INTEGER),
-		DEFINE_FIELD(CBubbling, m_frequency, FIELD_INTEGER),
-		DEFINE_FIELD(CBubbling, m_state, FIELD_BOOLEAN),
-		// Let spawn restore this!
-		//	DEFINE_FIELD( CBubbling, m_bubbleModel, FIELD_INTEGER ),
-};
-
-IMPLEMENT_SAVERESTORE(CBubbling, CBaseEntity);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CBubbling)
+	DEFINE_FIELD(CBubbling, m_density, FIELD_INTEGER),
+	DEFINE_FIELD(CBubbling, m_frequency, FIELD_INTEGER),
+	DEFINE_FIELD(CBubbling, m_state, FIELD_BOOLEAN),
+END_SAVERESTORE(CBubbling, CBaseEntity)
+#endif
 
 
 #define SF_BUBBLES_STARTOFF 0x0001
@@ -371,6 +367,8 @@ void CBeam::DoSparks(const Vector& start, const Vector& end)
 class CLightning : public CBeam
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	void Precache() override;
 	bool KeyValue(KeyValueData* pkvd) override;
@@ -390,10 +388,6 @@ public:
 			return true;
 		return false;
 	}
-
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
 
 	void BeamUpdateVars();
 
@@ -416,24 +410,23 @@ public:
 LINK_ENTITY_TO_CLASS(env_beam, CLightning);
 
 
-TYPEDESCRIPTION CLightning::m_SaveData[] =
-	{
-		DEFINE_FIELD(CLightning, m_active, FIELD_BOOLEAN),
-		DEFINE_FIELD(CLightning, m_iszStartEntity, FIELD_STRING),
-		DEFINE_FIELD(CLightning, m_iszEndEntity, FIELD_STRING),
-		DEFINE_FIELD(CLightning, m_life, FIELD_FLOAT),
-		DEFINE_FIELD(CLightning, m_boltWidth, FIELD_INTEGER),
-		DEFINE_FIELD(CLightning, m_noiseAmplitude, FIELD_INTEGER),
-		DEFINE_FIELD(CLightning, m_brightness, FIELD_INTEGER),
-		DEFINE_FIELD(CLightning, m_speed, FIELD_INTEGER),
-		DEFINE_FIELD(CLightning, m_restrike, FIELD_FLOAT),
-		DEFINE_FIELD(CLightning, m_spriteTexture, FIELD_INTEGER),
-		DEFINE_FIELD(CLightning, m_iszSpriteName, FIELD_STRING),
-		DEFINE_FIELD(CLightning, m_frameStart, FIELD_INTEGER),
-		DEFINE_FIELD(CLightning, m_radius, FIELD_FLOAT),
-};
-
-IMPLEMENT_SAVERESTORE(CLightning, CBeam);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CLightning)
+	DEFINE_FIELD(CLightning, m_active, FIELD_BOOLEAN),
+	DEFINE_FIELD(CLightning, m_iszStartEntity, FIELD_STRING),
+	DEFINE_FIELD(CLightning, m_iszEndEntity, FIELD_STRING),
+	DEFINE_FIELD(CLightning, m_life, FIELD_FLOAT),
+	DEFINE_FIELD(CLightning, m_boltWidth, FIELD_INTEGER),
+	DEFINE_FIELD(CLightning, m_noiseAmplitude, FIELD_INTEGER),
+	DEFINE_FIELD(CLightning, m_brightness, FIELD_INTEGER),
+	DEFINE_FIELD(CLightning, m_speed, FIELD_INTEGER),
+	DEFINE_FIELD(CLightning, m_restrike, FIELD_FLOAT),
+	DEFINE_FIELD(CLightning, m_spriteTexture, FIELD_INTEGER),
+	DEFINE_FIELD(CLightning, m_iszSpriteName, FIELD_STRING),
+	DEFINE_FIELD(CLightning, m_frameStart, FIELD_INTEGER),
+	DEFINE_FIELD(CLightning, m_radius, FIELD_FLOAT),
+END_SAVERESTORE(CLightning, CBeam)
+#endif
 
 
 bool CLightning::Spawn()
@@ -924,14 +917,13 @@ void CLightning::BeamUpdateVars()
 
 LINK_ENTITY_TO_CLASS(env_laser, CLaser);
 
-TYPEDESCRIPTION CLaser::m_SaveData[] =
-	{
-		DEFINE_FIELD(CLaser, m_pSprite, FIELD_CLASSPTR),
-		DEFINE_FIELD(CLaser, m_iszSpriteName, FIELD_STRING),
-		DEFINE_FIELD(CLaser, m_firePosition, FIELD_POSITION_VECTOR),
-};
-
-IMPLEMENT_SAVERESTORE(CLaser, CBeam);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CLaser)
+	DEFINE_FIELD(CLaser, m_pSprite, FIELD_CLASSPTR),
+	DEFINE_FIELD(CLaser, m_iszSpriteName, FIELD_STRING),
+	DEFINE_FIELD(CLaser, m_firePosition, FIELD_POSITION_VECTOR),
+END_SAVERESTORE(CLaser, CBeam)
+#endif
 
 bool CLaser::Spawn()
 {
@@ -1091,12 +1083,11 @@ void CLaser::StrikeThink()
 class CGlow : public CPointEntity
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	void Think() override;
 	void Animate(float frames);
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
 
 	float m_lastTime;
 	float m_maxFrame;
@@ -1104,13 +1095,12 @@ public:
 
 LINK_ENTITY_TO_CLASS(env_glow, CGlow);
 
-TYPEDESCRIPTION CGlow::m_SaveData[] =
-	{
-		DEFINE_FIELD(CGlow, m_lastTime, FIELD_TIME),
-		DEFINE_FIELD(CGlow, m_maxFrame, FIELD_FLOAT),
-};
-
-IMPLEMENT_SAVERESTORE(CGlow, CPointEntity);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CGlow)
+	DEFINE_FIELD(CGlow, m_lastTime, FIELD_TIME),
+	DEFINE_FIELD(CGlow, m_maxFrame, FIELD_FLOAT),
+END_SAVERESTORE(CGlow, CPointEntity)
+#endif
 
 bool CGlow::Spawn()
 {
@@ -1150,13 +1140,12 @@ void CGlow::Animate(float frames)
 
 LINK_ENTITY_TO_CLASS(env_sprite, CSprite);
 
-TYPEDESCRIPTION CSprite::m_SaveData[] =
-	{
-		DEFINE_FIELD(CSprite, m_lastTime, FIELD_TIME),
-		DEFINE_FIELD(CSprite, m_maxFrame, FIELD_FLOAT),
-};
-
-IMPLEMENT_SAVERESTORE(CSprite, CPointEntity);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CSprite)
+	DEFINE_FIELD(CSprite, m_lastTime, FIELD_TIME),
+	DEFINE_FIELD(CSprite, m_maxFrame, FIELD_FLOAT),
+END_SAVERESTORE(CSprite, CPointEntity)
+#endif
 
 bool CSprite::Spawn()
 {

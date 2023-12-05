@@ -29,6 +29,8 @@
 class CBaseDoor : public CBaseToggle
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	void Precache() override;
 	bool KeyValue(KeyValueData* pkvd) override;
@@ -43,10 +45,6 @@ public:
 		else
 			return (CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION);
 	};
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-
-	static TYPEDESCRIPTION m_SaveData[];
 
 	void SetToggleState(int state) override;
 
@@ -74,20 +72,18 @@ public:
 };
 
 
-TYPEDESCRIPTION CBaseDoor::m_SaveData[] =
-	{
-		DEFINE_FIELD(CBaseDoor, m_bHealthValue, FIELD_CHARACTER),
-		DEFINE_FIELD(CBaseDoor, m_bMoveSnd, FIELD_CHARACTER),
-		DEFINE_FIELD(CBaseDoor, m_bStopSnd, FIELD_CHARACTER),
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CBaseDoor)
+	DEFINE_FIELD(CBaseDoor, m_bHealthValue, FIELD_CHARACTER),
+	DEFINE_FIELD(CBaseDoor, m_bMoveSnd, FIELD_CHARACTER),
+	DEFINE_FIELD(CBaseDoor, m_bStopSnd, FIELD_CHARACTER),
 
-		DEFINE_FIELD(CBaseDoor, m_bLockedSound, FIELD_CHARACTER),
-		DEFINE_FIELD(CBaseDoor, m_bLockedSentence, FIELD_CHARACTER),
-		DEFINE_FIELD(CBaseDoor, m_bUnlockedSound, FIELD_CHARACTER),
-		DEFINE_FIELD(CBaseDoor, m_bUnlockedSentence, FIELD_CHARACTER),
-
-};
-
-IMPLEMENT_SAVERESTORE(CBaseDoor, CBaseToggle);
+	DEFINE_FIELD(CBaseDoor, m_bLockedSound, FIELD_CHARACTER),
+	DEFINE_FIELD(CBaseDoor, m_bLockedSentence, FIELD_CHARACTER),
+	DEFINE_FIELD(CBaseDoor, m_bUnlockedSound, FIELD_CHARACTER),
+	DEFINE_FIELD(CBaseDoor, m_bUnlockedSentence, FIELD_CHARACTER),
+END_SAVERESTORE(CBaseDoor, CBaseToggle)
+#endif
 
 
 #define DOOR_SENTENCEWAIT 6
@@ -851,16 +847,14 @@ void CRotDoor::SetToggleState(int state)
 class CMomentaryDoor : public CBaseToggle
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool Spawn() override;
 	void Precache() override;
 
 	bool KeyValue(KeyValueData* pkvd) override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 	int ObjectCaps() override { return CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
-
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
 
 	void EXPORT DoorMoveDone();
 	void EXPORT StopMoveSound();
@@ -870,12 +864,11 @@ public:
 
 LINK_ENTITY_TO_CLASS(momentary_door, CMomentaryDoor);
 
-TYPEDESCRIPTION CMomentaryDoor::m_SaveData[] =
-	{
-		DEFINE_FIELD(CMomentaryDoor, m_bMoveSnd, FIELD_CHARACTER),
-};
-
-IMPLEMENT_SAVERESTORE(CMomentaryDoor, CBaseToggle);
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CMomentaryDoor)
+	DEFINE_FIELD(CMomentaryDoor, m_bMoveSnd, FIELD_CHARACTER),
+END_SAVERESTORE(CMomentaryDoor, CBaseToggle)
+#endif
 
 bool CMomentaryDoor::Spawn()
 {

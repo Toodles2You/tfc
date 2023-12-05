@@ -171,8 +171,6 @@ globalentity_t* CGlobalState::Find(string_t globalname)
 }
 
 
-// This is available all the time now on impulse 104, remove later
-//#ifndef NDEBUG
 void CGlobalState::DumpGlobals()
 {
 	static const char* estates[] = {"Off", "On", "Dead"};
@@ -186,7 +184,6 @@ void CGlobalState::DumpGlobals()
 		pTest = pTest->pNext;
 	}
 }
-//#endif
 
 
 void CGlobalState::EntityAdd(string_t globalname, string_t mapName, GLOBALESTATE state)
@@ -229,17 +226,18 @@ GLOBALESTATE CGlobalState::EntityGetState(string_t globalname)
 
 
 // Global Savedata for Delay
+#ifdef HALFLIFE_SAVERESTORE
 TYPEDESCRIPTION CGlobalState::m_SaveData[] =
-	{
-		DEFINE_FIELD(CGlobalState, m_listCount, FIELD_INTEGER),
+{
+	DEFINE_FIELD(CGlobalState, m_listCount, FIELD_INTEGER),
 };
 
 // Global Savedata for Delay
 TYPEDESCRIPTION gGlobalEntitySaveData[] =
-	{
-		DEFINE_ARRAY(globalentity_t, name, FIELD_CHARACTER, 64),
-		DEFINE_ARRAY(globalentity_t, levelName, FIELD_CHARACTER, 32),
-		DEFINE_FIELD(globalentity_t, state, FIELD_INTEGER),
+{
+	DEFINE_ARRAY(globalentity_t, name, FIELD_CHARACTER, 64),
+	DEFINE_ARRAY(globalentity_t, levelName, FIELD_CHARACTER, 32),
+	DEFINE_FIELD(globalentity_t, state, FIELD_INTEGER),
 };
 
 
@@ -284,6 +282,7 @@ bool CGlobalState::Restore(CRestore& restore)
 	}
 	return true;
 }
+#endif
 
 void CGlobalState::EntityUpdate(string_t globalname, string_t mapname)
 {
@@ -309,6 +308,7 @@ void CGlobalState::ClearStates()
 
 void SaveGlobalState(SAVERESTOREDATA* pSaveData)
 {
+#ifdef HALFLIFE_SAVERESTORE
 	if (!CSaveRestoreBuffer::IsValidSaveRestoreData(pSaveData))
 	{
 		return;
@@ -316,11 +316,13 @@ void SaveGlobalState(SAVERESTOREDATA* pSaveData)
 
 	CSave saveHelper(*pSaveData);
 	gGlobalState.Save(saveHelper);
+#endif
 }
 
 
 void RestoreGlobalState(SAVERESTOREDATA* pSaveData)
 {
+#ifdef HALFLIFE_SAVERESTORE
 	if (!CSaveRestoreBuffer::IsValidSaveRestoreData(pSaveData))
 	{
 		return;
@@ -328,6 +330,7 @@ void RestoreGlobalState(SAVERESTOREDATA* pSaveData)
 
 	CRestore restoreHelper(*pSaveData);
 	gGlobalState.Restore(restoreHelper);
+#endif
 }
 
 

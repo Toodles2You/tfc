@@ -30,14 +30,11 @@
 class CLight : public CPointEntity
 {
 public:
+	DECLARE_SAVERESTORE()
+
 	bool KeyValue(KeyValueData* pkvd) override;
 	bool Spawn() override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
-
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-
-	static TYPEDESCRIPTION m_SaveData[];
 
 private:
 	int m_iStyle;
@@ -45,14 +42,12 @@ private:
 };
 LINK_ENTITY_TO_CLASS(light, CLight);
 
-TYPEDESCRIPTION CLight::m_SaveData[] =
-	{
-		DEFINE_FIELD(CLight, m_iStyle, FIELD_INTEGER),
-		DEFINE_FIELD(CLight, m_iszPattern, FIELD_STRING),
-};
-
-IMPLEMENT_SAVERESTORE(CLight, CPointEntity);
-
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CLight)
+	DEFINE_FIELD(CLight, m_iStyle, FIELD_INTEGER),
+	DEFINE_FIELD(CLight, m_iszPattern, FIELD_STRING),
+END_SAVERESTORE(CLight, CPointEntity)
+#endif
 
 //
 // Cache user-entity-field values until spawn is called.

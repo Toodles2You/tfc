@@ -18,6 +18,9 @@ public:
 //=========================================================
 class CWeaponBox : public CBaseEntity
 {
+public:
+	DECLARE_SAVERESTORE()
+
 	void Precache() override;
 	bool Spawn() override;
 	void Touch(CBaseEntity* pOther) override;
@@ -26,11 +29,7 @@ class CWeaponBox : public CBaseEntity
 	int GiveAmmo(int iCount, int iType, int iMax, int* pIndex = NULL);
 	void SetObjectCollisionBox() override;
 
-public:
 	void EXPORT Kill();
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
 
 	bool HasWeapon(CBasePlayerWeapon* pCheckWeapon);
 	bool PackWeapon(CBasePlayerWeapon* pWeapon);

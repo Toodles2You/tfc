@@ -52,7 +52,10 @@
 #define FL_SPECTATOR (1 << 26)	  // This client is a spectator, don't run touch functions, etc.
 #define FL_CUSTOMENTITY (1 << 29) // This is a custom entity
 #define FL_KILLME (1 << 30)		  // This entity is marked for death -- This allows the engine to kill ents at the appropriate time
+
+#ifdef HALFLIFE_SAVERESTORE
 #define FL_DORMANT (1 << 31)	  // Entity is dormant, no updates to client
+#endif
 
 
 // Goes into globalvars_t.trace_flags
