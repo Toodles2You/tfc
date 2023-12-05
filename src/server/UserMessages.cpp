@@ -53,7 +53,6 @@ void LinkUserMessages()
 	gmsgWeapPickup = REG_USER_MSG("WeapPickup", 1);
 	gmsgItemPickup = REG_USER_MSG("ItemPickup", -1);
 	gmsgHideWeapon = REG_USER_MSG("HideWeapon", 1);
-	gmsgSetFOV = REG_USER_MSG("SetFOV", 1);
 	gmsgShowMenu = REG_USER_MSG("ShowMenu", -1);
 	gmsgShake = REG_USER_MSG("ScreenShake", sizeof(ScreenShake));
 	gmsgFade = REG_USER_MSG("ScreenFade", sizeof(ScreenFade));

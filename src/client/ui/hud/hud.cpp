@@ -22,6 +22,7 @@
 #include "cl_util.h"
 #include <string.h>
 #include <stdio.h>
+#include <algorithm>
 #include "parsemsg.h"
 #include "vgui_int.h"
 #include "vgui_TeamFortressViewport.h"
@@ -105,11 +106,6 @@ int __MsgFunc_ViewMode(const char* pszName, int iSize, void* pbuf)
 {
 	gHUD.MsgFunc_ViewMode(pszName, iSize, pbuf);
 	return 1;
-}
-
-int __MsgFunc_SetFOV(const char* pszName, int iSize, void* pbuf)
-{
-	return static_cast<int>(gHUD.MsgFunc_SetFOV(pszName, iSize, pbuf));
 }
 
 int __MsgFunc_Concuss(const char* pszName, int iSize, void* pbuf)
@@ -267,7 +263,6 @@ void CHud::Init()
 	HOOK_MESSAGE(GameMode);
 	HOOK_MESSAGE(InitHUD);
 	HOOK_MESSAGE(ViewMode);
-	HOOK_MESSAGE(SetFOV);
 	HOOK_MESSAGE(Concuss);
 	HOOK_MESSAGE(Weapons);
 
@@ -304,26 +299,26 @@ void CHud::Init()
 	m_cColors[CHud::COLOR_DEFAULT].b = 255;
 	m_cColors[CHud::COLOR_DEFAULT].a = 255;
 
-	m_cColors[CHud::COLOR_PRIMARY].r = 255;		// 255
-	m_cColors[CHud::COLOR_PRIMARY].g = 160;		// 160
-	m_cColors[CHud::COLOR_PRIMARY].b = 0;		// 0
+	m_cColors[CHud::COLOR_PRIMARY].r = 255;
+	m_cColors[CHud::COLOR_PRIMARY].g = 160;
+	m_cColors[CHud::COLOR_PRIMARY].b = 0;
 	m_cColors[CHud::COLOR_PRIMARY].a = 255;
 
-	m_cColors[CHud::COLOR_SECONDARY].r = 0;		// 0
-	m_cColors[CHud::COLOR_SECONDARY].g = 160;	// 160
-	m_cColors[CHud::COLOR_SECONDARY].b = 0;		// 0
+	m_cColors[CHud::COLOR_SECONDARY].r = 0;
+	m_cColors[CHud::COLOR_SECONDARY].g = 160;
+	m_cColors[CHud::COLOR_SECONDARY].b = 0;
 	m_cColors[CHud::COLOR_SECONDARY].a = 255;
 
-	m_cColors[CHud::COLOR_WARNING].r = 255;		// 255
-	m_cColors[CHud::COLOR_WARNING].g = 16;		// 16
-	m_cColors[CHud::COLOR_WARNING].b = 16;		// 16
+	m_cColors[CHud::COLOR_WARNING].r = 255;
+	m_cColors[CHud::COLOR_WARNING].g = 16;
+	m_cColors[CHud::COLOR_WARNING].b = 16;
 	m_cColors[CHud::COLOR_WARNING].a = 255;
 
 	m_iFOV = 0;
 
 	zoom_sensitivity_ratio = CVAR_CREATE("zoom_sensitivity_ratio", "1.0", 0);
 	CVAR_CREATE("cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO);
-	default_fov = CVAR_CREATE("default_fov", "90", FCVAR_ARCHIVE);
+	cl_fov = gEngfuncs.pfnRegisterVariable("cl_fov", "90", FCVAR_ARCHIVE);
 	m_pCvarCrosshair = gEngfuncs.pfnGetCvarPointer("crosshair");
 	m_pCvarStealMouse = CVAR_CREATE("hud_capturemouse", "0", FCVAR_ARCHIVE);
 	m_pCvarDraw = CVAR_CREATE("hud_draw", "1", FCVAR_ARCHIVE);
@@ -623,29 +618,27 @@ float HUD_GetFOV()
 
 void CHud::Update_SetFOV(int iFov)
 {
+	if (cl_fov->value < FOV_MIN || cl_fov->value > FOV_MAX)
+	{
+		gEngfuncs.Cvar_SetValue(
+			"cl_fov", std::clamp(cl_fov->value, FOV_MIN, FOV_MAX));
+	}
+
 	if (iFov <= 0)
 	{
-		m_iFOV = default_fov->value;
+		m_iFOV = cl_fov->value;
 		m_flMouseSensitivity = 0;
 	}
 	else if (m_iFOV != iFov)
 	{
 		m_iFOV = iFov;
-		m_flMouseSensitivity = sensitivity->value * ((float)iFov / (float)default_fov->value) * zoom_sensitivity_ratio->value;
+
+		m_flMouseSensitivity =
+			sensitivity->value
+			* ((float)iFov / (float)cl_fov->value)
+			* zoom_sensitivity_ratio->value;
 	}
 }
-
-bool CHud::MsgFunc_SetFOV(const char* pszName, int iSize, void* pbuf)
-{
-	BEGIN_READ(pbuf, iSize);
-
-	int newfov = READ_BYTE();
-
-	Update_SetFOV(newfov);
-
-	return true;
-}
-
 
 void CHud::AddHudElem(CHudBase* phudelem)
 {

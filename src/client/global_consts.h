@@ -15,3 +15,6 @@ enum
 
 #define MAX_SERVERNAME_LENGTH	64
 #define MAX_TEAMNAME_SIZE 32
+
+#define FOV_MIN 70.0F
+#define FOV_MAX 100.0F

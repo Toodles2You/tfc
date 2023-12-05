@@ -611,7 +611,7 @@ private:
 	Rect* m_rgrcRects;							  /*[HUD_SPRITE_COUNT]*/
 	char* m_rgszSpriteNames;					  /*[HUD_SPRITE_COUNT][MAX_SPRITE_NAME_LENGTH]*/
 
-	cvar_t *default_fov;
+	cvar_t *cl_fov;
 	cvar_t *zoom_sensitivity_ratio;
 
 public:
@@ -660,7 +660,6 @@ public:
 	bool MsgFunc_ResetHUD(const char* pszName, int iSize, void* pbuf);
 	void MsgFunc_InitHUD(const char* pszName, int iSize, void* pbuf);
 	void MsgFunc_ViewMode(const char* pszName, int iSize, void* pbuf);
-	bool MsgFunc_SetFOV(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_Concuss(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_Weapons(const char* pszName, int iSize, void* pbuf);
 
@@ -690,6 +689,8 @@ public:
 	int GetObserverTarget2();
 	bool IsObserver();
 	bool IsSpectator();
+
+	bool IsViewZoomed() { return m_flMouseSensitivity != 0.0F; }
 };
 
 extern CHud gHUD;

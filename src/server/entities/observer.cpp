@@ -196,11 +196,6 @@ void CBasePlayer::Observer_CheckProperties()
 		if (m_iFOV != target->m_iFOV || m_iObserverWeapon != weapon)
 		{
 			m_iFOV = target->m_iFOV;
-			// write fov before wepon data, so zoomed crosshair is set correctly
-			MessageBegin(MSG_ONE, gmsgSetFOV, this);
-			WriteByte(m_iFOV);
-			MessageEnd();
-
 
 			m_iObserverWeapon = weapon;
 			//send weapon update

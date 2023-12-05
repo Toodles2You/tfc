@@ -916,26 +916,20 @@ static void DrawCrosshair(WEAPON *pWeapon, int a = 255, bool zoom = false, bool 
 	HSPRITE pic = pWeapon->hCrosshair;
 	Rect *rc = &pWeapon->rcCrosshair;
 	
-	if (zoom)
+	if (zoom && autoaim && 0 != pWeapon->hZoomedAutoaim)
 	{
-		if (autoaim && 0 != pWeapon->hAutoaim)
-		{
-			pic = pWeapon->hAutoaim;
-			rc = &pWeapon->rcAutoaim;
-		}
+		pic = pWeapon->hZoomedAutoaim;
+		rc = &pWeapon->rcZoomedAutoaim;
 	}
-	else
+	else if (zoom && 0 != pWeapon->hZoomedCrosshair)
 	{
-		if (autoaim && 0 != pWeapon->hZoomedAutoaim)
-		{
-			pic = pWeapon->hZoomedAutoaim;
-			rc = &pWeapon->rcZoomedAutoaim;
-		}
-		else if (0 != pWeapon->hZoomedCrosshair)
-		{
-			pic = pWeapon->hZoomedCrosshair;
-			rc = &pWeapon->rcZoomedCrosshair;
-		}
+		pic = pWeapon->hZoomedCrosshair;
+		rc = &pWeapon->rcZoomedCrosshair;
+	}
+	else if (autoaim && 0 != pWeapon->hAutoaim)
+	{
+		pic = pWeapon->hAutoaim;
+		rc = &pWeapon->rcAutoaim;
 	}
 
 	if (pic <= 0)
@@ -992,7 +986,11 @@ bool CHudAmmo::Draw(float flTime)
 
 	if (gHUD.m_pCvarCrosshair->value != 0)
 	{
-		DrawCrosshair(pw, 255, gHUD.m_iFOV >= 90, flTime - m_flHitFeedbackTime < 0.2);
+		DrawCrosshair(
+			pw,
+			255,
+			gHUD.IsViewZoomed(),
+			flTime - m_flHitFeedbackTime < 0.2);
 	}
 
 	// SPR_Draw Ammo
