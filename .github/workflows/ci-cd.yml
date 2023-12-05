@@ -2,59 +2,86 @@ name: CI/CD
 
 on: [push, pull_request]
 
+env:
+  BUILD_TYPE: Release
+  GAME_NAME: Half-Life
+  MOD_NAME: hlu
+  VCPKG_ROOT: ${{github.workspace}}/vcpkg
+
 jobs:
   linux:
     name: Linux-x86
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        compiler: [g++, clang++]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      
-      - name: Install G++ Multilib, Clang++ & OpenGL library
-        run: |
-          sudo apt update
-          sudo apt install -y g++-multilib clang libgl1-mesa-dev
-      
-      - name: Build
-        run: |
-          cd linux
-          make COMPILER=${{ matrix.compiler }} CFG=release -j2
-      
-      - name: Deploy
-        uses: actions/upload-artifact@v3.1.0
         with:
-          name: Linux-x86-${{ matrix.compiler }}
-          path: |
-            linux/release/client.so
-            linux/release/client.so.dbg
-            linux/release/hl.so
-            linux/release/hl.so.dbg
+          submodules: recursive
+          
+      - name: Install G++ Multilib & 32 bit OpenGL library
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+          sudo apt update
+          sudo apt install -y g++-11-multilib libgcc-s1:i386 libstdc++6:i386 libatomic1:i386 libgl1-mesa-dev:i386
+         
+      - uses: lukka/get-cmake@latest
       
+      - name: Restore artifacts, setup vcpkg
+        uses: lukka/run-vcpkg@v10
+        with:
+          vcpkgDirectory: '${{env.VCPKG_ROOT}}'
+          runVcpkgInstall: false
+          vcpkgJsonIgnores: "['**/vcpkg/**', '**/vcpkg_config/**', '**/utils/**']"
+         
+      - name: Configure
+        run: >
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{env.GAME_NAME}}/${{env.MOD_NAME}}
+          -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/cmake/LinuxToolchain.cmake
+        
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j3
+        
+      - name: Install
+        run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+        
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Linux-x86
+          path: ${{env.GAME_NAME}}
+        
   win32:
     name: Win32
     runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.1
         with:
-          msbuild-architecture: x86
+          submodules: recursive
       
+      - uses: lukka/get-cmake@latest
+      
+      - name: Restore artifacts, setup vcpkg
+        uses: lukka/run-vcpkg@v10
+        with:
+          vcpkgDirectory: '${{env.VCPKG_ROOT}}'
+          runVcpkgInstall: false
+          vcpkgJsonIgnores: "['**/vcpkg/**', '**/vcpkg_config/**', '**/utils/**']"
+        
+      - name: Configure
+        run: >
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{env.GAME_NAME}}/${{env.MOD_NAME}}
+          -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/cmake/WindowsToolchain.cmake -A Win32
+        
       - name: Build
-        run: msbuild projects/vs2019/projects.sln -t:rebuild -property:Configuration=Release -maxcpucount:2
-      
-      - name: Deploy
-        uses: actions/upload-artifact@v3.1.0
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j3
+        
+      - name: Install
+        run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+        
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
         with:
           name: Win32
-          path: |
-            projects/vs2019/Release/hl_cdll/client.dll
-            projects/vs2019/Release/hl_cdll/client.pdb
-            projects/vs2019/Release/hldll/hl.dll
-            projects/vs2019/Release/hldll/hl.pdb
-      
+          path: ${{env.GAME_NAME}}
