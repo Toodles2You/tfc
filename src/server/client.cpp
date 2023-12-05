@@ -850,7 +850,7 @@ void StartFrame()
 void ClientPrecache()
 {
 	// setup precaches always needed
-	PRECACHE_SOUND("player/sprayer.wav"); // spray paint sound for PreAlpha
+	PRECACHE_SOUND("player/sprayer.wav"); // spray paint sound
 
 	PRECACHE_SOUND("player/pl_jumpland2.wav");
 	PRECACHE_SOUND("player/pl_fallpain3.wav");
@@ -945,6 +945,8 @@ void ClientPrecache()
 	PRECACHE_SOUND("common/wpn_denyselect.wav");
 
 	PRECACHE_SOUND("misc/r_tele1.wav");
+
+	PRECACHE_SOUND("common/null.wav");
 
 	g_usGibbed = PRECACHE_EVENT(1, "events/gibs.sc");
 	g_usTeleport = PRECACHE_EVENT(1, "events/teleport.sc");

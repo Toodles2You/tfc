@@ -112,6 +112,15 @@ void W_Precache()
 
 	PRECACHE_SOUND("weapons/desert_eagle_sight.wav");
 	PRECACHE_SOUND("weapons/desert_eagle_sight2.wav");
+
+	PRECACHE_SOUND("items/itembk2.wav");
+	PRECACHE_SOUND("items/gunpickup2.wav");
+
+	PRECACHE_SOUND("weapons/ric1.wav");
+	PRECACHE_SOUND("weapons/ric2.wav");
+	PRECACHE_SOUND("weapons/ric3.wav");
+	PRECACHE_SOUND("weapons/ric4.wav");
+	PRECACHE_SOUND("weapons/ric5.wav");
 }
 
 

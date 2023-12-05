@@ -415,20 +415,6 @@ void CWorld::Precache()
 	BotPrecache();
 #endif
 
-	PRECACHE_SOUND("common/null.wav");
-
-	PRECACHE_SOUND("items/itembk2.wav");
-	PRECACHE_SOUND("items/gunpickup2.wav");
-
-	PRECACHE_SOUND("common/bodydrop3.wav");
-	PRECACHE_SOUND("common/bodydrop4.wav");
-
-	PRECACHE_SOUND("weapons/ric1.wav");
-	PRECACHE_SOUND("weapons/ric2.wav");
-	PRECACHE_SOUND("weapons/ric3.wav");
-	PRECACHE_SOUND("weapons/ric4.wav");
-	PRECACHE_SOUND("weapons/ric5.wav");
-
 	LIGHT_STYLE(0, "m");
 	LIGHT_STYLE(1, "mmnmmommommnonmmonqnmmo");
 	LIGHT_STYLE(2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
