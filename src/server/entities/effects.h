@@ -41,8 +41,10 @@ public:
 	int ObjectCaps() override
 	{
 		int flags = 0;
+#ifdef HALFLIFE_SAVERESTORE
 		if (pev->spawnflags & SF_SPRITE_TEMPORARY)
 			flags = FCAP_DONT_SAVE;
+#endif
 		return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | flags;
 	}
 	void EXPORT AnimateThink();
@@ -110,8 +112,10 @@ public:
 	int ObjectCaps() override
 	{
 		int flags = 0;
+#ifdef HALFLIFE_SAVERESTORE
 		if (pev->spawnflags & SF_BEAM_TEMPORARY)
 			flags = FCAP_DONT_SAVE;
+#endif
 		return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | flags;
 	}
 

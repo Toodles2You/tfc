@@ -15,16 +15,16 @@
 
 #pragma once
 
-#define MAX_PATH_SIZE 10 // max number of nodes available for a path.
-
 // These are caps bits to indicate what an object's capabilities (currently used for save/restore and level transitions)
-#define FCAP_CUSTOMSAVE 0x00000001
 #define FCAP_ACROSS_TRANSITION 0x00000002 // should transfer between transitions
+
+#ifdef HALFLIFE_SAVERESTORE
 #define FCAP_MUST_SPAWN 0x00000004		  // Spawn after restore
 #define FCAP_DONT_SAVE 0x80000000		  // Don't save this
+#endif
+
 #define FCAP_IMPULSE_USE 0x00000008		  // can be used by the player
 #define FCAP_CONTINUOUS_USE 0x00000010	  // can be used by the player
-#define FCAP_ONOFF_USE 0x00000020		  // can be used by the player
 #define FCAP_DIRECTIONAL_USE 0x00000040	  // Player sends +/- 1 when using (currently only tracktrains)
 #define FCAP_MASTER 0x00000080			  // Can be used to "master" other entities (like multisource)
 
@@ -49,7 +49,9 @@ extern "C" DLLEXPORT int GetNewDLLFunctions(NEW_DLL_FUNCTIONS* pFunctionTable, i
 *	@brief HACKHACK -- this is a hack to keep the node graph entity from "touching" things (like triggers)
 *	while it builds the graph
 */
+#ifdef HALFLIFE_NODEGRAPH
 inline bool gTouchDisabled = false;
+#endif
 
 inline Vector g_vecAttackDir;
 

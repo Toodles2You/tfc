@@ -215,8 +215,10 @@ void DispatchKeyValue(edict_t* pentKeyvalue, KeyValueData* pkvd)
 
 void DispatchTouch(edict_t* pentTouched, edict_t* pentOther)
 {
+#ifdef HALFLIFE_NODEGRAPH
 	if (gTouchDisabled)
 		return;
+#endif
 
 	CBaseEntity* pEntity = (CBaseEntity*)GET_PRIVATE(pentTouched);
 	CBaseEntity* pOther = (CBaseEntity*)GET_PRIVATE(pentOther);

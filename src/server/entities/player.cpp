@@ -1042,7 +1042,7 @@ void CBasePlayer::PlayerUse()
 	while ((pObject = util::FindEntityInSphere(pObject, pev->origin, PLAYER_SEARCH_RADIUS)) != NULL)
 	{
 
-		if ((pObject->ObjectCaps() & (FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE)) != 0)
+		if ((pObject->ObjectCaps() & FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE) != 0)
 		{
 			// !!!PERFORMANCE- should this check be done on a per case basis AFTER we've determined that
 			// this object is actually usable? This dot is being done for every object within PLAYER_SEARCH_RADIUS
@@ -1075,17 +1075,12 @@ void CBasePlayer::PlayerUse()
 			EmitSound("common/wpn_select.wav", CHAN_VOICE);
 
 		if (((pev->button & IN_USE) != 0 && (caps & FCAP_CONTINUOUS_USE) != 0) ||
-			((m_afButtonPressed & IN_USE) != 0 && (caps & (FCAP_IMPULSE_USE | FCAP_ONOFF_USE)) != 0))
+			((m_afButtonPressed & IN_USE) != 0 && (caps & FCAP_IMPULSE_USE) != 0))
 		{
 			if ((caps & FCAP_CONTINUOUS_USE) != 0)
 				m_afPhysicsFlags |= PFLAG_USING;
 
 			pObject->Use(this, this, USE_SET, 1);
-		}
-		// UNDONE: Send different USE codes for ON/OFF.  Cache last ONOFF_USE object to send 'off' if you turn away
-		else if ((m_afButtonReleased & IN_USE) != 0 && (pObject->ObjectCaps() & FCAP_ONOFF_USE) != 0) // BUGBUG This is an "off" use
-		{
-			pObject->Use(this, this, USE_SET, 0);
 		}
 	}
 	else
@@ -1429,7 +1424,9 @@ public:
 	bool Spawn(CBaseEntity* owner);
 	void Think() override;
 
+#ifdef HALFLIFE_SAVERESTORE
 	int ObjectCaps() override { return FCAP_DONT_SAVE; }
+#endif
 };
 
 bool CSprayCan::Spawn(CBaseEntity* owner)
