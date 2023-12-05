@@ -24,9 +24,11 @@
 #include "util.h"
 #include "cbase.h"
 #include "saverestore.h"
-#include "nodes.h"
 #include "doors.h"
 #include "gamerules.h"
+#ifdef HALFLIFE_NODEGRAPH
+#include "nodes.h"
+#endif
 
 // Landmark class
 bool CPointEntity::Spawn()
@@ -68,6 +70,7 @@ bool CBaseDMStart::Spawn()
 // This updates global tables that need to know about entities being removed
 void CBaseEntity::UpdateOnRemove()
 {
+#ifdef HALFLIFE_NODEGRAPH
 	int i;
 
 	if (FBitSet(pev->flags, FL_GRAPHED) && WorldGraph.IsAvailable())
@@ -83,6 +86,8 @@ void CBaseEntity::UpdateOnRemove()
 			}
 		}
 	}
+#endif
+
 	if (!FStringNull(pev->globalname))
 		gGlobalState.EntitySetState(pev->globalname, GLOBAL_DEAD);
 }

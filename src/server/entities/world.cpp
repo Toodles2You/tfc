@@ -23,13 +23,15 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "nodes.h"
 #include "client.h"
 #include "effects.h"
 #include "player.h"
 #include "weapons.h"
 #include "gamerules.h"
 #include "teamplay_gamerules.h"
+#ifdef HALFLIFE_NODEGRAPH
+#include "nodes.h"
+#endif
 #ifdef HALFLIFE_BOTS
 #include "bot/hl_bot.h"
 #include "bot/hl_bot_manager.h"
@@ -442,7 +444,7 @@ void CWorld::Precache()
 	LIGHT_STYLE(12, "mmnnmmnnnmmnn");
 	LIGHT_STYLE(63, "a");
 
-	// init the WorldGraph.
+#ifdef HALFLIFE_NODEGRAPH
 	WorldGraph.InitGraph();
 
 	if (g_pGameRules->FAllowMonsters())
@@ -468,6 +470,7 @@ void CWorld::Precache()
 		SetThink(&CWorld::PostSpawn);
 		pev->nextthink = gpGlobals->time + 0.5f;
 	}
+#endif
 
 	CVAR_SET_FLOAT("sv_zmax", (pev->speed > 0) ? pev->speed : 4096);
 
@@ -548,6 +551,7 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 }
 
 
+#ifdef HALFLIFE_NODEGRAPH
 void CWorld::PostSpawn()
 {
 	if (0 != WorldGraph.m_fGraphPresent)
@@ -567,3 +571,4 @@ void CWorld::PostSpawn()
 	}
 	SetThink(nullptr);
 }
+#endif

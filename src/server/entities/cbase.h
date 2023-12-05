@@ -599,8 +599,10 @@ public:
 
 	static inline CWorld* World = nullptr;
 
+#ifdef HALFLIFE_NODEGRAPH
 protected:
 	EXPORT void PostSpawn();
+#endif
 };
 
 inline CBaseEntity* CBaseEntity::Instance(edict_t* pent)

@@ -29,7 +29,6 @@
 #include "cbase.h"
 #include "player.h"
 #include "trains.h"
-#include "nodes.h"
 #include "weapons.h"
 #include "shake.h"
 #include "gamerules.h"
@@ -40,6 +39,9 @@
 #include "client.h"
 #include "animation.h"
 #include "weaponbox.h"
+#ifdef HALFLIFE_NODEGRAPH
+#include "nodes.h"
+#endif
 
 unsigned short g_usGibbed;
 
@@ -1642,6 +1644,8 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 			ALERT(at_console, "Texture: %s (%c)\n", pTextureName, PM_FindTextureType(pTextureName));
 	}
 	break;
+
+#ifdef HALFLIFE_NODEGRAPH
 	case 195: // show shortest paths for entire level to nearest node
 	{
 		if (WorldGraph.IsAvailable())
@@ -1675,6 +1679,8 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 		}
 	}
 	break;
+#endif
+
 	case 203: // remove creature.
 		pEntity = util::FindEntityForward(this);
 		if (pEntity)

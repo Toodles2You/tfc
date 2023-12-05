@@ -37,11 +37,10 @@
 #define FL_FAKECLIENT (1 << 13)	   // JAC: fake client, simulated server side; don't send network messages to them
 #define FL_DUCKING (1 << 14)	   // Player flag -- Player is fully crouched
 #define FL_FLOAT (1 << 15)		   // Apply floating force to this entity when in water
-#define FL_GRAPHED (1 << 16)	   // worldgraph has this ent listed as something that blocks a connection
 
-#define FL_IMMUNE_WATER (1 << 17)
-#define FL_IMMUNE_SLIME (1 << 18)
-#define FL_IMMUNE_LAVA (1 << 19)
+#ifdef HALFLIFE_NODEGRAPH
+#define FL_GRAPHED (1 << 16)	   // worldgraph has this ent listed as something that blocks a connection
+#endif
 
 #define FL_PROXY (1 << 20)		  // This is a spectator proxy
 #define FL_ALWAYSTHINK (1 << 21)  // Brush model flag -- call think every frame regardless of nextthink - ltime (for constantly changing velocity/path)

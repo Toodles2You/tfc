@@ -19,6 +19,7 @@ project(halflife
 )
 
 option(HALFLIFE_SAVERESTORE "Enable singleplayer game save system" OFF)
+option(HALFLIFE_NODEGRAPH "Enable node graphs for monster AI" OFF)
 option(HALFLIFE_BOTS "Enable multiplayer bots" ON)
 
 set(HL_SRC_DIR ${CMAKE_SOURCE_DIR}/src)
@@ -83,7 +84,6 @@ set(SERVER_SRC
     ${SERVER_SRC_DIR}/client.cpp
     ${SERVER_SRC_DIR}/game.cpp
     ${SERVER_SRC_DIR}/h_export.cpp
-    ${SERVER_SRC_DIR}/nodes.cpp
     ${SERVER_SRC_DIR}/tent.cpp
     ${SERVER_SRC_DIR}/UserMessages.cpp
     ${SERVER_SRC_DIR}/util.cpp
@@ -198,6 +198,16 @@ if(HALFLIFE_SAVERESTORE)
 
     list(APPEND SERVER_SRC
         ${SERVER_SRC_DIR}/saverestore.cpp
+    )
+
+endif()
+
+if(HALFLIFE_NODEGRAPH)
+
+    list(APPEND HL_COMPILE_DEFS HALFLIFE_NODEGRAPH)
+
+    list(APPEND SERVER_SRC
+        ${SERVER_SRC_DIR}/nodes.cpp
     )
 
 endif()

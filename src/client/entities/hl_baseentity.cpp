@@ -26,7 +26,6 @@ This file contains "stubs" of class member implementations so that we can predic
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
-#include "nodes.h"
 
 // CBaseEntity Stubs
 bool CBaseEntity::TakeHealth(float flHealth, int bitsDamageType) { return true; }
