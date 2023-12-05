@@ -69,11 +69,19 @@ bool CHudStatusBar::Draw(float fTime)
 		return true;
 	}
 
-#if 0
-	snprintf(m_szStatusBar, MAX_STATUSTEXT_LENGTH, "%s | Health: %i%%", info->name, extra->health);
-#else
-	snprintf(m_szStatusBar, MAX_STATUSTEXT_LENGTH, "%s", info->name);
-#endif
+	auto extra = &g_PlayerExtraInfo[m_targetIndex];
+
+	if (gHUD.m_GameMode == kGamemodeCooperative
+	 || (gHUD.m_GameMode >= kGamemodeTeamplay
+	 && extra->teamnumber == g_iTeamNumber)
+	 || gHUD.IsSpectator())
+	{
+		snprintf(m_szStatusBar, MAX_STATUSTEXT_LENGTH, "%s | %i", info->name, extra->health);
+	}
+	else
+	{
+		snprintf(m_szStatusBar, MAX_STATUSTEXT_LENGTH, "%s", info->name);
+	}
 	m_szStatusBar[MAX_STATUSTEXT_LENGTH - 1] = '\0';
 
 	int textWidth, textHeight;
