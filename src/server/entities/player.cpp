@@ -1116,11 +1116,9 @@ void CBasePlayer::AddPoints(float score, bool bAllowNegativeScore)
 	}
 
 	MessageBegin(MSG_ALL, gmsgScoreInfo);
-	WriteByte(ENTINDEX(edict()));
+	WriteByte(entindex());
 	WriteShort(pev->frags);
 	WriteShort(m_iDeaths);
-	WriteByte(PCNumber());
-	WriteByte(TeamNumber());
 	MessageEnd();
 }
 

@@ -583,6 +583,7 @@ public:
 	bool MsgFunc_RandomPC( const char *pszName, int iSize, void *pbuf );
 	bool MsgFunc_ServerName( const char *pszName, int iSize, void *pbuf );
 	bool MsgFunc_ScoreInfo( const char *pszName, int iSize, void *pbuf );
+	bool MsgFunc_ExtraInfo( const char *pszName, int iSize, void *pbuf );
 	bool MsgFunc_TeamScore( const char *pszName, int iSize, void *pbuf );
 	bool MsgFunc_AllowSpec( const char *pszName, int iSize, void *pbuf );
 	bool MsgFunc_SpecFade( const char *pszName, int iSize, void *pbuf );	

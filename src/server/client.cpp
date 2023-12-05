@@ -1147,7 +1147,7 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 	if (ent != host)
 	{
 		// don't send if flagged for NODRAW and it's not the host getting the message
-		if ((ent->v.flags & FL_CLIENT) == 0 && (ent->v.effects & EF_NODRAW) != 0)
+		if ((ent->v.effects & EF_NODRAW) != 0)
 		{
 			return 0;
 		}

@@ -42,7 +42,8 @@ void LinkUserMessages()
 	gmsgInitHUD = REG_USER_MSG("InitHUD", 0);	// called every time a new player joins the server
 	gmsgShowGameTitle = REG_USER_MSG("GameTitle", 1);
 	gmsgDeathMsg = REG_USER_MSG("DeathMsg", -1);
-	gmsgScoreInfo = REG_USER_MSG("ScoreInfo", 7);
+	gmsgScoreInfo = REG_USER_MSG("ScoreInfo", 5);
+	gmsgExtraInfo = REG_USER_MSG("ExtraInfo", 4);
 	gmsgTeamScore = REG_USER_MSG("TeamScore", 3); // sets the score of a team on the scoreboard
 	gmsgGameMode = REG_USER_MSG("GameMode", 1);
 	gmsgMOTD = REG_USER_MSG("MOTD", -1);

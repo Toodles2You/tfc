@@ -228,6 +228,13 @@ int __MsgFunc_ScoreInfo(const char* pszName, int iSize, void* pbuf)
 	return 0;
 }
 
+int __MsgFunc_ExtraInfo(const char* pszName, int iSize, void* pbuf)
+{
+	if (gViewPort)
+		return static_cast<int>(gViewPort->MsgFunc_ExtraInfo(pszName, iSize, pbuf));
+	return 0;
+}
+
 int __MsgFunc_TeamScore(const char* pszName, int iSize, void* pbuf)
 {
 	if (gViewPort)
@@ -281,6 +288,7 @@ void CHud::Init()
 	HOOK_MESSAGE(RandomPC);
 	HOOK_MESSAGE(ServerName);
 	HOOK_MESSAGE(ScoreInfo);
+	HOOK_MESSAGE(ExtraInfo);
 	HOOK_MESSAGE(TeamScore);
 
 	HOOK_MESSAGE(AllowSpec);

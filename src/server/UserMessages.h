@@ -30,6 +30,7 @@ inline int gmsgAmmoX = 0;
 inline int gmsgHudText = 0;
 inline int gmsgDeathMsg = 0;
 inline int gmsgScoreInfo = 0;
+inline int gmsgExtraInfo = 0;
 inline int gmsgTeamScore = 0;
 inline int gmsgGameMode = 0;
 inline int gmsgMOTD = 0;

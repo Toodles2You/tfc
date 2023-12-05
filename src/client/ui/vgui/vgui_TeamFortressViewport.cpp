@@ -2048,15 +2048,32 @@ bool TeamFortressViewport::MsgFunc_ScoreInfo(const char* pszName, int iSize, voi
 	auto cl = READ_BYTE();
 	auto score = READ_SHORT();
 	auto deaths = READ_SHORT();
-	auto playerclass = READ_BYTE();
-	auto teamnumber = READ_BYTE();
 
 	if (cl > 0 && cl <= MAX_PLAYERS_HUD)
 	{
 		g_PlayerExtraInfo[cl].score = score;
 		g_PlayerExtraInfo[cl].deaths = deaths;
+
+		UpdateOnPlayerInfo();
+	}
+
+	return true;
+}
+
+bool TeamFortressViewport::MsgFunc_ExtraInfo(const char* pszName, int iSize, void* pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	auto cl = READ_BYTE();
+	auto playerclass = READ_BYTE();
+	auto teamnumber = READ_BYTE();
+	auto dead = READ_BYTE() != 0;
+
+	if (cl > 0 && cl <= MAX_PLAYERS_HUD)
+	{
 		g_PlayerExtraInfo[cl].playerclass = playerclass;
 		g_PlayerExtraInfo[cl].teamnumber = teamnumber;
+		g_PlayerExtraInfo[cl].dead = dead;
 
 		//Dont go bellow 0!
 		if (g_PlayerExtraInfo[cl].teamnumber < 0)
