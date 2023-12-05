@@ -130,6 +130,9 @@ public:
 	virtual void Precache() {}
 	virtual bool KeyValue(KeyValueData* pkvd) { return false; }
 
+	enum { kEntvarsCount = 86 };
+	static TYPEDESCRIPTION m_EntvarsDescription[kEntvarsCount];
+
 #ifdef HALFLIFE_SAVERESTORE
 	static TYPEDESCRIPTION m_SaveData[];
 
