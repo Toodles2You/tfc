@@ -163,11 +163,27 @@ Show Scores
 
 Game_connected
 {
-%s connected
+Player %s has joined the game
 }
 Game_disconnected
 {
-%s has left the game
+Player %s has left the game
+}
+Game_join
+{
+Player %s entered the game
+}
+Game_join_team
+{
+Player %s joined team %s
+}
+Game_auto_team
+{
+Player %s was automatically assigned to team %s
+}
+Game_name_change
+{
+Player %s changed name to %s
 }
 Chat_all
 {
@@ -188,8 +204,4 @@ Chat_team_dead
 Chat_spec
 {
 (Spectator) %s: %s
-}
-Game_name_change
-{
-%s changed name to %s
 }

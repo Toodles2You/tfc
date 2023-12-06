@@ -39,5 +39,5 @@ public:
 	gamemode_e GetGameMode() override { return kGamemodeTeamplay; }
 	void Think() override;
 	int GetDefaultPlayerTeam(CBasePlayer* pPlayer) override;
-	bool ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib) override;
+	bool ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib, bool bAutoTeam) override;
 };

@@ -205,19 +205,21 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 		if (CMD_ARGC() > 1)
 		{
 			auto teamIndex = atoi(CMD_ARGV(1));
+			bool autoTeam = false;
 
 			if (teamIndex == 5)
 			{
 				teamIndex = GetDefaultPlayerTeam(pPlayer);
+				autoTeam = true;
 			}
 
-			ChangePlayerTeam(pPlayer, teamIndex, true, false);
+			ChangePlayerTeam(pPlayer, teamIndex, true, false, autoTeam);
 		}
 		return true;
 	}
 	else if (strcmp(pcmd, "spectate") == 0)
 	{
-		ChangePlayerTeam(pPlayer, TEAM_SPECTATORS, true, false);
+		ChangePlayerTeam(pPlayer, TEAM_SPECTATORS, true, false, false);
 		return true;
 	}
 	else if (pPlayer->IsObserver())
@@ -1286,7 +1288,7 @@ int CHalfLifeMultiplay::GetDefaultPlayerTeam(CBasePlayer* pPlayer)
 	return candidates[g_engfuncs.pfnRandomLong(1, numCandidates) - 1];
 }
 
-bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib)
+bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib, bool bAutoTeam)
 {
 	if (teamIndex == TEAM_SPECTATORS)
 	{
@@ -1341,12 +1343,28 @@ bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, b
 		pPlayer->StartObserver();
 	}
 
+	const char* msg;
+	if (m_numTeams > 1 || teamIndex == TEAM_SPECTATORS)
+	{
+		msg = bAutoTeam ? "#Game_auto_team" : "#Game_join_team";
+	}
+	else
+	{
+		msg = "#Game_join";
+	}
+
+	util::ClientPrintAll(
+		HUD_PRINTTALK,
+		msg,
+		STRING(pPlayer->pev->netname),
+		GetIndexedTeamName(teamIndex));
+
 	return true;
 }
 
-bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib)
+bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib, bool bAutoTeam)
 {
-	return ChangePlayerTeam(pPlayer, GetTeamIndex(pTeamName), bKill, bGib);
+	return ChangePlayerTeam(pPlayer, GetTeamIndex(pTeamName), bKill, bGib, bAutoTeam);
 }
 
 //=========================================================
