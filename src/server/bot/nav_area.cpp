@@ -4192,7 +4192,7 @@ void EditNavAreas( NavEditCmdType cmd )
 
 				sprintf( buffer, "Area #%d %s %s\n", area->GetID(), locName, attrib );
 
-				util::SayTextAll( buffer, player );
+				util::ClientPrintAll( HUD_PRINTTALK, buffer );
 
 				// do "place painting"
 				if (isPlacePainting)
@@ -4388,7 +4388,7 @@ void EditNavAreas( NavEditCmdType cmd )
 
 							char buffer[80];
 							sprintf( buffer, "Marked Area is connected to %d other Areas\n", connected );
-							util::SayTextAll( buffer, player );
+							util::ClientPrintAll( HUD_PRINTTALK, buffer );
 						}
 						break;
 
@@ -4436,7 +4436,7 @@ void EditNavAreas( NavEditCmdType cmd )
 
 								char buffer[80];
 								sprintf( buffer, "Marked Area is connected to %d other Areas - there are %d total unnamed areas\n", connected, totalUnnamedAreas );
-								util::SayTextAll( buffer, player );
+								util::ClientPrintAll( HUD_PRINTTALK, buffer );
 							}
 						}
 						break;

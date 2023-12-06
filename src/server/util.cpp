@@ -706,26 +706,6 @@ void util::ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, 
 	MessageEnd();
 }
 
-void util::SayText(const char* pText, CBaseEntity* pEntity)
-{
-	if (!pEntity->IsNetClient())
-		return;
-
-	MessageBegin(MSG_ONE, gmsgSayText, pEntity);
-	WriteByte(pEntity->entindex());
-	WriteString(pText);
-	MessageEnd();
-}
-
-void util::SayTextAll(const char* pText, CBaseEntity* pEntity)
-{
-	MessageBegin(MSG_ALL, gmsgSayText);
-	WriteByte(pEntity->entindex());
-	WriteString(pText);
-	MessageEnd();
-}
-
-
 char* util::dtos1(int d)
 {
 	static char buf[8];

@@ -298,9 +298,7 @@ bool Q_UnicodeValidate(const char* pUTF8)
 void Host_Say(edict_t* pEntity, bool teamonly)
 {
 	CBasePlayer* client;
-	int j;
 	char* p;
-	char text[128];
 	char szTemp[256];
 	const char* cpSay = "say";
 	const char* cpSayTeam = "say_team";
@@ -350,29 +348,15 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 		p[strlen(p) - 1] = 0;
 	}
 
+	player->m_flNextChatTime = gpGlobals->time + CHAT_INTERVAL;
+
 	// make sure the text has content
 
 	if (!p || '\0' == p[0] || !Q_UnicodeValidate(p))
 		return; // no character found, so say nothing
 
-	// turn on color set 2  (color on,  no sound)
-	// turn on color set 2  (color on,  no sound)
-	if (player->IsSpectator() && (teamonly))
-		sprintf(text, "%c(SPEC) %s: ", 2, STRING(pEntity->v.netname));
-	else if (teamonly)
-		sprintf(text, "%c(TEAM) %s: ", 2, STRING(pEntity->v.netname));
-	else
-		sprintf(text, "%c%s: ", 2, STRING(pEntity->v.netname));
-
-	j = sizeof(text) - 2 - strlen(text); // -2 for /n and null terminator
-	if ((int)strlen(p) > j)
-		p[j] = 0;
-
-	strcat(text, p);
-	strcat(text, "\n");
-
-
-	player->m_flNextChatTime = gpGlobals->time + CHAT_INTERVAL;
+	if (p[strlen(p) - 1] == '\n')
+		p[strlen(p) - 1] = '\0';
 
 	// loop through all players
 	// Start with the first player.
@@ -399,19 +383,18 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 			continue;
 
 		MessageBegin(MSG_ONE, gmsgSayText, client);
-		WriteByte(ENTINDEX(pEntity));
-		WriteString(text);
+		WriteByte(player->entindex());
+		WriteByte(teamonly);
+		WriteString(p);
 		MessageEnd();
 	}
 
 	// print to the sending client
 	MessageBegin(MSG_ONE, gmsgSayText, CBaseEntity::Instance(pEntity));
-	WriteByte(ENTINDEX(pEntity));
-	WriteString(text);
+	WriteByte(player->entindex());
+	WriteByte(teamonly);
+	WriteString(p);
 	MessageEnd();
-
-	// echo to server console
-	g_engfuncs.pfnServerPrint(text);
 
 	const char* temp;
 	if (teamonly)
@@ -564,13 +547,8 @@ void ClientUserInfoChanged(edict_t* pEntity, char* infobuffer)
 		g_engfuncs.pfnSetClientKeyValue(ENTINDEX(pEntity), infobuffer, "name", sName);
 
 		if (util::IsMultiplayer())
-		{
-			char text[256];
-			sprintf(text, "* %s changed name to %s\n", STRING(pEntity->v.netname), g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
-			MessageBegin(MSG_ALL, gmsgSayText);
-			WriteByte(ENTINDEX(pEntity));
-			WriteString(text);
-			MessageEnd();
+		{	
+			util::ClientPrintAll(HUD_PRINTTALK, "#Game_name_change", STRING(pEntity->v.netname), g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
 
 			// team match?
 			if (g_pGameRules->IsTeamplay())

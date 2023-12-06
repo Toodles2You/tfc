@@ -1205,6 +1205,7 @@ void TeamFortressViewport::UpdatePlayerMenu(int menuIndex)
 
 
 void COM_FileBase(const char* in, char* out);
+const char* GetSpectatorLabel(int iMode);
 
 void TeamFortressViewport::UpdateSpectatorPanel()
 {
@@ -1244,8 +1245,8 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 			}
 		}
 
-		sprintf(bottomText, "#Spec_Mode%d", gHUD.GetObserverMode());
-		sprintf(helpString2, "#Spec_Mode%d", gHUD.GetObserverMode());
+		strcpy(bottomText, GetSpectatorLabel(gHUD.GetObserverMode()));
+		strcpy(helpString2, GetSpectatorLabel(gHUD.GetObserverMode()));
 
 		if (0 != gEngfuncs.IsSpectateOnly())
 			strcat(helpString2, " - HLTV");

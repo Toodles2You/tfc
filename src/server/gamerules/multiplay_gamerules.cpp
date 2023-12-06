@@ -391,7 +391,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 	}
 
 	// notify other clients of player joining the game
-	util::ClientPrintAll(HUD_PRINTTALK, util::VarArgs("- %s has joined the game\n", name));
+	util::ClientPrintAll(HUD_PRINTTALK, "#Game_connected", name);
 
 	// team match?
 	if (IsTeamplay())
@@ -493,7 +493,7 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 			name = STRING(pClient->v.netname);
 		}
 		
-		util::ClientPrintAll(HUD_PRINTTALK, util::VarArgs("- %s has left the game\n", name));
+		util::ClientPrintAll(HUD_PRINTTALK, "#Game_disconnected", name);
 
 		CBasePlayer* pPlayer = (CBasePlayer*)CBaseEntity::Instance(pClient);
 

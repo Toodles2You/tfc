@@ -429,9 +429,6 @@ inline void CenterPrintAll(const char* msg_name, const char* param1 = NULL, cons
 // prints messages through the HUD
 void ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL);
 
-// prints a message to the HUD say (chat)
-void SayText(const char* pText, CBaseEntity* pEntity);
-void SayTextAll(const char* pText, CBaseEntity* pEntity);
 
 
 typedef struct hudtextparms_s

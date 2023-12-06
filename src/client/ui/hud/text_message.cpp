@@ -201,7 +201,7 @@ bool CHudTextMessage::MsgFunc_TextMsg(const char* pszName, int iSize, void* pbuf
 
 	case HUD_PRINTTALK:
 		safe_sprintf(psz, MSG_BUF_SIZE, msg_text, sstr1, sstr2, sstr3, sstr4);
-		gHUD.m_SayText.SayTextPrint(ConvertCRtoNL(psz), 128);
+		gHUD.m_SayText.SayTextPrint(ConvertCRtoNL(psz));
 		break;
 
 	case HUD_PRINTCONSOLE:

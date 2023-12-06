@@ -239,13 +239,16 @@ void CBasePlayer::Observer_SetMode(int iMode)
 
 	pev->iuser3 = 0; // clear second target from death cam
 
-	// print spepctaor mode on client screen
+	/*! Toodles FIXME: */
+#if 0
+	// print spectator mode on client screen
 	if (IsSpectator())
 	{
 		char modemsg[16];
 		sprintf(modemsg, "#Spec_Mode%i", pev->iuser1);
 		util::ClientPrint(this, HUD_PRINTCENTER, modemsg);
 	}
+#endif
 
 	m_iObserverLastMode = iMode;
 }

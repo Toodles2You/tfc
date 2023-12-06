@@ -47,6 +47,8 @@ int g_iObserverMode = OBS_NONE;
 int g_iObserverTarget = 0;
 int g_iObserverTarget2 = 0;
 
+const char* GetSpectatorLabel(int iMode);
+
 void SpectatorMode()
 {
 	if (gEngfuncs.Cmd_Argc() <= 1)
@@ -1153,7 +1155,7 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 		gViewPort->MsgFunc_ResetFade(NULL, 0, NULL);
 
 		char string[128];
-		sprintf(string, "#Spec_Mode%d", g_iObserverMode);
+		strcpy(string, GetSpectatorLabel(g_iObserverMode));
 		sprintf(string, "%c%s", HUD_PRINTCENTER, CHudTextMessage::BufferedLocaliseTextString(string));
 		gHUD.m_TextMessage.MsgFunc_TextMsg(NULL, strlen(string) + 1, string);
 	}

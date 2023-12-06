@@ -38,7 +38,6 @@ static float SCROLL_SPEED = 5;
 static char g_szLineBuffer[MAX_LINES + 1][MAX_CHARS_PER_LINE];
 static float* g_pflNameColors[MAX_LINES + 1];
 static int g_iNameLengths[MAX_LINES + 1];
-static bool g_bPlayerDead[MAX_LINES + 1];
 static float flScrollTime = 0; // the time at which the lines next scroll up
 
 DECLARE_MESSAGE(m_SayText, SayText);
@@ -72,7 +71,6 @@ void CHudSayText::InitHUDData()
 	memset(g_szLineBuffer, 0, sizeof g_szLineBuffer);
 	memset(g_pflNameColors, 0, sizeof g_pflNameColors);
 	memset(g_iNameLengths, 0, sizeof g_iNameLengths);
-	memset(g_bPlayerDead, 0, sizeof g_bPlayerDead);
 }
 
 bool CHudSayText::VidInit()
@@ -93,7 +91,6 @@ int ScrollTextUp()
 	memmove(g_szLineBuffer[0], g_szLineBuffer[1], sizeof(g_szLineBuffer) - sizeof(g_szLineBuffer[0])); // overwrite the first line
 	memmove(&g_pflNameColors[0], &g_pflNameColors[1], sizeof(g_pflNameColors) - sizeof(g_pflNameColors[0]));
 	memmove(&g_iNameLengths[0], &g_iNameLengths[1], sizeof(g_iNameLengths) - sizeof(g_iNameLengths[0]));
-	memmove(&g_bPlayerDead[0], &g_bPlayerDead[1], sizeof(g_bPlayerDead) - sizeof(g_bPlayerDead[0]));
 	g_szLineBuffer[MAX_LINES - 1][0] = 0;
 
 	if (g_szLineBuffer[0][0] == ' ') // also scroll up following lines
@@ -153,13 +150,6 @@ bool CHudSayText::Draw(float flTime)
 
 			int x = m_iBaseX;
 
-			if (g_bPlayerDead[i])
-			{
-				char sz[16];
-				sprintf(sz, "*%s* ", CHudTextMessage::BufferedLocaliseTextString("#DEAD"));
-				x = gHUD.DrawHudString(sz, x, y);
-			}
-
 			// draw the first x characters in the player color
 			const std::size_t playerNameEndIndex = std::min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH + 31);
 
@@ -199,15 +189,63 @@ bool CHudSayText::MsgFunc_SayText(const char* pszName, int iSize, void* pbuf)
 		return true;
 	}
 	
-	SayTextPrint(READ_STRING(), iSize - 1, client_index);
+	bool teamonly = READ_BYTE() != 0;
+	char buffer[1024];
+	const char* msg;
+
+	if (g_PlayerExtraInfo[client_index].teamnumber == TEAM_SPECTATORS && teamonly)
+	{
+		msg = "#Chat_spec";
+	}
+	else if (gHUD.m_GameMode >= kGamemodeTeamplay && teamonly)
+	{
+		if (!g_PlayerExtraInfo[client_index].dead)
+		{
+			msg = "#Chat_team";
+		}
+		else
+		{
+			msg = "#Chat_team_dead";
+		}
+	}
+	else
+	{
+		if (!g_PlayerExtraInfo[client_index].dead)
+		{
+			msg = "#Chat_all";
+		}
+		else
+		{
+			msg = "#Chat_all_dead";
+		}
+	}
+
+	snprintf(
+		buffer,
+		sizeof(buffer) - 1,
+		CHudTextMessage::BufferedLocaliseTextString(msg),
+		g_PlayerInfoList[client_index].name,
+		READ_STRING());
+
+	buffer[sizeof(buffer) - 1] = '\0';
+
+	SayTextPrint(buffer, client_index);
 
 	return true;
 }
 
-void CHudSayText::SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex)
+void CHudSayText::SayTextPrint(const char* pszBuf, int clientIndex)
 {
+	const auto hasNewLine =
+		pszBuf[std::max((int)strlen(pszBuf) - 1, 0)] == '\n';
+
 	// Print it straight to the console
-	// ConsolePrint(pszBuf);
+	ConsolePrint(pszBuf);
+
+	if (!hasNewLine)
+	{
+		ConsolePrint("\n");
+	}
 
 	int i;
 	// find an empty string slot
@@ -240,12 +278,16 @@ void CHudSayText::SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex
 			{
 				g_iNameLengths[i] = strlen(pName) + (nameInString - pszBuf);
 				g_pflNameColors[i] = gHUD.GetClientColor(clientIndex);
-				g_bPlayerDead[i] = g_PlayerExtraInfo[clientIndex].dead;
 			}
 		}
 	}
 
 	strncpy(g_szLineBuffer[i], pszBuf, MAX_CHARS_PER_LINE);
+
+	if (!hasNewLine)
+	{
+		strcat(g_szLineBuffer[i], "\n");
+	}
 
 	// make sure the text fits in one line
 	EnsureTextFitsInOneLineAndWrapIfHaveTo(i);

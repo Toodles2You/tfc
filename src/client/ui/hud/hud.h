@@ -311,7 +311,7 @@ public:
 	bool VidInit() override;
 	bool Draw(float flTime) override;
 	bool MsgFunc_SayText(const char* pszName, int iSize, void* pbuf);
-	void SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex = -1);
+	void SayTextPrint(const char* pszBuf, int clientIndex = -1);
 	void EnsureTextFitsInOneLineAndWrapIfHaveTo(int line);
 	friend class CHud;
 	friend class CHudSpectator;
