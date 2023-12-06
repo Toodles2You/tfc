@@ -1,0 +1,195 @@
+SCORE
+{
+SCORE
+}
+LATENCY
+{
+PING
+}
+DEAD
+{
+*DEAD*
+}
+BOT
+{
+BOT
+}
+
+Unmuted
+{
+You have unmuted %s
+}
+Muted
+{
+You have muted %s
+}
+No_longer_hear_that_player
+{
+You will no longer hear that player speak
+}
+
+Menu_OK
+{
+OK
+}
+Menu_Cancel
+{
+CANCEL
+}
+
+Title_SelectYourTeam
+{
+SELECT YOUR TEAM
+}
+Team_AutoAssign
+{
+AUTO ASSIGN
+}
+Menu_Spectate
+{
+SPECTATE
+}
+Spectators
+{
+Spectators
+}
+Unassigned
+{
+Unassigned
+}
+
+Map_Description_not_available
+{
+Map Description not available.
+}
+
+Title_SelectYourClass
+{
+SELECT YOUR CLASS
+}
+
+Spec_Help_Title
+{
+Spectator Mode
+}
+Spec_Help_Text
+{
+}
+Spec_Duck
+{
+Press DUCK for Spectator Menu
+}
+Spec_Auto
+{
+Auto
+}
+Spec_Map
+{
+Map
+}
+Spec_NoTarget
+{
+No valid targets. Cannot switch to Chase-Camera Mode.
+}
+SPECT_OPTIONS
+{
+Options
+}
+CAM_OPTIONS
+{
+Camera Options
+}
+OBS_NONE
+{
+Camera Options
+}
+OBS_CHASE_FREE
+{
+Free Chase-Cam
+}
+OBS_ROAMING
+{
+Roaming
+}
+OBS_MAP_FREE
+{
+Free Overview
+}
+OBS_MAP_CHASE
+{
+Chase-Cam Overview
+}
+
+Valve_Close
+{
+Close
+}
+Valve_Help
+{
+Help
+}
+Valve_Settings
+{
+Settings
+}
+Valve_Chat_Messages
+{
+Chat Messages
+}
+Valve_Show_Status
+{
+Show Status
+}
+Valve_View_Cone
+{
+View Cone
+}
+Valve_Player_Names
+{
+Player Names
+}
+Valve_PIP
+{
+Picture-In-Picture
+}
+Valve_Auto_Director
+{
+Auto Director
+}
+Valve_Show_Score
+{
+Show Scores
+}
+
+Game_connected
+{
+%s connected
+}
+Game_disconnected
+{
+%s has left the game
+}
+Chat_all
+{
+%s: %s
+}
+Chat_all_dead
+{
+*DEAD* %s: %s
+}
+Chat_team
+{
+(Team) %s: %s
+}
+Chat_team_dead
+{
+*DEAD* (Team) %s: %s
+}
+Chat_spec
+{
+(Spectator) %s: %s
+}
+Game_name_change
+{
+%s changed name to %s
+}

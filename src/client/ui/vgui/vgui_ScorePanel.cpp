@@ -377,7 +377,7 @@ void ScorePanel::FillGrid()
 				sz[0] = '\0';
 				if (g_PlayerExtraInfo[m_iSortedRows[row]].dead)
 				{
-					sprintf(sz, "*%s*", CHudTextMessage::BufferedLocaliseTextString("#DEAD"));
+					strcpy(sz, CHudTextMessage::BufferedLocaliseTextString("#DEAD"));
 				}
 				break;
 			case COLUMN_SCORE:
