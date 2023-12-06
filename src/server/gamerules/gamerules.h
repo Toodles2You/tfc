@@ -114,7 +114,6 @@ public:
 	virtual void AddPlayerSpawnSpot(CBaseEntity *pEntity);
 	virtual bool FPlayerCanSuicide(CBasePlayer *pPlayer) = 0;  // Prevent players from suiciding too often.
 
-	virtual bool AllowAutoTargetCrosshair() { return true; }
 	virtual bool ClientCommand(CBasePlayer* pPlayer, const char* pcmd) { return false; } // handles the user commands;  returns true if command handled properly
 	virtual void ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer) {}		 // the player has changed userinfo;  can change it now
 
@@ -219,8 +218,6 @@ public:
 	bool FPlayerCanRespawn(CBasePlayer* pPlayer) override;
 	float FlPlayerSpawnTime(CBasePlayer* pPlayer) override;
 	bool FPlayerCanSuicide(CBasePlayer *pPlayer) override;
-
-	bool AllowAutoTargetCrosshair() override;
 
 	// Client kills/scoring
 	float GetPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled, bool assist = false) override;
@@ -333,7 +330,6 @@ public:
 	void AddPlayerSpawnSpot(CBaseEntity *pEntity) override;
 	bool FPlayerCanSuicide(CBasePlayer *pPlayer) override;
 
-	bool AllowAutoTargetCrosshair() override;
 	bool ClientCommand(CBasePlayer* pPlayer, const char* pcmd) override;
 	void ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer) override;
 

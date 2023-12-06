@@ -113,13 +113,6 @@ void CHalfLifeRules::PlayerSpawn(CBasePlayer* pPlayer)
 
 //=========================================================
 //=========================================================
-bool CHalfLifeRules::AllowAutoTargetCrosshair()
-{
-	return true;
-}
-
-//=========================================================
-//=========================================================
 void CHalfLifeRules::PlayerThink(CBasePlayer* pPlayer)
 {
 }

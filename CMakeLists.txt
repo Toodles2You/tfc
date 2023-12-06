@@ -77,6 +77,7 @@ set(SERVER_SRC
     ${SERVER_SRC_DIR}/entities/world.cpp
 
     ${SERVER_SRC_DIR}/gamerules/gamerules.cpp
+    ${SERVER_SRC_DIR}/gamerules/mapcycle.cpp
     ${SERVER_SRC_DIR}/gamerules/multiplay_gamerules.cpp
     ${SERVER_SRC_DIR}/gamerules/singleplay_gamerules.cpp
     ${SERVER_SRC_DIR}/gamerules/teamplay_gamerules.cpp
