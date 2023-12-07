@@ -44,7 +44,6 @@ bool CBaseEntity::Intersects(CBaseEntity* pOther) { return false; }
 void CBaseEntity::MakeDormant() {}
 bool CBaseEntity::IsDormant() { return false; }
 #endif
-bool CBaseEntity::IsInWorld() { return true; }
 bool CBaseEntity::ShouldToggle(USE_TYPE useType, bool currentState) { return false; }
 CBaseEntity* CBaseEntity::Create(const char* szName, const Vector& vecOrigin, const Vector& vecAngles, edict_t* pentOwner) { return NULL; }
 void CBaseEntity::Remove() {}

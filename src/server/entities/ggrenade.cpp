@@ -128,12 +128,6 @@ void CGrenade::BounceSound()
 
 void CGrenade::TumbleThink()
 {
-	if (!IsInWorld())
-	{
-		Remove();
-		return;
-	}
-
 	StudioFrameAdvance();
 	pev->nextthink = gpGlobals->time + 0.1;
 

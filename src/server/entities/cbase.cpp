@@ -943,38 +943,6 @@ bool CBaseEntity::IsDormant()
 }
 #endif
 
-bool CBaseEntity::IsInWorld()
-{
-	// position
-	if (pev->origin.x >= 4096)
-		return false;
-	if (pev->origin.y >= 4096)
-		return false;
-	if (pev->origin.z >= 4096)
-		return false;
-	if (pev->origin.x <= -4096)
-		return false;
-	if (pev->origin.y <= -4096)
-		return false;
-	if (pev->origin.z <= -4096)
-		return false;
-	// speed
-	if (pev->velocity.x >= 2000)
-		return false;
-	if (pev->velocity.y >= 2000)
-		return false;
-	if (pev->velocity.z >= 2000)
-		return false;
-	if (pev->velocity.x <= -2000)
-		return false;
-	if (pev->velocity.y <= -2000)
-		return false;
-	if (pev->velocity.z <= -2000)
-		return false;
-
-	return true;
-}
-
 bool CBaseEntity::ShouldToggle(USE_TYPE useType, bool currentState)
 {
 	if (useType != USE_TOGGLE && useType != USE_SET)

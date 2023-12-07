@@ -170,7 +170,6 @@ public:
 	virtual bool IsAlive() { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
 	virtual bool IsBSPModel() { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }
 	virtual bool HasTarget(string_t targetname) { return FStrEq(STRING(targetname), STRING(pev->target)); }
-	virtual bool IsInWorld();
 	virtual bool IsClient() { return false; }
 	virtual bool IsPlayer() { return false; }
 	virtual bool IsBot() { return false; }
