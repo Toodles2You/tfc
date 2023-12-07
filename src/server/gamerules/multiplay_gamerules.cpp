@@ -398,7 +398,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 	// team match?
 	if (IsTeamplay())
 	{
-		util::LogPrintf("\"%s<%i><%s><%s>\" entered the game\n",
+		util::LogPrintf("\"%s<%i><%s><%s>\" connected\n",
 			name,
 			GETPLAYERUSERID(pl->edict()),
 			GETPLAYERAUTHID(pl->edict()),
@@ -406,7 +406,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 	}
 	else
 	{
-		util::LogPrintf("\"%s<%i><%s><%i>\" entered the game\n",
+		util::LogPrintf("\"%s<%i><%s><%i>\" connected\n",
 			name,
 			GETPLAYERUSERID(pl->edict()),
 			GETPLAYERAUTHID(pl->edict()),
@@ -420,7 +420,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 	WriteByte(m_numTeams);
 	for (auto t = m_teams.begin(); t != m_teams.end(); t++)
 	{
-		WriteString((*t).m_name.c_str());
+		WriteString(("#" + (*t).m_name).c_str());
 	}
 	MessageEnd();
 
@@ -448,7 +448,6 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 	// loop through all active players and send their score info to the new client
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		// FIXME:  Probably don't need to cast this just to read m_iDeaths
 		CBasePlayer* plr = (CBasePlayer*)util::PlayerByIndex(i);
 
 		if (plr)
@@ -1016,7 +1015,7 @@ void CHalfLifeMultiplay::PlayerGotAmmo(CBasePlayer* pPlayer, char* szName, int i
 //=========================================================
 bool CHalfLifeMultiplay::IsAllowedToSpawn(CBaseEntity* pEntity)
 {
-	if (!FAllowMonsters() && pEntity->pev->flags & FL_MONSTER)
+	if (!FAllowMonsters() && (pEntity->pev->flags & FL_MONSTER) != 0)
 	{
 		return false;
 	}
@@ -1353,11 +1352,33 @@ bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, b
 		msg = "#Game_join";
 	}
 
+	std::string localizeName =
+		std::string{"#"} + GetIndexedTeamName(teamIndex);
+
 	util::ClientPrintAll(
 		HUD_PRINTTALK,
 		msg,
 		STRING(pPlayer->pev->netname),
-		GetIndexedTeamName(teamIndex));
+		localizeName.c_str());
+	
+	if (IsTeamplay())
+	{
+		util::LogPrintf("\"%s<%i><%s><%s>\" joined team %s\n",
+			STRING(pPlayer->pev->netname),
+			GETPLAYERUSERID(pPlayer->edict()),
+			GETPLAYERAUTHID(pPlayer->edict()),
+			g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "model"),
+			GetIndexedTeamName(teamIndex));
+	}
+	else
+	{
+		util::LogPrintf("\"%s<%i><%s><%i>\" joined team %s\n",
+			STRING(pPlayer->pev->netname),
+			GETPLAYERUSERID(pPlayer->edict()),
+			GETPLAYERAUTHID(pPlayer->edict()),
+			GETPLAYERUSERID(pPlayer->edict()),
+			GetIndexedTeamName(teamIndex));
+	}
 
 	return true;
 }
@@ -1365,13 +1386,6 @@ bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, b
 bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib, bool bAutoTeam)
 {
 	return ChangePlayerTeam(pPlayer, GetTeamIndex(pTeamName), bKill, bGib, bAutoTeam);
-}
-
-//=========================================================
-//=========================================================
-bool CHalfLifeMultiplay::FAllowMonsters()
-{
-	return m_allowMonsters;
 }
 
 //=========================================================

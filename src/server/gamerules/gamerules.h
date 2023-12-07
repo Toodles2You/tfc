@@ -260,7 +260,7 @@ public:
 	int DeadPlayerAmmo(CBasePlayer* pPlayer) override;
 
 	// Monsters
-	bool FAllowMonsters() override;
+	bool FAllowMonsters() override { return true; }
 
 	// Teamplay stuff
 	int PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget) override;
@@ -385,7 +385,7 @@ public:
 	bool ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib, bool bAutoTeam) override;
 
 	// Monsters
-	bool FAllowMonsters() override;
+	bool FAllowMonsters() override { return m_allowMonsters; }
 
 	// Immediately end a multiplayer game
 	void EndMultiplayerGame() override { GoToIntermission(); }

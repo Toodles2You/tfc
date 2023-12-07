@@ -311,10 +311,3 @@ int CHalfLifeRules::PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarge
 	// why would a single player in half life need this?
 	return GR_NOTTEAMMATE;
 }
-
-//=========================================================
-//=========================================================
-bool CHalfLifeRules::FAllowMonsters()
-{
-	return true;
-}
