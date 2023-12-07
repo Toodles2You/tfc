@@ -74,74 +74,37 @@ void AddMultiDamage(CBaseEntity *inflictor, CBaseEntity *attacker, CBaseEntity* 
 }
 
 
-//
-// RadiusDamage - this entity is exploding, or otherwise needs to inflict damage upon entities within a certain range.
-//
-// only damage ents that can clearly be seen by the explosion!
-
-
-void RadiusDamage(Vector vecSrc, CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, float flRadius, int bitsDamageType)
+void RadiusDamage(
+	Vector vecSrc,
+	CBaseEntity* inflictor,
+	CBaseEntity* attacker,
+	float flDamage,
+	float flRadius,
+	int bitsDamageType)
 {
-	CBaseEntity* pEntity = NULL;
+	CBaseEntity* entity = nullptr;
 	TraceResult tr;
-	float flAdjustedDamage, falloff;
-	Vector vecSpot;
+	float ajdusted;
+	float falloff = flDamage / flRadius;
 
-	if (0 != flRadius)
-		falloff = flDamage / flRadius;
-	else
-		falloff = 1.0;
-
-	const bool bInWater = (g_engfuncs.pfnPointContents(vecSrc) == CONTENTS_WATER);
-
-	vecSrc.z += 1; // in case grenade is lying on the ground
-
-	// iterate on all entities in the vicinity.
-	while ((pEntity = util::FindEntityInSphere(pEntity, vecSrc, flRadius)) != NULL)
+	while ((entity = util::FindEntityInSphere(entity, vecSrc, flRadius)) != nullptr)
 	{
-		if (pEntity->pev->takedamage != DAMAGE_NO)
+		if (entity->pev->takedamage == DAMAGE_NO)
 		{
-			// blast's don't tavel into or out of water
-			if (bInWater && pEntity->pev->waterlevel == 0)
-				continue;
-			if (!bInWater && pEntity->pev->waterlevel == 3)
-				continue;
-
-			vecSpot = pEntity->BodyTarget(vecSrc);
-
-			util::TraceLine(vecSrc, vecSpot, util::dont_ignore_monsters, inflictor, &tr);
-
-			if (tr.flFraction == 1.0 || tr.pHit == pEntity->edict())
-			{ // the explosion can 'see' this entity, so hurt them!
-				if (0 != tr.fStartSolid)
-				{
-					// if we're stuck inside them, fixup the position and distance
-					tr.vecEndPos = vecSrc;
-					tr.flFraction = 0.0;
-				}
-
-				// decrease damage for an ent that's farther from the bomb.
-				flAdjustedDamage = (vecSrc - tr.vecEndPos).Length() * falloff;
-				flAdjustedDamage = flDamage - flAdjustedDamage;
-
-				if (flAdjustedDamage < 0)
-				{
-					flAdjustedDamage = 0;
-				}
-
-				// ALERT( at_console, "hit %s\n", STRING( pEntity->pev->classname ) );
-				if (tr.flFraction != 1.0)
-				{
-					ClearMultiDamage();
-					pEntity->TraceAttack(inflictor, flAdjustedDamage, (tr.vecEndPos - vecSrc).Normalize(), &tr, bitsDamageType);
-					ApplyMultiDamage(inflictor, attacker);
-				}
-				else
-				{
-					pEntity->TakeDamage(inflictor, attacker, flAdjustedDamage, bitsDamageType);
-				}
-			}
+			continue;
 		}
+
+		util::TraceLine(vecSrc, entity->EyePosition(), &tr, inflictor, util::kTraceBox);
+
+		if (tr.flFraction != 1.0F && tr.pHit != entity->edict())
+		{
+			continue;
+		}
+
+		ajdusted = (vecSrc - entity->BodyTarget()).Length() * falloff;
+		ajdusted = std::max(flDamage - ajdusted, 0.0F);
+
+		entity->TakeDamage(inflictor, attacker, ajdusted, bitsDamageType);
 	}
 }
 

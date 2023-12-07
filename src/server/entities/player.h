@@ -130,7 +130,7 @@ public:
 	void TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) override;
 	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
 	void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType) override;
-	Vector BodyTarget(const Vector& posSrc) override { return Center() + pev->view_ofs * 0.8; } // position to shoot at
+	Vector BodyTarget() override { return Center() + pev->view_ofs * 0.8; } // position to shoot at
 	bool IsAlive() override { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
 
 	bool IsClient() override { return true; }

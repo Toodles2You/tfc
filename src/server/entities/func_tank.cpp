@@ -58,7 +58,7 @@ public:
 	virtual void Fire(const Vector& barrelEnd, const Vector& forward, CBaseEntity* attacker);
 	virtual Vector UpdateTargetPosition(CBaseEntity* pTarget)
 	{
-		return pTarget->BodyTarget(pev->origin);
+		return pTarget->BodyTarget();
 	}
 
 	void StartRotSound();

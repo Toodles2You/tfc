@@ -61,7 +61,7 @@ void CHLBot::Upkeep()
         return;
     }
     auto start = GetGunPosition();
-    auto end = m_pEnemy->BodyTarget(start);
+    auto end = m_pEnemy->BodyTarget();
     pev->v_angle = util::VecToAngles(end - start);
     pev->v_angle.x = -pev->v_angle.x;
 }
@@ -108,7 +108,7 @@ bool CHLBot::IsVisible(CBasePlayer* player, bool testFOV = false, unsigned char*
     }
     TraceResult tr;
     auto start = GetGunPosition();
-    auto end = player->BodyTarget(start);
+    auto end = player->BodyTarget();
     util::TraceLine(start, end, util::ignore_monsters, this, &tr);
     if (tr.flFraction != 1.0f && tr.pHit != player->edict())
     {

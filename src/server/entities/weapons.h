@@ -214,7 +214,7 @@ private:
 	unsigned short m_usSecondaryAttack;
 };
 
-#ifndef CLIENT_DLL
+#ifdef GAME_DLL
 
 // Contact Grenade / Timed grenade / Satchel Charge
 class CGrenade : public CBaseAnimating
@@ -222,23 +222,17 @@ class CGrenade : public CBaseAnimating
 public:
 	bool Spawn() override;
 
-	static CGrenade* ShootTimed(CBaseEntity* owner, Vector vecStart, Vector vecVelocity, float time);
 	static CGrenade* ShootContact(CBaseEntity* owner, Vector vecStart, Vector vecVelocity);
 
 	void Explode(Vector vecSrc, Vector vecAim);
 	void Explode(TraceResult* pTrace, int bitsDamageType);
 
 	void EXPORT BounceTouch(CBaseEntity* pOther);
-	void EXPORT SlideTouch(CBaseEntity* pOther);
 	void EXPORT ExplodeTouch(CBaseEntity* pOther);
 	void EXPORT Detonate();
-	void EXPORT DetonateUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
 	void EXPORT TumbleThink();
 
 	virtual void BounceSound();
-	void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType) override;
-
-	float m_flNextAttack;
 };
 
 typedef struct
