@@ -84,6 +84,8 @@ state bit 2 is edge triggered on the down to up transition
 */
 
 
+kbutton_t in_mlook;
+kbutton_t in_klook;
 kbutton_t in_left;
 kbutton_t in_right;
 kbutton_t in_forward;
@@ -92,6 +94,7 @@ kbutton_t in_lookup;
 kbutton_t in_lookdown;
 kbutton_t in_moveleft;
 kbutton_t in_moveright;
+kbutton_t in_strafe;
 kbutton_t in_speed;
 kbutton_t in_use;
 kbutton_t in_jump;
@@ -252,6 +255,7 @@ void KB_Init()
 	g_kbkeys = NULL;
 
 	KB_Add("in_graph", &in_graph);
+	KB_Add("in_mlook", &in_mlook);
 }
 
 /*
@@ -365,6 +369,10 @@ int HUD_Key_Event(int down, int keynum, const char* pszCurrentBinding)
 
 void IN_BreakDown() { KeyDown(&in_break); }
 void IN_BreakUp() { KeyUp(&in_break); }
+void IN_KLookDown() { KeyDown(&in_klook); }
+void IN_KLookUp() { KeyUp(&in_klook); }
+void IN_MLookDown() { KeyDown(&in_mlook); }
+void IN_MLookUp() { KeyUp(&in_mlook); }
 void IN_UpDown() { KeyDown(&in_up); }
 void IN_UpUp() { KeyUp(&in_up); }
 void IN_DownDown() { KeyDown(&in_down); }
@@ -426,6 +434,8 @@ void IN_MoverightUp()
 }
 void IN_SpeedDown() { KeyDown(&in_speed); }
 void IN_SpeedUp() { KeyUp(&in_speed); }
+void IN_StrafeDown() { KeyDown(&in_strafe); }
+void IN_StrafeUp() { KeyUp(&in_strafe); }
 
 // needs capture by hud/vgui also
 extern void __CmdFunc_InputPlayerSpecial();
@@ -839,6 +849,8 @@ void InitInput()
 	gEngfuncs.pfnAddCommand("-lookup", IN_LookupUp);
 	gEngfuncs.pfnAddCommand("+lookdown", IN_LookdownDown);
 	gEngfuncs.pfnAddCommand("-lookdown", IN_LookdownUp);
+	gEngfuncs.pfnAddCommand("+strafe", IN_StrafeDown);
+	gEngfuncs.pfnAddCommand("-strafe", IN_StrafeUp);
 	gEngfuncs.pfnAddCommand("+moveleft", IN_MoveleftDown);
 	gEngfuncs.pfnAddCommand("-moveleft", IN_MoveleftUp);
 	gEngfuncs.pfnAddCommand("+moveright", IN_MoverightDown);
@@ -854,6 +866,10 @@ void InitInput()
 	gEngfuncs.pfnAddCommand("+jump", IN_JumpDown);
 	gEngfuncs.pfnAddCommand("-jump", IN_JumpUp);
 	gEngfuncs.pfnAddCommand("impulse", IN_Impulse);
+	gEngfuncs.pfnAddCommand("+klook", IN_KLookDown);
+	gEngfuncs.pfnAddCommand("-klook", IN_KLookUp);
+	gEngfuncs.pfnAddCommand("+mlook", IN_MLookDown);
+	gEngfuncs.pfnAddCommand("-mlook", IN_MLookUp);
 	gEngfuncs.pfnAddCommand("+duck", IN_DuckDown);
 	gEngfuncs.pfnAddCommand("-duck", IN_DuckUp);
 	gEngfuncs.pfnAddCommand("+reload", IN_ReloadDown);
