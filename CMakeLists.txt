@@ -152,6 +152,7 @@ set(CLIENT_SRC
     ${CLIENT_SRC_DIR}/parsemsg.cpp
     ${CLIENT_SRC_DIR}/studio_util.cpp
     ${CLIENT_SRC_DIR}/util.cpp
+    ${CLIENT_SRC_DIR}/view_spec.cpp
     ${CLIENT_SRC_DIR}/view.cpp
 
     ${CLIENT_SRC_DIR}/rendering/GameStudioModelRenderer.cpp

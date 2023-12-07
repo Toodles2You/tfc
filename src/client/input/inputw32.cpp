@@ -500,11 +500,6 @@ void IN_MouseMove(float frametime, usercmd_t* cmd)
 
 	gEngfuncs.GetViewAngles((float*)viewangles);
 
-	if ((in_mlook.state & 1) != 0)
-	{
-		V_StopPitchDrift();
-	}
-
 	//jjb - this disbles normal mouse control if the user is trying to
 	//      move the camera, or if the mouse cursor is visible or if we're in intermission
 	if (!iMouseInUse && !gHUD.m_iIntermission && !g_iVisibleMouse)
@@ -977,18 +972,6 @@ void IN_JoyMove(float frametime, usercmd_t* cmd)
 					{
 						viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value) * aspeed * cl_pitchspeed->value;
 					}
-					V_StopPitchDrift();
-				}
-				else
-				{
-					// no pitch movement
-					// disable pitch return-to-center unless requested by user
-					// *** this code can be removed when the lookspring bug is fixed
-					// *** the bug always has the lookspring feature on
-					if (lookspring->value == 0.0)
-					{
-						V_StopPitchDrift();
-					}
 				}
 			}
 			else
@@ -1048,17 +1031,6 @@ void IN_JoyMove(float frametime, usercmd_t* cmd)
 					{
 						viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value) * speed * 180.0;
 					}
-					V_StopPitchDrift();
-				}
-				else
-				{
-					// no pitch movement
-					// disable pitch return-to-center unless requested by user
-					// *** this code can be removed when the lookspring bug is fixed
-					// *** the bug always has the lookspring feature on
-					if (lookspring->value == 0.0)
-					{
-						V_StopPitchDrift();
 					}
 				}
 			}

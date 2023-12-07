@@ -1,13 +1,11 @@
 //========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
 //
-// Purpose:
+// Purpose: View / refresh setup functions
 //
 // $NoKeywords: $
 //=============================================================================
 
 #pragma once
 
-void V_StartPitchDrift();
-void V_StopPitchDrift();
 void V_PunchAxis(int axis, float punch);
 void V_ResetChaseCam();
