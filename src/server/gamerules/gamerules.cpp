@@ -124,13 +124,6 @@ bool CGameRules::CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pW
 }
 
 //=========================================================
-// load the SkillData struct with the proper values based on the skill level.
-//=========================================================
-void CGameRules::RefreshSkillData()
-{
-}
-
-//=========================================================
 //=========================================================
 bool CGameRules::IsPlayerPrivileged(CBasePlayer* pPlayer)
 {

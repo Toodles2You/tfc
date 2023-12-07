@@ -130,8 +130,6 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	m_teams.push_back(CTeam{TEAM_DEFAULT, "players"});
 	m_numTeams = 1;
 
-	RefreshSkillData();
-
 	if (!g_engfuncs.pfnIsDedicatedServer())
 	{
 		char* lservercfgfile = (char*)CVAR_GET_STRING("lservercfgfile");
@@ -249,20 +247,6 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 void CHalfLifeMultiplay::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer)
 {
 	pPlayer->SetPrefsFromUserinfo(infobuffer);
-}
-
-//=========================================================
-//=========================================================
-void CHalfLifeMultiplay::RefreshSkillData()
-{
-	// load all default values
-	CGameRules::RefreshSkillData();
-
-	// override some values for deathmatch
-	if (!IsDeathmatch())
-	{
-		return;
-	}
 }
 
 //=========================================================
