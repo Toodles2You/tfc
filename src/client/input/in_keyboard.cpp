@@ -17,6 +17,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "Exports.h"
+#include <algorithm>
 
 #include "vgui_TeamFortressViewport.h"
 #include "filesystem_utils.h"
@@ -28,15 +29,20 @@ extern cl_enginefunc_t gEngfuncs;
 // Defined in pm_math.c
 float anglemod(float a);
 
-void IN_Init();
-void IN_Move(float frametime, usercmd_t* cmd);
-void IN_Shutdown();
+void Mouse_Init();
+void Mouse_Move(float frametime, usercmd_t* cmd);
+void Mouse_Shutdown();
+
+#ifdef HALFLIFE_JOYSTICK
+void Joy_Init();
+void Joy_Move(float frametime, usercmd_t* cmd);
+
+extern cvar_t* in_joystick;
+#endif
+
 void V_Init();
 void VectorAngles(const float* forward, float* angles);
 int CL_ButtonBits(bool);
-
-// xxx need client dll function to get and clear impuse
-extern cvar_t* in_joystick;
 
 int in_impulse = 0;
 bool in_cancel = false;
@@ -46,8 +52,6 @@ cvar_t* m_yaw;
 cvar_t* m_forward;
 cvar_t* m_side;
 
-cvar_t* lookstrafe;
-cvar_t* lookspring;
 cvar_t* cl_pitchup;
 cvar_t* cl_pitchdown;
 cvar_t* cl_upspeed;
@@ -80,9 +84,6 @@ state bit 2 is edge triggered on the down to up transition
 */
 
 
-kbutton_t in_mlook;
-kbutton_t in_klook;
-kbutton_t in_jlook;
 kbutton_t in_left;
 kbutton_t in_right;
 kbutton_t in_forward;
@@ -91,7 +92,6 @@ kbutton_t in_lookup;
 kbutton_t in_lookdown;
 kbutton_t in_moveleft;
 kbutton_t in_moveright;
-kbutton_t in_strafe;
 kbutton_t in_speed;
 kbutton_t in_use;
 kbutton_t in_jump;
@@ -101,7 +101,6 @@ kbutton_t in_up;
 kbutton_t in_down;
 kbutton_t in_duck;
 kbutton_t in_reload;
-kbutton_t in_alt1;
 kbutton_t in_score;
 kbutton_t in_break;
 kbutton_t in_graph; // Display the netgraph
@@ -253,8 +252,6 @@ void KB_Init()
 	g_kbkeys = NULL;
 
 	KB_Add("in_graph", &in_graph);
-	KB_Add("in_mlook", &in_mlook);
-	KB_Add("in_jlook", &in_jlook);
 }
 
 /*
@@ -368,11 +365,6 @@ int HUD_Key_Event(int down, int keynum, const char* pszCurrentBinding)
 
 void IN_BreakDown() { KeyDown(&in_break); }
 void IN_BreakUp() { KeyUp(&in_break); }
-void IN_KLookDown() { KeyDown(&in_klook); }
-void IN_KLookUp() { KeyUp(&in_klook); }
-void IN_JLookDown() { KeyDown(&in_jlook); }
-void IN_JLookUp() { KeyUp(&in_jlook); }
-void IN_MLookDown() { KeyDown(&in_mlook); }
 void IN_UpDown() { KeyDown(&in_up); }
 void IN_UpUp() { KeyUp(&in_up); }
 void IN_DownDown() { KeyDown(&in_down); }
@@ -434,8 +426,6 @@ void IN_MoverightUp()
 }
 void IN_SpeedDown() { KeyDown(&in_speed); }
 void IN_SpeedUp() { KeyUp(&in_speed); }
-void IN_StrafeDown() { KeyDown(&in_strafe); }
-void IN_StrafeUp() { KeyUp(&in_strafe); }
 
 // needs capture by hud/vgui also
 extern void __CmdFunc_InputPlayerSpecial();
@@ -469,8 +459,6 @@ void IN_DuckDown()
 void IN_DuckUp() { KeyUp(&in_duck); }
 void IN_ReloadDown() { KeyDown(&in_reload); }
 void IN_ReloadUp() { KeyUp(&in_reload); }
-void IN_Alt1Down() { KeyDown(&in_alt1); }
-void IN_Alt1Up() { KeyUp(&in_alt1); }
 void IN_GraphDown() { KeyDown(&in_graph); }
 void IN_GraphUp() { KeyUp(&in_graph); }
 
@@ -518,11 +506,6 @@ void IN_ScoreUp()
 	{
 		gViewPort->HideScoreBoard();
 	}
-}
-
-void IN_MLookUp()
-{
-	KeyUp(&in_mlook);
 }
 
 /*
@@ -601,17 +584,9 @@ void CL_AdjustAngles(float frametime, float* viewangles)
 		speed = frametime;
 	}
 
-	if ((in_strafe.state & 1) == 0)
-	{
-		viewangles[YAW] -= speed * cl_yawspeed->value * CL_KeyState(&in_right);
-		viewangles[YAW] += speed * cl_yawspeed->value * CL_KeyState(&in_left);
-		viewangles[YAW] = anglemod(viewangles[YAW]);
-	}
-	if ((in_klook.state & 1) != 0)
-	{
-		viewangles[PITCH] -= speed * cl_pitchspeed->value * CL_KeyState(&in_forward);
-		viewangles[PITCH] += speed * cl_pitchspeed->value * CL_KeyState(&in_back);
-	}
+	viewangles[YAW] -= speed * cl_yawspeed->value * CL_KeyState(&in_right);
+	viewangles[YAW] += speed * cl_yawspeed->value * CL_KeyState(&in_left);
+	viewangles[YAW] = anglemod(viewangles[YAW]);
 
 	up = CL_KeyState(&in_lookup);
 	down = CL_KeyState(&in_lookdown);
@@ -619,15 +594,7 @@ void CL_AdjustAngles(float frametime, float* viewangles)
 	viewangles[PITCH] -= speed * cl_pitchspeed->value * up;
 	viewangles[PITCH] += speed * cl_pitchspeed->value * down;
 
-	if (viewangles[PITCH] > cl_pitchdown->value)
-		viewangles[PITCH] = cl_pitchdown->value;
-	if (viewangles[PITCH] < -cl_pitchup->value)
-		viewangles[PITCH] = -cl_pitchup->value;
-
-	if (viewangles[ROLL] > 50)
-		viewangles[ROLL] = 50;
-	if (viewangles[ROLL] < -50)
-		viewangles[ROLL] = -50;
+	viewangles[PITCH] = std::clamp(viewangles[PITCH], -cl_pitchup->value, cl_pitchdown->value);
 }
 
 /*
@@ -656,23 +623,14 @@ void CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 
 		gEngfuncs.SetViewAngles((float*)viewangles);
 
-		if ((in_strafe.state & 1) != 0)
-		{
-			cmd->sidemove += cl_sidespeed->value * CL_KeyState(&in_right);
-			cmd->sidemove -= cl_sidespeed->value * CL_KeyState(&in_left);
-		}
-
 		cmd->sidemove += cl_sidespeed->value * CL_KeyState(&in_moveright);
 		cmd->sidemove -= cl_sidespeed->value * CL_KeyState(&in_moveleft);
 
 		cmd->upmove += cl_upspeed->value * CL_KeyState(&in_up);
 		cmd->upmove -= cl_upspeed->value * CL_KeyState(&in_down);
 
-		if ((in_klook.state & 1) == 0)
-		{
-			cmd->forwardmove += cl_forwardspeed->value * CL_KeyState(&in_forward);
-			cmd->forwardmove -= cl_backspeed->value * CL_KeyState(&in_back);
-		}
+		cmd->forwardmove += cl_forwardspeed->value * CL_KeyState(&in_forward);
+		cmd->forwardmove -= cl_backspeed->value * CL_KeyState(&in_back);
 
 		// adjust for speed key
 		if ((in_speed.state & 1) != 0)
@@ -699,7 +657,10 @@ void CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 		}
 
 		// Allow mice and other controllers to add their inputs
-		IN_Move(frametime, cmd);
+		Mouse_Move(frametime, cmd);
+#ifdef HALFLIFE_JOYSTICK
+		Joy_Move(frametime, cmd);
+#endif
 	}
 
 	cmd->impulse = in_impulse;
@@ -712,7 +673,7 @@ void CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 	//
 	cmd->buttons = CL_ButtonBits(true);
 
-	// Using joystick?
+#ifdef HALFLIFE_JOYSTICK
 	if (0 != in_joystick->value)
 	{
 		if (cmd->forwardmove > 0)
@@ -724,6 +685,7 @@ void CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 			cmd->buttons |= IN_BACK;
 		}
 	}
+#endif
 
 	gEngfuncs.GetViewAngles((float*)viewangles);
 	// Set current view angles.
@@ -808,11 +770,6 @@ int CL_ButtonBits(bool bResetState)
 		bits |= IN_RELOAD;
 	}
 
-	if ((in_alt1.state & 3) != 0)
-	{
-		bits |= IN_ALT1;
-	}
-
 	if (bResetState)
 	{
 		in_attack.state &= ~2;
@@ -827,7 +784,6 @@ int CL_ButtonBits(bool bResetState)
 		in_moveright.state &= ~2;
 		in_attack2.state &= ~2;
 		in_reload.state &= ~2;
-		in_alt1.state &= ~2;
 		in_score.state &= ~2;
 	}
 
@@ -883,8 +839,6 @@ void InitInput()
 	gEngfuncs.pfnAddCommand("-lookup", IN_LookupUp);
 	gEngfuncs.pfnAddCommand("+lookdown", IN_LookdownDown);
 	gEngfuncs.pfnAddCommand("-lookdown", IN_LookdownUp);
-	gEngfuncs.pfnAddCommand("+strafe", IN_StrafeDown);
-	gEngfuncs.pfnAddCommand("-strafe", IN_StrafeUp);
 	gEngfuncs.pfnAddCommand("+moveleft", IN_MoveleftDown);
 	gEngfuncs.pfnAddCommand("-moveleft", IN_MoveleftUp);
 	gEngfuncs.pfnAddCommand("+moveright", IN_MoverightDown);
@@ -900,18 +854,10 @@ void InitInput()
 	gEngfuncs.pfnAddCommand("+jump", IN_JumpDown);
 	gEngfuncs.pfnAddCommand("-jump", IN_JumpUp);
 	gEngfuncs.pfnAddCommand("impulse", IN_Impulse);
-	gEngfuncs.pfnAddCommand("+klook", IN_KLookDown);
-	gEngfuncs.pfnAddCommand("-klook", IN_KLookUp);
-	gEngfuncs.pfnAddCommand("+mlook", IN_MLookDown);
-	gEngfuncs.pfnAddCommand("-mlook", IN_MLookUp);
-	gEngfuncs.pfnAddCommand("+jlook", IN_JLookDown);
-	gEngfuncs.pfnAddCommand("-jlook", IN_JLookUp);
 	gEngfuncs.pfnAddCommand("+duck", IN_DuckDown);
 	gEngfuncs.pfnAddCommand("-duck", IN_DuckUp);
 	gEngfuncs.pfnAddCommand("+reload", IN_ReloadDown);
 	gEngfuncs.pfnAddCommand("-reload", IN_ReloadUp);
-	gEngfuncs.pfnAddCommand("+alt1", IN_Alt1Down);
-	gEngfuncs.pfnAddCommand("-alt1", IN_Alt1Up);
 	gEngfuncs.pfnAddCommand("+score", IN_ScoreDown);
 	gEngfuncs.pfnAddCommand("-score", IN_ScoreUp);
 	gEngfuncs.pfnAddCommand("+showscores", IN_ScoreDown);
@@ -921,8 +867,6 @@ void InitInput()
 	gEngfuncs.pfnAddCommand("+break", IN_BreakDown);
 	gEngfuncs.pfnAddCommand("-break", IN_BreakUp);
 
-	lookstrafe = gEngfuncs.pfnRegisterVariable("lookstrafe", "0", FCVAR_ARCHIVE);
-	lookspring = gEngfuncs.pfnRegisterVariable("lookspring", "0", FCVAR_ARCHIVE);
 	cl_anglespeedkey = gEngfuncs.pfnRegisterVariable("cl_anglespeedkey", "0.67", 0);
 	cl_yawspeed = gEngfuncs.pfnRegisterVariable("cl_yawspeed", "210", 0);
 	cl_pitchspeed = gEngfuncs.pfnRegisterVariable("cl_pitchspeed", "225", 0);
@@ -942,7 +886,11 @@ void InitInput()
 	// Initialize third person camera controls.
 	CAM_Init();
 	// Initialize inputs
-	IN_Init();
+	Mouse_Init();
+#ifdef HALFLIFE_JOYSTICK
+	// Initialize game controllers
+	Joy_Init();
+#endif
 	// Initialize keyboard
 	KB_Init();
 	// Initialize view system
@@ -956,7 +904,7 @@ ShutdownInput
 */
 void ShutdownInput()
 {
-	IN_Shutdown();
+	Mouse_Shutdown();
 	KB_Shutdown();
 }
 

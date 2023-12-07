@@ -74,7 +74,7 @@ int g_iTeamNumber;
 #define SBOARD_INDENT_X_400 0
 #define SBOARD_INDENT_Y_400 20
 
-void IN_ResetMouse();
+void Mouse_Reset();
 extern CMenuPanel* CMessageWindowPanel_Create(const char* szMOTD, const char* szTitle, bool iShadeFullscreen, bool iRemoveMe, int x, int y, int wide, int tall);
 
 using namespace vgui;
@@ -1693,7 +1693,7 @@ void TeamFortressViewport::UpdateCursorState()
 	// Don't reset mouse in demo playback
 	if (0 == gEngfuncs.pDemoAPI->IsPlayingback())
 	{
-		IN_ResetMouse();
+		Mouse_Reset();
 	}
 
 	g_iVisibleMouse = false;

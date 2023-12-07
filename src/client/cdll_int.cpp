@@ -49,7 +49,10 @@ void CL_UnloadParticleMan();
 
 void InitInput();
 void EV_HookEvents();
-void IN_Commands();
+
+#ifdef HALFLIFE_JOYSTICK
+void Joy_Commands();
+#endif
 
 /*
 ================================
@@ -180,7 +183,9 @@ returns 1 if anything has been changed, 0 otherwise.
 
 int HUD_UpdateClientData(client_data_t* pcldata, float flTime)
 {
-	IN_Commands();
+#ifdef HALFLIFE_JOYSTICK
+	Joy_Commands();
+#endif
 
 	return static_cast<int>(gHUD.UpdateClientData(pcldata, flTime));
 }
@@ -271,11 +276,11 @@ extern "C" void DLLEXPORT F(void* pv)
 			HUD_PlayerMove,
 			HUD_PlayerMoveInit,
 			HUD_PlayerMoveTexture,
-			IN_ActivateMouse,
-			IN_DeactivateMouse,
-			IN_MouseEvent,
-			IN_ClearStates,
-			IN_Accumulate,
+			Mouse_Activate,
+			Mouse_Deactivate,
+			Mouse_Event,
+			Mouse_ClearStates,
+			Mouse_Accumulate,
 			CL_CreateMove,
 			CL_IsThirdPerson,
 			CL_CameraOffset,

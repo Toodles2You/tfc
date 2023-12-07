@@ -27,8 +27,6 @@ extern engine_studio_api_t IEngineStudio;
 
 float HUD_GetFOV();
 
-extern cvar_t* sensitivity;
-
 // Think
 void CHud::Think()
 {

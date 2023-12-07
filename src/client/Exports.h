@@ -47,11 +47,11 @@ void HUD_Shutdown( void );
 int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding );
 
 // From inputw32
-void IN_ActivateMouse( void );
-void IN_DeactivateMouse( void );
-void IN_MouseEvent (int mstate);
-void IN_Accumulate (void);
-void IN_ClearStates (void);
+void Mouse_Activate( void );
+void Mouse_Deactivate( void );
+void Mouse_Event (int mstate);
+void Mouse_Accumulate (void);
+void Mouse_ClearStates (void);
 
 // From tri
 void HUD_DrawNormalTriangles( void );

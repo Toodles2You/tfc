@@ -21,6 +21,7 @@ project(halflife
 option(HALFLIFE_SAVERESTORE "Enable singleplayer game save system" OFF)
 option(HALFLIFE_NODEGRAPH "Enable node graphs for monster AI" OFF)
 option(HALFLIFE_BOTS "Enable multiplayer bots" ON)
+option(HALFLIFE_JOYSTICK "Enable joystick support" OFF)
 
 set(HL_SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 set(SHARED_SRC_DIR ${HL_SRC_DIR}/shared)
@@ -165,8 +166,8 @@ set(CLIENT_SRC
     ${CLIENT_SRC_DIR}/rendering/particleman/IParticleMan_Active.cpp
 
     ${CLIENT_SRC_DIR}/input/in_camera.cpp
-    ${CLIENT_SRC_DIR}/input/input.cpp
-    ${CLIENT_SRC_DIR}/input/inputw32.cpp
+    ${CLIENT_SRC_DIR}/input/in_keyboard.cpp
+    ${CLIENT_SRC_DIR}/input/in_mouse.cpp
 
     ${SHARED_SRC}
 )
@@ -210,6 +211,16 @@ if(HALFLIFE_NODEGRAPH)
 
     list(APPEND SERVER_SRC
         ${SERVER_SRC_DIR}/nodes.cpp
+    )
+
+endif()
+
+if(HALFLIFE_JOYSTICK)
+
+    list(APPEND HL_COMPILE_DEFS HALFLIFE_JOYSTICK)
+
+    list(APPEND CLIENT_SRC
+        ${CLIENT_SRC_DIR}/input/in_joystick.cpp
     )
 
 endif()
