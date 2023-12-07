@@ -38,11 +38,6 @@ bool g_iVisibleMouse = false;
 extern cl_enginefunc_t gEngfuncs;
 extern bool iMouseInUse;
 
-extern cvar_t* m_pitch;
-extern cvar_t* m_yaw;
-extern cvar_t* m_forward;
-extern cvar_t* m_side;
-
 extern cvar_t* cl_pitchdown;
 extern cvar_t* cl_pitchup;
 extern cvar_t* cl_yawspeed;
@@ -69,6 +64,8 @@ static void Mouse_SetRelative(bool enable)
 }
 
 static cvar_t* m_filter;
+static cvar_t* m_pitch;
+static cvar_t* m_yaw;
 cvar_t* sensitivity;
 
 static int mouse_oldbuttonstate;
@@ -497,6 +494,8 @@ void Mouse_Move(float frametime, usercmd_t* cmd)
 void Mouse_Init()
 {
 	m_filter = gEngfuncs.pfnRegisterVariable("m_filter", "0", FCVAR_ARCHIVE);
+	m_pitch = gEngfuncs.pfnRegisterVariable("m_pitch", "0.022", FCVAR_ARCHIVE);
+	m_yaw = gEngfuncs.pfnRegisterVariable("m_yaw", "0.022", FCVAR_ARCHIVE);
 	sensitivity = gEngfuncs.pfnRegisterVariable("sensitivity", "3", FCVAR_ARCHIVE);
 
 #ifdef WIN32

@@ -1,9 +1,10 @@
-// cl.input.c  -- builds an intended movement command to send to the server
+//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//
+// Purpose:
+//
+// $NoKeywords: $
+//=============================================================================
 
-//xxxxxx Move bob and pitch drifting code here and other stuff from view if needed
-
-// Quake is a trademark of Id Software, Inc., (c) 1996 Id Software, Inc. All
-// rights reserved.
 #include "hud.h"
 #include "cl_util.h"
 #include "camera.h"
@@ -44,13 +45,7 @@ void V_Init();
 void VectorAngles(const float* forward, float* angles);
 int CL_ButtonBits(bool);
 
-int in_impulse = 0;
-bool in_cancel = false;
-
-cvar_t* m_pitch;
-cvar_t* m_yaw;
-cvar_t* m_forward;
-cvar_t* m_side;
+static int in_impulse = 0;
 
 cvar_t* cl_pitchup;
 cvar_t* cl_pitchdown;
@@ -437,14 +432,9 @@ void IN_SpeedUp() { KeyUp(&in_speed); }
 void IN_StrafeDown() { KeyDown(&in_strafe); }
 void IN_StrafeUp() { KeyUp(&in_strafe); }
 
-// needs capture by hud/vgui also
-extern void __CmdFunc_InputPlayerSpecial();
-
 void IN_Attack2Down()
 {
 	KeyDown(&in_attack2);
-
-
 	gHUD.m_Spectator.HandleButtonsDown(IN_ATTACK2);
 }
 
@@ -481,13 +471,6 @@ void IN_AttackDown()
 void IN_AttackUp()
 {
 	KeyUp(&in_attack);
-	in_cancel = false;
-}
-
-// Special handling
-void IN_Cancel()
-{
-	in_cancel = true;
 }
 
 void IN_Impulse()
@@ -745,11 +728,6 @@ int CL_ButtonBits(bool bResetState)
 		bits |= IN_USE;
 	}
 
-	if (in_cancel)
-	{
-		bits |= IN_CANCEL;
-	}
-
 	if ((in_left.state & 3) != 0)
 	{
 		bits |= IN_LEFT;
@@ -887,17 +865,12 @@ void InitInput()
 	cl_yawspeed = gEngfuncs.pfnRegisterVariable("cl_yawspeed", "210", 0);
 	cl_pitchspeed = gEngfuncs.pfnRegisterVariable("cl_pitchspeed", "225", 0);
 	cl_upspeed = gEngfuncs.pfnRegisterVariable("cl_upspeed", "320", 0);
-	cl_forwardspeed = gEngfuncs.pfnRegisterVariable("cl_forwardspeed", "400", FCVAR_ARCHIVE);
-	cl_backspeed = gEngfuncs.pfnRegisterVariable("cl_backspeed", "400", FCVAR_ARCHIVE);
+	cl_forwardspeed = gEngfuncs.pfnRegisterVariable("cl_forwardspeed", "400", 0);
+	cl_backspeed = gEngfuncs.pfnRegisterVariable("cl_backspeed", "400", 0);
 	cl_sidespeed = gEngfuncs.pfnRegisterVariable("cl_sidespeed", "400", 0);
 	cl_movespeedkey = gEngfuncs.pfnRegisterVariable("cl_movespeedkey", "0.3", 0);
 	cl_pitchup = gEngfuncs.pfnRegisterVariable("cl_pitchup", "89", 0);
 	cl_pitchdown = gEngfuncs.pfnRegisterVariable("cl_pitchdown", "89", 0);
-
-	m_pitch = gEngfuncs.pfnRegisterVariable("m_pitch", "0.022", FCVAR_ARCHIVE);
-	m_yaw = gEngfuncs.pfnRegisterVariable("m_yaw", "0.022", FCVAR_ARCHIVE);
-	m_forward = gEngfuncs.pfnRegisterVariable("m_forward", "1", FCVAR_ARCHIVE);
-	m_side = gEngfuncs.pfnRegisterVariable("m_side", "0.8", FCVAR_ARCHIVE);
 
 	// Initialize third person camera controls.
 	CAM_Init();
