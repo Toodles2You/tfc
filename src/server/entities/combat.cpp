@@ -261,7 +261,7 @@ void CBasePlayer::FireBullets(
 			traceEntities[traceCount] = hit;
 			traceCount++;
 			
-			if (hit->IsClient())
+			if (hit->IsClient() && g_pGameRules->FPlayerCanTakeDamage(hit, this))
 			{
 				traceEndPos[traceHits] = tr.vecEndPos;
 				traceHits++;
