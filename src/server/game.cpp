@@ -45,11 +45,6 @@ cvar_t mp_chattime = {"mp_chattime", "10", FCVAR_SERVER};
 // This gets called one time when the game is initialied
 void GameDLLInit()
 {
-	// Register cvars here:
-
-	g_psv_gravity = CVAR_GET_POINTER("sv_gravity");
-	g_psv_aim = CVAR_GET_POINTER("sv_aim");
-	g_footsteps = CVAR_GET_POINTER("mp_footsteps");
 	g_psv_cheats = CVAR_GET_POINTER("sv_cheats");
 
 	if (!FileSystem_LoadFileSystem())
