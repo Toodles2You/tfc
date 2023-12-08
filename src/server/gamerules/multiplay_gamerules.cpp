@@ -911,7 +911,7 @@ CSpawnPoint *CHalfLifeMultiplay::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
 		{
 			if (FPlayerCanTakeDamage((CBasePlayer *)entity, pPlayer))
 			{
-				entity->TakeDamage(pPlayer, pPlayer, 300.0F, DMG_ALWAYSGIB);
+				entity->Killed(CWorld::World, CWorld::World, DMG_ALWAYSGIB);
 			}
 		}
 	}
