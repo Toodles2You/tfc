@@ -480,7 +480,7 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 	WriteByte(pPlayer->entindex());
 	WriteByte(pPlayer->PCNumber());
 	WriteByte(pPlayer->TeamNumber());
-	WriteByte(pPlayer->IsPlayer() && !pPlayer->IsAlive());
+	WriteByte(false);
 	MessageEnd();
 
 	if (pPlayer->TeamNumber() == TEAM_UNASSIGNED)
@@ -791,11 +791,6 @@ bool CHalfLifeMultiplay::CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWe
 }
 
 
-void CHalfLifeMultiplay::PlayerGotItem(CBasePlayer* pPlayer, CItem* pItem)
-{
-}
-
-
 int CHalfLifeMultiplay::ItemShouldRespawn(CItem* pItem)
 {
 	if ((pItem->pev->spawnflags & SF_NORESPAWN) != 0)
@@ -816,11 +811,6 @@ float CHalfLifeMultiplay::FlItemRespawnTime(CItem* pItem)
 Vector CHalfLifeMultiplay::VecItemRespawnSpot(CItem* pItem)
 {
 	return pItem->pev->origin;
-}
-
-
-void CHalfLifeMultiplay::PlayerGotAmmo(CBasePlayer* pPlayer, char* szName, int iCount)
-{
 }
 
 
@@ -1239,12 +1229,8 @@ void CHalfLifeMultiplay::Think_GAME_OVER()
 }
 
 
-//=========================================================
-//======== CHalfLifeMultiplay private functions ===========
-
-
 #define MAX_MOTD_CHUNK 60
-#define MAX_MOTD_LENGTH 1536 // (MAX_MOTD_CHUNK * 4)
+#define MAX_MOTD_LENGTH 1536
 
 void CHalfLifeMultiplay::SendMOTDToClient(CBasePlayer* player)
 {
@@ -1297,6 +1283,7 @@ void CHalfLifeMultiplay::SendMOTDToClient(CBasePlayer* player)
 
 	FREE_FILE(aFileList);
 }
+
 
 void CHalfLifeMultiplay::SendMenusToClient(CBasePlayer* player)
 {

@@ -26,6 +26,7 @@
 #include "game.h"
 #include "UserMessages.h"
 
+
 CSpawnPoint::CSpawnPoint() :
 	m_origin{Vector(0, 0, -VEC_HULL_MIN.z + 1)},
 	m_angles{Vector(0, 0, 0)},
@@ -35,6 +36,7 @@ CSpawnPoint::CSpawnPoint() :
 {
 }
 
+
 CSpawnPoint::CSpawnPoint(CBaseEntity *pEntity) :
 	m_origin{pEntity->pev->origin + Vector(0, 0, 1)},
 	m_angles{pEntity->pev->angles},
@@ -43,6 +45,7 @@ CSpawnPoint::CSpawnPoint(CBaseEntity *pEntity) :
 	m_lastSpawnTime{-1000.0F}
 {
 }
+
 
 bool CSpawnPoint::IsValid(CBasePlayer *pPlayer, int attempt)
 {
@@ -79,6 +82,7 @@ bool CSpawnPoint::IsValid(CBasePlayer *pPlayer, int attempt)
 	return true;
 }
 
+
 void CGameRules::UpdateGameMode(CBasePlayer* pPlayer)
 {
 	MessageBegin(MSG_ONE, gmsgGameMode, pPlayer);
@@ -86,27 +90,25 @@ void CGameRules::UpdateGameMode(CBasePlayer* pPlayer)
 	MessageEnd();
 }
 
+
 void CGameRules::InitHUD(CBasePlayer* pl)
 {
 	UpdateGameMode(pl);
 }
 
-//=========================================================
-//=========================================================
+
 bool CGameRules::CanHaveAmmo(CBasePlayer* pPlayer, int iAmmoType, int iMaxCarry)
 {
 	return pPlayer->AmmoInventory(iAmmoType) < iMaxCarry;
 }
 
-//=========================================================
-//=========================================================
+
 CSpawnPoint *CGameRules::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
 {
 	return &m_startPoint;
 }
 
-//=========================================================
-//=========================================================
+
 void CGameRules::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 {
 	if (!FStrEq(STRING(pEntity->pev->classname), "info_player_start"))
@@ -116,16 +118,12 @@ void CGameRules::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 	m_startPoint = CSpawnPoint{pEntity};
 }
 
-//=========================================================
-//=========================================================
+
 bool CGameRules::IsPlayerPrivileged(CBasePlayer* pPlayer)
 {
 	return g_psv_cheats->value != 0;
 }
 
-//=========================================================
-// instantiate the proper game rules object
-//=========================================================
 
 CGameRules* InstallGameRules()
 {
@@ -154,3 +152,4 @@ CGameRules* InstallGameRules()
 	// generic half-life
 	return new CHalfLifeRules;
 }
+

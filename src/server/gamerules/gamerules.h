@@ -171,7 +171,7 @@ public:
 
 	// Item retrieval
 	virtual bool CanHaveItem(CBasePlayer* pPlayer, CItem* pItem) { return true; }	// is this player allowed to take this item?
-	virtual void PlayerGotItem(CBasePlayer* pPlayer, CItem* pItem) = 0; // call each time a player picks up an item (battery, healthkit, longjump)
+	virtual void PlayerGotItem(CBasePlayer* pPlayer, CItem* pItem) {} // call each time a player picks up an item (battery, healthkit, longjump)
 
 	// Item spawn/respawn control
 	virtual int ItemShouldRespawn(CItem* pItem) = 0;	 // Should this item respawn?
@@ -180,7 +180,7 @@ public:
 
 	// Ammo retrieval
 	virtual bool CanHaveAmmo(CBasePlayer* pPlayer, int iAmmoType, int iMaxCarry); // can this player take more of this ammo?
-	virtual void PlayerGotAmmo(CBasePlayer* pPlayer, char* szName, int iCount) = 0;			// called each time a player picks up some ammo in the world
+	virtual void PlayerGotAmmo(CBasePlayer* pPlayer, char* szName, int iCount) {}	// called each time a player picks up some ammo in the world
 
 	// Ammo spawn/respawn control
 	virtual int AmmoShouldRespawn(CBasePlayerAmmo* pAmmo) = 0;	   // should this ammo item respawn?
@@ -235,9 +235,9 @@ public:
 	bool FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) override;
 
 	// Functions to verify the single/multiplayer status of a game
-	bool IsMultiplayer() override;
-	bool IsDeathmatch() override;
-	bool IsCoOp() override;
+	bool IsMultiplayer() override { return false; }
+	bool IsDeathmatch() override { return false; }
+	bool IsCoOp() override { return false; }
 
 	// Client connection/disconnection
 	bool ClientConnected(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128]) override;
@@ -268,16 +268,10 @@ public:
 	float FlWeaponTryRespawn(CBasePlayerWeapon* pWeapon) override;
 	Vector VecWeaponRespawnSpot(CBasePlayerWeapon* pWeapon) override;
 
-	// Item retrieval
-	void PlayerGotItem(CBasePlayer* pPlayer, CItem* pItem) override;
-
 	// Item spawn/respawn control
 	int ItemShouldRespawn(CItem* pItem) override;
 	float FlItemRespawnTime(CItem* pItem) override;
 	Vector VecItemRespawnSpot(CItem* pItem) override;
-
-	// Ammo retrieval
-	void PlayerGotAmmo(CBasePlayer* pPlayer, char* szName, int iCount) override;
 
 	// Ammo spawn/respawn control
 	int AmmoShouldRespawn(CBasePlayerAmmo* pAmmo) override;
@@ -374,16 +368,10 @@ public:
 	float FlWeaponTryRespawn(CBasePlayerWeapon* pWeapon) override;
 	Vector VecWeaponRespawnSpot(CBasePlayerWeapon* pWeapon) override;
 
-	// Item retrieval
-	void PlayerGotItem(CBasePlayer* pPlayer, CItem* pItem) override;
-
 	// Item spawn/respawn control
 	int ItemShouldRespawn(CItem* pItem) override;
 	float FlItemRespawnTime(CItem* pItem) override;
 	Vector VecItemRespawnSpot(CItem* pItem) override;
-
-	// Ammo retrieval
-	void PlayerGotAmmo(CBasePlayer* pPlayer, char* szName, int iCount) override;
 
 	// Ammo spawn/respawn control
 	int AmmoShouldRespawn(CBasePlayerAmmo* pAmmo) override;
