@@ -212,13 +212,6 @@ int CHalfLifeRules::WeaponShouldRespawn(CBasePlayerWeapon* pWeapon)
 
 //=========================================================
 //=========================================================
-bool CHalfLifeRules::CanHaveItem(CBasePlayer* pPlayer, CItem* pItem)
-{
-	return true;
-}
-
-//=========================================================
-//=========================================================
 void CHalfLifeRules::PlayerGotItem(CBasePlayer* pPlayer, CItem* pItem)
 {
 }

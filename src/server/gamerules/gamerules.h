@@ -141,7 +141,6 @@ public:
 	// Client damage rules
 	virtual float FlPlayerFallDamage(CBasePlayer* pPlayer) = 0;										 // this client just hit the ground after a fall. How much damage?
 	virtual bool FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* pAttacker) { return true; } // can this player take damage from this attacker?
-	virtual bool ShouldAutoAim(CBasePlayer* pPlayer, edict_t* target) { return true; }
 
 	// Client spawn/respawn control
 	virtual void PlayerSpawn(CBasePlayer* pPlayer) = 0;		   // called by CBasePlayer::Spawn just before releasing player into the game
@@ -161,7 +160,7 @@ public:
 	virtual void PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, CBaseEntity* accomplice, int bitsDamageType) = 0; // Called each time a player dies
 	virtual void DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, CBaseEntity* accomplice, int bitsDamageType) = 0;	// Call this from within a GameRules class to report an obituary.
 																									// Weapon retrieval
-	virtual bool CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon);					// The player is touching an CBasePlayerWeapon, do I give it to him?
+	virtual bool CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) { return true; }	// The player is touching an CBasePlayerWeapon, do I give it to him?
 	virtual void PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) = 0;				// Called each time a player picks up a weapon from the ground
 
 	// Weapon spawn/respawn control
@@ -171,7 +170,7 @@ public:
 	virtual Vector VecWeaponRespawnSpot(CBasePlayerWeapon* pWeapon) = 0; // where in the world should this weapon respawn?
 
 	// Item retrieval
-	virtual bool CanHaveItem(CBasePlayer* pPlayer, CItem* pItem) = 0;	// is this player allowed to take this item?
+	virtual bool CanHaveItem(CBasePlayer* pPlayer, CItem* pItem) { return true; }	// is this player allowed to take this item?
 	virtual void PlayerGotItem(CBasePlayer* pPlayer, CItem* pItem) = 0; // call each time a player picks up an item (battery, healthkit, longjump)
 
 	// Item spawn/respawn control
@@ -270,7 +269,6 @@ public:
 	Vector VecWeaponRespawnSpot(CBasePlayerWeapon* pWeapon) override;
 
 	// Item retrieval
-	bool CanHaveItem(CBasePlayer* pPlayer, CItem* pItem) override;
 	void PlayerGotItem(CBasePlayer* pPlayer, CItem* pItem) override;
 
 	// Item spawn/respawn control
@@ -347,7 +345,6 @@ public:
 
 	// Client damage rules
 	float FlPlayerFallDamage(CBasePlayer* pPlayer) override;
-	bool FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* pAttacker) override;
 
 	// Client spawn/respawn control
 	void PlayerSpawn(CBasePlayer* pPlayer) override;
@@ -378,7 +375,6 @@ public:
 	Vector VecWeaponRespawnSpot(CBasePlayerWeapon* pWeapon) override;
 
 	// Item retrieval
-	bool CanHaveItem(CBasePlayer* pPlayer, CItem* pItem) override;
 	void PlayerGotItem(CBasePlayer* pPlayer, CItem* pItem) override;
 
 	// Item spawn/respawn control
@@ -410,9 +406,21 @@ public:
 	bool FAllowMonsters() override { return m_allowMonsters; }
 
 	// Immediately end a multiplayer game
-	void EndMultiplayerGame() override { GoToIntermission(); }
+	void EndMultiplayerGame() override { EnterState(GR_STATE_GAME_OVER); }
+
+	virtual void EnterState(gamerules_state_e state) override;
 
 protected:
+	void CheckTimeLimit();
+
+	virtual void Enter_RND_RUNNING();
+	virtual void Think_RND_RUNNING();
+
+	virtual void Enter_GAME_OVER();
+	virtual void Think_GAME_OVER();
+
+protected:
+	float m_stateChangeTime;
     std::vector<CSpawnPoint> m_spawnPoints;
 	std::vector<CSpawnPoint*> m_validSpawnPoints;
 	std::size_t m_numSpawnPoints = 0;
@@ -427,8 +435,6 @@ protected:
 	bool AllowSpectators() { return m_allowSpectators; }
 
 	virtual void ChangeLevel();
-	virtual void GoToIntermission();
-	float m_flIntermissionTime;
 	void SendMOTDToClient(CBasePlayer* player);
 
 	virtual bool PrivilegedCommand(CBasePlayer* pPlayer, const char* pcmd);

@@ -118,13 +118,6 @@ void CGameRules::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 
 //=========================================================
 //=========================================================
-bool CGameRules::CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon)
-{
-	return true;
-}
-
-//=========================================================
-//=========================================================
 bool CGameRules::IsPlayerPrivileged(CBasePlayer* pPlayer)
 {
 	return g_psv_cheats->value != 0;

@@ -27,17 +27,18 @@ class CHalfLifeTeamplay : public CHalfLifeMultiplay
 public:
 	CHalfLifeTeamplay();
 
-	bool ClientCommand(CBasePlayer* pPlayer, const char* pcmd) override;
 	void ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer) override;
 	bool IsTeamplay() override { return true; }
 	bool FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* pAttacker) override;
 	int PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget) override;
-	bool ShouldAutoAim(CBasePlayer* pPlayer, edict_t* target) override;
 	float GetPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled, bool assist = false) override;
 	void InitHUD(CBasePlayer* pl) override;
 	const char* GetGameDescription() override { return "HL Teamplay"; } // this is the game name that gets seen in the server browser
 	gamemode_e GetGameMode() override { return kGamemodeTeamplay; }
-	void Think() override;
 	int GetDefaultPlayerTeam(CBasePlayer* pPlayer) override;
 	bool ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib, bool bAutoTeam) override;
+
+protected:
+	virtual void Enter_RND_RUNNING() override;
+	virtual void Think_RND_RUNNING() override;
 };

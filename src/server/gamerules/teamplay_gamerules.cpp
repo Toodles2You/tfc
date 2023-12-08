@@ -25,6 +25,7 @@
 #include "game.h"
 #include "UserMessages.h"
 
+
 CHalfLifeTeamplay::CHalfLifeTeamplay()
 {
 	m_teams.clear();
@@ -64,89 +65,6 @@ CHalfLifeTeamplay::CHalfLifeTeamplay()
 	}
 }
 
-#include "voice_gamemgr.h"
-extern CVoiceGameMgr g_VoiceGameMgr;
-
-void CHalfLifeTeamplay::Think()
-{
-	///// Check game rules /////
-	static int last_frags;
-	static int last_time;
-
-	int frags_remaining = 0;
-	int time_remaining = 0;
-
-	g_VoiceGameMgr.Update(gpGlobals->frametime);
-
-	if (GetState() == GR_STATE_GAME_OVER)
-	{
-		CHalfLifeMultiplay::Think();
-		return;
-	}
-
-	float flTimeLimit = timelimit.value * 60;
-
-	time_remaining = (int)(0 != flTimeLimit ? (flTimeLimit - gpGlobals->time) : 0);
-
-	if (flTimeLimit != 0 && gpGlobals->time >= flTimeLimit)
-	{
-		GoToIntermission();
-		return;
-	}
-
-	float flFragLimit = fraglimit.value;
-	if (0 != flFragLimit)
-	{
-		int bestfrags = 9999;
-		int remain;
-
-		// check if any team is over the frag limit
-		for (auto t = m_teams.begin(); t != m_teams.end(); t++)
-		{
-			if ((*t).m_score >= flFragLimit)
-			{
-				GoToIntermission();
-				return;
-			}
-
-			remain = flFragLimit - (*t).m_score;
-			if (remain < bestfrags)
-			{
-				bestfrags = remain;
-			}
-		}
-		frags_remaining = bestfrags;
-	}
-
-	last_frags = frags_remaining;
-	last_time = time_remaining;
-}
-
-//=========================================================
-// ClientCommand
-// the user has typed a command which is unrecognized by everything else;
-// this check to see if the gamerules knows anything about the command
-//=========================================================
-bool CHalfLifeTeamplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
-{
-	if (g_VoiceGameMgr.ClientCommand(pPlayer, pcmd))
-		return true;
-
-	if (FStrEq(pcmd, "menuselect"))
-	{
-		if (CMD_ARGC() < 2)
-			return true;
-
-		int slot = atoi(CMD_ARGV(1));
-
-		// select the item from the current menu
-
-		return true;
-	}
-
-	return CHalfLifeMultiplay::ClientCommand(pPlayer, pcmd);
-}
-
 
 int CHalfLifeTeamplay::GetDefaultPlayerTeam(CBasePlayer* pPlayer)
 {
@@ -177,9 +95,6 @@ int CHalfLifeTeamplay::GetDefaultPlayerTeam(CBasePlayer* pPlayer)
 }
 
 
-//=========================================================
-// InitHUD
-//=========================================================
 void CHalfLifeTeamplay::InitHUD(CBasePlayer* pPlayer)
 {
 	CHalfLifeMultiplay::InitHUD(pPlayer);
@@ -217,6 +132,7 @@ bool CHalfLifeTeamplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bo
 	return true;
 }
 
+
 void CHalfLifeTeamplay::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer)
 {
 	CHalfLifeMultiplay::ClientUserInfoChanged(pPlayer, infobuffer);
@@ -230,6 +146,7 @@ void CHalfLifeTeamplay::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobu
 			pPlayer->TeamID());
 	}
 }
+
 
 bool CHalfLifeTeamplay::FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* pAttacker)
 {
@@ -246,8 +163,7 @@ bool CHalfLifeTeamplay::FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* 
 	return CHalfLifeMultiplay::FPlayerCanTakeDamage(pPlayer, pAttacker);
 }
 
-//=========================================================
-//=========================================================
+
 int CHalfLifeTeamplay::PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget)
 {
 	// half life multiplay has a simple concept of Player Relationships.
@@ -265,23 +181,7 @@ int CHalfLifeTeamplay::PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTa
 	return GR_NOTTEAMMATE;
 }
 
-//=========================================================
-//=========================================================
-bool CHalfLifeTeamplay::ShouldAutoAim(CBasePlayer* pPlayer, edict_t* target)
-{
-	// always autoaim, unless target is a teammate
-	CBaseEntity* pTgt = CBaseEntity::Instance(target);
-	if (pTgt && pTgt->IsPlayer())
-	{
-		if (PlayerRelationship(pPlayer, pTgt) >= GR_ALLY)
-			return false; // don't autoaim at teammates
-	}
 
-	return CHalfLifeMultiplay::ShouldAutoAim(pPlayer, target);
-}
-
-//=========================================================
-//=========================================================
 float CHalfLifeTeamplay::GetPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled, bool assist)
 {
 	if (pAttacker != pKilled && PlayerRelationship(pAttacker, pKilled) >= GR_ALLY)
@@ -294,3 +194,27 @@ float CHalfLifeTeamplay::GetPointsForKill(CBasePlayer* pAttacker, CBasePlayer* p
 	}
 	return CHalfLifeMultiplay::GetPointsForKill(pAttacker, pKilled, assist);
 }
+
+
+void CHalfLifeTeamplay::Enter_RND_RUNNING()
+{
+}
+
+
+void CHalfLifeTeamplay::Think_RND_RUNNING()
+{
+	if ((int)fraglimit.value > 0)
+	{
+		for (auto t = m_teams.begin(); t != m_teams.end(); t++)
+		{
+			if ((*t).m_score >= (int)fraglimit.value)
+			{
+				EnterState(GR_STATE_GAME_OVER);
+				return;
+			}
+		}
+	}
+
+	CheckTimeLimit();
+}
+

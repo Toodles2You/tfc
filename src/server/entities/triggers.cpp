@@ -1235,7 +1235,6 @@ public:
 	bool KeyValue(KeyValueData* pkvd) override;
 	void EXPORT UseChangeLevel(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
 	void EXPORT TriggerChangeLevel();
-	void EXPORT ExecuteChangeLevel();
 	void EXPORT TouchChangeLevel(CBaseEntity* pOther);
 	void ChangeLevelNow(CBaseEntity* pActivator);
 
@@ -1328,18 +1327,6 @@ bool CChangeLevel::Spawn()
 	//	ALERT( at_console, "TRANSITION: %s (%s)\n", m_szMapName, m_szLandmarkName );
 
 	return true;
-}
-
-
-void CChangeLevel::ExecuteChangeLevel()
-{
-	MessageBegin(MSG_ALL, SVC_CDTRACK);
-	WriteByte(3);
-	WriteByte(3);
-	MessageEnd();
-
-	MessageBegin(MSG_ALL, SVC_INTERMISSION);
-	MessageEnd();
 }
 
 
