@@ -19,6 +19,8 @@
 #include "pm_debug.h"
 #include "gamemovement.h"
 
+#include <algorithm>
+
 
 CHalfLifeMovement::CHalfLifeMovement(playermove_t* _pmove, CBasePlayer* _player)
     : CGameMovement{_pmove, _player}
@@ -76,29 +78,36 @@ void CHalfLifeMovement::Move()
 
 void CHalfLifeMovement::CheckParameters()
 {
-    float speed =
-        sqrtf((pmove->cmd.forwardmove * pmove->cmd.forwardmove)
-            + (pmove->cmd.sidemove * pmove->cmd.sidemove)
-            + (pmove->cmd.upmove * pmove->cmd.upmove));
+    float speedScale = 1.0F;
+    Vector move =
+    {
+        *reinterpret_cast<int*>(&pmove->cmd.forwardmove),
+        *reinterpret_cast<int*>(&pmove->cmd.sidemove),
+        *reinterpret_cast<int*>(&pmove->cmd.upmove)
+    };
+
+    move = move / 100.0F;
+
+    if ((pmove->cmd.buttons & IN_SPEED) != 0)
+    {
+        speedScale = 0.3F;
+    }
+
+    float speed = move.Length();
 
     if (pmove->clientmaxspeed != 0)
     {
         pmove->maxspeed = pmove->clientmaxspeed;
     }
 
-    if (speed != 0 && speed > pmove->maxspeed)
-    {
-        float rat = pmove->maxspeed / speed;
-        pmove->cmd.forwardmove *= rat;
-        pmove->cmd.sidemove *= rat;
-        pmove->cmd.upmove *= rat;
-    }
-
     if ((pmove->flags & (FL_FROZEN | FL_ONTRAIN)) != 0 || pmove->dead != 0)
     {
-        pmove->cmd.forwardmove = 0;
-        pmove->cmd.sidemove = 0;
-        pmove->cmd.upmove = 0;
+        move = g_vecZero;
+    }
+    else if (speed > speedScale)
+    {
+        speed = speedScale;
+        move = move.Normalize() * speedScale;
     }
 
     pmove->angles = pmove->cmd.viewangles;
@@ -122,17 +131,19 @@ void CHalfLifeMovement::CheckParameters()
      || pmove->movetype == MOVETYPE_FLY)
     {
         m_wishVel =
-            pmove->forward * pmove->cmd.forwardmove
-            + pmove->right * pmove->cmd.sidemove;
-        m_wishVel.z += pmove->cmd.upmove;
+            pmove->forward * move.x
+            + pmove->right * move.y;
     }
     else
     {
         m_wishVel =
-            m_flatForward * pmove->cmd.forwardmove
-            + m_flatRight * pmove->cmd.sidemove;
-        m_wishVel.z = 0;
+            m_flatForward * move.x
+            + m_flatRight * move.y;
     }
+
+    m_wishVel.z += move.z;
+
+    m_wishVel = m_wishVel * pmove->maxspeed;
 
     m_wishDir = m_wishVel.Normalize();
     m_wishSpeed = m_wishVel.Length();

@@ -91,15 +91,10 @@ cvar_t* joy_yawsensitivity;
 cvar_t* joy_wwhack1;
 cvar_t* joy_wwhack2;
 
-extern kbutton_t in_speed;
-
 extern cvar_t* cl_pitchdown;
 extern cvar_t* cl_pitchup;
 extern cvar_t* cl_yawspeed;
-extern cvar_t* cl_sidespeed;
-extern cvar_t* cl_forwardspeed;
 extern cvar_t* cl_pitchspeed;
-extern cvar_t* cl_movespeedkey;
 
 static bool joy_avail, joy_advancedinit, joy_haspov;
 
@@ -287,7 +282,7 @@ void Joy_Commands()
 
 void Joy_Move(float frametime, usercmd_t* cmd)
 {
-	float speed, aspeed;
+	float lookspeed, aspeed;
 	float fAxisValue, fTemp;
 	int i;
 	Vector viewangles;
@@ -312,11 +307,11 @@ void Joy_Move(float frametime, usercmd_t* cmd)
 	SDL_JoystickUpdate();
 
 	if ((in_speed.state & 1) != 0)
-		speed = cl_movespeedkey->value;
+		lookspeed = 0.3;
 	else
-		speed = 1;
+		lookspeed = 1;
 
-	aspeed = speed * frametime;
+	aspeed = lookspeed * frametime;
 
 	// loop through the axes
 	for (i = 0; i < JOY_MAX_AXES; i++)
@@ -348,14 +343,14 @@ void Joy_Move(float frametime, usercmd_t* cmd)
 		case AxisForward:
 			if (fabs(fAxisValue) > joy_forwardthreshold->value)
 			{
-				cmd->forwardmove += (fAxisValue * joy_forwardsensitivity->value) * speed * cl_forwardspeed->value;
+				*reinterpret_cast<int*>(&cmd->forwardmove) += (fAxisValue * joy_forwardsensitivity->value) * 100;
 			}
 			break;
 
 		case AxisSide:
 			if (fabs(fAxisValue) > joy_sidethreshold->value)
 			{
-				cmd->sidemove += (fAxisValue * joy_sidesensitivity->value) * speed * cl_sidespeed->value;
+				*reinterpret_cast<int*>(&cmd->sidemove) += (fAxisValue * joy_sidesensitivity->value) * 100;
 			}
 			break;
 
@@ -368,7 +363,7 @@ void Joy_Move(float frametime, usercmd_t* cmd)
                 }
                 else
                 {
-                    viewangles.y += (fAxisValue * joy_yawsensitivity->value) * speed * 180.0;
+                    viewangles.y += (fAxisValue * joy_yawsensitivity->value) * lookspeed * 180.0;
                 }
             }
 			break;
@@ -382,7 +377,7 @@ void Joy_Move(float frametime, usercmd_t* cmd)
                 }
                 else
                 {
-                    viewangles.x += (fAxisValue * joy_pitchsensitivity->value) * speed * 180.0;
+                    viewangles.x += (fAxisValue * joy_pitchsensitivity->value) * lookspeed * 180.0;
                 }
             }
 			break;

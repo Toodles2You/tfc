@@ -41,10 +41,7 @@ extern bool iMouseInUse;
 extern cvar_t* cl_pitchdown;
 extern cvar_t* cl_pitchup;
 extern cvar_t* cl_yawspeed;
-extern cvar_t* cl_sidespeed;
-extern cvar_t* cl_forwardspeed;
 extern cvar_t* cl_pitchspeed;
-extern cvar_t* cl_movespeedkey;
 
 static cvar_t* m_rawinput = nullptr;
 

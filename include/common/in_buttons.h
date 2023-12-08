@@ -23,6 +23,7 @@ enum
     IN_FORWARD   = 1 << 3,
     IN_BACK      = 1 << 4,
     IN_USE       = 1 << 5,
+    IN_SPEED     = 1 << 6,
     IN_LEFT      = 1 << 7,
     IN_RIGHT     = 1 << 8,
     IN_MOVELEFT  = 1 << 9,

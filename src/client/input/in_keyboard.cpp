@@ -49,11 +49,6 @@ static int in_impulse = 0;
 
 cvar_t* cl_pitchup;
 cvar_t* cl_pitchdown;
-cvar_t* cl_upspeed;
-cvar_t* cl_forwardspeed;
-cvar_t* cl_backspeed;
-cvar_t* cl_sidespeed;
-cvar_t* cl_movespeedkey;
 cvar_t* cl_yawspeed;
 cvar_t* cl_pitchspeed;
 cvar_t* cl_anglespeedkey;
@@ -513,47 +508,16 @@ Returns 0.25 if a key was pressed and released during the frame,
 */
 float CL_KeyState(kbutton_t* key)
 {
-	float val = 0.0;
-
+#if 0
 	const bool impulsedown = (key->state & 2) != 0;
 	const bool impulseup = (key->state & 4) != 0;
+#endif
 	const bool down = (key->state & 1) != 0;
-
-	if (impulsedown && !impulseup)
-	{
-		// pressed and held this frame?
-		val = down ? 0.5 : 0.0;
-	}
-
-	if (impulseup && !impulsedown)
-	{
-		// released this frame?
-		val = down ? 0.0 : 0.0;
-	}
-
-	if (!impulsedown && !impulseup)
-	{
-		// held the entire frame?
-		val = down ? 1.0 : 0.0;
-	}
-
-	if (impulsedown && impulseup)
-	{
-		if (down)
-		{
-			// released and re-pressed this frame
-			val = 0.75;
-		}
-		else
-		{
-			// pressed and released this frame
-			val = 0.25;
-		}
-	}
 
 	// clear impulses
 	key->state &= 1;
-	return val;
+
+	return down ? 1.0F : 0.0F;
 }
 
 /*
@@ -606,8 +570,6 @@ void CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 
 	if (0 != active)
 	{
-		//memset( viewangles, 0, sizeof( Vector ) );
-		//viewangles[ 0 ] = viewangles[ 1 ] = viewangles[ 2 ] = 0.0;
 		gEngfuncs.GetViewAngles((float*)viewangles);
 
 		CL_AdjustAngles(frametime, viewangles);
@@ -616,38 +578,18 @@ void CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 
 		gEngfuncs.SetViewAngles((float*)viewangles);
 
-		cmd->sidemove += cl_sidespeed->value * CL_KeyState(&in_moveright);
-		cmd->sidemove -= cl_sidespeed->value * CL_KeyState(&in_moveleft);
-
-		cmd->upmove += cl_upspeed->value * CL_KeyState(&in_up);
-		cmd->upmove -= cl_upspeed->value * CL_KeyState(&in_down);
-
-		cmd->forwardmove += cl_forwardspeed->value * CL_KeyState(&in_forward);
-		cmd->forwardmove -= cl_backspeed->value * CL_KeyState(&in_back);
-
-		// adjust for speed key
-		if ((in_speed.state & 1) != 0)
+		Vector move =
 		{
-			cmd->forwardmove *= cl_movespeedkey->value;
-			cmd->sidemove *= cl_movespeedkey->value;
-			cmd->upmove *= cl_movespeedkey->value;
-		}
+			CL_KeyState(&in_forward) - CL_KeyState(&in_back),
+			CL_KeyState(&in_moveright) - CL_KeyState(&in_moveleft),
+			CL_KeyState(&in_up) - CL_KeyState(&in_down),
+		};
 
-		// clip to maxspeed
-		spd = gEngfuncs.GetClientMaxspeed();
-		if (spd != 0.0)
-		{
-			// scale the 3 speeds so that the total velocity is not > cl.maxspeed
-			float fmov = sqrt((cmd->forwardmove * cmd->forwardmove) + (cmd->sidemove * cmd->sidemove) + (cmd->upmove * cmd->upmove));
+		move = move.Normalize() * 100.0F;
 
-			if (fmov > spd)
-			{
-				float fratio = spd / fmov;
-				cmd->forwardmove *= fratio;
-				cmd->sidemove *= fratio;
-				cmd->upmove *= fratio;
-			}
-		}
+		*reinterpret_cast<int*>(&cmd->forwardmove) = static_cast<int>(move.x);
+		*reinterpret_cast<int*>(&cmd->sidemove) = static_cast<int>(move.y);
+		*reinterpret_cast<int*>(&cmd->upmove) = static_cast<int>(move.z);
 
 		// Allow mice and other controllers to add their inputs
 		Mouse_Move(frametime, cmd);
@@ -669,11 +611,11 @@ void CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 #ifdef HALFLIFE_JOYSTICK
 	if (0 != in_joystick->value)
 	{
-		if (cmd->forwardmove > 0)
+		if (*reinterpret_cast<int*>(&cmd->forwardmove) > 0)
 		{
 			cmd->buttons |= IN_FORWARD;
 		}
-		else if (cmd->forwardmove < 0)
+		else if (*reinterpret_cast<int*>(&cmd->forwardmove) < 0)
 		{
 			cmd->buttons |= IN_BACK;
 		}
@@ -728,6 +670,11 @@ int CL_ButtonBits(bool bResetState)
 		bits |= IN_USE;
 	}
 
+	if ((in_speed.state & 3) != 0)
+	{
+		bits |= IN_SPEED;
+	}
+
 	if ((in_left.state & 3) != 0)
 	{
 		bits |= IN_LEFT;
@@ -766,6 +713,7 @@ int CL_ButtonBits(bool bResetState)
 		in_forward.state &= ~2;
 		in_back.state &= ~2;
 		in_use.state &= ~2;
+		in_speed.state &= ~2;
 		in_left.state &= ~2;
 		in_right.state &= ~2;
 		in_moveleft.state &= ~2;
@@ -864,11 +812,6 @@ void InitInput()
 	cl_anglespeedkey = gEngfuncs.pfnRegisterVariable("cl_anglespeedkey", "0.67", 0);
 	cl_yawspeed = gEngfuncs.pfnRegisterVariable("cl_yawspeed", "210", 0);
 	cl_pitchspeed = gEngfuncs.pfnRegisterVariable("cl_pitchspeed", "225", 0);
-	cl_upspeed = gEngfuncs.pfnRegisterVariable("cl_upspeed", "320", 0);
-	cl_forwardspeed = gEngfuncs.pfnRegisterVariable("cl_forwardspeed", "400", 0);
-	cl_backspeed = gEngfuncs.pfnRegisterVariable("cl_backspeed", "400", 0);
-	cl_sidespeed = gEngfuncs.pfnRegisterVariable("cl_sidespeed", "400", 0);
-	cl_movespeedkey = gEngfuncs.pfnRegisterVariable("cl_movespeedkey", "0.3", 0);
 	cl_pitchup = gEngfuncs.pfnRegisterVariable("cl_pitchup", "89", 0);
 	cl_pitchdown = gEngfuncs.pfnRegisterVariable("cl_pitchdown", "89", 0);
 
