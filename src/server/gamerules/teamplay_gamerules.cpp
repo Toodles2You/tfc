@@ -106,10 +106,6 @@ void CHalfLifeTeamplay::InitHUD(CBasePlayer* pPlayer)
 		WriteShort((*t).m_score);
 		MessageEnd();
 	}
-
-	MessageBegin(MSG_ONE, gmsgVGUIMenu, pPlayer);
-	WriteByte(MENU_TEAM);
-	MessageEnd();
 }
 
 
@@ -216,5 +212,13 @@ void CHalfLifeTeamplay::Think_RND_RUNNING()
 	}
 
 	CheckTimeLimit();
+}
+
+
+void CHalfLifeTeamplay::SendMenusToClient(CBasePlayer* player)
+{
+	MessageBegin(MSG_ONE, gmsgVGUIMenu, player);
+	WriteByte(MENU_TEAM);
+	MessageEnd();
 }
 

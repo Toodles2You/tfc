@@ -436,6 +436,7 @@ protected:
 
 	virtual void ChangeLevel();
 	void SendMOTDToClient(CBasePlayer* player);
+	virtual void SendMenusToClient(CBasePlayer* player);
 
 	virtual bool PrivilegedCommand(CBasePlayer* pPlayer, const char* pcmd);
 };

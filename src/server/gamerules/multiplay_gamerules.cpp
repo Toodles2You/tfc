@@ -404,12 +404,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 		MessageEnd();
 	}
 
-	if (!IsTeamplay())
-	{
-		MessageBegin(MSG_ONE, gmsgVGUIMenu, pl);
-		WriteByte(MENU_MAPBRIEFING);
-		MessageEnd();
-	}
+	SendMenusToClient(pl);
 }
 
 
@@ -1301,5 +1296,12 @@ void CHalfLifeMultiplay::SendMOTDToClient(CBasePlayer* player)
 	}
 
 	FREE_FILE(aFileList);
+}
+
+void CHalfLifeMultiplay::SendMenusToClient(CBasePlayer* player)
+{
+	MessageBegin(MSG_ONE, gmsgVGUIMenu, player);
+	WriteByte(MENU_MAPBRIEFING);
+	MessageEnd();
 }
 

@@ -41,4 +41,6 @@ public:
 protected:
 	virtual void Enter_RND_RUNNING() override;
 	virtual void Think_RND_RUNNING() override;
+
+	virtual void SendMenusToClient(CBasePlayer* player) override;
 };
