@@ -585,11 +585,20 @@ void CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 			CL_KeyState(&in_up) - CL_KeyState(&in_down),
 		};
 
-		move = move.Normalize() * 100.0F;
+		if (move.LengthSquared() != 0.0F)
+		{
+			move = move.Normalize() * 100.0F;
 
-		*reinterpret_cast<int*>(&cmd->forwardmove) = static_cast<int>(move.x);
-		*reinterpret_cast<int*>(&cmd->sidemove) = static_cast<int>(move.y);
-		*reinterpret_cast<int*>(&cmd->upmove) = static_cast<int>(move.z);
+			*reinterpret_cast<int*>(&cmd->forwardmove) = static_cast<int>(move.x);
+			*reinterpret_cast<int*>(&cmd->sidemove) = static_cast<int>(move.y);
+			*reinterpret_cast<int*>(&cmd->upmove) = static_cast<int>(move.z);
+		}
+		else
+		{
+			*reinterpret_cast<int*>(&cmd->forwardmove) = 0;
+			*reinterpret_cast<int*>(&cmd->sidemove) = 0;
+			*reinterpret_cast<int*>(&cmd->upmove) = 0;
+		}
 
 		// Allow mice and other controllers to add their inputs
 		Mouse_Move(frametime, cmd);
