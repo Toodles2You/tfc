@@ -67,6 +67,43 @@ bool CBaseDMStart::Spawn()
 	return false;
 }
 
+//=========================================================
+// Multiplayer intermission spots.
+//=========================================================
+class CInfoIntermission : public CPointEntity
+{
+	bool Spawn() override;
+	void Think() override;
+};
+
+bool CInfoIntermission::Spawn()
+{
+	SetOrigin(pev->origin);
+	pev->solid = SOLID_NOT;
+	pev->effects = EF_NODRAW;
+	pev->v_angle = g_vecZero;
+
+	pev->nextthink = gpGlobals->time + 2; // let targets spawn!
+
+	return true;
+}
+
+void CInfoIntermission::Think()
+{
+	edict_t* pTarget;
+
+	// find my target
+	pTarget = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(pev->target));
+
+	if (!FNullEnt(pTarget))
+	{
+		pev->v_angle = util::VecToAngles((pTarget->v.origin - pev->origin).Normalize());
+		pev->v_angle.x = -pev->v_angle.x;
+	}
+}
+
+LINK_ENTITY_TO_CLASS(info_intermission, CInfoIntermission);
+
 // This updates global tables that need to know about entities being removed
 void CBaseEntity::UpdateOnRemove()
 {

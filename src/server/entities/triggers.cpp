@@ -1764,7 +1764,7 @@ bool CTriggerTeleport::Spawn()
 LINK_ENTITY_TO_CLASS(info_teleport_destination, CPointEntity);
 
 
-
+#ifdef HALFLIFE_SAVERESTORE
 class CTriggerSave : public CBaseTrigger
 {
 public:
@@ -1799,6 +1799,97 @@ void CTriggerSave::SaveTouch(CBaseEntity* pOther)
 	Remove();
 	SERVER_COMMAND("autosave\n");
 }
+
+
+class CRevertSaved : public CPointEntity
+{
+public:
+	DECLARE_SAVERESTORE()
+
+	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
+	void EXPORT MessageThink();
+	void EXPORT LoadThink();
+	bool KeyValue(KeyValueData* pkvd) override;
+
+	inline float Duration() { return pev->dmg_take; }
+	inline float HoldTime() { return pev->dmg_save; }
+	inline float MessageTime() { return m_messageTime; }
+	inline float LoadTime() { return m_loadTime; }
+
+	inline void SetDuration(float duration) { pev->dmg_take = duration; }
+	inline void SetHoldTime(float hold) { pev->dmg_save = hold; }
+	inline void SetMessageTime(float time) { m_messageTime = time; }
+	inline void SetLoadTime(float time) { m_loadTime = time; }
+
+private:
+	float m_messageTime;
+	float m_loadTime;
+};
+
+LINK_ENTITY_TO_CLASS(player_loadsaved, CRevertSaved);
+
+IMPLEMENT_SAVERESTORE(CRevertSaved)
+	DEFINE_FIELD(CRevertSaved, m_messageTime, FIELD_FLOAT),
+	DEFINE_FIELD(CRevertSaved, m_loadTime, FIELD_FLOAT),
+END_SAVERESTORE(CRevertSaved, CPointEntity)
+
+bool CRevertSaved::KeyValue(KeyValueData* pkvd)
+{
+	if (FStrEq(pkvd->szKeyName, "duration"))
+	{
+		SetDuration(atof(pkvd->szValue));
+		return true;
+	}
+	else if (FStrEq(pkvd->szKeyName, "holdtime"))
+	{
+		SetHoldTime(atof(pkvd->szValue));
+		return true;
+	}
+	else if (FStrEq(pkvd->szKeyName, "messagetime"))
+	{
+		SetMessageTime(atof(pkvd->szValue));
+		return true;
+	}
+	else if (FStrEq(pkvd->szKeyName, "loadtime"))
+	{
+		SetLoadTime(atof(pkvd->szValue));
+		return true;
+	}
+
+	return CPointEntity::KeyValue(pkvd);
+}
+
+void CRevertSaved::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+{
+	util::ScreenFadeAll(pev->rendercolor, Duration(), HoldTime(), pev->renderamt, FFADE_OUT);
+	pev->nextthink = gpGlobals->time + MessageTime();
+	SetThink(&CRevertSaved::MessageThink);
+}
+
+
+void CRevertSaved::MessageThink()
+{
+	util::ShowMessageAll(STRING(pev->message));
+	float nextThink = LoadTime() - MessageTime();
+	if (nextThink > 0)
+	{
+		pev->nextthink = gpGlobals->time + nextThink;
+		SetThink(&CRevertSaved::LoadThink);
+	}
+	else
+		LoadThink();
+}
+
+
+void CRevertSaved::LoadThink()
+{
+	if (!util::IsMultiplayer())
+	{
+		SERVER_COMMAND("reload\n");
+	}
+}
+#endif
+
 
 #define SF_ENDSECTION_USEONLY 0x0001
 
