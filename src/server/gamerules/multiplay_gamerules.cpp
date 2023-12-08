@@ -379,23 +379,10 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 	// notify other clients of player joining the game
 	util::ClientPrintAll(HUD_PRINTTALK, "#Game_connected", name);
 
-	// team match?
-	if (IsTeamplay())
-	{
-		util::LogPrintf("\"%s<%i><%s><%s>\" connected\n",
-			name,
-			GETPLAYERUSERID(pl->edict()),
-			GETPLAYERAUTHID(pl->edict()),
-			g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pl->edict()), "model"));
-	}
-	else
-	{
-		util::LogPrintf("\"%s<%i><%s><%i>\" connected\n",
-			name,
-			GETPLAYERUSERID(pl->edict()),
-			GETPLAYERAUTHID(pl->edict()),
-			GETPLAYERUSERID(pl->edict()));
-	}
+	util::LogPrintf("\"%s<%i><%s><>\" connected\n",
+		name,
+		g_engfuncs.pfnGetPlayerUserId(pl->edict()),
+		g_engfuncs.pfnGetPlayerAuthId(pl->edict()));
 
 	CGameRules::InitHUD(pl);
 
@@ -492,23 +479,10 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 
 			util::FireTargets("game_playerleave", pPlayer, pPlayer, USE_TOGGLE, 0);
 
-			// team match?
-			if (IsTeamplay())
-			{
-				util::LogPrintf("\"%s<%i><%s><%s>\" disconnected\n",
-					STRING(pPlayer->pev->netname),
-					GETPLAYERUSERID(pPlayer->edict()),
-					GETPLAYERAUTHID(pPlayer->edict()),
-					g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "model"));
-			}
-			else
-			{
-				util::LogPrintf("\"%s<%i><%s><%i>\" disconnected\n",
-					STRING(pPlayer->pev->netname),
-					GETPLAYERUSERID(pPlayer->edict()),
-					GETPLAYERAUTHID(pPlayer->edict()),
-					GETPLAYERUSERID(pPlayer->edict()));
-			}
+			util::LogPrintf("\"%s<%i><%s><>\" disconnected\n",
+				STRING(pPlayer->pev->netname),
+				g_engfuncs.pfnGetPlayerUserId(pPlayer->edict()),
+				g_engfuncs.pfnGetPlayerAuthId(pPlayer->edict()));
 
 			pPlayer->RemoveAllWeapons(); // destroy all of the players weapons and items
 		}
@@ -773,74 +747,30 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 
 	if (pVictim == killer)
 	{
-		if (IsTeamplay())
-		{
-			util::LogPrintf("\"%s<%i><%s><%s>\" committed suicide with \"%s\"\n",
-				STRING(pVictim->pev->netname),
-				GETPLAYERUSERID(pVictim->edict()),
-				GETPLAYERAUTHID(pVictim->edict()),
-				g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pVictim->edict()), "model"),
-				killerWeapon);
-		}
-		else
-		{
-			util::LogPrintf("\"%s<%i><%s><%i>\" committed suicide with \"%s\"\n",
-				STRING(pVictim->pev->netname),
-				GETPLAYERUSERID(pVictim->edict()),
-				GETPLAYERAUTHID(pVictim->edict()),
-				GETPLAYERUSERID(pVictim->edict()),
-				killerWeapon);
-		}
+		util::LogPrintf("\"%s<%i><%s><>\" committed suicide with \"%s\"\n",
+			STRING(pVictim->pev->netname),
+			g_engfuncs.pfnGetPlayerUserId(pVictim->edict()),
+			g_engfuncs.pfnGetPlayerAuthId(pVictim->edict()),
+			killerWeapon);
 	}
 	else if (killer->IsClient())
 	{
-		if (IsTeamplay())
-		{
-			util::LogPrintf("\"%s<%i><%s><%s>\" killed \"%s<%i><%s><%s>\" with \"%s\"\n",
-				STRING(killer->pev->netname),
-				GETPLAYERUSERID(killer->edict()),
-				GETPLAYERAUTHID(killer->edict()),
-				g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(killer->edict()), "model"),
-				STRING(killer->pev->netname),
-				GETPLAYERUSERID(pVictim->edict()),
-				GETPLAYERAUTHID(pVictim->edict()),
-				g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pVictim->edict()), "model"),
-				killerWeapon);
-		}
-		else
-		{
-			util::LogPrintf("\"%s<%i><%s><%i>\" killed \"%s<%i><%s><%i>\" with \"%s\"\n",
-				STRING(killer->pev->netname),
-				GETPLAYERUSERID(killer->edict()),
-				GETPLAYERAUTHID(killer->edict()),
-				GETPLAYERUSERID(killer->edict()),
-				STRING(pVictim->pev->netname),
-				GETPLAYERUSERID(pVictim->edict()),
-				GETPLAYERAUTHID(pVictim->edict()),
-				GETPLAYERUSERID(pVictim->edict()),
-				killerWeapon);
-		}
+		util::LogPrintf("\"%s<%i><%s><>\" killed \"%s<%i><%s><>\" with \"%s\"\n",
+			STRING(killer->pev->netname),
+			g_engfuncs.pfnGetPlayerUserId(killer->edict()),
+			g_engfuncs.pfnGetPlayerAuthId(killer->edict()),
+			STRING(killer->pev->netname),
+			g_engfuncs.pfnGetPlayerUserId(pVictim->edict()),
+			g_engfuncs.pfnGetPlayerAuthId(pVictim->edict()),
+			killerWeapon);
 	}
 	else
 	{
-		if (IsTeamplay())
-		{
-			util::LogPrintf("\"%s<%i><%s><%s>\" committed suicide with \"%s\" (world)\n",
-				STRING(pVictim->pev->netname),
-				GETPLAYERUSERID(pVictim->edict()),
-				GETPLAYERAUTHID(pVictim->edict()),
-				g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pVictim->edict()), "model"),
-				killerWeapon);
-		}
-		else
-		{
-			util::LogPrintf("\"%s<%i><%s><%i>\" committed suicide with \"%s\" (world)\n",
-				STRING(pVictim->pev->netname),
-				GETPLAYERUSERID(pVictim->edict()),
-				GETPLAYERAUTHID(pVictim->edict()),
-				GETPLAYERUSERID(pVictim->edict()),
-				killerWeapon);
-		}
+		util::LogPrintf("\"%s<%i><%s><>\" died\n",
+			STRING(pVictim->pev->netname),
+			g_engfuncs.pfnGetPlayerUserId(pVictim->edict()),
+			g_engfuncs.pfnGetPlayerAuthId(pVictim->edict()),
+			killerWeapon);
 	}
 
 	MessageBegin(MSG_SPEC, SVC_DIRECTOR);
@@ -1345,24 +1275,11 @@ bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, b
 		STRING(pPlayer->pev->netname),
 		localizeName.c_str());
 	
-	if (IsTeamplay())
-	{
-		util::LogPrintf("\"%s<%i><%s><%s>\" joined team %s\n",
-			STRING(pPlayer->pev->netname),
-			GETPLAYERUSERID(pPlayer->edict()),
-			GETPLAYERAUTHID(pPlayer->edict()),
-			g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "model"),
-			GetIndexedTeamName(teamIndex));
-	}
-	else
-	{
-		util::LogPrintf("\"%s<%i><%s><%i>\" joined team %s\n",
-			STRING(pPlayer->pev->netname),
-			GETPLAYERUSERID(pPlayer->edict()),
-			GETPLAYERAUTHID(pPlayer->edict()),
-			GETPLAYERUSERID(pPlayer->edict()),
-			GetIndexedTeamName(teamIndex));
-	}
+	util::LogPrintf("\"%s<%i><%s><>\" joined team %s\n",
+		STRING(pPlayer->pev->netname),
+		g_engfuncs.pfnGetPlayerUserId(pPlayer->edict()),
+		g_engfuncs.pfnGetPlayerAuthId(pPlayer->edict()),
+		GetIndexedTeamName(teamIndex));
 
 	return true;
 }

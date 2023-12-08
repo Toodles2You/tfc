@@ -402,27 +402,12 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 	else
 		temp = "say";
 
-	// team match?
-	if (g_pGameRules->IsTeamplay())
-	{
-		util::LogPrintf("\"%s<%i><%s><%s>\" %s \"%s\"\n",
-			STRING(pEntity->v.netname),
-			GETPLAYERUSERID(pEntity),
-			GETPLAYERAUTHID(pEntity),
-			g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pEntity), "model"),
-			temp,
-			p);
-	}
-	else
-	{
-		util::LogPrintf("\"%s<%i><%s><%i>\" %s \"%s\"\n",
-			STRING(pEntity->v.netname),
-			GETPLAYERUSERID(pEntity),
-			GETPLAYERAUTHID(pEntity),
-			GETPLAYERUSERID(pEntity),
-			temp,
-			p);
-	}
+	util::LogPrintf("\"%s<%i><%s><>\" %s \"%s\"\n",
+		STRING(pEntity->v.netname),
+		g_engfuncs.pfnGetPlayerUserId(pEntity),
+		g_engfuncs.pfnGetPlayerAuthId(pEntity),
+		temp,
+		p);
 }
 
 
@@ -550,25 +535,11 @@ void ClientUserInfoChanged(edict_t* pEntity, char* infobuffer)
 		{	
 			util::ClientPrintAll(HUD_PRINTTALK, "#Game_name_change", STRING(pEntity->v.netname), g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
 
-			// team match?
-			if (g_pGameRules->IsTeamplay())
-			{
-				util::LogPrintf("\"%s<%i><%s><%s>\" changed name to \"%s\"\n",
-					STRING(pEntity->v.netname),
-					GETPLAYERUSERID(pEntity),
-					GETPLAYERAUTHID(pEntity),
-					g_engfuncs.pfnInfoKeyValue(infobuffer, "model"),
-					g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
-			}
-			else
-			{
-				util::LogPrintf("\"%s<%i><%s><%i>\" changed name to \"%s\"\n",
-					STRING(pEntity->v.netname),
-					GETPLAYERUSERID(pEntity),
-					GETPLAYERAUTHID(pEntity),
-					GETPLAYERUSERID(pEntity),
-					g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
-			}
+			util::LogPrintf("\"%s<%i><%s><>\" changed name to \"%s\"\n",
+				STRING(pEntity->v.netname),
+				g_engfuncs.pfnGetPlayerUserId(pEntity),
+				g_engfuncs.pfnGetPlayerAuthId(pEntity),
+				g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
 		}
 	}
 
