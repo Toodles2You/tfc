@@ -82,7 +82,9 @@ void GameDLLInit()
 	Bot_RegisterCvars();
 #endif
 	
+#ifdef HALFLIFE_NODEGRAPH
 	InitMapLoadingUtils();
+#endif
 }
 
 void GameDLLShutdown()

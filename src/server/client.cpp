@@ -704,6 +704,7 @@ void ParmsChangeLevel()
 #endif
 }
 
+#ifdef HALFLIFE_NODEGRAPH
 static std::vector<std::string> g_MapsToLoad;
 
 static void LoadNextMap()
@@ -798,6 +799,7 @@ void InitMapLoadingUtils()
 	g_engfuncs.pfnAddServerCommand("sv_stop_loading_all_maps", []()
 		{ g_MapsToLoad.clear(); });
 }
+#endif
 
 void StartFrame()
 {
@@ -813,6 +815,7 @@ void StartFrame()
 	}
 #endif
 
+#ifdef HALFLIFE_NODEGRAPH
 	if (g_fGameOver)
 		return;
 
@@ -822,6 +825,7 @@ void StartFrame()
 	{
 		LoadNextMap();
 	}
+#endif
 }
 
 

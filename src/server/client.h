@@ -23,7 +23,9 @@ extern void ClientCommand(edict_t* pEntity);
 extern void ClientUserInfoChanged(edict_t* pEntity, char* infobuffer);
 extern void ServerActivate(edict_t* pEdictList, int edictCount, int clientMax);
 extern void ServerDeactivate();
+#ifdef HALFLIFE_NODEGRAPH
 void InitMapLoadingUtils();
+#endif
 extern void StartFrame();
 extern void PlayerPostThink(edict_t* pEntity);
 extern void PlayerPreThink(edict_t* pEntity);
