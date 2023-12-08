@@ -262,7 +262,7 @@ void CHalfLifeMultiplay::Think()
 	int frags_remaining = 0;
 	int time_remaining = 0;
 
-	if (g_fGameOver)
+	if (g_pGameRules->GetState() == GR_STATE_GAME_OVER)
 	{
 		if (m_flIntermissionTime + mp_chattime.value <= gpGlobals->time)
 		{
@@ -438,7 +438,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 		}
 	}
 
-	if (g_fGameOver)
+	if (GetState() == GR_STATE_GAME_OVER)
 	{
 		MessageBegin(MSG_ONE, SVC_INTERMISSION, pl);
 		MessageEnd();
@@ -519,7 +519,7 @@ bool CHalfLifeMultiplay::FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity*
 //=========================================================
 void CHalfLifeMultiplay::PlayerThink(CBasePlayer* pPlayer)
 {
-	if (g_fGameOver)
+	if (GetState() == GR_STATE_GAME_OVER)
 	{
 		// clear attack/use commands from player
 		pPlayer->m_afButtonPressed = 0;
@@ -964,33 +964,6 @@ Vector CHalfLifeMultiplay::VecAmmoRespawnSpot(CBasePlayerAmmo* pAmmo)
 
 //=========================================================
 //=========================================================
-float CHalfLifeMultiplay::FlHealthChargerRechargeTime()
-{
-	return 60;
-}
-
-
-float CHalfLifeMultiplay::FlHEVChargerRechargeTime()
-{
-	return 30;
-}
-
-//=========================================================
-//=========================================================
-int CHalfLifeMultiplay::DeadPlayerWeapons(CBasePlayer* pPlayer)
-{
-	return GR_PLR_DROP_GUN_ACTIVE;
-}
-
-//=========================================================
-//=========================================================
-int CHalfLifeMultiplay::DeadPlayerAmmo(CBasePlayer* pPlayer)
-{
-	return GR_PLR_DROP_AMMO_ACTIVE;
-}
-
-//=========================================================
-//=========================================================
 bool CHalfLifeMultiplay::IsSpawnSpotValid(CSpawnPoint *pSpawn, CBasePlayer *pPlayer, int attempt)
 {
 	if (!CGameRules::IsSpawnSpotValid(pSpawn, pPlayer, attempt))
@@ -1295,7 +1268,7 @@ bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTea
 
 void CHalfLifeMultiplay::GoToIntermission()
 {
-	if (g_fGameOver)
+	if (GetState() == GR_STATE_GAME_OVER)
 		return; // intermission has already been triggered, so ignore.
 
 	MessageBegin(MSG_ALL, SVC_INTERMISSION);
@@ -1303,7 +1276,7 @@ void CHalfLifeMultiplay::GoToIntermission()
 
 	m_flIntermissionTime = gpGlobals->time;
 
-	g_fGameOver = true;
+	EnterState(GR_STATE_GAME_OVER);
 }
 
 #define MAX_MOTD_CHUNK 60

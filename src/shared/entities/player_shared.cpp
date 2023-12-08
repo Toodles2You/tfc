@@ -76,8 +76,12 @@ void CBasePlayer::PreThink()
 
 void CBasePlayer::PostThink()
 {
-	// if (g_fGameOver)
-	// 	goto pt_end; // intermission or finale
+#ifdef GAME_DLL
+	if (g_pGameRules->GetState() == GR_STATE_GAME_OVER)
+	{
+		goto pt_end;
+	}
+#endif
 
 	if (!IsAlive())
 	{

@@ -78,7 +78,7 @@ void CHalfLifeTeamplay::Think()
 
 	g_VoiceGameMgr.Update(gpGlobals->frametime);
 
-	if (g_fGameOver)
+	if (GetState() == GR_STATE_GAME_OVER)
 	{
 		CHalfLifeMultiplay::Think();
 		return;

@@ -476,7 +476,7 @@ void CHalfLifeMultiplay::ChangeLevel()
 		strcpy(szNextMap, szFirstMapInList);
 	}
 
-	g_fGameOver = true;
+	EnterState(GR_STATE_GAME_OVER);
 
 	ALERT(at_console, "CHANGE LEVEL: %s\n", szNextMap);
 	if (0 != minplayers || 0 != maxplayers)

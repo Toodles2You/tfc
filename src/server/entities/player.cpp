@@ -1152,7 +1152,7 @@ void CBasePlayer::PreThink()
 
 	g_pGameRules->PlayerThink(this);
 
-	if (g_fGameOver)
+	if (g_pGameRules->GetState() == GR_STATE_GAME_OVER)
 		return; // intermission or finale
 
 	// JOHN: checks if new client data (for HUD and view control) needs to be sent to the client

@@ -60,6 +60,46 @@ enum
 	GR_TEAMMATE		= 2,
 };
 
+typedef enum
+{
+	// initialize the game, create teams
+	GR_STATE_INIT = 0,
+
+	// Before players have joined the game. Periodically checks to see if enough players are ready
+	// to start a game. Also reverts to this when there are no active players
+	GR_STATE_PREGAME,
+
+	// The game is about to start, wait a bit and spawn everyone
+	GR_STATE_STARTGAME,
+
+	// All players are respawned, frozen in place
+	GR_STATE_PREROUND,
+
+	// Round is on, playing normally
+	GR_STATE_RND_RUNNING,
+
+	// Someone has won the round
+	GR_STATE_TEAM_WIN,
+
+	// Noone has won, manually restart the game, reset scores
+	GR_STATE_RESTART,
+
+	// Noone has won, restart the game
+	GR_STATE_STALEMATE,
+
+	// Game is over, showing the scoreboard etc
+	GR_STATE_GAME_OVER,
+
+	// Game is in a bonus state, transitioned to after a round ends
+	GR_STATE_BONUS,
+
+	// Game is awaiting the next wave/round of a multi round experience
+	GR_STATE_BETWEEN_RNDS,
+
+	GR_NUM_ROUND_STATES
+} gamerules_state_e;
+
+
 class CSpawnPoint
 {
 public:
@@ -149,15 +189,8 @@ public:
 	virtual Vector VecAmmoRespawnSpot(CBasePlayerAmmo* pAmmo) = 0; // where in the world should this ammo item respawn?
 																   // by default, everything spawns
 
-	// Healthcharger respawn control
-	virtual float FlHealthChargerRechargeTime() = 0;	   // how long until a depleted HealthCharger recharges itself?
-	virtual float FlHEVChargerRechargeTime() { return 0; } // how long until a depleted HealthCharger recharges itself?
-
-	// What happens to a dead player's weapons
-	virtual int DeadPlayerWeapons(CBasePlayer* pPlayer) = 0; // what do I do with a player's weapons when he's killed?
-
-	// What happens to a dead player's ammo
-	virtual int DeadPlayerAmmo(CBasePlayer* pPlayer) = 0; // Do I drop ammo when the player dies? How much?
+	virtual int DeadPlayerWeapons(CBasePlayer* pPlayer) = 0;
+	virtual int DeadPlayerAmmo(CBasePlayer* pPlayer) = 0;
 
 	// Teamplay stuff
 	virtual int PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget) = 0; // What is the player's relationship with this entity?
@@ -171,12 +204,16 @@ public:
 	// Monsters
 	virtual bool FAllowMonsters() = 0; //are monsters allowed
 
+	gamerules_state_e GetState() { return m_state; }
+	virtual void EnterState(gamerules_state_e state) { m_state = state; }
+
 	// Immediately end a multiplayer game
 	virtual void EndMultiplayerGame() {}
 
 	virtual bool IsPlayerPrivileged(CBasePlayer* pPlayer);
 
 protected:
+	gamerules_state_e m_state = GR_STATE_INIT;
 	CSpawnPoint m_startPoint;
 };
 
@@ -249,14 +286,8 @@ public:
 	float FlAmmoRespawnTime(CBasePlayerAmmo* pAmmo) override;
 	Vector VecAmmoRespawnSpot(CBasePlayerAmmo* pAmmo) override;
 
-	// Healthcharger respawn control
-	float FlHealthChargerRechargeTime() override;
-
-	// What happens to a dead player's weapons
-	int DeadPlayerWeapons(CBasePlayer* pPlayer) override;
-
-	// What happens to a dead player's ammo
-	int DeadPlayerAmmo(CBasePlayer* pPlayer) override;
+	int DeadPlayerWeapons(CBasePlayer* pPlayer) override { return GR_PLR_DROP_GUN_NO; }
+	int DeadPlayerAmmo(CBasePlayer* pPlayer) override { return GR_PLR_DROP_AMMO_NO; }
 
 	// Monsters
 	bool FAllowMonsters() override { return true; }
@@ -363,15 +394,8 @@ public:
 	float FlAmmoRespawnTime(CBasePlayerAmmo* pAmmo) override;
 	Vector VecAmmoRespawnSpot(CBasePlayerAmmo* pAmmo) override;
 
-	// Healthcharger respawn control
-	float FlHealthChargerRechargeTime() override;
-	float FlHEVChargerRechargeTime() override;
-
-	// What happens to a dead player's weapons
-	int DeadPlayerWeapons(CBasePlayer* pPlayer) override;
-
-	// What happens to a dead player's ammo
-	int DeadPlayerAmmo(CBasePlayer* pPlayer) override;
+	int DeadPlayerWeapons(CBasePlayer* pPlayer) override { return GR_PLR_DROP_GUN_ACTIVE; }
+	int DeadPlayerAmmo(CBasePlayer* pPlayer) override { return GR_PLR_DROP_AMMO_ALL; }
 
 	// Teamplay stuff
 	int PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget) override;
@@ -411,4 +435,3 @@ protected:
 };
 
 inline CGameRules* g_pGameRules = nullptr;
-inline bool g_fGameOver;

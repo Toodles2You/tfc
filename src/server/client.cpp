@@ -73,15 +73,10 @@ qboolean ClientConnect(edict_t* pEntity, const char* pszName, const char* pszAdd
 ClientDisconnect
 
 called when a player disconnects from a server
-
-GLOBALS ASSUMED SET:  g_fGameOver
 ============
 */
 void ClientDisconnect(edict_t* pEntity)
 {
-	if (g_fGameOver)
-		return;
-
 	auto entity = CBaseEntity::Instance(pEntity);
 
 	// since the edict doesn't get deleted, fix it so it doesn't interfere.
@@ -787,7 +782,7 @@ void StartFrame()
 #endif
 
 #ifdef HALFLIFE_NODEGRAPH
-	if (g_fGameOver)
+	if (g_pGameRules->GetState() == GR_STATE_GAME_OVER)
 		return;
 
 	// If we're loading all maps then change maps after 3 seconds (time starts at 1)

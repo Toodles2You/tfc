@@ -378,7 +378,6 @@ CWorld::~CWorld()
 
 bool CWorld::Spawn()
 {
-	g_fGameOver = false;
 	Precache();
 	return true;
 }

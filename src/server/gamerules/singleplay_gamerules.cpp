@@ -284,27 +284,6 @@ Vector CHalfLifeRules::VecAmmoRespawnSpot(CBasePlayerAmmo* pAmmo)
 
 //=========================================================
 //=========================================================
-float CHalfLifeRules::FlHealthChargerRechargeTime()
-{
-	return 0; // don't recharge
-}
-
-//=========================================================
-//=========================================================
-int CHalfLifeRules::DeadPlayerWeapons(CBasePlayer* pPlayer)
-{
-	return GR_PLR_DROP_GUN_NO;
-}
-
-//=========================================================
-//=========================================================
-int CHalfLifeRules::DeadPlayerAmmo(CBasePlayer* pPlayer)
-{
-	return GR_PLR_DROP_AMMO_NO;
-}
-
-//=========================================================
-//=========================================================
 int CHalfLifeRules::PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget)
 {
 	// why would a single player in half life need this?
