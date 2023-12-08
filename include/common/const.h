@@ -42,6 +42,8 @@
 #define FL_GRAPHED (1 << 16)	   // worldgraph has this ent listed as something that blocks a connection
 #endif
 
+#define FL_JUMPING (1 << 17)
+
 #define FL_PROXY (1 << 20)		  // This is a spectator proxy
 #define FL_ALWAYSTHINK (1 << 21)  // Brush model flag -- call think every frame regardless of nextthink - ltime (for constantly changing velocity/path)
 #define FL_BASEVELOCITY (1 << 22) // Base velocity has been applied this frame (used to convert base velocity into momentum)

@@ -28,6 +28,10 @@ void CHalfLifeMovement::Walk()
     {
         Jump();
     }
+    else if ((pmove->flags & FL_JUMPING) != 0)
+    {
+        pmove->flags &= ~FL_JUMPING;
+    }
 
     if (pmove->onground != -1)
     {
@@ -209,14 +213,16 @@ void CHalfLifeMovement::Jump()
         return;
     }
 
-    if (pmove->onground == -1)
+    if (pmove->onground == -1 || (pmove->flags & FL_JUMPING) != 0)
     {
         return;
     }
 
+    pmove->onground = -1;
+    pmove->flags |= FL_JUMPING;
+
     player->SetAnimation(PLAYER_JUMP);
 
-    pmove->onground = -1;
     pmove->velocity.z = sqrtf(2 * 800 * 45);
 
     if (pmove->basevelocity != g_vecZero)
