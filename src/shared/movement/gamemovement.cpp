@@ -507,22 +507,30 @@ void CHalfLifeMovement::CheckVelocity()
     }
 
     float maxSpeed = pmove->maxspeed;
-    if (pmove->onground != -1
-     && m_wishSpeed > pmove->movevars->stopspeed
+
+    if (pmove->onground == -1)
+    {
+        maxSpeed = pmove->movevars->maxvelocity;
+    }
+    else if (m_wishSpeed > pmove->movevars->stopspeed
      && m_wishSpeed < maxSpeed)
     {
         maxSpeed = m_wishSpeed;
     }
 
+    const float oldZed =
+        std::clamp(
+            pmove->velocity.z,
+            -pmove->movevars->maxvelocity,
+            pmove->movevars->maxvelocity);
+
     if (speed > maxSpeed * maxSpeed)
     {
-        const float oldZed = pmove->velocity.z;
-
         pmove->velocity =
             pmove->velocity / sqrtf(speed) * maxSpeed;
-
-        pmove->velocity.z = oldZed;
     }
+
+    pmove->velocity.z = oldZed;
 }
 
 
