@@ -57,6 +57,14 @@ Unassigned
 {
 Unassigned
 }
+scientist
+{
+Black Mesa
+}
+hgrunt
+{
+H.E.C.U.
+}
 
 Map_Description_not_available
 {
