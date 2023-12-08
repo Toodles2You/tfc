@@ -723,9 +723,8 @@ void CBeam::BeamDamage(TraceResult* ptr)
 		CBaseEntity* pHit = CBaseEntity::Instance(ptr->pHit);
 		if (pHit)
 		{
-			ClearMultiDamage();
 			pHit->TraceAttack(this, pev->dmg * (gpGlobals->time - pev->dmgtime), (ptr->vecEndPos - pev->origin).Normalize(), ptr, DMG_ENERGYBEAM);
-			ApplyMultiDamage(this, this);
+			pHit->ApplyMultiDamage(this, this);
 		}
 	}
 	pev->dmgtime = gpGlobals->time;

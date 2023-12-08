@@ -235,19 +235,12 @@ public:
 	virtual void BounceSound();
 };
 
-typedef struct
-{
-	CBaseEntity* pEntity;
-	float amount;
-	int type;
-} MULTIDAMAGE;
-
-inline MULTIDAMAGE gMultiDamage;
-
-void ClearMultiDamage();
-void ApplyMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker);
-void AddMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker, CBaseEntity* pEntity, float flDamage, int bitsDamageType);
-
-void RadiusDamage(Vector vecSrc, CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, float flRadius, int bitsDamageType);
+void RadiusDamage(
+	const Vector& origin,
+	CBaseEntity* inflictor,
+	CBaseEntity* attacker,
+	const float damage,
+	const float radius,
+	const int damageType);
 
 #endif

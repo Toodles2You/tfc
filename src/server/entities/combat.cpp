@@ -28,83 +28,61 @@
 #include "func_break.h"
 #include "player.h"
 #include "UserMessages.h"
-/*
-==============================================================================
-
-MULTI-DAMAGE
-
-Collects multiple small damages into a single damage
-
-==============================================================================
-*/
+#include "gamerules.h"
 
 
-void ClearMultiDamage()
+void CBaseEntity::ApplyMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker)
 {
-	gMultiDamage.pEntity = nullptr;
-	gMultiDamage.amount = 0;
-	gMultiDamage.type = 0;
-}
-
-
-void ApplyMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker)
-{
-	if (gMultiDamage.pEntity == nullptr)
-		return;
-
-	gMultiDamage.pEntity->TakeDamage(inflictor, attacker, gMultiDamage.amount, gMultiDamage.type);
-}
-
-
-void AddMultiDamage(CBaseEntity *inflictor, CBaseEntity *attacker, CBaseEntity* pEntity, float flDamage, int bitsDamageType)
-{
-	if (!pEntity)
-		return;
-
-	gMultiDamage.type |= bitsDamageType;
-
-	if (pEntity != gMultiDamage.pEntity)
+	if (m_multiDamage.amount <= 0.0F)
 	{
-		ApplyMultiDamage(inflictor, attacker);
-		gMultiDamage.pEntity = pEntity;
-		gMultiDamage.amount = 0;
+		return;
 	}
 
-	gMultiDamage.amount += flDamage;
+	TakeDamage(inflictor, attacker, m_multiDamage.amount, m_multiDamage.type);
+
+	m_multiDamage.amount = 0.0F;
+	m_multiDamage.type = DMG_GENERIC;
+}
+
+
+void CBaseEntity::AddMultiDamage(float damage, int damageType)
+{
+	m_multiDamage.amount += damage;
+	m_multiDamage.type |= damageType;
 }
 
 
 void RadiusDamage(
-	Vector vecSrc,
+	const Vector& origin,
 	CBaseEntity* inflictor,
 	CBaseEntity* attacker,
-	float flDamage,
-	float flRadius,
-	int bitsDamageType)
+	const float damage,
+	const float radius,
+	const int damageType)
 {
 	CBaseEntity* entity = nullptr;
 	TraceResult tr;
 	float ajdusted;
-	float falloff = flDamage / flRadius;
+	float falloff = damage / radius;
 
-	while ((entity = util::FindEntityInSphere(entity, vecSrc, flRadius)) != nullptr)
+	while ((entity = util::FindEntityInSphere(entity, origin, radius)) != nullptr)
 	{
 		if (entity->pev->takedamage == DAMAGE_NO)
 		{
 			continue;
 		}
 
-		util::TraceLine(vecSrc, entity->EyePosition(), &tr, inflictor, util::kTraceBox);
+		util::TraceLine(origin, entity->EyePosition(), &tr, inflictor, util::kTraceBox);
 
 		if (tr.flFraction != 1.0F && tr.pHit != entity->edict())
 		{
 			continue;
 		}
 
-		ajdusted = (vecSrc - entity->BodyTarget()).Length() * falloff;
-		ajdusted = std::max(flDamage - ajdusted, 0.0F);
+		ajdusted = (origin - entity->BodyTarget()).Length() * falloff;
+		ajdusted = std::max(damage - ajdusted, 0.0F);
 
-		entity->TakeDamage(inflictor, attacker, ajdusted, bitsDamageType);
+		entity->TakeDamage(inflictor, attacker, ajdusted, damageType);
 	}
 }
 
@@ -226,7 +204,7 @@ void CBaseEntity::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecD
 {
 	if (pev->takedamage != DAMAGE_NO)
 	{
-		AddMultiDamage(attacker, attacker, this, flDamage, bitsDamageType);
+		AddMultiDamage(flDamage, bitsDamageType);
 	}
 }
 
@@ -241,10 +219,9 @@ void CBasePlayer::FireBullets(
 
 	auto traceHits = 0;
 	auto traceFlags = 0;
-	auto traceEndPos = static_cast<Vector *>(alloca(count * sizeof(Vector)));
-
-	ClearMultiDamage();
-	gMultiDamage.type = DMG_BULLET | DMG_AIMED | DMG_NEVERGIB;
+	auto traceEndPos = static_cast<Vector*>(alloca(count * sizeof(Vector)));
+	auto traceCount = 0;
+	auto traceEntities = static_cast<CBaseEntity**>(alloca(count * sizeof(CBaseEntity*)));
 
 	for (auto i = 0; i < count; i++)
 	{
@@ -280,6 +257,9 @@ void CBasePlayer::FireBullets(
 				dir,
 				&tr,
 				DMG_BULLET | DMG_AIMED | DMG_NEVERGIB);
+
+			traceEntities[traceCount] = hit;
+			traceCount++;
 			
 			if (hit->IsClient())
 			{
@@ -292,8 +272,11 @@ void CBasePlayer::FireBullets(
 			}
 		}
 	}
-	
-	ApplyMultiDamage(this, this);
+
+	for (auto i = 0; i < traceCount; i++)
+	{
+		traceEntities[i]->ApplyMultiDamage(this, this);
+	}
 
 	Vector dir;
 	AngleVectors(aim, &dir, nullptr, nullptr);

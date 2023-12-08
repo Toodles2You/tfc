@@ -197,7 +197,7 @@ void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecD
 		}
 	}
 
-	AddMultiDamage(attacker, attacker, this, flDamage, bitsDamageType);
+	AddMultiDamage(flDamage, bitsDamageType);
 }
 
 static inline float DamageForce(entvars_t* pev, int damage)

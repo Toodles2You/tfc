@@ -104,6 +104,14 @@ public:
 	CBaseEntity* operator->();
 };
 
+#ifdef GAME_DLL
+typedef struct
+{
+	float amount;
+	int type;
+} MULTIDAMAGE;
+#endif
+
 //
 // Base Entity.  All entity types derive from this
 //
@@ -294,6 +302,16 @@ public:
 	void StopSound(const char* sample, int channel = CHAN_AUTO);
 
 	virtual void SetEntityState(entity_state_t& state);
+
+#ifdef GAME_DLL
+	void ApplyMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker);
+	void AddMultiDamage(float damage, int damageType);
+#endif
+
+protected:
+#ifdef GAME_DLL
+	MULTIDAMAGE m_multiDamage = {0.0F, DMG_GENERIC};
+#endif
 };
 
 inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->edict()); }

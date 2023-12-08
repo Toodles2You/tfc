@@ -112,8 +112,6 @@ void CCrowbar::PrimaryAttack()
 
 	auto entity = CBaseEntity::Instance(tr.pHit);
 
-	ClearMultiDamage();
-
 	entity->TraceAttack(
 		m_pPlayer,
 		25,
@@ -121,7 +119,7 @@ void CCrowbar::PrimaryAttack()
 		&tr,
 		DMG_CLUB);
 
-	ApplyMultiDamage(m_pPlayer, m_pPlayer);
+	entity->ApplyMultiDamage(m_pPlayer, m_pPlayer);
 #endif
 
 	m_iNextPrimaryAttack = 250;
