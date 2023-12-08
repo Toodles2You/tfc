@@ -8,4 +8,5 @@
 #pragma once
 
 void V_PunchAxis(int axis, float punch);
+void V_ResetPunchAngle();
 void V_ResetChaseCam();

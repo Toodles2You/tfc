@@ -48,10 +48,10 @@ Vector v_angles;
 Vector v_cl_angles;
 Vector v_lastAngles;
 
-Vector ev_punchangle;
-Vector ev_punchangleVel;
+static Vector ev_punchangle;
+static Vector ev_punchangleVel;
 
-cvar_t* v_oldpunch;
+static cvar_t* v_oldpunch;
 
 cvar_t* cl_bobcycle;
 cvar_t* cl_bob;
@@ -290,6 +290,13 @@ void V_PunchAxis(int axis, float punch)
 }
 
 
+void V_ResetPunchAngle()
+{
+	ev_punchangle = g_vecZero;
+	ev_punchangleVel = g_vecZero;
+}
+
+
 static void V_CalcNormalRefdef(ref_params_t* pparams)
 {
 	cl_entity_t *ent, *view;
@@ -517,10 +524,12 @@ void V_CalcRefdef(ref_params_t* pparams)
 	// intermission / finale rendering
 	if (0 != pparams->intermission)
 	{
+		V_ResetPunchAngle();
 		V_CalcIntermissionRefdef(pparams);
 	}
 	else if (0 != pparams->spectator || gHUD.IsObserver())
 	{
+		V_ResetPunchAngle();
 		V_CalcSpectatorRefdef(pparams);
 	}
 	else if (0 == pparams->paused)
