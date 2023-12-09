@@ -132,6 +132,11 @@ void CBaseEntity::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 	pev->effects |= EF_NODRAW;
 }
 
+int CBaseEntity::entindex()
+{
+	return gEngfuncs.GetLocalPlayer()->index;
+}
+
 /*
 =====================
 util::TraceLine
@@ -150,27 +155,6 @@ bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CB
 	memset(tr, 0, sizeof(*tr));
 	tr->flFraction = 1.0;
 	return false;
-}
-
-void HUD_TraceLine(const float* v1, const float* v2, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
-{
-	pmtrace_t tr;
-	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(true, true);
-	gEngfuncs.pEventAPI->EV_PushPMStates();
-	gEngfuncs.pEventAPI->EV_SetSolidPlayers(-1);
-	gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
-	gEngfuncs.pEventAPI->EV_PlayerTrace((float*)v1, (float*)v2, fNoMonsters, -1, &tr);
-	gEngfuncs.pEventAPI->EV_PopPMStates();
-	ptr->fAllSolid = tr.allsolid;
-	ptr->fStartSolid = tr.startsolid;
-	ptr->fInOpen = tr.inopen;
-	ptr->fInWater = tr.inwater;
-	ptr->flFraction = tr.fraction;
-	ptr->vecEndPos = tr.endpos;
-	ptr->flPlaneDist = tr.plane.dist;
-	ptr->vecPlaneNormal = tr.plane.normal;
-	ptr->pHit = nullptr;
-	ptr->iHitgroup = tr.hitgroup;
 }
 
 /*
@@ -223,7 +207,6 @@ void HUD_InitClientWeapons()
 	g_engfuncs.pfnSetClientMaxspeed = HUD_SetMaxSpeed;
 
 	// Handled locally
-	g_engfuncs.pfnTraceLine = HUD_TraceLine;
 	g_engfuncs.pfnPlaybackEvent = HUD_PlaybackEvent;
 	g_engfuncs.pfnAlertMessage = AlertMessage;
 

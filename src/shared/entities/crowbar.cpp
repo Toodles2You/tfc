@@ -10,6 +10,7 @@
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
+#include "trace.h"
 #ifdef GAME_DLL
 #include "gamerules.h"
 #endif
@@ -68,32 +69,30 @@ void CCrowbar::PrimaryAttack()
 {
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-#ifdef CLIENT_DLL
-	m_pPlayer->PlaybackEvent(m_usPrimaryAttack);
-#else
-	util::MakeVectors(m_pPlayer->pev->v_angle);
-
+	Vector forward;
+	AngleVectors(m_pPlayer->pev->v_angle, &forward, nullptr, nullptr);
 
 	Vector gun = m_pPlayer->GetGunPosition();
+	Vector end = gun + forward * 64;
 
-	TraceResult tr;
-	util::TraceLine(
-		gun,
-		gun + gpGlobals->v_forward * 64,
-		&tr,
-		m_pPlayer,
-		util::kTraceBox);
+	Trace trace{gun, end, m_pPlayer->entindex(), Trace::kBox};
 
 	auto hit = kCrowbarMiss;
-	if (tr.flFraction != 1.0F)
+	if (trace.fraction != 1.0F)
 	{
 		hit = kCrowbarHitWorld;
-		if (tr.pHit->v.solid != SOLID_BSP && tr.pHit->v.movetype != MOVETYPE_PUSHSTEP)
+
+#ifdef GAME_DLL
+		auto other = g_engfuncs.pfnPEntityOfEntIndex(trace.entity);
+
+		if (other->v.solid != SOLID_BSP && other->v.movetype != MOVETYPE_PUSHSTEP)
 		{
 			hit = kCrowbarHitPlayer;
 		}
+#endif
 	}
 
+#ifdef GAME_DLL
 	m_pPlayer->PlaybackEvent(
 		m_usPrimaryAttack,
 		0.0F,
@@ -103,23 +102,27 @@ void CCrowbar::PrimaryAttack()
 		true,
 		false,
 		FEV_RELIABLE | FEV_NOTHOST);
+#else
+	m_pPlayer->PlaybackEvent(m_usPrimaryAttack);
+#endif
 
-	if (tr.flFraction == 1.0F)
+	if (trace.fraction == 1.0F)
 	{
 		m_iNextPrimaryAttack = 500;
 		return;
 	}
 
-	auto entity = CBaseEntity::Instance(tr.pHit);
+#ifdef GAME_DLL
+	auto other = CBaseEntity::Instance(g_engfuncs.pfnPEntityOfEntIndex(trace.entity));
 
-	entity->TraceAttack(
+	other->TraceAttack(
 		m_pPlayer,
 		25,
 		gpGlobals->v_forward,
-		&tr,
+		trace.hitgroup,
 		DMG_CLUB);
 
-	entity->ApplyMultiDamage(m_pPlayer, m_pPlayer);
+	other->ApplyMultiDamage(m_pPlayer, m_pPlayer);
 #endif
 
 	m_iNextPrimaryAttack = 250;

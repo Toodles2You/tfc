@@ -160,7 +160,7 @@ public:
 
 	virtual void DeathNotice(entvars_t* pevChild) {} // monster maker children use this to tell the monster maker that they have died.
 
-	virtual void TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType);
+	virtual void TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, int hitgroup, int bitsDamageType);
 	virtual bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType);
 	virtual bool TakeHealth(float flHealth, int bitsDamageType);
 	virtual void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType);
@@ -261,7 +261,11 @@ public:
 	static CBaseEntity* Create(const char* szName, const Vector& vecOrigin, const Vector& vecAngles, edict_t* pentOwner = NULL);
 
 	edict_t* edict() { return pev->pContainingEntity; }
+#ifdef GAME_DLL
 	int entindex() { return g_engfuncs.pfnIndexOfEdict(pev->pContainingEntity); }
+#else
+	int entindex();
+#endif
 
 	virtual Vector Center() { return (pev->absmax + pev->absmin) * 0.5; } // center point of entity
 	virtual Vector EyePosition() { return pev->origin + pev->view_ofs; }  // position of eyes

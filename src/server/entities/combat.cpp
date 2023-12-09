@@ -200,7 +200,7 @@ bool CBaseEntity::FVisible(const Vector& vecOrigin)
 TraceAttack
 ================
 */
-void CBaseEntity::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
+void CBaseEntity::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, int hitgroup, int bitsDamageType)
 {
 	if (pev->takedamage != DAMAGE_NO)
 	{
@@ -255,7 +255,7 @@ void CBasePlayer::FireBullets(
 				this,
 				damage,
 				dir,
-				&tr,
+				tr.iHitgroup,
 				DMG_BULLET | DMG_AIMED | DMG_NEVERGIB);
 
 			traceEntities[traceCount] = hit;

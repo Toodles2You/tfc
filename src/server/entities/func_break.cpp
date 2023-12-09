@@ -469,36 +469,6 @@ void CBreakable::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE use
 	}
 }
 
-
-void CBreakable::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
-{
-	// random spark if this is a 'computer' object
-	if (RANDOM_LONG(0, 1))
-	{
-		switch (m_Material)
-		{
-		case matComputer:
-		{
-			tent::Sparks(ptr->vecEndPos);
-
-			float flVolume = RANDOM_FLOAT(0.7, 1.0); //random volume range
-			switch (RANDOM_LONG(0, 1))
-			{
-			case 0: EmitSound("buttons/spark5.wav", CHAN_VOICE, flVolume); break;
-			case 1: EmitSound("buttons/spark6.wav", CHAN_VOICE, flVolume); break;
-			}
-		}
-		break;
-
-		case matUnbreakableGlass:
-			tent::Ricochet(ptr->vecEndPos, RANDOM_FLOAT(0.5, 1.5));
-			break;
-		}
-	}
-
-	CBaseDelay::TraceAttack(attacker, flDamage, vecDir, ptr, bitsDamageType);
-}
-
 //=========================================================
 // Special takedamage for func_breakable. Allows us to make
 // exceptions that are breakable-specific

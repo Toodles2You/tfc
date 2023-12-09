@@ -164,18 +164,18 @@ bool CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
 //=========================================================
 // TraceAttack
 //=========================================================
-void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
+void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, int hitgroup, int bitsDamageType)
 {
 	if (pev->takedamage == DAMAGE_NO)
 	{
 		return;
 	}
 
-	m_LastHitGroup = ptr->iHitgroup;
+	m_LastHitGroup = hitgroup;
 
 	if ((bitsDamageType & DMG_AIMED) != 0)
 	{
-		switch (ptr->iHitgroup)
+		switch (hitgroup)
 		{
 		case HITGROUP_GENERIC:
 			break;

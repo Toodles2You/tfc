@@ -127,7 +127,7 @@ public:
 	virtual void PostThink();
 	inline Vector GetGunPosition() { return pev->origin + pev->view_ofs; }
 	bool TakeHealth(float flHealth, int bitsDamageType) override;
-	void TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) override;
+	void TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, int hitgroup, int bitsDamageType) override;
 	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
 	void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType) override;
 	Vector BodyTarget() override { return Center() + pev->view_ofs * 0.8; } // position to shoot at
