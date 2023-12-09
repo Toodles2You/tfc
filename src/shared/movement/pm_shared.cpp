@@ -95,18 +95,12 @@ typedef struct hull_s
 #pragma warning(disable : 4244)
 
 static Vector rgv3tStuckTable[54];
-static int rgStuckLast[MAX_PLAYERS][2];
+static int rgStuckLast[MAX_PLAYERS];
 
 // Texture names
 static int gcTextures = 0;
 static char grgszTextureName[CTEXTURESMAX][CBTEXTURENAMEMAX];
 static char grgchTextureType[CTEXTURESMAX];
-
-
-static int PM_ShouldIgnore(physent_t* pe)
-{
-	return 0;
-}
 
 
 static void PM_SwapTextures(int i, int j)
@@ -256,11 +250,11 @@ When a player is stuck, it's costly to try and unstick them
 Grab a test offset for the player based on a passed in index
 =================
 */
-int PM_GetRandomStuckOffsets(int nIndex, int server, Vector& offset)
+int PM_GetRandomStuckOffsets(int nIndex, Vector& offset)
 {
 	// Last time we did a full
 	int idx;
-	idx = rgStuckLast[nIndex][server]++;
+	idx = rgStuckLast[nIndex]++;
 
 	VectorCopy(rgv3tStuckTable[idx % 54], offset);
 
@@ -268,24 +262,22 @@ int PM_GetRandomStuckOffsets(int nIndex, int server, Vector& offset)
 }
 
 
-void PM_ResetStuckOffsets(int nIndex, int server)
+void PM_ResetStuckOffsets(int nIndex)
 {
-	rgStuckLast[nIndex][server] = 0;
+	rgStuckLast[nIndex] = 0;
 }
 
 
 /*
 =================
-NudgePosition
+PM_TryToUnstuck
 
 If pmove->origin is in a solid position,
 try nudging slightly on all axis to
 allow for the cut precision of the net coordinates
 =================
 */
-#define PM_CHECKSTUCK_MINTIME 0.05 // Don't check again too quickly.
-
-bool PM_TryToUnstuck(Vector base)
+bool PM_TryToUnstuck(Vector base, int (*pfnIgnore)(physent_t *pe))
 {
 	float x, y, z;
 	float xystep = 8.0;
@@ -305,7 +297,7 @@ bool PM_TryToUnstuck(Vector base)
 				test[1] += y;
 				test[2] += z;
 
-				if (pmove->PM_TestPlayerPositionEx(test, NULL, PM_ShouldIgnore) == -1)
+				if (pmove->PM_TestPlayerPositionEx(test, nullptr, pfnIgnore) == -1)
 				{
 					VectorCopy(test, pmove->origin);
 					return false;
@@ -313,122 +305,6 @@ bool PM_TryToUnstuck(Vector base)
 			}
 		}
 	}
-
-	return true;
-}
-
-
-bool PM_CheckStuck()
-{
-	Vector base;
-	Vector offset;
-	Vector test;
-	int hitent;
-	int i;
-	pmtrace_t traceresult;
-
-	static float rgStuckCheckTime[MAX_PLAYERS][2]; // Last time we did a full
-
-	// If position is okay, exit
-	hitent = pmove->PM_TestPlayerPositionEx(pmove->origin, &traceresult, PM_ShouldIgnore);
-	if (hitent == -1)
-	{
-		PM_ResetStuckOffsets(pmove->player_index, pmove->server);
-		return false;
-	}
-
-	VectorCopy(pmove->origin, base);
-
-	//
-	// Deal with precision error in network.
-	//
-	if (0 == pmove->server)
-	{
-		// World or BSP model
-		if ((hitent == 0) ||
-			(pmove->physents[hitent].model != NULL))
-		{
-			int nReps = 0;
-			PM_ResetStuckOffsets(pmove->player_index, pmove->server);
-			do
-			{
-				i = PM_GetRandomStuckOffsets(pmove->player_index, pmove->server, offset);
-
-				VectorAdd(base, offset, test);
-				if (pmove->PM_TestPlayerPositionEx(test, &traceresult, PM_ShouldIgnore) == -1)
-				{
-					PM_ResetStuckOffsets(pmove->player_index, pmove->server);
-
-					VectorCopy(test, pmove->origin);
-					return false;
-				}
-				nReps++;
-			} while (nReps < 54);
-		}
-	}
-
-	// Only an issue on the client.
-
-	// Always check if we've just changed levels.
-	if (!(pmove->server != 0 && g_CheckForPlayerStuck))
-	{
-		// TODO: not really necessary to have separate arrays for client and server since the code is separate anyway.
-		const int idx = 0 != pmove->server ? 0 : 1;
-
-		const float fTime = pmove->Sys_FloatTime();
-		// Too soon?
-		if (rgStuckCheckTime[pmove->player_index][idx] >=
-			(fTime - PM_CHECKSTUCK_MINTIME))
-		{
-			return true;
-		}
-		rgStuckCheckTime[pmove->player_index][idx] = fTime;
-	}
-
-	pmove->PM_StuckTouch(hitent, &traceresult);
-
-	i = PM_GetRandomStuckOffsets(pmove->player_index, pmove->server, offset);
-
-	VectorAdd(base, offset, test);
-	if ((hitent = pmove->PM_TestPlayerPositionEx(test, NULL, PM_ShouldIgnore)) == -1)
-	{
-		//Con_DPrintf("Nudged\n");
-
-		PM_ResetStuckOffsets(pmove->player_index, pmove->server);
-
-		if (i >= 27)
-			VectorCopy(test, pmove->origin);
-
-		return false;
-	}
-
-	// Try to unstuck the player after a level change.
-	// This only works in singleplayer. In multiplayer there it's too unreliable to try, so only the first player gets unstuck.
-	if (pmove->server != 0 && g_CheckForPlayerStuck)
-	{
-		g_CheckForPlayerStuck = false;
-
-		// Are we stuck inside the world?
-		if (hitent == 0)
-		{
-			if (!PM_TryToUnstuck(base))
-			{
-				return false;
-			}
-		}
-	}
-
-	// If player is flailing while stuck in another player ( should never happen ), then see
-	//  if we can't "unstick" them forceably.
-	if ((pmove->cmd.buttons & (IN_JUMP | IN_DUCK | IN_ATTACK)) != 0 && (pmove->physents[hitent].player != 0))
-	{
-		if (!PM_TryToUnstuck(base))
-		{
-			return false;
-		}
-	}
-
-	//VectorCopy (base, pmove->origin);
 
 	return true;
 }

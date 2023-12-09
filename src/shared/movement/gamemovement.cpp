@@ -35,6 +35,8 @@ CHalfLifeMovement::CHalfLifeMovement(playermove_t* _pmove, CBasePlayer* _player)
 
 void CHalfLifeMovement::Move()
 {
+    CGameMovement::Move();
+
     if (pmove->movetype == MOVETYPE_NONE)
     {
         return;
@@ -189,11 +191,11 @@ int CHalfLifeMovement::FlyMove()
 
         end = pmove->origin + timeLeft * pmove->velocity;
 
-        trace = pmove->PM_PlayerTrace(
+        trace = pmove->PM_PlayerTraceEx(
             pmove->origin,
             end,
             PM_STUDIO_BOX,
-            -1);
+            CGameMovement::g_ShouldIgnore);
 
         allFraction += trace.fraction;
 
@@ -363,11 +365,11 @@ void CHalfLifeMovement::CategorizePosition()
 
     Vector point = pmove->origin;
     point.z -= 2;
-    pmtrace_t trace = pmove->PM_PlayerTrace(
+    pmtrace_t trace = pmove->PM_PlayerTraceEx(
         pmove->origin,
         point,
         PM_STUDIO_BOX,
-        -1);
+        CGameMovement::g_ShouldIgnore);
 
     if (trace.plane.normal.z < 0.7)
     {
@@ -428,19 +430,23 @@ void CHalfLifeMovement::Accelerate(const Vector& wishDir, float wishSpeed)
 }
 
 
-int PM_GetRandomStuckOffsets(int nIndex, int server, Vector& offset);
-void PM_ResetStuckOffsets(int nIndex, int server);
-bool PM_TryToUnstuck(Vector base);
+int PM_GetRandomStuckOffsets(int nIndex, Vector& offset);
+void PM_ResetStuckOffsets(int nIndex);
+bool PM_TryToUnstuck(Vector base, int (*pfnIgnore)(physent_t *pe));
 
 bool CHalfLifeMovement::IsStuck()
 {
     int r, i;
     pmtrace_t trace;
 
-    int hitent = pmove->PM_TestPlayerPosition(pmove->origin, &trace);
+    int hitent = pmove->PM_TestPlayerPositionEx(
+        pmove->origin,
+        &trace,
+        CGameMovement::g_ShouldIgnore);
+
     if (hitent == -1)
     {
-        PM_ResetStuckOffsets(pmove->player_index, pmove->server);
+        PM_ResetStuckOffsets(pmove->player_index);
         return false;
     }
 
@@ -448,15 +454,18 @@ bool CHalfLifeMovement::IsStuck()
     Vector testPosition, offset;
 
 #ifdef CLIENT_DLL
-    PM_ResetStuckOffsets(pmove->player_index, pmove->server);
+    PM_ResetStuckOffsets(pmove->player_index);
     for (r = 0; r < 54; r++)
     {
-        i = PM_GetRandomStuckOffsets(pmove->player_index, pmove->server, offset);
+        i = PM_GetRandomStuckOffsets(pmove->player_index, offset);
         testPosition = originalOrigin + offset;
 
-        if (pmove->PM_TestPlayerPosition(testPosition, &trace) == -1)
+        if (pmove->PM_TestPlayerPositionEx(
+            testPosition,
+            &trace,
+            CGameMovement::g_ShouldIgnore) == -1)
         {
-            PM_ResetStuckOffsets(pmove->player_index, pmove->server);
+            PM_ResetStuckOffsets(pmove->player_index);
             pmove->origin = testPosition;
             return false;
         }
@@ -465,12 +474,15 @@ bool CHalfLifeMovement::IsStuck()
 
     pmove->PM_StuckTouch(hitent, &trace);
 
-    i = PM_GetRandomStuckOffsets(pmove->player_index, pmove->server, offset);
+    i = PM_GetRandomStuckOffsets(pmove->player_index, offset);
     testPosition = originalOrigin + offset;
 
-    if (pmove->PM_TestPlayerPosition(testPosition, nullptr) == -1)
+    if (pmove->PM_TestPlayerPositionEx(
+        testPosition,
+        nullptr,
+        CGameMovement::g_ShouldIgnore) == -1)
     {
-        PM_ResetStuckOffsets(pmove->player_index, pmove->server);
+        PM_ResetStuckOffsets(pmove->player_index);
         if (i >= 27)
         {
             pmove->origin = testPosition;
@@ -485,7 +497,7 @@ bool CHalfLifeMovement::IsStuck()
 #ifdef GAME_DLL
     if (pmove->cmd.buttons != 0 && pmove->physents[hitent].player != 0)
     {
-        if (!PM_TryToUnstuck(originalOrigin))
+        if (!PM_TryToUnstuck(originalOrigin, CGameMovement::g_ShouldIgnore))
         {
             return false;
         }
@@ -544,11 +556,6 @@ void CHalfLifeMovement::AddCorrectGravity()
 
     pmove->velocity.z -=
         gravity * pmove->movevars->gravity * pmove->frametime * 0.5F;
-
-    pmove->velocity.z +=
-        pmove->basevelocity.z * pmove->frametime;
-
-    pmove->basevelocity.z = 0;
 
     CheckVelocity();
 }

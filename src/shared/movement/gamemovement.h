@@ -16,7 +16,12 @@ public:
     CGameMovement(playermove_t* _pmove, CBasePlayer* _player)
         : pmove{_pmove}, player{_player} {}
 
-    virtual void Move() = 0;
+    static inline CGameMovement* g_pCurrentMovement;
+
+    virtual void Move() { g_pCurrentMovement = this; }
+    virtual bool ShouldCollide(physent_t* other) { return true; }
+
+    static int g_ShouldIgnore(physent_t* other);
 
 public:
     playermove_t* pmove;
@@ -61,4 +66,10 @@ protected:
     Vector m_wishDir;
     float m_wishSpeed;
 };
+
+
+inline int CGameMovement::g_ShouldIgnore(physent_t* other)
+{
+    return g_pCurrentMovement->ShouldCollide(other) ? 0 : 1;
+}
 

@@ -86,11 +86,11 @@ void CHalfLifeMovement::WalkMove()
     int oldonground = pmove->onground;
     Vector dest = pmove->origin + pmove->velocity * pmove->frametime;
     pmtrace_t trace =
-        pmove->PM_PlayerTrace(
+        pmove->PM_PlayerTraceEx(
             pmove->origin,
             dest,
             PM_STUDIO_BOX,
-            -1);
+            CGameMovement::g_ShouldIgnore);
 
     if (trace.fraction == 1)
     {
@@ -132,11 +132,11 @@ void CHalfLifeMovement::WalkMove()
     dest = pmove->origin;
     dest.z += pmove->movevars->stepsize;
 
-    trace = pmove->PM_PlayerTrace(
+    trace = pmove->PM_PlayerTraceEx(
         pmove->origin,
         dest,
         PM_STUDIO_BOX,
-        -1);
+        CGameMovement::g_ShouldIgnore);
 
     /*
     If we started okay and made it part of the way at least,
@@ -157,11 +157,11 @@ void CHalfLifeMovement::WalkMove()
     dest = pmove->origin;
     dest.z -= pmove->movevars->stepsize;
 
-    trace = pmove->PM_PlayerTrace(
+    trace = pmove->PM_PlayerTraceEx(
         pmove->origin,
         dest,
         PM_STUDIO_BOX,
-        -1);
+        CGameMovement::g_ShouldIgnore);
 
     /*
     If we are not on the ground any more then
@@ -258,11 +258,11 @@ void CHalfLifeMovement::ApplyFriction()
         stop.z = start.z - 34;
 
         pmtrace_t trace =
-            pmove->PM_PlayerTrace(
+            pmove->PM_PlayerTraceEx(
                 start,
                 stop,
                 PM_STUDIO_BOX,
-                -1);
+                CGameMovement::g_ShouldIgnore);
 
         float friction = pmove->movevars->friction;
         if (trace.fraction == 1)
@@ -295,9 +295,19 @@ void CHalfLifeMovement::StayOnGround()
     start.z += 2;
     end.z -= pmove->movevars->stepsize;
 
-    trace = pmove->PM_PlayerTrace(pmove->origin, start, PM_STUDIO_BOX, -1);
+    trace = pmove->PM_PlayerTraceEx(
+        pmove->origin,
+        start,
+        PM_STUDIO_BOX,
+        CGameMovement::g_ShouldIgnore);
+
     start = trace.endpos;
-    trace = pmove->PM_PlayerTrace(start, end, PM_STUDIO_BOX, -1);
+
+    trace = pmove->PM_PlayerTraceEx(
+        start,
+        end,
+        PM_STUDIO_BOX,
+        CGameMovement::g_ShouldIgnore);
 
     if (trace.fraction != 0.0F
      && trace.fraction != 1.0F
