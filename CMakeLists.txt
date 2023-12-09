@@ -340,6 +340,8 @@ target_include_directories(server BEFORE PRIVATE ${SERVER_INCLUDE_DIRS})
 target_link_options(server PRIVATE ${HL_LINK_OPTIONS})
 target_link_libraries(server ${HL_LIBRARIES})
 
+install(TARGETS server DESTINATION ${CMAKE_INSTALL_PREFIX}/dlls)
+
 #===============================================================
 # Client
 #===============================================================
@@ -429,3 +431,5 @@ set_target_properties(server client
     PROPERTIES
         PREFIX ""
 )
+
+install(TARGETS client DESTINATION ${CMAKE_INSTALL_PREFIX}/cl_dlls)
