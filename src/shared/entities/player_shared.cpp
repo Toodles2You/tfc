@@ -327,3 +327,89 @@ CBasePlayerWeapon* CBasePlayer::GetNextBestWeapon(CBasePlayerWeapon* current)
 	return best;
 }
 
+
+void CBaseEntity::SetEntityState(const entity_state_t& state)
+{
+	pev->animtime = state.animtime;
+
+	pev->origin = state.origin;
+	pev->angles = state.angles;
+	pev->mins = state.mins;
+	pev->maxs = state.maxs;
+
+	pev->startpos = state.startpos;
+	pev->endpos = state.endpos;
+
+	pev->impacttime = state.impacttime;
+	pev->starttime = state.starttime;
+
+	pev->modelindex = state.modelindex;
+
+	pev->frame = state.frame;
+
+	pev->skin = state.skin;
+	pev->effects = state.effects;
+
+	m_EFlags |= state.eflags;
+
+	pev->scale = state.scale;
+	pev->solid = state.solid;
+	pev->colormap = state.colormap;
+
+	pev->movetype = state.movetype;
+	pev->sequence = state.sequence;
+	pev->framerate = state.framerate;
+	pev->body = state.body;
+
+	for (int i = 0; i < 4; i++)
+	{
+		pev->controller[i] = state.controller[i];
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		pev->blending[i] = state.blending[i];
+	}
+
+	pev->rendermode = state.rendermode;
+	pev->renderamt = state.renderamt;
+	pev->renderfx = state.renderfx;
+	pev->rendercolor.x = state.rendercolor.r;
+	pev->rendercolor.y = state.rendercolor.g;
+	pev->rendercolor.z = state.rendercolor.b;
+
+	// pev->aiment = state.aiment;
+
+	// pev->owner = state.owner;
+
+	pev->playerclass = state.playerclass;
+}
+
+
+void CBasePlayer::SetEntityState(const entity_state_t& state)
+{
+	CBaseEntity::SetEntityState(state);
+
+	pev->team = state.team;
+	pev->playerclass = state.playerclass;
+
+	pev->basevelocity = state.basevelocity;
+
+	pev->weaponmodel = state.weaponmodel;
+	pev->gaitsequence = state.gaitsequence;
+	if (state.spectator != 0)
+	{
+		pev->flags |= FL_SPECTATOR;
+	}
+	pev->friction = state.friction;
+
+	pev->gravity = state.gravity;
+
+	if (state.usehull == 1)
+	{
+		pev->flags |= FL_DUCKING;
+	}
+
+	pev->health = state.health;
+}
+

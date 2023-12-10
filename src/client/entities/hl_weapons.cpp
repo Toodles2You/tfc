@@ -32,17 +32,23 @@
 #include "demo.h"
 #include "hud.h"
 #include "ammohistory.h"
+#include "view.h"
 
+extern int g_iObserverMode;
+extern int g_iObserverTarget;
+extern int g_iObserverTarget2;
 extern struct local_state_s g_finalstate;
 
 static bool firstTimePredicting = false;
 
-// Pool of client side entities/entvars_t
-static entvars_t ev[WEAPON_LAST + 1];
-static int num_ents = 0;
+// Pool of client side entities
+static edict_t theEdicts[256];
+static int numEntities = 0;
+
+static CBasePlayer players[MAX_PLAYERS + 1];
 
 // The entity we'll use to represent the local client
-static CBasePlayer player;
+static CBasePlayer* player = players;
 
 // Local version of game .dll global variables ( time, etc. )
 static globalvars_t Globals;
@@ -80,11 +86,6 @@ void AlertMessage(ALERT_TYPE atype, const char* szFmt, ...)
 	gEngfuncs.Con_Printf(string);
 }
 
-//Just loads a v_ model.
-void LoadVModel(const char* szViewModel, CBasePlayer* m_pPlayer)
-{
-	gEngfuncs.CL_LoadModel(szViewModel, &m_pPlayer->pev->viewmodel);
-}
 
 /*
 =====================
@@ -94,31 +95,43 @@ Links the raw entity to an entvars_s holder.  If a player is passed in as the ow
 we set up the m_pPlayer field.
 =====================
 */
-void HUD_PrepEntity(CBaseEntity* pEntity, CBasePlayer* pWeaponOwner)
+static void HUD_PrepEntity(CBaseEntity* entity, CBasePlayer* owner)
 {
-	memset(&ev[num_ents], 0, sizeof(entvars_t));
-	pEntity->pev = &ev[num_ents++];
+	auto edict = theEdicts + numEntities;
+	numEntities++;
 
-	pEntity->Precache();
-	pEntity->Spawn();
+	memset(edict, 0, sizeof(edict_t));
 
-	if (pWeaponOwner)
+	edict->free = false;
+	edict->pvPrivateData = entity;
+	entity->pev = &edict->v;
+	entity->pev->pContainingEntity = edict;
+
+	entity->Precache();
+	entity->Spawn();
+
+	if (owner)
 	{
-		const auto weapon = dynamic_cast<CBasePlayerWeapon*>(pEntity);
+		const auto weapon = dynamic_cast<CBasePlayerWeapon*>(entity);
 
 		WeaponInfo info;
 
 		memset(&info, 0, sizeof(info));
 
-		weapon->m_pPlayer = pWeaponOwner;
+		weapon->m_pPlayer = owner;
 
 		weapon->GetWeaponInfo(&info);
 
 		CBasePlayerWeapon::WeaponInfoArray[weapon->GetID()] = info;
 
-		pWeaponOwner->m_rgpPlayerWeapons[weapon->GetID()] = (CBasePlayerWeapon*)pEntity;
+		owner->m_rgpPlayerWeapons[weapon->GetID()] = (CBasePlayerWeapon*)entity;
+	}
+	else
+	{
+		entity->pev->flags |= FL_CLIENT;
 	}
 }
+
 
 /*
 =====================
@@ -132,30 +145,12 @@ void CBaseEntity::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 	pev->effects |= EF_NODRAW;
 }
 
+
 int CBaseEntity::entindex()
 {
 	return gEngfuncs.GetLocalPlayer()->index;
 }
 
-/*
-=====================
-util::TraceLine
-
-Don't actually trace, but act like the trace didn't hit anything.
-=====================
-*/
-void util::TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, CBaseEntity* ignore, TraceResult* ptr)
-{
-	memset(ptr, 0, sizeof(*ptr));
-	ptr->flFraction = 1.0;
-}
-
-bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CBaseEntity* ignore, int flags, int hull)
-{
-	memset(tr, 0, sizeof(*tr));
-	tr->flFraction = 1.0;
-	return false;
-}
 
 /*
 =====================
@@ -175,9 +170,10 @@ void HUD_PlaybackEvent(int flags, const edict_t* pInvoker, unsigned short eventi
 
 	// Weapon prediction events are assumed to occur at the player's origin
 	org = g_finalstate.playerstate.origin;
-	ang = player.pev->v_angle + player.pev->punchangle * 2;
+	ang = player->pev->v_angle + player->pev->punchangle * 2;
 	gEngfuncs.pfnPlaybackEvent(flags, pInvoker, eventindex, delay, org, ang, fparam1, fparam2, iparam1, iparam2, bparam1, bparam2);
 }
+
 
 /*
 =====================
@@ -186,7 +182,7 @@ HUD_InitClientWeapons
 Set up weapons, player and functions needed to run weapons code client-side.
 =====================
 */
-void HUD_InitClientWeapons()
+static void HUD_InitClientWeapons()
 {
 	static bool initialized = false;
 	if (initialized)
@@ -218,15 +214,19 @@ void HUD_InitClientWeapons()
 	g_engfuncs.pfnCVarGetString = gEngfuncs.pfnGetCvarString;
 	g_engfuncs.pfnCVarGetFloat = gEngfuncs.pfnGetCvarFloat;
 
-	// Allocate a slot for the local player
-	HUD_PrepEntity(&player, nullptr);
+	// Allocate slots for the players
+	for (auto i = 0; i <= MAX_PLAYERS; i++)
+	{
+		HUD_PrepEntity(players + i, nullptr);
+	}
 
 	// Allocate slots for each weapon that we are going to be predicting
 	for (auto i = 0; i < ARRAYSIZE(weapons); i++)
 	{
-		HUD_PrepEntity(weapons[i], &player);
+		HUD_PrepEntity(weapons[i], player);
 	}
 }
+
 
 /*
 =====================
@@ -240,6 +240,7 @@ Vector HUD_GetLastOrg()
 	return previousorigin;
 }
 
+
 /*
 =====================
 HUD_SetLastOrg
@@ -251,6 +252,89 @@ void HUD_SetLastOrg()
 {
 	previousorigin = g_finalstate.playerstate.origin + g_finalstate.client.view_ofs;
 }
+
+
+/*
+=========================
+HUD_ProcessPlayerState
+
+We have received entity_state_t for this player over the network.  We need to copy appropriate fields to the
+playerstate structure
+=========================
+*/
+void HUD_ProcessPlayerState(struct entity_state_s* dst, const struct entity_state_s* src)
+{
+	HUD_InitClientWeapons();
+
+	// Copy in network data
+	dst->origin = src->origin;
+	dst->angles = src->angles;
+	dst->velocity = src->velocity;
+
+	dst->frame = src->frame;
+	dst->modelindex = src->modelindex;
+	dst->skin = src->skin;
+	dst->effects = src->effects;
+	dst->weaponmodel = src->weaponmodel;
+	dst->movetype = src->movetype;
+	dst->sequence = src->sequence;
+	dst->animtime = src->animtime;
+
+	dst->solid = src->solid;
+
+	dst->rendermode = src->rendermode;
+	dst->renderamt = src->renderamt;
+	dst->rendercolor.r = src->rendercolor.r;
+	dst->rendercolor.g = src->rendercolor.g;
+	dst->rendercolor.b = src->rendercolor.b;
+	dst->renderfx = src->renderfx;
+
+	dst->framerate = src->framerate;
+	dst->body = src->body;
+
+	memcpy(&dst->controller[0], &src->controller[0], 4 * sizeof(byte));
+	memcpy(&dst->blending[0], &src->blending[0], 2 * sizeof(byte));
+
+	VectorCopy(src->basevelocity, dst->basevelocity);
+
+	dst->friction = src->friction;
+	dst->gravity = src->gravity;
+	dst->gaitsequence = src->gaitsequence;
+	dst->spectator = src->spectator;
+	dst->usehull = src->usehull;
+	dst->playerclass = src->playerclass;
+	dst->team = src->team;
+	dst->colormap = src->colormap;
+	dst->health = src->health;
+
+	g_PlayerExtraInfo[dst->number].health = dst->health;
+	g_PlayerExtraInfo[dst->number].dead = dst->health <= 0;
+
+	// Save off some data so other areas of the Client DLL can get to it
+	cl_entity_t* localPlayer = gEngfuncs.GetLocalPlayer(); // Get the local player's index
+	if (dst->number == localPlayer->index)
+	{
+		g_iPlayerClass = dst->playerclass;
+		g_iTeamNumber = dst->team;
+
+		if (g_iObserverMode != src->iuser1
+		 || g_iObserverTarget != src->iuser2
+		 || g_iObserverTarget2 != src->iuser3)
+		{
+			V_ResetChaseCam();
+		}
+
+		g_iObserverMode = src->iuser1;
+		g_iObserverTarget = src->iuser2;
+		g_iObserverTarget2 = src->iuser3;
+	}
+
+	if (dst->number >= 1 && dst->number <= MAX_PLAYERS)
+	{
+		players[dst->number].SetEntityState(*dst);
+	}
+}
+
 
 /*
 =====================
@@ -283,23 +367,24 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 	// If so, run the appropriate player killed or spawn function
 	if (HUD_FirstTimePredicting())
 	{
-		if (to->client.health <= 0 && player.pev->health > 0)
+		if (to->client.health <= 0 && player->pev->health > 0)
 		{
-			player.Killed(nullptr, nullptr, DMG_GENERIC);
+			player->Killed(nullptr, nullptr, DMG_GENERIC);
 		}
-		else if (to->client.health > 0 && player.pev->health <= 0)
+		else if (to->client.health > 0 && player->pev->health <= 0)
 		{
-			player.Spawn();
+			player->Spawn();
 		}
-		player.pev->health = to->client.health;
+		player->pev->health = to->client.health;
 	}
 
-	gEngfuncs.GetViewAngles(player.pev->v_angle);
-	player.pev->button = cmd->buttons;
-	player.m_afButtonLast = from->playerstate.oldbuttons;
-	player.m_WeaponBits = gHUD.m_iWeaponBits;
+	gEngfuncs.GetViewAngles(player->pev->v_angle);
+	player->pev->button = cmd->buttons;
+	player->m_afButtonLast = from->playerstate.oldbuttons;
+	player->m_WeaponBits = gHUD.m_iWeaponBits;
 
-	player.SetClientData(from->client);
+	player->SetEntityState(from->playerstate);
+	player->SetClientData(from->client);
 
 	for (i = 0; i < ARRAYSIZE(weapons); i++)
 	{
@@ -307,10 +392,10 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 		weapon->SetWeaponData(from->weapondata[weapon->GetID()]);
 	}
 
-	player.CmdStart(*cmd, random_seed);
-	player.PreThink();
+	player->CmdStart(*cmd, random_seed);
+	player->PreThink();
 
-	player.PostThink();
+	player->PostThink();
 
 	for (i = 0; i < ARRAYSIZE(weapons); i++)
 	{
@@ -319,9 +404,9 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 		weapon->GetWeaponData(to->weapondata[weapon->GetID()]);
 	}
 
-	player.UpdateHudData();
-	player.DecrementTimers(cmd->msec);
-	player.GetClientData(to->client, true);
+	player->UpdateHudData();
+	player->DecrementTimers(cmd->msec);
+	player->GetClientData(to->client, true);
 
 	// Store off the last position from the predicted state.
 	HUD_SetLastOrg();
@@ -332,22 +417,26 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 	g_PunchAngle = to->client.punchangle * 2;
 }
 
+
 void HUD_PlayerMoveInit(struct playermove_s* ppmove)
 {
 	PM_Init(ppmove);
-	player.InstallGameMovement(new CHalfLifeMovement{ppmove, &player});
+	player->InstallGameMovement(new CHalfLifeMovement{ppmove, player});
 }
+
 
 void HUD_PlayerMove(struct playermove_s* ppmove, int server)
 {
 	ppmove->server = 0;
-	player.GetGameMovement()->Move();
+	player->GetGameMovement()->Move();
 }
+
 
 bool HUD_FirstTimePredicting()
 {
 	return firstTimePredicting;
 }
+
 
 /*! Toodles FIXME: Lots-a spaghetti */
 void WeaponsResource::Init()
@@ -378,3 +467,4 @@ void WeaponsResource::Init()
 		rgWeapons[weapons[i]->GetID()] = w;
 	}
 }
+

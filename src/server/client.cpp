@@ -1159,7 +1159,7 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 	// delta from it.
 	state->number = e;
 
-	entity->SetEntityState(*state);
+	entity->GetEntityState(*state);
 
 	return 1;
 }

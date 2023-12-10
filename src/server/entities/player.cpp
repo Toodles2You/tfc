@@ -2048,9 +2048,9 @@ void CBasePlayer::SetPrefsFromUserinfo(char* infobuffer)
 	}
 }
 
-void CBasePlayer::SetEntityState(entity_state_t& state)
+void CBasePlayer::GetEntityState(entity_state_t& state)
 {
-	CBaseEntity::SetEntityState(state);
+	CBaseEntity::GetEntityState(state);
 
 	state.team = pev->team;
 	state.playerclass = pev->playerclass;

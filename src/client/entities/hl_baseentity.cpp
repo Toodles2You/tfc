@@ -158,5 +158,5 @@ void CBaseEntity::EmitSound(const char* sample, int channel, float volume, float
 void CBaseEntity::EmitSoundPredicted(const char* sample, int channel, float volume, float attenuation, int pitch, int flags) {}
 void CBaseEntity::StopSound(const char* sample, int channel) {}
 
-void CBaseEntity::SetEntityState(entity_state_t& state) {}
-void CBasePlayer::SetEntityState(entity_state_t& state) {}
+void CBaseEntity::GetEntityState(entity_state_t& state) {}
+void CBasePlayer::GetEntityState(entity_state_t& state) {}

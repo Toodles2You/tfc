@@ -245,7 +245,8 @@ public:
 	virtual void UpdateHudData();
 #endif
 
-	void SetEntityState(entity_state_t& state) override;
+	virtual void GetEntityState(entity_state_t& state) override;
+	virtual void SetEntityState(const entity_state_t& state) override;
 
 	void InstallGameMovement(CGameMovement* gameMovement)
 	{
