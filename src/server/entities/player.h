@@ -31,14 +31,7 @@
 #define PLAYER_FATAL_FALL_SPEED 1024															  // approx 60 feet
 #define PLAYER_MAX_SAFE_FALL_SPEED 580															  // approx 20 feet
 #define DAMAGE_FOR_FALL_SPEED (float)100 / (PLAYER_FATAL_FALL_SPEED - PLAYER_MAX_SAFE_FALL_SPEED) // damage per unit per second.
-#define PLAYER_MIN_BOUNCE_SPEED 200
 #define PLAYER_FALL_PUNCH_THRESHHOLD (float)350 // won't punch player's screen/make scrape noise unless player falling at least this fast.
-
-//
-// Player PHYSICS FLAGS bits
-//
-#define PFLAG_ONTRAIN (1 << 1)
-#define PFLAG_USING (1 << 4)	// Using a continuous entity
 
 typedef enum
 {
@@ -81,7 +74,6 @@ public:
 
 	float m_flFallVelocity;
 
-	unsigned int m_afPhysicsFlags; // physics flags - set when 'normal' physics should be revisited or overriden
 	float m_fNextSuicideTime;	   // the time after which the player can next use the suicide command
 
 
@@ -221,8 +213,6 @@ public:
 	void SetPrefsFromUserinfo(char* infobuffer);
 
 	int m_iAutoWepSwitch;
-
-	bool m_bRestored;
 
 	//True if the player is currently spawning.
 	bool m_bIsSpawning = false;
