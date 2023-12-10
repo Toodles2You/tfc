@@ -5,7 +5,6 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "const.h"
-#include "entity_types.h"
 #include "studio_event.h" // def. of mstudioevent_t
 #include "r_efx.h"
 #include "event_api.h"
@@ -25,33 +24,6 @@ extern Vector v_origin;
 extern int g_iObserverMode;
 extern int g_iObserverTarget;
 extern int g_iObserverTarget2;
-
-/*
-========================
-HUD_AddEntity
-	Return 0 to filter entity from visible list for rendering
-========================
-*/
-int HUD_AddEntity(int type, struct cl_entity_s* ent, const char* modelname)
-{
-	switch (type)
-	{
-	case ET_NORMAL:
-		break;
-	case ET_PLAYER:
-	case ET_BEAM:
-	case ET_TEMPENTITY:
-	case ET_FRAGMENTED:
-	default:
-		break;
-	}
-	// each frame every entity passes this function, so the overview hooks it to filter the overview entities
-	// in spectator mode:
-	// each frame every entity passes this function, so the overview hooks
-	// it to filter the overview entities
-
-	return 1;
-}
 
 /*
 =========================

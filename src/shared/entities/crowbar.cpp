@@ -22,18 +22,18 @@ LINK_ENTITY_TO_CLASS(weapon_crowbar, CCrowbar);
 void CCrowbar::Precache()
 {
 #ifdef GAME_DLL
-	PRECACHE_MODEL("models/v_crowbar.mdl");
-	PRECACHE_MODEL("models/w_crowbar.mdl");
-	PRECACHE_MODEL("models/p_crowbar.mdl");
+	g_engfuncs.pfnPrecacheModel("models/v_crowbar.mdl");
+	g_engfuncs.pfnPrecacheModel("models/w_crowbar.mdl");
+	g_engfuncs.pfnPrecacheModel("models/p_crowbar.mdl");
 
-	PRECACHE_SOUND("weapons/cbar_hit1.wav");
-	PRECACHE_SOUND("weapons/cbar_hit2.wav");
+	g_engfuncs.pfnPrecacheSound("weapons/cbar_hit1.wav");
+	g_engfuncs.pfnPrecacheSound("weapons/cbar_hit2.wav");
 
-	PRECACHE_SOUND("weapons/cbar_hitbod1.wav");
-	PRECACHE_SOUND("weapons/cbar_hitbod2.wav");
-	PRECACHE_SOUND("weapons/cbar_hitbod3.wav");
+	g_engfuncs.pfnPrecacheSound("weapons/cbar_hitbod1.wav");
+	g_engfuncs.pfnPrecacheSound("weapons/cbar_hitbod2.wav");
+	g_engfuncs.pfnPrecacheSound("weapons/cbar_hitbod3.wav");
 
-	PRECACHE_SOUND("weapons/cbar_miss1.wav");
+	g_engfuncs.pfnPrecacheSound("weapons/cbar_miss1.wav");
 #endif
 
 	m_usPrimaryAttack = g_engfuncs.pfnPrecacheEvent(1, "events/crowbar.sc");

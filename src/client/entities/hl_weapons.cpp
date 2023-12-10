@@ -33,6 +33,7 @@
 #include "hud.h"
 #include "ammohistory.h"
 #include "view.h"
+#include "entity_types.h"
 
 extern int g_iObserverMode;
 extern int g_iObserverTarget;
@@ -50,9 +51,6 @@ static CBasePlayer players[MAX_PLAYERS + 1];
 // The entity we'll use to represent the local client
 static CBasePlayer* player = players;
 
-// Local version of game .dll global variables ( time, etc. )
-static globalvars_t Globals;
-
 static CCrowbar crowbar;
 static CMP5 mp5;
 static CBasePlayerWeapon* weapons[] =
@@ -68,12 +66,12 @@ Vector g_PunchAngle;
 
 /*
 ======================
-AlertMessage
+HUD_AlertMessage
 
 Print debug messages to console
 ======================
 */
-void AlertMessage(ALERT_TYPE atype, const char* szFmt, ...)
+static void HUD_AlertMessage(ALERT_TYPE atype, const char* szFmt, ...)
 {
 	va_list argptr;
 	static char string[1024];
@@ -159,7 +157,7 @@ HUD_PlaybackEvent
 Directly queue up an event on the client
 =====================
 */
-void HUD_PlaybackEvent(int flags, const edict_t* pInvoker, unsigned short eventindex, float delay,
+static void HUD_PlaybackEvent(int flags, const edict_t* pInvoker, unsigned short eventindex, float delay,
 	const float* origin, const float* angles, float fparam1, float fparam2, int iparam1, int iparam2, int bparam1, int bparam2)
 {
 	Vector org;
@@ -172,6 +170,12 @@ void HUD_PlaybackEvent(int flags, const edict_t* pInvoker, unsigned short eventi
 	org = g_finalstate.playerstate.origin;
 	ang = player->pev->v_angle + player->pev->punchangle * 2;
 	gEngfuncs.pfnPlaybackEvent(flags, pInvoker, eventindex, delay, org, ang, fparam1, fparam2, iparam1, iparam2, bparam1, bparam2);
+}
+
+
+static edict_t* HUD_GetEntityByIndex(int index)
+{
+	return theEdicts + index;
 }
 
 
@@ -190,21 +194,18 @@ static void HUD_InitClientWeapons()
 
 	initialized = true;
 
-	// Set up pointer ( dummy object )
-	gpGlobals = &Globals;
+	// Local version of game .dll global variables ( time, etc. )
+	static globalvars_t globals;
+	gpGlobals = &globals;
 
-	// Fill in current time ( probably not needed )
+	// Fill in current time
 	gpGlobals->time = gEngfuncs.GetClientTime();
 
-	// Fake functions
-	g_engfuncs.pfnPrecacheModel = stub_PrecacheModel;
-	g_engfuncs.pfnPrecacheSound = stub_PrecacheSound;
-	g_engfuncs.pfnSetModel = stub_SetModel;
-	g_engfuncs.pfnSetClientMaxspeed = HUD_SetMaxSpeed;
-
 	// Handled locally
+	g_engfuncs.pfnAlertMessage = HUD_AlertMessage;
 	g_engfuncs.pfnPlaybackEvent = HUD_PlaybackEvent;
-	g_engfuncs.pfnAlertMessage = AlertMessage;
+	g_engfuncs.pfnPEntityOfEntIndex = HUD_GetEntityByIndex;
+	g_engfuncs.pfnPEntityOfEntIndexAllEntities = HUD_GetEntityByIndex;
 
 	// Pass through to engine
 	g_engfuncs.pfnPrecacheEvent = gEngfuncs.pfnPrecacheEvent;
@@ -435,6 +436,30 @@ void HUD_PlayerMove(struct playermove_s* ppmove, int server)
 bool HUD_FirstTimePredicting()
 {
 	return firstTimePredicting;
+}
+
+
+/*
+========================
+HUD_AddEntity
+	Return 0 to filter entity from visible list for rendering
+========================
+*/
+int HUD_AddEntity(int type, struct cl_entity_s* ent, const char* modelname)
+{
+	switch (type)
+	{
+		case ET_PLAYER:
+		case ET_BEAM:
+		case ET_TEMPENTITY:
+			break;
+		case ET_NORMAL:
+		case ET_FRAGMENTED:
+		default:
+			break;
+	}
+
+	return 1;
 }
 
 
