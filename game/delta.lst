@@ -24,16 +24,15 @@ clientdata_t none
 	DEFINE_DELTA( m_iId, DT_INTEGER, 6, 1.0 ),
 
 	DEFINE_DELTA( punchangle[2], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
-	DEFINE_DELTA( flags, DT_INTEGER, 32, 1.0 ), // Cut to 3 bits?
+	DEFINE_DELTA( flags, DT_INTEGER, 32, 1.0 ),
 	DEFINE_DELTA( weaponanim, DT_INTEGER, 8, 1.0 ),
-	DEFINE_DELTA( health, DT_SIGNED | DT_FLOAT, 10, 1.0 ), // Cut # of bits?
+	DEFINE_DELTA( health, DT_SIGNED | DT_FLOAT, 10, 1.0 ),
 	DEFINE_DELTA( maxspeed, DT_FLOAT, 16, 10.0 ),
 	DEFINE_DELTA( flDuckTime, DT_INTEGER, 10, 1.0 ),
 	DEFINE_DELTA( view_ofs[2], DT_SIGNED | DT_FLOAT, 10, 4.0 ),
 	DEFINE_DELTA( punchangle[0], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 	DEFINE_DELTA( punchangle[1], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 	DEFINE_DELTA( viewmodel, DT_INTEGER, 10, 1.0 ),
-	DEFINE_DELTA( weapons, DT_INTEGER, 32, 1.0 ),
 
 	DEFINE_DELTA( pushmsec, DT_INTEGER, 11, 1.0 ),
 	DEFINE_DELTA( deadflag, DT_INTEGER, 3, 1.0 ),
@@ -125,8 +124,6 @@ entity_state_t gamedll Entity_Encode
 	DEFINE_DELTA( basevelocity[0], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 	DEFINE_DELTA( basevelocity[1], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 	DEFINE_DELTA( basevelocity[2], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
-
-	// Playerclass signifies it's a decalable glass item when referring to an object
 
 	DEFINE_DELTA( playerclass, DT_INTEGER, 1, 1.0 )
 }
