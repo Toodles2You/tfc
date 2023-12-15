@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2001, Valve LLC, All rights reserved. ============
 //
-// Purpose: Stupid bipedal dumb ass movement
+// Purpose: Player movement interface
 //
 // $NoKeywords: $
 //=============================================================================

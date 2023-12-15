@@ -31,6 +31,8 @@
 #define PM_TRACELINE_PHYSENTSONLY 0
 #define PM_TRACELINE_ANYVISIBLE 1
 
+constexpr float kGroundPlaneMinZ = 0.7;
+
 
 #include "pm_info.h"
 

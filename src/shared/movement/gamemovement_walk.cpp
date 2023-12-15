@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2001, Valve LLC, All rights reserved. ============
 //
-// Purpose: Stupid bipedal dumb ass movement
+// Purpose: Player movement interface
 //
 // $NoKeywords: $
 //=============================================================================
@@ -167,7 +167,7 @@ void CHalfLifeMovement::WalkMove()
     If we are not on the ground any more then
     use the original movement attempt
     */
-    if (trace.plane.normal.z < 0.7)
+    if (trace.plane.normal.z < kGroundPlaneMinZ)
     {
         pmove->origin = downOrigin;
         pmove->velocity = downVelocity;
@@ -312,7 +312,7 @@ void CHalfLifeMovement::StayOnGround()
     if (trace.fraction != 0.0F
      && trace.fraction != 1.0F
      && trace.startsolid == 0
-     && trace.plane.normal.z >= 0.7
+     && trace.plane.normal.z >= kGroundPlaneMinZ
      && fabsf(pmove->origin.z - trace.endpos.z) > 0.5F)
     {
         pmove->origin = trace.endpos;

@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2001, Valve LLC, All rights reserved. ============
 //
-// Purpose: Stupid bipedal dumb ass movement
+// Purpose: Player movement interface
 //
 // $NoKeywords: $
 //=============================================================================
@@ -231,7 +231,7 @@ int CHalfLifeMovement::FlyMove()
 
         AddToTouched(trace, pmove->velocity);
 
-        if (trace.plane.normal.z > 0.7)
+        if (trace.plane.normal.z >= kGroundPlaneMinZ)
         {
             /* Floor */
             blocked |= 1;
@@ -261,7 +261,7 @@ int CHalfLifeMovement::FlyMove()
         {
             for (i = 0; i < numPlanes; i++)
             {
-                if (planes[i].z > 0.7)
+                if (planes[i].z >= kGroundPlaneMinZ)
                 {
                     CHalfLifeMovement::ClipVelocity(
                         originalVelocity,
@@ -371,7 +371,7 @@ void CHalfLifeMovement::CategorizePosition()
         PM_STUDIO_BOX,
         CGameMovement::g_ShouldIgnore);
 
-    if (trace.plane.normal.z < 0.7)
+    if (trace.plane.normal.z < kGroundPlaneMinZ)
     {
         pmove->onground = -1;
     }
