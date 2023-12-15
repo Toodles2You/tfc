@@ -500,7 +500,21 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 
 void CHudAmmo::Update_AmmoX(int iIndex, int iCount)
 {
-	gWR.SetAmmo(iIndex, abs(iCount));
+	iCount = abs(iCount);
+
+	if (m_pWeapon != nullptr)
+	{
+		if (m_pWeapon->iAmmoType == iIndex
+		 || m_pWeapon->iAmmo2Type == iIndex)
+		{
+			if (gWR.CountAmmo(iIndex) != iCount)
+			{
+				m_fFade = 200.0f;
+			}
+		}
+	}
+
+	gWR.SetAmmo(iIndex, iCount);
 }
 
 void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip)
@@ -529,24 +543,34 @@ void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip)
 
 	WEAPON* pWeapon = gWR.GetWeapon(iId);
 
-	if (!pWeapon)
+	if (pWeapon == nullptr)
 		return;
-
-	if (iClip < -1)
-		pWeapon->iClip = abs(iClip);
-	else
-		pWeapon->iClip = iClip;
-
 
 	if (iState == 0) // we're not the current weapon, so update no more
 		return;
 
-	if (m_pWeapon && m_pWeapon != pWeapon)
-		g_lastselect = m_pWeapon->iId;
+	if (iClip < -1)
+	{
+		iClip = abs(iClip);
+	}
 
-	m_pWeapon = pWeapon;
+	if (pWeapon->iClip != iClip)
+	{
+		pWeapon->iClip = iClip;
+		m_fFade = 200.0f;
+	}
 
-	m_fFade = 200.0f; //!!!
+	if (m_pWeapon != pWeapon)
+	{
+		if (m_pWeapon != nullptr)
+		{
+			g_lastselect = m_pWeapon->iId;
+		}
+
+		m_pWeapon = pWeapon;
+		m_fFade = 200.0f;
+	}
+
 	m_iFlags |= HUD_ACTIVE;
 }
 
