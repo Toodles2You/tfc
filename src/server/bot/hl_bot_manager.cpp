@@ -146,7 +146,8 @@ void CHLBotManager::ServerDeactivate()
 		{
 			continue;
 		}
-		FREE_PRIVATE(player->edict());
+		player->pev->takedamage = DAMAGE_NO;
+		player->pev->solid = SOLID_NOT;
 	}
 	delete TheBotProfiles;
 	TheBotProfiles = nullptr;
