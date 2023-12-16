@@ -154,16 +154,7 @@ void CBaseEntity::Remove()
 	SetBlocked(nullptr);
 }
 
-
-// Global Savedata for Delay
-#ifdef HALFLIFE_SAVERESTORE
-IMPLEMENT_SAVERESTORE(CBaseDelay)
-	DEFINE_FIELD(CBaseDelay, m_flDelay, FIELD_FLOAT),
-	DEFINE_FIELD(CBaseDelay, m_iszKillTarget, FIELD_STRING),
-END_SAVERESTORE(CBaseDelay, CBaseEntity)
-#endif
-
-bool CBaseDelay::KeyValue(KeyValueData* pkvd)
+bool CBaseEntity::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "delay"))
 	{
@@ -176,34 +167,7 @@ bool CBaseDelay::KeyValue(KeyValueData* pkvd)
 		return true;
 	}
 
-	return CBaseEntity::KeyValue(pkvd);
-}
-
-
-/*
-==============================
-UseTargets
-
-If self.delay is set, a DelayedUse entity will be created that will actually
-do the UseTargets after that many seconds have passed.
-
-Removes all entities with a targetname that match self.killtarget,
-and removes them, so some events can remove other triggers.
-
-Search for (string)targetname in all entities that
-match (string)self.target and call their .use function (if they have one)
-
-==============================
-*/
-void CBaseEntity::UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value)
-{
-	//
-	// fire targets
-	//
-	if (!FStringNull(pev->target))
-	{
-		util::FireTargets(STRING(pev->target), pActivator, this, useType, value);
-	}
+	return false;
 }
 
 
@@ -230,10 +194,10 @@ void util::FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEnt
 	}
 }
 
-LINK_ENTITY_TO_CLASS(DelayedUse, CBaseDelay);
+LINK_ENTITY_TO_CLASS(DelayedUse, CBaseEntity);
 
 
-void CBaseDelay::UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value)
+void CBaseEntity::UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value)
 {
 	//
 	// exit immediatly if we don't have a target or kill target
@@ -247,12 +211,12 @@ void CBaseDelay::UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float val
 	if (m_flDelay != 0)
 	{
 		// create a temp object to fire at a later time
-		CBaseDelay* pTemp = GetClassPtr((CBaseDelay*)NULL);
+		CBaseEntity* pTemp = GetClassPtr((CBaseEntity*)nullptr);
 		pTemp->pev->classname = MAKE_STRING("DelayedUse");
 
 		pTemp->pev->nextthink = gpGlobals->time + m_flDelay;
 
-		pTemp->SetThink(&CBaseDelay::DelayThink);
+		pTemp->SetThink(&CBaseEntity::DelayThink);
 
 		// Save the useType
 		pTemp->pev->button = (int)useType;
@@ -332,7 +296,7 @@ Vector util::SetMovedir(Vector& angles)
 }
 
 
-void CBaseDelay::DelayThink()
+void CBaseEntity::DelayThink()
 {
 	CBaseEntity* pActivator = NULL;
 
@@ -395,7 +359,7 @@ bool CBaseToggle::KeyValue(KeyValueData* pkvd)
 		return true;
 	}
 
-	return CBaseDelay::KeyValue(pkvd);
+	return CBaseEntity::KeyValue(pkvd);
 }
 
 /*

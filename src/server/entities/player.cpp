@@ -102,7 +102,7 @@ void CBasePlayer::Pain()
 }
 
 
-int TrainSpeed(int iSpeed, int iMax)
+static int TrainSpeed(int iSpeed, int iMax)
 {
 	float fSpeed, fMax;
 	int iRet = 0;

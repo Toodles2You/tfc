@@ -15,7 +15,6 @@
 
 #pragma once
 
-#include "effects.h"
 #include "weaponinfo.h"
 #ifdef CLIENT_DLL
 #include "event_args.h"

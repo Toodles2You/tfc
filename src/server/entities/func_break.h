@@ -35,7 +35,7 @@ typedef enum
 	matLastMaterial
 } Materials;
 
-class CBreakable : public CBaseDelay
+class CBreakable : public CBaseEntity
 {
 public:
 	DECLARE_SAVERESTORE()

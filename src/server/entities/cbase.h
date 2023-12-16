@@ -16,21 +16,25 @@
 #pragma once
 
 // These are caps bits to indicate what an object's capabilities (currently used for save/restore and level transitions)
-#define FCAP_ACROSS_TRANSITION 0x00000002 // should transfer between transitions
+
+enum
+{
+	FCAP_ACROSS_TRANSITION = 0x00000002, // should transfer between transitions
 
 #ifdef HALFLIFE_SAVERESTORE
-#define FCAP_MUST_SPAWN 0x00000004		  // Spawn after restore
-#define FCAP_DONT_SAVE 0x80000000		  // Don't save this
+	FCAP_MUST_SPAWN = 0x00000004,		  // Spawn after restore
+	FCAP_DONT_SAVE = 0x80000000,		  // Don't save this
 #endif
 
-#define FCAP_IMPULSE_USE 0x00000008		  // can be used by the player
-#define FCAP_CONTINUOUS_USE 0x00000010	  // can be used by the player
-#define FCAP_DIRECTIONAL_USE 0x00000040	  // Player sends +/- 1 when using (currently only tracktrains)
-#define FCAP_MASTER 0x00000080			  // Can be used to "master" other entities (like multisource)
+	FCAP_IMPULSE_USE = 0x00000008,		  // can be used by the player
+	FCAP_CONTINUOUS_USE = 0x00000010,	  // can be used by the player
+	FCAP_DIRECTIONAL_USE = 0x00000040,	  // Player sends +/- 1 when using (currently only tracktrains)
+	FCAP_MASTER = 0x00000080,			  // Can be used to "master" other entities (like multisource)
 
-#define FCAP_FORCE_TRANSITION 0x00000080 // ALWAYS goes across transitions
+	FCAP_FORCE_TRANSITION = 0x00000080, // ALWAYS goes across transitions
 
-#define FCAP_NET_ALWAYS_SEND 0x00000100 // Don't perform a PVS check in AddToFullPack
+	FCAP_NET_ALWAYS_SEND = 0x00000100, // Don't perform a PVS check in AddToFullPack
+};
 
 #include "Platform.h"
 #include "saverestore.h"
@@ -55,6 +59,8 @@ inline bool gTouchDisabled = false;
 
 inline Vector g_vecAttackDir;
 
+#ifdef GAME_DLL
+
 extern int DispatchSpawn(edict_t* pent);
 extern void DispatchKeyValue(edict_t* pentKeyvalue, KeyValueData* pkvd);
 extern void DispatchTouch(edict_t* pentTouched, edict_t* pentOther);
@@ -70,14 +76,18 @@ extern void SaveGlobalState(SAVERESTOREDATA* pSaveData);
 extern void RestoreGlobalState(SAVERESTOREDATA* pSaveData);
 extern void ResetGlobalState();
 
+#endif /* GAME_DLL */
 
 // monster to monster relationship types
-#define R_AL -2 // (ALLY) pals. Good alternative to R_NO when applicable.
-#define R_FR -1 // (FEAR)will run
-#define R_NO 0	// (NO RELATIONSHIP) disregard
-#define R_DL 1	// (DISLIKE) will attack
-#define R_HT 2	// (HATE)will attack this character instead of any visible DISLIKEd characters
-#define R_NM 3	// (NEMESIS)  A monster Will ALWAYS attack its nemsis, no matter what
+enum
+{
+	R_AL = -2,	// (ALLY) pals. Good alternative to R_NO when applicable.
+	R_FR = -1,	// (FEAR)will run
+	R_NO = 0,	// (NO RELATIONSHIP) disregard
+	R_DL = 1,	// (DISLIKE) will attack
+	R_HT = 2,	// (HATE)will attack this character instead of any visible DISLIKEd characters
+	R_NM = 3,	// (NEMESIS)  A monster Will ALWAYS attack its nemsis, no matter what
+};
 
 class CBaseEntity;
 class CBasePlayerWeapon;
@@ -136,7 +146,7 @@ public:
 	// initialization functions
 	virtual bool Spawn() { return false; }
 	virtual void Precache() {}
-	virtual bool KeyValue(KeyValueData* pkvd) { return false; }
+	virtual bool KeyValue(KeyValueData* pkvd);
 
 	enum { kEntvarsCount = 86 };
 	static TYPEDESCRIPTION m_EntvarsDescription[kEntvarsCount];
@@ -313,6 +323,11 @@ public:
 	void AddMultiDamage(float damage, int damageType);
 #endif
 
+	float m_flDelay;
+	int m_iszKillTarget;
+
+	void EXPORT DelayThink();
+
 protected:
 #ifdef GAME_DLL
 	MULTIDAMAGE m_multiDamage = {0.0F, DMG_GENERIC};
@@ -325,6 +340,8 @@ inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->e
 #define SetTouch(a) m_pfnTouch = static_cast<void (CBaseEntity::*)(CBaseEntity*)>(a)
 #define SetUse(a) m_pfnUse = static_cast<void (CBaseEntity::*)(CBaseEntity * pActivator, CBaseEntity * pCaller, USE_TYPE useType, float value)>(a)
 #define SetBlocked(a) m_pfnBlocked = static_cast<void (CBaseEntity::*)(CBaseEntity*)>(a)
+
+#ifdef GAME_DLL
 
 class CPointEntity : public CBaseEntity
 {
@@ -380,27 +397,10 @@ public:
 	string_t m_globalstate;
 };
 
-
-//
-// generic Delay entity.
-//
-class CBaseDelay : public CBaseEntity
-{
-public:
-	DECLARE_SAVERESTORE()
-
-	float m_flDelay;
-	int m_iszKillTarget;
-
-	bool KeyValue(KeyValueData* pkvd) override;
-
-	// common member functions
-	void UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value);
-	void EXPORT DelayThink();
-};
+#endif /* GAME_DLL */
 
 
-class CBaseAnimating : public CBaseDelay
+class CBaseAnimating : public CBaseEntity
 {
 public:
 	DECLARE_SAVERESTORE()
@@ -418,7 +418,6 @@ public:
 	void InitBoneControllers();
 	float SetBlending(int iBlender, float flValue);
 	void GetBonePosition(int iBone, Vector& origin, Vector& angles);
-	void GetAutomovement(Vector& origin, Vector& angles, float flInterval = 0.1);
 	int FindTransition(int iEndingSequence, int iGoalSequence, int* piDir);
 	void GetAttachment(int iAttachment, Vector& origin, Vector& angles);
 	void SetBodygroup(int iGroup, int iValue);
@@ -435,12 +434,13 @@ public:
 };
 
 
+#ifdef GAME_DLL
+
 //
 // generic Toggle entity.
 //
-#define SF_ITEM_USE_ONLY 256 //  ITEM_USE_ONLY = BUTTON_USE_ONLY = DOOR_USE_ONLY!!!
 
-class CBaseToggle : public CBaseDelay
+class CBaseToggle : public CBaseEntity
 {
 public:
 	DECLARE_SAVERESTORE()
@@ -491,9 +491,6 @@ public:
 };
 #define SetMoveDone(a) m_pfnCallWhenMoveDone = static_cast<void (CBaseToggle::*)()>(a)
 
-#define ROUTE_SIZE 8	  // how many waypoints a monster can store at one time
-#define MAX_OLD_ENEMIES 4 // how many old enemies to remember
-
 #define bits_CAP_DUCK (1 << 0)		 // crouch
 #define bits_CAP_JUMP (1 << 1)		 // jump/leap
 #define bits_CAP_STRAFE (1 << 2)	 // strafe ( walk/run sideways)
@@ -515,18 +512,7 @@ public:
 
 #define bits_CAP_DOORS_GROUP (bits_CAP_USE | bits_CAP_AUTO_DOORS | bits_CAP_OPEN_DOORS)
 
-// when calling KILLED(), a value that governs gib behavior is expected to be
-// one of these three values
-enum {
-	GIB_NORMAL,	// gib if entity was overkilled
-	GIB_NEVER,	// never gib, no matter how much death damage is done ( freezing, etc )
-	GIB_ALWAYS,	// always gib ( Houndeye Shock, Barnacle Bite )
-};
-
-class CSound;
-
-const char* ButtonSound(int sound); // get string of button sound number
-
+const char* ButtonSound(int sound);
 
 //
 // Generic Button
@@ -577,6 +563,7 @@ public:
 	int m_sounds;
 };
 
+#endif /* GAME_DLL */
 
 //
 // Converts a entvars_t * to a class pointer

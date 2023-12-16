@@ -26,6 +26,8 @@
 #define noiseMoving noise1
 #define noiseArrived noise2
 
+#define SF_ITEM_USE_ONLY 256
+
 class CBaseDoor : public CBaseToggle
 {
 public:

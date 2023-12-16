@@ -110,7 +110,7 @@ bool CBreakable::KeyValue(KeyValueData* pkvd)
 	else if (FStrEq(pkvd->szKeyName, "lip"))
 		return true;
 
-	return CBaseDelay::KeyValue(pkvd);
+	return CBaseEntity::KeyValue(pkvd);
 }
 
 

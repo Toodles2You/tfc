@@ -29,6 +29,7 @@
 
 #include "cl_dll.h"
 #include "com_weapons.h"
+#include "com_model.h"
 #include "demo.h"
 #include "hud.h"
 #include "ammohistory.h"
@@ -179,6 +180,19 @@ static edict_t* HUD_GetEntityByIndex(int index)
 }
 
 
+static void* HUD_GetModelPtr(edict_t* edict)
+{
+	model_t* model = gEngfuncs.hudGetModelByIndex(edict->v.modelindex);
+
+	if (model == nullptr || model->type != mod_studio)
+	{
+		return nullptr;
+	}
+
+	return model->cache.data;
+}
+
+
 /*
 =====================
 HUD_InitClientWeapons
@@ -205,6 +219,9 @@ static void HUD_InitClientWeapons()
 	g_engfuncs.pfnAlertMessage = HUD_AlertMessage;
 	g_engfuncs.pfnPlaybackEvent = HUD_PlaybackEvent;
 	g_engfuncs.pfnPEntityOfEntIndex = HUD_GetEntityByIndex;
+	g_engfuncs.pfnGetModelPtr = HUD_GetModelPtr;
+	g_engfuncs.pfnGetBonePosition = nullptr; /*! Toodles FIXME: */
+	g_engfuncs.pfnGetAttachment = nullptr; /*! Toodles FIXME: */
 	g_engfuncs.pfnPEntityOfEntIndexAllEntities = HUD_GetEntityByIndex;
 
 	// Pass through to engine

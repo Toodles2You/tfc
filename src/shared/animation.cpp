@@ -22,11 +22,8 @@
 #include "animation.h"
 #include "scriptevent.h"
 
-#pragma warning(disable : 4244)
 
-
-
-bool ExtractBbox(void* pmodel, int sequence, float* mins, float* maxs)
+bool studio::ExtractBbox(void* pmodel, int sequence, float* mins, float* maxs)
 {
 	studiohdr_t* pstudiohdr;
 
@@ -50,7 +47,7 @@ bool ExtractBbox(void* pmodel, int sequence, float* mins, float* maxs)
 }
 
 
-int LookupActivity(void* pmodel, entvars_t* pev, int activity)
+int studio::LookupActivity(void* pmodel, entvars_t* pev, int activity)
 {
 	studiohdr_t* pstudiohdr;
 
@@ -78,7 +75,7 @@ int LookupActivity(void* pmodel, entvars_t* pev, int activity)
 }
 
 
-int LookupActivityHeaviest(void* pmodel, entvars_t* pev, int activity)
+int studio::LookupActivityHeaviest(void* pmodel, entvars_t* pev, int activity)
 {
 	studiohdr_t* pstudiohdr;
 
@@ -107,7 +104,7 @@ int LookupActivityHeaviest(void* pmodel, entvars_t* pev, int activity)
 	return seq;
 }
 
-void GetEyePosition(void* pmodel, float* vecEyePosition)
+void studio::GetEyePosition(void* pmodel, Vector& vecEyePosition)
 {
 	studiohdr_t* pstudiohdr;
 
@@ -119,10 +116,10 @@ void GetEyePosition(void* pmodel, float* vecEyePosition)
 		return;
 	}
 
-	VectorCopy(pstudiohdr->eyeposition, vecEyePosition);
+	vecEyePosition = pstudiohdr->eyeposition;
 }
 
-int LookupSequence(void* pmodel, const char* label)
+int studio::LookupSequence(void* pmodel, const char* label)
 {
 	studiohdr_t* pstudiohdr;
 
@@ -144,7 +141,9 @@ int LookupSequence(void* pmodel, const char* label)
 }
 
 
-bool IsSoundEvent(int eventNumber)
+#ifdef GAME_DLL
+
+static bool IsSoundEvent(int eventNumber)
 {
 	if (eventNumber == SCRIPT_EVENT_SOUND || eventNumber == SCRIPT_EVENT_SOUND_VOICE)
 		return true;
@@ -152,7 +151,7 @@ bool IsSoundEvent(int eventNumber)
 }
 
 
-void SequencePrecache(void* pmodel, const char* pSequenceName)
+void studio::SequencePrecache(void* pmodel, const char* pSequenceName)
 {
 	int index = LookupSequence(pmodel, pSequenceName);
 	if (index >= 0)
@@ -188,9 +187,10 @@ void SequencePrecache(void* pmodel, const char* pSequenceName)
 	}
 }
 
+#endif /* GAME_DLL */
 
 
-void GetSequenceInfo(void* pmodel, entvars_t* pev, float* pflFrameRate, float* pflGroundSpeed)
+void studio::GetSequenceInfo(void* pmodel, entvars_t* pev, float* pflFrameRate, float* pflGroundSpeed)
 {
 	studiohdr_t* pstudiohdr;
 
@@ -223,7 +223,7 @@ void GetSequenceInfo(void* pmodel, entvars_t* pev, float* pflFrameRate, float* p
 }
 
 
-int GetSequenceFlags(void* pmodel, entvars_t* pev)
+int studio::GetSequenceFlags(void* pmodel, entvars_t* pev)
 {
 	studiohdr_t* pstudiohdr;
 
@@ -238,7 +238,7 @@ int GetSequenceFlags(void* pmodel, entvars_t* pev)
 }
 
 
-int GetAnimationEvent(void* pmodel, entvars_t* pev, MonsterEvent_t* pMonsterEvent, float flStart, float flEnd, int index)
+int studio::GetAnimationEvent(void* pmodel, entvars_t* pev, MonsterEvent_t* pMonsterEvent, float flStart, float flEnd, int index)
 {
 	studiohdr_t* pstudiohdr;
 
@@ -285,7 +285,7 @@ int GetAnimationEvent(void* pmodel, entvars_t* pev, MonsterEvent_t* pMonsterEven
 	return 0;
 }
 
-float SetController(void* pmodel, entvars_t* pev, int iController, float flValue)
+float studio::SetController(void* pmodel, entvars_t* pev, int iController, float flValue)
 {
 	studiohdr_t* pstudiohdr;
 	int i;
@@ -342,7 +342,7 @@ float SetController(void* pmodel, entvars_t* pev, int iController, float flValue
 }
 
 
-float SetBlending(void* pmodel, entvars_t* pev, int iBlender, float flValue)
+float studio::SetBlending(void* pmodel, entvars_t* pev, int iBlender, float flValue)
 {
 	studiohdr_t* pstudiohdr;
 
@@ -388,7 +388,7 @@ float SetBlending(void* pmodel, entvars_t* pev, int iBlender, float flValue)
 
 
 
-int FindTransition(void* pmodel, int iEndingAnim, int iGoalAnim, int* piDir)
+int studio::FindTransition(void* pmodel, int iEndingAnim, int iGoalAnim, int* piDir)
 {
 	studiohdr_t* pstudiohdr;
 
@@ -455,7 +455,7 @@ int FindTransition(void* pmodel, int iEndingAnim, int iGoalAnim, int* piDir)
 	return iGoalAnim;
 }
 
-void SetBodygroup(void* pmodel, entvars_t* pev, int iGroup, int iValue)
+void studio::SetBodygroup(void* pmodel, entvars_t* pev, int iGroup, int iValue)
 {
 	studiohdr_t* pstudiohdr;
 
@@ -477,7 +477,7 @@ void SetBodygroup(void* pmodel, entvars_t* pev, int iGroup, int iValue)
 }
 
 
-int GetBodygroup(void* pmodel, entvars_t* pev, int iGroup)
+int studio::GetBodygroup(void* pmodel, entvars_t* pev, int iGroup)
 {
 	studiohdr_t* pstudiohdr;
 

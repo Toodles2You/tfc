@@ -1580,7 +1580,7 @@ void CMessage::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useTy
 //=========================================================
 // FunnelEffect
 //=========================================================
-class CEnvFunnel : public CBaseDelay
+class CEnvFunnel : public CBaseEntity
 {
 public:
 	bool Spawn() override;
@@ -1634,7 +1634,7 @@ bool CEnvFunnel::Spawn()
 // overloaded pev->frags, is now a flag for whether or not a can is stuck in the dispenser.
 // overloaded pev->health, is now how many cans remain in the machine.
 //=========================================================
-class CEnvBeverage : public CBaseDelay
+class CEnvBeverage : public CBaseEntity
 {
 public:
 	bool Spawn() override;

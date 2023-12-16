@@ -29,6 +29,7 @@ set(SERVER_SRC_DIR ${HL_SRC_DIR}/server)
 set(CLIENT_SRC_DIR ${HL_SRC_DIR}/client)
 
 set(SHARED_SRC
+    ${SHARED_SRC_DIR}/entities/animating.cpp
     ${SHARED_SRC_DIR}/entities/crowbar.cpp
     ${SHARED_SRC_DIR}/entities/mp5.cpp
     ${SHARED_SRC_DIR}/entities/player_shared.cpp
@@ -40,6 +41,7 @@ set(SHARED_SRC
     ${SHARED_SRC_DIR}/movement/pm_math.cpp
     ${SHARED_SRC_DIR}/movement/pm_shared.cpp
 
+    ${SHARED_SRC_DIR}/animation.cpp
     ${SHARED_SRC_DIR}/interface.cpp
     ${SHARED_SRC_DIR}/trace.cpp
 
@@ -48,8 +50,6 @@ set(SHARED_SRC
 )
 
 set(SERVER_SRC
-    ${SERVER_SRC_DIR}/entities/animating.cpp
-    ${SERVER_SRC_DIR}/entities/animation.cpp
     ${SERVER_SRC_DIR}/entities/bmodels.cpp
     ${SERVER_SRC_DIR}/entities/buttons.cpp
     ${SERVER_SRC_DIR}/entities/cbase.cpp
@@ -292,6 +292,7 @@ set(SHARED_INCLUDE_DIRS
     ${HL_INCLUDE_DIR}/engine
     ${HL_INCLUDE_DIR}/public
     ${SHARED_SRC_DIR}
+    ${SERVER_SRC_DIR}/entities
     ${SHARED_SRC_DIR}/utils
     ${SHARED_SRC_DIR}/movement
 )
