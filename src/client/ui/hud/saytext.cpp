@@ -197,7 +197,7 @@ bool CHudSayText::MsgFunc_SayText(const char* pszName, int iSize, void* pbuf)
 	{
 		msg = "#Chat_spec";
 	}
-	else if (gHUD.m_GameMode >= kGamemodeTeamplay && teamonly)
+	else if (gHUD.m_gameMode >= kGamemodeTeamplay && teamonly)
 	{
 		if (!g_PlayerExtraInfo[client_index].dead)
 		{

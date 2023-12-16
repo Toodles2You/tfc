@@ -523,7 +523,7 @@ public:
 	int m_iKeyBits;
 	int m_iHideHUDDisplay;
 	int m_iFOV;
-	gamemode_e m_GameMode;
+	gamemode_e m_gameMode;
 	int m_iRes;
 	cvar_t* m_pCvarStealMouse;
 	cvar_t* m_pCvarDraw;
@@ -654,7 +654,6 @@ public:
 
 	void Update_SetFOV(int iFov);
 	// user messages
-	bool MsgFunc_Damage(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_GameMode(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_ResetHUD(const char* pszName, int iSize, void* pbuf);
 	void MsgFunc_InitHUD(const char* pszName, int iSize, void* pbuf);

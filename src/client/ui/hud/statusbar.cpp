@@ -71,8 +71,8 @@ bool CHudStatusBar::Draw(float fTime)
 
 	auto extra = &g_PlayerExtraInfo[m_targetIndex];
 
-	if (gHUD.m_GameMode == kGamemodeCooperative
-	 || (gHUD.m_GameMode >= kGamemodeTeamplay
+	if (gHUD.m_gameMode == kGamemodeCooperative
+	 || (gHUD.m_gameMode >= kGamemodeTeamplay
 	 && extra->teamnumber == g_iTeamNumber)
 	 || gHUD.IsSpectator())
 	{

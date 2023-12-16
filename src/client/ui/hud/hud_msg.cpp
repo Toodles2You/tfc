@@ -84,11 +84,11 @@ bool CHud::MsgFunc_GameMode(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
 	
-	m_GameMode = static_cast<gamemode_e>(READ_BYTE());
+	m_gameMode = static_cast<gamemode_e>(READ_BYTE());
 	
-	gEngfuncs.Con_DPrintf("Gamemode: ", static_cast<int>(m_GameMode));
+	gEngfuncs.Con_DPrintf("Gamemode: ");
 
-	switch (m_GameMode)
+	switch (m_gameMode)
 	{
 		default:
 			gEngfuncs.Con_DPrintf("Unknown\n");
@@ -110,30 +110,6 @@ bool CHud::MsgFunc_GameMode(const char* pszName, int iSize, void* pbuf)
 	return true;
 }
 
-
-bool CHud::MsgFunc_Damage(const char* pszName, int iSize, void* pbuf)
-{
-	int armor, blood;
-	Vector from;
-	int i;
-	float count;
-
-	BEGIN_READ(pbuf, iSize);
-	armor = READ_BYTE();
-	blood = READ_BYTE();
-
-	for (i = 0; i < 3; i++)
-		from[i] = READ_COORD();
-
-	count = (blood * 0.5) + (armor * 0.5);
-
-	if (count < 10)
-		count = 10;
-
-	// TODO: kick viewangles,  show damage visually
-
-	return true;
-}
 
 bool CHud::MsgFunc_Concuss(const char* pszName, int iSize, void* pbuf)
 {

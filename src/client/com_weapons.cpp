@@ -227,7 +227,7 @@ float util::SharedRandomFloat(unsigned int seed, float low, float high)
 
 gamemode_e util::GetGameMode()
 {
-	return gHUD.m_GameMode;
+	return gHUD.m_gameMode;
 }
 
 bool util::IsMultiplayer()

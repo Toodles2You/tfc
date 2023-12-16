@@ -182,7 +182,7 @@ void Viewport_MapBriefing()
 
 void Viewport_ChangeTeam()
 {
-	if (gHUD.m_GameMode < kGamemodeTeamplay)
+	if (gHUD.m_gameMode < kGamemodeTeamplay)
 	{
 		return;
 	}
