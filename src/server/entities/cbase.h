@@ -39,7 +39,11 @@
 
 // C functions for external declarations that call the appropriate C++ methods
 
+#ifdef HALFLIFE_SAVERESTORE
 #define EXPORT DLLEXPORT
+#else
+#define EXPORT
+#endif
 
 extern "C" DLLEXPORT int GetEntityAPI(DLL_FUNCTIONS* pFunctionTable, int interfaceVersion);
 extern "C" DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion);
