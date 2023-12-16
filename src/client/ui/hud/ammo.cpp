@@ -295,6 +295,8 @@ bool CHudAmmo::Init()
 
 	CVAR_CREATE("hud_drawhistory_time", HISTORY_DRAW_TIME, 0);
 	hud_fastswitch = CVAR_CREATE("hud_fastswitch", "0", FCVAR_ARCHIVE); // controls whether or not weapons can be selected in one keypress
+	hud_selection_fadeout = CVAR_CREATE("hud_selection_fadeout", "0.5", FCVAR_ARCHIVE);
+	hud_selection_timeout = CVAR_CREATE("hud_selection_timeout", "1.5", FCVAR_ARCHIVE);
 
 	m_iFlags |= HUD_ACTIVE; //!!!
 
@@ -312,6 +314,7 @@ void CHudAmmo::Reset()
 	gpActiveSel = NULL;
 	gHUD.m_iHideHUDDisplay = 0;
 
+	m_flSelectionTime = -1000.0F;
 	m_flHitFeedbackTime = -1000.0F;
 
 	gWR.Reset();
@@ -465,6 +468,7 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 		else
 		{
 			gpActiveSel = (WEAPON*)1;
+			gHUD.m_Ammo.m_flSelectionTime = gEngfuncs.GetClientTime();
 		}
 
 		PlaySound("common/wpn_denyselect.wav", 1);
@@ -481,6 +485,7 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 		else
 		{
 			gpActiveSel = weapon;
+			gHUD.m_Ammo.m_flSelectionTime = gEngfuncs.GetClientTime();
 
 			if (newSlot)
 			{
@@ -796,6 +801,7 @@ void CHudAmmo::UserCmd_NextWeapon()
 	if (!gpActiveSel || gpActiveSel == (WEAPON*)1)
 	{
 		gpActiveSel = m_pWeapon;
+		m_flSelectionTime = gEngfuncs.GetClientTime();
 		open = true;
 	}
 
@@ -834,6 +840,7 @@ void CHudAmmo::UserCmd_NextWeapon()
 						PlaySound("common/wpn_moveselect.wav", 1);
 					}
 					gpActiveSel = wsp;
+					m_flSelectionTime = gEngfuncs.GetClientTime();
 					return;
 				}
 			}
@@ -859,6 +866,7 @@ void CHudAmmo::UserCmd_PrevWeapon()
 	if (!gpActiveSel || gpActiveSel == (WEAPON*)1)
 	{
 		gpActiveSel = m_pWeapon;
+		m_flSelectionTime = gEngfuncs.GetClientTime();
 		open = true;
 	}
 
@@ -897,6 +905,7 @@ void CHudAmmo::UserCmd_PrevWeapon()
 						PlaySound("common/wpn_moveselect.wav", 1);
 					}
 					gpActiveSel = wsp;
+					m_flSelectionTime = gEngfuncs.GetClientTime();
 					return;
 				}
 			}
@@ -1176,6 +1185,24 @@ bool CHudAmmo::DrawWList(float flTime)
 	if (!gpActiveSel)
 		return false;
 
+	float fadeDelta = 1.0F;
+
+	if (hud_selection_timeout->value > 0.0F)
+	{
+		float selectionDelta = flTime - m_flSelectionTime;
+
+		if (selectionDelta >= hud_selection_fadeout->value + hud_selection_timeout->value)
+		{
+			UserCmd_Close();
+			return false;
+		}
+
+		fadeDelta =
+			std::max(selectionDelta - hud_selection_fadeout->value, 0.0F);
+		
+		fadeDelta = 1.0F - (fadeDelta / hud_selection_timeout->value);
+	}
+
 	int iActiveSlot;
 
 	if (gpActiveSel == (WEAPON*)1)
@@ -1221,7 +1248,7 @@ bool CHudAmmo::DrawWList(float flTime)
 			x,
 			y,
 			CHud::COLOR_PRIMARY,
-			iActiveSlot == i ? 255 : 192
+			(iActiveSlot == i ? 255 : 192) * fadeDelta
 		);
 
 		x += iWidth + 5;
@@ -1256,18 +1283,18 @@ bool CHudAmmo::DrawWList(float flTime)
 
 				if (gpActiveSel == p)
 				{
-					gHUD.DrawHudSprite(p->hActive, 0, &p->rcActive, x, y, color, 255);
-					gHUD.DrawHudSpriteIndex(m_HUD_selection, x, y, color, 255);
+					gHUD.DrawHudSprite(p->hActive, 0, &p->rcActive, x, y, color, 255 * fadeDelta);
+					gHUD.DrawHudSpriteIndex(m_HUD_selection, x, y, color, 255 * fadeDelta);
 				}
 				else
 				{
-					gHUD.DrawHudSprite(p->hInactive, 0, &p->rcInactive, x, y, color, ammo ? 192 : 128);
+					gHUD.DrawHudSprite(p->hInactive, 0, &p->rcInactive, x, y, color, (ammo ? 192 : 128) * fadeDelta);
 				}
 
 				// Draw Ammo Bar
 				if (ammo)
 				{
-					DrawAmmoBar(p, x + giABWidth / 2, y, giABWidth, giABHeight, color, 192);
+					DrawAmmoBar(p, x + giABWidth / 2, y, giABWidth, giABHeight, color, 192 * fadeDelta);
 				}
 
 				y += p->rcActive.bottom - p->rcActive.top + 5;
@@ -1293,7 +1320,7 @@ bool CHudAmmo::DrawWList(float flTime)
 					y,
 					giBucketWidth, giBucketHeight,
 					ammo ? CHud::COLOR_PRIMARY : CHud::COLOR_WARNING,
-					ammo ? 128 : 96
+					(ammo ? 128 : 96) * fadeDelta
 				);
 
 				y += giBucketHeight + 5;

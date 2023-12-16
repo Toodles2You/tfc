@@ -142,6 +142,9 @@ protected:
 	int m_HUD_bucket0;
 	int m_HUD_selection;
 	cvar_t* hud_fastswitch;
+	cvar_t* hud_selection_fadeout;
+	cvar_t* hud_selection_timeout;
+	float m_flSelectionTime;
 	float m_flHitFeedbackTime;
 };
 
