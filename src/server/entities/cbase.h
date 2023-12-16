@@ -41,13 +41,7 @@ enum
 #include "monsterevent.h"
 #include "entity_state.h"
 
-// C functions for external declarations that call the appropriate C++ methods
-
 #define EXPORT DLLEXPORT
-
-extern "C" DLLEXPORT int GetEntityAPI(DLL_FUNCTIONS* pFunctionTable, int interfaceVersion);
-extern "C" DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion);
-extern "C" DLLEXPORT int GetNewDLLFunctions(NEW_DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion);
 
 /**
 *	@brief HACKHACK -- this is a hack to keep the node graph entity from "touching" things (like triggers)
@@ -59,22 +53,27 @@ inline bool gTouchDisabled = false;
 
 inline Vector g_vecAttackDir;
 
+// C functions for external declarations that call the appropriate C++ methods
 #ifdef GAME_DLL
 
-extern int DispatchSpawn(edict_t* pent);
-extern void DispatchKeyValue(edict_t* pentKeyvalue, KeyValueData* pkvd);
-extern void DispatchTouch(edict_t* pentTouched, edict_t* pentOther);
-extern void DispatchUse(edict_t* pentUsed, edict_t* pentOther);
-extern void DispatchThink(edict_t* pent);
-extern void DispatchBlocked(edict_t* pentBlocked, edict_t* pentOther);
-extern void DispatchSave(edict_t* pent, SAVERESTOREDATA* pSaveData);
-extern int DispatchRestore(edict_t* pent, SAVERESTOREDATA* pSaveData, int globalEntity);
-extern void DispatchObjectCollsionBox(edict_t* pent);
-extern void SaveWriteFields(SAVERESTOREDATA* pSaveData, const char* pname, void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCount);
-extern void SaveReadFields(SAVERESTOREDATA* pSaveData, const char* pname, void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCount);
-extern void SaveGlobalState(SAVERESTOREDATA* pSaveData);
-extern void RestoreGlobalState(SAVERESTOREDATA* pSaveData);
-extern void ResetGlobalState();
+extern "C" DLLEXPORT int GetEntityAPI(DLL_FUNCTIONS* pFunctionTable, int interfaceVersion);
+extern "C" DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion);
+extern "C" DLLEXPORT int GetNewDLLFunctions(NEW_DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion);
+
+int DispatchSpawn(edict_t* pent);
+void DispatchKeyValue(edict_t* pentKeyvalue, KeyValueData* pkvd);
+void DispatchTouch(edict_t* pentTouched, edict_t* pentOther);
+void DispatchUse(edict_t* pentUsed, edict_t* pentOther);
+void DispatchThink(edict_t* pent);
+void DispatchBlocked(edict_t* pentBlocked, edict_t* pentOther);
+void DispatchSave(edict_t* pent, SAVERESTOREDATA* pSaveData);
+int DispatchRestore(edict_t* pent, SAVERESTOREDATA* pSaveData, int globalEntity);
+void DispatchObjectCollsionBox(edict_t* pent);
+void SaveWriteFields(SAVERESTOREDATA* pSaveData, const char* pname, void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCount);
+void SaveReadFields(SAVERESTOREDATA* pSaveData, const char* pname, void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCount);
+void SaveGlobalState(SAVERESTOREDATA* pSaveData);
+void RestoreGlobalState(SAVERESTOREDATA* pSaveData);
+void ResetGlobalState();
 
 #endif /* GAME_DLL */
 
@@ -341,6 +340,39 @@ inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->e
 #define SetUse(a) m_pfnUse = static_cast<void (CBaseEntity::*)(CBaseEntity * pActivator, CBaseEntity * pCaller, USE_TYPE useType, float value)>(a)
 #define SetBlocked(a) m_pfnBlocked = static_cast<void (CBaseEntity::*)(CBaseEntity*)>(a)
 
+class CBaseAnimating : public CBaseEntity
+{
+public:
+	DECLARE_SAVERESTORE()
+
+	// Basic Monster Animation functions
+	float StudioFrameAdvance(float flInterval = 0.0); // accumulate animation frame time from last time called until now
+	int GetSequenceFlags();
+	int LookupActivity(int activity);
+	int LookupActivityHeaviest(int activity);
+	int LookupSequence(const char* label);
+	void ResetSequenceInfo();
+	void DispatchAnimEvents(float flFutureInterval = 0.1); // Handle events that have happend since last time called up until X seconds into the future
+	virtual void HandleAnimEvent(MonsterEvent_t* pEvent) {}
+	float SetBoneController(int iController, float flValue);
+	void InitBoneControllers();
+	float SetBlending(int iBlender, float flValue);
+	void GetBonePosition(int iBone, Vector& origin, Vector& angles);
+	int FindTransition(int iEndingSequence, int iGoalSequence, int* piDir);
+	void GetAttachment(int iAttachment, Vector& origin, Vector& angles);
+	void SetBodygroup(int iGroup, int iValue);
+	int GetBodygroup(int iGroup);
+	bool ExtractBbox(int sequence, float* mins, float* maxs);
+	void SetSequenceBox();
+
+	// animation needs
+	float m_flFrameRate;	  // computed FPS for current sequence
+	float m_flGroundSpeed;	  // computed linear movement rate for current sequence
+	float m_flLastEventCheck; // last time the event list was checked
+	bool m_fSequenceFinished; // flag set when StudioAdvanceFrame moves across a frame boundry
+	bool m_fSequenceLoops;	  // true if the sequence loops
+};
+
 #ifdef GAME_DLL
 
 class CPointEntity : public CBaseEntity
@@ -396,45 +428,6 @@ public:
 	int m_iTotal;
 	string_t m_globalstate;
 };
-
-#endif /* GAME_DLL */
-
-
-class CBaseAnimating : public CBaseEntity
-{
-public:
-	DECLARE_SAVERESTORE()
-
-	// Basic Monster Animation functions
-	float StudioFrameAdvance(float flInterval = 0.0); // accumulate animation frame time from last time called until now
-	int GetSequenceFlags();
-	int LookupActivity(int activity);
-	int LookupActivityHeaviest(int activity);
-	int LookupSequence(const char* label);
-	void ResetSequenceInfo();
-	void DispatchAnimEvents(float flFutureInterval = 0.1); // Handle events that have happend since last time called up until X seconds into the future
-	virtual void HandleAnimEvent(MonsterEvent_t* pEvent) {}
-	float SetBoneController(int iController, float flValue);
-	void InitBoneControllers();
-	float SetBlending(int iBlender, float flValue);
-	void GetBonePosition(int iBone, Vector& origin, Vector& angles);
-	int FindTransition(int iEndingSequence, int iGoalSequence, int* piDir);
-	void GetAttachment(int iAttachment, Vector& origin, Vector& angles);
-	void SetBodygroup(int iGroup, int iValue);
-	int GetBodygroup(int iGroup);
-	bool ExtractBbox(int sequence, float* mins, float* maxs);
-	void SetSequenceBox();
-
-	// animation needs
-	float m_flFrameRate;	  // computed FPS for current sequence
-	float m_flGroundSpeed;	  // computed linear movement rate for current sequence
-	float m_flLastEventCheck; // last time the event list was checked
-	bool m_fSequenceFinished; // flag set when StudioAdvanceFrame moves across a frame boundry
-	bool m_fSequenceLoops;	  // true if the sequence loops
-};
-
-
-#ifdef GAME_DLL
 
 //
 // generic Toggle entity.
@@ -563,8 +556,6 @@ public:
 	int m_sounds;
 };
 
-#endif /* GAME_DLL */
-
 //
 // Converts a entvars_t * to a class pointer
 // It will allocate the class and entity if necessary
@@ -593,6 +584,8 @@ T* GetClassPtr(T* a)
 	}
 	return a;
 }
+
+#endif /* GAME_DLL */
 
 
 // this moved here from world.cpp, to allow classes to be derived from it
