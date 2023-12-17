@@ -12,19 +12,14 @@
 *   without written permission from Valve LLC.
 *
 ****/
-/*
-
-===== monsters.cpp ========================================================
-
-  Monster-related utility code
-
-*/
 
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
 #include "animation.h"
 #include "saverestore.h"
+
+#ifdef GAME_DLL
 
 #ifdef HALFLIFE_SAVERESTORE
 IMPLEMENT_SAVERESTORE(CBaseAnimating)
@@ -34,6 +29,8 @@ IMPLEMENT_SAVERESTORE(CBaseAnimating)
 	DEFINE_FIELD(CBaseAnimating, m_fSequenceFinished, FIELD_BOOLEAN),
 	DEFINE_FIELD(CBaseAnimating, m_fSequenceLoops, FIELD_BOOLEAN),
 END_SAVERESTORE(CBaseAnimating, CBaseDelay)
+#endif
+
 #endif
 
 
@@ -77,7 +74,7 @@ int CBaseAnimating::LookupActivity(int activity)
 {
 	void* pmodel = GET_MODEL_PTR(ENT(pev));
 
-	return ::LookupActivity(pmodel, pev, activity);
+	return studio::LookupActivity(pmodel, pev, activity);
 }
 
 //=========================================================
@@ -90,7 +87,7 @@ int CBaseAnimating::LookupActivityHeaviest(int activity)
 {
 	void* pmodel = GET_MODEL_PTR(ENT(pev));
 
-	return ::LookupActivityHeaviest(pmodel, pev, activity);
+	return studio::LookupActivityHeaviest(pmodel, pev, activity);
 }
 
 //=========================================================
@@ -99,7 +96,7 @@ int CBaseAnimating::LookupSequence(const char* label)
 {
 	void* pmodel = GET_MODEL_PTR(ENT(pev));
 
-	return ::LookupSequence(pmodel, label);
+	return studio::LookupSequence(pmodel, label);
 }
 
 
@@ -109,7 +106,7 @@ void CBaseAnimating::ResetSequenceInfo()
 {
 	void* pmodel = GET_MODEL_PTR(ENT(pev));
 
-	GetSequenceInfo(pmodel, pev, &m_flFrameRate, &m_flGroundSpeed);
+	studio::GetSequenceInfo(pmodel, pev, &m_flFrameRate, &m_flGroundSpeed);
 	m_fSequenceLoops = ((GetSequenceFlags() & STUDIO_LOOPING) != 0);
 	pev->animtime = gpGlobals->time;
 	pev->framerate = 1.0;
@@ -125,7 +122,7 @@ int CBaseAnimating::GetSequenceFlags()
 {
 	void* pmodel = GET_MODEL_PTR(ENT(pev));
 
-	return ::GetSequenceFlags(pmodel, pev);
+	return studio::GetSequenceFlags(pmodel, pev);
 }
 
 //=========================================================
@@ -157,7 +154,7 @@ void CBaseAnimating::DispatchAnimEvents(float flInterval)
 
 	int index = 0;
 
-	while ((index = GetAnimationEvent(pmodel, pev, &event, flStart, flEnd, index)) != 0)
+	while ((index = studio::GetAnimationEvent(pmodel, pev, &event, flStart, flEnd, index)) != 0)
 	{
 		HandleAnimEvent(&event);
 	}
@@ -170,7 +167,7 @@ float CBaseAnimating::SetBoneController(int iController, float flValue)
 {
 	void* pmodel = GET_MODEL_PTR(ENT(pev));
 
-	return SetController(pmodel, pev, iController, flValue);
+	return studio::SetController(pmodel, pev, iController, flValue);
 }
 
 //=========================================================
@@ -179,10 +176,10 @@ void CBaseAnimating::InitBoneControllers()
 {
 	void* pmodel = GET_MODEL_PTR(ENT(pev));
 
-	SetController(pmodel, pev, 0, 0.0);
-	SetController(pmodel, pev, 1, 0.0);
-	SetController(pmodel, pev, 2, 0.0);
-	SetController(pmodel, pev, 3, 0.0);
+	studio::SetController(pmodel, pev, 0, 0.0);
+	studio::SetController(pmodel, pev, 1, 0.0);
+	studio::SetController(pmodel, pev, 2, 0.0);
+	studio::SetController(pmodel, pev, 3, 0.0);
 }
 
 //=========================================================
@@ -191,7 +188,7 @@ float CBaseAnimating::SetBlending(int iBlender, float flValue)
 {
 	void* pmodel = GET_MODEL_PTR(ENT(pev));
 
-	return ::SetBlending(pmodel, pev, iBlender, flValue);
+	return studio::SetBlending(pmodel, pev, iBlender, flValue);
 }
 
 //=========================================================
@@ -217,36 +214,30 @@ int CBaseAnimating::FindTransition(int iEndingSequence, int iGoalSequence, int* 
 	if (piDir == NULL)
 	{
 		int iDir;
-		int sequence = ::FindTransition(pmodel, iEndingSequence, iGoalSequence, &iDir);
+		int sequence = studio::FindTransition(pmodel, iEndingSequence, iGoalSequence, &iDir);
 		if (iDir != 1)
 			return -1;
 		else
 			return sequence;
 	}
 
-	return ::FindTransition(pmodel, iEndingSequence, iGoalSequence, piDir);
-}
-
-//=========================================================
-//=========================================================
-void CBaseAnimating::GetAutomovement(Vector& origin, Vector& angles, float flInterval)
-{
+	return studio::FindTransition(pmodel, iEndingSequence, iGoalSequence, piDir);
 }
 
 void CBaseAnimating::SetBodygroup(int iGroup, int iValue)
 {
-	::SetBodygroup(GET_MODEL_PTR(ENT(pev)), pev, iGroup, iValue);
+	studio::SetBodygroup(GET_MODEL_PTR(ENT(pev)), pev, iGroup, iValue);
 }
 
 int CBaseAnimating::GetBodygroup(int iGroup)
 {
-	return ::GetBodygroup(GET_MODEL_PTR(ENT(pev)), pev, iGroup);
+	return studio::GetBodygroup(GET_MODEL_PTR(ENT(pev)), pev, iGroup);
 }
 
 
 bool CBaseAnimating::ExtractBbox(int sequence, float* mins, float* maxs)
 {
-	return ::ExtractBbox(GET_MODEL_PTR(ENT(pev)), sequence, mins, maxs);
+	return studio::ExtractBbox(GET_MODEL_PTR(ENT(pev)), sequence, mins, maxs);
 }
 
 //=========================================================

@@ -35,7 +35,7 @@ typedef enum
 	matLastMaterial
 } Materials;
 
-class CBreakable : public CBaseDelay
+class CBreakable : public CBaseEntity
 {
 public:
 	DECLARE_SAVERESTORE()
@@ -50,8 +50,6 @@ public:
 
 	// breakables use an overridden takedamage
 	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
-	// To spark when hit
-	void TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) override;
 
 	bool IsBreakable();
 

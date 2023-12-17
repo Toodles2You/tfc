@@ -31,14 +31,7 @@
 #define PLAYER_FATAL_FALL_SPEED 1024															  // approx 60 feet
 #define PLAYER_MAX_SAFE_FALL_SPEED 580															  // approx 20 feet
 #define DAMAGE_FOR_FALL_SPEED (float)100 / (PLAYER_FATAL_FALL_SPEED - PLAYER_MAX_SAFE_FALL_SPEED) // damage per unit per second.
-#define PLAYER_MIN_BOUNCE_SPEED 200
 #define PLAYER_FALL_PUNCH_THRESHHOLD (float)350 // won't punch player's screen/make scrape noise unless player falling at least this fast.
-
-//
-// Player PHYSICS FLAGS bits
-//
-#define PFLAG_ONTRAIN (1 << 1)
-#define PFLAG_USING (1 << 4)	// Using a continuous entity
 
 typedef enum
 {
@@ -87,7 +80,6 @@ public:
 
 	float m_flFallVelocity;
 
-	unsigned int m_afPhysicsFlags; // physics flags - set when 'normal' physics should be revisited or overriden
 	float m_fNextSuicideTime;	   // the time after which the player can next use the suicide command
 
 
@@ -136,7 +128,7 @@ public:
 	virtual void PostThink();
 	inline Vector GetGunPosition() { return pev->origin + pev->view_ofs; }
 	bool TakeHealth(float flHealth, int bitsDamageType) override;
-	void TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) override;
+	void TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, int hitgroup, int bitsDamageType) override;
 	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
 	void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType) override;
 	Vector BodyTarget() override { return Center() + pev->view_ofs * 0.8; } // position to shoot at
@@ -232,8 +224,6 @@ public:
 	int m_iAutoWepSwitch;
 	bool m_bGrenadeToggle;
 
-	bool m_bRestored;
-
 	//True if the player is currently spawning.
 	bool m_bIsSpawning = false;
 
@@ -255,7 +245,8 @@ public:
 	virtual void UpdateHudData();
 #endif
 
-	void SetEntityState(entity_state_t& state) override;
+	virtual void GetEntityState(entity_state_t& state) override;
+	virtual void SetEntityState(const entity_state_t& state) override;
 
 	void InstallGameMovement(CGameMovement* gameMovement)
 	{

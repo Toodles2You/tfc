@@ -5,7 +5,6 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "const.h"
-#include "entity_types.h"
 #include "studio_event.h" // def. of mstudioevent_t
 #include "r_efx.h"
 #include "event_api.h"
@@ -27,33 +26,6 @@ extern int g_iObserverTarget;
 extern int g_iObserverTarget2;
 
 /*
-========================
-HUD_AddEntity
-	Return 0 to filter entity from visible list for rendering
-========================
-*/
-int HUD_AddEntity(int type, struct cl_entity_s* ent, const char* modelname)
-{
-	switch (type)
-	{
-	case ET_NORMAL:
-		break;
-	case ET_PLAYER:
-	case ET_BEAM:
-	case ET_TEMPENTITY:
-	case ET_FRAGMENTED:
-	default:
-		break;
-	}
-	// each frame every entity passes this function, so the overview hooks it to filter the overview entities
-	// in spectator mode:
-	// each frame every entity passes this function, so the overview hooks
-	// it to filter the overview entities
-
-	return 1;
-}
-
-/*
 =========================
 HUD_TxferLocalOverrides
 
@@ -72,81 +44,6 @@ void HUD_TxferLocalOverrides(struct entity_state_s* state, const struct clientda
 	state->iuser4 = client->iuser4;
 
 	state->health = static_cast<int>(client->health);
-}
-
-/*
-=========================
-HUD_ProcessPlayerState
-
-We have received entity_state_t for this player over the network.  We need to copy appropriate fields to the
-playerstate structure
-=========================
-*/
-void HUD_ProcessPlayerState(struct entity_state_s* dst, const struct entity_state_s* src)
-{
-	// Copy in network data
-	VectorCopy(src->origin, dst->origin);
-	VectorCopy(src->angles, dst->angles);
-
-	VectorCopy(src->velocity, dst->velocity);
-
-	dst->frame = src->frame;
-	dst->modelindex = src->modelindex;
-	dst->skin = src->skin;
-	dst->effects = src->effects;
-	dst->weaponmodel = src->weaponmodel;
-	dst->movetype = src->movetype;
-	dst->sequence = src->sequence;
-	dst->animtime = src->animtime;
-
-	dst->solid = src->solid;
-
-	dst->rendermode = src->rendermode;
-	dst->renderamt = src->renderamt;
-	dst->rendercolor.r = src->rendercolor.r;
-	dst->rendercolor.g = src->rendercolor.g;
-	dst->rendercolor.b = src->rendercolor.b;
-	dst->renderfx = src->renderfx;
-
-	dst->framerate = src->framerate;
-	dst->body = src->body;
-
-	memcpy(&dst->controller[0], &src->controller[0], 4 * sizeof(byte));
-	memcpy(&dst->blending[0], &src->blending[0], 2 * sizeof(byte));
-
-	VectorCopy(src->basevelocity, dst->basevelocity);
-
-	dst->friction = src->friction;
-	dst->gravity = src->gravity;
-	dst->gaitsequence = src->gaitsequence;
-	dst->spectator = src->spectator;
-	dst->usehull = src->usehull;
-	dst->playerclass = src->playerclass;
-	dst->team = src->team;
-	dst->colormap = src->colormap;
-	dst->health = src->health;
-
-	g_PlayerExtraInfo[dst->number].health = dst->health;
-	g_PlayerExtraInfo[dst->number].dead = dst->health <= 0;
-
-	// Save off some data so other areas of the Client DLL can get to it
-	cl_entity_t* player = gEngfuncs.GetLocalPlayer(); // Get the local player's index
-	if (dst->number == player->index)
-	{
-		g_iPlayerClass = dst->playerclass;
-		g_iTeamNumber = dst->team;
-
-		if (g_iObserverMode != src->iuser1
-		 || g_iObserverTarget != src->iuser2
-		 || g_iObserverTarget2 != src->iuser3)
-		{
-			V_ResetChaseCam();
-		}
-
-		g_iObserverMode = src->iuser1;
-		g_iObserverTarget = src->iuser2;
-		g_iObserverTarget2 = src->iuser3;
-	}
 }
 
 /*

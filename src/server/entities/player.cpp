@@ -65,8 +65,6 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 	DEFINE_FIELD(CBasePlayer, m_afButtonPressed, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayer, m_afButtonReleased, FIELD_INTEGER),
 
-	DEFINE_FIELD(CBasePlayer, m_afPhysicsFlags, FIELD_INTEGER),
-
 	DEFINE_ARRAY(CBasePlayer, m_rgpPlayerWeapons, FIELD_CLASSPTR, WEAPON_LAST),
 	DEFINE_FIELD(CBasePlayer, m_pActiveWeapon, FIELD_CLASSPTR),
 	DEFINE_FIELD(CBasePlayer, m_WeaponBits, FIELD_INT64),
@@ -104,7 +102,7 @@ void CBasePlayer::Pain()
 }
 
 
-int TrainSpeed(int iSpeed, int iMax)
+static int TrainSpeed(int iSpeed, int iMax)
 {
 	float fSpeed, fMax;
 	int iRet = 0;
@@ -164,18 +162,18 @@ bool CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
 //=========================================================
 // TraceAttack
 //=========================================================
-void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
+void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, int hitgroup, int bitsDamageType)
 {
 	if (pev->takedamage == DAMAGE_NO)
 	{
 		return;
 	}
 
-	m_LastHitGroup = ptr->iHitgroup;
+	m_LastHitGroup = hitgroup;
 
 	if ((bitsDamageType & DMG_AIMED) != 0)
 	{
-		switch (ptr->iHitgroup)
+		switch (hitgroup)
 		{
 		case HITGROUP_GENERIC:
 			break;
@@ -1011,9 +1009,9 @@ void CBasePlayer::PlayerUse()
 		}
 		else
 		{
-			if ((m_afPhysicsFlags & PFLAG_ONTRAIN) != 0)
+			if ((pev->flags & FL_ONTRAIN) != 0)
 			{
-				m_afPhysicsFlags &= ~PFLAG_ONTRAIN;
+				pev->flags &= ~FL_ONTRAIN;
 				m_iTrain = TRAIN_NEW | TRAIN_OFF;
 				return;
 			}
@@ -1023,7 +1021,7 @@ void CBasePlayer::PlayerUse()
 
 				if (pTrain && (pev->button & IN_JUMP) == 0 && (pev->flags & FL_ONGROUND) != 0 && (pTrain->ObjectCaps() & FCAP_DIRECTIONAL_USE) != 0 && pTrain->OnControls(pev))
 				{
-					m_afPhysicsFlags |= PFLAG_ONTRAIN;
+					pev->flags |= FL_ONTRAIN;
 					m_iTrain = TrainSpeed(pTrain->pev->speed, pTrain->pev->impulse);
 					m_iTrain |= TRAIN_NEW;
 					EmitSound("plats/train_use1.wav", CHAN_VOICE);
@@ -1079,9 +1077,6 @@ void CBasePlayer::PlayerUse()
 		if (((pev->button & IN_USE) != 0 && (caps & FCAP_CONTINUOUS_USE) != 0) ||
 			((m_afButtonPressed & IN_USE) != 0 && (caps & FCAP_IMPULSE_USE) != 0))
 		{
-			if ((caps & FCAP_CONTINUOUS_USE) != 0)
-				m_afPhysicsFlags |= PFLAG_USING;
-
 			pObject->Use(this, this, USE_SET, 1);
 		}
 	}
@@ -1179,15 +1174,8 @@ void CBasePlayer::PreThink()
 		return;
 	}
 
-	// So the correct flags get sent to client asap.
-	//
-	if ((m_afPhysicsFlags & PFLAG_ONTRAIN) != 0)
-		pev->flags |= FL_ONTRAIN;
-	else
-		pev->flags &= ~FL_ONTRAIN;
-
 	// Train speed control
-	if ((m_afPhysicsFlags & PFLAG_ONTRAIN) != 0)
+	if ((pev->flags & FL_ONTRAIN) != 0)
 	{
 		CBaseEntity* pTrain = CBaseEntity::Instance(pev->groundentity);
 		float vel;
@@ -1206,7 +1194,7 @@ void CBasePlayer::PreThink()
 			if (!pTrain || (pTrain->ObjectCaps() & FCAP_DIRECTIONAL_USE) == 0 || !pTrain->OnControls(pev))
 			{
 				//ALERT( at_error, "In train mode with no train!\n" );
-				m_afPhysicsFlags &= ~PFLAG_ONTRAIN;
+				pev->flags &= ~FL_ONTRAIN;
 				m_iTrain = TRAIN_NEW | TRAIN_OFF;
 				return;
 			}
@@ -1214,7 +1202,7 @@ void CBasePlayer::PreThink()
 		else if ((pev->flags & FL_ONGROUND) == 0 || (pTrain->pev->spawnflags & SF_TRACKTRAIN_NOCONTROL) != 0 || (pev->button & (IN_MOVELEFT | IN_MOVERIGHT)) != 0)
 		{
 			// Turn off the train if you jump, strafe, or the train controls go dead
-			m_afPhysicsFlags &= ~PFLAG_ONTRAIN;
+			pev->flags &= ~FL_ONTRAIN;
 			m_iTrain = TRAIN_NEW | TRAIN_OFF;
 			return;
 		}
@@ -1267,6 +1255,7 @@ bool CBasePlayer::Spawn()
 	pev->max_health = pev->health;
 	pev->flags &= FL_PROXY | FL_FAKECLIENT; // keep proxy and fakeclient flags set by engine
 	pev->flags |= FL_CLIENT;
+	pev->flags &= ~FL_ONTRAIN;
 	pev->air_finished = gpGlobals->time + 12;
 	pev->dmg = 2; // initial water damage
 	pev->effects = EF_NOINTERP;
@@ -1277,7 +1266,6 @@ bool CBasePlayer::Spawn()
 	pev->gravity = 1.0;
 	m_bitsHUDDamage = -1;
 	m_bitsDamageType = 0;
-	m_afPhysicsFlags = 0;
 	pev->iuser1 = OBS_NONE;
 	pev->iuser2 = pev->iuser3 = 0;
 	m_hLastAttacker[0] = m_hLastAttacker[1] = nullptr;
@@ -1395,8 +1383,6 @@ bool CBasePlayer::Restore(CRestore& restore)
 	{
 		SetSize(mins, maxs);
 	}
-
-	m_bRestored = true;
 
 	return status;
 }
@@ -1901,9 +1887,6 @@ void CBasePlayer::UpdateClientData()
 		WriteShort((short)m_SndRoomtype); // sequence number
 		MessageEnd();
 	}
-
-	//Handled anything that needs resetting
-	m_bRestored = false;
 }
 
 
@@ -2063,9 +2046,9 @@ void CBasePlayer::SetPrefsFromUserinfo(char* infobuffer)
 	}
 }
 
-void CBasePlayer::SetEntityState(entity_state_t& state)
+void CBasePlayer::GetEntityState(entity_state_t& state)
 {
-	CBaseEntity::SetEntityState(state);
+	CBaseEntity::GetEntityState(state);
 
 	state.team = pev->team;
 	state.playerclass = pev->playerclass;

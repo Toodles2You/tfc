@@ -103,7 +103,7 @@ bool CFrictionModifier::KeyValue(KeyValueData* pkvd)
 
 #define SF_AUTO_FIREONCE 0x0001
 
-class CAutoTrigger : public CBaseDelay
+class CAutoTrigger : public CBaseEntity
 {
 public:
 	DECLARE_SAVERESTORE()
@@ -113,7 +113,7 @@ public:
 	void Precache() override;
 	void Think() override;
 
-	int ObjectCaps() override { return CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 
 private:
 	int m_globalstate;
@@ -153,7 +153,7 @@ bool CAutoTrigger::KeyValue(KeyValueData* pkvd)
 		return true;
 	}
 
-	return CBaseDelay::KeyValue(pkvd);
+	return CBaseEntity::KeyValue(pkvd);
 }
 
 
@@ -184,7 +184,7 @@ void CAutoTrigger::Think()
 
 #define SF_RELAY_FIREONCE 0x0001
 
-class CTriggerRelay : public CBaseDelay
+class CTriggerRelay : public CBaseEntity
 {
 public:
 	DECLARE_SAVERESTORE()
@@ -193,7 +193,7 @@ public:
 	bool Spawn() override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 
-	int ObjectCaps() override { return CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 
 private:
 	USE_TYPE triggerType;
@@ -226,7 +226,7 @@ bool CTriggerRelay::KeyValue(KeyValueData* pkvd)
 		return true;
 	}
 
-	return CBaseDelay::KeyValue(pkvd);
+	return CBaseEntity::KeyValue(pkvd);
 }
 
 
@@ -1187,13 +1187,13 @@ bool CTriggerVolume::Spawn()
 
 
 // Fires a target after level transition and then dies
-class CFireAndDie : public CBaseDelay
+class CFireAndDie : public CBaseEntity
 {
 public:
 	bool Spawn() override;
 	void Precache() override;
 	void Think() override;
-	int ObjectCaps() override { return CBaseDelay::ObjectCaps() | FCAP_FORCE_TRANSITION; } // Always go across transitions
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() | FCAP_FORCE_TRANSITION; } // Always go across transitions
 };
 LINK_ENTITY_TO_CLASS(fireanddie, CFireAndDie);
 
@@ -1983,7 +1983,7 @@ void CTriggerGravity::GravityTouch(CBaseEntity* pOther)
 
 
 // this is a really bad idea.
-class CTriggerChangeTarget : public CBaseDelay
+class CTriggerChangeTarget : public CBaseEntity
 {
 public:
 	DECLARE_SAVERESTORE()
@@ -1992,7 +1992,7 @@ public:
 	bool Spawn() override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 
-	int ObjectCaps() override { return CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 
 private:
 	int m_iszNewTarget;
@@ -2013,7 +2013,7 @@ bool CTriggerChangeTarget::KeyValue(KeyValueData* pkvd)
 		return true;
 	}
 
-	return CBaseDelay::KeyValue(pkvd);
+	return CBaseEntity::KeyValue(pkvd);
 }
 
 bool CTriggerChangeTarget::Spawn()

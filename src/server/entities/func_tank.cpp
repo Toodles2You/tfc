@@ -744,7 +744,7 @@ void CFuncTankGun::Fire(const Vector& barrelEnd, const Vector& forward, CBaseEnt
 						attacker,
 						m_iBulletDamage,
 						forward,
-						&tr,
+						tr.iHitgroup,
 						DMG_BULLET
 					);
 				}

@@ -807,6 +807,9 @@ TYPEDESCRIPTION CBaseEntity::m_SaveData[] =
 	DEFINE_FIELD(CBaseEntity, m_pfnTouch, FIELD_FUNCTION),
 	DEFINE_FIELD(CBaseEntity, m_pfnUse, FIELD_FUNCTION),
 	DEFINE_FIELD(CBaseEntity, m_pfnBlocked, FIELD_FUNCTION),
+
+	DEFINE_FIELD(CBaseDelay, m_flDelay, FIELD_FLOAT),
+	DEFINE_FIELD(CBaseDelay, m_iszKillTarget, FIELD_STRING),
 };
 
 
@@ -977,7 +980,7 @@ CBaseEntity* CBaseEntity::Create(const char* szName, const Vector& vecOrigin, co
 }
 
 
-void CBaseEntity::SetEntityState(entity_state_t& state)
+void CBaseEntity::GetEntityState(entity_state_t& state)
 {
 	state.entityType = ENTITY_NORMAL;
 
@@ -1073,3 +1076,4 @@ void CBaseEntity::SetEntityState(entity_state_t& state)
 	// Class is overridden for non-players to signify a breakable glass object ( sort of a class? )
 	state.playerclass = pev->playerclass;
 }
+

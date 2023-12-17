@@ -141,6 +141,13 @@ enum
 #define SLOWFREEZE_DURATION 2
 #define SLOWFREEZE_DAMAGE 1.0
 
+enum
+{
+	GIB_NORMAL,
+	GIB_NEVER,
+	GIB_ALWAYS,
+};
+
 constexpr Vector VEC_HULL_MIN(-16, -16, -36);
 constexpr Vector VEC_HULL_MAX(16, 16, 36);
 constexpr Vector VEC_HUMAN_HULL_MIN(-16, -16, 0);

@@ -27,7 +27,7 @@ This file contains "stubs" of class member implementations so that we can predic
 #include "player.h"
 #include "weapons.h"
 
-// CBaseEntity Stubs
+bool CBaseEntity::KeyValue(KeyValueData* pkvd) { return false; }
 bool CBaseEntity::TakeHealth(float flHealth, int bitsDamageType) { return true; }
 bool CBaseEntity::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) { return true; }
 CBaseEntity* CBaseEntity::GetNextTarget() { return NULL; }
@@ -47,71 +47,21 @@ bool CBaseEntity::IsDormant() { return false; }
 bool CBaseEntity::ShouldToggle(USE_TYPE useType, bool currentState) { return false; }
 CBaseEntity* CBaseEntity::Create(const char* szName, const Vector& vecOrigin, const Vector& vecAngles, edict_t* pentOwner) { return NULL; }
 void CBaseEntity::Remove() {}
-
-// CBaseDelay Stubs
-bool CBaseDelay::KeyValue(struct KeyValueData_s*) { return false; }
-#ifdef HALFLIFE_SAVERESTORE
-bool CBaseDelay::Restore(class CRestore&) { return true; }
-bool CBaseDelay::Save(class CSave&) { return true; }
-#endif
-
-// CBaseAnimating Stubs
-#ifdef HALFLIFE_SAVERESTORE
-bool CBaseAnimating::Restore(class CRestore&) { return true; }
-bool CBaseAnimating::Save(class CSave&) { return true; }
-#endif
-
-// util Stubs
-void util::PrecacheOther(const char* szClassname) {}
-void util::MakeVectors(const Vector& vecAngles) {}
-void util::LogPrintf(const char*, ...) {}
-void util::ClientPrintAll(int, char const*, char const*, char const*, char const*, char const*) {}
-void util::ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4) {}
-
-// CBaseToggle Stubs
-#ifdef HALFLIFE_SAVERESTORE
-bool CBaseToggle::Restore(class CRestore&) { return true; }
-bool CBaseToggle::Save(class CSave&) { return true; }
-#endif
-bool CBaseToggle::KeyValue(struct KeyValueData_s*) { return false; }
-
-CBaseEntity* util::FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius) { return 0; }
-
-Vector util::VecToAngles(const Vector& vec) { return 0; }
-CSprite* CSprite::SpriteCreate(const char* pSpriteName, const Vector& origin, bool animate) { return 0; }
-void CBeam::PointEntInit(const Vector& start, int endIndex) {}
-CBeam* CBeam::BeamCreate(const char* pSpriteName, int width) { return NULL; }
-void CSprite::Expand(float scaleSpeed, float fadeSpeed) {}
-
-
-float CBaseAnimating::StudioFrameAdvance(float flInterval) { return 0.0; }
 bool CBaseEntity::FInViewCone(CBaseEntity* pEntity) { return false; }
 bool CBaseEntity::FInViewCone(const Vector& vecOrigin) { return false; }
 bool CBaseEntity::FVisible(CBaseEntity* pEntity) { return false; }
 bool CBaseEntity::FVisible(const Vector& vecOrigin) { return false; }
 void CBaseEntity::Look(int iDistance) {}
 CBaseEntity* CBaseEntity::BestVisibleEnemy() { return nullptr; }
-int CBaseAnimating::LookupActivity(int activity) { return 0; }
-int CBaseAnimating::LookupActivityHeaviest(int activity) { return 0; }
-int CBaseAnimating::LookupSequence(const char* label) { return 0; }
-void CBaseAnimating::ResetSequenceInfo() {}
-int CBaseAnimating::GetSequenceFlags() { return 0; }
-void CBaseAnimating::DispatchAnimEvents(float flInterval) {}
-float CBaseAnimating::SetBoneController(int iController, float flValue) { return 0.0; }
-void CBaseAnimating::InitBoneControllers() {}
-float CBaseAnimating::SetBlending(int iBlender, float flValue) { return 0; }
-void CBaseAnimating::GetBonePosition(int iBone, Vector& origin, Vector& angles) {}
-void CBaseAnimating::GetAttachment(int iAttachment, Vector& origin, Vector& angles) {}
-int CBaseAnimating::FindTransition(int iEndingSequence, int iGoalSequence, int* piDir) { return -1; }
-void CBaseAnimating::GetAutomovement(Vector& origin, Vector& angles, float flInterval) {}
-void CBaseAnimating::SetBodygroup(int iGroup, int iValue) {}
-int CBaseAnimating::GetBodygroup(int iGroup) { return 0; }
-void CBaseEntity::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) {}
+void CBaseEntity::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, int hitgroup, int bitsDamageType) {}
+void CBaseEntity::EmitSound(const char* sample, int channel, float volume, float attenuation, int pitch, int flags) {}
+void CBaseEntity::StopSound(const char* sample, int channel) {}
+void CBaseEntity::GetEntityState(entity_state_t& state) {}
+void CBaseEntity::DelayThink() {}
 
-int TrainSpeed(int iSpeed, int iMax) { return 0; }
 void CBasePlayer::DeathSound() {}
 bool CBasePlayer::TakeHealth(float flHealth, int bitsDamageType) { return false; }
-void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) {}
+void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, int hitgroup, int bitsDamageType) {}
 bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) { return false; }
 void CBasePlayer::PackDeadPlayerWeapons() {}
 void CBasePlayer::RemoveAllWeapons() {}
@@ -139,6 +89,7 @@ const char* CBasePlayer::TeamID() { return ""; }
 int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax) { return 0; }
 void CBasePlayer::AddPoints(float score, bool bAllowNegativeScore) {}
 void CBasePlayer::AddPointsToTeam(float score, bool bAllowNegativeScore) {}
+void CBasePlayer::GetEntityState(entity_state_t& state) {}
 
 #ifdef HALFLIFE_SAVERESTORE
 bool CBasePlayerWeapon::Restore(class CRestore&) { return true; }
@@ -153,9 +104,3 @@ CBaseEntity* CBasePlayerWeapon::Respawn() { return nullptr; }
 void CBasePlayerWeapon::DefaultTouch(CBaseEntity* pOther) {}
 bool CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer) { return false; }
 void CBasePlayerWeapon::RemoveFromPlayer() {}
-
-void CBaseEntity::EmitSound(const char* sample, int channel, float volume, float attenuation, int pitch, int flags) {}
-void CBaseEntity::StopSound(const char* sample, int channel) {}
-
-void CBaseEntity::SetEntityState(entity_state_t& state) {}
-void CBasePlayer::SetEntityState(entity_state_t& state) {}

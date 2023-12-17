@@ -21,18 +21,18 @@ LINK_ENTITY_TO_CLASS(weapon_9mmAR, CMP5);
 void CMP5::Precache()
 {
 #ifdef GAME_DLL
-	PRECACHE_MODEL("models/v_9mmAR.mdl");
-	PRECACHE_MODEL("models/w_9mmAR.mdl");
-	PRECACHE_MODEL("models/p_9mmAR.mdl");
+	g_engfuncs.pfnPrecacheModel("models/v_9mmAR.mdl");
+	g_engfuncs.pfnPrecacheModel("models/w_9mmAR.mdl");
+	g_engfuncs.pfnPrecacheModel("models/p_9mmAR.mdl");
 
-	PRECACHE_MODEL("models/w_9mmARclip.mdl");
+	g_engfuncs.pfnPrecacheModel("models/w_9mmARclip.mdl");
 
-	PRECACHE_SOUND("weapons/hks1.wav");
-	PRECACHE_SOUND("weapons/hks2.wav");
-	PRECACHE_SOUND("weapons/hks3.wav");
+	g_engfuncs.pfnPrecacheSound("weapons/hks1.wav");
+	g_engfuncs.pfnPrecacheSound("weapons/hks2.wav");
+	g_engfuncs.pfnPrecacheSound("weapons/hks3.wav");
 
-	PRECACHE_SOUND("weapons/glauncher.wav");
-	PRECACHE_SOUND("weapons/glauncher2.wav");
+	g_engfuncs.pfnPrecacheSound("weapons/glauncher.wav");
+	g_engfuncs.pfnPrecacheSound("weapons/glauncher2.wav");
 #endif
 
 	m_usPrimaryAttack = g_engfuncs.pfnPrecacheEvent(1, "events/mp5.sc");
