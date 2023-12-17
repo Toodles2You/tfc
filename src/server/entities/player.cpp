@@ -2046,6 +2046,17 @@ void CBasePlayer::SetPrefsFromUserinfo(char* infobuffer)
 	{
 		m_iAutoWepSwitch = 1;
 	}
+
+	value = g_engfuncs.pfnInfoKeyValue(infobuffer, "cl_grenadetoggle");
+
+	if ('\0' != *value)
+	{
+		m_bGrenadeToggle = atoi(value) != 0;
+	}
+	else
+	{
+		m_bGrenadeToggle = false;
+	}
 }
 
 void CBasePlayer::SetEntityState(entity_state_t& state)

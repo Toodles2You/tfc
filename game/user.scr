@@ -87,4 +87,15 @@ DESCRIPTION INFO_OPTIONS
 		}
 		{ "2" }
 	}
+
+	"cl_grenadetoggle"
+	{
+		"#Mod_Grenade_Mode_Title"
+		{
+			LIST
+			"#Mod_Key_Hold" "0"
+			"#Mod_Key_Tap" "1"
+		}
+		{ "0" }
+	}
 }

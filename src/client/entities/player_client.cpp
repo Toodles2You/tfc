@@ -25,6 +25,9 @@
 #include "demo.h"
 #include "hud.h"
 
+extern cvar_t* cl_autowepswitch;
+extern cvar_t* cl_grenadetoggle;
+
 
 void CBasePlayer::FireBullets(
 	const float damage,
@@ -94,6 +97,13 @@ void CBaseEntity::EmitSoundPredicted(const char* sample, int channel, float volu
     }
 
 	gEngfuncs.pEventAPI->EV_PlaySound(player->index, player->origin, channel, sample, volume, attenuation, flags, pitch);
+}
+
+
+void CBasePlayer::SetPrefsFromUserinfo(char* infobuffer)
+{
+	m_iAutoWepSwitch = (int)cl_autowepswitch->value;
+	m_bGrenadeToggle = (int)cl_grenadetoggle->value != 0;
 }
 
 

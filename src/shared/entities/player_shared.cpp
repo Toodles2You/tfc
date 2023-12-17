@@ -55,14 +55,23 @@ void CBasePlayer::WeaponPostFrame()
 	}
 #endif
 
-	if ((m_afButtonPressed & IN_GRENADE) != 0)
+	if ((m_TFState & kTFStateGrenadePrime) != 0)
+	{
+		if (m_bGrenadeToggle)
+		{
+			if ((m_afButtonPressed & IN_GRENADE) != 0)
+			{
+				ThrowGrenade();
+			}
+		}
+		else if ((pev->button & IN_GRENADE) == 0)
+		{
+			ThrowGrenade();
+		}
+	}
+	else if ((m_afButtonPressed & IN_GRENADE) != 0)
 	{
 		PrimeGrenade();
-	}
-	else if ((m_TFState & kTFStateGrenadePrime) != 0
-	 && (pev->button & IN_GRENADE) == 0)
-	{
-		ThrowGrenade();
 	}
 
 	if (m_pActiveWeapon == nullptr)

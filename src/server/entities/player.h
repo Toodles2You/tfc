@@ -230,6 +230,7 @@ public:
 	void SetPrefsFromUserinfo(char* infobuffer);
 
 	int m_iAutoWepSwitch;
+	bool m_bGrenadeToggle;
 
 	bool m_bRestored;
 

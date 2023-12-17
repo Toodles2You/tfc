@@ -311,6 +311,8 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 		player.pev->health = to->client.health;
 	}
 
+	player.SetPrefsFromUserinfo(nullptr);
+
 	gEngfuncs.GetViewAngles(player.pev->v_angle);
 	player.pev->button = cmd->buttons;
 	player.m_afButtonLast = from->playerstate.oldbuttons;

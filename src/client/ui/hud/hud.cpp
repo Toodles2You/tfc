@@ -88,6 +88,8 @@ cvar_t* cl_bobtilt = nullptr;
 cvar_t* r_decals = nullptr;
 cvar_t* violence_hblood = nullptr;
 cvar_t* violence_hgibs = nullptr;
+cvar_t* cl_autowepswitch = nullptr;
+cvar_t* cl_grenadetoggle = nullptr;
 
 void ShutdownInput();
 
@@ -325,7 +327,6 @@ void CHud::Init()
 	m_iFOV = 0;
 
 	zoom_sensitivity_ratio = CVAR_CREATE("zoom_sensitivity_ratio", "1.0", 0);
-	CVAR_CREATE("cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO);
 	cl_fov = gEngfuncs.pfnRegisterVariable("cl_fov", "90", FCVAR_ARCHIVE);
 	m_pCvarCrosshair = gEngfuncs.pfnGetCvarPointer("crosshair");
 	m_pCvarStealMouse = CVAR_CREATE("hud_capturemouse", "0", FCVAR_ARCHIVE);
@@ -339,6 +340,9 @@ void CHud::Init()
 	violence_hblood = gEngfuncs.pfnGetCvarPointer("violence_hblood");
 	violence_hgibs = gEngfuncs.pfnGetCvarPointer("violence_hgibs");
 	m_pCvarSuitVolume = gEngfuncs.pfnGetCvarPointer("suitvolume");
+
+	cl_autowepswitch = CVAR_CREATE("cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO);
+	cl_grenadetoggle = gEngfuncs.pfnRegisterVariable("cl_grenadetoggle", "0", FCVAR_ARCHIVE | FCVAR_USERINFO);
 
 	m_pSpriteList = NULL;
 
