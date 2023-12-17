@@ -512,6 +512,8 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 
 	m_iFOV = 0;
 
+	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
+
 	m_iObserverLastMode = OBS_CHASE_FREE;
 	pev->iuser1 = OBS_DEATHCAM;
 	pev->iuser2 = entindex();
@@ -1322,6 +1324,8 @@ bool CBasePlayer::Spawn()
 	}
 
 	m_flNextChatTime = gpGlobals->time;
+
+	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
 
 	g_pGameRules->PlayerSpawn(this);
 

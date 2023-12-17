@@ -45,11 +45,14 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 		m_pActiveWeapon->Holster();
 		m_pActiveWeapon = nullptr;
     }
+
+	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
 }
 
 
 bool CBasePlayer::Spawn()
 {
+	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
 	return true;
 }
 
