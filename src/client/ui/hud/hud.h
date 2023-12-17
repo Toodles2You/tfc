@@ -479,7 +479,7 @@ public:
 
 	//had to make these public so CHud could access them (to enable concussion icon)
 	//could use a friend declaration instead...
-	void EnableIcon(const char* pszIconName, unsigned char red, unsigned char green, unsigned char blue);
+	void EnableIcon(const char* pszIconName, int red = 0, int green = 0, int blue = 0);
 	void DisableIcon(const char* pszIconName);
 
 private:

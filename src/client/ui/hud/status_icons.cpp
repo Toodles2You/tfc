@@ -84,15 +84,21 @@ bool CHudStatusIcons::MsgFunc_StatusIcon(const char* pszName, int iSize, void* p
 {
 	BEGIN_READ(pbuf, iSize);
 
-	bool ShouldEnable = READ_BYTE() != 0;
+	int mode = READ_BYTE();
 	char* pszIconName = READ_STRING();
-	if (ShouldEnable)
+	if (mode != 0)
 	{
-		int r = READ_BYTE();
-		int g = READ_BYTE();
-		int b = READ_BYTE();
-		EnableIcon(pszIconName, r, g, b);
-		m_iFlags |= HUD_ACTIVE;
+		if (mode == 1)
+		{
+			int r = READ_BYTE();
+			int g = READ_BYTE();
+			int b = READ_BYTE();
+			EnableIcon(pszIconName, r, g, b);
+		}
+		else
+		{
+			EnableIcon(pszIconName);
+		}
 	}
 	else
 	{
@@ -103,8 +109,15 @@ bool CHudStatusIcons::MsgFunc_StatusIcon(const char* pszName, int iSize, void* p
 }
 
 // add the icon to the icon list, and set it's drawing color
-void CHudStatusIcons::EnableIcon(const char* pszIconName, unsigned char red, unsigned char green, unsigned char blue)
+void CHudStatusIcons::EnableIcon(const char* pszIconName, int red, int green, int blue)
 {
+	if (red == 0 && green == 0 && blue == 0)
+	{
+		gHUD.GetColor(red, green, blue, CHud::COLOR_PRIMARY);
+	}
+
+	bool added = false;
+
 	int i;
 	// check to see if the sprite is in the current list
 	for (i = 0; i < MAX_ICONSPRITES; i++)
@@ -121,6 +134,7 @@ void CHudStatusIcons::EnableIcon(const char* pszIconName, unsigned char red, uns
 			if (0 == m_IconList[i].spr)
 				break;
 		}
+		added = true;
 	}
 
 	// if we've run out of space in the list, overwrite the first icon
@@ -140,11 +154,22 @@ void CHudStatusIcons::EnableIcon(const char* pszIconName, unsigned char red, uns
 	strcpy(m_IconList[i].szSpriteName, pszIconName);
 
 	// Hack: Play Timer sound when a grenade icon is played (in 0.8 seconds)
-	if (strstr(m_IconList[i].szSpriteName, "grenade"))
+	if (added && strstr(m_IconList[i].szSpriteName, "grenade"))
 	{
 		cl_entity_t* pthisplayer = gEngfuncs.GetLocalPlayer();
-		gEngfuncs.pEventAPI->EV_PlaySound(pthisplayer->index, pthisplayer->origin, CHAN_STATIC, "weapons/timer.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+
+		gEngfuncs.pEventAPI->EV_PlaySound(
+			pthisplayer->index,
+			pthisplayer->origin,
+			CHAN_STATIC,
+			"weapons/timer.wav",
+			VOL_NORM,
+			ATTN_NORM,
+			0,
+			PITCH_NORM);
 	}
+
+	m_iFlags |= HUD_ACTIVE;
 }
 
 void CHudStatusIcons::DisableIcon(const char* pszIconName)

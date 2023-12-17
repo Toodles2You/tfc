@@ -53,4 +53,6 @@ inline int gmsgWeapons = 0;
 inline int gmsgHitFeedback = 0;
 inline int gmsgBlood = 0;
 
+inline int gmsgStatusIcon = 0;
+
 void LinkUserMessages();
