@@ -1580,8 +1580,6 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 		gEvilImpulse101 = true;
 		GiveNamedItem("weapon_crowbar");
 		GiveNamedItem("weapon_9mmAR");
-		// GiveAmmo(250, AMMO_9MM, 250);
-		// GiveAmmo(10, AMMO_ARGRENADES, 10);
 		gEvilImpulse101 = false;
 		break;
 
