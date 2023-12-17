@@ -1311,8 +1311,6 @@ bool CBasePlayer::Spawn()
 		m_rgAmmoLast[i] = 0; // client ammo values also have to be reset  (the death hud clear messages does on the client side)
 	}
 
-	m_flNextChatTime = gpGlobals->time;
-
 	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
 
 	g_pGameRules->PlayerSpawn(this);

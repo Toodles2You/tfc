@@ -151,7 +151,8 @@ void ClientPutInServer(edict_t* pEntity)
 
 	pPlayer = GetClassPtr((CBasePlayer*)pev);
 	pPlayer->InstallGameMovement(new CHalfLifeMovement{pmove, pPlayer});
-	pPlayer->SetCustomDecalFrames(-1); // Assume none;
+	pPlayer->SetCustomDecalFrames(-1);
+	pPlayer->m_flNextChatTime = gpGlobals->time + CHAT_INTERVAL;
 
 	g_pGameRules->ClientPutInServer(pPlayer);
 
