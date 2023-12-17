@@ -72,48 +72,55 @@ cvar_t v_ipitch_level = {"v_ipitch_level", "0.3", 0, 0.3};
 float v_idlescale; // used by TFC for concussion grenade effect
 
 
-static float V_CalcBob(ref_params_t* pparams)
+typedef struct {
+	float time;
+	float lastTime;
+	float value;
+	float cycleValue;
+} bob_params_t;
+
+static float V_CalcBob(
+	ref_params_t* pparams,
+	bob_params_t& bob,
+	const float clBob,
+	const float clBobCycle,
+	const float clBobUp)
 {
-	static double bobtime = 0;
-	static float bob = 0;
 	float cycle;
-	static float lasttime = 0;
-	Vector vel;
+	Vector2D vel;
 
-
-	if (pparams->onground == -1 ||
-		pparams->time == lasttime)
+	if (pparams->onground == -1
+	 || pparams->time == bob.lastTime)
 	{
 		// just use old value
-		return bob;
+		return bob.value;
 	}
 
-	lasttime = pparams->time;
+	bob.lastTime = pparams->time;
 
 	//TODO: bobtime will eventually become a value so large that it will no longer behave properly.
 	//Consider resetting the variable if a level change is detected (pparams->time < lasttime might do the trick).
-	bobtime += pparams->frametime;
-	cycle = bobtime - (int)(bobtime / cl_bobcycle->value) * cl_bobcycle->value;
-	cycle /= cl_bobcycle->value;
+	bob.time += pparams->frametime;
+	cycle = bob.time - (int)(bob.time / clBobCycle) * clBobCycle;
+	cycle /= clBobCycle;
 
-	if (cycle < cl_bobup->value)
+	if (cycle < clBobUp)
 	{
-		cycle = M_PI * cycle / cl_bobup->value;
+		cycle = M_PI * cycle / clBobUp;
 	}
 	else
 	{
-		cycle = M_PI + M_PI * (cycle - cl_bobup->value) / (1.0 - cl_bobup->value);
+		cycle = M_PI + M_PI * (cycle - clBobUp) / (1.0 - clBobUp);
 	}
 
 	// bob is proportional to simulated velocity in the xy plane
 	// (don't count Z, or jumping messes it up)
-	VectorCopy(pparams->simvel, vel);
-	vel[2] = 0;
+	vel = Vector2D(pparams->simvel[0], pparams->simvel[1]);
 
-	bob = sqrt(vel[0] * vel[0] + vel[1] * vel[1]) * cl_bob->value;
-	bob = bob * 0.3 + bob * 0.7 * sin(cycle);
-	bob = std::clamp(bob, -7.0F, 4.0F);
-	return bob;
+	bob.value = vel.Length() * clBob;
+	bob.cycleValue = bob.value * sin(cycle);
+
+	return bob.value;
 }
 
 
@@ -303,9 +310,9 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	int i;
 	Vector angles;
 	float bob, waterOffset;
-
 	Vector camAngles, camForward, camRight, camUp;
 	cl_entity_t* pwater;
+	static bob_params_t bobParams;
 
 	if (0 != gEngfuncs.IsSpectateOnly())
 	{
@@ -322,14 +329,16 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 
 	// transform the view offset by the model's matrix to get the offset from
 	// model origin for the view
-	bob = V_CalcBob(pparams);
+	V_CalcBob(pparams, bobParams, cl_bob->value, cl_bobcycle->value, cl_bobup->value);
+
+	bob = bobParams.value * 0.3 + bobParams.cycleValue * 0.7;
 
 	// refresh position
 	VectorCopy(pparams->simorg, pparams->vieworg);
 
 	if (0 != cl_bobview->value)
 	{
-		pparams->vieworg[2] += (bob);
+		pparams->vieworg[2] += bob;
 	}
 
 	VectorAdd(pparams->vieworg, pparams->viewheight, pparams->vieworg);
