@@ -21,7 +21,9 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
+#include "player.h"
 #include "weapons.h"
+#include "UserMessages.h"
 
 LINK_ENTITY_TO_CLASS(grenade, CGrenade);
 
@@ -179,5 +181,128 @@ CGrenade* CGrenade::ShootContact(CBaseEntity* owner, Vector vecStart, Vector vec
 	pGrenade->pev->dmg = 100;
 
 	return pGrenade;
+}
+
+
+bool CPrimeGrenade::Spawn()
+{
+	pev->classname = MAKE_STRING("grenade");
+	pev->movetype = MOVETYPE_NONE;
+	pev->solid = SOLID_NOT;
+
+	SetSize(g_vecZero, g_vecZero);
+
+	SetOrigin(pev->owner->v.origin);
+
+	SetThink(&CPrimeGrenade::PrimedThink);
+	pev->nextthink = gpGlobals->time + 0.8;
+	pev->dmgtime = pev->nextthink + 3.0;
+
+	pev->dmg = 100;
+
+	return true;
+}
+
+
+void CPrimeGrenade::PrimedThink()
+{
+	auto owner = dynamic_cast<CBasePlayer*>(CBaseEntity::Instance(pev->owner));
+
+	if (owner == nullptr)
+	{
+		Remove();
+		return;
+	}
+
+	SetOrigin(owner->pev->origin);
+
+	if (!owner->IsAlive())
+	{
+		Throw(kDrop);
+		return;
+	}
+
+	if (!owner->IsPlayer())
+	{
+		Remove();
+		return;
+	}
+
+	if ((owner->m_TFState & kTFStateGrenadeThrowing) == 0)
+	{
+		if (pev->dmgtime <= gpGlobals->time)
+		{
+			Throw(kOvercook);
+			return;
+		}
+		pev->nextthink = gpGlobals->time + 0.1;
+		return;
+	}
+
+	Throw(kThrow);
+}
+
+
+void CPrimeGrenade::Throw(throw_e mode)
+{
+	auto owner = dynamic_cast<CBasePlayer*>(CBaseEntity::Instance(pev->owner));
+
+	pev->movetype = MOVETYPE_BOUNCE;
+	pev->solid = SOLID_BBOX;
+
+	SetOrigin(owner->pev->origin);
+	pev->angles = Vector(0, owner->pev->angles.y, 0);
+
+	if (mode == kOvercook)
+	{
+		pev->velocity = g_vecZero;
+
+		SetThink(&CPrimeGrenade::Detonate);
+		pev->nextthink = gpGlobals->time;
+	}
+	else
+	{
+		pev->gravity = 0.81;
+		pev->friction = 0.6;
+
+		SetModel("models/w_grenade.mdl");
+		SetSize(g_vecZero, g_vecZero);
+
+		if (mode == kDrop)
+		{
+			pev->velocity = Vector(0, 0, 30);
+		}
+		else
+		{
+			util::MakeVectors(owner->pev->v_angle);
+			pev->velocity = gpGlobals->v_forward * 600 + gpGlobals->v_up * 200;
+		}
+
+		SetTouch(&CPrimeGrenade::BounceTouch);
+		SetThink(&CPrimeGrenade::TumbleThink);
+		pev->nextthink = gpGlobals->time + 0.1;
+
+		pev->sequence = g_engfuncs.pfnRandomLong(3, 6);
+		pev->framerate = 1.0;
+		ResetSequenceInfo();
+	}
+
+	MessageBegin(MSG_ONE, gmsgStatusIcon, owner);
+	WriteByte(0);
+	WriteString("grenade");
+	MessageEnd();
+	
+	owner->m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
+}
+
+
+CPrimeGrenade* CPrimeGrenade::PrimeGrenade(CBaseEntity* owner)
+{
+	auto grenade = GetClassPtr((CPrimeGrenade*)nullptr);
+
+	grenade->pev->owner = owner->edict();
+	grenade->Spawn();
+
+	return grenade;
 }
 

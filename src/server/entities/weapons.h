@@ -89,7 +89,6 @@ public:
 	void CheckRespawn();
 
 	virtual void SendWeaponAnim(int iAnim);
-	virtual void PlayWeaponSound(int iChannel, const char* szSound, float flVolume = VOL_NORM, float flAttn = ATTN_IDLE, int iFlags = 0, float flPitch = PITCH_NORM);
 
 	virtual bool CanDeploy() { return true; }
 	virtual void Deploy();
@@ -233,6 +232,26 @@ public:
 	void EXPORT TumbleThink();
 
 	virtual void BounceSound();
+};
+
+/* Team Fortress style timed grenade */
+class CPrimeGrenade : public CGrenade
+{
+public:
+	bool Spawn() override;
+	void EXPORT PrimedThink();
+
+	static CPrimeGrenade* PrimeGrenade(CBaseEntity* owner);
+
+protected:
+	typedef enum
+	{
+		kThrow,
+		kDrop,
+		kOvercook,
+	} throw_e;
+
+	void Throw(throw_e mode);
 };
 
 void RadiusDamage(

@@ -155,7 +155,6 @@ bool CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer) { return false; }
 void CBasePlayerWeapon::RemoveFromPlayer() {}
 
 void CBaseEntity::EmitSound(const char* sample, int channel, float volume, float attenuation, int pitch, int flags) {}
-void CBaseEntity::EmitSoundPredicted(const char* sample, int channel, float volume, float attenuation, int pitch, int flags) {}
 void CBaseEntity::StopSound(const char* sample, int channel) {}
 
 void CBaseEntity::SetEntityState(entity_state_t& state) {}

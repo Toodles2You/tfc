@@ -12,6 +12,7 @@
 #include "weapons.h"
 #ifdef GAME_DLL
 #include "gamerules.h"
+#include "UserMessages.h"
 #endif
 
 
@@ -53,6 +54,16 @@ void CBasePlayer::WeaponPostFrame()
 		return;
 	}
 #endif
+
+	if ((m_afButtonPressed & IN_GRENADE) != 0)
+	{
+		PrimeGrenade();
+	}
+	else if ((m_TFState & kTFStateGrenadePrime) != 0
+	 && (pev->button & IN_GRENADE) == 0)
+	{
+		ThrowGrenade();
+	}
 
 	if (m_pActiveWeapon == nullptr)
 	{
@@ -181,6 +192,8 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 	data.iuser3 = pev->iuser3;
 #endif
 
+	data.tfstate = m_TFState;
+
 	data.m_iId = (m_pActiveWeapon != nullptr) ? m_pActiveWeapon->GetID() : WEAPON_NONE;
 
 	byte* ammo = reinterpret_cast<byte*>(&data.ammo_shells);
@@ -219,6 +232,8 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 	pev->iuser1 = data.iuser1;
 	pev->iuser2 = data.iuser2;
 	pev->iuser3 = data.iuser3;
+
+	m_TFState = data.tfstate;
 
 	if (m_pActiveWeapon == nullptr)
 	{

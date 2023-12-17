@@ -2077,6 +2077,33 @@ void CBasePlayer::SetEntityState(entity_state_t& state)
 }
 
 
+void CBasePlayer::PrimeGrenade()
+{
+	if ((m_TFState & (kTFStateGrenadePrime | kTFStateGrenadeThrowing)) != 0)
+	{
+		return;
+	}
+
+	m_TFState |= kTFStateGrenadePrime;
+
+	CPrimeGrenade::PrimeGrenade(this);
+
+	MessageBegin(MSG_ONE, gmsgStatusIcon, this);
+	WriteByte(2);
+	WriteString("grenade");
+	MessageEnd();
+
+	EmitSoundPredicted("weapons/ax1.wav", CHAN_WEAPON);
+}
+
+
+void CBasePlayer::ThrowGrenade()
+{
+	m_TFState &= ~kTFStateGrenadePrime;
+	m_TFState |= kTFStateGrenadeThrowing;
+}
+
+
 class CStripWeapons : public CPointEntity
 {
 public:

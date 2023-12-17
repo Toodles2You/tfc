@@ -50,6 +50,12 @@ typedef enum
 	PLAYER_ATTACK1,
 } PLAYER_ANIM;
 
+enum
+{
+	kTFStateGrenadePrime    = 1,
+	kTFStateGrenadeThrowing = 2,
+};
+
 #define CHAT_INTERVAL 1.0f
 
 class CTeam;
@@ -108,6 +114,9 @@ public:
 
 	//Not saved, used to update client.
 	std::uint64_t m_ClientWeaponBits;
+
+	/* Player state flags synchronized between the client & server. */
+	unsigned int m_TFState;
 
 	// shared ammo slots
 	int m_rgAmmo[AMMO_LAST];
@@ -263,6 +272,9 @@ public:
 protected:
 	CGameMovement* m_gameMovement = nullptr;
 	EHANDLE m_hLastAttacker[2];
+
+	void PrimeGrenade();
+	void ThrowGrenade();
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

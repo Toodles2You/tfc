@@ -78,3 +78,51 @@ void CBasePlayer::UpdateHudData()
 	}
 }
 
+
+void CBaseEntity::EmitSoundPredicted(const char* sample, int channel, float volume, float attenuation, int pitch, int flags)
+{
+	if (!HUD_FirstTimePredicting())
+	{
+		return;
+	}
+
+	auto player = gEngfuncs.GetLocalPlayer();
+
+	if (!player)
+    {
+		return;
+    }
+
+	gEngfuncs.pEventAPI->EV_PlaySound(player->index, player->origin, channel, sample, volume, attenuation, flags, pitch);
+}
+
+
+void CBasePlayer::PrimeGrenade()
+{
+	if ((m_TFState & (kTFStateGrenadePrime | kTFStateGrenadeThrowing)) != 0)
+	{
+		return;
+	}
+
+	m_TFState |= kTFStateGrenadePrime;
+
+	if (HUD_FirstTimePredicting())
+	{
+		gHUD.m_StatusIcons.EnableIcon("grenade");
+	}
+
+	EmitSoundPredicted("weapons/ax1.wav", CHAN_WEAPON);
+}
+
+
+void CBasePlayer::ThrowGrenade()
+{
+	if (!HUD_FirstTimePredicting())
+	{
+		return;
+	}
+
+	m_TFState &= ~kTFStateGrenadePrime;
+	m_TFState |= kTFStateGrenadeThrowing;
+}
+

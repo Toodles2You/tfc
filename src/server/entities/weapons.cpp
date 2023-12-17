@@ -89,6 +89,7 @@ void W_Precache()
 	g_sModelIndexBloodDrop = PRECACHE_MODEL("sprites/blood.spr");
 
 	PRECACHE_MODEL("models/grenade.mdl");
+	PRECACHE_MODEL("models/w_grenade.mdl");
 	PRECACHE_MODEL("sprites/explode1.spr");
 
 	PRECACHE_MODEL("models/shell.mdl");
@@ -121,6 +122,9 @@ void W_Precache()
 	PRECACHE_SOUND("weapons/ric3.wav");
 	PRECACHE_SOUND("weapons/ric4.wav");
 	PRECACHE_SOUND("weapons/ric5.wav");
+
+	PRECACHE_SOUND("weapons/ax1.wav");
+	PRECACHE_SOUND("weapons/timer.wav");
 }
 
 
@@ -335,12 +339,6 @@ void CBasePlayerWeapon::SendWeaponAnim(int iAnim)
 	WriteByte(iAnim);
 	WriteByte(pev->body);
 	MessageEnd();
-}
-
-
-void CBasePlayerWeapon::PlayWeaponSound(int iChannel, const char* szSound, float flVolume, float flAttn, int iFlags, float flPitch)
-{
-	m_pPlayer->EmitSoundPredicted(szSound, iChannel, flVolume, flAttn, flPitch, iFlags);
 }
 
 

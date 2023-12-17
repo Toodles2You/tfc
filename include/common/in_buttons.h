@@ -29,5 +29,6 @@ enum
     IN_MOVELEFT  = 1 << 9,
     IN_MOVERIGHT = 1 << 10,
     IN_ATTACK2   = 1 << 11,
+    IN_GRENADE   = 1 << 12,
     IN_RELOAD    = 1 << 13,
 };

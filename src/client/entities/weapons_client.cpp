@@ -58,21 +58,3 @@ void CBasePlayerWeapon::SendWeaponAnim(int iAnim)
 	HUD_SendWeaponAnim(iAnim, pev->body, false);
 }
 
-
-void CBasePlayerWeapon::PlayWeaponSound(int iChannel, const char* szSound, float flVolume, float flAttn, int iFlags, float flPitch)
-{
-	if (!HUD_FirstTimePredicting())
-    {
-		return;
-    }
-
-	auto player = gEngfuncs.GetLocalPlayer();
-
-	if (!player)
-    {
-		return;
-    }
-
-	gEngfuncs.pEventAPI->EV_PlaySound(player->index, player->origin, iChannel, szSound, flVolume, flAttn, iFlags, flPitch);
-}
-
