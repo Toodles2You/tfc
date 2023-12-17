@@ -863,12 +863,14 @@ void CPushable::Move(CBaseEntity* pOther, bool push)
 	entvars_t* pevToucher = pOther->pev;
 	bool playerTouch = false;
 
+	const float frameScale = gpGlobals->frametime / (1.0 / 30.0);
+
 	// Is entity standing on this pushable ?
 	if (FBitSet(pevToucher->flags, FL_ONGROUND) && pevToucher->groundentity && VARS(pevToucher->groundentity) == pev)
 	{
 		// Only push if floating
 		if (pev->waterlevel > 0)
-			pev->velocity.z += pevToucher->velocity.z * 0.1;
+			pev->velocity.z += pevToucher->velocity.z * 0.1 * frameScale;
 
 		return;
 	}
@@ -898,8 +900,8 @@ void CPushable::Move(CBaseEntity* pOther, bool push)
 	else
 		factor = 0.25;
 
-	pev->velocity.x += pevToucher->velocity.x * factor;
-	pev->velocity.y += pevToucher->velocity.y * factor;
+	pev->velocity.x += pevToucher->velocity.x * factor * frameScale;
+	pev->velocity.y += pevToucher->velocity.y * factor * frameScale;
 
 	float length = sqrt(pev->velocity.x * pev->velocity.x + pev->velocity.y * pev->velocity.y);
 	if (push && (length > MaxSpeed()))
