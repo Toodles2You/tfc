@@ -139,8 +139,15 @@ void CGrenade::TumbleThink()
 	}
 	if (pev->waterlevel != 0)
 	{
-		pev->velocity = pev->velocity * 0.5;
+		pev->velocity =
+			pev->velocity - pev->velocity * 0.5
+			* (gpGlobals->frametime / (1.0 / 30.0));
+
 		pev->framerate = 0.2;
+	}
+	else
+	{
+		pev->framerate = 1.0;
 	}
 }
 
