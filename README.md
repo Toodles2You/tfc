@@ -36,6 +36,8 @@ Features
 - New HL2-esque player movement interface
 - C++-ified a lot of C-isms
 - Clean project structure
+- Team Fortress style grenade priming
+- CMake options for toggling features
 - Other stuff I'm probably forgetting
 
 Building this SDK
