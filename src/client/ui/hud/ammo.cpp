@@ -236,7 +236,6 @@ int giBucketHeight, giBucketWidth, giABHeight, giABWidth; // Ammo Bar width and 
 HSPRITE ghsprBuckets; // Sprite for top row of weapons menu
 
 DECLARE_MESSAGE(m_Ammo, CurWeapon);	 // Current weapon and clip
-DECLARE_MESSAGE(m_Ammo, AmmoX);		 // update known ammo type's count
 DECLARE_MESSAGE(m_Ammo, AmmoPickup); // flashes an ammo pickup record
 DECLARE_MESSAGE(m_Ammo, WeapPickup); // flashes a weapon pickup record
 DECLARE_MESSAGE(m_Ammo, HideWeapon); // hides the weapon, ammo, and crosshair displays temporarily
@@ -273,7 +272,6 @@ bool CHudAmmo::Init()
 	HOOK_MESSAGE(WeapPickup);
 	HOOK_MESSAGE(ItemPickup);
 	HOOK_MESSAGE(HideWeapon);
-	HOOK_MESSAGE(AmmoX);
 	HOOK_MESSAGE(HitFeedback);
 
 	HOOK_COMMAND("slot1", Slot1);
@@ -577,29 +575,6 @@ void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip)
 	}
 
 	m_iFlags |= HUD_ACTIVE;
-}
-
-//
-// AmmoX  -- Update the count of a known type of ammo
-//
-bool CHudAmmo::MsgFunc_AmmoX(const char* pszName, int iSize, void* pbuf)
-{
-	BEGIN_READ(pbuf, iSize);
-
-	int iIndex = READ_BYTE();
-	int iCount = READ_BYTE();
-	
-	Update_AmmoX(iIndex, iCount);
-
-	if (m_pWeapon)
-	{
-		if (iIndex == m_pWeapon->iAmmoType || iIndex == m_pWeapon->iAmmo2Type)
-		{
-			m_fFade = 200.0f;
-		}
-	}
-
-	return true;
 }
 
 bool CHudAmmo::MsgFunc_AmmoPickup(const char* pszName, int iSize, void* pbuf)
