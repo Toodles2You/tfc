@@ -335,10 +335,9 @@ public:
 		void* user = nullptr,
 		int duration = kPollDuration);
 
-	~CPoll();
-
 	void CastVote(int playerIndex, int option);
 	bool CheckVotes();
+	void Close();
 
 private:
 	bool CanPlayerVote(CBasePlayer* player);
@@ -352,6 +351,7 @@ class CHalfLifeMultiplay : public CGameRules
 {
 public:
 	CHalfLifeMultiplay();
+	virtual ~CHalfLifeMultiplay();
 
 	// GR_Think
 	void Think() override;

@@ -161,60 +161,6 @@ CPoll::CPoll(
 }
 
 
-CPoll::~CPoll()
-{
-	int total = 0;
-
-	int maxVotes = -1;
-	int candidates[12];
-	int numCandidates = 0;
-	
-	for (int i = 0; i < m_NumOptions; i++)
-	{
-		total += m_Tally[i];
-
-		if (m_Tally[i] > maxVotes)
-		{
-			maxVotes = m_Tally[i];
-
-			candidates[0] = i;
-			numCandidates = 1;
-		}
-		else if (m_Tally[i] == maxVotes)
-		{
-			candidates[numCandidates] = i;
-			numCandidates++;
-		}
-	}
-
-	ALERT(at_console, "Vote finished with %i total\n", total);
-
-	int winner = candidates[g_engfuncs.pfnRandomLong(1, numCandidates) - 1];
-	
-	float percent = 100;
-	if (total != 0)
-	{
-		percent = (maxVotes / (float)total) * 100;
-	}
-
-	ALERT(
-		at_console,
-		"Option %i won with %i votes (%g%%)\n",
-		winner + 1,
-		maxVotes,
-		percent);
-
-	MessageBegin(MSG_ALL, gmsgVoteMenu);
-	WriteByte(0);
-	MessageEnd();
-
-	if (m_Callback != nullptr)
-	{
-		(g_pGameRules->*m_Callback)(winner, m_NumOptions, m_Tally, m_User);
-	}
-}
-
-
 void CPoll::CastVote(int playerIndex, int option)
 {
 	const auto bit = 1 << (playerIndex - 1);
@@ -279,6 +225,60 @@ bool CPoll::CheckVotes()
 }
 
 
+void CPoll::Close()
+{
+	int total = 0;
+
+	int maxVotes = -1;
+	int candidates[12];
+	int numCandidates = 0;
+	
+	for (int i = 0; i < m_NumOptions; i++)
+	{
+		total += m_Tally[i];
+
+		if (m_Tally[i] > maxVotes)
+		{
+			maxVotes = m_Tally[i];
+
+			candidates[0] = i;
+			numCandidates = 1;
+		}
+		else if (m_Tally[i] == maxVotes)
+		{
+			candidates[numCandidates] = i;
+			numCandidates++;
+		}
+	}
+
+	ALERT(at_console, "Vote finished with %i total\n", total);
+
+	int winner = candidates[g_engfuncs.pfnRandomLong(1, numCandidates) - 1];
+	
+	float percent = 100;
+	if (total != 0)
+	{
+		percent = (maxVotes / (float)total) * 100;
+	}
+
+	ALERT(
+		at_console,
+		"Option %i won with %i votes (%g%%)\n",
+		winner + 1,
+		maxVotes,
+		percent);
+
+	MessageBegin(MSG_ALL, gmsgVoteMenu);
+	WriteByte(0);
+	MessageEnd();
+
+	if (m_Callback != nullptr)
+	{
+		(g_pGameRules->*m_Callback)(winner, m_NumOptions, m_Tally, m_User);
+	}
+}
+
+
 bool CPoll::CanPlayerVote(CBasePlayer* player)
 {
 	return player != nullptr
@@ -321,6 +321,16 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	}
 
 	EnterState(GR_STATE_RND_RUNNING);
+}
+
+
+CHalfLifeMultiplay::~CHalfLifeMultiplay()
+{
+	if (m_CurrentPoll != nullptr)
+	{
+		delete m_CurrentPoll;
+		m_CurrentPoll = nullptr;
+	}
 }
 
 
@@ -1371,8 +1381,10 @@ void CHalfLifeMultiplay::CheckTimeLimit()
 
 void CHalfLifeMultiplay::CheckCurrentPoll()
 {
-	if (m_CurrentPoll != nullptr && m_CurrentPoll->CheckVotes())
+	if (m_CurrentPoll != nullptr
+	 && m_CurrentPoll->CheckVotes())
 	{
+		m_CurrentPoll->Close();
 		delete m_CurrentPoll;
 		m_CurrentPoll = nullptr;
 	}
