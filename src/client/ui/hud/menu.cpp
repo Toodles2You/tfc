@@ -334,9 +334,9 @@ bool CHudMenu::MsgFunc_VoteMenu(const char* pszName, int iSize, void* pbuf)
 
 		std::string key = "F" + std::to_string(i + 1) + ". ";
 
-		strncat(g_szMenuString, "\n", MAX_MENU_STRING);
-		strncat(g_szMenuString, key.c_str(), MAX_MENU_STRING);
-		strncat(g_szMenuString, str, MAX_MENU_STRING);
+		strncat(g_szMenuString, "\n", MAX_MENU_STRING - strlen(g_szMenuString));
+		strncat(g_szMenuString, key.c_str(), MAX_MENU_STRING - strlen(g_szMenuString));
+		strncat(g_szMenuString, str, MAX_MENU_STRING - strlen(g_szMenuString));
 	}
 
 	g_szMenuString[MAX_MENU_STRING - 1] = '\0';
