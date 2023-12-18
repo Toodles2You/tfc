@@ -204,6 +204,10 @@ CPoll::~CPoll()
 		maxVotes,
 		percent);
 
+	MessageBegin(MSG_ALL, gmsgVoteMenu);
+	WriteByte(0);
+	MessageEnd();
+
 	if (m_Callback != nullptr)
 	{
 		(g_pGameRules->*m_Callback)(winner, m_NumOptions, m_Tally, m_User);
