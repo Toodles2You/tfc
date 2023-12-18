@@ -23,7 +23,6 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <string>
 
 #include "vgui_TeamFortressViewport.h"
 
@@ -321,6 +320,7 @@ bool CHudMenu::MsgFunc_VoteMenu(const char* pszName, int iSize, void* pbuf)
 
 	strncpy(g_szMenuString, str, MAX_MENU_STRING);
 
+	char keyName[8];
 	m_bitsValidSlots = 0;
 	for (int i = 0; i < numOptions; i++)
 	{
@@ -332,10 +332,8 @@ bool CHudMenu::MsgFunc_VoteMenu(const char* pszName, int iSize, void* pbuf)
 			str = gHUD.m_TextMessage.BufferedLocaliseTextString(str);
 		}
 
-		std::string key = "F" + std::to_string(i + 1) + ". ";
-
-		strncat(g_szMenuString, "\n", MAX_MENU_STRING - strlen(g_szMenuString));
-		strncat(g_szMenuString, key.c_str(), MAX_MENU_STRING - strlen(g_szMenuString));
+		sprintf(keyName, "\nF%i. ", i + 1);
+		strncat(g_szMenuString, keyName, MAX_MENU_STRING - strlen(g_szMenuString));
 		strncat(g_szMenuString, str, MAX_MENU_STRING - strlen(g_szMenuString));
 	}
 
