@@ -124,7 +124,7 @@ CPoll::CPoll(callback_t callback, int options, const char* text, void* user, int
 	: m_Callback(callback),
 	  m_NumOptions(options),
 	  m_EndTime(gpGlobals->time + duration),
-	  m_PlayersVoted(0),
+	  m_IgnorePlayers(0),
 	  m_User(user)
 {
 	int bits = 0;
@@ -135,12 +135,24 @@ CPoll::CPoll(callback_t callback, int options, const char* text, void* user, int
 
 	memset(m_Tally, 0, sizeof(m_Tally));
 
-	MessageBegin(MSG_ALL, gmsgShowMenu);
-	WriteShort(bits);
-	WriteChar(duration);
-	WriteByte(0);
-	WriteString(text);
-	MessageEnd();
+	/* Mask off players that cannot partake in this vote */
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		auto player = dynamic_cast<CBasePlayer*>(util::PlayerByIndex(i));
+
+		if (!CanPlayerVote(player))
+		{
+			m_IgnorePlayers |= 1 << (i - 1);
+			continue;
+		}
+
+		MessageBegin(MSG_ONE, gmsgShowMenu, player);
+		WriteShort(bits);
+		WriteChar(duration);
+		WriteByte(0);
+		WriteString(text);
+		MessageEnd();
+	}
 
 	ALERT(at_aiconsole, "Vote starting with %i options\n", options);
 }
@@ -194,8 +206,14 @@ void CPoll::CastVote(int playerIndex, int option)
 {
 	const auto bit = 1 << (playerIndex - 1);
 
-	if ((m_PlayersVoted & bit) != 0)
+	if ((m_IgnorePlayers & bit) != 0)
 	{
+		return;
+	}
+
+	if (!CanPlayerVote(dynamic_cast<CBasePlayer*>(util::PlayerByIndex(playerIndex))))
+	{
+		m_IgnorePlayers |= bit;
 		return;
 	}
 
@@ -204,14 +222,14 @@ void CPoll::CastVote(int playerIndex, int option)
 		return;
 	}
 
-	m_PlayersVoted |= bit;
+	m_IgnorePlayers |= bit;
 	m_Tally[option - 1]++;
 
 	ALERT(at_aiconsole, "Player %i voted for option %i\n", playerIndex, option);
 }
 
 
-bool CPoll::CheckVote()
+bool CPoll::CheckVotes()
 {
 	if (g_pGameRules->GetState() == GR_STATE_GAME_OVER)
 	{
@@ -229,24 +247,31 @@ bool CPoll::CheckVote()
 	{
 		auto player = dynamic_cast<CBasePlayer*>(util::PlayerByIndex(i));
 
-		if (player == nullptr)
+		if ((m_IgnorePlayers & (1 << (i - 1))) != 0)
 		{
 			continue;
 		}
 
-		if (player->IsSpectator() || player->IsBot())
+		if (!CanPlayerVote(player))
 		{
+			m_IgnorePlayers |= 1 << (i - 1);
 			continue;
 		}
 
-		if ((m_PlayersVoted & (1 << (i - 1))) == 0)
-		{
-			everyoneVoted = false;
-			break;
-		}
+		everyoneVoted = false;
+		break;
 	}
 
 	return everyoneVoted;
+}
+
+
+bool CPoll::CanPlayerVote(CBasePlayer* player)
+{
+	return player != nullptr
+		&& player->TeamNumber() != TEAM_UNASSIGNED
+		&& player->TeamNumber() != TEAM_SPECTATORS
+		&& !player->IsBot();
 }
 
 
@@ -364,7 +389,7 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 	}
 	else if (m_CurrentPoll != nullptr && strcmp(pcmd, "menuselect") == 0)
 	{
-		if (!pPlayer->IsSpectator() && CMD_ARGC() > 1)
+		if (CMD_ARGC() > 1)
 		{
 			int option = atoi(CMD_ARGV(1));
 			m_CurrentPoll->CastVote(pPlayer->entindex(), option);
@@ -1333,7 +1358,7 @@ void CHalfLifeMultiplay::CheckTimeLimit()
 
 void CHalfLifeMultiplay::CheckCurrentPoll()
 {
-	if (m_CurrentPoll != nullptr && m_CurrentPoll->CheckVote())
+	if (m_CurrentPoll != nullptr && m_CurrentPoll->CheckVotes())
 	{
 		delete m_CurrentPoll;
 		m_CurrentPoll = nullptr;

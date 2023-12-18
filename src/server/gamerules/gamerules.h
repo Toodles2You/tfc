@@ -323,7 +323,7 @@ private:
 	const unsigned int m_NumOptions;
 	const float m_EndTime;
 
-	unsigned int m_PlayersVoted;
+	unsigned int m_IgnorePlayers;
 	byte m_Tally[12];
 
 public:
@@ -337,7 +337,10 @@ public:
 	~CPoll();
 
 	void CastVote(int playerIndex, int option);
-	bool CheckVote();
+	bool CheckVotes();
+
+private:
+	bool CanPlayerVote(CBasePlayer* player);
 };
 
 //=========================================================
@@ -459,7 +462,7 @@ protected:
 
 	bool m_NextMapVoteCalled;
 	void MapVoteBegin();
-	void MapVoteFinished(int winner, int numOptions, byte* tally, void* user);
+	void MapVoteEnd(int winner, int numOptions, byte* tally, void* user);
 
 	bool AllowSpectators() { return m_allowSpectators; }
 

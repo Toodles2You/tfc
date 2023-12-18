@@ -33,7 +33,7 @@ typedef struct mapcycle_s
 
 static char szPreviousMapCycleFile[256];
 static mapcycle_t mapcycle;
-static char szNextLevel[32];
+static mapcycle_item_s* nextItem;
 
 /*
 ==============
@@ -42,7 +42,7 @@ DestroyMapCycle
 Clean up memory used by mapcycle when switching it
 ==============
 */
-void DestroyMapCycle(mapcycle_t* cycle)
+static void DestroyMapCycle(mapcycle_t* cycle)
 {
 	mapcycle_item_t *p, *n, *start;
 	p = cycle->items;
@@ -72,7 +72,7 @@ COM_Parse
 Parse a token out of a string
 ==============
 */
-char* COM_Parse(char* data)
+static char* COM_Parse(char* data)
 {
 	int c;
 	int len;
@@ -149,7 +149,7 @@ COM_TokenWaiting
 Returns 1 if additional data is waiting to be processed on this line
 ==============
 */
-bool COM_TokenWaiting(char* buffer)
+static bool COM_TokenWaiting(char* buffer)
 {
 	char* p;
 
@@ -175,7 +175,7 @@ ReloadMapCycleFile
 Parses mapcycle.txt file into mapcycle_t structure
 ==============
 */
-bool ReloadMapCycleFile(char* filename, mapcycle_t* cycle)
+static bool ReloadMapCycleFile(char* filename, mapcycle_t* cycle)
 {
 	char szBuffer[MAX_RULE_BUFFER];
 	char szMap[32];
@@ -300,7 +300,7 @@ CountPlayers
 Determine the current # of active players on the server for map cycling logic
 ==============
 */
-int CountPlayers()
+static int CountPlayers()
 {
 	int num = 0;
 
@@ -308,7 +308,7 @@ int CountPlayers()
 	{
 		CBaseEntity* pEnt = util::PlayerByIndex(i);
 
-		if (pEnt)
+		if (pEnt && !pEnt->IsBot())
 		{
 			num = num + 1;
 		}
@@ -325,7 +325,7 @@ Parse commands/key value pairs to issue right after map xxx command is issued on
  level transition
 ==============
 */
-void ExtractCommandString(char* s, char* szCommand)
+static void ExtractCommandString(char* s, char* szCommand)
 {
 	// Now make rules happen
 	char pkey[512];
@@ -407,13 +407,16 @@ void CHalfLifeMultiplay::ChangeLevel()
 	char szCommands[1500];
 	char szRules[1500];
 	int minplayers = 0, maxplayers = 0;
-	strcpy(szFirstMapInList, "hldm1"); // the absolute default level is hldm1
+	strcpy(szFirstMapInList, "crossfire"); // the absolute default level is purgatory
 
-	if (szNextLevel[0] != '\0' && g_engfuncs.pfnIsMapValid(szNextLevel) != 0)
+	if (nextItem != nullptr && g_engfuncs.pfnIsMapValid(nextItem->mapname) != 0)
 	{
 		EnterState(GR_STATE_GAME_OVER);
-		ALERT(at_console, "CHANGE LEVEL: %s\n", szNextLevel);
-		g_engfuncs.pfnChangeLevel(szNextLevel, nullptr);
+
+		ALERT(at_console, "CHANGE LEVEL: %s\n", nextItem->mapname);
+
+		g_engfuncs.pfnChangeLevel(nextItem->mapname, nullptr);
+		nextItem = nullptr;
 		return;
 	}
 
@@ -521,8 +524,7 @@ void CHalfLifeMultiplay::MapVoteBegin()
 		return;
 	}
 
-	std::string pollString =
-		"Vote for the next level!\n";
+	std::string pollString = "#Vote_level_title\n";
 
 	int count = 0;
 	for (auto i = mapcycle.next_item; i->next != mapcycle.next_item; i = i->next)
@@ -544,23 +546,23 @@ void CHalfLifeMultiplay::MapVoteBegin()
 
 	if (count == 1)
 	{
-		strcpy(szNextLevel, mapcycle.next_item->mapname);
+		nextItem = mapcycle.next_item;
 		mapcycle.next_item = mapcycle.next_item->next;
 		return;
 	}
 
 	m_CurrentPoll =
 		new CPoll{
-			static_cast<CPoll::callback_t>(&CHalfLifeMultiplay::MapVoteFinished),
+			static_cast<CPoll::callback_t>(&CHalfLifeMultiplay::MapVoteEnd),
 			count,
 			pollString.c_str(),
 			mapcycle.next_item};
 
-	util::ClientPrintAll(HUD_PRINTTALK, "Next level vote has begun");
+	util::ClientPrintAll(HUD_PRINTTALK, "#Vote_level_begin");
 }
 
 
-void CHalfLifeMultiplay::MapVoteFinished(int winner, int numOptions, byte* tally, void* user)
+void CHalfLifeMultiplay::MapVoteEnd(int winner, int numOptions, byte* tally, void* user)
 {
 	auto item = reinterpret_cast<mapcycle_item_s*>(user);
 
@@ -569,15 +571,12 @@ void CHalfLifeMultiplay::MapVoteFinished(int winner, int numOptions, byte* tally
 	{
 		if (count == winner)
 		{
-			item = i;
+			nextItem = i;
 			break;
 		}
 		count++;
 	}
 
-	strcpy(szNextLevel, item->mapname);
-	mapcycle.next_item = item->next;
-
-	util::ClientPrintAll(HUD_PRINTTALK, "Next level will be \"%s\"", szNextLevel);
+	util::ClientPrintAll(HUD_PRINTTALK, "#Vote_level_end", nextItem->mapname);
 }
 
