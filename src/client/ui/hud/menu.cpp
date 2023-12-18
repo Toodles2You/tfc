@@ -118,7 +118,7 @@ static inline const char* ParseEscapeToken(const char* token)
 		break;
 
 	case 'R':
-		menu_x = ScreenWidth / 2;
+		menu_x = gHUD.GetWidth() / 2;
 		menu_ralign = true;
 		break;
 	}
