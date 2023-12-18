@@ -26,7 +26,6 @@ inline int gmsgHealth = 0;
 inline int gmsgDamage = 0;
 inline int gmsgBattery = 0;
 inline int gmsgTrain = 0;
-inline int gmsgAmmoX = 0;
 inline int gmsgHudText = 0;
 inline int gmsgDeathMsg = 0;
 inline int gmsgScoreInfo = 0;
@@ -45,7 +44,6 @@ inline int gmsgSayText = 0;
 inline int gmsgTextMsg = 0;
 inline int gmsgShowMenu = 0;
 inline int gmsgVoteMenu = 0;
-inline int gmsgGeigerRange = 0;
 inline int gmsgTeamNames = 0;
 inline int gmsgAllowSpec = 0;
 

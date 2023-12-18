@@ -96,9 +96,7 @@ static inline const char* ParseEscapeToken(const char* token)
 		return token;
 
 	case 'w':
-		menu_r = 255;
-		menu_g = 255;
-		menu_b = 255;
+		gHUD.GetColor(menu_r, menu_g, menu_b, CHud::COLOR_PRIMARY);
 		break;
 
 	case 'd':
@@ -120,7 +118,7 @@ static inline const char* ParseEscapeToken(const char* token)
 		break;
 
 	case 'R':
-		menu_x = ScreenWidth / 2;
+		menu_x = gHUD.GetWidth() / 2;
 		menu_ralign = true;
 		break;
 	}
@@ -163,9 +161,7 @@ bool CHudMenu::Draw(float flTime)
 	// center it
 	int y = (gHUD.GetHeight() / 2) - ((nlc / 2) * 12) - 40; // make sure it is above the say text
 
-	menu_r = 255;
-	menu_g = 255;
-	menu_b = 255;
+	gHUD.GetColor(menu_r, menu_g, menu_b, CHud::COLOR_PRIMARY);
 	menu_x = 20;
 	menu_ralign = false;
 
