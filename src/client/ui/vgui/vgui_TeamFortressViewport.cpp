@@ -1818,7 +1818,7 @@ bool TeamFortressViewport::SlotInput(int iSlot)
 // Direct Key Input
 bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurrentBinding)
 {
-	if (0 != gEngfuncs.Con_IsVisible() || !down)
+	if (!down || 0 != gEngfuncs.Con_IsVisible())
 	{
 		return true;
 	}
