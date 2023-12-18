@@ -1862,10 +1862,21 @@ bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurren
 		}
 	}
 
-	if (gHUD.m_Menu.m_fMenuDisplayed && keynum >= '1' && keynum <= '9')
+	if (gHUD.m_Menu.m_fMenuDisplayed != CHudMenu::kNone)
 	{
-		gHUD.m_Menu.SelectMenuItem(keynum - '0');
-		return false;
+		if (gHUD.m_Menu.m_fMenuDisplayed == CHudMenu::kVote)
+		{
+			if (keynum >= K_F1 && keynum <= K_F12)
+			{
+				gHUD.m_Menu.SelectMenuItem(keynum - K_F1 + 1);
+				return false;
+			}
+		}
+		else if (keynum >= '1' && keynum <= '9')
+		{
+			gHUD.m_Menu.SelectMenuItem(keynum - '0');
+			return false;
+		}
 	}
 
 	if (keynum == K_MOUSE2 && IsScoreBoardVisible())

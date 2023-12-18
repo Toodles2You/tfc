@@ -390,7 +390,7 @@ static bool CheckMapCycle()
 		}
 	}
 
-	return true;
+	return mapcycle.items != nullptr;
 }
 
 /*
@@ -429,7 +429,7 @@ void CHalfLifeMultiplay::ChangeLevel()
 
 	curplayers = CountPlayers();
 
-	if (CheckMapCycle() && mapcycle.items)
+	if (CheckMapCycle())
 	{
 		bool keeplooking = false;
 		bool found = false;
@@ -519,20 +519,20 @@ void CHalfLifeMultiplay::ChangeLevel()
 
 void CHalfLifeMultiplay::MapVoteBegin()
 {
-	if (!CheckMapCycle() || mapcycle.items == nullptr)
+	if (!CheckMapCycle())
 	{
 		return;
 	}
 
-	std::string pollString = "#Vote_level_title\n";
+	std::string mapNames[4];
 
 	int count = 0;
 	for (auto i = mapcycle.next_item; i->next != mapcycle.next_item; i = i->next)
 	{
+		mapNames[count] = i->mapname;
+
 		count++;
 
-		pollString += std::to_string(count) + ". " + i->mapname + "\n";
-		
 		if (count == 4)
 		{
 			break;
@@ -555,7 +555,8 @@ void CHalfLifeMultiplay::MapVoteBegin()
 		new CPoll{
 			static_cast<CPoll::callback_t>(&CHalfLifeMultiplay::MapVoteEnd),
 			count,
-			pollString.c_str(),
+			"#Vote_level_title",
+			mapNames,
 			mapcycle.next_item};
 
 	util::ClientPrintAll(HUD_PRINTTALK, "#Vote_level_begin");

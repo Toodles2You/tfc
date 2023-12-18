@@ -288,16 +288,25 @@ private:
 class CHudMenu : public CHudBase
 {
 public:
+	typedef enum {
+		kNone = 0,
+		kMenu,
+		kVote,
+	} menu_e;
+
 	bool Init() override;
 	void InitHUDData() override;
 	bool VidInit() override;
 	void Reset() override;
 	bool Draw(float flTime) override;
 	bool MsgFunc_ShowMenu(const char* pszName, int iSize, void* pbuf);
+	bool MsgFunc_VoteMenu(const char* pszName, int iSize, void* pbuf);
 
 	void SelectMenuItem(int menu_item);
 
-	bool m_fMenuDisplayed;
+	menu_e m_fMenuDisplayed;
+
+protected:
 	int m_bitsValidSlots;
 	float m_flShutoffTime;
 	bool m_fWaitingForMore;

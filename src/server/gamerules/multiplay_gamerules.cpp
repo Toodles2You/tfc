@@ -120,19 +120,19 @@ void CTeam::AddPoints(float score)
 }
 
 
-CPoll::CPoll(callback_t callback, int options, const char* text, void* user, int duration)
-	: m_Callback(callback),
-	  m_NumOptions(options),
-	  m_EndTime(gpGlobals->time + duration),
-	  m_IgnorePlayers(0),
-	  m_User(user)
+CPoll::CPoll(
+	callback_t callback,
+	int numOptions,
+	std::string title,
+	std::string* options,
+	void* user,
+	int duration)
+		: m_Callback(callback),
+		  m_NumOptions(numOptions),
+		  m_EndTime(gpGlobals->time + duration),
+		  m_IgnorePlayers(0),
+		  m_User(user)
 {
-	int bits = 0;
-	for (int i = 0; i < options; i++)
-	{
-		bits |= 1 << i;
-	}
-
 	memset(m_Tally, 0, sizeof(m_Tally));
 
 	/* Mask off players that cannot partake in this vote */
@@ -146,15 +146,18 @@ CPoll::CPoll(callback_t callback, int options, const char* text, void* user, int
 			continue;
 		}
 
-		MessageBegin(MSG_ONE, gmsgShowMenu, player);
-		WriteShort(bits);
-		WriteChar(duration);
-		WriteByte(0);
-		WriteString(text);
+		MessageBegin(MSG_ONE, gmsgVoteMenu, player);
+		WriteByte(numOptions);
+		WriteByte(duration);
+		WriteString(title.c_str());
+		for (int j = 0; j < numOptions; j++)
+		{
+			WriteString(options[j].c_str());
+		}
 		MessageEnd();
 	}
 
-	ALERT(at_aiconsole, "Vote starting with %i options\n", options);
+	ALERT(at_console, "Vote starting with %i options\n", options);
 }
 
 
@@ -162,7 +165,7 @@ CPoll::~CPoll()
 {
 	int total = 0;
 
-	int maxVotes = 0;
+	int maxVotes = -1;
 	int candidates[12];
 	int numCandidates = 0;
 	
@@ -172,28 +175,34 @@ CPoll::~CPoll()
 
 		if (m_Tally[i] > maxVotes)
 		{
-			maxVotes = i;
+			maxVotes = m_Tally[i];
 
-			candidates[0] = m_Tally[i];
+			candidates[0] = i;
 			numCandidates = 1;
 		}
 		else if (m_Tally[i] == maxVotes)
 		{
-			candidates[numCandidates] = m_Tally[i];
+			candidates[numCandidates] = i;
 			numCandidates++;
 		}
 	}
 
-	ALERT(at_aiconsole, "Vote finished with %i total\n", total);
+	ALERT(at_console, "Vote finished with %i total\n", total);
 
 	int winner = candidates[g_engfuncs.pfnRandomLong(1, numCandidates) - 1];
+	
+	float percent = 100;
+	if (total != 0)
+	{
+		percent = (maxVotes / (float)total) * 100;
+	}
 
 	ALERT(
-		at_aiconsole,
+		at_console,
 		"Option %i won with %i votes (%g%%)\n",
 		winner + 1,
 		maxVotes,
-		(maxVotes / (float)total) * 100);
+		percent);
 
 	if (m_Callback != nullptr)
 	{
@@ -225,7 +234,7 @@ void CPoll::CastVote(int playerIndex, int option)
 	m_IgnorePlayers |= bit;
 	m_Tally[option - 1]++;
 
-	ALERT(at_aiconsole, "Player %i voted for option %i\n", playerIndex, option);
+	ALERT(at_console, "Player %i voted for option %i\n", playerIndex, option);
 }
 
 
@@ -1370,8 +1379,9 @@ void CHalfLifeMultiplay::CheckCurrentPoll()
 	vote for the next map.
 	*/
 	if (!m_NextMapVoteCalled
-	 && timelimit.value >= 10
-	 && m_stateChangeTime + (timelimit.value * 60) > gpGlobals->time - 300
+	//  && timelimit.value >= 10
+	//  && m_stateChangeTime + (timelimit.value * 60) <= gpGlobals->time - 300
+	 && gpGlobals->time > 5
 	 && m_CurrentPoll == nullptr)
 	{
 		MapVoteBegin();

@@ -23,6 +23,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <string>
 
 #include "vgui_TeamFortressViewport.h"
 
@@ -33,12 +34,14 @@ char g_szPrelocalisedMenuString[MAX_MENU_STRING];
 bool KB_ConvertString(char* in, char** ppout);
 
 DECLARE_MESSAGE(m_Menu, ShowMenu);
+DECLARE_MESSAGE(m_Menu, VoteMenu);
 
 bool CHudMenu::Init()
 {
 	gHUD.AddHudElem(this);
 
 	HOOK_MESSAGE(ShowMenu);
+	HOOK_MESSAGE(VoteMenu);
 
 	InitHUDData();
 
@@ -47,7 +50,7 @@ bool CHudMenu::Init()
 
 void CHudMenu::InitHUDData()
 {
-	m_fMenuDisplayed = false;
+	m_fMenuDisplayed = kNone;
 	m_bitsValidSlots = 0;
 	Reset();
 }
@@ -134,7 +137,7 @@ bool CHudMenu::Draw(float flTime)
 	{
 		if (m_flShutoffTime <= gHUD.m_flTime)
 		{ // times up, shutoff
-			m_fMenuDisplayed = false;
+			m_fMenuDisplayed = kNone;
 			m_iFlags &= ~HUD_ACTIVE;
 			return true;
 		}
@@ -217,7 +220,7 @@ void CHudMenu::SelectMenuItem(int menu_item)
 		EngineClientCmd(szbuf);
 
 		// remove the menu
-		m_fMenuDisplayed = false;
+		m_fMenuDisplayed = kNone;
 		m_iFlags &= ~HUD_ACTIVE;
 	}
 }
@@ -269,16 +272,74 @@ bool CHudMenu::MsgFunc_ShowMenu(const char* pszName, int iSize, void* pbuf)
 			}
 		}
 
-		m_fMenuDisplayed = true;
+		m_fMenuDisplayed = kMenu;
 		m_iFlags |= HUD_ACTIVE;
 	}
 	else
 	{
-		m_fMenuDisplayed = false; // no valid slots means that the menu should be turned off
+		m_fMenuDisplayed = kNone; // no valid slots means that the menu should be turned off
 		m_iFlags &= ~HUD_ACTIVE;
 	}
 
 	m_fWaitingForMore = NeedMore;
 
+	return true;
+}
+
+bool CHudMenu::MsgFunc_VoteMenu(const char* pszName, int iSize, void* pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	m_fWaitingForMore = false;
+
+	int numOptions = READ_BYTE();
+	if (numOptions == 0)
+	{
+		m_fMenuDisplayed = kNone;
+		m_iFlags &= ~HUD_ACTIVE;
+		return true;
+	}
+
+	int displayTime = READ_BYTE();
+	if (displayTime > 0)
+	{
+		m_flShutoffTime = gHUD.m_flTime + displayTime;
+	}
+	else
+	{
+		m_flShutoffTime = -1;
+	}
+
+	char* str = READ_STRING();
+	if (str[0] == '#')
+	{
+		str = gHUD.m_TextMessage.BufferedLocaliseTextString(str);
+	}
+
+	strncpy(g_szMenuString, str, MAX_MENU_STRING);
+	strncat(g_szMenuString, "\n", MAX_MENU_STRING);
+
+	m_bitsValidSlots = 0;
+	for (int i = 0; i < numOptions; i++)
+	{
+		m_bitsValidSlots |= 1 << i;
+
+		str = READ_STRING();
+		if (str[0] == '#')
+		{
+			str = gHUD.m_TextMessage.BufferedLocaliseTextString(str);
+		}
+
+		std::string key = "F" + std::to_string(i + 1) + ". ";
+
+		strncat(g_szMenuString, key.c_str(), MAX_MENU_STRING);
+		strncat(g_szMenuString, str, MAX_MENU_STRING);
+		strncat(g_szMenuString, "\n", MAX_MENU_STRING);
+	}
+
+	g_szMenuString[MAX_MENU_STRING - 1] = '\0';
+
+	m_fMenuDisplayed = kVote;
+	m_iFlags |= HUD_ACTIVE;
 	return true;
 }

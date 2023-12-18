@@ -329,8 +329,9 @@ private:
 public:
 	CPoll(
 		callback_t callback,
-		int options,
-		const char* text,
+		int numOptions,
+		std::string title,
+		std::string* options,
 		void* user = nullptr,
 		int duration = kPollDuration);
 

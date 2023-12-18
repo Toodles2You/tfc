@@ -54,6 +54,7 @@ void LinkUserMessages()
 	gmsgItemPickup = REG_USER_MSG("ItemPickup", -1);
 	gmsgHideWeapon = REG_USER_MSG("HideWeapon", 1);
 	gmsgShowMenu = REG_USER_MSG("ShowMenu", -1);
+	gmsgVoteMenu = REG_USER_MSG("VoteMenu", -1);
 	gmsgShake = REG_USER_MSG("ScreenShake", sizeof(ScreenShake));
 	gmsgFade = REG_USER_MSG("ScreenFade", sizeof(ScreenFade));
 	gmsgAmmoX = REG_USER_MSG("AmmoX", 2);
