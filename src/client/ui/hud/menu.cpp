@@ -320,7 +320,6 @@ bool CHudMenu::MsgFunc_VoteMenu(const char* pszName, int iSize, void* pbuf)
 	}
 
 	strncpy(g_szMenuString, str, MAX_MENU_STRING);
-	strncat(g_szMenuString, "\n", MAX_MENU_STRING);
 
 	m_bitsValidSlots = 0;
 	for (int i = 0; i < numOptions; i++)
@@ -335,9 +334,9 @@ bool CHudMenu::MsgFunc_VoteMenu(const char* pszName, int iSize, void* pbuf)
 
 		std::string key = "F" + std::to_string(i + 1) + ". ";
 
+		strncat(g_szMenuString, "\n", MAX_MENU_STRING);
 		strncat(g_szMenuString, key.c_str(), MAX_MENU_STRING);
 		strncat(g_szMenuString, str, MAX_MENU_STRING);
-		strncat(g_szMenuString, "\n", MAX_MENU_STRING);
 	}
 
 	g_szMenuString[MAX_MENU_STRING - 1] = '\0';
