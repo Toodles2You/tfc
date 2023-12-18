@@ -221,9 +221,9 @@ Vote for the next level
 }
 Vote_level_begin
 {
-Next level vote has begun
+Voting for the next level has begun
 }
 Vote_level_end
 {
-Next level will be %s
+Voting has concluded! The next level will be '%s'
 }
