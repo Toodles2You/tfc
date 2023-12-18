@@ -159,7 +159,7 @@ bool CHudMenu::Draw(float flTime)
 	}
 
 	// center it
-	int y = (ScreenHeight / 2) - ((nlc / 2) * 12) - 40; // make sure it is above the say text
+	int y = (gHUD.GetHeight() / 2) - ((nlc / 2) * 12) - 40; // make sure it is above the say text
 
 	menu_r = 255;
 	menu_g = 255;

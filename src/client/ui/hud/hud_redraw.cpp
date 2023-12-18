@@ -299,7 +299,9 @@ void CHud::DrawHudFill(int x, int y, int w, int h, hudcolor_e color, int a)
 
 int CHud::DrawHudString(int xpos, int ypos, int iMaxX, const char* szIt, int r, int g, int b)
 {
-	return xpos + gEngfuncs.pfnDrawString(xpos, ypos, szIt, r, g, b);
+	auto x1 = roundf (m_flOffsetX + xpos * m_flScaleX);
+	auto y1 = roundf (m_flOffsetY + ypos * m_flScaleY);
+	return (gEngfuncs.pfnDrawString(x1, y1, szIt, r, g, b) - m_flOffsetX) / m_flScaleX;
 }
 
 int CHud::DrawHudNumberString(int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b)
