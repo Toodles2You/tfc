@@ -1378,14 +1378,13 @@ void CHalfLifeMultiplay::CheckCurrentPoll()
 	}
 
 	/*
-	If the map time limit is 10 minutes or more
-	& there's only five minutes left, let players
-	vote for the next map.
+	If the map time limit is set
+	& only five minutes are left,
+	let players vote for the next map.
 	*/
 	if (!m_NextMapVoteCalled
-	//  && timelimit.value >= 10
-	//  && m_stateChangeTime + (timelimit.value * 60) <= gpGlobals->time - 300
-	 && gpGlobals->time > 5
+	 && timelimit.value > 0.0F
+	 && m_stateChangeTime + (timelimit.value * 60) - 300 <= gpGlobals->time
 	 && m_CurrentPoll == nullptr)
 	{
 		MapVoteBegin();
