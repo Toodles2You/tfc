@@ -307,6 +307,39 @@ public:
 	std::vector<CBasePlayer *> m_players;
 };
 
+class CPoll
+{
+public:
+	enum
+	{
+		kPollDuration = 20,
+	};
+
+	typedef void (CGameRules::*callback_t)(int, int, byte*, void*);
+
+private:
+	callback_t m_Callback;
+	void* m_User;
+	const unsigned int m_NumOptions;
+	const float m_EndTime;
+
+	unsigned int m_PlayersVoted;
+	byte m_Tally[12];
+
+public:
+	CPoll(
+		callback_t callback,
+		int options,
+		const char* text,
+		void* user = nullptr,
+		int duration = kPollDuration);
+
+	~CPoll();
+
+	void CastVote(int playerIndex, int option);
+	bool CheckVote();
+};
+
 //=========================================================
 // CHalfLifeMultiplay - rules for the basic half life multiplayer
 // competition
@@ -400,6 +433,7 @@ public:
 
 protected:
 	void CheckTimeLimit();
+	void CheckCurrentPoll();
 
 	virtual void Enter_RND_RUNNING();
 	virtual void Think_RND_RUNNING();
@@ -419,6 +453,13 @@ protected:
 	int m_numTeams;
 	std::vector<CTeam> m_teams;
 	CTeam m_spectators;
+	
+	float m_NextPollCheck;
+	CPoll* m_CurrentPoll;
+
+	bool m_NextMapVoteCalled;
+	void MapVoteBegin();
+	void MapVoteFinished(int winner, int numOptions, byte* tally, void* user);
 
 	bool AllowSpectators() { return m_allowSpectators; }
 

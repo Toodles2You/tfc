@@ -9,6 +9,10 @@
 #include "util.h"
 #include "cbase.h"
 #include "gamerules.h"
+#include "game.h"
+#include "filesystem_utils.h"
+
+#include <algorithm>
 
 #define MAX_RULE_BUFFER 1024
 
@@ -26,6 +30,10 @@ typedef struct mapcycle_s
 	struct mapcycle_item_s* items;
 	struct mapcycle_item_s* next_item;
 } mapcycle_t;
+
+static char szPreviousMapCycleFile[256];
+static mapcycle_t mapcycle;
+static char szNextLevel[32];
 
 /*
 ==============
@@ -364,35 +372,9 @@ void ExtractCommandString(char* s, char* szCommand)
 	}
 }
 
-/*
-==============
-ChangeLevel
-
-Server is changing to a new level, check mapcycle.txt for map name and setup info
-==============
-*/
-void CHalfLifeMultiplay::ChangeLevel()
+static bool CheckMapCycle()
 {
-	static char szPreviousMapCycleFile[256];
-	static mapcycle_t mapcycle;
-
-	char szNextMap[32];
-	char szFirstMapInList[32];
-	char szCommands[1500];
-	char szRules[1500];
-	int minplayers = 0, maxplayers = 0;
-	strcpy(szFirstMapInList, "hldm1"); // the absolute default level is hldm1
-
-	int curplayers;
-	bool do_cycle = true;
-
-	// find the map to change to
 	char* mapcfile = (char*)CVAR_GET_STRING("mapcyclefile");
-
-	szCommands[0] = '\0';
-	szRules[0] = '\0';
-
-	curplayers = CountPlayers();
 
 	// Has the map cycle filename changed?
 	if (stricmp(mapcfile, szPreviousMapCycleFile))
@@ -404,11 +386,47 @@ void CHalfLifeMultiplay::ChangeLevel()
 		if (!ReloadMapCycleFile(mapcfile, &mapcycle) || (!mapcycle.items))
 		{
 			ALERT(at_console, "Unable to load map cycle file %s\n", mapcfile);
-			do_cycle = false;
+			return false;
 		}
 	}
 
-	if (do_cycle && mapcycle.items)
+	return true;
+}
+
+/*
+==============
+ChangeLevel
+
+Server is changing to a new level, check mapcycle.txt for map name and setup info
+==============
+*/
+void CHalfLifeMultiplay::ChangeLevel()
+{
+	char szNextMap[32];
+	char szFirstMapInList[32];
+	char szCommands[1500];
+	char szRules[1500];
+	int minplayers = 0, maxplayers = 0;
+	strcpy(szFirstMapInList, "hldm1"); // the absolute default level is hldm1
+
+	if (szNextLevel[0] != '\0' && g_engfuncs.pfnIsMapValid(szNextLevel) != 0)
+	{
+		EnterState(GR_STATE_GAME_OVER);
+		ALERT(at_console, "CHANGE LEVEL: %s\n", szNextLevel);
+		g_engfuncs.pfnChangeLevel(szNextLevel, nullptr);
+		return;
+	}
+
+	int curplayers;
+
+	// find the map to change to
+
+	szCommands[0] = '\0';
+	szRules[0] = '\0';
+
+	curplayers = CountPlayers();
+
+	if (CheckMapCycle() && mapcycle.items)
 	{
 		bool keeplooking = false;
 		bool found = false;
@@ -494,3 +512,72 @@ void CHalfLifeMultiplay::ChangeLevel()
 		SERVER_COMMAND(szCommands);
 	}
 }
+
+
+void CHalfLifeMultiplay::MapVoteBegin()
+{
+	if (!CheckMapCycle() || mapcycle.items == nullptr)
+	{
+		return;
+	}
+
+	std::string pollString =
+		"Vote for the next level!\n";
+
+	int count = 0;
+	for (auto i = mapcycle.next_item; i->next != mapcycle.next_item; i = i->next)
+	{
+		count++;
+
+		pollString += std::to_string(count) + ". " + i->mapname + "\n";
+		
+		if (count == 4)
+		{
+			break;
+		}
+	}
+
+	if (count == 0)
+	{
+		return;
+	}
+
+	if (count == 1)
+	{
+		strcpy(szNextLevel, mapcycle.next_item->mapname);
+		mapcycle.next_item = mapcycle.next_item->next;
+		return;
+	}
+
+	m_CurrentPoll =
+		new CPoll{
+			static_cast<CPoll::callback_t>(&CHalfLifeMultiplay::MapVoteFinished),
+			count,
+			pollString.c_str(),
+			mapcycle.next_item};
+
+	util::ClientPrintAll(HUD_PRINTTALK, "Next level vote has begun");
+}
+
+
+void CHalfLifeMultiplay::MapVoteFinished(int winner, int numOptions, byte* tally, void* user)
+{
+	auto item = reinterpret_cast<mapcycle_item_s*>(user);
+
+	int count = 0;
+	for (auto i = item; i->next != mapcycle.next_item; i = i->next)
+	{
+		if (count == winner)
+		{
+			item = i;
+			break;
+		}
+		count++;
+	}
+
+	strcpy(szNextLevel, item->mapname);
+	mapcycle.next_item = item->next;
+
+	util::ClientPrintAll(HUD_PRINTTALK, "Next level will be \"%s\"", szNextLevel);
+}
+

@@ -120,6 +120,136 @@ void CTeam::AddPoints(float score)
 }
 
 
+CPoll::CPoll(callback_t callback, int options, const char* text, void* user, int duration)
+	: m_Callback(callback),
+	  m_NumOptions(options),
+	  m_EndTime(gpGlobals->time + duration),
+	  m_PlayersVoted(0),
+	  m_User(user)
+{
+	int bits = 0;
+	for (int i = 0; i < options; i++)
+	{
+		bits |= 1 << i;
+	}
+
+	memset(m_Tally, 0, sizeof(m_Tally));
+
+	MessageBegin(MSG_ALL, gmsgShowMenu);
+	WriteShort(bits);
+	WriteChar(duration);
+	WriteByte(0);
+	WriteString(text);
+	MessageEnd();
+
+	ALERT(at_aiconsole, "Vote starting with %i options\n", options);
+}
+
+
+CPoll::~CPoll()
+{
+	int total = 0;
+
+	int maxVotes = 0;
+	int candidates[12];
+	int numCandidates = 0;
+	
+	for (int i = 0; i < m_NumOptions; i++)
+	{
+		total += m_Tally[i];
+
+		if (m_Tally[i] > maxVotes)
+		{
+			maxVotes = i;
+
+			candidates[0] = m_Tally[i];
+			numCandidates = 1;
+		}
+		else if (m_Tally[i] == maxVotes)
+		{
+			candidates[numCandidates] = m_Tally[i];
+			numCandidates++;
+		}
+	}
+
+	ALERT(at_aiconsole, "Vote finished with %i total\n", total);
+
+	int winner = candidates[g_engfuncs.pfnRandomLong(1, numCandidates) - 1];
+
+	ALERT(
+		at_aiconsole,
+		"Option %i won with %i votes (%g%%)\n",
+		winner + 1,
+		maxVotes,
+		(maxVotes / (float)total) * 100);
+
+	if (m_Callback != nullptr)
+	{
+		(g_pGameRules->*m_Callback)(winner, m_NumOptions, m_Tally, m_User);
+	}
+}
+
+
+void CPoll::CastVote(int playerIndex, int option)
+{
+	const auto bit = 1 << (playerIndex - 1);
+
+	if ((m_PlayersVoted & bit) != 0)
+	{
+		return;
+	}
+
+	if (option < 1 || option > m_NumOptions)
+	{
+		return;
+	}
+
+	m_PlayersVoted |= bit;
+	m_Tally[option - 1]++;
+
+	ALERT(at_aiconsole, "Player %i voted for option %i\n", playerIndex, option);
+}
+
+
+bool CPoll::CheckVote()
+{
+	if (g_pGameRules->GetState() == GR_STATE_GAME_OVER)
+	{
+		return true;
+	}
+
+	if (m_EndTime <= gpGlobals->time)
+	{
+		return true;
+	}
+
+	auto everyoneVoted = true;
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		auto player = dynamic_cast<CBasePlayer*>(util::PlayerByIndex(i));
+
+		if (player == nullptr)
+		{
+			continue;
+		}
+
+		if (player->IsSpectator() || player->IsBot())
+		{
+			continue;
+		}
+
+		if ((m_PlayersVoted & (1 << (i - 1))) == 0)
+		{
+			everyoneVoted = false;
+			break;
+		}
+	}
+
+	return everyoneVoted;
+}
+
+
 CHalfLifeMultiplay::CHalfLifeMultiplay()
 {
 	g_VoiceGameMgr.Init(&g_GameMgrHelper, gpGlobals->maxClients);
@@ -132,6 +262,11 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	m_teams.clear();
 	m_teams.push_back(CTeam{TEAM_DEFAULT, "players"});
 	m_numTeams = 1;
+
+	m_NextPollCheck = gpGlobals->time + 1;
+	m_CurrentPoll = nullptr;
+
+	m_NextMapVoteCalled = false;
 
 	if (!g_engfuncs.pfnIsDedicatedServer())
 	{
@@ -227,6 +362,15 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 		ChangePlayerTeam(pPlayer, TEAM_SPECTATORS, true, false, false);
 		return true;
 	}
+	else if (m_CurrentPoll != nullptr && strcmp(pcmd, "menuselect") == 0)
+	{
+		if (!pPlayer->IsSpectator() && CMD_ARGC() > 1)
+		{
+			int option = atoi(CMD_ARGV(1));
+			m_CurrentPoll->CastVote(pPlayer->entindex(), option);
+		}
+		return true;
+	}
 	else if (pPlayer->IsObserver())
 	{
 		if (CMD_ARGC() > 1)
@@ -261,6 +405,12 @@ void CHalfLifeMultiplay::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infob
 void CHalfLifeMultiplay::Think()
 {
 	g_VoiceGameMgr.Update(gpGlobals->frametime);
+
+	if (m_NextPollCheck <= gpGlobals->time)
+	{
+		m_NextPollCheck = gpGlobals->time + 1;
+		CheckCurrentPoll();
+	}
 
 	switch (GetState())
 	{
@@ -1178,6 +1328,30 @@ void CHalfLifeMultiplay::CheckTimeLimit()
 	}
 
 	EnterState(GR_STATE_GAME_OVER);
+}
+
+
+void CHalfLifeMultiplay::CheckCurrentPoll()
+{
+	if (m_CurrentPoll != nullptr && m_CurrentPoll->CheckVote())
+	{
+		delete m_CurrentPoll;
+		m_CurrentPoll = nullptr;
+	}
+
+	/*
+	If the map time limit is 10 minutes or more
+	& there's only five minutes left, let players
+	vote for the next map.
+	*/
+	if (!m_NextMapVoteCalled
+	 && timelimit.value >= 10
+	 && m_stateChangeTime + (timelimit.value * 60) > gpGlobals->time - 300
+	 && m_CurrentPoll == nullptr)
+	{
+		MapVoteBegin();
+		m_NextMapVoteCalled = true;
+	}
 }
 
 
