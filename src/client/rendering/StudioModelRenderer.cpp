@@ -1183,9 +1183,23 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 		IEngineStudio.StudioSetupLighting(&lighting);
 
 		// get remap colors
+		if (m_pCurrentEntity == IEngineStudio.GetViewEntity())
+		{
+			auto player = gEngfuncs.GetLocalPlayer();
 
-		m_nTopColor = m_pCurrentEntity->curstate.colormap & 0xFF;
-		m_nBottomColor = (m_pCurrentEntity->curstate.colormap & 0xFF00) >> 8;
+			m_pCurrentEntity->curstate.rendermode = player->curstate.rendermode;
+			m_pCurrentEntity->curstate.renderfx = player->curstate.renderfx;
+			m_pCurrentEntity->curstate.renderamt = player->curstate.renderamt;
+			m_pCurrentEntity->curstate.rendercolor = player->curstate.rendercolor;
+
+			m_nTopColor = player->curstate.colormap & 0xFF;
+			m_nBottomColor = (player->curstate.colormap & 0xFF00) >> 8;
+		}
+		else
+		{
+			m_nTopColor = m_pCurrentEntity->curstate.colormap & 0xFF;
+			m_nBottomColor = (m_pCurrentEntity->curstate.colormap & 0xFF00) >> 8;
+		}
 
 
 		IEngineStudio.StudioSetRemapColors(m_nTopColor, m_nBottomColor);
