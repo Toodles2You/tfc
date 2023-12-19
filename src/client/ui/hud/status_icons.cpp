@@ -158,6 +158,11 @@ void CHudStatusIcons::EnableIcon(const char* pszIconName, int red, int green, in
 	{
 		cl_entity_t* pthisplayer = gEngfuncs.GetLocalPlayer();
 
+		gEngfuncs.pEventAPI->EV_StopSound(
+			pthisplayer->index,
+			CHAN_STATIC,
+			"weapons/timer.wav");
+
 		gEngfuncs.pEventAPI->EV_PlaySound(
 			pthisplayer->index,
 			pthisplayer->origin,
