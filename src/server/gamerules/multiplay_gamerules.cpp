@@ -306,6 +306,7 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 
 	m_NextMapVoteState = kMapVoteNotCalled;
 	m_RockTheVote = 0;
+	memset(m_MapNominees, 0, sizeof(m_MapNominees));
 
 	if (!g_engfuncs.pfnIsDedicatedServer())
 	{
@@ -447,10 +448,24 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 
 int CountPlayers();
 
-bool CHalfLifeMultiplay::SayCommand(CBasePlayer* player, const char* cmd)
+bool CHalfLifeMultiplay::SayCommand(CBasePlayer* player, char* cmd)
 {
+	char* argv[8];
+
+	argv[0] = strtok(cmd, " ");
+
+	if (argv[0] == nullptr || argv[0][0] == '\0')
+	{
+		return true;
+	}
+
+	int argc = 1;
+	do {
+		argv[argc] = strtok(nullptr, " ");
+	} while (argv[argc] != nullptr && (++argc) < ARRAYSIZE(argv));
+
 	/* Classic "rock the vote" command to request a level change */
-	if (stricmp(cmd, "rtv") == 0)
+	if (stricmp(argv[0], "rtv") == 0)
 	{
 		if (m_NextMapVoteState == kMapVoteChangeImmediately)
 		{
@@ -497,6 +512,71 @@ bool CHalfLifeMultiplay::SayCommand(CBasePlayer* player, const char* cmd)
 				STRING(player->pev->netname),
 				util::dtos1(players - rocked));
 		}
+
+		return true;
+	}
+	else if (stricmp(argv[0], "nominate") == 0)
+	{
+		if (m_NextMapVoteState != kMapVoteNotCalled)
+		{
+			return true;
+		}
+
+		/*! Toodles TODO: Bring up map list if no name is provided */
+		if (argc < 2)
+		{
+			return true;
+		}
+
+		int slot = -1;
+
+		for (int i = 0; i < 4; i++)
+		{
+			/* Overwrite this player's previous nomination */
+			if (m_MapNominees[i].playerIndex == player->entindex())
+			{
+				slot = i;
+				break;
+			}
+			if (m_MapNominees[i].playerIndex == 0)
+			{
+				if (slot == -1)
+				{
+					slot = i;
+				}
+				continue;
+			}
+			/* Already nominated */
+			if (stricmp(m_MapNominees[i].name, argv[1]) == 0)
+			{
+				slot = -1;
+				break;
+			}
+		}
+
+		if (slot == -1)
+		{
+			return true;
+		}
+
+		/* Engine treats relative paths as valid... Ugh */
+		if (strchr(argv[1], '.') != nullptr
+			|| strchr(argv[1], '/') != nullptr
+			|| strchr(argv[1], '\\') != nullptr
+			|| g_engfuncs.pfnIsMapValid(argv[1]) == 0)
+		{
+			return true;
+		}
+
+		strncpy(m_MapNominees[slot].name, argv[1], 31);
+		m_MapNominees[slot].name[31] = '\0';
+		m_MapNominees[slot].playerIndex = player->entindex();
+
+		util::ClientPrintAll(
+			HUD_PRINTTALK,
+			"#Vote_level_nominate",
+			STRING(player->pev->netname),
+			m_MapNominees[slot].name);
 
 		return true;
 	}
@@ -682,7 +762,32 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 
 		CBasePlayer* pPlayer = (CBasePlayer*)CBaseEntity::Instance(pClient);
 
-		m_RockTheVote &= ~(1 << (ENTINDEX(pClient) - 1));
+		int playerIndex = ENTINDEX(pClient);
+
+		m_RockTheVote &= ~(1 << (playerIndex - 1));
+
+		/* Discard nomination if the vote hasn't happened yet */
+		if (m_NextMapVoteState == kMapVoteNotCalled)
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				if (m_MapNominees[i].playerIndex != playerIndex)
+				{
+					continue;
+				}
+
+				if (i < 3)
+				{
+					memmove(
+						m_MapNominees + i,
+						m_MapNominees + i + 1,
+						sizeof(map_nominee_t) * (3 - i));
+				}
+
+				memset(m_MapNominees + 3, 0, sizeof(map_nominee_t));
+				break;
+			}
+		}
 
 		if (pPlayer)
 		{

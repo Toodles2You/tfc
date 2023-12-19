@@ -235,3 +235,7 @@ Vote_level_pass
 {
 Player %s wants to change levels
 }
+Vote_level_nominate
+{
+Player %s has nominated '%s'
+}

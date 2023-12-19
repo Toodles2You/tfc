@@ -33,7 +33,7 @@ typedef struct mapcycle_s
 
 static char szPreviousMapCycleFile[256];
 static mapcycle_t mapcycle;
-static mapcycle_item_s* nextItem;
+static std::string nextlevel;
 
 /*
 ==============
@@ -409,14 +409,14 @@ void CHalfLifeMultiplay::ChangeLevel()
 	int minplayers = 0, maxplayers = 0;
 	strcpy(szFirstMapInList, "crossfire"); // the absolute default level is purgatory
 
-	if (nextItem != nullptr && g_engfuncs.pfnIsMapValid(nextItem->mapname) != 0)
+	if (nextlevel.length() != 0 && g_engfuncs.pfnIsMapValid(nextlevel.c_str()) != 0)
 	{
 		EnterState(GR_STATE_GAME_OVER);
 
-		ALERT(at_console, "CHANGE LEVEL: %s\n", nextItem->mapname);
+		ALERT(at_console, "CHANGE LEVEL: %s\n", nextlevel.c_str());
 
-		g_engfuncs.pfnChangeLevel(nextItem->mapname, nullptr);
-		nextItem = nullptr;
+		g_engfuncs.pfnChangeLevel(nextlevel.c_str(), nullptr);
+		nextlevel.clear();
 		return;
 	}
 
@@ -527,16 +527,46 @@ void CHalfLifeMultiplay::MapVoteBegin()
 	std::string mapNames[4];
 
 	int count = 0;
-	for (auto i = mapcycle.next_item; i->next != mapcycle.next_item; i = i->next)
+
+	for (int i = 0; i < 4; i++)
 	{
-		mapNames[count] = i->mapname;
+		if (m_MapNominees[i].playerIndex != 0)
+		{
+			mapNames[count] = m_MapNominees[i].name;
+			count++;
+		}
+	}
 
-		count++;
-
+	mapcycle_item_t* item;
+	for (item = mapcycle.next_item; item->next != mapcycle.next_item; item = item->next)
+	{
 		if (count == 4)
 		{
 			break;
 		}
+		
+		/* Check if already nominated */
+		bool already = false;
+		for (int j = 0; j < 4; j++)
+		{
+			if (m_MapNominees[j].playerIndex != 0
+			 && stricmp(m_MapNominees[j].name, item->mapname) == 0)
+			{
+				already = true;
+				break;
+			}
+		}
+		if (already)
+		{
+			continue;
+		}
+
+		/* Append this map to the nominees */
+		m_MapNominees[count].playerIndex = -1;
+		strcpy(m_MapNominees[count].name, item->mapname);
+
+		mapNames[count] = item->mapname;
+		count++;
 	}
 
 	if (count == 0)
@@ -544,20 +574,15 @@ void CHalfLifeMultiplay::MapVoteBegin()
 		return;
 	}
 
-	if (count == 1)
-	{
-		nextItem = mapcycle.next_item;
-		mapcycle.next_item = mapcycle.next_item->next;
-		return;
-	}
+	/* New pool of maps for the next vote or level change */
+	mapcycle.next_item = item->next;
 
 	m_CurrentPoll =
 		new CPoll{
 			static_cast<CPoll::callback_t>(&CHalfLifeMultiplay::MapVoteEnd),
 			count,
 			"#Vote_level_title",
-			mapNames,
-			mapcycle.next_item};
+			mapNames};
 
 	util::ClientPrintAll(HUD_PRINTTALK, "#Vote_level_begin");
 }
@@ -565,19 +590,11 @@ void CHalfLifeMultiplay::MapVoteBegin()
 
 void CHalfLifeMultiplay::MapVoteEnd(int winner, int numOptions, byte* tally, void* user)
 {
-	auto item = reinterpret_cast<mapcycle_item_s*>(user);
+	nextlevel = m_MapNominees[winner].name;
 
-	int count = 0;
-	for (auto i = item; i->next != mapcycle.next_item; i = i->next)
-	{
-		if (count == winner)
-		{
-			nextItem = i;
-			break;
-		}
-		count++;
-	}
-
-	util::ClientPrintAll(HUD_PRINTTALK, "#Vote_level_end", nextItem->mapname);
+	util::ClientPrintAll(
+		HUD_PRINTTALK,
+		"#Vote_level_end",
+		nextlevel.c_str());
 }
 
