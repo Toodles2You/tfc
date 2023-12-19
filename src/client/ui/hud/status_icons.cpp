@@ -40,6 +40,11 @@ bool CHudStatusIcons::Init()
 
 bool CHudStatusIcons::VidInit()
 {
+	m_hTimer = SPR_Load("sprites/timer.spr");
+	
+	int i = gHUD.GetSpriteIndex("d_grenade");
+	m_hGrenade = gHUD.GetSprite(i);
+	m_rcGrenade = gHUD.GetSpriteRect(i);
 
 	return true;
 }
@@ -47,6 +52,10 @@ bool CHudStatusIcons::VidInit()
 void CHudStatusIcons::Reset()
 {
 	memset(m_IconList, 0, sizeof m_IconList);
+
+	m_bTimerActive = false;
+	m_flTimerStart = -1000;
+
 	m_iFlags &= ~HUD_ACTIVE;
 }
 
@@ -69,6 +78,63 @@ bool CHudStatusIcons::Draw(float flTime)
 			gHUD.DrawHudSprite(m_IconList[i].spr, 0, &m_IconList[i].rc, x, y, m_IconList[i].r, m_IconList[i].g, m_IconList[i].b, 255);
 		}
 	}
+
+	if (!m_bTimerActive)
+	{
+		return true;
+	}
+
+	return DrawTimer(flTime);
+}
+
+bool CHudStatusIcons::DrawTimer(float flTime)
+{	
+	int timerFrames = SPR_Frames(m_hTimer);
+
+	float timerDelta = (flTime - (m_flTimerStart + 0.8)) / 3.1;
+	int timerFrame = std::floor(timerFrames * std::max(timerDelta, 0.0F));
+
+	if (timerFrame >= timerFrames)
+	{
+		m_bTimerActive = false;
+		return true;
+	}
+
+	const auto color =
+		timerFrame >= timerFrames - 1 ? CHud::COLOR_WARNING : CHud::COLOR_PRIMARY;
+
+	int y = gHUD.GetHeight() - (gHUD.m_iFontHeight >> 1);
+
+	int timerWidth = SPR_Width(m_hTimer, timerFrame);
+	int timerHeight = SPR_Height(m_hTimer, timerFrame);
+	float timerAlpha = std::min((flTime - m_flTimerStart) / 0.8F, 1.0F);
+
+#if 0
+	constexpr float kTickInterval = 3.9F / 3.0F;
+	float tickAlpha =
+		1 - std::fmod(flTime - m_flTimerStart, kTickInterval) / kTickInterval;
+#endif
+
+	gHUD.DrawHudSprite(
+		m_hTimer,
+		timerFrame,
+		nullptr,
+		(gHUD.GetWidth() - timerWidth) >> 1,
+		y - timerHeight,
+		color,
+		192 * timerAlpha);
+
+	int grenadeWidth = m_rcGrenade.right - m_rcGrenade.left;
+	int grenadeHeight = m_rcGrenade.bottom - m_rcGrenade.top;
+	
+	gHUD.DrawHudSprite(
+		m_hGrenade,
+		0,
+		&m_rcGrenade,
+		(gHUD.GetWidth() - grenadeWidth) >> 1,
+		y - ((timerHeight + grenadeHeight) >> 1),
+		color,
+		192 * timerAlpha);
 
 	return true;
 }
@@ -172,6 +238,9 @@ void CHudStatusIcons::EnableIcon(const char* pszIconName, int red, int green, in
 			ATTN_NORM,
 			0,
 			PITCH_NORM);
+		
+		m_bTimerActive = true;
+		m_flTimerStart = gHUD.m_flTime;
 	}
 
 	m_iFlags |= HUD_ACTIVE;

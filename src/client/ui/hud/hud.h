@@ -482,6 +482,8 @@ public:
 	void DisableIcon(const char* pszIconName);
 
 private:
+	bool DrawTimer(float flTime);
+
 	typedef struct
 	{
 		char szSpriteName[MAX_ICONSPRITENAME_LENGTH];
@@ -491,6 +493,14 @@ private:
 	} icon_sprite_t;
 
 	icon_sprite_t m_IconList[MAX_ICONSPRITES];
+
+	bool m_bTimerActive;
+	float m_flTimerStart;
+
+	HSPRITE m_hTimer;
+	
+	HSPRITE m_hGrenade;
+	Rect m_rcGrenade;
 };
 
 //
