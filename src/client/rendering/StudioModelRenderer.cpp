@@ -1570,8 +1570,27 @@ void CStudioModelRenderer::StudioRenderModel()
 
 	if (m_pCurrentEntity->curstate.renderfx == kRenderFxGlowShell)
 	{
-		m_pCurrentEntity->curstate.renderfx = kRenderFxNone;
-		StudioRenderFinal();
+		bool invisible = true;
+
+		if (m_pCurrentEntity == IEngineStudio.GetViewEntity())
+		{
+			if (m_pCurrentEntity->curstate.renderamt != 5)
+			{
+				m_pCurrentEntity->curstate.renderfx = kRenderFxNone;
+				StudioRenderFinal();
+				invisible = false;
+			}
+		}
+		else
+		{
+			if (m_pCurrentEntity->curstate.renderamt != 5
+			 && m_pCurrentEntity->curstate.rendermode != kRenderTransColor)
+			{
+				m_pCurrentEntity->curstate.renderfx = kRenderFxNone;
+				StudioRenderFinal();
+				invisible = false;
+			}
+		}
 
 		if (0 == IEngineStudio.IsHardware())
 		{
@@ -1583,10 +1602,20 @@ void CStudioModelRenderer::StudioRenderModel()
 		gEngfuncs.pTriAPI->SpriteTexture(m_pChromeSprite, 0);
 		m_pCurrentEntity->curstate.renderfx = kRenderFxGlowShell;
 
+		if (invisible)
+		{
+			m_pCurrentEntity->curstate.renderamt = 0;
+		}
+
 		StudioRenderFinal();
 		if (0 == IEngineStudio.IsHardware())
 		{
 			gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
+		}
+
+		if (invisible)
+		{
+			m_pCurrentEntity->curstate.renderamt = 5;
 		}
 	}
 	else
