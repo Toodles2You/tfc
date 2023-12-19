@@ -304,7 +304,8 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	m_NextPollCheck = gpGlobals->time + 1;
 	m_CurrentPoll = nullptr;
 
-	m_NextMapVoteCalled = false;
+	m_NextMapVoteState = kMapVoteNotCalled;
+	m_RockTheVote = 0;
 
 	if (!g_engfuncs.pfnIsDedicatedServer())
 	{
@@ -441,6 +442,66 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 	}
 
 	return CGameRules::ClientCommand(pPlayer, pcmd);
+}
+
+
+int CountPlayers();
+
+bool CHalfLifeMultiplay::SayCommand(CBasePlayer* player, const char* cmd)
+{
+	/* Classic "rock the vote" command to request a level change */
+	if (stricmp(cmd, "rtv") == 0)
+	{
+		if (m_NextMapVoteState == kMapVoteChangeImmediately)
+		{
+			return true;
+		}
+
+		const auto bit = 1 << (player->entindex() - 1);
+
+		if ((m_RockTheVote & bit) != 0)
+		{
+			return true;
+		}
+
+		m_RockTheVote |= bit;
+		
+		int players = std::floor(CountPlayers() * 0.5F);
+		int rocked = 0;
+		for (int i = 0; i < gpGlobals->maxClients; i++)
+		{
+			if ((m_RockTheVote & (1 << i)) != 0)
+			{
+				rocked++;
+			}
+		}
+
+		if (rocked >= players)
+		{
+			util::ClientPrintAll(
+				HUD_PRINTTALK,
+				"#Vote_level_pass",
+				STRING(player->pev->netname));
+
+			if (m_NextMapVoteState == kMapVoteNotCalled)
+			{
+				MapVoteBegin();
+			}
+			m_NextMapVoteState = kMapVoteChangeImmediately;
+		}
+		else
+		{
+			util::ClientPrintAll(
+				HUD_PRINTTALK,
+				"#Vote_level_rock",
+				STRING(player->pev->netname),
+				util::dtos1(players - rocked));
+		}
+
+		return true;
+	}
+
+	return false;
 }
 
 
@@ -620,6 +681,8 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 		util::ClientPrintAll(HUD_PRINTTALK, "#Game_disconnected", name);
 
 		CBasePlayer* pPlayer = (CBasePlayer*)CBaseEntity::Instance(pClient);
+
+		m_RockTheVote &= ~(1 << (ENTINDEX(pClient) - 1));
 
 		if (pPlayer)
 		{
@@ -1394,13 +1457,25 @@ void CHalfLifeMultiplay::CheckCurrentPoll()
 	& only five minutes are left,
 	let players vote for the next map.
 	*/
-	if (!m_NextMapVoteCalled
-	 && timelimit.value > 0.0F
-	 && m_stateChangeTime + (timelimit.value * 60) - 300 <= gpGlobals->time
-	 && m_CurrentPoll == nullptr)
+	switch (m_NextMapVoteState)
 	{
-		MapVoteBegin();
-		m_NextMapVoteCalled = true;
+	case kMapVoteNotCalled:
+		if (timelimit.value > 0.0F
+		 && m_stateChangeTime + (timelimit.value * 60) - 300 <= gpGlobals->time
+		 && m_CurrentPoll == nullptr)
+		{
+			MapVoteBegin();
+			m_NextMapVoteState = kMapVoteCalled;
+		}
+		break;
+	case kMapVoteChangeImmediately:
+		if (m_CurrentPoll == nullptr)
+		{
+			ChangeLevel();
+		}
+		break;
+	default:
+		break;
 	}
 }
 

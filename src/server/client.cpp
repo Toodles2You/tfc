@@ -354,6 +354,12 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 	if (p[strlen(p) - 1] == '\n')
 		p[strlen(p) - 1] = '\0';
 
+	if (p[0] == '!')
+	{
+		g_pGameRules->SayCommand(player, p + 1);
+		return;
+	}
+
 	// loop through all players
 	// Start with the first player.
 	// This may return the world in single player if the client types something between levels or during spawn

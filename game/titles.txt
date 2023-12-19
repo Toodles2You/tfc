@@ -227,3 +227,11 @@ Vote_level_end
 {
 Voting has concluded! The next level will be '%s'
 }
+Vote_level_rock
+{
+Player %s wants to change levels (%s needed)
+}
+Vote_level_pass
+{
+Player %s wants to change levels
+}

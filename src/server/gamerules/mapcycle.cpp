@@ -300,7 +300,7 @@ CountPlayers
 Determine the current # of active players on the server for map cycling logic
 ==============
 */
-static int CountPlayers()
+int CountPlayers()
 {
 	int num = 0;
 

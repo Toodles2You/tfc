@@ -153,6 +153,7 @@ public:
 	virtual bool FPlayerCanSuicide(CBasePlayer *pPlayer) = 0;  // Prevent players from suiciding too often.
 
 	virtual bool ClientCommand(CBasePlayer* pPlayer, const char* pcmd) { return false; } // handles the user commands;  returns true if command handled properly
+	virtual bool SayCommand(CBasePlayer* pPlayer, const char* pcmd) { return false; }
 	virtual void ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer) {}		 // the player has changed userinfo;  can change it now
 
 	// Client kills/scoring
@@ -388,6 +389,7 @@ public:
 	bool FPlayerCanSuicide(CBasePlayer *pPlayer) override;
 
 	bool ClientCommand(CBasePlayer* pPlayer, const char* pcmd) override;
+	bool SayCommand(CBasePlayer* pPlayer, const char* pcmd) override;
 	void ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer) override;
 
 	// Client kills/scoring
@@ -461,7 +463,15 @@ protected:
 	float m_NextPollCheck;
 	CPoll* m_CurrentPoll;
 
-	bool m_NextMapVoteCalled;
+	typedef enum
+	{
+		kMapVoteNotCalled = 0,
+		kMapVoteCalled,
+		kMapVoteChangeImmediately,
+	} map_vote_e;
+
+	map_vote_e m_NextMapVoteState;
+	unsigned int m_RockTheVote;
 	void MapVoteBegin();
 	void MapVoteEnd(int winner, int numOptions, byte* tally, void* user);
 
