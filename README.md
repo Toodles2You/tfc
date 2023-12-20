@@ -19,10 +19,10 @@ Features
 - Improved weapon prediction
     - Weapon events sync up with where you're actually aiming
     - Millisecond integer timers
-    - Crosshair compensates for recoil (& third-person) (& concussions)
+    - Crosshair compensates for recoil
 - Bot system with dummy bots
 - Removed Half-Life single-player content
-    - Monster code removed (Seriously, *all* of it! No stub classes.)
+    - Monster code removed (No stub classes!)
     - Saves & node graphs are still in-tact
 - Improved combat feedback
     - Hit sounds & crosshair hit marker
@@ -38,7 +38,9 @@ Features
 - Clean project structure
 - Team Fortress style grenade priming
 - CMake options for toggling features
-- Other stuff I'm probably forgetting
+- Player voting system
+    - Next level voting
+    - Chat commands, `!rtv` and `!nominate`
 
 Building this SDK
 ======================
