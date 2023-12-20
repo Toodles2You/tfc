@@ -43,8 +43,6 @@
 #include "nodes.h"
 #endif
 
-unsigned short g_usGibbed;
-
 #define TRAIN_ACTIVE 0x80
 #define TRAIN_NEW 0xc0
 #define TRAIN_OFF 0x00
@@ -533,20 +531,7 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 		gibMode = GIB_NEVER;
 	}
 
-	PLAYBACK_EVENT_FULL(
-		FEV_GLOBAL | FEV_RELIABLE,
-		edict(),
-		g_usGibbed,
-		0.0f,
-		pev->origin,
-		util::VecToAngles(g_vecAttackDir),
-		0.0,
-		pev->health,
-		pev->sequence,
-		gibMode,
-		false,
-		false
-	);
+	tent::SpawnCorpse(this, gibMode);
 }
 
 

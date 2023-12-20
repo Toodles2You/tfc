@@ -17,6 +17,7 @@
 
 unsigned short g_usTeleport;
 unsigned short g_usExplosion;
+unsigned short g_usGibbed;
 
 
 void tent::Sparks(const Vector& position)
@@ -84,13 +85,30 @@ void tent::Explosion(
 }
 
 
+void tent::SpawnCorpse(CBaseEntity* entity, const int gibMode)
+{
+	g_engfuncs.pfnPlaybackEvent(
+		FEV_GLOBAL | FEV_RELIABLE,
+		entity->edict(),
+		g_usGibbed,
+		0.0F,
+		entity->pev->origin,
+		util::VecToAngles(g_vecAttackDir),
+		0.0F,
+		entity->pev->health,
+		entity->pev->sequence,
+		gibMode,
+		false,
+		false
+	);
+}
+
+
 /*
 ==============
-tent::PlayerDecalTrace
+PlayerDecalTrace
 
-A player is trying to apply his custom decal for the spray can.
-Tell connected clients to display it, or use the default spray can decal
-if the custom can't be loaded.
+Custom player decal for the spray can
 ==============
 */
 void tent::PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber)
