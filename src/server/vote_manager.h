@@ -40,9 +40,7 @@ public:
 
 protected:
     virtual void DoResults(const int winner, const std::vector<int>& tally) = 0;
-
-private:
-    bool CanPlayerVote(CBasePlayer* player);
+    virtual bool CanPlayerVote(CBasePlayer* player);
 };
 
 
