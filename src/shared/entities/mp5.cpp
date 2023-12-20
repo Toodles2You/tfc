@@ -20,11 +20,9 @@ LINK_ENTITY_TO_CLASS(weapon_9mmAR, CMP5);
 
 void CMP5::Precache()
 {
-#ifdef GAME_DLL
-	g_engfuncs.pfnPrecacheModel("models/v_9mmAR.mdl");
-	g_engfuncs.pfnPrecacheModel("models/w_9mmAR.mdl");
-	g_engfuncs.pfnPrecacheModel("models/p_9mmAR.mdl");
+	CBasePlayerWeapon::Precache();
 
+#ifdef GAME_DLL
 	g_engfuncs.pfnPrecacheModel("models/w_9mmARclip.mdl");
 
 	g_engfuncs.pfnPrecacheSound("weapons/hks1.wav");
@@ -40,29 +38,27 @@ void CMP5::Precache()
 }
 
 
-bool CMP5::GetWeaponInfo(WeaponInfo* i)
+void CMP5::GetWeaponInfo(WeaponInfo& i)
 {
-	i->pszName = "weapon_9mmAR";
-	i->iAmmo1 = AMMO_NONE;
-	i->iMaxAmmo1 = -1;
-	i->iAmmo2 = AMMO_NONE;
-	i->iMaxAmmo2 = -1;
-	i->iMaxClip = 30;
-	i->iSlot = 2;
-	i->iPosition = 0;
-	i->iFlags = 0;
-	i->iWeight = 15;
+	i.pszName = "weapon_9mmAR";
+	i.iAmmo1 = AMMO_NONE;
+	i.iMaxAmmo1 = -1;
+	i.iAmmo2 = AMMO_NONE;
+	i.iMaxAmmo2 = -1;
+	i.iMaxClip = 30;
+	i.iSlot = 2;
+	i.iPosition = 0;
+	i.iFlags = 0;
+	i.iWeight = 15;
 
-	i->pszWorld = "models/w_9mmAR.mdl";
-	i->pszView = "models/v_9mmAR.mdl";
-	i->pszPlayer = "models/p_9mmAR.mdl";
-	i->pszAnimExt = "mp5";
+	i.pszWorld = "models/w_9mmAR.mdl";
+	i.pszView = "models/v_9mmAR.mdl";
+	i.pszPlayer = "models/p_9mmAR.mdl";
+	i.pszAnimExt = "mp5";
 
-	i->iAnims[kWeaponAnimIdle] = kAnimIdle1;
-	i->iAnims[kWeaponAnimDeploy] = kAnimDeploy;
-	i->iAnims[kWeaponAnimHolster] = kAnimHolster;
-
-	return true;
+	i.iAnims[kWeaponAnimIdle] = kAnimIdle1;
+	i.iAnims[kWeaponAnimDeploy] = kAnimDeploy;
+	i.iAnims[kWeaponAnimHolster] = kAnimHolster;
 }
 
 

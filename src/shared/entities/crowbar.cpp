@@ -21,11 +21,9 @@ LINK_ENTITY_TO_CLASS(weapon_crowbar, CCrowbar);
 
 void CCrowbar::Precache()
 {
-#ifdef GAME_DLL
-	g_engfuncs.pfnPrecacheModel("models/v_crowbar.mdl");
-	g_engfuncs.pfnPrecacheModel("models/w_crowbar.mdl");
-	g_engfuncs.pfnPrecacheModel("models/p_crowbar.mdl");
+	CBasePlayerWeapon::Precache();
 
+#ifdef GAME_DLL
 	g_engfuncs.pfnPrecacheSound("weapons/cbar_hit1.wav");
 	g_engfuncs.pfnPrecacheSound("weapons/cbar_hit2.wav");
 
@@ -40,28 +38,26 @@ void CCrowbar::Precache()
 }
 
 
-bool CCrowbar::GetWeaponInfo(WeaponInfo* i)
+void CCrowbar::GetWeaponInfo(WeaponInfo& i)
 {
-	i->pszName = "weapon_crowbar";
-	i->iAmmo1 = AMMO_NONE;
-	i->iMaxAmmo1 = -1;
-	i->iAmmo2 = AMMO_NONE;
-	i->iMaxAmmo2 = -1;
-	i->iMaxClip = -1;
-	i->iSlot = 0;
-	i->iPosition = 0;
-	i->iWeight = 0;
+	i.pszName = "weapon_crowbar";
+	i.iAmmo1 = AMMO_NONE;
+	i.iMaxAmmo1 = -1;
+	i.iAmmo2 = AMMO_NONE;
+	i.iMaxAmmo2 = -1;
+	i.iMaxClip = -1;
+	i.iSlot = 0;
+	i.iPosition = 0;
+	i.iWeight = 0;
 
-	i->pszWorld = "models/w_crowbar.mdl";
-	i->pszView = "models/v_crowbar.mdl";
-	i->pszPlayer = "models/p_crowbar.mdl";
-	i->pszAnimExt = "crowbar";
+	i.pszWorld = "models/w_crowbar.mdl";
+	i.pszView = "models/v_crowbar.mdl";
+	i.pszPlayer = "models/p_crowbar.mdl";
+	i.pszAnimExt = "crowbar";
 
-	i->iAnims[kWeaponAnimIdle] = kAnimIdle;
-	i->iAnims[kWeaponAnimDeploy] = kAnimDeploy;
-	i->iAnims[kWeaponAnimHolster] = kAnimHolster;
-
-	return true;
+	i.iAnims[kWeaponAnimIdle] = kAnimIdle;
+	i.iAnims[kWeaponAnimDeploy] = kAnimDeploy;
+	i.iAnims[kWeaponAnimHolster] = kAnimHolster;
 }
 
 

@@ -96,6 +96,7 @@ bool CBasePlayerWeapon::Restore(class CRestore&) { return true; }
 bool CBasePlayerWeapon::Save(class CSave&) { return true; }
 #endif
 bool CBasePlayerWeapon::Spawn() { return false; }
+void CBasePlayerWeapon::Precache() {}
 void CBasePlayerWeapon::SetObjectCollisionBox() {}
 void CBasePlayerWeapon::Materialize() {}
 void CBasePlayerWeapon::AttemptToMaterialize() {}

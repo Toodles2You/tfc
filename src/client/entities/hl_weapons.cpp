@@ -114,12 +114,11 @@ static void HUD_PrepEntity(CBaseEntity* entity, CBasePlayer* owner)
 		const auto weapon = dynamic_cast<CBasePlayerWeapon*>(entity);
 
 		WeaponInfo info;
-
 		memset(&info, 0, sizeof(info));
 
 		weapon->m_pPlayer = owner;
 
-		weapon->GetWeaponInfo(&info);
+		weapon->GetWeaponInfo(info);
 
 		CBasePlayerWeapon::WeaponInfoArray[weapon->GetID()] = info;
 
@@ -493,7 +492,7 @@ void WeaponsResource::Init()
 		WeaponInfo info;
 		memset(&info, 0, sizeof(info));
 
-		weapons[i]->GetWeaponInfo(&info);
+		weapons[i]->GetWeaponInfo(info);
 
 		WEAPON w;
 		memset(&w, 0, sizeof(w));

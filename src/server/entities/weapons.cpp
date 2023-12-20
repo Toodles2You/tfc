@@ -45,15 +45,14 @@ void util::PrecacheWeapon(const char* szClassname)
 	if (pEntity)
 	{
 		const auto weapon = dynamic_cast<CBasePlayerWeapon*>(pEntity);
-		WeaponInfo II;
-		pEntity->Precache();
-		memset(&II, 0, sizeof II);
-		if (weapon->GetWeaponInfo(&II))
-		{
-			CBasePlayerWeapon::WeaponInfoArray[weapon->GetID()] = II;
 
-			memset(&II, 0, sizeof(II));
-		}
+		WeaponInfo info;
+		memset(&info, 0, sizeof(info));
+
+		weapon->Precache();
+		weapon->GetWeaponInfo(info);
+
+		CBasePlayerWeapon::WeaponInfoArray[weapon->GetID()] = info;
 	}
 
 	g_engfuncs.pfnRemoveEntity(pent);
@@ -154,6 +153,18 @@ bool CBasePlayerWeapon::Spawn()
 	Materialize();
 
 	return true;
+}
+
+
+void CBasePlayerWeapon::Precache()
+{
+	WeaponInfo info;
+
+	GetWeaponInfo(info);
+
+	g_engfuncs.pfnPrecacheModel(info.pszView);
+	g_engfuncs.pfnPrecacheModel(info.pszWorld);
+	g_engfuncs.pfnPrecacheModel(info.pszPlayer);
 }
 
 

@@ -73,6 +73,7 @@ public:
 	void SetObjectCollisionBox() override;
 
 	virtual bool Spawn() override;
+	virtual void Precache() override;
 
 	// generic weapon versions of CBasePlayerWeapon calls
 	virtual bool AddToPlayer(CBasePlayer* pPlayer);
@@ -106,7 +107,7 @@ public:
 	CBasePlayer* m_pPlayer;
 
 	virtual int GetID() const = 0;
-	virtual bool GetWeaponInfo(WeaponInfo* p) = 0;
+	virtual void GetWeaponInfo(WeaponInfo& i) = 0;
 
 	WeaponInfo& GetInfo() { return WeaponInfoArray[GetID()]; }
 	int iAmmo1() { return GetInfo().iAmmo1; }
@@ -162,7 +163,7 @@ public:
 	};
 
 	int GetID() const override { return WEAPON_CROWBAR; }
-	bool GetWeaponInfo(WeaponInfo* i) override;
+	void GetWeaponInfo(WeaponInfo& i) override;
 
 	void Precache() override;
 
@@ -194,7 +195,7 @@ public:
 	};
 
 	int GetID() const override { return WEAPON_MP5; }
-	bool GetWeaponInfo(WeaponInfo* i) override;
+	void GetWeaponInfo(WeaponInfo& i) override;
 
 	void Precache() override;
 
