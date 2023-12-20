@@ -49,21 +49,21 @@ bool CHudMenu::Init()
 
 void CHudMenu::InitHUDData()
 {
+	m_fMenuDisplayed = kNone;
+	m_bitsValidSlots = 0;
+	m_iFlags &= ~HUD_ACTIVE;
 	Reset();
 }
 
 void CHudMenu::Reset()
 {
-	m_fMenuDisplayed = kNone;
-	m_bitsValidSlots = 0;
 	g_szPrelocalisedMenuString[0] = 0;
 	m_fWaitingForMore = false;
-	m_iFlags &= ~HUD_ACTIVE;
 }
 
 bool CHudMenu::VidInit()
 {
-	Reset();
+	InitHUDData();
 	return true;
 }
 
