@@ -1818,8 +1818,13 @@ bool TeamFortressViewport::SlotInput(int iSlot)
 // Direct Key Input
 bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurrentBinding)
 {
+	if (!down || 0 != gEngfuncs.Con_IsVisible())
+	{
+		return true;
+	}
+
 	// Open Text Window?
-	if (m_pCurrentMenu && 0 == gEngfuncs.Con_IsVisible())
+	if (m_pCurrentMenu)
 	{
 		int iMenuID = m_pCurrentMenu->GetMenuID();
 
@@ -1828,7 +1833,7 @@ bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurren
 		{
 			for (int i = '0'; i <= '9'; i++)
 			{
-				if (down && (keynum == i))
+				if (keynum == i)
 				{
 					SlotInput(i - '0');
 					return false;
@@ -1837,7 +1842,7 @@ bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurren
 		}
 
 		// Grab enter keys to close TextWindows
-		if (down && (keynum == K_ENTER || keynum == K_KP_ENTER || keynum == K_SPACE))
+		if (keynum == K_ENTER || keynum == K_KP_ENTER || keynum == K_SPACE)
 		{
 			if (iMenuID == MENU_MAPBRIEFING || iMenuID == MENU_INTRO || iMenuID == MENU_CLASSHELP)
 			{
@@ -1847,7 +1852,7 @@ bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurren
 		}
 
 		// Grab jump key on Team Menu as autoassign
-		if (pszCurrentBinding && down && 0 == strcmp(pszCurrentBinding, "+jump"))
+		if (pszCurrentBinding && 0 == strcmp(pszCurrentBinding, "+jump"))
 		{
 			if (iMenuID == MENU_TEAM)
 			{
@@ -1857,7 +1862,7 @@ bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurren
 		}
 	}
 
-	if (down && keynum == K_MOUSE2 && IsScoreBoardVisible() && 0 == gEngfuncs.Con_IsVisible())
+	if (keynum == K_MOUSE2 && IsScoreBoardVisible())
 	{
 		if (!GetClientVoiceMgr()->IsInSquelchMode())
 		{
@@ -1871,7 +1876,7 @@ bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurren
 	}
 
 	// if we're in a command menu, try hit one of it's buttons
-	if (down && m_pCurrentCommandMenu)
+	if (m_pCurrentCommandMenu)
 	{
 		// only trap the number keys
 		if (keynum >= '0' && keynum <= '9')
@@ -1882,6 +1887,23 @@ bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurren
 				HideCommandMenu();
 			}
 
+			return false;
+		}
+	}
+
+	if (gHUD.m_Menu.m_fMenuDisplayed != CHudMenu::kNone)
+	{
+		if (gHUD.m_Menu.m_fMenuDisplayed == CHudMenu::kVote)
+		{
+			if (keynum >= K_F1 && keynum <= K_F12)
+			{
+				gHUD.m_Menu.SelectMenuItem(keynum - K_F1 + 1);
+				return false;
+			}
+		}
+		else if (keynum >= '1' && keynum <= '9')
+		{
+			gHUD.m_Menu.SelectMenuItem(keynum - '0');
 			return false;
 		}
 	}

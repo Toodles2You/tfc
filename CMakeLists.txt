@@ -91,6 +91,8 @@ set(SERVER_SRC
     ${SERVER_SRC_DIR}/UserMessages.cpp
     ${SERVER_SRC_DIR}/util.cpp
     ${SERVER_SRC_DIR}/voice_gamemgr.cpp
+    ${SERVER_SRC_DIR}/vote_manager.cpp
+    ${SERVER_SRC_DIR}/vote_poll.cpp
 
     ${SHARED_SRC}
 )

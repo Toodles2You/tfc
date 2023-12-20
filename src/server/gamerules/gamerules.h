@@ -153,6 +153,7 @@ public:
 	virtual bool FPlayerCanSuicide(CBasePlayer *pPlayer) = 0;  // Prevent players from suiciding too often.
 
 	virtual bool ClientCommand(CBasePlayer* pPlayer, const char* pcmd) { return false; } // handles the user commands;  returns true if command handled properly
+	virtual bool SayCommand(CBasePlayer* pPlayer, const int argc, const char** argv) { return false; }
 	virtual void ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer) {}		 // the player has changed userinfo;  can change it now
 
 	// Client kills/scoring
@@ -208,6 +209,7 @@ public:
 
 	// Immediately end a multiplayer game
 	virtual void EndMultiplayerGame() {}
+	virtual float GetMapTimeLeft() { return -1.0F; }
 
 	virtual bool IsPlayerPrivileged(CBasePlayer* pPlayer);
 
@@ -351,6 +353,7 @@ public:
 	bool FPlayerCanSuicide(CBasePlayer *pPlayer) override;
 
 	bool ClientCommand(CBasePlayer* pPlayer, const char* pcmd) override;
+	bool SayCommand(CBasePlayer* pPlayer, const int argc, const char** argv) override;
 	void ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer) override;
 
 	// Client kills/scoring
@@ -395,6 +398,7 @@ public:
 
 	// Immediately end a multiplayer game
 	void EndMultiplayerGame() override { EnterState(GR_STATE_GAME_OVER); }
+	float GetMapTimeLeft() override;
 
 	virtual void EnterState(gamerules_state_e state) override;
 

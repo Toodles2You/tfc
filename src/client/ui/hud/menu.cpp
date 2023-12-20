@@ -33,12 +33,14 @@ char g_szPrelocalisedMenuString[MAX_MENU_STRING];
 bool KB_ConvertString(char* in, char** ppout);
 
 DECLARE_MESSAGE(m_Menu, ShowMenu);
+DECLARE_MESSAGE(m_Menu, VoteMenu);
 
 bool CHudMenu::Init()
 {
 	gHUD.AddHudElem(this);
 
 	HOOK_MESSAGE(ShowMenu);
+	HOOK_MESSAGE(VoteMenu);
 
 	InitHUDData();
 
@@ -47,19 +49,21 @@ bool CHudMenu::Init()
 
 void CHudMenu::InitHUDData()
 {
-	m_fMenuDisplayed = false;
-	m_bitsValidSlots = 0;
 	Reset();
 }
 
 void CHudMenu::Reset()
 {
+	m_fMenuDisplayed = kNone;
+	m_bitsValidSlots = 0;
 	g_szPrelocalisedMenuString[0] = 0;
 	m_fWaitingForMore = false;
+	m_iFlags &= ~HUD_ACTIVE;
 }
 
 bool CHudMenu::VidInit()
 {
+	Reset();
 	return true;
 }
 
@@ -132,14 +136,17 @@ bool CHudMenu::Draw(float flTime)
 	{
 		if (m_flShutoffTime <= gHUD.m_flTime)
 		{ // times up, shutoff
-			m_fMenuDisplayed = false;
+			m_fMenuDisplayed = kNone;
 			m_iFlags &= ~HUD_ACTIVE;
 			return true;
 		}
 	}
 
 	// don't draw the menu if the scoreboard is being shown
-	if (gViewPort && gViewPort->IsScoreBoardVisible())
+	if (gViewPort
+	 && (gViewPort->IsScoreBoardVisible()
+	  || gViewPort->m_pCurrentMenu != nullptr
+	  || gViewPort->m_pCurrentCommandMenu != nullptr))
 		return true;
 
 	// draw the menu, along the left-hand side of the screen
@@ -213,7 +220,7 @@ void CHudMenu::SelectMenuItem(int menu_item)
 		EngineClientCmd(szbuf);
 
 		// remove the menu
-		m_fMenuDisplayed = false;
+		m_fMenuDisplayed = kNone;
 		m_iFlags &= ~HUD_ACTIVE;
 	}
 }
@@ -265,16 +272,72 @@ bool CHudMenu::MsgFunc_ShowMenu(const char* pszName, int iSize, void* pbuf)
 			}
 		}
 
-		m_fMenuDisplayed = true;
+		m_fMenuDisplayed = kMenu;
 		m_iFlags |= HUD_ACTIVE;
 	}
 	else
 	{
-		m_fMenuDisplayed = false; // no valid slots means that the menu should be turned off
+		m_fMenuDisplayed = kNone; // no valid slots means that the menu should be turned off
 		m_iFlags &= ~HUD_ACTIVE;
 	}
 
 	m_fWaitingForMore = NeedMore;
 
+	return true;
+}
+
+bool CHudMenu::MsgFunc_VoteMenu(const char* pszName, int iSize, void* pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	m_fWaitingForMore = false;
+
+	int numOptions = READ_BYTE();
+	if (numOptions == 0)
+	{
+		m_fMenuDisplayed = kNone;
+		m_iFlags &= ~HUD_ACTIVE;
+		return true;
+	}
+
+	int displayTime = READ_BYTE();
+	if (displayTime > 0)
+	{
+		m_flShutoffTime = gHUD.m_flTime + displayTime;
+	}
+	else
+	{
+		m_flShutoffTime = -1;
+	}
+
+	char* str = READ_STRING();
+	if (str[0] == '#')
+	{
+		str = gHUD.m_TextMessage.BufferedLocaliseTextString(str);
+	}
+
+	strncpy(g_szMenuString, str, MAX_MENU_STRING);
+
+	char keyName[8];
+	m_bitsValidSlots = 0;
+	for (int i = 0; i < numOptions; i++)
+	{
+		m_bitsValidSlots |= 1 << i;
+
+		str = READ_STRING();
+		if (str[0] == '#')
+		{
+			str = gHUD.m_TextMessage.BufferedLocaliseTextString(str);
+		}
+
+		sprintf(keyName, "\nF%i. ", i + 1);
+		strncat(g_szMenuString, keyName, MAX_MENU_STRING - strlen(g_szMenuString));
+		strncat(g_szMenuString, str, MAX_MENU_STRING - strlen(g_szMenuString));
+	}
+
+	g_szMenuString[MAX_MENU_STRING - 1] = '\0';
+
+	m_fMenuDisplayed = kVote;
+	m_iFlags |= HUD_ACTIVE;
 	return true;
 }

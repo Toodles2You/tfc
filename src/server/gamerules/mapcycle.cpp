@@ -9,6 +9,11 @@
 #include "util.h"
 #include "cbase.h"
 #include "gamerules.h"
+#include "game.h"
+#include "filesystem_utils.h"
+#include "vote_manager.h"
+
+#include <algorithm>
 
 #define MAX_RULE_BUFFER 1024
 
@@ -27,6 +32,10 @@ typedef struct mapcycle_s
 	struct mapcycle_item_s* next_item;
 } mapcycle_t;
 
+static char szPreviousMapCycleFile[256];
+static mapcycle_t mapcycle;
+static std::string nextlevel;
+
 /*
 ==============
 DestroyMapCycle
@@ -34,7 +43,7 @@ DestroyMapCycle
 Clean up memory used by mapcycle when switching it
 ==============
 */
-void DestroyMapCycle(mapcycle_t* cycle)
+static void DestroyMapCycle(mapcycle_t* cycle)
 {
 	mapcycle_item_t *p, *n, *start;
 	p = cycle->items;
@@ -64,7 +73,7 @@ COM_Parse
 Parse a token out of a string
 ==============
 */
-char* COM_Parse(char* data)
+static char* COM_Parse(char* data)
 {
 	int c;
 	int len;
@@ -141,7 +150,7 @@ COM_TokenWaiting
 Returns 1 if additional data is waiting to be processed on this line
 ==============
 */
-bool COM_TokenWaiting(char* buffer)
+static bool COM_TokenWaiting(char* buffer)
 {
 	char* p;
 
@@ -167,7 +176,7 @@ ReloadMapCycleFile
 Parses mapcycle.txt file into mapcycle_t structure
 ==============
 */
-bool ReloadMapCycleFile(char* filename, mapcycle_t* cycle)
+static bool ReloadMapCycleFile(char* filename, mapcycle_t* cycle)
 {
 	char szBuffer[MAX_RULE_BUFFER];
 	char szMap[32];
@@ -300,7 +309,7 @@ int CountPlayers()
 	{
 		CBaseEntity* pEnt = util::PlayerByIndex(i);
 
-		if (pEnt)
+		if (pEnt && !pEnt->IsBot())
 		{
 			num = num + 1;
 		}
@@ -317,7 +326,7 @@ Parse commands/key value pairs to issue right after map xxx command is issued on
  level transition
 ==============
 */
-void ExtractCommandString(char* s, char* szCommand)
+static void ExtractCommandString(char* s, char* szCommand)
 {
 	// Now make rules happen
 	char pkey[512];
@@ -364,35 +373,9 @@ void ExtractCommandString(char* s, char* szCommand)
 	}
 }
 
-/*
-==============
-ChangeLevel
-
-Server is changing to a new level, check mapcycle.txt for map name and setup info
-==============
-*/
-void CHalfLifeMultiplay::ChangeLevel()
+static bool CheckMapCycle()
 {
-	static char szPreviousMapCycleFile[256];
-	static mapcycle_t mapcycle;
-
-	char szNextMap[32];
-	char szFirstMapInList[32];
-	char szCommands[1500];
-	char szRules[1500];
-	int minplayers = 0, maxplayers = 0;
-	strcpy(szFirstMapInList, "hldm1"); // the absolute default level is hldm1
-
-	int curplayers;
-	bool do_cycle = true;
-
-	// find the map to change to
 	char* mapcfile = (char*)CVAR_GET_STRING("mapcyclefile");
-
-	szCommands[0] = '\0';
-	szRules[0] = '\0';
-
-	curplayers = CountPlayers();
 
 	// Has the map cycle filename changed?
 	if (stricmp(mapcfile, szPreviousMapCycleFile))
@@ -404,11 +387,50 @@ void CHalfLifeMultiplay::ChangeLevel()
 		if (!ReloadMapCycleFile(mapcfile, &mapcycle) || (!mapcycle.items))
 		{
 			ALERT(at_console, "Unable to load map cycle file %s\n", mapcfile);
-			do_cycle = false;
+			return false;
 		}
 	}
 
-	if (do_cycle && mapcycle.items)
+	return mapcycle.items != nullptr;
+}
+
+/*
+==============
+ChangeLevel
+
+Server is changing to a new level, check mapcycle.txt for map name and setup info
+==============
+*/
+void CHalfLifeMultiplay::ChangeLevel()
+{
+	char szNextMap[32];
+	char szFirstMapInList[32];
+	char szCommands[1500];
+	char szRules[1500];
+	int minplayers = 0, maxplayers = 0;
+	strcpy(szFirstMapInList, "crossfire"); // the absolute default level is purgatory
+
+	if (nextlevel.length() != 0 && g_engfuncs.pfnIsMapValid(nextlevel.c_str()) != 0)
+	{
+		EnterState(GR_STATE_GAME_OVER);
+
+		ALERT(at_console, "CHANGE LEVEL: %s\n", nextlevel.c_str());
+
+		g_engfuncs.pfnChangeLevel(nextlevel.c_str(), nullptr);
+		nextlevel.clear();
+		return;
+	}
+
+	int curplayers;
+
+	// find the map to change to
+
+	szCommands[0] = '\0';
+	szRules[0] = '\0';
+
+	curplayers = CountPlayers();
+
+	if (CheckMapCycle())
 	{
 		bool keeplooking = false;
 		bool found = false;
@@ -494,3 +516,41 @@ void CHalfLifeMultiplay::ChangeLevel()
 		SERVER_COMMAND(szCommands);
 	}
 }
+
+
+CLevelPoll::CLevelPoll(const std::vector<CVoteManager::LevelNominee>& nominees)
+{
+	m_LevelNames.clear();
+
+    for (auto n = nominees.begin(); m_LevelNames.size() < 4 && n != nominees.end(); n++)
+    {
+        m_LevelNames.push_back((*n).name);
+    }
+
+	if (CheckMapCycle())
+	{
+		for (auto i = mapcycle.next_item; m_LevelNames.size() < 4 && i->next != mapcycle.next_item; i = i->next)
+		{
+			/* Make sure it wasn't already nominated */
+			if (std::find_if(m_LevelNames.begin(), m_LevelNames.end(), [=](const auto& candidate)
+				{ return stricmp(candidate.c_str(), i->mapname) == 0; }) == m_LevelNames.end())
+			{
+				m_LevelNames.push_back(i->mapname);
+			}
+
+			/* New pool of maps for the next vote or level change */
+			mapcycle.next_item = i->next;
+		}
+	}
+
+	util::ClientPrintAll(HUD_PRINTTALK, "#Vote_level_begin");
+	Begin("#Vote_level_title", m_LevelNames);
+}
+
+
+void CLevelPoll::DoResults(const int winner, const std::vector<int>& tally)
+{
+	nextlevel = m_LevelNames[winner];
+	util::ClientPrintAll(HUD_PRINTTALK, "#Vote_level_end", nextlevel.c_str());
+}
+

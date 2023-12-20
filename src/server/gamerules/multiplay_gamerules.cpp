@@ -26,6 +26,7 @@
 #include "game.h"
 #include "items.h"
 #include "voice_gamemgr.h"
+#include "vote_manager.h"
 #include "hltv.h"
 #include "UserMessages.h"
 
@@ -35,6 +36,7 @@
 #define AMMO_RESPAWN_TIME 20
 
 CVoiceGameMgr g_VoiceGameMgr;
+CVoteManager g_VoteManager;
 
 class CMultiplayGameMgrHelper : public IVoiceGameMgrHelper
 {
@@ -123,6 +125,7 @@ void CTeam::AddPoints(float score)
 CHalfLifeMultiplay::CHalfLifeMultiplay()
 {
 	g_VoiceGameMgr.Init(&g_GameMgrHelper, gpGlobals->maxClients);
+	g_VoteManager.Init();
 
 	m_deathmatch = (int)gpGlobals->deathmatch != 0;
 	m_coop = (int)gpGlobals->coop != 0;
@@ -203,7 +206,14 @@ bool CHalfLifeMultiplay::PrivilegedCommand(CBasePlayer* pPlayer, const char* pcm
 bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 {
 	if (g_VoiceGameMgr.ClientCommand(pPlayer, pcmd))
+	{
 		return true;
+	}
+
+	if (g_VoteManager.ClientCommand(pPlayer->entindex(), pcmd))
+	{
+		return true;
+	}
 
 	if (strcmp(pcmd, "jointeam") == 0)
 	{
@@ -252,6 +262,12 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 }
 
 
+bool CHalfLifeMultiplay::SayCommand(CBasePlayer* player, const int argc, const char** argv)
+{
+	return g_VoteManager.SayCommand(player->entindex(), argc, argv);
+}
+
+
 void CHalfLifeMultiplay::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer)
 {
 	pPlayer->SetPrefsFromUserinfo(infobuffer);
@@ -261,6 +277,7 @@ void CHalfLifeMultiplay::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infob
 void CHalfLifeMultiplay::Think()
 {
 	g_VoiceGameMgr.Update(gpGlobals->frametime);
+	g_VoteManager.Update();
 
 	switch (GetState())
 	{
@@ -316,6 +333,7 @@ bool CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWe
 bool CHalfLifeMultiplay::ClientConnected(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128])
 {
 	g_VoiceGameMgr.ClientConnected(pEntity);
+	g_VoteManager.ClientConnected(ENTINDEX(pEntity));
 	return true;
 }
 
@@ -412,6 +430,8 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 {
 	if (pClient)
 	{
+		g_VoteManager.ClientDisconnected(ENTINDEX(pClient));
+
 		const char *name = "unconnected";
 		
 		if (!FStringNull(pClient->v.netname) && STRING(pClient->v.netname)[0] != '\0')
@@ -1144,6 +1164,19 @@ bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, b
 bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib, bool bAutoTeam)
 {
 	return ChangePlayerTeam(pPlayer, GetTeamIndex(pTeamName), bKill, bGib, bAutoTeam);
+}
+
+
+float CHalfLifeMultiplay::GetMapTimeLeft()
+{
+	if (timelimit.value <= 0.0F)
+	{
+		return -1.0F;
+	}
+
+	const auto timeLimit = timelimit.value * 60.0F;
+
+	return std::max(m_stateChangeTime + timeLimit - gpGlobals->time, 0.0F);
 }
 
 

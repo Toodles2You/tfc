@@ -193,6 +193,7 @@ Game_name_change
 {
 Player %s changed name to %s
 }
+
 Chat_all
 {
 %s: %s
@@ -212,4 +213,29 @@ Chat_team_dead
 Chat_spec
 {
 (Spectator) %s: %s
+}
+
+Vote_level_title
+{
+Vote for the next level
+}
+Vote_level_begin
+{
+Voting for the next level has begun
+}
+Vote_level_end
+{
+Voting has concluded! The next level will be '%s'
+}
+Vote_level_rock
+{
+Player %s wants to change levels (%s needed)
+}
+Vote_level_pass
+{
+Player %s wants to change levels
+}
+Vote_level_nominate
+{
+Player %s has nominated '%s'
 }
