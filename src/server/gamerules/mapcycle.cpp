@@ -11,6 +11,7 @@
 #include "gamerules.h"
 #include "game.h"
 #include "filesystem_utils.h"
+#include "vote_manager.h"
 
 #include <algorithm>
 
@@ -517,84 +518,40 @@ void CHalfLifeMultiplay::ChangeLevel()
 }
 
 
-void CHalfLifeMultiplay::MapVoteBegin()
+CLevelPoll::CLevelPoll(const std::vector<CVoteManager::LevelNominee>& nominees)
 {
-	if (!CheckMapCycle())
+	m_LevelNames.clear();
+
+    for (auto n = nominees.begin(); m_LevelNames.size() < 4 && n != nominees.end(); n++)
+    {
+        m_LevelNames.push_back((*n).name);
+    }
+
+	if (CheckMapCycle())
 	{
-		return;
-	}
-
-	std::string mapNames[4];
-
-	int count = 0;
-
-	for (int i = 0; i < 4; i++)
-	{
-		if (m_MapNominees[i].playerIndex != 0)
+		for (auto i = mapcycle.next_item; m_LevelNames.size() < 4 && i->next != mapcycle.next_item; i = i->next)
 		{
-			mapNames[count] = m_MapNominees[i].name;
-			count++;
-		}
-	}
-
-	mapcycle_item_t* item;
-	for (item = mapcycle.next_item; item->next != mapcycle.next_item; item = item->next)
-	{
-		if (count == 4)
-		{
-			break;
-		}
-		
-		/* Check if already nominated */
-		bool already = false;
-		for (int j = 0; j < 4; j++)
-		{
-			if (m_MapNominees[j].playerIndex != 0
-			 && stricmp(m_MapNominees[j].name, item->mapname) == 0)
+			/* Make sure it wasn't already nominated */
+			if (std::find_if(m_LevelNames.begin(), m_LevelNames.end(), [=](const auto& candidate)
+				{ return stricmp(candidate.c_str(), i->mapname) == 0; }) == m_LevelNames.end())
 			{
-				already = true;
-				break;
+				m_LevelNames.push_back(i->mapname);
 			}
-		}
-		if (already)
-		{
-			continue;
-		}
 
-		/* Append this map to the nominees */
-		m_MapNominees[count].playerIndex = -1;
-		strcpy(m_MapNominees[count].name, item->mapname);
-
-		mapNames[count] = item->mapname;
-		count++;
+			/* New pool of maps for the next vote or level change */
+			mapcycle.next_item = i->next;
+		}
 	}
 
-	if (count == 0)
-	{
-		return;
-	}
-
-	/* New pool of maps for the next vote or level change */
-	mapcycle.next_item = item->next;
-
-	m_CurrentPoll =
-		new CPoll{
-			static_cast<CPoll::callback_t>(&CHalfLifeMultiplay::MapVoteEnd),
-			count,
-			"#Vote_level_title",
-			mapNames};
+	Begin("#Vote_level_title", m_LevelNames);
 
 	util::ClientPrintAll(HUD_PRINTTALK, "#Vote_level_begin");
 }
 
 
-void CHalfLifeMultiplay::MapVoteEnd(int winner, int numOptions, byte* tally, void* user)
+void CLevelPoll::DoResults(const int winner, const std::vector<int>& tally)
 {
-	nextlevel = m_MapNominees[winner].name;
-
-	util::ClientPrintAll(
-		HUD_PRINTTALK,
-		"#Vote_level_end",
-		nextlevel.c_str());
+	nextlevel = m_LevelNames[winner];
+	util::ClientPrintAll(HUD_PRINTTALK, "#Vote_level_end", nextlevel.c_str());
 }
 

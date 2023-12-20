@@ -356,7 +356,21 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 
 	if (p[0] == '!')
 	{
-		g_pGameRules->SayCommand(player, p + 1);
+		char* argv[8];
+
+		argv[0] = strtok(p + 1, " ");
+
+		if (argv[0] != nullptr && argv[0][0] != '\0')
+		{
+			int argc = 1;
+
+			do {
+				argv[argc] = strtok(nullptr, " ");
+			} while (argv[argc] != nullptr && (++argc) < ARRAYSIZE(argv));
+
+			g_pGameRules->SayCommand(player, argc, argv);
+		}
+
 		return;
 	}
 

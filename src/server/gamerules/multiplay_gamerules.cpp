@@ -26,6 +26,7 @@
 #include "game.h"
 #include "items.h"
 #include "voice_gamemgr.h"
+#include "vote_manager.h"
 #include "hltv.h"
 #include "UserMessages.h"
 
@@ -35,6 +36,7 @@
 #define AMMO_RESPAWN_TIME 20
 
 CVoiceGameMgr g_VoiceGameMgr;
+CVoteManager g_VoteManager;
 
 class CMultiplayGameMgrHelper : public IVoiceGameMgrHelper
 {
@@ -120,177 +122,10 @@ void CTeam::AddPoints(float score)
 }
 
 
-CPoll::CPoll(
-	callback_t callback,
-	int numOptions,
-	std::string title,
-	std::string* options,
-	void* user,
-	int duration)
-		: m_Callback(callback),
-		  m_NumOptions(numOptions),
-		  m_EndTime(gpGlobals->time + duration),
-		  m_IgnorePlayers(0),
-		  m_User(user)
-{
-	memset(m_Tally, 0, sizeof(m_Tally));
-
-	/* Mask off players that cannot partake in this vote */
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
-	{
-		auto player = dynamic_cast<CBasePlayer*>(util::PlayerByIndex(i));
-
-		if (!CanPlayerVote(player))
-		{
-			m_IgnorePlayers |= 1 << (i - 1);
-			continue;
-		}
-
-		MessageBegin(MSG_ONE, gmsgVoteMenu, player);
-		WriteByte(numOptions);
-		WriteByte(duration);
-		WriteString(title.c_str());
-		for (int j = 0; j < numOptions; j++)
-		{
-			WriteString(options[j].c_str());
-		}
-		MessageEnd();
-	}
-
-	ALERT(at_console, "Vote starting with %i options\n", options);
-}
-
-
-void CPoll::CastVote(int playerIndex, int option)
-{
-	const auto bit = 1 << (playerIndex - 1);
-
-	if ((m_IgnorePlayers & bit) != 0)
-	{
-		return;
-	}
-
-	if (!CanPlayerVote(dynamic_cast<CBasePlayer*>(util::PlayerByIndex(playerIndex))))
-	{
-		m_IgnorePlayers |= bit;
-		return;
-	}
-
-	if (option < 1 || option > m_NumOptions)
-	{
-		return;
-	}
-
-	m_IgnorePlayers |= bit;
-	m_Tally[option - 1]++;
-
-	ALERT(at_console, "Player %i voted for option %i\n", playerIndex, option);
-}
-
-
-bool CPoll::CheckVotes()
-{
-	if (g_pGameRules->GetState() == GR_STATE_GAME_OVER)
-	{
-		return true;
-	}
-
-	if (m_EndTime <= gpGlobals->time)
-	{
-		return true;
-	}
-
-	auto everyoneVoted = true;
-
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
-	{
-		auto player = dynamic_cast<CBasePlayer*>(util::PlayerByIndex(i));
-
-		if ((m_IgnorePlayers & (1 << (i - 1))) != 0)
-		{
-			continue;
-		}
-
-		if (!CanPlayerVote(player))
-		{
-			m_IgnorePlayers |= 1 << (i - 1);
-			continue;
-		}
-
-		everyoneVoted = false;
-		break;
-	}
-
-	return everyoneVoted;
-}
-
-
-void CPoll::Close()
-{
-	int total = 0;
-
-	int maxVotes = -1;
-	int candidates[12];
-	int numCandidates = 0;
-	
-	for (int i = 0; i < m_NumOptions; i++)
-	{
-		total += m_Tally[i];
-
-		if (m_Tally[i] > maxVotes)
-		{
-			maxVotes = m_Tally[i];
-
-			candidates[0] = i;
-			numCandidates = 1;
-		}
-		else if (m_Tally[i] == maxVotes)
-		{
-			candidates[numCandidates] = i;
-			numCandidates++;
-		}
-	}
-
-	ALERT(at_console, "Vote finished with %i total\n", total);
-
-	int winner = candidates[g_engfuncs.pfnRandomLong(1, numCandidates) - 1];
-	
-	float percent = 100;
-	if (total != 0)
-	{
-		percent = (maxVotes / (float)total) * 100;
-	}
-
-	ALERT(
-		at_console,
-		"Option %i won with %i votes (%g%%)\n",
-		winner + 1,
-		maxVotes,
-		percent);
-
-	MessageBegin(MSG_ALL, gmsgVoteMenu);
-	WriteByte(0);
-	MessageEnd();
-
-	if (m_Callback != nullptr)
-	{
-		(g_pGameRules->*m_Callback)(winner, m_NumOptions, m_Tally, m_User);
-	}
-}
-
-
-bool CPoll::CanPlayerVote(CBasePlayer* player)
-{
-	return player != nullptr
-		&& player->TeamNumber() != TEAM_UNASSIGNED
-		&& player->TeamNumber() != TEAM_SPECTATORS
-		&& !player->IsBot();
-}
-
-
 CHalfLifeMultiplay::CHalfLifeMultiplay()
 {
 	g_VoiceGameMgr.Init(&g_GameMgrHelper, gpGlobals->maxClients);
+	g_VoteManager.Init();
 
 	m_deathmatch = (int)gpGlobals->deathmatch != 0;
 	m_coop = (int)gpGlobals->coop != 0;
@@ -300,13 +135,6 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	m_teams.clear();
 	m_teams.push_back(CTeam{TEAM_DEFAULT, "players"});
 	m_numTeams = 1;
-
-	m_NextPollCheck = gpGlobals->time + 1;
-	m_CurrentPoll = nullptr;
-
-	m_NextMapVoteState = kMapVoteNotCalled;
-	m_RockTheVote = 0;
-	memset(m_MapNominees, 0, sizeof(m_MapNominees));
 
 	if (!g_engfuncs.pfnIsDedicatedServer())
 	{
@@ -323,16 +151,6 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	}
 
 	EnterState(GR_STATE_RND_RUNNING);
-}
-
-
-CHalfLifeMultiplay::~CHalfLifeMultiplay()
-{
-	if (m_CurrentPoll != nullptr)
-	{
-		delete m_CurrentPoll;
-		m_CurrentPoll = nullptr;
-	}
 }
 
 
@@ -388,7 +206,14 @@ bool CHalfLifeMultiplay::PrivilegedCommand(CBasePlayer* pPlayer, const char* pcm
 bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 {
 	if (g_VoiceGameMgr.ClientCommand(pPlayer, pcmd))
+	{
 		return true;
+	}
+
+	if (g_VoteManager.ClientCommand(pPlayer->entindex(), pcmd))
+	{
+		return true;
+	}
 
 	if (strcmp(pcmd, "jointeam") == 0)
 	{
@@ -410,15 +235,6 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 	else if (strcmp(pcmd, "spectate") == 0)
 	{
 		ChangePlayerTeam(pPlayer, TEAM_SPECTATORS, true, false, false);
-		return true;
-	}
-	else if (m_CurrentPoll != nullptr && strcmp(pcmd, "menuselect") == 0)
-	{
-		if (CMD_ARGC() > 1)
-		{
-			int option = atoi(CMD_ARGV(1));
-			m_CurrentPoll->CastVote(pPlayer->entindex(), option);
-		}
 		return true;
 	}
 	else if (pPlayer->IsObserver())
@@ -446,142 +262,9 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 }
 
 
-int CountPlayers();
-
-bool CHalfLifeMultiplay::SayCommand(CBasePlayer* player, char* cmd)
+bool CHalfLifeMultiplay::SayCommand(CBasePlayer* player, const int argc, const char** argv)
 {
-	char* argv[8];
-
-	argv[0] = strtok(cmd, " ");
-
-	if (argv[0] == nullptr || argv[0][0] == '\0')
-	{
-		return true;
-	}
-
-	int argc = 1;
-	do {
-		argv[argc] = strtok(nullptr, " ");
-	} while (argv[argc] != nullptr && (++argc) < ARRAYSIZE(argv));
-
-	/* Classic "rock the vote" command to request a level change */
-	if (stricmp(argv[0], "rtv") == 0)
-	{
-		if (m_NextMapVoteState == kMapVoteChangeImmediately)
-		{
-			return true;
-		}
-
-		const auto bit = 1 << (player->entindex() - 1);
-
-		if ((m_RockTheVote & bit) != 0)
-		{
-			return true;
-		}
-
-		m_RockTheVote |= bit;
-		
-		int players = std::floor(CountPlayers() * 0.5F);
-		int rocked = 0;
-		for (int i = 0; i < gpGlobals->maxClients; i++)
-		{
-			if ((m_RockTheVote & (1 << i)) != 0)
-			{
-				rocked++;
-			}
-		}
-
-		if (rocked >= players)
-		{
-			util::ClientPrintAll(
-				HUD_PRINTTALK,
-				"#Vote_level_pass",
-				STRING(player->pev->netname));
-
-			if (m_NextMapVoteState == kMapVoteNotCalled)
-			{
-				MapVoteBegin();
-			}
-			m_NextMapVoteState = kMapVoteChangeImmediately;
-		}
-		else
-		{
-			util::ClientPrintAll(
-				HUD_PRINTTALK,
-				"#Vote_level_rock",
-				STRING(player->pev->netname),
-				util::dtos1(players - rocked));
-		}
-
-		return true;
-	}
-	else if (stricmp(argv[0], "nominate") == 0)
-	{
-		if (m_NextMapVoteState != kMapVoteNotCalled)
-		{
-			return true;
-		}
-
-		/*! Toodles TODO: Bring up map list if no name is provided */
-		if (argc < 2)
-		{
-			return true;
-		}
-
-		int slot = -1;
-
-		for (int i = 0; i < 4; i++)
-		{
-			/* Overwrite this player's previous nomination */
-			if (m_MapNominees[i].playerIndex == player->entindex())
-			{
-				slot = i;
-				break;
-			}
-			if (m_MapNominees[i].playerIndex == 0)
-			{
-				if (slot == -1)
-				{
-					slot = i;
-				}
-				continue;
-			}
-			/* Already nominated */
-			if (stricmp(m_MapNominees[i].name, argv[1]) == 0)
-			{
-				slot = -1;
-				break;
-			}
-		}
-
-		if (slot == -1)
-		{
-			return true;
-		}
-
-		/* Engine treats relative paths as valid... Ugh */
-		if (strchr(argv[1], '.') != nullptr
-			|| strchr(argv[1], '/') != nullptr
-			|| strchr(argv[1], '\\') != nullptr
-			|| g_engfuncs.pfnIsMapValid(argv[1]) == 0)
-		{
-			return true;
-		}
-
-		strncpy(m_MapNominees[slot].name, argv[1], 31);
-		m_MapNominees[slot].name[31] = '\0';
-		m_MapNominees[slot].playerIndex = player->entindex();
-
-		util::ClientPrintAll(
-			HUD_PRINTTALK,
-			"#Vote_level_nominate",
-			STRING(player->pev->netname),
-			m_MapNominees[slot].name);
-
-		return true;
-	}
-
-	return false;
+	return g_VoteManager.SayCommand(player->entindex(), argc, argv);
 }
 
 
@@ -594,12 +277,7 @@ void CHalfLifeMultiplay::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infob
 void CHalfLifeMultiplay::Think()
 {
 	g_VoiceGameMgr.Update(gpGlobals->frametime);
-
-	if (m_NextPollCheck <= gpGlobals->time)
-	{
-		m_NextPollCheck = gpGlobals->time + 1;
-		CheckCurrentPoll();
-	}
+	g_VoteManager.Update();
 
 	switch (GetState())
 	{
@@ -655,6 +333,7 @@ bool CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWe
 bool CHalfLifeMultiplay::ClientConnected(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128])
 {
 	g_VoiceGameMgr.ClientConnected(pEntity);
+	g_VoteManager.ClientConnected(ENTINDEX(pEntity));
 	return true;
 }
 
@@ -751,6 +430,8 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 {
 	if (pClient)
 	{
+		g_VoteManager.ClientDisconnected(ENTINDEX(pClient));
+
 		const char *name = "unconnected";
 		
 		if (!FStringNull(pClient->v.netname) && STRING(pClient->v.netname)[0] != '\0')
@@ -761,33 +442,6 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 		util::ClientPrintAll(HUD_PRINTTALK, "#Game_disconnected", name);
 
 		CBasePlayer* pPlayer = (CBasePlayer*)CBaseEntity::Instance(pClient);
-
-		int playerIndex = ENTINDEX(pClient);
-
-		m_RockTheVote &= ~(1 << (playerIndex - 1));
-
-		/* Discard nomination if the vote hasn't happened yet */
-		if (m_NextMapVoteState == kMapVoteNotCalled)
-		{
-			for (int i = 0; i < 4; i++)
-			{
-				if (m_MapNominees[i].playerIndex != playerIndex)
-				{
-					continue;
-				}
-
-				if (i < 3)
-				{
-					memmove(
-						m_MapNominees + i,
-						m_MapNominees + i + 1,
-						sizeof(map_nominee_t) * (3 - i));
-				}
-
-				memset(m_MapNominees + 3, 0, sizeof(map_nominee_t));
-				break;
-			}
-		}
 
 		if (pPlayer)
 		{
@@ -1513,6 +1167,19 @@ bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTea
 }
 
 
+float CHalfLifeMultiplay::GetMapTimeLeft()
+{
+	if (timelimit.value <= 0.0F)
+	{
+		return -1.0F;
+	}
+
+	const auto timeLimit = timelimit.value * 60.0F;
+
+	return std::max(m_stateChangeTime + timeLimit - gpGlobals->time, 0.0F);
+}
+
+
 void CHalfLifeMultiplay::EnterState(gamerules_state_e state)
 {
 	CGameRules::EnterState(state);
@@ -1544,44 +1211,6 @@ void CHalfLifeMultiplay::CheckTimeLimit()
 	}
 
 	EnterState(GR_STATE_GAME_OVER);
-}
-
-
-void CHalfLifeMultiplay::CheckCurrentPoll()
-{
-	if (m_CurrentPoll != nullptr
-	 && m_CurrentPoll->CheckVotes())
-	{
-		m_CurrentPoll->Close();
-		delete m_CurrentPoll;
-		m_CurrentPoll = nullptr;
-	}
-
-	/*
-	If the map time limit is set
-	& only five minutes are left,
-	let players vote for the next map.
-	*/
-	switch (m_NextMapVoteState)
-	{
-	case kMapVoteNotCalled:
-		if (timelimit.value > 0.0F
-		 && m_stateChangeTime + (timelimit.value * 60) - 300 <= gpGlobals->time
-		 && m_CurrentPoll == nullptr)
-		{
-			MapVoteBegin();
-			m_NextMapVoteState = kMapVoteCalled;
-		}
-		break;
-	case kMapVoteChangeImmediately:
-		if (m_CurrentPoll == nullptr)
-		{
-			ChangeLevel();
-		}
-		break;
-	default:
-		break;
-	}
 }
 
 

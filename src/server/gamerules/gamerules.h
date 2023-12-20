@@ -153,7 +153,7 @@ public:
 	virtual bool FPlayerCanSuicide(CBasePlayer *pPlayer) = 0;  // Prevent players from suiciding too often.
 
 	virtual bool ClientCommand(CBasePlayer* pPlayer, const char* pcmd) { return false; } // handles the user commands;  returns true if command handled properly
-	virtual bool SayCommand(CBasePlayer* pPlayer, char* pcmd) { return false; }
+	virtual bool SayCommand(CBasePlayer* pPlayer, const int argc, const char** argv) { return false; }
 	virtual void ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer) {}		 // the player has changed userinfo;  can change it now
 
 	// Client kills/scoring
@@ -209,6 +209,7 @@ public:
 
 	// Immediately end a multiplayer game
 	virtual void EndMultiplayerGame() {}
+	virtual float GetMapTimeLeft() { return -1.0F; }
 
 	virtual bool IsPlayerPrivileged(CBasePlayer* pPlayer);
 
@@ -308,42 +309,6 @@ public:
 	std::vector<CBasePlayer *> m_players;
 };
 
-class CPoll
-{
-public:
-	enum
-	{
-		kPollDuration = 20,
-	};
-
-	typedef void (CGameRules::*callback_t)(int, int, byte*, void*);
-
-private:
-	callback_t m_Callback;
-	void* m_User;
-	const unsigned int m_NumOptions;
-	const float m_EndTime;
-
-	unsigned int m_IgnorePlayers;
-	byte m_Tally[12];
-
-public:
-	CPoll(
-		callback_t callback,
-		int numOptions,
-		std::string title,
-		std::string* options,
-		void* user = nullptr,
-		int duration = kPollDuration);
-
-	void CastVote(int playerIndex, int option);
-	bool CheckVotes();
-	void Close();
-
-private:
-	bool CanPlayerVote(CBasePlayer* player);
-};
-
 //=========================================================
 // CHalfLifeMultiplay - rules for the basic half life multiplayer
 // competition
@@ -352,7 +317,6 @@ class CHalfLifeMultiplay : public CGameRules
 {
 public:
 	CHalfLifeMultiplay();
-	virtual ~CHalfLifeMultiplay();
 
 	// GR_Think
 	void Think() override;
@@ -389,7 +353,7 @@ public:
 	bool FPlayerCanSuicide(CBasePlayer *pPlayer) override;
 
 	bool ClientCommand(CBasePlayer* pPlayer, const char* pcmd) override;
-	bool SayCommand(CBasePlayer* pPlayer, char* pcmd) override;
+	bool SayCommand(CBasePlayer* pPlayer, const int argc, const char** argv) override;
 	void ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer) override;
 
 	// Client kills/scoring
@@ -434,12 +398,12 @@ public:
 
 	// Immediately end a multiplayer game
 	void EndMultiplayerGame() override { EnterState(GR_STATE_GAME_OVER); }
+	float GetMapTimeLeft() override;
 
 	virtual void EnterState(gamerules_state_e state) override;
 
 protected:
 	void CheckTimeLimit();
-	void CheckCurrentPoll();
 
 	virtual void Enter_RND_RUNNING();
 	virtual void Think_RND_RUNNING();
@@ -459,28 +423,6 @@ protected:
 	int m_numTeams;
 	std::vector<CTeam> m_teams;
 	CTeam m_spectators;
-	
-	float m_NextPollCheck;
-	CPoll* m_CurrentPoll;
-
-	typedef enum
-	{
-		kMapVoteNotCalled = 0,
-		kMapVoteCalled,
-		kMapVoteChangeImmediately,
-	} map_vote_e;
-
-	typedef struct
-	{
-		char name[31];
-		byte playerIndex;
-	} map_nominee_t;
-
-	map_vote_e m_NextMapVoteState;
-	unsigned int m_RockTheVote;
-	map_nominee_t m_MapNominees[4];
-	void MapVoteBegin();
-	void MapVoteEnd(int winner, int numOptions, byte* tally, void* user);
 
 	bool AllowSpectators() { return m_allowSpectators; }
 
