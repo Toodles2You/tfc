@@ -21,6 +21,7 @@
 #ifdef HALFLIFE_BOTS
 #include "bot/hl_bot.h"
 #endif
+#include "vote_manager.h"
 
 // multiplayer server rules
 cvar_t teamplay = {"mp_teamplay", "0", FCVAR_SERVER};
@@ -72,6 +73,8 @@ void GameDLLInit()
 	CVAR_REGISTER(&allowmonsters);
 
 	CVAR_REGISTER(&mp_chattime);
+
+	CVoteManager::RegisterCvars();
 
 #ifdef HALFLIFE_BOTS
 	Bot_RegisterCvars();

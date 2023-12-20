@@ -16,6 +16,10 @@
 
 int CountPlayers();
 
+static cvar_t sv_vote_nextlevel = {"sv_vote_nextlevel", "1", FCVAR_SERVER};
+static cvar_t sv_vote_changelevel = {"sv_vote_changelevel", "1", FCVAR_SERVER};
+static cvar_t sv_vote_nominate = {"sv_vote_nominate", "1", FCVAR_SERVER};
+
 
 CVoteManager::CVoteManager()
 {
@@ -26,6 +30,14 @@ CVoteManager::CVoteManager()
 CVoteManager::~CVoteManager()
 {
     ClearPoll();
+}
+
+
+void CVoteManager::RegisterCvars()
+{
+	g_engfuncs.pfnCVarRegister(&sv_vote_nextlevel);
+	g_engfuncs.pfnCVarRegister(&sv_vote_changelevel);
+	g_engfuncs.pfnCVarRegister(&sv_vote_nominate);
 }
 
 
@@ -153,6 +165,7 @@ void CVoteManager::NominateLevel(
 		return;
 	}
 
+	/*! Toodles TODO: Option to limit to levels in the map cycle */
 	if (g_engfuncs.pfnIsMapValid(levelName.c_str()) == 0)
 	{
 		return;
@@ -234,13 +247,18 @@ bool CVoteManager::SayCommand(
 		return false;
 	}
 
-	if (stricmp(argv[0], "rtv") == 0)
+	if (sv_vote_nextlevel.value == 0 && sv_vote_changelevel.value == 0)
+	{
+		return false;
+	}
+
+	if (sv_vote_changelevel.value != 0 && stricmp(argv[0], "rtv") == 0)
 	{
 		/* Classic "rock the vote" command to request a level change */
 		RequestLevelChange(playerIndex);
 		return true;
 	}
-    else if (stricmp(argv[0], "nominate") == 0)
+    else if (sv_vote_nominate.value != 0 && stricmp(argv[0], "nominate") == 0)
     {
 		/*! Toodles TODO: Bring up map list if no name is provided */
         if (argc > 1)
@@ -270,11 +288,12 @@ void CVoteManager::LevelVoteUpdate()
     case LevelVote::NotCalled:
     {
 		/*
-		If the map time limit is set
-		& only five minutes are left,
-		let players vote for the next map.
+		If the time limit is set &
+		only five minutes are left,
+		let players vote for the next level.
 		*/
-        if (timelimit.value > 0.0F
+        if (sv_vote_nextlevel.value != 0
+		 && timelimit.value > 0.0F
          && !IsPollRunning()
          && g_pGameRules->GetMapTimeLeft() <= 300)
         {

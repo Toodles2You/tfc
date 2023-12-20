@@ -52,6 +52,8 @@ public:
     CVoteManager();
     ~CVoteManager();
     
+    static void RegisterCvars();
+
     void Init();
     void Update();
 
