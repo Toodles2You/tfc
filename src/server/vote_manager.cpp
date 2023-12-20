@@ -111,8 +111,15 @@ void CVoteManager::RequestLevelChange(const unsigned int playerIndex)
 		}
 	}
 
+	auto player = util::PlayerByIndex(playerIndex);
+
     const auto name =
-        STRING(util::PlayerByIndex(playerIndex)->pev->netname);
+        STRING(player->pev->netname);
+
+	util::LogPrintf("\"%s<%i><%s><>\" rocked the vote\n",
+		STRING(player->pev->netname),
+		g_engfuncs.pfnGetPlayerUserId(player->edict()),
+		g_engfuncs.pfnGetPlayerAuthId(player->edict()));
 
 	if (rocked >= players)
 	{
@@ -157,8 +164,10 @@ void CVoteManager::NominateLevel(
 		playerIndex
 	};
 
+	auto player = util::PlayerByIndex(playerIndex);
+
     const auto name =
-        STRING(util::PlayerByIndex(playerIndex)->pev->netname);
+        STRING(player->pev->netname);
 
 	/* See if this player has nominated a level already & overwrite it */
 	auto previous =
@@ -168,6 +177,13 @@ void CVoteManager::NominateLevel(
 	if (previous != m_LevelNominees.end())
 	{
 		*previous = nomination;
+
+		util::LogPrintf("\"%s<%i><%s><>\" changed their nomination to '%s'\n",
+			STRING(player->pev->netname),
+			g_engfuncs.pfnGetPlayerUserId(player->edict()),
+			g_engfuncs.pfnGetPlayerAuthId(player->edict()),
+			levelName.c_str());
+
 		util::ClientPrintAll(HUD_PRINTTALK, "#Vote_level_nominate", name, levelName.c_str());
 		return;
 	}
@@ -177,6 +193,13 @@ void CVoteManager::NominateLevel(
 			{ return stricmp(candidate.name.c_str(), levelName.c_str()) == 0; }) == m_LevelNominees.end())
 	{
 		m_LevelNominees.push_back(nomination);
+
+		util::LogPrintf("\"%s<%i><%s><>\" nominated '%s'\n",
+			STRING(player->pev->netname),
+			g_engfuncs.pfnGetPlayerUserId(player->edict()),
+			g_engfuncs.pfnGetPlayerAuthId(player->edict()),
+			levelName.c_str());
+
 		util::ClientPrintAll(HUD_PRINTTALK, "#Vote_level_nominate", name, levelName.c_str());
 	}
 }

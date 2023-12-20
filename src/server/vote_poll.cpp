@@ -63,7 +63,7 @@ void IPoll::Begin(const std::string& title, const std::vector<std::string>& opti
 		MessageEnd();
 	}
 
-	ALERT(at_console, "Vote starting with %i options\n", numOptions);
+	util::LogPrintf("Vote beginning\n");
 }
 
 
@@ -81,7 +81,9 @@ void IPoll::ClientVote(unsigned int playerIndex, unsigned int option)
 		return;
 	}
 
-	if (!CanPlayerVote(dynamic_cast<CBasePlayer*>(util::PlayerByIndex(playerIndex))))
+	auto player = dynamic_cast<CBasePlayer*>(util::PlayerByIndex(playerIndex));
+
+	if (!CanPlayerVote(player))
 	{
 		m_IgnorePlayers |= bit;
 		return;
@@ -90,7 +92,11 @@ void IPoll::ClientVote(unsigned int playerIndex, unsigned int option)
 	m_IgnorePlayers |= bit;
 	m_Tally[option - 1]++;
 
-	ALERT(at_console, "Player %i voted for option %i\n", playerIndex, option - 1);
+	util::LogPrintf("\"%s<%i><%s><>\" voted for option %i\n",
+		STRING(player->pev->netname),
+		g_engfuncs.pfnGetPlayerUserId(player->edict()),
+		g_engfuncs.pfnGetPlayerAuthId(player->edict()),
+		option - 1);
 }
 
 
@@ -130,6 +136,8 @@ void IPoll::End()
 {
     const auto numOptions = m_Tally.size();
 
+	util::LogPrintf("Vote ended\n");
+
 	int totalVotes = 0;
 	int minVotes = -1;
 
@@ -139,8 +147,6 @@ void IPoll::End()
 	for (int i = 0; i < numOptions; i++)
 	{
 		totalVotes += m_Tally[i];
-
-		ALERT(at_console, "Option %i has %i votes\n", i, m_Tally[i]);
 
 		if (m_Tally[i] > minVotes)
 		{
@@ -154,8 +160,6 @@ void IPoll::End()
 		}
 	}
 
-	ALERT(at_console, "Vote finished with %i total\n", totalVotes);
-
 	const int winner =
         candidates[g_engfuncs.pfnRandomLong(1, candidates.size()) - 1];
 	
@@ -166,7 +170,11 @@ void IPoll::End()
 		percent = (minVotes / (float)totalVotes) * 100.0F;
 	}
 
-	ALERT(at_console, "Option %i won with %i votes (%g%%)\n", winner, minVotes, percent);
+	util::LogPrintf("Option %i won with %i / %i (%g%%) votes\n",
+		winner,
+		m_Tally[winner],
+		totalVotes,
+		percent);
 
 	MessageBegin(MSG_ALL, gmsgVoteMenu);
 	WriteByte(0);

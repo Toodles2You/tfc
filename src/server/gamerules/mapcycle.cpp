@@ -543,9 +543,8 @@ CLevelPoll::CLevelPoll(const std::vector<CVoteManager::LevelNominee>& nominees)
 		}
 	}
 
-	Begin("#Vote_level_title", m_LevelNames);
-
 	util::ClientPrintAll(HUD_PRINTTALK, "#Vote_level_begin");
+	Begin("#Vote_level_title", m_LevelNames);
 }
 
 
