@@ -63,7 +63,7 @@ void CCrowbar::GetWeaponInfo(WeaponInfo& i)
 
 void CCrowbar::PrimaryAttack()
 {
-	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+	m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
 	Vector forward;
 	AngleVectors(m_pPlayer->pev->v_angle, &forward, nullptr, nullptr);

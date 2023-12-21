@@ -79,7 +79,7 @@ void CMP5::PrimaryAttack()
 
 	m_iClip -= shots;
 
-	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+	m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
 #ifdef GAME_DLL
 	m_pPlayer->FireBullets(8, Vector2D(3, 3), shots);
@@ -91,7 +91,7 @@ void CMP5::PrimaryAttack()
 
 void CMP5::SecondaryAttack()
 {
-	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+	m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
 #ifndef CLIENT_DLL
 	util::MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
@@ -130,6 +130,7 @@ void CMP5::WeaponPostFrame()
 		 || ((m_pPlayer->pev->button & IN_RELOAD) != 0 && m_iClip < iMaxClip()))
 		{
 			SendWeaponAnim(kAnimReload);
+			m_pPlayer->SetAction(CBasePlayer::Action::Reload);
 			m_fInReload = true;
 			m_iNextPrimaryAttack = 1500;
 			return;

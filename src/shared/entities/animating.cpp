@@ -62,6 +62,7 @@ float CBaseAnimating::StudioFrameAdvance(float flInterval)
 		else
 			pev->frame = (pev->frame < 0.0) ? 0 : 255;
 		m_fSequenceFinished = true; // just in case it wasn't caught in GetEvents
+        HandleSequenceFinished();
 	}
 
 	return flInterval;
@@ -150,7 +151,10 @@ void CBaseAnimating::DispatchAnimEvents(float flInterval)
 
 	m_fSequenceFinished = false;
 	if (flEnd >= 256 || flEnd <= 0.0)
+    {
 		m_fSequenceFinished = true;
+        HandleSequenceFinished();
+    }
 
 	int index = 0;
 

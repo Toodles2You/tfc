@@ -363,6 +363,8 @@ void CBasePlayerWeapon::Deploy()
 
 	SendWeaponAnim(info.iAnims[kWeaponAnimDeploy]);
 
+	m_pPlayer->SetAction(CBasePlayer::Action::Arm);
+
 	m_iNextPrimaryAttack = std::max(m_iNextPrimaryAttack, 500);
 }
 

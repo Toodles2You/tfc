@@ -14,6 +14,9 @@
 #include "gamerules.h"
 #include "UserMessages.h"
 #endif
+#include "animation.h"
+#include "trace.h"
+#include <string>
 
 
 void
@@ -160,6 +163,7 @@ void CBasePlayer::PostThink()
 #endif
 
 pt_end:
+    UpdateMovementAction();
 	StudioFrameAdvance();
 
 	m_afButtonLast = pev->button;
@@ -349,6 +353,229 @@ CBasePlayerWeapon* CBasePlayer::GetNextBestWeapon(CBasePlayerWeapon* current)
 	}
 
 	return best;
+}
+
+
+bool CBasePlayer::CanBeginAction(const Action action)
+{
+    switch (action)
+    {
+    case Action::Idle:
+        switch (m_Action)
+        {
+        case Action::Attack:
+        case Action::Reload:
+        case Action::Arm:
+            return m_fSequenceFinished;
+        default:
+            break;
+        }
+        break;
+
+    case Action::Attack:
+    case Action::Reload:
+    case Action::Arm:
+        switch (m_Action)
+        {
+        case Action::Jump:
+        case Action::Die:
+            return m_fSequenceFinished;
+        default:
+            break;
+        }
+        break;
+
+    case Action::Jump:
+    case Action::Die:
+        break;
+    }
+
+    return true;
+}
+
+
+void CBasePlayer::SetAction(const Action action, const bool force)
+{
+    if (!force && !CanBeginAction(action))
+    {
+        return;
+    }
+
+    const auto oldSequence = pev->sequence;
+    bool restart = false;
+    pev->sequence = GetActionSequence(action, restart);
+
+    m_Action = action;
+
+    if (restart || oldSequence != pev->sequence)
+    {
+        pev->frame = 0;
+        ResetSequenceInfo();
+    }
+}
+
+
+void CBasePlayer::HandleSequenceFinished()
+{
+	if (m_Action != Action::Idle && m_Action != Action::Die)
+	{
+		SetAction(Action::Idle);
+	}
+}
+
+
+int CBasePlayer::GetDeathSequence()
+{
+	Activity activity = ACT_DIESIMPLE;
+	Vector center;
+    Vector forward;
+	float dot;
+
+	switch (m_LastHitGroup)
+	{
+	case HITGROUP_HEAD:     activity = ACT_DIE_HEADSHOT;    break;
+	case HITGROUP_STOMACH:  activity = ACT_DIE_GUTSHOT;     break;
+
+	case HITGROUP_GENERIC:
+	default:
+        center = Center();
+
+        AngleVectors(pev->angles, &forward, nullptr, nullptr);
+
+        dot = DotProduct(gpGlobals->v_forward, g_vecAttackDir * -1);
+
+		if (dot > 0.3)
+		{
+            Trace trace{center, center + forward * 64, entindex(), Trace::kBox};
+
+            if (trace.fraction == 1)
+            {
+                return LookupActivity(ACT_DIEFORWARD);
+            }
+		}
+		else if (dot <= -0.3)
+		{
+            Trace trace{center, center - forward * 64, entindex(), Trace::kBox};
+
+            if (trace.fraction == 1)
+            {
+                return LookupActivity(ACT_DIEBACKWARD);
+            }
+		}
+		break;
+	}
+
+	return LookupActivity(activity);
+}
+
+
+int CBasePlayer::GetSmallFlinchSequence()
+{
+	Activity activity;
+
+	switch (m_LastHitGroup)
+	{
+	case HITGROUP_HEAD:     activity = ACT_FLINCH_HEAD;     break;
+	case HITGROUP_STOMACH:  activity = ACT_FLINCH_STOMACH;  break;
+	case HITGROUP_LEFTARM:  activity = ACT_FLINCH_LEFTARM;  break;
+	case HITGROUP_RIGHTARM: activity = ACT_FLINCH_RIGHTARM; break;
+	case HITGROUP_LEFTLEG:  activity = ACT_FLINCH_LEFTLEG;  break;
+	case HITGROUP_RIGHTLEG: activity = ACT_FLINCH_RIGHTLEG; break;
+
+	case HITGROUP_GENERIC:
+	default:
+        return LookupActivity(ACT_SMALL_FLINCH);
+	}
+
+	return LookupActivity(activity);
+}
+
+
+int CBasePlayer::GetActionSequence(const Action action, bool& restart)
+{
+    const auto ducking = (pev->flags & FL_DUCKING) != 0;
+
+    std::string sequenceName;
+
+    restart = false;
+
+    switch (action)
+    {
+    case Action::Idle:
+    case Action::Attack:
+    case Action::Reload:
+    case Action::Arm:
+        if (m_szAnimExtention[0] == '\0')
+        {
+            break;
+        }
+
+		sequenceName = ducking ? "crouch_" : "ref_";
+
+		switch (action)
+		{
+			case Action::Idle: sequenceName += "aim_"; break;
+			case Action::Attack: sequenceName += "shoot_"; restart = true; break;
+    		case Action::Reload: sequenceName += "aim_"; restart = true; break;
+			case Action::Arm: sequenceName += "aim_"; restart = true; break;
+		}
+
+		sequenceName += m_szAnimExtention;
+        return LookupSequence(sequenceName.c_str());
+
+    case Action::Jump:
+        restart = true;
+        return LookupActivity(ACT_HOP);
+    case Action::Die:
+        restart = true;
+        return GetDeathSequence();
+    }
+
+    return LookupSequence("deep_idle");
+}
+
+
+int CBasePlayer::GetGaitSequence()
+{
+    const auto ducking = (pev->flags & FL_DUCKING) != 0;
+    const auto speed = pev->velocity.Length2D();
+
+    if (ducking)
+    {
+        if (speed == 0)
+        {
+            return LookupActivity(ACT_CROUCHIDLE);
+        }
+        return LookupActivity(ACT_CROUCH);
+    }
+
+    if (speed > 220)
+    {
+        return LookupActivity(ACT_RUN);
+    }
+
+    if (speed > 0)
+    {
+        return LookupActivity(ACT_WALK);
+    }
+
+    return LookupSequence("deep_idle");
+}
+
+
+void CBasePlayer::UpdateMovementAction()
+{
+	if (m_Action == Action::Jump)
+	{
+		if ((pev->flags & FL_ONGROUND) == 0)
+		{
+			pev->gaitsequence = 0;
+			return;
+		}
+		SetAction(Action::Idle);
+	}
+
+    pev->gaitsequence = GetGaitSequence();
 }
 
 

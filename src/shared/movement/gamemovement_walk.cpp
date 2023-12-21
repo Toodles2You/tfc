@@ -59,14 +59,6 @@ void CHalfLifeMovement::Walk()
 
     if (pmove->onground != -1)
     {
-        if (m_wishSpeed != 0.0F)
-        {
-            player->SetAnimation(PLAYER_WALK);
-        }
-        else
-        {
-            player->SetAnimation(PLAYER_IDLE);
-        }
         pmove->velocity.z = 0;
     }
 }
@@ -221,7 +213,7 @@ void CHalfLifeMovement::Jump()
     pmove->onground = -1;
     pmove->flags |= FL_JUMPING;
 
-    player->SetAnimation(PLAYER_JUMP);
+    player->SetAction(CBasePlayer::Action::Jump);
 
     pmove->velocity.z = sqrtf(2 * 800 * 45);
 

@@ -368,6 +368,7 @@ public:
 	int GetBodygroup(int iGroup);
 	bool ExtractBbox(int sequence, float* mins, float* maxs);
 	void SetSequenceBox();
+	virtual void HandleSequenceFinished() {}
 
 	// animation needs
 	float m_flFrameRate;	  // computed FPS for current sequence

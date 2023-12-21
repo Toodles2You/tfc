@@ -426,6 +426,7 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 	player->UpdateHudData();
 	player->DecrementTimers(cmd->msec);
 	player->GetClientData(to->client, true);
+	player->GetEntityState(to->playerstate);
 
 	// Store off the last position from the predicted state.
 	HUD_SetLastOrg();

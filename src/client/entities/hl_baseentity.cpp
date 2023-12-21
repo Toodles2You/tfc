@@ -56,7 +56,6 @@ CBaseEntity* CBaseEntity::BestVisibleEnemy() { return nullptr; }
 void CBaseEntity::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, int hitgroup, int bitsDamageType) {}
 void CBaseEntity::EmitSound(const char* sample, int channel, float volume, float attenuation, int pitch, int flags) {}
 void CBaseEntity::StopSound(const char* sample, int channel) {}
-void CBaseEntity::GetEntityState(entity_state_t& state) {}
 void CBaseEntity::DelayThink() {}
 
 void CBasePlayer::DeathSound() {}
@@ -65,7 +64,6 @@ void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecD
 bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) { return false; }
 void CBasePlayer::PackDeadPlayerWeapons() {}
 void CBasePlayer::RemoveAllWeapons() {}
-void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim) {}
 void CBasePlayer::PlayerDeathFrame() {}
 void CBasePlayer::StartObserver() {}
 void CBasePlayer::PlayerUse() {}
@@ -89,7 +87,6 @@ const char* CBasePlayer::TeamID() { return ""; }
 int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax) { return 0; }
 void CBasePlayer::AddPoints(float score, bool bAllowNegativeScore) {}
 void CBasePlayer::AddPointsToTeam(float score, bool bAllowNegativeScore) {}
-void CBasePlayer::GetEntityState(entity_state_t& state) {}
 
 #ifdef HALFLIFE_SAVERESTORE
 bool CBasePlayerWeapon::Restore(class CRestore&) { return true; }

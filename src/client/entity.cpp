@@ -63,6 +63,11 @@ void HUD_TxferPredictionData(struct entity_state_s* ps, const struct entity_stat
 	ps->iStepLeft = pps->iStepLeft;
 	ps->playerclass = pps->playerclass;
 
+	ps->frame = pps->frame;
+	ps->sequence = pps->sequence;
+	ps->framerate = pps->framerate;
+	ps->gaitsequence = pps->gaitsequence;
+
 	pcd->viewmodel = ppcd->viewmodel;
 	pcd->m_iId = ppcd->m_iId;
 	pcd->ammo_shells = ppcd->ammo_shells;

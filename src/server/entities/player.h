@@ -169,11 +169,36 @@ public:
 
 	void DeathSound();
 
-	void SetAnimation(PLAYER_ANIM playerAnim);
-	Activity CBasePlayer::GetDeathActivity();
-	Activity CBasePlayer::GetSmallFlinchActivity();
+	virtual void HandleSequenceFinished() override;
+
+	enum class Action
+	{
+		Idle,
+		Walk,
+		Jump,
+		Die,
+		Attack,
+		Reload,
+		Arm,
+	};
+
+	Action m_Action;
 	char m_szAnimExtention[32];
 
+	virtual void SetAction(const Action action, const bool force = false);
+
+protected:
+	virtual bool CanBeginAction(const Action action);
+
+	virtual int GetDeathSequence();
+	virtual int GetSmallFlinchSequence();
+	virtual int GetActionSequence(const Action action, bool& restart);
+
+	virtual int GetGaitSequence();
+
+	virtual void UpdateMovementAction();
+
+public:
 	// custom player functions
 	virtual void ImpulseCommands();
 	void CheatImpulseCommands(int iImpulse);
@@ -228,9 +253,6 @@ public:
 	bool m_bIsSpawning = false;
 
 	int m_bitsDamageType; // what types of damage has monster (player) taken
-
-	Activity m_Activity;	  // what the monster is doing (animation)
-	Activity m_IdealActivity; // monster should switch to this activity
 
 	int m_LastHitGroup; // the last body region that took damage
 

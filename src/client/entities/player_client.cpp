@@ -52,6 +52,9 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 
 bool CBasePlayer::Spawn()
 {
+	SetModel("models/player.mdl");
+	SetAction(Action::Idle, true);
+
 	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
 	return true;
 }
@@ -137,5 +140,24 @@ void CBasePlayer::ThrowGrenade()
 
 	m_TFState &= ~kTFStateGrenadePrime;
 	m_TFState |= kTFStateGrenadeThrowing;
+}
+
+
+void CBaseEntity::GetEntityState(entity_state_t& state)
+{
+	state.animtime = (int)(1000.0 * pev->animtime) / 1000.0;
+
+	state.frame = pev->frame;
+
+	state.sequence = pev->sequence;
+	state.framerate = pev->framerate;
+}
+
+
+void CBasePlayer::GetEntityState(entity_state_t& state)
+{
+	CBaseEntity::GetEntityState(state);
+
+	state.gaitsequence = pev->gaitsequence;
 }
 
