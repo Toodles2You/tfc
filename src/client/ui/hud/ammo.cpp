@@ -937,7 +937,11 @@ static void DrawCrosshair(WEAPON *pWeapon, int a = 255, bool zoom = false, bool 
 	}
 
 	Vector screen;
-	gEngfuncs.pTriAPI->WorldToScreen(g_CrosshairTarget, screen);
+	if (gEngfuncs.pTriAPI->WorldToScreen(g_CrosshairTarget, screen) != 0)
+	{
+		return;
+	}
+
 	screen.x = (1.0f + screen.x) * gHUD.GetWidth() * 0.5f;
 	screen.y = (1.0f - screen.y) * gHUD.GetHeight() * 0.5f;
 	gHUD.DrawHudSprite(
