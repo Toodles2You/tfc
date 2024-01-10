@@ -112,7 +112,6 @@ public:
 
 	// shared ammo slots
 	int m_rgAmmo[AMMO_LAST];
-	int m_rgAmmoLast[AMMO_LAST];
 
 	int m_iDeaths;
 

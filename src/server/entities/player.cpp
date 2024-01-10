@@ -957,7 +957,6 @@ bool CBasePlayer::Spawn()
 	for (int i = 0; i < AMMO_LAST; i++)
 	{
 		m_rgAmmo[i] = 0;
-		m_rgAmmoLast[i] = 0; // client ammo values also have to be reset  (the death hud clear messages does on the client side)
 	}
 
 	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
@@ -1152,11 +1151,6 @@ void CBasePlayer::ForceClientDllUpdate()
 	m_iClientHideHUD = -1;
 	m_ClientWeaponBits = 0;
 	m_ClientSndRoomtype = -1;
-
-	for (int i = 0; i < AMMO_LAST; ++i)
-	{
-		m_rgAmmoLast[i] = 0;
-	}
 
 	m_iTrain |= TRAIN_NEW; // Force new train message.
 	m_fInitHUD = true;	   // Force HUD gmsgResetHUD message
