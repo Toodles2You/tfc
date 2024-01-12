@@ -342,6 +342,7 @@ void CHalfLifeMultiplay::ClientPutInServer(CBasePlayer* pPlayer)
 {
 	pPlayer->m_team = nullptr;
 	pPlayer->pev->team = TEAM_UNASSIGNED;
+	pPlayer->pev->playerclass = PC_UNDEFINED;
 }
 
 
