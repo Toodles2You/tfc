@@ -2,9 +2,6 @@
 # Half-Life Mod CMake Project
 #===============================================================
 
-# Much of this was borrowed from the Half-Life Unified SDK:
-# https://github.com/SamVanheer/halflife-unified-sdk
-
 cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_CXX_STANDARD 17)

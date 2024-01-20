@@ -4,7 +4,7 @@ About
 ### This is work-in-progress! Use at your own discretion.
 
 Half-Life SDK with fixes & new features geared toward online play.  
-This SDK is derived from [Half-Life Updated](https://github.com/SamVanheer/halflife-updated) with bits from the [Half-Life Unified SDK](https://github.com/SamVanheer/halflife-unified-sdk).
+This SDK is derived from [Half-Life Updated](https://github.com/twhl-community/halflife-updated) with bits from the [Half-Life Unified SDK](https://github.com/twhl-community/halflife-unified-sdk).
 
 Features
 ======================
