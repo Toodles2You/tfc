@@ -501,6 +501,7 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 		}
 		return true;
 	}
+#ifdef HALFLIFE_SAVERESTORE
 	else if (FStrEq(pkvd->szKeyName, "newunit"))
 	{
 		// Single player only.  Clear save directory if set
@@ -510,6 +511,7 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 		}
 		return true;
 	}
+#endif
 	else if (FStrEq(pkvd->szKeyName, "gametitle"))
 	{
 		if (0 != atoi(pkvd->szValue))
