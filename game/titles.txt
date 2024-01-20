@@ -83,6 +83,15 @@ Title_SelectYourClass
 {
 SELECT YOUR CLASS
 }
+Title_CurrentlyOnYourTeam
+{
+There are %d on your team
+}
+
+Class_Description_not_available
+{
+Class Description not available.
+}
 
 Spec_Help_Title
 {

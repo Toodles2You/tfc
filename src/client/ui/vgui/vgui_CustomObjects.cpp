@@ -304,16 +304,8 @@ bool ClassButton::IsNotValid()
 	}
 
 	// Is it an illegal class?
-
-	// Only check current class if they've got autokill on
-	bool bAutoKill = CVAR_GET_FLOAT("hud_classautokill") != 0;
-	if (bAutoKill)
-	{
-		// Is it the player's current class?
-		if (
-			(!gViewPort->IsRandomPC() && (m_iPlayerClass == g_iPlayerClass)))
-			return true;
-	}
+	if ((gViewPort->GetValidClasses(0) & sTFValidClassInts[m_iPlayerClass]) || (gViewPort->GetValidClasses(g_iTeamNumber) & sTFValidClassInts[m_iPlayerClass]))
+		return true;
 
 	return false;
 }

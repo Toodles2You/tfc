@@ -128,6 +128,22 @@ const char* sTFClassSelection[] =
 		"civilian",
 };
 
+int sTFValidClassInts[] =
+	{
+        0,
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64,
+        256,
+        512,
+        128,
+        -1,
+};
+
 
 // Get the name of TGA file, based on GameDir
 char* GetVGUITGAName(const char* pszName)
