@@ -57,13 +57,21 @@ Unassigned
 {
 Unassigned
 }
-scientist
+Team_Blue
 {
-Black Mesa
+BLUE
 }
-hgrunt
+Team_Red
 {
-H.E.C.U.
+RED
+}
+Team_Green
+{
+GREEN
+}
+Team_Yellow
+{
+YELLOW
 }
 
 Map_Description_not_available

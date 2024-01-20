@@ -18,7 +18,7 @@ project(halflife
     LANGUAGES CXX
 )
 
-set(HALFLIFE_GAMEDESC "Half-Life" CACHE STRING "Server browser game & default scoreboard title")
+set(HALFLIFE_GAMEDESC "Team Fortress" CACHE STRING "Server browser game & default scoreboard title")
 option(HALFLIFE_SAVERESTORE "Enable singleplayer game save system" OFF)
 option(HALFLIFE_NODEGRAPH "Enable node graphs for monster AI" OFF)
 option(HALFLIFE_BOTS "Enable multiplayer bots" ON)
@@ -83,7 +83,7 @@ set(SERVER_SRC
     ${SERVER_SRC_DIR}/gamerules/mapcycle.cpp
     ${SERVER_SRC_DIR}/gamerules/multiplay_gamerules.cpp
     ${SERVER_SRC_DIR}/gamerules/singleplay_gamerules.cpp
-    ${SERVER_SRC_DIR}/gamerules/teamplay_gamerules.cpp
+    ${SERVER_SRC_DIR}/gamerules/tf_gamerules.cpp
 
     ${SERVER_SRC_DIR}/client.cpp
     ${SERVER_SRC_DIR}/game.cpp

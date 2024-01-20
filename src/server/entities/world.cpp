@@ -28,7 +28,6 @@
 #include "player.h"
 #include "weapons.h"
 #include "gamerules.h"
-#include "teamplay_gamerules.h"
 #ifdef HALFLIFE_NODEGRAPH
 #include "nodes.h"
 #endif
@@ -351,10 +350,6 @@ void ResetGlobalState()
 
 LINK_ENTITY_TO_CLASS(worldspawn, CWorld);
 
-#define SF_WORLD_DARK 0x0001	  // Fade from black at startup
-#define SF_WORLD_TITLE 0x0002	  // Display game title at startup
-#define SF_WORLD_FORCETEAM 0x0004 // Force teams
-
 CWorld::CWorld()
 {
 	if (World)
@@ -458,8 +453,6 @@ void CWorld::Precache()
 #endif
 
 	CVAR_SET_FLOAT("sv_zmax", (pev->speed > 0) ? pev->speed : 4096);
-
-	CVAR_SET_FLOAT("mp_defaultteam", ((pev->spawnflags & SF_WORLD_FORCETEAM) != 0) ? 1 : 0);
 }
 
 
@@ -486,51 +479,6 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 	else if (FStrEq(pkvd->szKeyName, "MaxRange"))
 	{
 		pev->speed = atof(pkvd->szValue);
-		return true;
-	}
-	else if (FStrEq(pkvd->szKeyName, "chaptertitle"))
-	{
-		pev->netname = ALLOC_STRING(pkvd->szValue);
-		return true;
-	}
-	else if (FStrEq(pkvd->szKeyName, "startdark"))
-	{
-		if (0 != atoi(pkvd->szValue))
-		{	
-			pev->spawnflags |= SF_WORLD_DARK;
-		}
-		return true;
-	}
-#ifdef HALFLIFE_SAVERESTORE
-	else if (FStrEq(pkvd->szKeyName, "newunit"))
-	{
-		// Single player only.  Clear save directory if set
-		if (0 != atoi(pkvd->szValue))
-		{
-			CVAR_SET_FLOAT("sv_newunit", 1);
-		}
-		return true;
-	}
-#endif
-	else if (FStrEq(pkvd->szKeyName, "gametitle"))
-	{
-		if (0 != atoi(pkvd->szValue))
-		{
-			pev->spawnflags |= SF_WORLD_TITLE;
-		}
-		return true;
-	}
-	else if (FStrEq(pkvd->szKeyName, "mapteams"))
-	{
-		pev->team = ALLOC_STRING(pkvd->szValue);
-		return true;
-	}
-	else if (FStrEq(pkvd->szKeyName, "defaultteam"))
-	{
-		if (0 != atoi(pkvd->szValue))
-		{
-			pev->spawnflags |= SF_WORLD_FORCETEAM;
-		}
 		return true;
 	}
 

@@ -33,9 +33,6 @@ cvar_t weaponstay = {"mp_weaponstay", "0", FCVAR_SERVER};
 cvar_t forcerespawn = {"mp_forcerespawn", "0", FCVAR_SERVER};
 cvar_t aimcrosshair = {"mp_autocrosshair", "1", FCVAR_SERVER};
 cvar_t decalfrequency = {"decalfrequency", "30", FCVAR_SERVER};
-cvar_t teamlist = {"mp_teamlist", "hgrunt;scientist", FCVAR_SERVER};
-cvar_t teamoverride = {"mp_teamoverride", "1"};
-cvar_t defaultteam = {"mp_defaultteam", "0"};
 cvar_t allowmonsters = {"mp_allowmonsters", "0", FCVAR_SERVER};
 
 cvar_t allow_spectators = {"allow_spectators", "1", FCVAR_SERVER};
@@ -67,9 +64,6 @@ void GameDLLInit()
 	CVAR_REGISTER(&forcerespawn);
 	CVAR_REGISTER(&aimcrosshair);
 	CVAR_REGISTER(&decalfrequency);
-	CVAR_REGISTER(&teamlist);
-	CVAR_REGISTER(&teamoverride);
-	CVAR_REGISTER(&defaultteam);
 	CVAR_REGISTER(&allowmonsters);
 
 	CVAR_REGISTER(&mp_chattime);

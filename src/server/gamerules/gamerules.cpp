@@ -22,7 +22,7 @@
 #include "player.h"
 #include "weapons.h"
 #include "gamerules.h"
-#include "teamplay_gamerules.h"
+#include "tf_gamerules.h"
 #include "game.h"
 #include "UserMessages.h"
 
@@ -132,24 +132,6 @@ CGameRules* InstallGameRules()
 
 	gpGlobals->teamplay = teamplay.value;
 
-	if ((int)gpGlobals->coop != 0)
-	{
-		// coop
-		return new CHalfLifeMultiplay;
-	}
-	
-	if ((int)gpGlobals->deathmatch != 0)
-	{
-		if ((int)gpGlobals->teamplay != 0)
-		{
-			// teamplay
-			return new CHalfLifeTeamplay;
-		}
-		// vanilla deathmatch
-		return new CHalfLifeMultiplay;
-	}
-	
-	// generic half-life
-	return new CHalfLifeRules;
+	return new CTeamFortress;
 }
 

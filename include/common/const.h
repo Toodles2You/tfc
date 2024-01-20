@@ -721,6 +721,7 @@ typedef enum
 	kGamemodeCooperative,
 	kGamemodeDeathmatch,
 	kGamemodeTeamplay,
+	kGamemodeTeamFortress,
 } gamemode_e;
 
 typedef struct
@@ -770,6 +771,10 @@ enum
 {
 	TEAM_UNASSIGNED = 0,
 	TEAM_DEFAULT,
+	TEAM_BLUE = 1,
+	TEAM_RED,
+	TEAM_GREEN,
+	TEAM_YELLOW,
 	TEAM_SPECTATORS = 5,
 };
 
