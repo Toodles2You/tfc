@@ -18,6 +18,7 @@ project(halflife
     LANGUAGES CXX
 )
 
+set(HALFLIFE_GAMEDESC "Half-Life" CACHE STRING "Server browser game & default scoreboard title")
 option(HALFLIFE_SAVERESTORE "Enable singleplayer game save system" OFF)
 option(HALFLIFE_NODEGRAPH "Enable node graphs for monster AI" OFF)
 option(HALFLIFE_BOTS "Enable multiplayer bots" ON)
@@ -175,7 +176,7 @@ set(CLIENT_SRC
     ${SHARED_SRC}
 )
 
-set(HL_COMPILE_DEFS)
+set(HL_COMPILE_DEFS HALFLIFE_GAMEDESC="${HALFLIFE_GAMEDESC}")
 set(HL_COMPILE_OPTIONS)
 set(HL_LINK_OPTIONS)
 
