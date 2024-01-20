@@ -710,7 +710,7 @@ static float g_ColorGrey[3] = {0.8, 0.8, 0.8};
 
 float* CHud::GetTeamColor(int teamNumber)
 {
-	if (m_gameMode != kGamemodeTeamplay)
+	if (m_gameMode < kGamemodeTeamplay)
 	{
 		switch (teamNumber)
 		{
