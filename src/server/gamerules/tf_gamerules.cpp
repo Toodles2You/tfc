@@ -48,6 +48,124 @@ static const char* sTFClassSelection[] =
 };
 
 
+PCInfo sTFClassInfo[PC_LASTCLASS] =
+{
+    [PC_UNDEFINED] = {},
+
+    [PC_SCOUT] = {
+        .maxHealth        = 75,
+        .maxSpeed         = 400,
+        .maxArmor         = 50,
+        .initArmor        = 25,
+        .maxArmorType     = 0.3,
+        .initArmorType    = 0.3,
+        .armorClasses     = AT_SAVESHOT | AT_SAVENAIL,
+        .initArmorClasses = 0,
+    },
+
+    [PC_SNIPER] = {
+        .maxHealth        = 90,
+        .maxSpeed         = 300,
+        .maxArmor         = 50,
+        .initArmor        = 0,
+        .maxArmorType     = 0.3,
+        .initArmorType    = 0.3,
+        .armorClasses     = AT_SAVESHOT | AT_SAVENAIL,
+        .initArmorClasses = 0,
+    },
+    
+    [PC_SOLDIER] = {
+        .maxHealth        = 100,
+        .maxSpeed         = 240,
+        .maxArmor         = 200,
+        .initArmor        = 100,
+        .maxArmorType     = 0.8,
+        .initArmorType    = 0.8,
+        .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEEXPLOSION | AT_SAVEELECTRICITY | AT_SAVEFIRE,
+        .initArmorClasses = 0,
+    },
+
+    [PC_DEMOMAN] = {
+        .maxHealth        = 90,
+        .maxSpeed         = 280,
+        .maxArmor         = 120,
+        .initArmor        = 50,
+        .maxArmorType     = 0.6,
+        .initArmorType    = 0.6,
+        .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEEXPLOSION | AT_SAVEELECTRICITY | AT_SAVEFIRE,
+        .initArmorClasses = 0,
+    },
+    
+    [PC_MEDIC] = {
+        .maxHealth        = 90,
+        .maxSpeed         = 320,
+        .maxArmor         = 100,
+        .initArmor        = 50,
+        .maxArmorType     = 0.6,
+        .initArmorType    = 0.3,
+        .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEELECTRICITY | AT_SAVEFIRE,
+        .initArmorClasses = 0,
+    },
+
+    [PC_HVYWEAP] = {
+        .maxHealth        = 100,
+        .maxSpeed         = 230,
+        .maxArmor         = 300,
+        .initArmor        = 150,
+        .maxArmorType     = 0.8,
+        .initArmorType    = 0.8,
+        .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEEXPLOSION | AT_SAVEELECTRICITY | AT_SAVEFIRE,
+        .initArmorClasses = 0,
+    },
+
+    [PC_PYRO] = {
+        .maxHealth        = 100,
+        .maxSpeed         = 300,
+        .maxArmor         = 150,
+        .initArmor        = 50,
+        .maxArmorType     = 0.6,
+        .initArmorType    = 0.6,
+        .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEELECTRICITY | AT_SAVEFIRE,
+        .initArmorClasses = AT_SAVEFIRE,
+    },
+
+    [PC_SPY] = {
+        .maxHealth        = 90,
+        .maxSpeed         = 300,
+        .maxArmor         = 100,
+        .initArmor        = 25,
+        .maxArmorType     = 0.6,
+        .initArmorType    = 0.6,
+        .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEELECTRICITY | AT_SAVEFIRE,
+        .initArmorClasses = 0,
+    },
+
+    [PC_ENGINEER] = {
+        .maxHealth        = 80,
+        .maxSpeed         = 300,
+        .maxArmor         = 50,
+        .initArmor        = 25,
+        .maxArmorType     = 0.6,
+        .initArmorType    = 0.3,
+        .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEEXPLOSION | AT_SAVEELECTRICITY | AT_SAVEFIRE,
+        .initArmorClasses = 0,
+    },
+
+    [PC_RANDOM] = {},
+
+    [PC_CIVILIAN] = {
+        .maxHealth        = 50,
+        .maxSpeed         = 240,
+        .maxArmor         = 0,
+        .initArmor        = 0,
+        .maxArmorType     = 0,
+        .initArmorType    = 0,
+        .armorClasses     = 0,
+        .initArmorClasses = 0,
+    }
+};
+
+
 CTeamFortress::CTeamFortress()
 {
     m_teams.clear();
@@ -272,100 +390,23 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
 
 	pPlayer->m_iHideHUD &= ~(HIDEHUD_WEAPONS | HIDEHUD_FLASHLIGHT | HIDEHUD_HEALTH);
 
-	//Ensure the player switches to the Glock on spawn regardless of setting
 	const int originalAutoWepSwitch = pPlayer->m_iAutoWepSwitch;
 	pPlayer->m_iAutoWepSwitch = 1;
 
+    PCInfo& i = sTFClassInfo[pPlayer->PCNumber()];
+
+	pPlayer->pev->health = pPlayer->pev->max_health = i.maxHealth;
+
+    g_engfuncs.pfnSetClientMaxspeed(pPlayer->edict(), i.maxSpeed);
+
+    pPlayer->pev->armorvalue = i.initArmor;
+    pPlayer->pev->armortype = i.initArmorType;
+
     pPlayer->GiveNamedItem("weapon_crowbar");
     pPlayer->GiveNamedItem("weapon_9mmAR");
-
-    switch (pPlayer->PCNumber())
-    {
-	case PC_SCOUT:    ScoutSpawn(pPlayer);    break;
-	case PC_SNIPER:   SniperSpawn(pPlayer);   break;
-	case PC_SOLDIER:  SoldierSpawn(pPlayer);  break;
-	case PC_DEMOMAN:  DemomanSpawn(pPlayer);  break;
-	case PC_MEDIC:    MedicSpawn(pPlayer);    break;
-	case PC_HVYWEAP:  HvyweapSpawn(pPlayer);  break;
-	case PC_PYRO:     PyroSpawn(pPlayer);     break;
-	case PC_SPY:      SpySpawn(pPlayer);      break;
-	case PC_ENGINEER: EngineerSpawn(pPlayer); break;
-    default:          CivilianSpawn(pPlayer); break;
-    }
 
 	pPlayer->m_iAutoWepSwitch = originalAutoWepSwitch;
 
 	tent::TeleportSplash(pPlayer);
 }
-
-
-void CTeamFortress::ScoutSpawn(CBasePlayer* player)
-{
-	player->pev->health = player->pev->max_health = 75;
-    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 400);
-}
-
-
-void CTeamFortress::SniperSpawn(CBasePlayer* player)
-{
-	player->pev->health = player->pev->max_health = 90;
-    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 300);
-}
-
-
-void CTeamFortress::SoldierSpawn(CBasePlayer* player)
-{
-	player->pev->health = player->pev->max_health = 100;
-    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 240);
-}
-
-
-void CTeamFortress::DemomanSpawn(CBasePlayer* player)
-{
-	player->pev->health = player->pev->max_health = 90;
-    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 280);
-}
-
-
-void CTeamFortress::MedicSpawn(CBasePlayer* player)
-{
-	player->pev->health = player->pev->max_health = 90;
-    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 320);
-}
-
-
-void CTeamFortress::HvyweapSpawn(CBasePlayer* player)
-{
-	player->pev->health = player->pev->max_health = 100;
-    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 230);
-}
-
-
-void CTeamFortress::PyroSpawn(CBasePlayer* player)
-{
-	player->pev->health = player->pev->max_health = 100;
-    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 300);
-}
-
-
-void CTeamFortress::SpySpawn(CBasePlayer* player)
-{
-	player->pev->health = player->pev->max_health = 90;
-    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 300);
-}
-
-
-void CTeamFortress::EngineerSpawn(CBasePlayer* player)
-{
-	player->pev->health = player->pev->max_health = 80;
-    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 300);
-}
-
-
-void CTeamFortress::CivilianSpawn(CBasePlayer* player)
-{
-	player->pev->health = player->pev->max_health = 50;
-    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 240);
-}
-
 

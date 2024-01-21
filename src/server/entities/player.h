@@ -49,6 +49,15 @@ enum
 	kTFStateGrenadeThrowing = 2,
 };
 
+enum
+{
+	AT_SAVESHOT = 1,		// Kevlar  	 : Reduces bullet damage by 15%
+	AT_SAVENAIL = 2,		// Wood :) 	 : Reduces nail damage by 15%
+	AT_SAVEEXPLOSION = 4,	// Blast   	 : Reduces explosion damage by 15%
+	AT_SAVEELECTRICITY = 8, // Shock	 : Reduces electricity damage by 15%
+	AT_SAVEFIRE = 16,		// Asbestos	 : Reduces fire damage by 15%
+};
+
 #define CHAT_INTERVAL 1.0f
 
 class CTeam;

@@ -9,6 +9,20 @@
 
 class CHLBot;
 
+struct PCInfo
+{
+	int maxHealth;		  // Maximum Health Level
+	int maxSpeed;		  // Maximum movement speed
+	int maxArmor;		  // Maximum Armor Level, of any armor class
+	int initArmor;		  // Armor level when respawned
+	float maxArmorType;	  // Maximum level of Armor absorption
+	float initArmorType;  // Absorption Level of armor when respawned
+	int armorClasses;	  // Armor Classes allowed for this class
+	int initArmorClasses; // Armorclass worn when respawned
+};
+
+extern PCInfo sTFClassInfo[PC_LASTCLASS];
+
 class CTeamFortress : public CHalfLifeMultiplay
 {
 public:
@@ -26,18 +40,6 @@ public:
 	gamemode_e GetGameMode() override { return kGamemodeTeamFortress; }
 	bool ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib, bool bAutoTeam) override;
 	void PlayerSpawn(CBasePlayer* pPlayer) override;
-
-protected:
-	void ScoutSpawn(CBasePlayer* player);
-	void SniperSpawn(CBasePlayer* player);
-	void SoldierSpawn(CBasePlayer* player);
-	void DemomanSpawn(CBasePlayer* player);
-	void MedicSpawn(CBasePlayer* player);
-	void HvyweapSpawn(CBasePlayer* player);
-	void PyroSpawn(CBasePlayer* player);
-	void SpySpawn(CBasePlayer* player);
-	void EngineerSpawn(CBasePlayer* player);
-	void CivilianSpawn(CBasePlayer* player);
 
 protected:
 	bool ChangePlayerClass(CBasePlayer* pPlayer, int classIndex);
