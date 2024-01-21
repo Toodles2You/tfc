@@ -26,6 +26,7 @@ void CBasePlayerWeapon::GetWeaponData(weapon_data_t& data)
 {
 	data.m_fInReload = m_fInReload;
 	data.m_iClip = m_iClip;
+	data.m_iWeaponState = m_iWeaponState;
 
     *reinterpret_cast<int*>(&data.m_flNextPrimaryAttack) = m_iNextPrimaryAttack;
 }
@@ -35,6 +36,7 @@ void CBasePlayerWeapon::SetWeaponData(const weapon_data_t& data)
 {
 	m_fInReload = data.m_fInReload;
 	m_iClip = data.m_iClip;
+	m_iWeaponState = data.m_iWeaponState;
 
     m_iNextPrimaryAttack = *reinterpret_cast<const int*>(&data.m_flNextPrimaryAttack);
 }

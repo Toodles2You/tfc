@@ -52,12 +52,34 @@ static CBasePlayer players[MAX_PLAYERS + 1];
 // The entity we'll use to represent the local client
 static CBasePlayer* player = players;
 
-static CCrowbar crowbar;
-static CMP5 mp5;
-static CBasePlayerWeapon* weapons[] =
+static CShotgun tf_weapon_shotgun;
+static CSuperShotgun tf_weapon_supershotgun;
+
+static CTFWeapon* weapons[] =
 {
-	&crowbar,
-	&mp5,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	&tf_weapon_shotgun,
+	&tf_weapon_supershotgun,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
 };
 
 static Vector previousorigin;
@@ -238,9 +260,12 @@ static void HUD_InitClientWeapons()
 	}
 
 	// Allocate slots for each weapon that we are going to be predicting
-	for (auto i = 0; i < ARRAYSIZE(weapons); i++)
+	for (auto i = 1; i < ARRAYSIZE(weapons); i++)
 	{
-		HUD_PrepEntity(weapons[i], player);
+		if (weapons[i] != nullptr)
+		{
+			HUD_PrepEntity(weapons[i], player);
+		}
 	}
 }
 
@@ -405,10 +430,12 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 	player->SetEntityState(from->playerstate);
 	player->SetClientData(from->client);
 
-	for (i = 0; i < ARRAYSIZE(weapons); i++)
+	for (i = 1; i < ARRAYSIZE(weapons); i++)
 	{
-		auto weapon = weapons[i];
-		weapon->SetWeaponData(from->weapondata[weapon->GetID()]);
+		if (weapons[i] != nullptr)
+		{
+			weapons[i]->SetWeaponData(from->weapondata[weapons[i]->GetID()]);
+		}
 	}
 
 	player->CmdStart(*cmd, random_seed);
@@ -416,11 +443,13 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 
 	player->PostThink();
 
-	for (i = 0; i < ARRAYSIZE(weapons); i++)
+	for (i = 1; i < ARRAYSIZE(weapons); i++)
 	{
-		auto weapon = weapons[i];
-		weapon->DecrementTimers(cmd->msec);
-		weapon->GetWeaponData(to->weapondata[weapon->GetID()]);
+		if (weapons[i] != nullptr)
+		{
+			weapons[i]->DecrementTimers(cmd->msec);
+			weapons[i]->GetWeaponData(to->weapondata[weapons[i]->GetID()]);
+		}
 	}
 
 	player->UpdateHudData();
@@ -488,27 +517,54 @@ void WeaponsResource::Init()
 	memset(rgWeapons, 0, sizeof(rgWeapons));
 	Reset();
 
-	for (auto i = 0; i < ARRAYSIZE(weapons); i++)
+	for (auto i = 1; i < ARRAYSIZE(weapons); i++)
 	{
-		WeaponInfo info;
-		memset(&info, 0, sizeof(info));
+		if (weapons[i] != nullptr)
+		{
+			WeaponInfo info;
+			memset(&info, 0, sizeof(info));
 
-		weapons[i]->GetWeaponInfo(info);
+			weapons[i]->GetWeaponInfo(info);
 
-		WEAPON w;
-		memset(&w, 0, sizeof(w));
+			WEAPON w;
+			memset(&w, 0, sizeof(w));
 
-		strcpy(w.szName, info.pszName);
-		w.iAmmoType = info.iAmmo1;
-		w.iAmmo2Type = info.iAmmo2;
-		w.iMax1 = info.iMaxAmmo1;
-		w.iMax2 = info.iMaxAmmo2;
-		w.iSlot = info.iSlot;
-		w.iSlotPos = info.iPosition;
-		w.iFlags = info.iFlags;
-		w.iId = weapons[i]->GetID();
+			strcpy(w.szName, info.pszName);
+			w.iAmmoType = info.iAmmo1;
+			w.iAmmo2Type = info.iAmmo2;
+			w.iMax1 = info.iMaxAmmo1;
+			w.iMax2 = info.iMaxAmmo2;
+			w.iSlot = info.iSlot;
+			w.iSlotPos = info.iPosition;
+			w.iFlags = info.iFlags;
+			w.iId = weapons[i]->GetID();
 
-		rgWeapons[weapons[i]->GetID()] = w;
+			rgWeapons[weapons[i]->GetID()] = w;
+		}
+	}
+}
+
+
+/*
+======================
+EV_HookWeaponEvents
+
+Associate script file name with callback functions.
+======================
+*/
+void EV_HookWeaponEvents()
+{
+	for (auto i = 1; i < ARRAYSIZE(weapons); i++)
+	{
+		if (weapons[i] != nullptr)
+		{
+			WeaponInfo info;
+			memset(&info, 0, sizeof(info));
+
+			weapons[i]->GetWeaponInfo(info);
+
+			gEngfuncs.pfnHookEvent(info.pszEvent, CTFWeapon::EV_PrimaryAttack);
+		}
 	}
 }
 

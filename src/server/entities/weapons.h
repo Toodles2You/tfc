@@ -41,6 +41,10 @@ enum WeaponAnim
 	kWeaponAnimIdle = 0,
 	kWeaponAnimDeploy,
 	kWeaponAnimHolster,
+	kWeaponAnimAttack,
+	kWeaponAnimReload,
+	kWeaponAnimStartReload,
+	kWeaponAnimEndReload,
 
 	kWeaponAnimLast
 };
@@ -62,6 +66,16 @@ typedef struct
 	const char* pszPlayer;
 	const char* pszAnimExt;
 	int iAnims[kWeaponAnimLast];
+
+	int iShots;
+	int iAttackTime;
+	int iReloadTime;
+	int iProjectileDamage;
+	Vector2D vecProjectileSpread;
+	int iProjectileCount;
+	const char* pszEvent;
+	const char* pszAttackSound;
+	float flPunchAngle;
 } WeaponInfo;
 
 #ifdef GAME_DLL
@@ -154,6 +168,13 @@ public:
 	int m_iNextPrimaryAttack;
 	int m_iClip;
 	bool m_fInReload;
+
+	enum
+	{
+		kWpnStateReloading = 1,
+	};
+
+	int m_iWeaponState;
 };
 
 inline short g_sModelIndexPlayer;
@@ -168,35 +189,12 @@ inline short g_sModelIndexBubbles;
 inline short g_sModelIndexBloodDrop;
 inline short g_sModelIndexBloodSpray;
 
-class CCrowbar : public CBasePlayerWeapon
+class CTFWeapon : public CBasePlayerWeapon
 {
 public:
-	enum
-	{
-		kAnimIdle = 0,
-		kAnimDeploy,
-		kAnimHolster,
-		kAnimAttack1Hit,
-		kAnimAttack1Miss,
-		kAnimAttack2Miss,
-		kAnimAttack2Hit,
-		kAnimAttack3Miss,
-		kAnimAttack3Hit
-	};
-
-	enum
-	{
-		kCrowbarMiss = 0,
-		kCrowbarHitWorld,
-		kCrowbarHitPlayer,
-	};
-
-	int GetID() const override { return WEAPON_CROWBAR; }
-	void GetWeaponInfo(WeaponInfo& i) override;
-
 	void Precache() override;
 
-	void PrimaryAttack();
+	virtual void PrimaryAttack();
 	void WeaponPostFrame() override;
 
 #ifdef CLIENT_DLL
@@ -207,39 +205,18 @@ private:
 	unsigned short m_usPrimaryAttack;
 };
 
-class CMP5 : public CBasePlayerWeapon
+class CShotgun : public CTFWeapon
 {
 public:
-	enum
-	{
-		kAnimLongidle = 0,
-		kAnimIdle1,
-		kAnimLaunch,
-		kAnimReload,
-		kAnimDeploy,
-		kAnimFire1,
-		kAnimFire2,
-		kAnimFire3,
-		kAnimHolster,
-	};
-
-	int GetID() const override { return WEAPON_MP5; }
+	int GetID() const override { return WEAPON_TF_SHOTGUN; }
 	void GetWeaponInfo(WeaponInfo& i) override;
+};
 
-	void Precache() override;
-
-	void PrimaryAttack();
-	void SecondaryAttack();
-	void WeaponPostFrame() override;
-
-#ifdef CLIENT_DLL
-	static void EV_PrimaryAttack(event_args_t* args);
-	static void EV_SecondaryAttack(event_args_t* args);
-#endif
-
-private:
-	unsigned short m_usPrimaryAttack;
-	unsigned short m_usSecondaryAttack;
+class CSuperShotgun : public CTFWeapon
+{
+public:
+	int GetID() const override { return WEAPON_SUPER_SHOTGUN; }
+	void GetWeaponInfo(WeaponInfo& i) override;
 };
 
 #ifdef GAME_DLL

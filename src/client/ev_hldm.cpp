@@ -462,8 +462,10 @@ static void EV_FireBullets(
 	gEngfuncs.pEventAPI->EV_PopPMStates();
 }
 
-void CMP5::EV_PrimaryAttack(event_args_t* args)
+void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 {
+	const auto& info = CBasePlayerWeapon::WeaponInfoArray[(int)args->fparam1];
+
 	Vector up, right, forward;
 	AngleVectors(args->angles, forward, right, up);
 
@@ -471,180 +473,26 @@ void CMP5::EV_PrimaryAttack(event_args_t* args)
 	{
 		EV_MuzzleFlash();
 
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(
-			kAnimFire1 + gEngfuncs.pfnRandomLong(0, 2), 0);
+		gEngfuncs.pEventAPI->EV_WeaponAnimation(info.iAnims[kWeaponAnimAttack], 0);
 
-		V_PunchAxis(0, gEngfuncs.pfnRandomFloat(-2, 2));
+		V_PunchAxis(0, info.flPunchAngle);
 	}
 
 	Vector shellOrigin, shellVelocity;
 	EV_GetDefaultShellInfo(args, args->origin, args->velocity, shellVelocity, shellOrigin, forward, right, up, 20, -12, 4);
-	EV_EjectBrass(shellOrigin, shellVelocity, args->angles[YAW], g_sModelIndexShell, TE_BOUNCE_SHELL);
-
-	const char* sample;
-	switch (gEngfuncs.pfnRandomLong(0, 1))
-	{
-	case 0: sample = "weapons/hks1.wav"; break;
-	case 1: sample = "weapons/hks2.wav"; break;
-	}
+	EV_EjectBrass(shellOrigin, shellVelocity, args->angles[YAW], g_sModelIndexShell, TE_BOUNCE_SHOTSHELL);
 
 	gEngfuncs.pEventAPI->EV_PlaySound(
 		args->entindex,
 		args->origin,
 		CHAN_WEAPON,
-		sample,
+		info.pszAttackSound,
 		VOL_NORM,
 		ATTN_NORM,
 		0,
 		gEngfuncs.pfnRandomLong(94, 109));
 
-	EV_FireBullets(args, args->iparam1, Vector2D(6, 6), args->iparam2, 8192, false, 2);
-}
-
-void CMP5::EV_SecondaryAttack(event_args_t* args)
-{
-	if (EV_IsLocal(args->entindex))
-	{
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimLaunch, 0);
-
-		V_PunchAxis(0, -10);
-	}
-
-	const char* sample;
-	switch (gEngfuncs.pfnRandomLong(0, 1))
-	{
-	case 0: sample = "weapons/glauncher.wav"; break;
-	case 1: sample = "weapons/glauncher2.wav"; break;
-	}
-
-	gEngfuncs.pEventAPI->EV_PlaySound(
-		args->entindex,
-		args->origin,
-		CHAN_WEAPON,
-		sample,
-		VOL_NORM,
-		ATTN_NORM,
-		0,
-		gEngfuncs.pfnRandomLong(94, 109));
-}
-
-static int g_iSwing;
-
-void CCrowbar::EV_PrimaryAttack(event_args_t* args)
-{
-	Vector gun;
-	EV_GetGunPosition(args, gun, args->origin);
-
-	const auto reliable = args->bparam1;
-	auto hit = args->iparam1;
-
-	pmtrace_t tr;
-
-	if (!reliable)
-	{
-		gEngfuncs.pEventAPI->EV_PushPMStates();
-		gEngfuncs.pEventAPI->EV_SetSolidPlayers(args->entindex - 1);
-		gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
-
-		Vector forward, right, up;
-		AngleVectors(args->angles, forward, right, up);
-
-		gEngfuncs.pEventAPI->EV_PlayerTrace(gun, gun + forward * 64, PM_NORMAL, -1, &tr);
-
-		if (EV_IsLocal(args->entindex))
-		{
-			g_iSwing++;
-		}
-
-		if (tr.fraction != 1.0F)
-		{
-			auto ent = gEngfuncs.pEventAPI->EV_GetPhysent(tr.ent);
-
-			if (ent->solid != SOLID_BSP && ent->movetype != MOVETYPE_PUSHSTEP)
-			{
-				hit = kCrowbarHitPlayer;
-			}
-			else
-			{
-				hit = kCrowbarHitWorld;
-			}
-		}
-		else
-		{
-			hit = kCrowbarMiss;
-		}
-	}
-
-	if (hit == kCrowbarMiss)
-	{
-		if (EV_IsLocal(args->entindex))
-		{
-			switch (g_iSwing % 3)
-			{
-			case 0: gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimAttack1Miss, 0); break;
-			case 1: gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimAttack2Miss, 0); break;
-			case 2: gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimAttack3Miss, 0); break;
-			}
-		}
-
-		//Play Swing sound
-		gEngfuncs.pEventAPI->EV_PlaySound(
-			args->entindex,
-			args->origin,
-			CHAN_WEAPON,
-			"weapons/cbar_miss1.wav",
-			VOL_NORM,
-			ATTN_NORM,
-			0,
-			PITCH_NORM);
-	}
-	else
-	{
-		if (EV_IsLocal(args->entindex))
-		{
-			switch (g_iSwing % 3)
-			{
-			case 0: gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimAttack1Hit, 0); break;
-			case 1: gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimAttack2Hit, 0); break;
-			case 2: gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimAttack3Hit, 0); break;
-			}
-		}
-
-		const char* sample;
-
-		if (hit == kCrowbarHitWorld)
-		{
-			switch (gEngfuncs.pfnRandomLong(0, 1))
-			{
-				case 0: sample = "weapons/cbar_hit1.wav"; break;
-				case 1: sample = "weapons/cbar_hit2.wav"; break;
-			}
-		}
-		else
-		{
-			switch (gEngfuncs.pfnRandomLong(0, 2))
-			{
-				case 0: sample = "weapons/cbar_hitbod1.wav"; break;
-				case 1: sample = "weapons/cbar_hitbod2.wav"; break;
-				case 2: sample = "weapons/cbar_hitbod3.wav"; break;
-			}
-		}
-
-		gEngfuncs.pEventAPI->EV_PlaySound(
-			args->entindex,
-			args->origin,
-			CHAN_ITEM,
-			sample,
-			VOL_NORM,
-			ATTN_NORM,
-			0,
-			PITCH_NORM);
-	}
-	
-	if (!reliable)
-	{
-		gEngfuncs.pEventAPI->EV_PopPMStates();
-	}
+	EV_FireBullets(args, args->iparam1, info.vecProjectileSpread, info.iProjectileCount * args->iparam2, 2048, false, 0);
 }
 
 TEMPENTITY* pLaserDot;
@@ -1111,9 +959,6 @@ Associate script file name with callback functions.
 */
 void EV_HookEvents()
 {
-	gEngfuncs.pfnHookEvent("events/mp5.sc", CMP5::EV_PrimaryAttack);
-	gEngfuncs.pfnHookEvent("events/mp52.sc", CMP5::EV_SecondaryAttack);
-	gEngfuncs.pfnHookEvent("events/crowbar.sc", CCrowbar::EV_PrimaryAttack);
 	gEngfuncs.pfnHookEvent("events/laser_on.sc", EV_LaserDotOn);
 	gEngfuncs.pfnHookEvent("events/laser_off.sc", EV_LaserDotOff);
 	gEngfuncs.pfnHookEvent("events/gibs.sc", EV_Gibbed);
@@ -1128,7 +973,7 @@ void EV_Init()
 {
 	g_sModelIndexPlayer = gEngfuncs.pEventAPI->EV_FindModelIndex("models/player.mdl");
 	g_sModelIndexGibs = gEngfuncs.pEventAPI->EV_FindModelIndex("models/hgibs.mdl");
-	g_sModelIndexShell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shell.mdl");
+	g_sModelIndexShell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shotgunshell.mdl");
 
 	g_sModelIndexLaser = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/laserbeam.spr");
 	g_sModelIndexLaserDot = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/laserdot.spr");

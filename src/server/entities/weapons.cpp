@@ -63,20 +63,20 @@ void W_Precache()
 {
 	memset(CBasePlayerWeapon::WeaponInfoArray, 0, sizeof(CBasePlayerWeapon::WeaponInfoArray));
 
-	// weapons
-	util::PrecacheWeapon("weapon_crowbar");
-	util::PrecacheWeapon("weapon_9mmAR");
-
-	// common world objects
-	util::PrecacheOther("item_battery");
-	util::PrecacheOther("item_healthkit");
+	for (int i = 0; i < sizeof(g_szWeaponNames) / sizeof(*g_szWeaponNames); i++)
+	{
+		if (g_szWeaponNames[i] != nullptr)
+		{
+			util::PrecacheWeapon(g_szWeaponNames[i]);
+		}
+	}
 
 	if (util::IsMultiplayer())
 	{
 		util::PrecacheOther("weaponbox");
 	}
 
-	g_sModelIndexShell = PRECACHE_MODEL("models/shell.mdl");
+	g_sModelIndexShell = PRECACHE_MODEL("models/shotgunshell.mdl");
 
 	g_sModelIndexLaser = PRECACHE_MODEL("sprites/laserbeam.spr");
 	g_sModelIndexLaserDot = PRECACHE_MODEL("sprites/laserdot.spr");

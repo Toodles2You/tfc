@@ -48,6 +48,7 @@ void CL_LoadParticleMan();
 void CL_UnloadParticleMan();
 
 void InitInput();
+void EV_HookWeaponEvents();
 void EV_HookEvents();
 
 #ifdef HALFLIFE_JOYSTICK
@@ -102,6 +103,7 @@ int Initialize(cl_enginefunc_t* pEnginefuncs, int iVersion)
 
 	memcpy(&gEngfuncs, pEnginefuncs, sizeof(cl_enginefunc_t));
 
+	EV_HookWeaponEvents();
 	EV_HookEvents();
 	CL_LoadParticleMan();
 
