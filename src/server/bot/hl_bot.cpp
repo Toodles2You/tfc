@@ -10,6 +10,7 @@
 #include "cbase.h"
 #include "weapons.h"
 #include "gamerules.h"
+#include "tf_gamerules.h"
 #include "player.h"
 #include "client.h"
 #include "pm_shared.h"
@@ -72,6 +73,10 @@ void CHLBot::Update()
     if (TeamNumber() == TEAM_UNASSIGNED)
     {
         g_pGameRules->ChangePlayerTeam(this, g_pGameRules->GetDefaultPlayerTeam(this), false, false, false);
+        if (g_pGameRules->GetGameMode() >= kGamemodeTeamFortress)
+        {
+            dynamic_cast<CTeamFortress*>(g_pGameRules)->ChangePlayerClass(this, g_engfuncs.pfnRandomLong(PC_SCOUT, PC_ENGINEER));
+        }
         return;
     }
     if (!m_pActiveWeapon || m_pActiveWeapon->m_iClip == 0)

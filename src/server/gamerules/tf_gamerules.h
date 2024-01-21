@@ -7,9 +7,13 @@
 
 #pragma once
 
+class CHLBot;
+
 class CTeamFortress : public CHalfLifeMultiplay
 {
 public:
+	friend class CHLBot;
+
 	CTeamFortress();
 
 	bool ClientCommand(CBasePlayer* pPlayer, const char* pcmd) override;
