@@ -16,6 +16,38 @@
 #include "UserMessages.h"
 
 
+static const char* sTFClassModels[] =
+{
+    "civilian",
+    "scout",
+    "sniper",
+    "soldier",
+    "demoman",
+    "medic",
+    "hvyweapon",
+    "pyro",
+    "spy",
+    "engineer",
+    "civilian",
+};
+
+static const char* sTFClassSelection[] =
+{
+    "civilian",
+    "scout",
+    "sniper",
+    "soldier",
+    "demoman",
+    "medic",
+    "hwguy",
+    "pyro",
+    "spy",
+    "engineer",
+    "randompc",
+    "civilian",
+};
+
+
 CTeamFortress::CTeamFortress()
 {
     m_teams.clear();
@@ -23,6 +55,21 @@ CTeamFortress::CTeamFortress()
 
     m_teams.push_back(CTeam{TEAM_BLUE, "Team_Blue"});
     m_teams.push_back(CTeam{TEAM_RED, "Team_Red"});
+}
+
+
+bool CTeamFortress::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
+{
+    for (int i = PC_SCOUT; i <= PC_ENGINEER; i++)
+    {
+        if (strcmp(pcmd, sTFClassSelection[i]) == 0)
+        {
+            ChangePlayerClass(pPlayer, i);
+            return true;
+        }
+    }
+
+    return CHalfLifeMultiplay::ClientCommand(pPlayer, pcmd);
 }
 
 
@@ -37,6 +84,13 @@ void CTeamFortress::InitHUD(CBasePlayer* pPlayer)
         WriteShort((*t).m_score);
         MessageEnd();
     }
+
+    MessageBegin(MSG_ONE, gmsgValClass, pPlayer);
+    for (int i = 0; i < 5; i++)
+    {
+        WriteShort(0);
+    }
+    MessageEnd();
 }
 
 
@@ -47,6 +101,74 @@ bool CTeamFortress::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool b
         return false;
     }
 
+    pPlayer->pev->playerclass = PC_UNDEFINED;
+
+    if (pPlayer->TeamNumber() != TEAM_SPECTATORS)
+    {
+        MessageBegin(MSG_ONE, gmsgVGUIMenu, pPlayer);
+        WriteByte(MENU_CLASS);
+        MessageEnd();
+    }
+
+    return true;
+}
+
+
+bool CTeamFortress::ChangePlayerClass(CBasePlayer* pPlayer, int classIndex)
+{
+    if (pPlayer->TeamNumber() <= TEAM_UNASSIGNED || pPlayer->TeamNumber() > m_numTeams)
+    {
+        return false;
+    }
+    else if (classIndex < PC_SCOUT || classIndex > PC_ENGINEER)
+    {
+        return false;
+    }
+
+	if (classIndex == pPlayer->PCNumber())
+	{
+		return true;
+	}
+
+    bool bKill = true;
+
+	if (!pPlayer->IsPlayer() || !pPlayer->IsAlive())
+	{
+		bKill = false;
+	}
+
+	if (bKill)
+	{
+		if (!g_pGameRules->FPlayerCanSuicide(pPlayer))
+		{
+			return false;
+		}
+
+		pPlayer->Killed(
+			CWorld::World,
+			CWorld::World,
+			DMG_GENERIC);
+	}
+
+    pPlayer->pev->playerclass = classIndex;
+
+    g_engfuncs.pfnSetClientKeyValue(
+        pPlayer->entindex(),
+        g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()),
+        "model",
+        sTFClassModels[pPlayer->PCNumber()]);
+
+    if (!bKill)
+    {
+        pPlayer->Spawn();
+    }
+
+	util::LogPrintf("\"%s<%i><%s><>\" became a %s\n",
+		STRING(pPlayer->pev->netname),
+		g_engfuncs.pfnGetPlayerUserId(pPlayer->edict()),
+		g_engfuncs.pfnGetPlayerAuthId(pPlayer->edict()),
+		sTFClassModels[pPlayer->PCNumber()]);
+
     return true;
 }
 
@@ -54,6 +176,15 @@ bool CTeamFortress::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool b
 void CTeamFortress::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer)
 {
     CHalfLifeMultiplay::ClientUserInfoChanged(pPlayer, infobuffer);
+
+    if (pPlayer->TeamNumber() != TEAM_SPECTATORS)
+    {
+        g_engfuncs.pfnSetClientKeyValue(
+            pPlayer->entindex(),
+            infobuffer,
+            "model",
+            sTFClassModels[pPlayer->PCNumber()]);
+    }
 }
 
 

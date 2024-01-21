@@ -56,6 +56,7 @@ void LinkUserMessages()
 	gmsgVoteMenu = REG_USER_MSG("VoteMenu", -1);
 	gmsgShake = REG_USER_MSG("ScreenShake", sizeof(ScreenShake));
 	gmsgFade = REG_USER_MSG("ScreenFade", sizeof(ScreenFade));
+	gmsgValClass = REG_USER_MSG("ValClass", 10);
 	gmsgTeamNames = REG_USER_MSG("TeamNames", -1);
 	gmsgAllowSpec = REG_USER_MSG("AllowSpec", 1);
 

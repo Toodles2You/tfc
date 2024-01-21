@@ -44,6 +44,7 @@ inline int gmsgSayText = 0;
 inline int gmsgTextMsg = 0;
 inline int gmsgShowMenu = 0;
 inline int gmsgVoteMenu = 0;
+inline int gmsgValClass = 0;
 inline int gmsgTeamNames = 0;
 inline int gmsgAllowSpec = 0;
 

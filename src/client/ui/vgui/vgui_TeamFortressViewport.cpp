@@ -205,6 +205,15 @@ void Viewport_ChangeTeam()
 	Viewport_VGUIMenu(MENU_TEAM);
 }
 
+void Viewport_ChangeClass()
+{
+	if (gHUD.m_gameMode < kGamemodeTeamFortress)
+	{
+		return;
+	}
+	Viewport_VGUIMenu(MENU_CLASS);
+}
+
 //================================================================
 // COMMAND MENU
 //================================================================
@@ -645,6 +654,7 @@ TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : P
 	gEngfuncs.pfnAddCommand("servermotd", Viewport_ServerMOTD);
 	gEngfuncs.pfnAddCommand("missionbriefing", Viewport_MapBriefing);
 	gEngfuncs.pfnAddCommand("changeteam", Viewport_ChangeTeam);
+	gEngfuncs.pfnAddCommand("changeclass", Viewport_ChangeClass);
 }
 
 //-----------------------------------------------------------------------------

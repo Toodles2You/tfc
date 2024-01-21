@@ -678,6 +678,36 @@ public:
 	}
 };
 
+// Used instead of CMenuHandler_StringCommand for Class Selection buttons.
+// Checks the state of hud_classautokill and kills the player if set
+class CMenuHandler_StringCommandClassSelect : public CMenuHandler_StringCommand
+{
+private:
+public:
+	CMenuHandler_StringCommandClassSelect( const char *pszCommand ) : CMenuHandler_StringCommand( pszCommand )
+	{
+	}
+
+	CMenuHandler_StringCommandClassSelect( const char *pszCommand, bool iClose ) : CMenuHandler_StringCommand( pszCommand, iClose )
+	{
+	}
+
+	virtual void actionPerformed(Panel* panel)
+	{
+		CMenuHandler_StringCommand::actionPerformed( panel );
+
+		// Try to guess the player's new class (it'll be corrected if it's wrong)
+		for ( int i = PC_SCOUT; i <= PC_ENGINEER; i++ )
+		{
+			if ( strcmp( m_pszCommand, sTFClassSelection[i]) == 0 )
+			{
+				g_iPlayerClass = i;
+				break;
+			}
+		}
+	}
+};
+
 class CMenuHandler_PopupSubMenuInput : public InputSignal
 {
 private:
