@@ -19,6 +19,7 @@ struct PCInfo
 	float initArmorType;  // Absorption Level of armor when respawned
 	int armorClasses;	  // Armor Classes allowed for this class
 	int initArmorClasses; // Armorclass worn when respawned
+	int weapons[4];
 };
 
 extern PCInfo sTFClassInfo[PC_LASTCLASS];

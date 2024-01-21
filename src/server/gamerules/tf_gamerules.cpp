@@ -61,6 +61,11 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .initArmorType    = 0.3,
         .armorClasses     = AT_SAVESHOT | AT_SAVENAIL,
         .initArmorClasses = 0,
+        .weapons = {
+            WEAPON_NAILGUN,
+            WEAPON_TF_SHOTGUN,
+            WEAPON_AXE,
+        },
     },
 
     [PC_SNIPER] = {
@@ -72,6 +77,12 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .initArmorType    = 0.3,
         .armorClasses     = AT_SAVESHOT | AT_SAVENAIL,
         .initArmorClasses = 0,
+        .weapons = {
+            WEAPON_SNIPER_RIFLE,
+            WEAPON_AUTO_RIFLE,
+            WEAPON_NAILGUN,
+            WEAPON_AXE,
+        },
     },
     
     [PC_SOLDIER] = {
@@ -83,6 +94,12 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .initArmorType    = 0.8,
         .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEEXPLOSION | AT_SAVEELECTRICITY | AT_SAVEFIRE,
         .initArmorClasses = 0,
+        .weapons = {
+            WEAPON_ROCKET_LAUNCHER,
+            WEAPON_SUPER_SHOTGUN,
+            WEAPON_TF_SHOTGUN,
+            WEAPON_AXE,
+        },
     },
 
     [PC_DEMOMAN] = {
@@ -94,6 +111,12 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .initArmorType    = 0.6,
         .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEEXPLOSION | AT_SAVEELECTRICITY | AT_SAVEFIRE,
         .initArmorClasses = 0,
+        .weapons = {
+            WEAPON_GRENADE_LAUNCHER,
+            WEAPON_PIPEBOMB_LAUNCHER,
+            WEAPON_TF_SHOTGUN,
+            WEAPON_AXE,
+        },
     },
     
     [PC_MEDIC] = {
@@ -105,6 +128,12 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .initArmorType    = 0.3,
         .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEELECTRICITY | AT_SAVEFIRE,
         .initArmorClasses = 0,
+        .weapons = {
+            WEAPON_MEDIKIT,
+            WEAPON_SUPER_NAILGUN,
+            WEAPON_SUPER_SHOTGUN,
+            WEAPON_TF_SHOTGUN,
+        },
     },
 
     [PC_HVYWEAP] = {
@@ -116,6 +145,12 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .initArmorType    = 0.8,
         .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEEXPLOSION | AT_SAVEELECTRICITY | AT_SAVEFIRE,
         .initArmorClasses = 0,
+        .weapons = {
+            WEAPON_ASSAULT_CANNON,
+            WEAPON_SUPER_SHOTGUN,
+            WEAPON_TF_SHOTGUN,
+            WEAPON_AXE,
+        },
     },
 
     [PC_PYRO] = {
@@ -127,6 +162,12 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .initArmorType    = 0.6,
         .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEELECTRICITY | AT_SAVEFIRE,
         .initArmorClasses = AT_SAVEFIRE,
+        .weapons = {
+            WEAPON_FLAMETHROWER,
+            WEAPON_INCENDIARY,
+            WEAPON_TF_SHOTGUN,
+            WEAPON_AXE,
+        },
     },
 
     [PC_SPY] = {
@@ -138,6 +179,12 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .initArmorType    = 0.6,
         .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEELECTRICITY | AT_SAVEFIRE,
         .initArmorClasses = 0,
+        .weapons = {
+            WEAPON_KNIFE,
+            WEAPON_SUPER_SHOTGUN,
+            WEAPON_NAILGUN,
+            WEAPON_TRANQ,
+        },
     },
 
     [PC_ENGINEER] = {
@@ -149,6 +196,11 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .initArmorType    = 0.3,
         .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEEXPLOSION | AT_SAVEELECTRICITY | AT_SAVEFIRE,
         .initArmorClasses = 0,
+        .weapons = {
+            WEAPON_SPANNER,
+            WEAPON_SUPER_SHOTGUN,
+            WEAPON_LASER,
+        },
     },
 
     [PC_RANDOM] = {},
@@ -162,6 +214,9 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .initArmorType    = 0,
         .armorClasses     = 0,
         .initArmorClasses = 0,
+        .weapons = {
+            WEAPON_AXE,
+        },
     }
 };
 
@@ -393,17 +448,22 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
 	const int originalAutoWepSwitch = pPlayer->m_iAutoWepSwitch;
 	pPlayer->m_iAutoWepSwitch = 1;
 
-    PCInfo& i = sTFClassInfo[pPlayer->PCNumber()];
+    PCInfo& info = sTFClassInfo[pPlayer->PCNumber()];
 
-	pPlayer->pev->health = pPlayer->pev->max_health = i.maxHealth;
+	pPlayer->pev->health = pPlayer->pev->max_health = info.maxHealth;
 
-    g_engfuncs.pfnSetClientMaxspeed(pPlayer->edict(), i.maxSpeed);
+    g_engfuncs.pfnSetClientMaxspeed(pPlayer->edict(), info.maxSpeed);
 
-    pPlayer->pev->armorvalue = i.initArmor;
-    pPlayer->pev->armortype = i.initArmorType;
+    pPlayer->pev->armorvalue = info.initArmor;
+    pPlayer->pev->armortype = info.initArmorType;
 
-    pPlayer->GiveNamedItem("weapon_crowbar");
-    pPlayer->GiveNamedItem("weapon_9mmAR");
+    for (int i = 0; i < 4; i++)
+    {
+        if (info.weapons[i] != WEAPON_NONE)
+        {
+            pPlayer->GiveNamedItem(g_szWeaponNames[info.weapons[i]]);
+        }
+    }
 
 	pPlayer->m_iAutoWepSwitch = originalAutoWepSwitch;
 

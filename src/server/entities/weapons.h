@@ -64,6 +64,35 @@ typedef struct
 	int iAnims[kWeaponAnimLast];
 } WeaponInfo;
 
+#ifdef GAME_DLL
+constexpr const char* g_szWeaponNames[] =
+{
+	nullptr,
+	nullptr,
+	nullptr,
+	"tf_weapon_medikit",
+	"tf_weapon_spanner",
+	"tf_weapon_axe",
+	"tf_weapon_sniperrifle",
+	"tf_weapon_autorifle",
+	"tf_weapon_shotgun",
+	"tf_weapon_supershotgun",
+	"tf_weapon_ng",
+	"tf_weapon_superng",
+	"tf_weapon_gl",
+	"tf_weapon_flamethrower",
+	"tf_weapon_rpg",
+	"tf_weapon_ic",
+	"tf_weapon_ac",
+	nullptr,
+	nullptr,
+	"tf_weapon_tranq",
+	"tf_weapon_railgun",
+	"tf_weapon_pl",
+	"tf_weapon_knife",
+};
+#endif
+
 // inventory items that commit war crimes
 class CBasePlayerWeapon : public CBaseAnimating
 {
