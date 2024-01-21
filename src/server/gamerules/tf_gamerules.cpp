@@ -250,3 +250,122 @@ void CTeamFortress::SendMenusToClient(CBasePlayer* player)
     MessageEnd();
 }
 
+
+void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
+{
+	MessageBegin(MSG_ALL, gmsgExtraInfo);
+	WriteByte(pPlayer->entindex());
+	WriteByte(pPlayer->PCNumber());
+	WriteByte(pPlayer->TeamNumber());
+	WriteByte(false);
+	MessageEnd();
+
+	if (pPlayer->TeamNumber() == TEAM_UNASSIGNED || pPlayer->PCNumber() == PC_UNDEFINED)
+	{
+		pPlayer->pev->effects |= EF_NODRAW;
+		pPlayer->pev->solid = SOLID_NOT;
+		pPlayer->pev->takedamage = DAMAGE_NO;
+		pPlayer->pev->movetype = MOVETYPE_NONE;
+		pPlayer->m_iHideHUD |= HIDEHUD_WEAPONS | HIDEHUD_FLASHLIGHT | HIDEHUD_HEALTH;
+		return;
+	}
+
+	pPlayer->m_iHideHUD &= ~(HIDEHUD_WEAPONS | HIDEHUD_FLASHLIGHT | HIDEHUD_HEALTH);
+
+	//Ensure the player switches to the Glock on spawn regardless of setting
+	const int originalAutoWepSwitch = pPlayer->m_iAutoWepSwitch;
+	pPlayer->m_iAutoWepSwitch = 1;
+
+    pPlayer->GiveNamedItem("weapon_crowbar");
+    pPlayer->GiveNamedItem("weapon_9mmAR");
+
+    switch (pPlayer->PCNumber())
+    {
+	case PC_SCOUT:    ScoutSpawn(pPlayer);    break;
+	case PC_SNIPER:   SniperSpawn(pPlayer);   break;
+	case PC_SOLDIER:  SoldierSpawn(pPlayer);  break;
+	case PC_DEMOMAN:  DemomanSpawn(pPlayer);  break;
+	case PC_MEDIC:    MedicSpawn(pPlayer);    break;
+	case PC_HVYWEAP:  HvyweapSpawn(pPlayer);  break;
+	case PC_PYRO:     PyroSpawn(pPlayer);     break;
+	case PC_SPY:      SpySpawn(pPlayer);      break;
+	case PC_ENGINEER: EngineerSpawn(pPlayer); break;
+    default:          CivilianSpawn(pPlayer); break;
+    }
+
+	pPlayer->m_iAutoWepSwitch = originalAutoWepSwitch;
+
+	tent::TeleportSplash(pPlayer);
+}
+
+
+void CTeamFortress::ScoutSpawn(CBasePlayer* player)
+{
+	player->pev->health = player->pev->max_health = 75;
+    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 400);
+}
+
+
+void CTeamFortress::SniperSpawn(CBasePlayer* player)
+{
+	player->pev->health = player->pev->max_health = 90;
+    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 300);
+}
+
+
+void CTeamFortress::SoldierSpawn(CBasePlayer* player)
+{
+	player->pev->health = player->pev->max_health = 100;
+    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 240);
+}
+
+
+void CTeamFortress::DemomanSpawn(CBasePlayer* player)
+{
+	player->pev->health = player->pev->max_health = 90;
+    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 280);
+}
+
+
+void CTeamFortress::MedicSpawn(CBasePlayer* player)
+{
+	player->pev->health = player->pev->max_health = 90;
+    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 320);
+}
+
+
+void CTeamFortress::HvyweapSpawn(CBasePlayer* player)
+{
+	player->pev->health = player->pev->max_health = 100;
+    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 230);
+}
+
+
+void CTeamFortress::PyroSpawn(CBasePlayer* player)
+{
+	player->pev->health = player->pev->max_health = 100;
+    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 300);
+}
+
+
+void CTeamFortress::SpySpawn(CBasePlayer* player)
+{
+	player->pev->health = player->pev->max_health = 90;
+    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 300);
+}
+
+
+void CTeamFortress::EngineerSpawn(CBasePlayer* player)
+{
+	player->pev->health = player->pev->max_health = 80;
+    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 300);
+}
+
+
+void CTeamFortress::CivilianSpawn(CBasePlayer* player)
+{
+	player->pev->health = player->pev->max_health = 50;
+    g_engfuncs.pfnSetClientMaxspeed(player->edict(), 240);
+}
+
+

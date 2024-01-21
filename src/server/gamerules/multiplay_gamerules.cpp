@@ -504,7 +504,7 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 	WriteByte(false);
 	MessageEnd();
 
-	if (pPlayer->TeamNumber() == TEAM_UNASSIGNED || pPlayer->PCNumber() == PC_UNDEFINED)
+	if (pPlayer->TeamNumber() == TEAM_UNASSIGNED)
 	{
 		pPlayer->pev->effects |= EF_NODRAW;
 		pPlayer->pev->solid = SOLID_NOT;
