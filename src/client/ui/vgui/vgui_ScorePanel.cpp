@@ -379,6 +379,19 @@ void ScorePanel::FillGrid()
 				{
 					strcpy(sz, CHudTextMessage::BufferedLocaliseTextString("#DEAD"));
 				}
+				else if (util::GetGameMode() >= kGamemodeTeamFortress)
+				{
+					int pc = g_PlayerExtraInfo[m_iSortedRows[row]].playerclass;
+					int team = g_PlayerExtraInfo[m_iSortedRows[row]].teamnumber;
+
+					if (pc != PC_UNDEFINED && team != TEAM_UNASSIGNED && team != TEAM_SPECTATORS)
+					{
+						if (team == g_iTeamNumber || gHUD.IsSpectator())
+						{
+							strcpy(sz, CHudTextMessage::BufferedLocaliseTextString(sLocalisedClasses[pc]));
+						}
+					}
+				}
 				break;
 			case COLUMN_SCORE:
 				sprintf(sz, "%d", g_PlayerExtraInfo[m_iSortedRows[row]].score);
