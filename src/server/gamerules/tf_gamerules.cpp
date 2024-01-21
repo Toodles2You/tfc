@@ -22,7 +22,7 @@ static const char* sTFClassModels[] =
     "scout",
     "sniper",
     "soldier",
-    "demoman",
+    "demo",
     "medic",
     "hvyweapon",
     "pyro",
