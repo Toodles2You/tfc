@@ -202,50 +202,28 @@ static inline float DamageForce(entvars_t* pev, int damage)
 	return std::clamp(damage * size * 5.0F, 0.0F, 1000.0F);
 }
 
-static float ArmourBonus(float &damage, float armour, float ratio, float bonus)
+static float ArmourBonus(float &damage, float armour, float ratio)
 {
 	if (armour <= 0)
 	{
 		return 0.0f;
 	}
 	float newDamage = damage * ratio;
-	float take = (damage - newDamage) * bonus;
+	float take = damage - newDamage;
 	if (take > armour)
 	{
-		damage -= armour * (1.0f / bonus);
+		damage -= armour;
 		return armour;
 	}
 	damage = newDamage;
 	return take;
 }
 
-#define kArmourRatio 0.2f // Armor Takes 80% of the damage
-#define kArmourBonus 0.5f // Each Point of Armor is work 1/x points of health
-
 bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType)
 {
 	if (pev->takedamage == DAMAGE_NO || !IsAlive())
 	{
 		return false;
-	}
-
-	if (!g_pGameRules->FPlayerCanTakeDamage(this, attacker))
-	{
-		return false;
-	}
-
-	m_bitsDamageType |= bitsDamageType;
-	m_bitsHUDDamage = -1;
-
-	float flArmour = 0.0f;
-	if ((bitsDamageType & DMG_ARMOR_PIERCING) == 0)
-	{
-		float armourBonus = kArmourBonus;
-		if ((bitsDamageType & DMG_BLAST) != 0 && util::IsDeathmatch())
-		{
-			armourBonus *= 2;
-		}
-		flArmour = ArmourBonus(flDamage, pev->armorvalue, kArmourRatio, armourBonus);
 	}
 
 	// Grab the vector of the incoming attack. (Pretend that the inflictor is a little lower than it really is, so the body will tend to fly upward a bit.)
@@ -257,6 +235,14 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		pev->velocity = pev->velocity + g_vecAttackDir * -DamageForce(pev, flDamage);
 	}
 	pev->dmg_inflictor = inflictor->edict();
+
+	if (!g_pGameRules->FPlayerCanTakeDamage(this, attacker))
+	{
+		return false;
+	}
+
+	m_bitsDamageType |= bitsDamageType;
+	m_bitsHUDDamage = -1;
 
 	// Check for godmode or invincibility.
 	if ((pev->flags & FL_GODMODE) != 0)
@@ -271,6 +257,12 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 			m_hLastAttacker[1] = m_hLastAttacker[0];
 		}
 		m_hLastAttacker[0] = attacker;
+	}
+
+	float flArmour = 0.0f;
+	if ((bitsDamageType & DMG_ARMOR_PIERCING) == 0)
+	{
+		flArmour = ArmourBonus(flDamage, pev->armorvalue, 1.0f - pev->armortype);
 	}
 
 	// Do the damage!
