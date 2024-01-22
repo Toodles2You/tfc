@@ -212,11 +212,10 @@ static float ArmourBonus(float &damage, float armour, float ratio, float bonus)
 	float take = (damage - newDamage) * bonus;
 	if (take > armour)
 	{
-		take = armour;
-		take *= 1 / bonus;
-		newDamage = damage - take;
+		damage -= armour * (1.0f / bonus);
 		return armour;
 	}
+	damage = newDamage;
 	return take;
 }
 
