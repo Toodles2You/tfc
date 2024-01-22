@@ -244,7 +244,7 @@ void CBasePlayer::FireBullets(
 		AngleVectors(angles, &dir, nullptr, nullptr);
 
 		TraceResult tr;
-		util::TraceLine(gun, gun + dir * distance, util::dont_ignore_monsters, this, &tr);
+		util::TraceLine(gun, gun + dir * distance, &tr, this, util::kTraceBox | util::kTraceBoxModel);
 		
 		if (tr.flFraction != 1.0F)
 		{
@@ -256,7 +256,7 @@ void CBasePlayer::FireBullets(
 				damage,
 				dir,
 				tr.iHitgroup,
-				DMG_BULLET | DMG_AIMED | DMG_NEVERGIB);
+				DMG_BULLET | DMG_NEVERGIB);
 
 			traceEntities[traceCount] = hit;
 			traceCount++;
