@@ -67,6 +67,7 @@ set(SERVER_SRC
     ${SERVER_SRC_DIR}/entities/pathcorner.cpp
     ${SERVER_SRC_DIR}/entities/plats.cpp
     ${SERVER_SRC_DIR}/entities/player.cpp
+    ${SERVER_SRC_DIR}/entities/rocket.cpp
     ${SERVER_SRC_DIR}/entities/sound.cpp
     ${SERVER_SRC_DIR}/entities/spectator.cpp
     ${SERVER_SRC_DIR}/entities/subs.cpp

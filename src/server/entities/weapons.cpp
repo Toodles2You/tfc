@@ -88,6 +88,7 @@ void W_Precache()
 	g_sModelIndexBloodDrop = PRECACHE_MODEL("sprites/blood.spr");
 
 	PRECACHE_MODEL("models/grenade.mdl");
+	PRECACHE_MODEL("models/rpgrocket.mdl");
 	PRECACHE_MODEL("models/w_grenade.mdl");
 	PRECACHE_MODEL("sprites/explode1.spr");
 

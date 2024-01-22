@@ -478,10 +478,6 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 		V_PunchAxis(0, info.flPunchAngle);
 	}
 
-	Vector shellOrigin, shellVelocity;
-	EV_GetDefaultShellInfo(args, args->origin, args->velocity, shellVelocity, shellOrigin, forward, right, up, 20, -12, 4);
-	EV_EjectBrass(shellOrigin, shellVelocity, args->angles[YAW], g_sModelIndexShell, TE_BOUNCE_SHOTSHELL);
-
 	gEngfuncs.pEventAPI->EV_PlaySound(
 		args->entindex,
 		args->origin,
@@ -492,7 +488,22 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 		0,
 		gEngfuncs.pfnRandomLong(94, 109));
 
-	EV_FireBullets(args, args->iparam1, info.vecProjectileSpread, info.iProjectileCount * args->iparam2, 2048, false, 0);
+	switch (info.iProjectileType)
+	{
+		case kProjRocket:
+		{
+			break;
+		}
+		default:
+		{
+			Vector shellOrigin, shellVelocity;
+			EV_GetDefaultShellInfo(args, args->origin, args->velocity, shellVelocity, shellOrigin, forward, right, up, 20, -12, 4);
+			EV_EjectBrass(shellOrigin, shellVelocity, args->angles[YAW], g_sModelIndexShell, TE_BOUNCE_SHOTSHELL);
+
+			EV_FireBullets(args, args->iparam1, info.vecProjectileSpread, info.iProjectileCount * args->iparam2, 2048, false, 0);
+			break;
+		}
+	}
 }
 
 TEMPENTITY* pLaserDot;

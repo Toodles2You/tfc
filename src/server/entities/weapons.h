@@ -49,6 +49,12 @@ enum WeaponAnim
 	kWeaponAnimLast
 };
 
+enum
+{
+	kProjBullet = 0,
+	kProjRocket,
+};
+
 typedef struct
 {
 	int iSlot;
@@ -70,6 +76,7 @@ typedef struct
 	int iShots;
 	int iAttackTime;
 	int iReloadTime;
+	int iProjectileType;
 	int iProjectileDamage;
 	Vector2D vecProjectileSpread;
 	int iProjectileCount;
@@ -219,6 +226,13 @@ public:
 	void GetWeaponInfo(WeaponInfo& i) override;
 };
 
+class CRocketLauncher : public CTFWeapon
+{
+public:
+	int GetID() const override { return WEAPON_ROCKET_LAUNCHER; }
+	void GetWeaponInfo(WeaponInfo& i) override;
+};
+
 #ifdef GAME_DLL
 
 // Contact Grenade / Timed grenade / Satchel Charge
@@ -258,6 +272,15 @@ protected:
 	} throw_e;
 
 	void Throw(throw_e mode);
+};
+
+class CRocket : public CBaseEntity
+{
+public:
+	bool Spawn() override;
+
+	static CRocket* CreateRocket(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
+	void EXPORT RocketTouch(CBaseEntity *pOther);
 };
 
 void RadiusDamage(

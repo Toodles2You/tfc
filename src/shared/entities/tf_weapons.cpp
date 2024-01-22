@@ -52,7 +52,29 @@ void CTFWeapon::PrimaryAttack()
 	m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
 #ifdef GAME_DLL
-	m_pPlayer->FireBullets(info.iProjectileDamage, info.vecProjectileSpread, info.iProjectileCount * rounds, 2048);
+	switch (info.iProjectileType)
+	{
+		case kProjRocket:
+		{
+			const auto aim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
+			util::MakeVectors(aim);
+
+			const auto gun =
+				m_pPlayer->pev->origin
+					+ m_pPlayer->pev->view_ofs
+					+ gpGlobals->v_forward * 16
+					+ gpGlobals->v_right * 8
+					+ gpGlobals->v_up * -8;
+
+			CRocket::CreateRocket(gun, gpGlobals->v_forward, info.iProjectileDamage, m_pPlayer);
+			break;
+		}
+		default:
+		{
+			m_pPlayer->FireBullets(info.iProjectileDamage, info.vecProjectileSpread, info.iProjectileCount * rounds, 2048);
+			break;
+		}
+	}
 #endif
 
 	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), 0.0F, m_pPlayer->m_randomSeed, rounds);
@@ -130,12 +152,12 @@ void CShotgun::GetWeaponInfo(WeaponInfo& i)
 	i.iAmmo2 = AMMO_NONE;
 	i.iMaxAmmo2 = -1;
 	i.iMaxClip = 8;
-	i.iSlot = 2;
+	i.iSlot = 1;
 	i.iPosition = 0;
 	i.iFlags = 0;
 	i.iWeight = 15;
 
-	i.pszWorld = "models/w_9mmAR.mdl";
+	i.pszWorld = "models/w_shotgun.mdl";
 	i.pszView = "models/v_tfc_12gauge.mdl";
 	i.pszPlayer = "models/p_smallshotgun.mdl";
 	i.pszAnimExt = "shotgun";
@@ -153,6 +175,7 @@ void CShotgun::GetWeaponInfo(WeaponInfo& i)
 	i.iAttackTime = 500;
 	i.iReloadTime = 2000;
 
+	i.iProjectileType = kProjBullet;
 	i.iProjectileDamage = 4;
 	i.vecProjectileSpread = Vector2D(2.3F, 2.3F);
 	i.iProjectileCount = 6;
@@ -178,7 +201,7 @@ void CSuperShotgun::GetWeaponInfo(WeaponInfo& i)
 	i.iFlags = 0;
 	i.iWeight = 15;
 
-	i.pszWorld = "models/w_9mmAR.mdl";
+	i.pszWorld = "models/w_shotgun.mdl";
 	i.pszView = "models/v_tfc_shotgun.mdl";
 	i.pszPlayer = "models/p_shotgun.mdl";
 	i.pszAnimExt = "shotgun";
@@ -196,12 +219,57 @@ void CSuperShotgun::GetWeaponInfo(WeaponInfo& i)
 	i.iAttackTime = 700;
 	i.iReloadTime = 3000;
 
+	i.iProjectileType = kProjBullet;
 	i.iProjectileDamage = 4;
 	i.vecProjectileSpread = Vector2D(8.0F, 4.6F);
 	i.iProjectileCount = 14;
 
 	i.pszEvent = "events/wpn/tf_ssg.sc";
 	i.pszAttackSound = "weapons/shotgn2.wav";
+	i.flPunchAngle = -4.0F;
+}
+
+
+LINK_ENTITY_TO_CLASS(tf_weapon_rpg, CRocketLauncher);
+
+void CRocketLauncher::GetWeaponInfo(WeaponInfo& i)
+{
+	i.pszName = "tf_weapon_rpg";
+	i.iAmmo1 = AMMO_NONE;
+	i.iMaxAmmo1 = -1;
+	i.iAmmo2 = AMMO_NONE;
+	i.iMaxAmmo2 = -1;
+	i.iMaxClip = 4;
+	i.iSlot = 4;
+	i.iPosition = 0;
+	i.iFlags = 0;
+	i.iWeight = 15;
+
+	i.pszWorld = "models/w_rpg.mdl";
+	i.pszView = "models/v_tfc_rpg.mdl";
+	i.pszPlayer = "models/p_rpg.mdl";
+	i.pszAnimExt = "rpg";
+
+	i.iAnims[kWeaponAnimIdle] = 0;
+	i.iAnims[kWeaponAnimDeploy] = 4;
+	i.iAnims[kWeaponAnimHolster] = 3;
+	i.iAnims[kWeaponAnimAttack] = 2;
+	i.iAnims[kWeaponAnimReload] = 8;
+	i.iAnims[kWeaponAnimStartReload] = 7;
+	i.iAnims[kWeaponAnimEndReload] = 9;
+
+	i.iShots = 1;
+
+	i.iAttackTime = 800;
+	i.iReloadTime = 5000;
+
+	i.iProjectileType = kProjRocket;
+	i.iProjectileDamage = 92;
+	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
+	i.iProjectileCount = 1;
+
+	i.pszEvent = "events/wpn/tf_rpg.sc";
+	i.pszAttackSound = "weapons/rocketfire1.wav";
 	i.flPunchAngle = -4.0F;
 }
 
