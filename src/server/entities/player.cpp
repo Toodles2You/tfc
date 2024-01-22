@@ -226,6 +226,11 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		return false;
 	}
 
+	if (attacker->IsClient())
+	{
+		flDamage *= 0.9F;
+	}
+
 	// Grab the vector of the incoming attack. (Pretend that the inflictor is a little lower than it really is, so the body will tend to fly upward a bit.)
 	if (attacker != CWorld::World && attacker->pev->solid != SOLID_TRIGGER)
 	{
