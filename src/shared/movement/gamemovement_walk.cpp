@@ -215,6 +215,8 @@ void CHalfLifeMovement::Jump()
 
     player->SetAction(CBasePlayer::Action::Jump);
 
+    pmove->PM_PlaySound(CHAN_BODY, "player/plyrjmp8.wav", 0.5, ATTN_NORM, 0, PITCH_NORM);
+
     pmove->velocity.z = sqrtf(2 * 800 * 45);
 
     if (pmove->basevelocity != g_vecZero)

@@ -897,11 +897,23 @@ void ClientPrecache()
 	PRECACHE_SOUND("common/bodysplat.wav");
 
 	// player pain sounds
-	PRECACHE_SOUND("player/pl_pain2.wav");
-	PRECACHE_SOUND("player/pl_pain4.wav");
-	PRECACHE_SOUND("player/pl_pain5.wav");
-	PRECACHE_SOUND("player/pl_pain6.wav");
-	PRECACHE_SOUND("player/pl_pain7.wav");
+	PRECACHE_SOUND("player/pain1.wav");
+	PRECACHE_SOUND("player/pain2.wav");
+	PRECACHE_SOUND("player/pain3.wav");
+	PRECACHE_SOUND("player/pain4.wav");
+	PRECACHE_SOUND("player/pain5.wav");
+	PRECACHE_SOUND("player/pain6.wav");
+
+	PRECACHE_SOUND("player/drown1.wav");
+	PRECACHE_SOUND("player/drown2.wav");
+
+	PRECACHE_SOUND("player/death1.wav");
+	PRECACHE_SOUND("player/death2.wav");
+	PRECACHE_SOUND("player/death3.wav");
+	PRECACHE_SOUND("player/death4.wav");
+	PRECACHE_SOUND("player/death5.wav");
+
+	PRECACHE_SOUND("player/h2odeath.wav");
 
 	g_sModelIndexPlayer = PRECACHE_MODEL("models/player.mdl");
 	g_sModelIndexGibs = PRECACHE_MODEL("models/hgibs.mdl");
@@ -917,6 +929,8 @@ void ClientPrecache()
 	PRECACHE_SOUND("misc/r_tele1.wav");
 
 	PRECACHE_SOUND("common/null.wav");
+
+	PRECACHE_SOUND("player/plyrjmp8.wav");
 
 	g_usGibbed = PRECACHE_EVENT(1, "events/gibs.sc");
 	g_usTeleport = PRECACHE_EVENT(1, "events/teleport.sc");

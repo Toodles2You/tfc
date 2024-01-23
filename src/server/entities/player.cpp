@@ -87,16 +87,34 @@ LINK_ENTITY_TO_CLASS(player, CBasePlayer);
 
 void CBasePlayer::Pain()
 {
-	float flRndSound; //sound randomizer
+	char* sample = nullptr;
 
-	flRndSound = RANDOM_FLOAT(0, 1);
-
-	if (flRndSound <= 0.33)
-		EmitSound("player/pl_pain5.wav", CHAN_VOICE);
-	else if (flRndSound <= 0.66)
-		EmitSound("player/pl_pain6.wav", CHAN_VOICE);
+	if (pev->waterlevel == 3)
+	{
+		// water pain sounds
+		switch (g_engfuncs.pfnRandomLong(0, 1))
+		{
+			case 0: sample = "player/drown1.wav"; break;
+			case 1: sample = "player/drown2.wav"; break;
+			default: return;
+		}
+	}
 	else
-		EmitSound("player/pl_pain7.wav", CHAN_VOICE);
+	{
+		// play random sound
+		switch (g_engfuncs.pfnRandomLong(0, 35))
+		{
+			case 0: sample = "player/pain1.wav"; break;
+			case 1: sample = "player/pain2.wav"; break;
+			case 2: sample = "player/pain3.wav"; break;
+			case 3: sample = "player/pain4.wav"; break;
+			case 4: sample = "player/pain5.wav"; break;
+			case 5: sample = "player/pain6.wav"; break;
+			default: return;
+		}
+	}
+
+	EmitSound(sample, CHAN_VOICE);
 }
 
 
@@ -126,22 +144,28 @@ static int TrainSpeed(int iSpeed, int iMax)
 
 void CBasePlayer::DeathSound()
 {
-	// water death sounds
-	/*
+	char* sample = nullptr;
+
 	if (pev->waterlevel == 3)
 	{
-		EmitSound("player/h2odeath.wav", CHAN_VOICE);
-		return;
+		// water death sounds
+		sample = "player/h2odeath.wav";
 	}
-	*/
-
-	// temporarily using pain sounds for death sounds
-	switch (RANDOM_LONG(1, 5))
+	else
 	{
-	case 1: EmitSound("player/pl_pain5.wav", CHAN_VOICE); break;
-	case 2: EmitSound("player/pl_pain6.wav", CHAN_VOICE); break;
-	case 3: EmitSound("player/pl_pain7.wav", CHAN_VOICE); break;
+		// play random sound
+		switch (g_engfuncs.pfnRandomLong(0, 4))
+		{
+			case 0: sample = "player/death1.wav"; break;
+			case 1: sample = "player/death2.wav"; break;
+			case 2: sample = "player/death3.wav"; break;
+			case 3: sample = "player/death4.wav"; break;
+			case 4: sample = "player/death5.wav"; break;
+			default: return;
+		}
 	}
+
+	EmitSound(sample, CHAN_VOICE);
 }
 
 // override takehealth
@@ -307,6 +331,8 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		Killed(inflictor, attacker, bitsDamageType);
 		return false;
 	}
+
+	Pain();
 
 	MessageBegin(MSG_SPEC, SVC_DIRECTOR);
 		WriteByte(9);							  // command length in bytes
@@ -515,8 +541,6 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 	pev->movetype = MOVETYPE_NONE;
 	pev->effects |= EF_NODRAW | EF_NOINTERP;
 
-	DeathSound();
-
 	auto gibMode = GIB_NORMAL;
 	if ((bitsDamageType & DMG_ALWAYSGIB) != 0)
 	{
@@ -525,6 +549,11 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 	else if ((bitsDamageType & DMG_NEVERGIB) != 0)
 	{
 		gibMode = GIB_NEVER;
+	}
+
+	if (gibMode == GIB_NEVER || (gibMode != GIB_ALWAYS && pev->health >= -40.0f))
+	{
+		DeathSound();
 	}
 
 	tent::SpawnCorpse(this, gibMode);
