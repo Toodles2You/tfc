@@ -25,6 +25,8 @@ extern int g_iObserverMode;
 extern int g_iObserverTarget;
 extern int g_iObserverTarget2;
 
+int gTempEntCount;
+
 /*
 =========================
 HUD_TxferLocalOverrides
@@ -228,6 +230,8 @@ void HUD_TempEntUpdate(
 	gravity = -frametime * cl_gravity;
 	gravitySlow = gravity * 0.5;
 
+	gTempEntCount = 0;
+
 	while (pTemp)
 	{
 		bool active;
@@ -263,6 +267,8 @@ void HUD_TempEntUpdate(
 		}
 		else
 		{
+			gTempEntCount++;
+
 			pprev = pTemp;
 
 			hull = (pTemp->entity.curstate.renderfx == kRenderFxDeadPlayer) ? kHullPlayer : kHullPoint;
@@ -284,6 +290,7 @@ void HUD_TempEntUpdate(
 					if (pTemp->entity.baseline.framerate <= 0.0)
 					{
 						pTemp->die = client_time;
+						gTempEntCount--;
 					}
 					else
 					{
@@ -345,6 +352,7 @@ void HUD_TempEntUpdate(
 						// this animating sprite isn't set to loop, so destroy it.
 						pTemp->die = client_time;
 						pTemp = pnext;
+						gTempEntCount--;
 						continue;
 					}
 				}
@@ -468,6 +476,7 @@ void HUD_TempEntUpdate(
 						// die on impact
 						pTemp->flags &= ~FTENT_FADEOUT;
 						pTemp->die = client_time;
+						gTempEntCount--;
 					}
 					else
 					{
@@ -539,6 +548,7 @@ void HUD_TempEntUpdate(
 					{
 						pTemp->die = client_time;		// If we can't draw it this frame, just dump it.
 						pTemp->flags &= ~FTENT_FADEOUT; // Don't fade out, just die
+						gTempEntCount--;
 					}
 				}
 			}
