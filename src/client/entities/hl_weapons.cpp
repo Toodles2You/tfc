@@ -54,6 +54,8 @@ static CBasePlayer* player = players;
 
 static CShotgun tf_weapon_shotgun;
 static CSuperShotgun tf_weapon_supershotgun;
+static CNailgun tf_weapon_ng;
+static CSuperNailgun tf_weapon_superng;
 static CRocketLauncher tf_weapon_rpg;
 
 static CTFWeapon* weapons[] =
@@ -68,8 +70,8 @@ static CTFWeapon* weapons[] =
 	nullptr,
 	&tf_weapon_shotgun,
 	&tf_weapon_supershotgun,
-	nullptr,
-	nullptr,
+	&tf_weapon_ng,
+	&tf_weapon_superng,
 	nullptr,
 	nullptr,
 	&tf_weapon_rpg,

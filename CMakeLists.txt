@@ -63,6 +63,7 @@ set(SERVER_SRC
     ${SERVER_SRC_DIR}/entities/maprules.cpp
     ${SERVER_SRC_DIR}/entities/monstermaker.cpp
     ${SERVER_SRC_DIR}/entities/mortar.cpp
+    ${SERVER_SRC_DIR}/entities/nail.cpp
     ${SERVER_SRC_DIR}/entities/observer.cpp
     ${SERVER_SRC_DIR}/entities/pathcorner.cpp
     ${SERVER_SRC_DIR}/entities/plats.cpp

@@ -87,6 +87,7 @@ void W_Precache()
 	g_sModelIndexBloodSpray = PRECACHE_MODEL("sprites/bloodspray.spr");
 	g_sModelIndexBloodDrop = PRECACHE_MODEL("sprites/blood.spr");
 	g_sModelIndexSmokeTrail = PRECACHE_MODEL("sprites/smoke.spr");
+	g_sModelIndexNail = PRECACHE_MODEL("models/nail.mdl");
 
 	PRECACHE_MODEL("models/grenade.mdl");
 	PRECACHE_MODEL("models/rpgrocket.mdl");

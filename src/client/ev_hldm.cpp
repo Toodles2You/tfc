@@ -464,6 +464,11 @@ static void EV_FireBullets(
 	gEngfuncs.pEventAPI->EV_PopPMStates();
 }
 
+static void EV_NailTouch(TEMPENTITY* ent, pmtrace_t* tr)
+{
+	EV_DecalGunshot(tr, ent->entity.curstate.origin - ent->entity.prevstate.origin);
+}
+
 void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 {
 	const auto& info = CBasePlayerWeapon::WeaponInfoArray[(int)args->fparam1];
@@ -494,6 +499,17 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 	{
 		case kProjRocket:
 		{
+			break;
+		}
+		case kProjNail:
+		{
+			Vector gun;
+
+			EV_GetGunPosition(args, gun, args->origin);
+
+			gun = gun + right * 4 + up * -4;
+
+			gEngfuncs.pEfxAPI->R_Projectile(gun, forward * 1000.0F, g_sModelIndexNail, 5.0F, args->entindex, EV_NailTouch);
 			break;
 		}
 		default:
@@ -1051,6 +1067,7 @@ void EV_Init()
 	g_sModelIndexBloodSpray = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/bloodspray.spr");
 	g_sModelIndexBloodDrop = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/blood.spr");
 	g_sModelIndexSmokeTrail = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/smoke.spr");
+	g_sModelIndexNail = gEngfuncs.pEventAPI->EV_FindModelIndex("models/nail.mdl");
 
 	if (pLaserDot != nullptr)
 	{

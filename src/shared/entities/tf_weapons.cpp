@@ -42,12 +42,15 @@ void CTFWeapon::PrimaryAttack()
 		rounds++;
 	}
 
-	if (info.iShots * rounds > m_iClip)
+	if (info.iMaxClip > 0)
 	{
-		rounds = m_iClip / info.iShots;
-	}
+		if (info.iShots * rounds > m_iClip)
+		{
+			rounds = m_iClip / info.iShots;
+		}
 
-	m_iClip -= info.iShots * rounds;
+		m_iClip -= info.iShots * rounds;
+	}
 
 	m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
@@ -67,6 +70,20 @@ void CTFWeapon::PrimaryAttack()
 					+ gpGlobals->v_up * -8;
 
 			CRocket::CreateRocket(gun, gpGlobals->v_forward, info.iProjectileDamage, m_pPlayer);
+			break;
+		}
+		case kProjNail:
+		{
+			const auto aim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
+			util::MakeVectors(aim);
+
+			const auto gun =
+				m_pPlayer->pev->origin
+					+ m_pPlayer->pev->view_ofs
+					+ gpGlobals->v_right * 4
+					+ gpGlobals->v_up * -4;
+
+			CNail::CreateNail(gun, gpGlobals->v_forward, info.iProjectileDamage, m_pPlayer);
 			break;
 		}
 		default:
@@ -122,7 +139,8 @@ void CTFWeapon::WeaponPostFrame()
 	}
 	else if (m_iNextPrimaryAttack <= 0)
 	{
-		if ((m_pPlayer->pev->button & IN_ATTACK) != 0 && m_iClip >= info.iShots)
+		if ((m_pPlayer->pev->button & IN_ATTACK) != 0
+		 && (info.iMaxClip <= 0 || m_iClip >= info.iShots))
 		{
 			PrimaryAttack();
 		}
@@ -227,6 +245,94 @@ void CSuperShotgun::GetWeaponInfo(WeaponInfo& i)
 	i.pszEvent = "events/wpn/tf_ssg.sc";
 	i.pszAttackSound = "weapons/shotgn2.wav";
 	i.flPunchAngle = -4.0F;
+}
+
+
+LINK_ENTITY_TO_CLASS(tf_weapon_ng, CNailgun);
+
+void CNailgun::GetWeaponInfo(WeaponInfo& i)
+{
+	i.pszName = "tf_weapon_ng";
+	i.iAmmo1 = AMMO_NONE;
+	i.iMaxAmmo1 = -1;
+	i.iAmmo2 = AMMO_NONE;
+	i.iMaxAmmo2 = -1;
+	i.iMaxClip = -1;
+	i.iSlot = 3;
+	i.iPosition = 0;
+	i.iFlags = 0;
+	i.iWeight = 15;
+
+	i.pszWorld = "models/w_9mmAR.mdl";
+	i.pszView = "models/v_tfc_nailgun.mdl";
+	i.pszPlayer = "models/p_nailgun.mdl";
+	i.pszAnimExt = "mp5";
+
+	i.iAnims[kWeaponAnimIdle] = 0;
+	i.iAnims[kWeaponAnimDeploy] = 4;
+	i.iAnims[kWeaponAnimHolster] = 8;
+	i.iAnims[kWeaponAnimAttack] = 5;
+	i.iAnims[kWeaponAnimReload] = 3;
+	i.iAnims[kWeaponAnimStartReload] = 3;
+	i.iAnims[kWeaponAnimEndReload] = 3;
+
+	i.iShots = 1;
+
+	i.iAttackTime = 100;
+	i.iReloadTime = 1500;
+
+	i.iProjectileType = kProjNail;
+	i.iProjectileDamage = 9;
+	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
+	i.iProjectileCount = 1;
+
+	i.pszEvent = "events/wpn/tf_nail.sc";
+	i.pszAttackSound = "weapons/airgun_1.wav";
+	i.flPunchAngle = -2.0F;
+}
+
+
+LINK_ENTITY_TO_CLASS(tf_weapon_superng, CSuperNailgun);
+
+void CSuperNailgun::GetWeaponInfo(WeaponInfo& i)
+{
+	i.pszName = "tf_weapon_superng";
+	i.iAmmo1 = AMMO_NONE;
+	i.iMaxAmmo1 = -1;
+	i.iAmmo2 = AMMO_NONE;
+	i.iMaxAmmo2 = -1;
+	i.iMaxClip = -1;
+	i.iSlot = 3;
+	i.iPosition = 2;
+	i.iFlags = 0;
+	i.iWeight = 15;
+
+	i.pszWorld = "models/w_9mmAR.mdl";
+	i.pszView = "models/v_tfc_supernailgun.mdl";
+	i.pszPlayer = "models/p_snailgun.mdl";
+	i.pszAnimExt = "mp5";
+
+	i.iAnims[kWeaponAnimIdle] = 0;
+	i.iAnims[kWeaponAnimDeploy] = 4;
+	i.iAnims[kWeaponAnimHolster] = 8;
+	i.iAnims[kWeaponAnimAttack] = 5;
+	i.iAnims[kWeaponAnimReload] = 3;
+	i.iAnims[kWeaponAnimStartReload] = 3;
+	i.iAnims[kWeaponAnimEndReload] = 3;
+
+	i.iShots = 2;
+
+	i.iAttackTime = 100;
+	i.iReloadTime = 1500;
+
+	i.iProjectileType = kProjNail;
+	i.iProjectileDamage = 18;
+	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
+	i.iProjectileCount = 1;
+
+	i.pszEvent = "events/wpn/tf_snail.sc";
+	i.pszAttackSound = "weapons/spike2.wav";
+	i.flPunchAngle = -2.0F;
 }
 
 

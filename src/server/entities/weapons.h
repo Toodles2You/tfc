@@ -53,6 +53,7 @@ enum
 {
 	kProjBullet = 0,
 	kProjRocket,
+	kProjNail,
 };
 
 typedef struct
@@ -196,6 +197,7 @@ inline short g_sModelIndexBubbles;
 inline short g_sModelIndexBloodDrop;
 inline short g_sModelIndexBloodSpray;
 inline short g_sModelIndexSmokeTrail;
+inline short g_sModelIndexNail;
 
 class CTFWeapon : public CBasePlayerWeapon
 {
@@ -224,6 +226,20 @@ class CSuperShotgun : public CTFWeapon
 {
 public:
 	int GetID() const override { return WEAPON_SUPER_SHOTGUN; }
+	void GetWeaponInfo(WeaponInfo& i) override;
+};
+
+class CNailgun : public CTFWeapon
+{
+public:
+	int GetID() const override { return WEAPON_NAILGUN; }
+	void GetWeaponInfo(WeaponInfo& i) override;
+};
+
+class CSuperNailgun : public CTFWeapon
+{
+public:
+	int GetID() const override { return WEAPON_SUPER_NAILGUN; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 };
 
@@ -282,6 +298,15 @@ public:
 
 	static CRocket* CreateRocket(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
 	void EXPORT RocketTouch(CBaseEntity *pOther);
+};
+
+class CNail : public CBaseEntity
+{
+public:
+	bool Spawn() override;
+
+	static CNail* CreateNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
+	void EXPORT NailTouch(CBaseEntity *pOther);
 };
 
 void RadiusDamage(
