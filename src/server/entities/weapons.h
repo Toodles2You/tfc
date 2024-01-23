@@ -291,7 +291,7 @@ protected:
 	void Throw(throw_e mode);
 };
 
-class CRocket : public CBaseEntity
+class CRocket : public CGrenade
 {
 public:
 	bool Spawn() override;

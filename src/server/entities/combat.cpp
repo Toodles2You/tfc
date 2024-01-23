@@ -63,7 +63,6 @@ void RadiusDamage(
 	CBaseEntity* entity = nullptr;
 	TraceResult tr;
 	float ajdusted;
-	float falloff = damage / radius;
 
 	while ((entity = util::FindEntityInSphere(entity, origin, radius)) != nullptr)
 	{
@@ -79,7 +78,7 @@ void RadiusDamage(
 			continue;
 		}
 
-		ajdusted = (origin - entity->BodyTarget()).Length() * falloff;
+		ajdusted = 0.5F * (origin - entity->BodyTarget()).Length();
 		ajdusted = std::max(damage - ajdusted, 0.0F);
 
 		entity->TakeDamage(inflictor, attacker, ajdusted, damageType);

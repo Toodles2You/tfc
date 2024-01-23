@@ -370,7 +370,7 @@ void CRocketLauncher::GetWeaponInfo(WeaponInfo& i)
 	i.iReloadTime = 5000;
 
 	i.iProjectileType = kProjRocket;
-	i.iProjectileDamage = 92;
+	i.iProjectileDamage = 100;
 	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
 	i.iProjectileCount = 1;
 

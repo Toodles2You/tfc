@@ -67,9 +67,7 @@ void CRocket::RocketTouch(CBaseEntity* pOther)
 			}
 		}
 
-		RadiusDamage(pev->origin, this, owner, pev->dmg, pev->dmg, DMG_BLAST);
-
-		tent::Explosion(pev->origin, -gpGlobals->trace_plane_normal, pev->dmg);
+		ExplodeTouch(pOther);
 	}
 
 	Remove();
