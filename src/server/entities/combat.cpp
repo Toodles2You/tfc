@@ -283,7 +283,7 @@ void CBasePlayer::FireBullets(
 	
 	if (traceHits != 0)
 	{
-		MessageBegin(MSG_PVS, gmsgBlood, gun);
+		MessageBegin(MSG_ONE_UNRELIABLE, gmsgBlood, this);
 		WriteFloat(dir.x);
 		WriteFloat(dir.y);
 		WriteFloat(dir.z);
