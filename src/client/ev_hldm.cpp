@@ -906,6 +906,52 @@ void EV_Explosion(event_args_t* args)
 	}
 }
 
+static void EV_TrailCallback(TEMPENTITY* ent, float frametime, float currenttime)
+{
+	if (ent->entity.baseline.fuser1 <= currenttime && ent->entity.origin == ent->entity.attachment[0])
+	{
+		gEngfuncs.pEventAPI->EV_StopAllSounds(ent->clientIndex, CHAN_VOICE);
+		ent->die = gEngfuncs.GetClientTime();
+		return;
+	}
+
+	ent->entity.attachment[0] = ent->entity.origin;
+
+	if (ent->entity.baseline.sequence != 0)
+	{
+		gEngfuncs.pEfxAPI->R_RocketFlare(ent->entity.origin);
+
+		dlight_t* dl = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
+		dl->origin = ent->entity.origin;
+
+		dl->radius = 160;
+		dl->dark = true;
+		dl->die = gEngfuncs.GetClientTime() + 0.001;
+
+		dl->color.r = 255;
+		dl->color.g = 255;
+		dl->color.b = 255;
+	}
+}
+
+void EV_Trail(event_args_t* args)
+{
+	gEngfuncs.pEfxAPI->R_BeamFollow(args->entindex, g_sModelIndexSmokeTrail, 1, 5, 0.9, 0.9, 1.0, 0.3);
+
+	TEMPENTITY* trail = gEngfuncs.pEfxAPI->CL_TempEntAllocNoModel(args->origin);
+	if (trail) {
+		trail->flags |= FTENT_PLYRATTACHMENT | FTENT_COLLIDEKILL | FTENT_CLIENTCUSTOM | FTENT_COLLIDEWORLD;
+		trail->callback = EV_TrailCallback;
+		trail->clientIndex = args->entindex;
+
+		trail->entity.baseline.sequence = 1;
+		trail->entity.baseline.fuser2 = 0;
+
+		trail->die = gEngfuncs.GetClientTime() + 10;
+		trail->entity.baseline.fuser1 = gEngfuncs.GetClientTime() + 0.2;
+	}
+}
+
 int MSG_Blood(const char* name, int size, void* buf)
 {
 	BEGIN_READ(buf, size);
@@ -975,6 +1021,7 @@ void EV_HookEvents()
 	gEngfuncs.pfnHookEvent("events/gibs.sc", EV_Gibbed);
 	gEngfuncs.pfnHookEvent("events/teleport.sc", EV_Teleport);
 	gEngfuncs.pfnHookEvent("events/explosion.sc", EV_Explosion);
+	gEngfuncs.pfnHookEvent("events/trail.sc", EV_Trail);
 	gEngfuncs.pfnHookEvent("events/train.sc", EV_TrainPitchAdjust);
 
 	gEngfuncs.pfnHookUserMsg("blood", MSG_Blood);
@@ -994,6 +1041,7 @@ void EV_Init()
 	g_sModelIndexBubbles = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/bubble.spr");
 	g_sModelIndexBloodSpray = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/bloodspray.spr");
 	g_sModelIndexBloodDrop = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/blood.spr");
+	g_sModelIndexSmokeTrail = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/smoke.spr");
 
 	if (pLaserDot != nullptr)
 	{

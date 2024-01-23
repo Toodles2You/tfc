@@ -18,6 +18,7 @@
 unsigned short g_usTeleport;
 unsigned short g_usExplosion;
 unsigned short g_usGibbed;
+unsigned short g_usTrail;
 
 
 void tent::Sparks(const Vector& position)
@@ -101,6 +102,24 @@ void tent::SpawnCorpse(CBaseEntity* entity, const int gibMode)
 		false,
 		false
 	);
+}
+
+
+void tent::RocketTrail(CBaseEntity* entity)
+{
+	g_engfuncs.pfnPlaybackEvent(
+		FEV_GLOBAL | FEV_RELIABLE,
+		entity->edict(),
+		g_usTrail,
+		0.0F,
+		entity->pev->origin,
+		g_vecZero,
+		0.0F,
+		0.0F,
+		0,
+		0,
+		false,
+		false);
 }
 
 

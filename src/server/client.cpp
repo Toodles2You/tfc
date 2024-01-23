@@ -53,6 +53,7 @@ void LinkUserMessages();
 extern unsigned short g_usGibbed;
 extern unsigned short g_usTeleport;
 extern unsigned short g_usExplosion;
+extern unsigned short g_usTrail;
 
 
 /*
@@ -920,6 +921,7 @@ void ClientPrecache()
 	g_usGibbed = PRECACHE_EVENT(1, "events/gibs.sc");
 	g_usTeleport = PRECACHE_EVENT(1, "events/teleport.sc");
 	g_usExplosion = PRECACHE_EVENT(1, "events/explosion.sc");
+	g_usTrail = PRECACHE_EVENT(1, "events/trail.sc");
 }
 
 /*

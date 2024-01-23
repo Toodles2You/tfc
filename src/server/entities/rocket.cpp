@@ -45,6 +45,8 @@ bool CRocket::Spawn()
 	SetThink(&CRocket::Remove);
 	pev->nextthink = gpGlobals->time + 5.0F;
 
+	tent::RocketTrail(this);
+
 	return true;
 }
 
