@@ -1073,7 +1073,7 @@ void EV_HookEvents()
 
 void EV_Init()
 {
-	g_sModelIndexPlayer = gEngfuncs.pEventAPI->EV_FindModelIndex("models/player.mdl");
+	g_sModelIndexPlayer = gEngfuncs.pEventAPI->EV_FindModelIndex("models/player/scout/scout.mdl");
 	g_sModelIndexGibs = gEngfuncs.pEventAPI->EV_FindModelIndex("models/hgibs.mdl");
 	g_sModelIndexShell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shotgunshell.mdl");
 

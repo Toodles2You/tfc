@@ -989,7 +989,7 @@ bool CBasePlayer::Spawn()
 	pev->punchangle = g_vecZero;
 	pev->fixangle = 1;
 
-	SetModel("models/player.mdl");
+	SetModel("models/player/scout/scout.mdl");
 	SetAction(Action::Idle, true);
 
 	Vector mins, maxs;

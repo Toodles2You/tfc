@@ -915,7 +915,7 @@ void ClientPrecache()
 
 	PRECACHE_SOUND("player/h2odeath.wav");
 
-	g_sModelIndexPlayer = PRECACHE_MODEL("models/player.mdl");
+	g_sModelIndexPlayer = PRECACHE_MODEL("models/player/scout/scout.mdl");
 	g_sModelIndexGibs = PRECACHE_MODEL("models/hgibs.mdl");
 
 	// hud sounds

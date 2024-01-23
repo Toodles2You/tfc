@@ -52,7 +52,7 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 
 bool CBasePlayer::Spawn()
 {
-	SetModel("models/player.mdl");
+	SetModel("models/player/scout/scout.mdl");
 	SetAction(Action::Idle, true);
 
 	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
