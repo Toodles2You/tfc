@@ -261,7 +261,14 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		// Move them around!
 		g_vecAttackDir = (inflictor->Center() - Vector(0, 0, 10) - Center()).Normalize();
 
-		pev->velocity = pev->velocity + g_vecAttackDir * -DamageForce(pev, flDamage);
+		if ((bitsDamageType & DMG_NAIL) != 0)
+		{
+			pev->velocity = pev->velocity + inflictor->pev->velocity.Normalize() * DamageForce(pev, flDamage);
+		}
+		else
+		{
+			pev->velocity = pev->velocity + g_vecAttackDir * -DamageForce(pev, flDamage);
+		}
 	}
 	pev->dmg_inflictor = inflictor->edict();
 
