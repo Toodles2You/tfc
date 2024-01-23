@@ -135,16 +135,22 @@ void CTFWeapon::PrimaryAttack()
 			const auto gun =
 				m_pPlayer->pev->origin
 					+ m_pPlayer->pev->view_ofs
-					+ gpGlobals->v_forward * 16
 					+ gpGlobals->v_right * 8
-					+ gpGlobals->v_up * -8;
+					+ gpGlobals->v_up * -16;
+
+			CPipeBombLauncher* launcher = nullptr;
+
+			if (info.iProjectileType == kProjPipeBombRemote)
+			{
+				launcher = dynamic_cast<CPipeBombLauncher*>(this);
+			}
 
 			CPipeBomb::CreatePipeBomb(
 				gun,
 				gpGlobals->v_forward * 0.75F + gpGlobals->v_up * 0.25F,
 				info.iProjectileDamage,
-				info.iProjectileType == kProjPipeBombRemote,
-				m_pPlayer);
+				m_pPlayer,
+				launcher);
 			break;
 		}
 		default:
@@ -534,4 +540,64 @@ void CPipeBombLauncher::GetWeaponInfo(WeaponInfo& i)
 	i.flPunchAngle = -2.0F;
 	i.iSibling = WEAPON_GRENADE_LAUNCHER;
 }
+
+
+#ifdef GAME_DLL
+
+CPipeBombLauncher::~CPipeBombLauncher()
+{
+	DetonatePipeBombs(true);
+}
+
+
+void CPipeBombLauncher::DetonatePipeBombs(const bool fizzle)
+{
+	for (; !m_pPipeBombs.empty(); m_pPipeBombs.pop())
+	{
+		CPipeBomb* pipebomb = m_pPipeBombs.front();
+
+		if (pipebomb != nullptr)
+		{
+			if (fizzle)
+			{
+				pipebomb->Remove();
+			}
+			else
+			{
+				if (pipebomb->pev->pain_finished > gpGlobals->time)
+				{
+					break;
+				}
+
+				pipebomb->SetThink(&CPipeBomb::Detonate);
+				pipebomb->pev->nextthink = gpGlobals->time;
+			}
+		}
+	}
+}
+
+
+void CPipeBombLauncher::AddPipeBomb(CPipeBomb* pipebomb)
+{
+	EHANDLE hPipeBomb;
+	
+	hPipeBomb = (CBaseEntity*)pipebomb;
+
+	m_pPipeBombs.push(hPipeBomb);
+
+	if (m_pPipeBombs.size() > kMaxPipeBombs)
+	{
+		pipebomb = m_pPipeBombs.front();
+
+		if (pipebomb != nullptr)
+		{
+			pipebomb->SetThink(&CPipeBomb::Detonate);
+			pipebomb->pev->nextthink = gpGlobals->time;
+
+			m_pPipeBombs.pop();
+		}
+	}
+}
+
+#endif
 

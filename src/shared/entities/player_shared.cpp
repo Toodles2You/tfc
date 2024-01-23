@@ -77,6 +77,13 @@ void CBasePlayer::WeaponPostFrame()
 		PrimeGrenade();
 	}
 
+#ifdef GAME_DLL
+	if ((m_afButtonPressed & IN_ATTACK2) != 0 && m_rgpPlayerWeapons[WEAPON_PIPEBOMB_LAUNCHER] != nullptr)
+	{
+		dynamic_cast<CPipeBombLauncher*>(m_rgpPlayerWeapons[WEAPON_PIPEBOMB_LAUNCHER])->DetonatePipeBombs();
+	}
+#endif
+
 	if (m_pActiveWeapon == nullptr)
 	{
 		return;

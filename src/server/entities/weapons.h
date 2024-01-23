@@ -20,6 +20,12 @@
 #include "event_args.h"
 #endif
 
+#ifdef GAME_DLL
+#include <queue>
+
+class CPipeBomb;
+#endif
+
 class CBasePlayer;
 class CBasePlayerWeapon;
 
@@ -272,6 +278,19 @@ class CPipeBombLauncher : public CTFWeapon
 public:
 	int GetID() const override { return WEAPON_PIPEBOMB_LAUNCHER; }
 	void GetWeaponInfo(WeaponInfo& i) override;
+
+#ifdef GAME_DLL
+public:
+	~CPipeBombLauncher() override;
+
+	void DetonatePipeBombs(const bool fizzle = false);
+	void AddPipeBomb(CPipeBomb* pipebomb);
+
+private:
+	static constexpr int kMaxPipeBombs = 8;
+
+	std::queue<EHANDLE> m_pPipeBombs;
+#endif
 };
 
 #ifdef GAME_DLL
@@ -338,7 +357,7 @@ class CPipeBomb : public CGrenade
 public:
 	bool Spawn() override;
 
-	static CPipeBomb* CreatePipeBomb(const Vector& origin, const Vector& dir, const float damage, const bool remote, CBaseEntity* owner);
+	static CPipeBomb* CreatePipeBomb(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner, CPipeBombLauncher* launcher);
 	void EXPORT PipeBombTouch(CBaseEntity *pOther);
 };
 

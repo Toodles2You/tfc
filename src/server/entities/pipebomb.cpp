@@ -8,19 +8,21 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
+#include "player.h"
 #include "weapons.h"
 #include "gamerules.h"
 
 
-CPipeBomb* CPipeBomb::CreatePipeBomb(const Vector& origin, const Vector& dir, const float damage, const bool remote, CBaseEntity* owner)
+CPipeBomb* CPipeBomb::CreatePipeBomb(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner, CPipeBombLauncher* launcher)
 {
 	auto pipebomb = GetClassPtr((CPipeBomb*)nullptr);
 
 	pipebomb->pev->origin = origin;
 	pipebomb->pev->angles = dir;
 	pipebomb->pev->dmg = damage;
-    if (remote)
+    if (launcher != nullptr)
     {
+        launcher->AddPipeBomb(pipebomb);
         pipebomb->pev->skin = 0;
     }
     else
@@ -53,8 +55,15 @@ bool CPipeBomb::Spawn()
 
 	SetTouch(&CPipeBomb::PipeBombTouch);
 
-	SetThink(&CPipeBomb::Detonate);
-	pev->nextthink = gpGlobals->time + 2.5F;
+    if (pev->skin != 0)
+    {
+        SetThink(&CPipeBomb::Detonate);
+        pev->nextthink = gpGlobals->time + 2.5F;
+    }
+    else
+    {
+        pev->pain_finished = gpGlobals->time + 0.5F;
+    }
 
 	tent::RocketTrail(this, false);
 
@@ -78,7 +87,7 @@ void CPipeBomb::PipeBombTouch(CBaseEntity* pOther)
 			}
 		}
 
-        if (pOther->pev->takedamage != DAMAGE_NO)
+        if (pev->skin != 0 && pOther->pev->takedamage != DAMAGE_NO)
         {
     		ExplodeTouch(pOther);
         }
