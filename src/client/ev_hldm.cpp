@@ -48,6 +48,8 @@ extern cvar_t* r_decals;
 extern cvar_t* violence_hblood;
 extern cvar_t* violence_hgibs;
 
+extern int gTempEntCount;
+
 static float EV_WaterLevel(const Vector& position, float minz, float maxz)
 {
 	Vector midUp = position;
@@ -1076,6 +1078,11 @@ int MSG_Blood(const char* name, int size, void* buf)
 			continue;
 		}
 
+		if (gTempEntCount >= 400)
+		{
+			continue;
+		}
+
 		if ((traceFlags & (1 << i)) != 0)
 		{
 			gEngfuncs.pEfxAPI->R_BloodStream(
@@ -1092,6 +1099,8 @@ int MSG_Blood(const char* name, int size, void* buf)
 				g_sModelIndexBloodSpray,
 				g_sModelIndexBloodDrop,
 				4);
+
+			gTempEntCount += 15;
 		}
 
 		EV_BloodTrace(traceEndPos, traceDir, 4);

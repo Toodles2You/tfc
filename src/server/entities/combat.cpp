@@ -265,7 +265,7 @@ void CBasePlayer::FireBullets(
 			{
 				traceEndPos[traceHits] = tr.vecEndPos;
 				traceHits++;
-				if (hit->m_LastHitGroup == HITGROUP_HEAD)
+				if (i < 8 && hit->m_LastHitGroup == HITGROUP_HEAD)
 				{
 					traceFlags |= 1 << i;
 				}
