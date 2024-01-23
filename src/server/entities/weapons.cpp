@@ -91,6 +91,7 @@ void W_Precache()
 
 	PRECACHE_MODEL("models/grenade.mdl");
 	PRECACHE_MODEL("models/rpgrocket.mdl");
+	PRECACHE_MODEL("models/pipebomb.mdl");
 	PRECACHE_MODEL("models/w_grenade.mdl");
 	PRECACHE_MODEL("sprites/explode1.spr");
 
@@ -342,6 +343,11 @@ void CBasePlayerWeapon::RemoveFromPlayer()
 
 void CBasePlayerWeapon::SendWeaponAnim(int iAnim)
 {
+	if (iAnim < 0)
+	{
+		return;
+	}
+
 	const bool skiplocal = !m_ForceSendAnimations;
 
 	m_pPlayer->pev->weaponanim = iAnim;

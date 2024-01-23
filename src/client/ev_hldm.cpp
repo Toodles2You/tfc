@@ -513,6 +513,11 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 			gEngfuncs.pEfxAPI->R_Projectile(gun, forward * 1000.0F, g_sModelIndexNail, 5.0F, args->entindex, EV_NailTouch);
 			break;
 		}
+		case kProjPipeBomb:
+		case kProjPipeBombRemote:
+		{
+			break;
+		}
 		default:
 		{
 			Vector shellOrigin, shellVelocity;
@@ -981,7 +986,7 @@ void EV_Trail(event_args_t* args)
 		trail->callback = EV_TrailCallback;
 		trail->clientIndex = args->entindex;
 
-		trail->entity.baseline.sequence = 1;
+		trail->entity.baseline.sequence = args->bparam1 ? 1 : 0;
 		trail->entity.baseline.fuser2 = 0;
 
 		trail->die = gEngfuncs.GetClientTime() + 10;

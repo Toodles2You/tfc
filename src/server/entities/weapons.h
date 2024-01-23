@@ -54,6 +54,8 @@ enum
 	kProjBullet = 0,
 	kProjRocket,
 	kProjNail,
+	kProjPipeBomb,
+	kProjPipeBombRemote,
 };
 
 typedef struct
@@ -84,6 +86,7 @@ typedef struct
 	const char* pszEvent;
 	const char* pszAttackSound;
 	float flPunchAngle;
+	int iSibling;
 } WeaponInfo;
 
 #ifdef GAME_DLL
@@ -204,12 +207,19 @@ class CTFWeapon : public CBasePlayerWeapon
 public:
 	void Precache() override;
 
+	void Deploy() override;
+
 	virtual void PrimaryAttack();
 	void WeaponPostFrame() override;
+
+	void Holster() override;
 
 #ifdef CLIENT_DLL
 	static void EV_PrimaryAttack(event_args_t* args);
 #endif
+
+protected:
+	void UpdateSiblingInfo(const bool holster);
 
 private:
 	unsigned short m_usPrimaryAttack;
@@ -243,10 +253,24 @@ public:
 	void GetWeaponInfo(WeaponInfo& i) override;
 };
 
+class CGrenadeLauncher : public CTFWeapon
+{
+public:
+	int GetID() const override { return WEAPON_GRENADE_LAUNCHER; }
+	void GetWeaponInfo(WeaponInfo& i) override;
+};
+
 class CRocketLauncher : public CTFWeapon
 {
 public:
 	int GetID() const override { return WEAPON_ROCKET_LAUNCHER; }
+	void GetWeaponInfo(WeaponInfo& i) override;
+};
+
+class CPipeBombLauncher : public CTFWeapon
+{
+public:
+	int GetID() const override { return WEAPON_PIPEBOMB_LAUNCHER; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 };
 
@@ -307,6 +331,15 @@ public:
 
 	static CNail* CreateNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
 	void EXPORT NailTouch(CBaseEntity *pOther);
+};
+
+class CPipeBomb : public CGrenade
+{
+public:
+	bool Spawn() override;
+
+	static CPipeBomb* CreatePipeBomb(const Vector& origin, const Vector& dir, const float damage, const bool remote, CBaseEntity* owner);
+	void EXPORT PipeBombTouch(CBaseEntity *pOther);
 };
 
 void RadiusDamage(

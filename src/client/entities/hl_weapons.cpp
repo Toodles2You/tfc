@@ -56,7 +56,9 @@ static CShotgun tf_weapon_shotgun;
 static CSuperShotgun tf_weapon_supershotgun;
 static CNailgun tf_weapon_ng;
 static CSuperNailgun tf_weapon_superng;
+static CGrenadeLauncher tf_weapon_gl;
 static CRocketLauncher tf_weapon_rpg;
+static CPipeBombLauncher tf_weapon_pl;
 
 static CTFWeapon* weapons[] =
 {
@@ -72,7 +74,7 @@ static CTFWeapon* weapons[] =
 	&tf_weapon_supershotgun,
 	&tf_weapon_ng,
 	&tf_weapon_superng,
-	nullptr,
+	&tf_weapon_gl,
 	nullptr,
 	&tf_weapon_rpg,
 	nullptr,
@@ -81,7 +83,7 @@ static CTFWeapon* weapons[] =
 	nullptr,
 	nullptr,
 	nullptr,
-	nullptr,
+	&tf_weapon_pl,
 	nullptr,
 };
 

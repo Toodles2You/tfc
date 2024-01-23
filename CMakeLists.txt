@@ -66,6 +66,7 @@ set(SERVER_SRC
     ${SERVER_SRC_DIR}/entities/nail.cpp
     ${SERVER_SRC_DIR}/entities/observer.cpp
     ${SERVER_SRC_DIR}/entities/pathcorner.cpp
+    ${SERVER_SRC_DIR}/entities/pipebomb.cpp
     ${SERVER_SRC_DIR}/entities/plats.cpp
     ${SERVER_SRC_DIR}/entities/player.cpp
     ${SERVER_SRC_DIR}/entities/rocket.cpp

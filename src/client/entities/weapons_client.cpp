@@ -56,6 +56,10 @@ void CBasePlayerWeapon::Holster()
 
 void CBasePlayerWeapon::SendWeaponAnim(int iAnim)
 {
+	if (iAnim < 0)
+	{
+		return;
+	}
 	m_pPlayer->pev->weaponanim = iAnim;
 	HUD_SendWeaponAnim(iAnim, pev->body, false);
 }

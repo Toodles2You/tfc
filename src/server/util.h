@@ -511,7 +511,7 @@ void Ricochet(const Vector& position, float scale);
 void TeleportSplash(CBaseEntity* entity);
 void Explosion(const Vector& origin, const Vector& velocity, float damage = 100.0F, bool smoke = true, bool sparks = true);
 void SpawnCorpse(CBaseEntity* entity, const int gibMode);
-void RocketTrail(CBaseEntity* entity);
+void RocketTrail(CBaseEntity* entity, const bool flare = true);
 
 void PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber);
 } // namespace tent

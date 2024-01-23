@@ -31,6 +31,46 @@ void CTFWeapon::Precache()
 }
 
 
+void CTFWeapon::UpdateSiblingInfo(const bool holster)
+{
+	const auto info = GetInfo();
+
+	if (info.iSibling != WEAPON_NONE
+	 && m_pPlayer->m_rgpPlayerWeapons[info.iSibling] != nullptr)
+	{
+		CTFWeapon* from;
+		CTFWeapon* to;
+
+		if (holster)
+		{
+			from = this;
+			to = dynamic_cast<CTFWeapon*>(m_pPlayer->m_rgpPlayerWeapons[info.iSibling]);
+		}
+		else
+		{
+			from = dynamic_cast<CTFWeapon*>(m_pPlayer->m_rgpPlayerWeapons[info.iSibling]);
+			to = this;
+		}
+
+		to->m_iClip = from->m_iClip;
+	}
+}
+
+
+void CTFWeapon::Deploy()
+{
+	CBasePlayerWeapon::Deploy();
+	UpdateSiblingInfo(false);
+}
+
+
+void CTFWeapon::Holster()
+{
+	CBasePlayerWeapon::Holster();
+	UpdateSiblingInfo(true);
+}
+
+
 void CTFWeapon::PrimaryAttack()
 {
 	const auto info = GetInfo();
@@ -84,6 +124,27 @@ void CTFWeapon::PrimaryAttack()
 					+ gpGlobals->v_up * -4;
 
 			CNail::CreateNail(gun, gpGlobals->v_forward, info.iProjectileDamage, m_pPlayer);
+			break;
+		}
+		case kProjPipeBomb:
+		case kProjPipeBombRemote:
+		{
+			const auto aim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
+			util::MakeVectors(aim);
+
+			const auto gun =
+				m_pPlayer->pev->origin
+					+ m_pPlayer->pev->view_ofs
+					+ gpGlobals->v_forward * 16
+					+ gpGlobals->v_right * 8
+					+ gpGlobals->v_up * -8;
+
+			CPipeBomb::CreatePipeBomb(
+				gun,
+				gpGlobals->v_forward * 0.75F + gpGlobals->v_up * 0.25F,
+				info.iProjectileDamage,
+				info.iProjectileType == kProjPipeBombRemote,
+				m_pPlayer);
 			break;
 		}
 		default:
@@ -201,6 +262,7 @@ void CShotgun::GetWeaponInfo(WeaponInfo& i)
 	i.pszEvent = "events/wpn/tf_sg.sc";
 	i.pszAttackSound = "weapons/sbarrel1.wav";
 	i.flPunchAngle = -2.0F;
+	i.iSibling = WEAPON_NONE;
 }
 
 
@@ -245,6 +307,7 @@ void CSuperShotgun::GetWeaponInfo(WeaponInfo& i)
 	i.pszEvent = "events/wpn/tf_ssg.sc";
 	i.pszAttackSound = "weapons/shotgn2.wav";
 	i.flPunchAngle = -4.0F;
+	i.iSibling = WEAPON_NONE;
 }
 
 
@@ -289,6 +352,7 @@ void CNailgun::GetWeaponInfo(WeaponInfo& i)
 	i.pszEvent = "events/wpn/tf_nail.sc";
 	i.pszAttackSound = "weapons/airgun_1.wav";
 	i.flPunchAngle = -2.0F;
+	i.iSibling = WEAPON_NONE;
 }
 
 
@@ -333,6 +397,52 @@ void CSuperNailgun::GetWeaponInfo(WeaponInfo& i)
 	i.pszEvent = "events/wpn/tf_snail.sc";
 	i.pszAttackSound = "weapons/spike2.wav";
 	i.flPunchAngle = -2.0F;
+	i.iSibling = WEAPON_NONE;
+}
+
+
+LINK_ENTITY_TO_CLASS(tf_weapon_gl, CGrenadeLauncher);
+
+void CGrenadeLauncher::GetWeaponInfo(WeaponInfo& i)
+{
+	i.pszName = "tf_weapon_gl";
+	i.iAmmo1 = AMMO_NONE;
+	i.iMaxAmmo1 = -1;
+	i.iAmmo2 = AMMO_NONE;
+	i.iMaxAmmo2 = -1;
+	i.iMaxClip = 6;
+	i.iSlot = 3;
+	i.iPosition = 1;
+	i.iFlags = 0;
+	i.iWeight = 15;
+
+	i.pszWorld = "models/w_rpg.mdl";
+	i.pszView = "models/v_tfgl.mdl";
+	i.pszPlayer = "models/p_glauncher.mdl";
+	i.pszAnimExt = "shotgun";
+
+	i.iAnims[kWeaponAnimIdle] = 0;
+	i.iAnims[kWeaponAnimDeploy] = 8;
+	i.iAnims[kWeaponAnimHolster] = 10;
+	i.iAnims[kWeaponAnimAttack] = 2;
+	i.iAnims[kWeaponAnimReload] = -1;
+	i.iAnims[kWeaponAnimStartReload] = 4;
+	i.iAnims[kWeaponAnimEndReload] = 5;
+
+	i.iShots = 1;
+
+	i.iAttackTime = 600;
+	i.iReloadTime = 4000;
+
+	i.iProjectileType = kProjPipeBomb;
+	i.iProjectileDamage = 100;
+	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
+	i.iProjectileCount = 1;
+
+	i.pszEvent = "events/wpn/tf_gl.sc";
+	i.pszAttackSound = "weapons/glauncher.wav";
+	i.flPunchAngle = -2.0F;
+	i.iSibling = WEAPON_PIPEBOMB_LAUNCHER;
 }
 
 
@@ -377,5 +487,51 @@ void CRocketLauncher::GetWeaponInfo(WeaponInfo& i)
 	i.pszEvent = "events/wpn/tf_rpg.sc";
 	i.pszAttackSound = "weapons/rocketfire1.wav";
 	i.flPunchAngle = -4.0F;
+	i.iSibling = WEAPON_NONE;
+}
+
+
+LINK_ENTITY_TO_CLASS(tf_weapon_pl, CPipeBombLauncher);
+
+void CPipeBombLauncher::GetWeaponInfo(WeaponInfo& i)
+{
+	i.pszName = "tf_weapon_pl";
+	i.iAmmo1 = AMMO_NONE;
+	i.iMaxAmmo1 = -1;
+	i.iAmmo2 = AMMO_NONE;
+	i.iMaxAmmo2 = -1;
+	i.iMaxClip = 6;
+	i.iSlot = 4;
+	i.iPosition = 1;
+	i.iFlags = 0;
+	i.iWeight = 15;
+
+	i.pszWorld = "models/w_rpg.mdl";
+	i.pszView = "models/v_tfgl.mdl";
+	i.pszPlayer = "models/p_glauncher.mdl";
+	i.pszAnimExt = "shotgun";
+
+	i.iAnims[kWeaponAnimIdle] = 1;
+	i.iAnims[kWeaponAnimDeploy] = 9;
+	i.iAnims[kWeaponAnimHolster] = 11;
+	i.iAnims[kWeaponAnimAttack] = 3;
+	i.iAnims[kWeaponAnimReload] = -1;
+	i.iAnims[kWeaponAnimStartReload] = 6;
+	i.iAnims[kWeaponAnimEndReload] = 7;
+
+	i.iShots = 1;
+
+	i.iAttackTime = 600;
+	i.iReloadTime = 4000;
+
+	i.iProjectileType = kProjPipeBombRemote;
+	i.iProjectileDamage = 100;
+	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
+	i.iProjectileCount = 1;
+
+	i.pszEvent = "events/wpn/tf_pipel.sc";
+	i.pszAttackSound = "weapons/glauncher.wav";
+	i.flPunchAngle = -2.0F;
+	i.iSibling = WEAPON_GRENADE_LAUNCHER;
 }
 

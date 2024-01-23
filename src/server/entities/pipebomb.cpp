@@ -1,0 +1,104 @@
+//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//
+// Purpose: You want it? It's yours, my friend!
+//
+// $NoKeywords: $
+//=============================================================================
+
+#include "extdll.h"
+#include "util.h"
+#include "cbase.h"
+#include "weapons.h"
+#include "gamerules.h"
+
+
+CPipeBomb* CPipeBomb::CreatePipeBomb(const Vector& origin, const Vector& dir, const float damage, const bool remote, CBaseEntity* owner)
+{
+	auto pipebomb = GetClassPtr((CPipeBomb*)nullptr);
+
+	pipebomb->pev->origin = origin;
+	pipebomb->pev->angles = dir;
+	pipebomb->pev->dmg = damage;
+    if (remote)
+    {
+        pipebomb->pev->skin = 0;
+    }
+    else
+    {
+        pipebomb->pev->skin = 1;
+    }
+	pipebomb->pev->owner = owner->edict();
+	pipebomb->Spawn();
+
+	return pipebomb;
+}
+
+
+bool CPipeBomb::Spawn()
+{
+	pev->classname = MAKE_STRING("pipebomb");
+	pev->movetype = MOVETYPE_BOUNCE;
+	pev->solid = SOLID_TRIGGER; /* SOLID_BBOX */
+
+	SetModel("models/pipebomb.mdl");
+
+	SetSize(g_vecZero, g_vecZero);
+
+	SetOrigin(pev->origin);
+
+	pev->velocity = pev->angles * 800;
+	pev->angles = util::VecToAngles(pev->angles);
+    pev->avelocity = Vector(300, 300, 300);
+    pev->friction = 0.5F;
+
+	SetTouch(&CPipeBomb::PipeBombTouch);
+
+	SetThink(&CPipeBomb::Detonate);
+	pev->nextthink = gpGlobals->time + 2.5F;
+
+	tent::RocketTrail(this, false);
+
+	return true;
+}
+
+
+void CPipeBomb::PipeBombTouch(CBaseEntity* pOther)
+{
+	if (g_engfuncs.pfnPointContents(pev->origin) != CONTENT_SKY)
+	{
+		CBaseEntity* owner = this;
+
+		if (pev->owner != nullptr)
+		{
+			owner = CBaseEntity::Instance(pev->owner);
+
+			if (pOther == owner)
+			{
+				return;
+			}
+		}
+
+        if (pOther->pev->takedamage != DAMAGE_NO)
+        {
+    		ExplodeTouch(pOther);
+        }
+        else
+		{
+			if (pev->flags & FL_ONGROUND)
+			{
+				pev->velocity = pev->velocity * 0.75F;
+
+				if (pev->velocity.Length() <= 20.0F)
+				{
+					pev->avelocity = g_vecZero;
+				}
+			}
+
+			BounceTouch(pOther);
+		}
+	}
+    else
+    {
+    	Remove();        
+    }
+}
