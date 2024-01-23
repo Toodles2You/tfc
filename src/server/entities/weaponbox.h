@@ -19,6 +19,8 @@ public:
 class CWeaponBox : public CBaseEntity
 {
 public:
+	~CWeaponBox() override;
+
 	DECLARE_SAVERESTORE()
 
 	void Precache() override;
@@ -29,13 +31,13 @@ public:
 	int GiveAmmo(int iCount, int iType, int iMax, int* pIndex = NULL);
 	void SetObjectCollisionBox() override;
 
-	void EXPORT Kill();
+	void RemoveWeapons();
 
 	bool HasWeapon(CBasePlayerWeapon* pCheckWeapon);
 	bool PackWeapon(CBasePlayerWeapon* pWeapon);
 	bool PackAmmo(int iType, int iCount);
 
-	CBasePlayerWeapon* m_rgpPlayerWeapons[WEAPON_LAST]; // one slot for each
+	EHANDLE m_hPlayerWeapons[WEAPON_LAST]; // one slot for each
 
 	int m_rgAmmo[AMMO_LAST];	 // ammo quantities
 

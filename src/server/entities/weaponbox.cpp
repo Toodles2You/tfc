@@ -108,6 +108,11 @@ IMPLEMENT_SAVERESTORE(CWeaponBox)
 END_SAVERESTORE(CWeaponBox, CBaseEntity)
 #endif
 
+CWeaponBox::~CWeaponBox()
+{
+	RemoveWeapons();
+}
+
 //=========================================================
 //
 //=========================================================
@@ -157,24 +162,22 @@ bool CWeaponBox::Spawn()
 // CWeaponBox - Kill - the think function that removes the
 // box from the world.
 //=========================================================
-void CWeaponBox::Kill()
+void CWeaponBox::RemoveWeapons()
 {
-	CBasePlayerWeapon* pWeapon;
+	CBaseEntity* pWeapon;
 	int i;
 
 	// destroy the weapons
 	for (i = 0; i < WEAPON_LAST; i++)
 	{
-		pWeapon = m_rgpPlayerWeapons[i];
+		pWeapon = m_hPlayerWeapons[i];
 		if (!pWeapon)
 		{
 			continue;
 		}
 		pWeapon->Remove();
+		m_hPlayerWeapons[i] = nullptr;
 	}
-
-	// remove the box
-	Remove();
 }
 
 //=========================================================
@@ -201,7 +204,7 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 	}
 
 	CBasePlayer* pPlayer = (CBasePlayer*)pOther;
-	CBasePlayerWeapon* pWeapon;
+	CBaseEntity* pWeapon;
 	int i;
 
 	// dole out ammo
@@ -219,7 +222,7 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 	// to deploy a better weapon that the player may pick up because he has no ammo for it.
 	for (i = 0; i < WEAPON_LAST; i++)
 	{
-		pWeapon = m_rgpPlayerWeapons[i];
+		pWeapon = m_hPlayerWeapons[i];
 
 		if (!pWeapon)
 		{
@@ -228,7 +231,10 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 
 		//ALERT ( at_console, "trying to give %s\n", STRING( pWeapon[ i ]->pev->classname ) );
 
-		pWeapon->AddToPlayer(pPlayer);
+		if (dynamic_cast<CBasePlayerWeapon*>(pWeapon)->AddToPlayer(pPlayer))
+		{
+			m_hPlayerWeapons[i] = nullptr;
+		}
 	}
 
 	pOther->EmitSound("items/gunpickup2.wav", CHAN_ITEM);
@@ -249,7 +255,7 @@ bool CWeaponBox::PackWeapon(CBasePlayerWeapon* pWeapon)
 
 	pWeapon->RemoveFromPlayer();
 
-	m_rgpPlayerWeapons[pWeapon->GetID()] = pWeapon;
+	m_hPlayerWeapons[pWeapon->GetID()] = pWeapon;
 
 	pWeapon->pev->spawnflags |= SF_NORESPAWN;
 	pWeapon->pev->movetype = MOVETYPE_NONE;
@@ -309,7 +315,7 @@ int CWeaponBox::GiveAmmo(int iCount, int iType, int iMax, int* pIndex /* = nullp
 //=========================================================
 bool CWeaponBox::HasWeapon(CBasePlayerWeapon* pCheckWeapon)
 {
-	return m_rgpPlayerWeapons[pCheckWeapon->GetID()] != nullptr;
+	return m_hPlayerWeapons[pCheckWeapon->GetID()] != nullptr;
 }
 
 //=========================================================
@@ -321,7 +327,7 @@ bool CWeaponBox::IsEmpty()
 
 	for (i = 0; i < WEAPON_LAST; i++)
 	{
-		if (m_rgpPlayerWeapons[i] != nullptr)
+		if (m_hPlayerWeapons[i] != nullptr)
 		{
 			return false;
 		}

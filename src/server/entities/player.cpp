@@ -474,7 +474,7 @@ void CBasePlayer::PackDeadPlayerWeapons()
 	pWeaponBox->pev->angles.x = 0; // don't let weaponbox tilt.
 	pWeaponBox->pev->angles.z = 0;
 
-	pWeaponBox->SetThink(&CWeaponBox::Kill);
+	pWeaponBox->SetThink(&CWeaponBox::Remove);
 	pWeaponBox->pev->nextthink = gpGlobals->time + 120;
 
 	// back these two lists up to their first elements
