@@ -86,6 +86,7 @@ cvar_t* cl_rollangle = nullptr;
 cvar_t* cl_rollspeed = nullptr;
 cvar_t* cl_bobtilt = nullptr;
 cvar_t* r_decals = nullptr;
+cvar_t* r_explosionstyle = nullptr;
 cvar_t* violence_hblood = nullptr;
 cvar_t* violence_hgibs = nullptr;
 cvar_t* cl_autowepswitch = nullptr;
@@ -337,6 +338,7 @@ void CHud::Init()
 	cl_rollspeed = CVAR_CREATE("cl_rollspeed", "200", FCVAR_ARCHIVE);
 	cl_bobtilt = CVAR_CREATE("cl_bobtilt", "0", FCVAR_ARCHIVE);
 	r_decals = gEngfuncs.pfnGetCvarPointer("r_decals");
+	r_explosionstyle = gEngfuncs.pfnRegisterVariable("r_explosionstyle", "1", FCVAR_ARCHIVE);
 	violence_hblood = gEngfuncs.pfnGetCvarPointer("violence_hblood");
 	violence_hgibs = gEngfuncs.pfnGetCvarPointer("violence_hgibs");
 	m_pCvarSuitVolume = gEngfuncs.pfnGetCvarPointer("suitvolume");

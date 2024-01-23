@@ -80,7 +80,7 @@ void W_Precache()
 
 	g_sModelIndexLaser = PRECACHE_MODEL("sprites/laserbeam.spr");
 	g_sModelIndexLaserDot = PRECACHE_MODEL("sprites/laserdot.spr");
-	g_sModelIndexFireball = PRECACHE_MODEL("sprites/zerogxplode.spr");
+	g_sModelIndexFireball = PRECACHE_MODEL("sprites/explode01.spr");
 	g_sModelIndexWExplosion = PRECACHE_MODEL("sprites/WXplo1.spr");
 	g_sModelIndexSmoke = PRECACHE_MODEL("sprites/steam1.spr");
 	g_sModelIndexBubbles = PRECACHE_MODEL("sprites/bubble.spr");

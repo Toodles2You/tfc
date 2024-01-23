@@ -45,6 +45,7 @@ static int tracerCount[MAX_PLAYERS];
 #include "pm_shared.h"
 
 extern cvar_t* r_decals;
+extern cvar_t* r_explosionstyle;
 extern cvar_t* violence_hblood;
 extern cvar_t* violence_hgibs;
 
@@ -830,6 +831,7 @@ static void EV_SmokeCallback(TEMPENTITY* ent, float frametime, float currenttime
 
 void EV_Explosion(event_args_t* args)
 {
+	const auto simple = r_explosionstyle->value != 0.0F;
 	const auto underwater =
 		gEngfuncs.PM_PointContents(args->origin, nullptr) == CONTENTS_WATER;
 
@@ -865,9 +867,21 @@ void EV_Explosion(event_args_t* args)
 	}
 
 	auto sprite = g_sModelIndexFireball;
+	auto flags = TE_EXPLFLAG_NONE;
+
+	if (simple)
+	{
+		flags |= TE_EXPLFLAG_NOPARTICLES;
+	}
+	else
+	{
+		flags |= TE_EXPLFLAG_NOADDITIVE;
+	}
+
 	if (underwater)
 	{
 		sprite = g_sModelIndexWExplosion;
+		flags &= ~TE_EXPLFLAG_NOADDITIVE;
 	}
 
 	gEngfuncs.pEfxAPI->R_Explosion(
@@ -875,11 +889,16 @@ void EV_Explosion(event_args_t* args)
 		sprite,
 		scale,
 		15,
-		TE_EXPLFLAG_NONE);
+		flags);
 
 	EV_DecalTrace(&tr, EV_DecalName("{scorch%i", 3));
 
 	gEngfuncs.pEventAPI->EV_PopPMStates();
+
+	if (simple)
+	{
+		return;
+	}
 
 	const char* sample;
 
@@ -1060,7 +1079,7 @@ void EV_Init()
 
 	g_sModelIndexLaser = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/laserbeam.spr");
 	g_sModelIndexLaserDot = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/laserdot.spr");
-	g_sModelIndexFireball = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/zerogxplode.spr");
+	g_sModelIndexFireball = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/explode01.spr");
 	g_sModelIndexWExplosion = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/WXplo1.spr");
 	g_sModelIndexSmoke = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/steam1.spr");
 	g_sModelIndexBubbles = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/bubble.spr");
