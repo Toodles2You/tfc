@@ -360,7 +360,10 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		return false;
 	}
 
-	Pain();
+	if ((bitsDamageType & DMG_FALL) == 0)
+	{
+		Pain();
+	}
 
 	MessageBegin(MSG_SPEC, SVC_DIRECTOR);
 		WriteByte(9);							  // command length in bytes

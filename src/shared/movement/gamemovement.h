@@ -48,6 +48,7 @@ protected:
     void AddCorrectGravity();
     void FixUpGravity();
     bool AddToTouched(pmtrace_t& tr, Vector& velocity);
+    void CheckFalling();
 
     virtual void Walk();
     virtual void WalkMove();

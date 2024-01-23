@@ -19,10 +19,19 @@
 #include "pm_debug.h"
 #include "gamemovement.h"
 
+#ifdef CLIENT_DLL
+#include "view.h"
+#endif
+
 
 void CHalfLifeMovement::Walk()
 {
     AddCorrectGravity();
+
+    if (pmove->onground == -1)
+    {
+        pmove->flFallVelocity = -pmove->velocity.z;
+    }
 
     if ((pmove->cmd.buttons & IN_JUMP) != 0)
     {
@@ -57,10 +66,7 @@ void CHalfLifeMovement::Walk()
     CheckVelocity();
     FixUpGravity();
 
-    if (pmove->onground != -1)
-    {
-        pmove->velocity.z = 0;
-    }
+    CheckFalling();
 }
 
 
@@ -313,3 +319,34 @@ void CHalfLifeMovement::StayOnGround()
     }
 }
 
+
+void CHalfLifeMovement::CheckFalling()
+{
+    if (pmove->onground != -1)
+    {
+        if (pmove->dead == 0
+         && pmove->flFallVelocity >= PLAYER_FALL_PUNCH_THRESHHOLD
+         && pmove->waterlevel == 0)
+        {
+            if (pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED)
+            {
+                pmove->PM_PlaySound(CHAN_VOICE, "player/pl_fallpain3.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+#ifdef CLIENT_DLL
+                V_PunchAxis(2, std::min(pmove->flFallVelocity * 0.013F, 8.0F));
+#endif
+            }
+            else if (pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED / 2)
+            {
+                pmove->PM_PlaySound(CHAN_VOICE, "player/pl_jumpland2.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+#ifdef CLIENT_DLL
+                V_PunchAxis(2, std::min(pmove->flFallVelocity * 0.0065F, 4.0F));
+#endif
+            }
+
+            pmove->flTimeStepSound = 0;
+        }
+
+        pmove->velocity.z = 0;
+        pmove->flFallVelocity = 0;
+    }
+}
