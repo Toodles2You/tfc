@@ -220,10 +220,26 @@ void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecD
 	AddMultiDamage(flDamage, bitsDamageType);
 }
 
-static inline float DamageForce(entvars_t* pev, int damage)
+static inline float DamageForce(CBasePlayer* player, CBaseEntity* attacker, int damage)
 {
-	float size = (32 * 32 * 72) / (pev->size.x * pev->size.y * pev->size.z);
-	return std::clamp(damage * size * 5.0F, 0.0F, 1000.0F);
+	float force = 8.0F;
+
+	if (player->PCNumber() == PC_HVYWEAP)
+	{
+		if (damage < 50)
+		{
+			return 0.0F;
+		}
+
+		damage /= 4;
+	}
+
+	if (damage < 60 && attacker->IsClient() && attacker != player)
+	{
+		force = 11.0F;
+	}
+
+	return damage * force;
 }
 
 static float ArmourBonus(float &damage, float armour, float ratio)
@@ -261,13 +277,18 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		// Move them around!
 		g_vecAttackDir = (inflictor->Center() - Vector(0, 0, 10) - Center()).Normalize();
 
-		if ((bitsDamageType & DMG_NAIL) != 0)
+		float force = DamageForce(this, attacker, flDamage);
+
+		if (force > 0.0F)
 		{
-			pev->velocity = pev->velocity + inflictor->pev->velocity.Normalize() * DamageForce(pev, flDamage);
-		}
-		else
-		{
-			pev->velocity = pev->velocity + g_vecAttackDir * -DamageForce(pev, flDamage);
+			if ((bitsDamageType & DMG_NAIL) != 0)
+			{
+				pev->velocity = pev->velocity + inflictor->pev->velocity.Normalize() * force;
+			}
+			else
+			{
+				pev->velocity = pev->velocity + g_vecAttackDir * -force;
+			}
 		}
 	}
 	pev->dmg_inflictor = inflictor->edict();
