@@ -1408,7 +1408,9 @@ void CBasePlayer::AddPlayerWeapon(CBasePlayerWeapon* weapon)
 
 void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* weapon)
 {
-	if (m_pActiveWeapon == weapon)
+	const auto isActive = m_pActiveWeapon == weapon;
+
+	if (isActive)
 	{
 		weapon->m_ForceSendAnimations = true;
 		weapon->Holster();
@@ -1420,12 +1422,15 @@ void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* weapon)
 	m_lpPlayerWeapons.remove(weapon);
 	ClearWeaponBit(weapon->GetID());
 
-	auto best = GetNextBestWeapon(weapon);
-	if (best != nullptr)
+	if (isActive)
 	{
-		best->m_ForceSendAnimations = true;
-		SelectWeapon(best->GetID());
-		best->m_ForceSendAnimations = false;
+		auto best = GetNextBestWeapon(weapon);
+		if (best != nullptr)
+		{
+			best->m_ForceSendAnimations = true;
+			SelectWeapon(best->GetID());
+			best->m_ForceSendAnimations = false;
+		}
 	}
 }
 
