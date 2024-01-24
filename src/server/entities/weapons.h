@@ -224,6 +224,8 @@ public:
 	static void EV_PrimaryAttack(event_args_t* args);
 #endif
 
+	CTFWeapon* GetSibling();
+
 protected:
 	void UpdateSiblingInfo(const bool holster);
 

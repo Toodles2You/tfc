@@ -417,6 +417,12 @@ void CBasePlayer::PackDeadPlayerWeapons()
 			{
 				// this is the active weapon. Pack it.
 				rgpPackWeapons[iPW++] = pWeapon;
+
+				CTFWeapon* pSibling = dynamic_cast<CTFWeapon*>(pWeapon)->GetSibling();
+				if (pSibling != nullptr)
+				{
+					rgpPackWeapons[iPW++] = pSibling;
+				}
 			}
 			break;
 
@@ -1675,6 +1681,13 @@ void CBasePlayer::DropPlayerWeapon(char* pszWeaponName)
 	pWeaponBox->SetModel(STRING(pWeapon->pev->model));
 	pWeaponBox->pev->angles.x = 0;
 	pWeaponBox->pev->angles.z = 0;
+
+	CTFWeapon* pSibling = dynamic_cast<CTFWeapon*>(pWeapon)->GetSibling();
+	if (pSibling != nullptr)
+	{
+		pWeaponBox->PackWeapon(pSibling);
+	}
+
 	pWeaponBox->PackWeapon(pWeapon);
 	pWeaponBox->pev->velocity = gpGlobals->v_forward * 300 + gpGlobals->v_forward * 100;
 

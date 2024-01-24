@@ -31,24 +31,35 @@ void CTFWeapon::Precache()
 }
 
 
-void CTFWeapon::UpdateSiblingInfo(const bool holster)
+CTFWeapon* CTFWeapon::GetSibling()
 {
 	const auto info = GetInfo();
 
-	if (info.iSibling != WEAPON_NONE
-	 && m_pPlayer->m_rgpPlayerWeapons[info.iSibling] != nullptr)
+	if (info.iSibling != WEAPON_NONE)
 	{
-		CTFWeapon* from;
-		CTFWeapon* to;
+		return dynamic_cast<CTFWeapon*>(m_pPlayer->m_rgpPlayerWeapons[info.iSibling]);
+	}
+
+	return nullptr;
+}
+
+
+void CTFWeapon::UpdateSiblingInfo(const bool holster)
+{
+	CTFWeapon* sibling = GetSibling();
+
+	if (sibling != nullptr)
+	{
+		CTFWeapon* from,* to;
 
 		if (holster)
 		{
 			from = this;
-			to = dynamic_cast<CTFWeapon*>(m_pPlayer->m_rgpPlayerWeapons[info.iSibling]);
+			to = sibling;
 		}
 		else
 		{
-			from = dynamic_cast<CTFWeapon*>(m_pPlayer->m_rgpPlayerWeapons[info.iSibling]);
+			from = sibling;
 			to = this;
 		}
 
