@@ -52,6 +52,8 @@ static CBasePlayer players[MAX_PLAYERS + 1];
 // The entity we'll use to represent the local client
 static CBasePlayer* player = players;
 
+static CSniperRifle tf_weapon_sniperrifle;
+static CAutoRifle tf_weapon_autorifle;
 static CShotgun tf_weapon_shotgun;
 static CSuperShotgun tf_weapon_supershotgun;
 static CNailgun tf_weapon_ng;
@@ -68,8 +70,8 @@ static CTFWeapon* weapons[] =
 	nullptr,
 	nullptr,
 	nullptr,
-	nullptr,
-	nullptr,
+	&tf_weapon_sniperrifle,
+	&tf_weapon_autorifle,
 	&tf_weapon_shotgun,
 	&tf_weapon_supershotgun,
 	&tf_weapon_ng,

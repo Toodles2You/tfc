@@ -522,7 +522,15 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 		{
 			Vector shellOrigin, shellVelocity;
 			EV_GetDefaultShellInfo(args, args->origin, args->velocity, shellVelocity, shellOrigin, forward, right, up, 20, -12, 4);
-			EV_EjectBrass(shellOrigin, shellVelocity, args->angles[YAW], g_sModelIndexShell, TE_BOUNCE_SHOTSHELL);
+
+			if (info.iProjectileCount > 1)
+			{
+				EV_EjectBrass(shellOrigin, shellVelocity, args->angles[YAW], g_sModelIndexShotgunShell, TE_BOUNCE_SHOTSHELL);
+			}
+			else
+			{
+				EV_EjectBrass(shellOrigin, shellVelocity, args->angles[YAW], g_sModelIndexShell, TE_BOUNCE_SHELL);
+			}
 
 			EV_FireBullets(args, args->iparam1, info.vecProjectileSpread, info.iProjectileCount * args->iparam2, 2048, false, 0);
 			break;
@@ -1080,7 +1088,8 @@ void EV_Init()
 {
 	g_sModelIndexPlayer = gEngfuncs.pEventAPI->EV_FindModelIndex("models/player/scout/scout.mdl");
 	g_sModelIndexGibs = gEngfuncs.pEventAPI->EV_FindModelIndex("models/hgibs.mdl");
-	g_sModelIndexShell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shotgunshell.mdl");
+	g_sModelIndexShell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shell.mdl");
+	g_sModelIndexShotgunShell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shotgunshell.mdl");
 
 	g_sModelIndexLaser = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/laserbeam.spr");
 	g_sModelIndexLaserDot = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/laserdot.spr");

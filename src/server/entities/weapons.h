@@ -89,6 +89,7 @@ typedef struct
 	int iProjectileDamage;
 	Vector2D vecProjectileSpread;
 	int iProjectileCount;
+	int iProjectileChargeDamage;
 	const char* pszEvent;
 	const char* pszAttackSound;
 	float flPunchAngle;
@@ -197,6 +198,7 @@ public:
 inline short g_sModelIndexPlayer;
 inline short g_sModelIndexGibs;
 inline short g_sModelIndexShell;
+inline short g_sModelIndexShotgunShell;
 inline short g_sModelIndexLaser;
 inline short g_sModelIndexLaserDot;
 inline short g_sModelIndexFireball;
@@ -229,8 +231,25 @@ public:
 protected:
 	void UpdateSiblingInfo(const bool holster);
 
-private:
+protected:
 	unsigned short m_usPrimaryAttack;
+};
+
+class CSniperRifle : public CTFWeapon
+{
+public:
+	int GetID() const override { return WEAPON_SNIPER_RIFLE; }
+	void GetWeaponInfo(WeaponInfo& i) override;
+
+	void PrimaryAttack() override;
+	void WeaponPostFrame() override;
+};
+
+class CAutoRifle : public CTFWeapon
+{
+public:
+	int GetID() const override { return WEAPON_AUTO_RIFLE; }
+	void GetWeaponInfo(WeaponInfo& i) override;
 };
 
 class CShotgun : public CTFWeapon

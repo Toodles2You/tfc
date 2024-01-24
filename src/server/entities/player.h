@@ -47,6 +47,7 @@ enum
 {
 	kTFStateGrenadePrime    = 1,
 	kTFStateGrenadeThrowing = 2,
+	kTFStateAiming			= 4,
 };
 
 enum

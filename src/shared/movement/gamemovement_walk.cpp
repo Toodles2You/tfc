@@ -211,6 +211,11 @@ void CHalfLifeMovement::Jump()
         return;
     }
 
+    if ((player->m_TFState & kTFStateAiming) != 0)
+    {
+        return;
+    }
+
     if (pmove->onground == -1 || (pmove->flags & FL_JUMPING) != 0)
     {
         return;

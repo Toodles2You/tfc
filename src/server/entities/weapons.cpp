@@ -76,7 +76,8 @@ void W_Precache()
 		util::PrecacheOther("weaponbox");
 	}
 
-	g_sModelIndexShell = PRECACHE_MODEL("models/shotgunshell.mdl");
+	g_sModelIndexShell = PRECACHE_MODEL("models/shell.mdl");
+	g_sModelIndexShotgunShell = PRECACHE_MODEL("models/shotgunshell.mdl");
 
 	g_sModelIndexLaser = PRECACHE_MODEL("sprites/laserbeam.spr");
 	g_sModelIndexLaserDot = PRECACHE_MODEL("sprites/laserdot.spr");

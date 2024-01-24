@@ -52,6 +52,7 @@ void CGrenadeLauncher::GetWeaponInfo(WeaponInfo& i)
 	i.iProjectileDamage = 100;
 	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
 	i.iProjectileCount = 1;
+	i.iProjectileChargeDamage = 0;
 
 	i.pszEvent = "events/wpn/tf_gl.sc";
 	i.pszAttackSound = "weapons/glauncher.wav";
@@ -97,6 +98,7 @@ void CPipeBombLauncher::GetWeaponInfo(WeaponInfo& i)
 	i.iProjectileDamage = 100;
 	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
 	i.iProjectileCount = 1;
+	i.iProjectileChargeDamage = 0;
 
 	i.pszEvent = "events/wpn/tf_pipel.sc";
 	i.pszAttackSound = "weapons/glauncher.wav";

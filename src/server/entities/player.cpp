@@ -200,7 +200,7 @@ void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecD
 		case HITGROUP_GENERIC:
 			break;
 		case HITGROUP_HEAD:
-			flDamage *= 3;
+			flDamage *= 2;
 			break;
 		case HITGROUP_CHEST:
 			break;

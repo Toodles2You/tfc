@@ -30,6 +30,7 @@ set(SHARED_SRC
     ${SHARED_SRC_DIR}/entities/animating.cpp
     ${SHARED_SRC_DIR}/entities/player_shared.cpp
     ${SHARED_SRC_DIR}/entities/tf_pipebomb.cpp
+    ${SHARED_SRC_DIR}/entities/tf_sniper.cpp
     ${SHARED_SRC_DIR}/entities/tf_weapons.cpp
     ${SHARED_SRC_DIR}/entities/weapons_shared.cpp
 
