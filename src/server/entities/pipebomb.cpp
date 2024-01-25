@@ -40,7 +40,15 @@ bool CPipeBomb::Spawn()
 {
 	pev->classname = MAKE_STRING("pipebomb");
 	pev->movetype = MOVETYPE_BOUNCE;
-	pev->solid = SOLID_TRIGGER; /* SOLID_BBOX */
+
+	if (pev->skin != 0)
+	{
+		pev->solid = SOLID_TRIGGER;
+	}
+	else
+	{
+		pev->solid = SOLID_BBOX;
+	}
 
 	SetModel("models/pipebomb.mdl");
 
