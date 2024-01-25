@@ -41,6 +41,7 @@ public:
 	gamemode_e GetGameMode() override { return kGamemodeTeamFortress; }
 	bool ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib, bool bAutoTeam) override;
 	void PlayerSpawn(CBasePlayer* pPlayer) override;
+	int DeadPlayerWeapons(CBasePlayer* pPlayer) override { return GR_PLR_DROP_GUN_NO; }
 
 protected:
 	bool ChangePlayerClass(CBasePlayer* pPlayer, int classIndex);
