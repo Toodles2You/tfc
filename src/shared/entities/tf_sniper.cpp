@@ -59,6 +59,8 @@ void CSniperRifle::GetWeaponInfo(WeaponInfo& i)
 
 	i.pszEvent = "events/wpn/tf_sniper.sc";
 	i.pszAttackSound = "ambience/rifle1.wav";
+	i.pszAlternateSound = nullptr;
+	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -4.0F;
 	i.iSibling = WEAPON_AUTO_RIFLE;
 }
@@ -193,6 +195,8 @@ void CAutoRifle::GetWeaponInfo(WeaponInfo& i)
 
 	i.pszEvent = "events/wpn/tf_ar.sc";
 	i.pszAttackSound = "weapons/sniper.wav";
+	i.pszAlternateSound = nullptr;
+	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -2.0F;
 	i.iSibling = WEAPON_SNIPER_RIFLE;
 }

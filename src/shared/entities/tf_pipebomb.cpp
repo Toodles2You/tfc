@@ -56,6 +56,8 @@ void CGrenadeLauncher::GetWeaponInfo(WeaponInfo& i)
 
 	i.pszEvent = "events/wpn/tf_gl.sc";
 	i.pszAttackSound = "weapons/glauncher.wav";
+	i.pszAlternateSound = nullptr;
+	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -2.0F;
 	i.iSibling = WEAPON_PIPEBOMB_LAUNCHER;
 }
@@ -102,6 +104,8 @@ void CPipeBombLauncher::GetWeaponInfo(WeaponInfo& i)
 
 	i.pszEvent = "events/wpn/tf_pipel.sc";
 	i.pszAttackSound = "weapons/glauncher.wav";
+	i.pszAlternateSound = nullptr;
+	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -2.0F;
 	i.iSibling = WEAPON_GRENADE_LAUNCHER;
 }

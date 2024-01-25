@@ -474,6 +474,12 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 {
 	const auto& info = CBasePlayerWeapon::WeaponInfoArray[(int)args->fparam1];
 
+	if (info.iProjectileType == kProjKinetic)
+	{
+		CTFMelee::EV_MeleeAttack(args);
+		return;
+	}
+
 	Vector up, right, forward;
 	AngleVectors(args->angles, forward, right, up);
 
@@ -481,7 +487,10 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 	{
 		EV_MuzzleFlash();
 
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(info.iAnims[kWeaponAnimAttack], 0);
+		if (info.iAnims[kWeaponAnimAttack] >= 0)
+		{
+			gEngfuncs.pEventAPI->EV_WeaponAnimation(info.iAnims[kWeaponAnimAttack], 0);
+		}
 
 		V_PunchAxis(0, info.flPunchAngle);
 	}
@@ -536,6 +545,77 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 			break;
 		}
 	}
+}
+
+void CTFMelee::EV_MeleeAttack(event_args_t* args)
+{
+	const auto& info = CBasePlayerWeapon::WeaponInfoArray[(int)args->fparam1];
+
+	Vector up, right, forward;
+	AngleVectors(args->angles, forward, right, up);
+
+	if (args->bparam1)
+	{
+		if (args->iparam2 == kResultMiss)
+		{
+			return;
+		}
+
+		if (EV_IsLocal(args->entindex))
+		{
+			if (info.iAnims[kWeaponAnimAttack] >= 0)
+			{
+				gEngfuncs.pEventAPI->EV_WeaponAnimation(info.iAnims[kWeaponAnimAttack], 0);
+			}
+
+			V_PunchAxis(0, info.flPunchAngle);
+		}
+
+		if (args->iparam2 == kResultHit)
+		{
+			gEngfuncs.pEventAPI->EV_PlaySound(
+				args->entindex,
+				args->origin,
+				CHAN_WEAPON,
+				info.pszAttackSound,
+				VOL_NORM,
+				ATTN_NORM,
+				0,
+				gEngfuncs.pfnRandomLong(94, 109));
+		}
+		else
+		{
+			gEngfuncs.pEventAPI->EV_PlaySound(
+				args->entindex,
+				args->origin,
+				CHAN_WEAPON,
+				info.pszAlternateSound,
+				VOL_NORM,
+				ATTN_NORM,
+				0,
+				gEngfuncs.pfnRandomLong(94, 109));
+		}
+
+		return;
+	}
+
+	if (EV_IsLocal(args->entindex))
+	{
+		if (info.iAnims[kWeaponAnimReload] >= 0)
+		{
+			gEngfuncs.pEventAPI->EV_WeaponAnimation(info.iAnims[kWeaponAnimReload], 0);
+		}
+	}
+
+	gEngfuncs.pEventAPI->EV_PlaySound(
+		args->entindex,
+		args->origin,
+		CHAN_ITEM,
+		info.pszReloadSound,
+		VOL_NORM,
+		ATTN_NORM,
+		0,
+		gEngfuncs.pfnRandomLong(94, 109));
 }
 
 TEMPENTITY* pLaserDot;

@@ -29,6 +29,7 @@ set(CLIENT_SRC_DIR ${HL_SRC_DIR}/client)
 set(SHARED_SRC
     ${SHARED_SRC_DIR}/entities/animating.cpp
     ${SHARED_SRC_DIR}/entities/player_shared.cpp
+    ${SHARED_SRC_DIR}/entities/tf_axe.cpp
     ${SHARED_SRC_DIR}/entities/tf_pipebomb.cpp
     ${SHARED_SRC_DIR}/entities/tf_sniper.cpp
     ${SHARED_SRC_DIR}/entities/tf_weapons.cpp

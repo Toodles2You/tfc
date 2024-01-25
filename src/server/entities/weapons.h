@@ -62,6 +62,7 @@ enum
 	kProjNail,
 	kProjPipeBomb,
 	kProjPipeBombRemote,
+	kProjKinetic,
 };
 
 typedef struct
@@ -92,6 +93,8 @@ typedef struct
 	int iProjectileChargeDamage;
 	const char* pszEvent;
 	const char* pszAttackSound;
+	const char* pszAlternateSound;
+	const char* pszReloadSound;
 	float flPunchAngle;
 	int iSibling;
 } WeaponInfo;
@@ -233,6 +236,31 @@ protected:
 
 protected:
 	unsigned short m_usPrimaryAttack;
+};
+
+class CTFMelee : public CTFWeapon
+{
+public:
+	enum
+	{
+		kResultMiss = 0,
+		kResultHit,
+		kResultHitWorld
+	};
+
+	void PrimaryAttack() override;
+	void WeaponPostFrame() override;
+
+#ifdef CLIENT_DLL
+	static void EV_MeleeAttack(event_args_t* args);
+#endif
+};
+
+class CAxe : public CTFMelee
+{
+public:
+	int GetID() const override { return WEAPON_AXE; }
+	void GetWeaponInfo(WeaponInfo& i) override;
 };
 
 class CSniperRifle : public CTFWeapon

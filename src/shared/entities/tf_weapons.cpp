@@ -24,7 +24,18 @@ void CTFWeapon::Precache()
 	CBasePlayerWeapon::Precache();
 
 #ifdef GAME_DLL
-	g_engfuncs.pfnPrecacheSound(info.pszAttackSound);
+	if (info.pszAttackSound != nullptr)
+	{
+		g_engfuncs.pfnPrecacheSound(info.pszAttackSound);
+	}
+	if (info.pszAlternateSound != nullptr)
+	{
+		g_engfuncs.pfnPrecacheSound(info.pszAlternateSound);
+	}
+	if (info.pszReloadSound != nullptr)
+	{
+		g_engfuncs.pfnPrecacheSound(info.pszReloadSound);
+	}
 #endif
 
 	m_usPrimaryAttack = g_engfuncs.pfnPrecacheEvent(1, info.pszEvent);
@@ -286,6 +297,8 @@ void CShotgun::GetWeaponInfo(WeaponInfo& i)
 
 	i.pszEvent = "events/wpn/tf_sg.sc";
 	i.pszAttackSound = "weapons/sbarrel1.wav";
+	i.pszAlternateSound = nullptr;
+	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -2.0F;
 	i.iSibling = WEAPON_NONE;
 }
@@ -332,6 +345,8 @@ void CSuperShotgun::GetWeaponInfo(WeaponInfo& i)
 
 	i.pszEvent = "events/wpn/tf_ssg.sc";
 	i.pszAttackSound = "weapons/shotgn2.wav";
+	i.pszAlternateSound = nullptr;
+	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -4.0F;
 	i.iSibling = WEAPON_NONE;
 }
@@ -378,6 +393,8 @@ void CNailgun::GetWeaponInfo(WeaponInfo& i)
 
 	i.pszEvent = "events/wpn/tf_nail.sc";
 	i.pszAttackSound = "weapons/airgun_1.wav";
+	i.pszAlternateSound = nullptr;
+	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -2.0F;
 	i.iSibling = WEAPON_NONE;
 }
@@ -424,6 +441,8 @@ void CSuperNailgun::GetWeaponInfo(WeaponInfo& i)
 
 	i.pszEvent = "events/wpn/tf_snail.sc";
 	i.pszAttackSound = "weapons/spike2.wav";
+	i.pszAlternateSound = nullptr;
+	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -2.0F;
 	i.iSibling = WEAPON_NONE;
 }
@@ -470,6 +489,8 @@ void CRocketLauncher::GetWeaponInfo(WeaponInfo& i)
 
 	i.pszEvent = "events/wpn/tf_rpg.sc";
 	i.pszAttackSound = "weapons/rocketfire1.wav";
+	i.pszAlternateSound = nullptr;
+	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -4.0F;
 	i.iSibling = WEAPON_NONE;
 }
