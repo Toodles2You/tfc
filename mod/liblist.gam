@@ -2,7 +2,7 @@
 
 game "Half-Life: Updated"
 type "multiplayer_only"
-// fallback_dir "valve"
+fallback_dir "tfc"
 secure "1"
 
 gamedll "dlls\server.dll"
@@ -13,7 +13,7 @@ edicts "2048"
 startmap "c0a0"
 trainmap "t0a0"
 mpentity "info_player_deathmatch"
-nomodels "0"
+nomodels "1"
 nohimodel "0"
 
 icon "game"
