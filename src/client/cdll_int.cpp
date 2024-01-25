@@ -18,6 +18,8 @@
 // this implementation handles the linking of the engine to the DLL
 //
 
+#include <SDL2/SDL_messagebox.h>
+
 #include "hud.h"
 #include "cl_util.h"
 #include "netadr.h"
@@ -94,6 +96,29 @@ char HUD_PlayerMoveTexture(char* name)
 	return PM_FindTextureType(name);
 }
 
+static bool CL_InitClient()
+{
+	EV_HookWeaponEvents();
+	EV_HookEvents();
+	CL_LoadParticleMan();
+
+	if (!FileSystem_LoadFileSystem())
+	{
+		return false;
+	}
+
+	if (UTIL_IsValveGameDirectory())
+	{
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Fatal Error",
+			"This mod has detected that it is being run from a Valve game directory which is not supported\n"
+			"Run this mod from its intended location\n\nThe game will now shut down", nullptr);
+		return false;
+	}
+
+	// get tracker interface, if any
+	return true;
+}
+
 int Initialize(cl_enginefunc_t* pEnginefuncs, int iVersion)
 {
 	gEngfuncs = *pEnginefuncs;
@@ -103,12 +128,12 @@ int Initialize(cl_enginefunc_t* pEnginefuncs, int iVersion)
 
 	memcpy(&gEngfuncs, pEnginefuncs, sizeof(cl_enginefunc_t));
 
-	EV_HookWeaponEvents();
-	EV_HookEvents();
-	CL_LoadParticleMan();
+	const bool result = CL_InitClient();
 
-	if (!FileSystem_LoadFileSystem())
+	if (!result)
 	{
+		gEngfuncs.Con_DPrintf("Error initializing client\n");
+		gEngfuncs.pfnClientCmd("quit\n");
 		return 0;
 	}
 
