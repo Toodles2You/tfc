@@ -1657,6 +1657,11 @@ void CBasePlayer::DropPlayerWeapon(char* pszWeaponName)
 		return;
 	}
 
+	if (g_pGameRules->DeadPlayerWeapons(this) == GR_PLR_DROP_GUN_NO)
+	{
+		return;
+	}
+
 	CBasePlayerWeapon *pWeapon = nullptr;
 
 	if (pszWeaponName != nullptr && pszWeaponName[0] != '\0')
