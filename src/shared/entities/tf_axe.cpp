@@ -38,34 +38,67 @@ void CTFMelee::PrimaryAttack()
 	{
 		const auto hit = CBaseEntity::Instance(tr.pHit);
 
-		hit->TraceAttack(
-			m_pPlayer,
-			info.iProjectileDamage,
-			dir,
-			tr.iHitgroup,
-			DMG_CLUB);
-
-		hit->ApplyMultiDamage(m_pPlayer, m_pPlayer);
-
-		result = kResultHitWorld;
-
-		if (hit->IsClient())
+		if (info.iProjectileType == kProjAdrenaline)
 		{
-			if (g_pGameRules->FPlayerCanTakeDamage(dynamic_cast<CBasePlayer*>(hit), m_pPlayer))
+			if (hit->IsClient())
 			{
-				MessageBegin(MSG_PVS, gmsgBlood, tr.vecEndPos);
-				WriteFloat(dir.x);
-				WriteFloat(dir.y);
-				WriteFloat(dir.z);
-				WriteByte(0);
-				WriteByte(0);
-				WriteCoord(tr.vecEndPos.x);
-				WriteCoord(tr.vecEndPos.y);
-				WriteCoord(tr.vecEndPos.z);
-				MessageEnd();
-			}
+				if (g_pGameRules->PlayerRelationship(dynamic_cast<CBasePlayer*>(hit), m_pPlayer) >= GR_ALLY)
+				{
+					if (hit->pev->health >= hit->pev->max_health)
+					{
+						hit->TakeHealth(5, DMG_IGNORE_MAXHEALTH);
+					}
+					else
+					{
+						hit->TakeHealth(hit->pev->max_health - hit->pev->health, DMG_IGNORE_MAXHEALTH);
+					}
+				}
+				else
+				{
+					hit->TraceAttack(
+						m_pPlayer,
+						info.iProjectileDamage,
+						dir,
+						tr.iHitgroup,
+						DMG_POISON);
 
-			result = kResultHit;
+					hit->ApplyMultiDamage(m_pPlayer, m_pPlayer);
+				}
+
+				result = kResultHit;
+			}
+		}
+		else
+		{
+			hit->TraceAttack(
+				m_pPlayer,
+				info.iProjectileDamage,
+				dir,
+				tr.iHitgroup,
+				DMG_CLUB);
+
+			hit->ApplyMultiDamage(m_pPlayer, m_pPlayer);
+
+			result = kResultHitWorld;
+
+			if (hit->IsClient())
+			{
+				if (g_pGameRules->FPlayerCanTakeDamage(dynamic_cast<CBasePlayer*>(hit), m_pPlayer))
+				{
+					MessageBegin(MSG_PVS, gmsgBlood, tr.vecEndPos);
+					WriteFloat(dir.x);
+					WriteFloat(dir.y);
+					WriteFloat(dir.z);
+					WriteByte(0);
+					WriteByte(0);
+					WriteCoord(tr.vecEndPos.x);
+					WriteCoord(tr.vecEndPos.y);
+					WriteCoord(tr.vecEndPos.z);
+					MessageEnd();
+				}
+
+				result = kResultHit;
+			}
 		}
 	}
 
@@ -108,6 +141,54 @@ void CTFMelee::WeaponPostFrame()
 			m_iNextPrimaryAttack = std::max(m_iNextPrimaryAttack, 0);
 		}
 	}
+}
+
+
+LINK_ENTITY_TO_CLASS(tf_weapon_medikit, CMedikit);
+
+void CMedikit::GetWeaponInfo(WeaponInfo& i)
+{
+	i.pszName = "tf_weapon_medikit";
+	i.iAmmo1 = AMMO_NONE;
+	i.iMaxAmmo1 = -1;
+	i.iAmmo2 = AMMO_NONE;
+	i.iMaxAmmo2 = -1;
+	i.iMaxClip = -1;
+	i.iSlot = 0;
+	i.iPosition = 1;
+	i.iFlags = 0;
+	i.iWeight = 15;
+
+	i.pszWorld = "models/w_medkit.mdl";
+	i.pszView = "models/v_tfc_medkit.mdl";
+	i.pszPlayer = "models/p_medkit.mdl";
+	i.pszAnimExt = "medkit";
+
+	i.iAnims[kWeaponAnimIdle] = 0;
+	i.iAnims[kWeaponAnimDeploy] = 5;
+	i.iAnims[kWeaponAnimHolster] = 4;
+	i.iAnims[kWeaponAnimAttack] = 3;
+	i.iAnims[kWeaponAnimReload] = 2;
+	i.iAnims[kWeaponAnimStartReload] = -1;
+	i.iAnims[kWeaponAnimEndReload] = -1;
+
+	i.iShots = 1;
+
+	i.iAttackTime = 400;
+	i.iReloadTime = 0;
+
+	i.iProjectileType = kProjAdrenaline;
+	i.iProjectileDamage = 10;
+	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
+	i.iProjectileCount = 1;
+	i.iProjectileChargeDamage = 0;
+
+	i.pszEvent = "events/wpn/tf_mednormal.sc";
+	i.pszAttackSound = "items/medshot5.wav";
+	i.pszAlternateSound = nullptr;
+	i.pszReloadSound = "items/medshotno1.wav";
+	i.flPunchAngle = 0.0F;
+	i.iSibling = WEAPON_NONE;
 }
 
 

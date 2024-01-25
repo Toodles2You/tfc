@@ -63,6 +63,7 @@ enum
 	kProjPipeBomb,
 	kProjPipeBombRemote,
 	kProjKinetic,
+	kProjAdrenaline,
 };
 
 typedef struct
@@ -254,6 +255,13 @@ public:
 #ifdef CLIENT_DLL
 	static void EV_MeleeAttack(event_args_t* args);
 #endif
+};
+
+class CMedikit : public CTFMelee
+{
+public:
+	int GetID() const override { return WEAPON_MEDIKIT; }
+	void GetWeaponInfo(WeaponInfo& i) override;
 };
 
 class CAxe : public CTFMelee

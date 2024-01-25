@@ -474,7 +474,7 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 {
 	const auto& info = CBasePlayerWeapon::WeaponInfoArray[(int)args->fparam1];
 
-	if (info.iProjectileType == kProjKinetic)
+	if (info.iProjectileType == kProjKinetic || info.iProjectileType == kProjAdrenaline)
 	{
 		CTFMelee::EV_MeleeAttack(args);
 		return;
@@ -581,7 +581,7 @@ void CTFMelee::EV_MeleeAttack(event_args_t* args)
 				VOL_NORM,
 				ATTN_NORM,
 				0,
-				gEngfuncs.pfnRandomLong(94, 109));
+				PITCH_NORM);
 		}
 		else
 		{
@@ -593,7 +593,7 @@ void CTFMelee::EV_MeleeAttack(event_args_t* args)
 				VOL_NORM,
 				ATTN_NORM,
 				0,
-				gEngfuncs.pfnRandomLong(94, 109));
+				PITCH_NORM);
 		}
 
 		return;
@@ -610,12 +610,12 @@ void CTFMelee::EV_MeleeAttack(event_args_t* args)
 	gEngfuncs.pEventAPI->EV_PlaySound(
 		args->entindex,
 		args->origin,
-		CHAN_ITEM,
+		CHAN_WEAPON,
 		info.pszReloadSound,
 		VOL_NORM,
 		ATTN_NORM,
 		0,
-		gEngfuncs.pfnRandomLong(94, 109));
+		PITCH_NORM);
 }
 
 TEMPENTITY* pLaserDot;
