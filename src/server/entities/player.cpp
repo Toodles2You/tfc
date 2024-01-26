@@ -249,7 +249,9 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	}
 
 	// Grab the vector of the incoming attack. (Pretend that the inflictor is a little lower than it really is, so the body will tend to fly upward a bit.)
-	if (attacker != CWorld::World && attacker->pev->solid != SOLID_TRIGGER)
+	if (attacker != CWorld::World
+	 && attacker->pev->solid != SOLID_TRIGGER
+	 && (bitsDamageType & DMG_ARMOR_PIERCING) == 0)
 	{
 		// Move them around!
 		g_vecAttackDir = (inflictor->Center() - Vector(0, 0, 10) - Center()).Normalize();
