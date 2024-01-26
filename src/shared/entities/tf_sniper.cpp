@@ -75,7 +75,14 @@ void CSniperRifle::PrimaryAttack()
 	float damageScale = std::clamp(1.0F - (float)m_iNextPrimaryAttack / info.iReloadTime, 0.0F, 1.0F);
 	float damageMod = (info.iProjectileChargeDamage - info.iProjectileDamage) * damageScale;
 
-#if 0
+	int damageType = DMG_BULLET;
+
+	if (damageScale > 0.0F)
+	{
+		damageType |= DMG_AIMED;
+	}
+
+#ifndef NDEBUG
 	ALERT(at_console, "SNIPER RIFLE: %i (%i%%)\n", (int)(info.iProjectileDamage + damageMod), (int)(damageScale * 100));
 #endif
 
@@ -98,7 +105,7 @@ void CSniperRifle::PrimaryAttack()
 			info.iProjectileDamage + damageMod,
 			dir,
 			tr.iHitgroup,
-			DMG_BULLET | DMG_AIMED);
+			damageType);
 		
 		hit->ApplyMultiDamage(m_pPlayer, m_pPlayer);
 		
