@@ -200,13 +200,7 @@ void CTFWeapon::WeaponPostFrame()
 
 	if (m_fInReload)
 	{
-		if ((m_pPlayer->pev->button & IN_ATTACK) != 0 && m_iClip >= info.iShots)
-		{
-			m_fInReload = false;
-			m_iNextPrimaryAttack = 0;
-			PrimaryAttack();
-		}
-		else if (m_iNextPrimaryAttack <= 0)
+		if (m_iNextPrimaryAttack <= 0)
 		{
 			if ((m_iWeaponState & kWpnStateReloading) == 0)
 			{
@@ -216,12 +210,26 @@ void CTFWeapon::WeaponPostFrame()
 			{
 				m_iClip = std::min(m_iClip + info.iShots, info.iMaxClip);
 			}
-
+		}
+		if ((m_pPlayer->pev->button & IN_ATTACK) != 0 && m_iClip >= info.iShots)
+		{
+			m_fInReload = false;
+			m_iNextPrimaryAttack = 0;
+			PrimaryAttack();
+		}
+		else if (m_iNextPrimaryAttack <= 0)
+		{
 			if (m_iClip < info.iMaxClip)
 			{
 				m_pPlayer->SetAction(CBasePlayer::Action::Reload);
 
 				SendWeaponAnim(info.iAnims[kWeaponAnimReload]);
+#ifdef CLIENT_DLL
+				if (info.pszReloadSound != nullptr)
+				{
+					m_pPlayer->EmitSoundPredicted(info.pszReloadSound, CHAN_ITEM);
+				}
+#endif
 
 				m_iNextPrimaryAttack = info.iReloadTime / (info.iMaxClip / info.iShots);
 			}
@@ -298,7 +306,7 @@ void CShotgun::GetWeaponInfo(WeaponInfo& i)
 	i.pszEvent = "events/wpn/tf_sg.sc";
 	i.pszAttackSound = "weapons/sbarrel1.wav";
 	i.pszAlternateSound = nullptr;
-	i.pszReloadSound = nullptr;
+	i.pszReloadSound = "weapons/reload1.wav";
 	i.flPunchAngle = -2.0F;
 	i.iSibling = WEAPON_NONE;
 }
@@ -346,7 +354,7 @@ void CSuperShotgun::GetWeaponInfo(WeaponInfo& i)
 	i.pszEvent = "events/wpn/tf_ssg.sc";
 	i.pszAttackSound = "weapons/shotgn2.wav";
 	i.pszAlternateSound = nullptr;
-	i.pszReloadSound = nullptr;
+	i.pszReloadSound = "weapons/reload1.wav";
 	i.flPunchAngle = -4.0F;
 	i.iSibling = WEAPON_NONE;
 }
