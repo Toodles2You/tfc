@@ -974,9 +974,7 @@ void CBasePlayer::PreThink()
 		CBaseEntity* infector;
 		infector = m_hInfector;
 		
-		TakeDamage(infector, infector, 8, DMG_IGNOREARMOR);
-
-		if (infector != nullptr)
+		if (TakeDamage(infector, infector, 8, DMG_IGNOREARMOR) && infector != nullptr)
 		{
 			CBaseEntity* e = nullptr;
 			while ((e = util::FindEntityInSphere(e, pev->origin, 80.0F)) != nullptr)
@@ -987,6 +985,10 @@ void CBasePlayer::PreThink()
 					dynamic_cast<CBasePlayer*>(e)->BecomeInfected(infector);
 				}
 			}
+		}
+		else
+		{
+			m_TFState &= ~kTFStateInfected;
 		}
 
 		m_flNextInfectionTime = gpGlobals->time + 3.0F;
