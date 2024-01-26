@@ -129,6 +129,8 @@ void W_Precache()
 
 	PRECACHE_SOUND("weapons/ax1.wav");
 	PRECACHE_SOUND("weapons/timer.wav");
+
+	PRECACHE_SOUND("weapons/zoom.wav");
 }
 
 

@@ -136,6 +136,22 @@ void CSniperRifle::WeaponPostFrame()
 {
 	const auto info = GetInfo();
 
+	if ((m_pPlayer->m_afButtonPressed & IN_ATTACK2) != 0)
+	{
+		if (m_pPlayer->m_iFOV == 0)
+		{
+			m_pPlayer->m_iFOV = 20;
+		}
+		else
+		{
+			m_pPlayer->m_iFOV = 0;
+		}
+
+#ifdef CLIENT_DLL
+		m_pPlayer->EmitSoundPredicted("weapons/zoom.wav", CHAN_ITEM);
+#endif
+	}
+
 	if ((m_pPlayer->pev->button & IN_ATTACK) != 0)
 	{
 		if ((m_pPlayer->m_TFState & kTFStateAiming) == 0 && m_iNextPrimaryAttack <= 0)
