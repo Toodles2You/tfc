@@ -643,14 +643,19 @@ void CHud::Update_SetFOV(int iFov)
 		m_iFOV = cl_fov->value;
 		m_flMouseSensitivity = 0;
 	}
-	else if (m_iFOV != iFov)
+	else
 	{
-		m_iFOV = iFov;
+		iFov = cl_fov->value * (iFov / 90.0F);
 
-		m_flMouseSensitivity =
-			sensitivity->value
-			* ((float)iFov / (float)cl_fov->value)
-			* zoom_sensitivity_ratio->value;
+		if (m_iFOV != iFov)
+		{
+			m_iFOV = iFov;
+
+			m_flMouseSensitivity =
+				sensitivity->value
+				* ((float)iFov / (float)cl_fov->value)
+				* zoom_sensitivity_ratio->value;
+		}
 	}
 }
 
