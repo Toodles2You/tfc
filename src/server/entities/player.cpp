@@ -258,7 +258,15 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 
 		pev->velocity = pev->velocity + g_vecAttackDir * -DamageForce(pev, flDamage);
 	}
-	pev->dmg_inflictor = inflictor->edict();
+
+	if ((bitsDamageType & DMG_ARMOR_PIERCING) == 0)
+	{
+		pev->dmg_inflictor = inflictor->edict();
+	}
+	else
+	{
+		pev->dmg_inflictor = nullptr;
+	}
 
 	// Check for godmode or invincibility.
 	if ((pev->flags & FL_GODMODE) != 0)
@@ -1493,6 +1501,8 @@ void CBasePlayer::UpdateClientData()
 			CBaseEntity* pEntity = CBaseEntity::Instance(other);
 			if (pEntity)
 				damageOrigin = pEntity->Center();
+
+			pev->dmg_inflictor = nullptr;
 		}
 
 		// only send down damage type that have hud art
