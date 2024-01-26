@@ -322,7 +322,7 @@ public:
 	virtual void SetEntityState(const entity_state_t& state);
 
 #ifdef GAME_DLL
-	void ApplyMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker);
+	bool ApplyMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker);
 	void AddMultiDamage(float damage, int damageType);
 #endif
 

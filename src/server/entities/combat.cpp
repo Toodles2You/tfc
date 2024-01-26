@@ -31,17 +31,20 @@
 #include "gamerules.h"
 
 
-void CBaseEntity::ApplyMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker)
+bool CBaseEntity::ApplyMultiDamage(CBaseEntity* inflictor, CBaseEntity* attacker)
 {
 	if (m_multiDamage.amount <= 0.0F)
 	{
-		return;
+		return false;
 	}
 
-	TakeDamage(inflictor, attacker, m_multiDamage.amount, m_multiDamage.type);
+	const bool result =
+		TakeDamage(inflictor, attacker, m_multiDamage.amount, m_multiDamage.type);
 
 	m_multiDamage.amount = 0.0F;
 	m_multiDamage.type = DMG_GENERIC;
+
+	return result;
 }
 
 

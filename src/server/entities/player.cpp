@@ -285,7 +285,9 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	}
 
 	// Grab the vector of the incoming attack. (Pretend that the inflictor is a little lower than it really is, so the body will tend to fly upward a bit.)
-	if (attacker != CWorld::World && attacker->pev->solid != SOLID_TRIGGER)
+	if (attacker != CWorld::World
+	 && attacker->pev->solid != SOLID_TRIGGER
+	 && (bitsDamageType & DMG_ARMOR_PIERCING) == 0)
 	{
 		// Move them around!
 		g_vecAttackDir = (inflictor->Center() - Vector(0, 0, 10) - Center()).Normalize();
@@ -304,7 +306,15 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 			}
 		}
 	}
-	pev->dmg_inflictor = inflictor->edict();
+
+	if ((bitsDamageType & DMG_ARMOR_PIERCING) == 0)
+	{
+		pev->dmg_inflictor = inflictor->edict();
+	}
+	else
+	{
+		pev->dmg_inflictor = nullptr;
+	}
 
 	if (!g_pGameRules->FPlayerCanTakeDamage(this, attacker))
 	{
@@ -1567,6 +1577,8 @@ void CBasePlayer::UpdateClientData()
 			CBaseEntity* pEntity = CBaseEntity::Instance(other);
 			if (pEntity)
 				damageOrigin = pEntity->Center();
+
+			pev->dmg_inflictor = nullptr;
 		}
 
 		// only send down damage type that have hud art
