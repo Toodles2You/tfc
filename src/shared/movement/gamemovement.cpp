@@ -90,7 +90,11 @@ void CHalfLifeMovement::CheckParameters()
 
     move = move / 100.0F;
 
-    if ((pmove->cmd.buttons & IN_SPEED) != 0
+    if (player->m_nLegDamage != 0)
+    {
+        speedScale *= (10.0F - player->m_nLegDamage) / 10.0F;
+    }
+    else if ((pmove->cmd.buttons & IN_SPEED) != 0
      || (player->m_TFState & kTFStateAiming) != 0)
     {
         speedScale = 0.3F;

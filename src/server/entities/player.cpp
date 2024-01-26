@@ -178,6 +178,9 @@ bool CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
 		return false;
 	}
 
+	m_TFState &= ~kTFStateInfected;
+	m_nLegDamage = 0;
+
 	return CBaseAnimating::TakeHealth(flHealth, bitsDamageType);
 }
 
@@ -195,12 +198,17 @@ void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecD
 
 	if ((bitsDamageType & DMG_AIMED) != 0)
 	{
+		float distance = (attacker->pev->origin - pev->origin).Length();
+
 		switch (hitgroup)
 		{
 		case HITGROUP_GENERIC:
 			break;
 		case HITGROUP_HEAD:
 			flDamage *= 2;
+#ifndef NDEBUG
+			ALERT(at_console, "HEAD SHOT\n");
+#endif
 			break;
 		case HITGROUP_CHEST:
 			break;
@@ -211,6 +219,11 @@ void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecD
 			break;
 		case HITGROUP_LEFTLEG:
 		case HITGROUP_RIGHTLEG:
+			flDamage *= 0.5F;
+			m_nLegDamage = std::min(m_nLegDamage + 1, 6);
+#ifndef NDEBUG
+			ALERT(at_console, "LEG SHOT\n");
+#endif
 			break;
 		default:
 			break;
@@ -567,7 +580,7 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 
 	m_iFOV = 0;
 
-	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
+	ClearEffects();
 
 	m_iObserverLastMode = OBS_CHASE_FREE;
 	pev->iuser1 = OBS_DEATHCAM;
@@ -1021,7 +1034,7 @@ bool CBasePlayer::Spawn()
 		m_rgAmmo[i] = 0;
 	}
 
-	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
+	ClearEffects();
 
 	g_pGameRules->PlayerSpawn(this);
 

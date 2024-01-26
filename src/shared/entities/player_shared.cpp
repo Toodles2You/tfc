@@ -213,6 +213,7 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 #endif
 
 	data.tfstate = m_TFState;
+	data.vuser4.y = static_cast<float>(m_nLegDamage);
 
 	data.m_iId = (m_pActiveWeapon != nullptr) ? m_pActiveWeapon->GetID() : WEAPON_NONE;
 
@@ -256,6 +257,7 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 	pev->iuser3 = data.iuser3;
 
 	m_TFState = data.tfstate;
+	m_nLegDamage = static_cast<byte>(data.vuser4.y);
 
 	if (m_pActiveWeapon == nullptr)
 	{

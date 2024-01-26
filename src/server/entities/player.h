@@ -292,6 +292,14 @@ public:
 
 	CBasePlayerWeapon* GetNextBestWeapon(CBasePlayerWeapon* current);
 
+	byte m_nLegDamage;
+
+	void ClearEffects()
+	{
+		m_TFState = 0;
+		m_nLegDamage = 0;
+	}
+
 protected:
 	CGameMovement* m_gameMovement = nullptr;
 	EHANDLE m_hLastAttacker[2];

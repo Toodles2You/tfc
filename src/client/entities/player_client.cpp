@@ -46,7 +46,7 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 		m_pActiveWeapon = nullptr;
     }
 
-	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
+	ClearEffects();
 }
 
 
@@ -55,7 +55,7 @@ bool CBasePlayer::Spawn()
 	SetModel("models/player/scout/scout.mdl");
 	SetAction(Action::Idle, true);
 
-	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
+	ClearEffects();
 	return true;
 }
 
