@@ -60,9 +60,12 @@ void CTFMelee::PrimaryAttack()
 						info.iProjectileDamage,
 						dir,
 						tr.iHitgroup,
-						DMG_POISON);
+						DMG_GENERIC);
 
-					hit->ApplyMultiDamage(m_pPlayer, m_pPlayer);
+					if (hit->ApplyMultiDamage(m_pPlayer, m_pPlayer))
+					{
+						dynamic_cast<CBasePlayer*>(hit)->BecomeInfected(m_pPlayer);
+					}
 				}
 
 				result = kResultHit;

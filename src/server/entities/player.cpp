@@ -967,6 +967,30 @@ void CBasePlayer::PreThink()
 	{
 		m_flFallVelocity = -pev->velocity.z;
 	}
+
+	if ((m_TFState & kTFStateInfected) != 0
+	 && m_flNextInfectionTime <= gpGlobals->time)
+	{
+		CBaseEntity* infector;
+		infector = m_hInfector;
+		
+		TakeDamage(infector, infector, 8, DMG_IGNOREARMOR);
+
+		if (infector != nullptr)
+		{
+			CBaseEntity* e = nullptr;
+			while ((e = util::FindEntityInSphere(e, pev->origin, 80.0F)) != nullptr)
+			{
+				if (e->IsPlayer()
+				 && g_pGameRules->PlayerRelationship(this, e) >= GR_ALLY)
+				{
+					dynamic_cast<CBasePlayer*>(e)->BecomeInfected(infector);
+				}
+			}
+		}
+
+		m_flNextInfectionTime = gpGlobals->time + 3.0F;
+	}
 }
 
 bool CBasePlayer::Spawn()

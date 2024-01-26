@@ -48,6 +48,7 @@ enum
 	kTFStateGrenadePrime    = 1,
 	kTFStateGrenadeThrowing = 2,
 	kTFStateAiming			= 4,
+	kTFStateInfected		= 8,
 };
 
 enum
@@ -293,6 +294,24 @@ public:
 	CBasePlayerWeapon* GetNextBestWeapon(CBasePlayerWeapon* current);
 
 	byte m_nLegDamage;
+#ifdef GAME_DLL
+protected:
+	EHANDLE m_hInfector;
+	float m_flNextInfectionTime;
+
+public:
+	void BecomeInfected(CBaseEntity* infector)
+	{
+		if (PCNumber() == PC_MEDIC)
+		{
+			return;
+		}
+
+		m_TFState |= kTFStateInfected;
+		m_hInfector = infector;
+		m_flNextInfectionTime = gpGlobals->time + 1.0F;
+	}
+#endif
 
 	void ClearEffects()
 	{
