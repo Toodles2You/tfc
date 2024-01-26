@@ -75,7 +75,7 @@ void CHLBot::Update()
         g_pGameRules->ChangePlayerTeam(this, g_pGameRules->GetDefaultPlayerTeam(this), false, false, false);
         if (g_pGameRules->GetGameMode() >= kGamemodeTeamFortress)
         {
-            dynamic_cast<CTeamFortress*>(g_pGameRules)->ChangePlayerClass(this, g_engfuncs.pfnRandomLong(PC_SCOUT, PC_ENGINEER));
+            dynamic_cast<CTeamFortress*>(g_pGameRules)->ChangePlayerClass(this, g_engfuncs.pfnRandomLong(PC_SCOUT, PC_MEDIC));
         }
         return;
     }
