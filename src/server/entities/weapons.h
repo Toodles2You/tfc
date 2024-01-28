@@ -21,6 +21,8 @@
 #endif
 
 #ifdef GAME_DLL
+#include "effects.h"
+
 #include <queue>
 
 class CPipeBomb;
@@ -279,6 +281,18 @@ public:
 
 	void PrimaryAttack() override;
 	void WeaponPostFrame() override;
+
+	void Holster() override;
+
+#ifdef GAME_DLL
+protected:
+	void CreateLaserEffect();
+	void UpdateLaserEffect();
+	void DestroyLaserEffect();
+
+	CSprite* m_pLaserDot = nullptr;
+	CBeam* m_pLaserBeam = nullptr;
+#endif
 };
 
 class CAutoRifle : public CTFWeapon

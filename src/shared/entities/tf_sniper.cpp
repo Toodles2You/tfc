@@ -13,6 +13,7 @@
 #ifdef GAME_DLL
 #include "UserMessages.h"
 #include "gamerules.h"
+#include "customentity.h"
 #endif
 
 #include <algorithm>
@@ -166,6 +167,9 @@ void CSniperRifle::WeaponPostFrame()
 			SendWeaponAnim(info.iAnims[kWeaponAnimReload]);
 			m_pPlayer->m_TFState |= kTFStateAiming;
 			m_iNextPrimaryAttack = 333 + info.iReloadTime;
+#ifdef GAME_DLL
+			CreateLaserEffect();
+#endif
 		}
 	}
 	else if ((m_pPlayer->m_TFState & kTFStateAiming) != 0)
@@ -173,8 +177,105 @@ void CSniperRifle::WeaponPostFrame()
 		PrimaryAttack();
 		m_pPlayer->m_TFState &= ~kTFStateAiming;
 		m_iNextPrimaryAttack = info.iAttackTime;
+#ifdef GAME_DLL
+		DestroyLaserEffect();
+#endif
+	}
+
+#ifdef GAME_DLL
+	UpdateLaserEffect();
+#endif
+}
+
+
+void CSniperRifle::Holster()
+{
+	CTFWeapon::Holster();
+#ifdef GAME_DLL
+	DestroyLaserEffect();
+#endif
+}
+
+#ifdef GAME_DLL
+void CSniperRifle::CreateLaserEffect()
+{
+	DestroyLaserEffect();
+
+	m_pLaserDot = CSprite::SpriteCreate("sprites/laserdot.spr", pev->origin, false);
+	m_pLaserDot->pev->scale = 1.0;
+	m_pLaserDot->pev->spawnflags |= SF_SPRITE_TEMPORARY;
+#ifdef NDEBUG
+	m_pLaserDot->pev->flags |= FL_SKIPLOCALHOST;
+#endif
+	m_pLaserDot->pev->owner = m_pPlayer->edict();
+
+	m_pLaserBeam = CBeam::BeamCreate("sprites/laserbeam.spr", 16);
+	m_pLaserBeam->PointEntInit(pev->origin, m_pPlayer->entindex());
+	m_pLaserBeam->SetFlags(BEAM_FSHADEOUT);
+	m_pLaserBeam->SetEndAttachment(1);
+	m_pLaserBeam->pev->spawnflags |= SF_BEAM_TEMPORARY;
+#ifdef NDEBUG
+	m_pLaserBeam->pev->flags |= FL_SKIPLOCALHOST;
+#endif
+	m_pLaserBeam->pev->owner = m_pPlayer->edict();
+
+	if (m_pPlayer->TeamNumber() == TEAM_BLUE)
+	{
+		m_pLaserDot->SetTransparency(kRenderGlow, 51, 51, 255, 223, kRenderFxNoDissipation);
+		m_pLaserBeam->SetColor(51, 51, 255);
+		m_pLaserBeam->SetBrightness(159);
+	}
+	else
+	{
+		m_pLaserDot->SetTransparency(kRenderGlow, 255, 0, 0, 159, kRenderFxNoDissipation);
+		m_pLaserBeam->SetColor(255, 0, 0);
+		m_pLaserBeam->SetBrightness(63);
 	}
 }
+
+
+void CSniperRifle::UpdateLaserEffect()
+{
+	if (m_pLaserDot != nullptr || m_pLaserBeam != nullptr)
+	{
+		const auto gun = m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs;
+		const auto aim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
+
+		Vector dir;
+		AngleVectors(aim, &dir, nullptr, nullptr);
+
+		TraceResult tr;
+		util::TraceLine(gun, gun + dir * 8192.0F, &tr, m_pPlayer, util::kTraceBox);
+
+		if (m_pLaserDot != nullptr)
+		{
+			m_pLaserDot->pev->effects |= EF_NOINTERP;
+			m_pLaserDot->SetOrigin(tr.vecEndPos);
+		}
+
+		if (m_pLaserBeam != nullptr)
+		{
+			m_pLaserBeam->SetStartPos(tr.vecEndPos);
+		}
+	}
+}
+
+
+void CSniperRifle::DestroyLaserEffect()
+{
+	if (m_pLaserDot != nullptr)
+	{
+		m_pLaserDot->Remove();
+		m_pLaserDot = nullptr;
+	}
+
+	if (m_pLaserBeam != nullptr)
+	{
+		m_pLaserBeam->Remove();
+		m_pLaserBeam = nullptr;
+	}
+}
+#endif
 
 
 LINK_ENTITY_TO_CLASS(tf_weapon_autorifle, CAutoRifle);
