@@ -30,81 +30,64 @@ void CTFMelee::PrimaryAttack()
 	AngleVectors(aim, &dir, nullptr, nullptr);
 
 	TraceResult tr;
-	util::TraceLine(gun, gun + dir * 72.0F, &tr, m_pPlayer, util::kTraceBox);
+	util::TraceLine(gun, gun + dir * 64.0F, &tr, m_pPlayer, util::kTraceBox);
 
+	edict_t* first = tr.pHit;
 	int result = kResultMiss;
 
 	if (tr.flFraction != 1.0F)
 	{
-		const auto hit = CBaseEntity::Instance(tr.pHit);
+		result = HitEntity(CBaseEntity::Instance(tr.pHit), dir, tr);
 
-		if (info.iProjectileType == kProjAdrenaline)
+		if (info.iProjectileCount != -1)
 		{
-			if (hit->IsClient())
-			{
-				if (g_pGameRules->PlayerRelationship(dynamic_cast<CBasePlayer*>(hit), m_pPlayer) >= GR_ALLY)
-				{
-					if (hit->pev->health >= hit->pev->max_health)
-					{
-						hit->TakeHealth(5, DMG_IGNORE_MAXHEALTH);
-					}
-					else
-					{
-						hit->TakeHealth(hit->pev->max_health - hit->pev->health, DMG_IGNORE_MAXHEALTH);
-					}
-				}
-				else
-				{
-					hit->TraceAttack(
-						m_pPlayer,
-						info.iProjectileDamage,
-						dir,
-						tr.iHitgroup,
-						DMG_GENERIC);
-
-					if (hit->ApplyMultiDamage(m_pPlayer, m_pPlayer))
-					{
-						dynamic_cast<CBasePlayer*>(hit)->BecomeInfected(m_pPlayer);
-					}
-				}
-
-				result = kResultHit;
-			}
+			goto finished;
 		}
-		else
+	}
+
+	{
+		CBaseEntity* entity = nullptr;
+		CBaseEntity* closest = nullptr;
+		float bestDot = 0.4F;
+
+		while ((entity = util::FindEntityInSphere(entity, gun, 64.0F)) != nullptr)
 		{
-			hit->TraceAttack(
-				m_pPlayer,
-				info.iProjectileDamage,
-				dir,
-				tr.iHitgroup,
-				DMG_CLUB);
-
-			hit->ApplyMultiDamage(m_pPlayer, m_pPlayer);
-
-			result = kResultHitWorld;
-
-			if (hit->IsClient())
+			if (first != entity->edict() && entity->pev->takedamage != DAMAGE_NO)
 			{
-				if (g_pGameRules->FPlayerCanTakeDamage(dynamic_cast<CBasePlayer*>(hit), m_pPlayer))
-				{
-					MessageBegin(MSG_PVS, gmsgBlood, tr.vecEndPos);
-					WriteFloat(dir.x);
-					WriteFloat(dir.y);
-					WriteFloat(dir.z);
-					WriteByte(0);
-					WriteByte(0);
-					WriteCoord(tr.vecEndPos.x);
-					WriteCoord(tr.vecEndPos.y);
-					WriteCoord(tr.vecEndPos.z);
-					MessageEnd();
-				}
+				Vector los = entity->Center() - gun;
 
-				result = kResultHit;
+				los = util::ClampVectorToBox(los, entity->pev->size * 0.5);
+
+				float dot = DotProduct(los.Make2D(), dir.Make2D());
+
+				if (dot > bestDot)
+				{
+					util::TraceLine(gun, entity->pev->origin + los, &tr, m_pPlayer, util::kTraceBox);
+
+					if (tr.pHit == entity->edict())
+					{
+						closest = entity;
+						bestDot = dot;
+
+						int newResult = HitEntity(CBaseEntity::Instance(tr.pHit), dir, tr);
+
+						if (result < newResult)
+						{
+							result = newResult;
+
+							if (info.iProjectileCount != -1)
+							{
+								goto finished;
+							}
+						}
+
+					}
+				}
 			}
 		}
 	}
 
+finished:
 	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), 0.0F, m_pPlayer->m_randomSeed, result, true, false, FEV_RELIABLE);
 #endif
 }
@@ -145,6 +128,47 @@ void CTFMelee::WeaponPostFrame()
 		}
 	}
 }
+
+
+#ifdef GAME_DLL
+
+int CTFMelee::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& tr)
+{
+	const auto info = GetInfo();
+	int result = kResultHitWorld;
+
+	hit->TraceAttack(
+		m_pPlayer,
+		info.iProjectileDamage,
+		dir,
+		tr.iHitgroup,
+		DMG_CLUB);
+
+	hit->ApplyMultiDamage(m_pPlayer, m_pPlayer);
+
+	if (hit->IsClient())
+	{
+		if (g_pGameRules->FPlayerCanTakeDamage(dynamic_cast<CBasePlayer*>(hit), m_pPlayer))
+		{
+			MessageBegin(MSG_PVS, gmsgBlood, tr.vecEndPos);
+			WriteFloat(dir.x);
+			WriteFloat(dir.y);
+			WriteFloat(dir.z);
+			WriteByte(0);
+			WriteByte(0);
+			WriteCoord(tr.vecEndPos.x);
+			WriteCoord(tr.vecEndPos.y);
+			WriteCoord(tr.vecEndPos.z);
+			MessageEnd();
+		}
+
+		result = kResultHit;
+	}
+
+	return result;
+}
+
+#endif
 
 
 LINK_ENTITY_TO_CLASS(tf_weapon_medikit, CMedikit);
@@ -195,6 +219,50 @@ void CMedikit::GetWeaponInfo(WeaponInfo& i)
 }
 
 
+#ifdef GAME_DLL
+
+int CMedikit::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& tr)
+{
+	const auto info = GetInfo();
+	int result = kResultMiss;
+
+	if (hit->IsClient())
+	{
+		result = kResultHit;
+
+		if (g_pGameRules->PlayerRelationship(dynamic_cast<CBasePlayer*>(hit), m_pPlayer) >= GR_ALLY)
+		{
+			if (hit->pev->health >= hit->pev->max_health)
+			{
+				hit->TakeHealth(5, DMG_IGNORE_MAXHEALTH);
+			}
+			else
+			{
+				hit->TakeHealth(hit->pev->max_health - hit->pev->health, DMG_IGNORE_MAXHEALTH);
+			}
+		}
+		else
+		{
+			hit->TraceAttack(
+				m_pPlayer,
+				info.iProjectileDamage,
+				dir,
+				tr.iHitgroup,
+				DMG_GENERIC);
+
+			if (hit->ApplyMultiDamage(m_pPlayer, m_pPlayer))
+			{
+				dynamic_cast<CBasePlayer*>(hit)->BecomeInfected(m_pPlayer);
+			}
+		}
+	}
+
+	return result;
+}
+
+#endif
+
+
 LINK_ENTITY_TO_CLASS(tf_weapon_axe, CAxe);
 
 void CAxe::GetWeaponInfo(WeaponInfo& i)
@@ -231,7 +299,7 @@ void CAxe::GetWeaponInfo(WeaponInfo& i)
 	i.iProjectileType = kProjKinetic;
 	i.iProjectileDamage = 20;
 	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
-	i.iProjectileCount = 1;
+	i.iProjectileCount = -1;
 	i.iProjectileChargeDamage = 0;
 
 	i.pszEvent = "events/wpn/tf_axe.sc";

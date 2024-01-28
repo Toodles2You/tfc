@@ -257,6 +257,11 @@ public:
 #ifdef CLIENT_DLL
 	static void EV_MeleeAttack(event_args_t* args);
 #endif
+
+#ifdef GAME_DLL
+protected:
+	virtual int HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& tr);
+#endif
 };
 
 class CMedikit : public CTFMelee
@@ -264,6 +269,11 @@ class CMedikit : public CTFMelee
 public:
 	int GetID() const override { return WEAPON_MEDIKIT; }
 	void GetWeaponInfo(WeaponInfo& i) override;
+
+#ifdef GAME_DLL
+protected:
+	int HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& tr) override;
+#endif
 };
 
 class CAxe : public CTFMelee
