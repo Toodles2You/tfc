@@ -196,38 +196,39 @@ void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecD
 
 	m_LastHitGroup = hitgroup;
 
-	if ((bitsDamageType & DMG_AIMED) != 0)
+	switch (hitgroup)
 	{
-		float distance = (attacker->pev->origin - pev->origin).Length();
-
-		switch (hitgroup)
+	case HITGROUP_GENERIC:
+		break;
+	case HITGROUP_HEAD:
+		if ((bitsDamageType & DMG_AIMED) != 0)
 		{
-		case HITGROUP_GENERIC:
-			break;
-		case HITGROUP_HEAD:
 			flDamage *= 2;
 #ifndef NDEBUG
 			ALERT(at_console, "HEAD SHOT\n");
 #endif
-			break;
-		case HITGROUP_CHEST:
-			break;
-		case HITGROUP_STOMACH:
-			break;
-		case HITGROUP_LEFTARM:
-		case HITGROUP_RIGHTARM:
-			break;
-		case HITGROUP_LEFTLEG:
-		case HITGROUP_RIGHTLEG:
+		}
+		break;
+	case HITGROUP_CHEST:
+		break;
+	case HITGROUP_STOMACH:
+		break;
+	case HITGROUP_LEFTARM:
+	case HITGROUP_RIGHTARM:
+		break;
+	case HITGROUP_LEFTLEG:
+	case HITGROUP_RIGHTLEG:
+		if ((bitsDamageType & DMG_CALTROP) != 0)
+		{
 			flDamage *= 0.5F;
 			m_nLegDamage = std::min(m_nLegDamage + 1, 6);
 #ifndef NDEBUG
 			ALERT(at_console, "LEG SHOT\n");
 #endif
-			break;
-		default:
-			break;
 		}
+		break;
+	default:
+		break;
 	}
 
 	AddMultiDamage(flDamage, bitsDamageType);

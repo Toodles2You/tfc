@@ -75,16 +75,17 @@ void CSniperRifle::PrimaryAttack()
 
 	float damageScale = std::clamp(1.0F - (float)m_iNextPrimaryAttack / info.iReloadTime, 0.0F, 1.0F);
 	float damageMod = (info.iProjectileChargeDamage - info.iProjectileDamage) * damageScale;
+	int damage = std::roundf(info.iProjectileDamage + damageMod);
 
 	int damageType = DMG_BULLET;
 
 	if (damageScale > 0.0F)
 	{
-		damageType |= DMG_AIMED;
+		damageType |= DMG_AIMED | DMG_CALTROP;
 	}
 
 #ifndef NDEBUG
-	ALERT(at_console, "SNIPER RIFLE: %i (%i%%)\n", (int)(info.iProjectileDamage + damageMod), (int)(damageScale * 100));
+	ALERT(at_console, "SNIPER RIFLE: %i (%i%%)\n", damage, (int)(damageScale * 100));
 #endif
 
 #ifdef GAME_DLL
@@ -95,15 +96,37 @@ void CSniperRifle::PrimaryAttack()
 	AngleVectors(aim, &dir, nullptr, nullptr);
 
 	TraceResult tr;
-	util::TraceLine(gun, gun + dir * 8192.0F, &tr, m_pPlayer, util::kTraceBox | util::kTraceBoxModel);
+	util::TraceLine(gun, gun + dir * 4096.0F, &tr, m_pPlayer, util::kTraceBox | util::kTraceBoxModel);
 
 	if (tr.flFraction != 1.0F)
 	{
 		const auto hit = CBaseEntity::Instance(tr.pHit);
 
+		if (hit->IsClient())
+		{
+			float distance = (hit->pev->origin - m_pPlayer->pev->origin).Length();
+
+			if (distance > 1536.0F && dynamic_cast<CBasePlayer*>(hit)->PCNumber() != PC_SNIPER)
+			{
+				damage *= 0.5F;
+				damageType &= ~DMG_AIMED | DMG_CALTROP;
+#ifndef NDEBUG
+				ALERT(at_console, "SNIPER TOO FAR\n");
+#endif
+			}
+			else if (distance < 512.0F)
+			{
+				damage *= 0.8F;
+				damageType &= ~DMG_AIMED;
+#ifndef NDEBUG
+				ALERT(at_console, "SNIPER TOO CLOSE\n");
+#endif
+			}
+		}
+
 		hit->TraceAttack(
 			m_pPlayer,
-			info.iProjectileDamage + damageMod,
+			damage,
 			dir,
 			tr.iHitgroup,
 			damageType);
@@ -245,7 +268,7 @@ void CSniperRifle::UpdateLaserEffect()
 		AngleVectors(aim, &dir, nullptr, nullptr);
 
 		TraceResult tr;
-		util::TraceLine(gun, gun + dir * 8192.0F, &tr, m_pPlayer, util::kTraceBox);
+		util::TraceLine(gun, gun + dir * 4096.0F, &tr, m_pPlayer, util::kTraceBox);
 
 		if (m_pLaserDot != nullptr)
 		{
