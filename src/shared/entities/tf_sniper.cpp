@@ -336,7 +336,7 @@ void CAutoRifle::GetWeaponInfo(WeaponInfo& i)
 
 	i.iProjectileType = kProjBullet;
 	i.iProjectileDamage = 8;
-	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
+	i.vecProjectileSpread = Vector2D(2.3F, 2.3F);
 	i.iProjectileCount = 1;
 	i.iProjectileChargeDamage = 0;
 
