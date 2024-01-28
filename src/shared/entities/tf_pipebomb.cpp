@@ -49,7 +49,7 @@ void CGrenadeLauncher::GetWeaponInfo(WeaponInfo& i)
 	i.iReloadTime = 4000;
 
 	i.iProjectileType = kProjPipeBomb;
-	i.iProjectileDamage = 100;
+	i.iProjectileDamage = 110;
 	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
 	i.iProjectileCount = 1;
 	i.iProjectileChargeDamage = 0;
@@ -97,7 +97,7 @@ void CPipeBombLauncher::GetWeaponInfo(WeaponInfo& i)
 	i.iReloadTime = 4000;
 
 	i.iProjectileType = kProjPipeBombRemote;
-	i.iProjectileDamage = 100;
+	i.iProjectileDamage = 110;
 	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
 	i.iProjectileCount = 1;
 	i.iProjectileChargeDamage = 0;
