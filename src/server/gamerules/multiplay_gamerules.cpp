@@ -154,6 +154,17 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 }
 
 
+CHalfLifeMultiplay::~CHalfLifeMultiplay()
+{
+	for (auto spawn : m_spawnPoints)
+	{
+		delete spawn;
+	}
+
+	m_spawnPoints.clear();
+}
+
+
 bool CHalfLifeMultiplay::PrivilegedCommand(CBasePlayer* pPlayer, const char* pcmd)
 {
 	if (strcmp(pcmd, "nc") == 0)
@@ -889,9 +900,9 @@ CSpawnPoint *CHalfLifeMultiplay::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
 		
 		for (i = 0; i < m_numSpawnPoints; i++)
 		{
-			if (IsSpawnSpotValid(&m_spawnPoints[i], pPlayer, attempt))
+			if (IsSpawnSpotValid(m_spawnPoints[i], pPlayer, attempt))
 			{
-				m_validSpawnPoints[numValid] = &m_spawnPoints[i];
+				m_validSpawnPoints[numValid] = m_spawnPoints[i];
 				numValid++;
 			}
 		}
@@ -947,7 +958,7 @@ void CHalfLifeMultiplay::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 		return;
 	}
 
-	CSpawnPoint spawn{pEntity};
+	auto spawn = new CSpawnPoint {pEntity};
 
 #if 0
 	ALERT(
@@ -955,9 +966,9 @@ void CHalfLifeMultiplay::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 		"%s %lu at (%g, %g, %g)\n",
 		STRING(pEntity->pev->classname),
 		m_numSpawnPoints,
-		spawn.m_origin.x,
-		spawn.m_origin.y,
-		spawn.m_origin.z);
+		spawn->m_origin.x,
+		spawn->m_origin.y,
+		spawn->m_origin.z);
 #endif
 	
 	m_spawnPoints.push_back(spawn);

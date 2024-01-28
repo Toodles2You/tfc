@@ -317,6 +317,7 @@ class CHalfLifeMultiplay : public CGameRules
 {
 public:
 	CHalfLifeMultiplay();
+	virtual ~CHalfLifeMultiplay();
 
 	// GR_Think
 	void Think() override;
@@ -413,7 +414,7 @@ protected:
 
 protected:
 	float m_stateChangeTime;
-    std::vector<CSpawnPoint> m_spawnPoints;
+    std::vector<CSpawnPoint*> m_spawnPoints;
 	std::vector<CSpawnPoint*> m_validSpawnPoints;
 	std::size_t m_numSpawnPoints = 0;
 	bool m_deathmatch = false;
