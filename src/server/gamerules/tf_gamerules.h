@@ -24,6 +24,17 @@ struct PCInfo
 
 extern PCInfo sTFClassInfo[PC_LASTCLASS];
 
+class CTFSpawnPoint : public CSpawnPoint
+{
+public:
+	CTFSpawnPoint(int iTeamNumber = TEAM_UNASSIGNED);
+	CTFSpawnPoint(CBaseEntity *pEntity, int iTeamNumber = TEAM_UNASSIGNED);
+
+	bool IsValid(CBasePlayer *pPlayer, int attempt) override;
+
+	int m_teamNumber;
+};
+
 class CTeamFortress : public CHalfLifeMultiplay
 {
 public:
@@ -42,6 +53,7 @@ public:
 	bool ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib, bool bAutoTeam) override;
 	void PlayerSpawn(CBasePlayer* pPlayer) override;
 	int DeadPlayerWeapons(CBasePlayer* pPlayer) override { return GR_PLR_DROP_GUN_NO; }
+	void AddPlayerSpawnSpot(CBaseEntity *pEntity) override;
 
 protected:
 	bool ChangePlayerClass(CBasePlayer* pPlayer, int classIndex);

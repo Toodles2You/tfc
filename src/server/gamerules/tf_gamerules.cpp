@@ -228,6 +228,32 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
 };
 
 
+CTFSpawnPoint::CTFSpawnPoint(int iTeamNumber)
+    : CSpawnPoint()
+{
+    m_teamNumber = iTeamNumber;
+}
+
+
+CTFSpawnPoint::CTFSpawnPoint(CBaseEntity *pEntity, int iTeamNumber)
+    : CSpawnPoint(pEntity)
+{
+    m_teamNumber = iTeamNumber;
+}
+
+
+bool CTFSpawnPoint::IsValid(CBasePlayer *pPlayer, int attempt)
+{	
+    if (m_teamNumber != TEAM_UNASSIGNED
+     && pPlayer->TeamNumber() != m_teamNumber)
+    {
+        return false;
+    }
+
+	return CSpawnPoint::IsValid(pPlayer, attempt);
+}
+
+
 CTeamFortress::CTeamFortress()
 {
     m_teams.clear();
@@ -502,5 +528,40 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
 	pPlayer->m_iAutoWepSwitch = originalAutoWepSwitch;
 
 	tent::TeleportSplash(pPlayer);
+}
+
+
+void CTeamFortress::AddPlayerSpawnSpot(CBaseEntity *pEntity)
+{
+    if (FStrEq(STRING(pEntity->pev->classname), "info_player_start"))
+    {
+        CGameRules::AddPlayerSpawnSpot(pEntity);
+        return;
+    }
+
+    if (!FStrEq(STRING(pEntity->pev->classname), "info_player_teamspawn")
+     && !FStrEq(STRING(pEntity->pev->classname), "i_p_t"))
+    {
+        return;
+    }
+
+    auto spawn = new CTFSpawnPoint {pEntity, pEntity->pev->team};
+
+#if 1
+    ALERT(
+        at_aiconsole,
+        "%s %lu for team %i at (%g, %g, %g)\n",
+        STRING(pEntity->pev->classname),
+        m_numSpawnPoints,
+        spawn->m_teamNumber,
+        spawn->m_origin.x,
+        spawn->m_origin.y,
+        spawn->m_origin.z);
+#endif
+
+    m_spawnPoints.push_back(spawn);
+
+    m_numSpawnPoints++;
+    m_validSpawnPoints.reserve(m_numSpawnPoints);
 }
 

@@ -50,6 +50,9 @@ public:
 LINK_ENTITY_TO_CLASS(info_player_deathmatch, CBaseDMStart);
 LINK_ENTITY_TO_CLASS(info_player_start, CBaseDMStart);
 
+LINK_ENTITY_TO_CLASS(info_player_teamspawn, CBaseDMStart);
+LINK_ENTITY_TO_CLASS(i_p_t, CBaseDMStart);
+
 bool CBaseDMStart::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "master"))
@@ -164,6 +167,11 @@ bool CBaseEntity::KeyValue(KeyValueData* pkvd)
 	else if (FStrEq(pkvd->szKeyName, "killtarget"))
 	{
 		m_iszKillTarget = ALLOC_STRING(pkvd->szValue);
+		return true;
+	}
+	else if (FStrEq(pkvd->szKeyName, "team_no"))
+	{
+		pev->team = atoi(pkvd->szValue);
 		return true;
 	}
 
