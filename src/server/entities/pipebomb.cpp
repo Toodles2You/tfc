@@ -104,6 +104,7 @@ void CPipeBomb::PipeBombTouch(CBaseEntity* pOther)
 			if (pev->flags & FL_ONGROUND)
 			{
 				pev->velocity = pev->velocity * 0.75F;
+				pev->angles.x = pev->angles.z = 0.0F;
 
 				if (pev->velocity.Length() <= 20.0F)
 				{
