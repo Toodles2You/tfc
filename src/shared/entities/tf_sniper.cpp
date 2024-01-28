@@ -81,7 +81,12 @@ void CSniperRifle::PrimaryAttack()
 
 	if (damageScale > 0.0F)
 	{
-		damageType |= DMG_AIMED | DMG_CALTROP;
+		damageType |= DMG_CALTROP;
+
+		if (m_pPlayer->m_iFOV != 0 && m_iScopeTime <= 0)
+		{
+			damageType |= DMG_AIMED;
+		}
 	}
 
 #ifndef NDEBUG
@@ -167,7 +172,7 @@ void CSniperRifle::WeaponPostFrame()
 {
 	const auto info = GetInfo();
 
-	if ((m_pPlayer->m_afButtonPressed & IN_ATTACK2) != 0)
+	if ((m_pPlayer->pev->button & IN_ATTACK2) != 0 && m_iScopeTime <= 300)
 	{
 		if (m_pPlayer->m_iFOV == 0)
 		{
@@ -181,6 +186,8 @@ void CSniperRifle::WeaponPostFrame()
 #ifdef CLIENT_DLL
 		m_pPlayer->EmitSoundPredicted("weapons/zoom.wav", CHAN_ITEM);
 #endif
+
+		m_iScopeTime = 500;
 	}
 
 	if ((m_pPlayer->pev->button & IN_ATTACK) != 0)
@@ -218,6 +225,31 @@ void CSniperRifle::Holster()
 	DestroyLaserEffect();
 #endif
 }
+
+
+void CSniperRifle::GetWeaponData(weapon_data_t& data)
+{
+	CTFWeapon::GetWeaponData(data);
+
+    *reinterpret_cast<int*>(&data.m_flNextSecondaryAttack) = m_iScopeTime;
+}
+
+
+void CSniperRifle::SetWeaponData(const weapon_data_t& data)
+{
+	CTFWeapon::SetWeaponData(data);
+
+    m_iScopeTime = *reinterpret_cast<const int*>(&data.m_flNextSecondaryAttack);
+}
+
+
+void CSniperRifle::DecrementTimers(const int msec)
+{
+	CTFWeapon::DecrementTimers(msec);
+
+	m_iScopeTime = std::max(m_iScopeTime - msec, -1100);
+}
+
 
 #ifdef GAME_DLL
 void CSniperRifle::CreateLaserEffect()

@@ -284,8 +284,14 @@ public:
 
 	void Holster() override;
 
-#ifdef GAME_DLL
+	void GetWeaponData(weapon_data_t& data) override;
+	void SetWeaponData(const weapon_data_t& data) override;
+	void DecrementTimers(const int msec) override;
+
 protected:
+	int m_iScopeTime;
+
+#ifdef GAME_DLL
 	void CreateLaserEffect();
 	void UpdateLaserEffect();
 	void DestroyLaserEffect();
