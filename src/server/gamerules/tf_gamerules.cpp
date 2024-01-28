@@ -47,6 +47,13 @@ static const char* sTFClassSelection[] =
     "civilian",
 };
 
+static const char* sTFTeamColors[] =
+{
+    "0",
+    "159",
+    "0",
+};
+
 
 PCInfo sTFClassInfo[PC_LASTCLASS] =
 {
@@ -278,6 +285,20 @@ bool CTeamFortress::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool b
 
     if (pPlayer->TeamNumber() != TEAM_SPECTATORS)
     {
+        char* infobuffer = g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict());
+
+        g_engfuncs.pfnSetClientKeyValue(
+            pPlayer->entindex(),
+            infobuffer,
+            "topcolor",
+            sTFTeamColors[pPlayer->TeamNumber()]);
+
+        g_engfuncs.pfnSetClientKeyValue(
+            pPlayer->entindex(),
+            infobuffer,
+            "bottomcolor",
+            sTFTeamColors[pPlayer->TeamNumber()]);
+
         MessageBegin(MSG_ONE, gmsgVGUIMenu, pPlayer);
         WriteByte(MENU_CLASS);
         MessageEnd();
@@ -357,6 +378,18 @@ void CTeamFortress::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer
             infobuffer,
             "model",
             sTFClassModels[pPlayer->PCNumber()]);
+
+		g_engfuncs.pfnSetClientKeyValue(
+			pPlayer->entindex(),
+			infobuffer,
+			"topcolor",
+			sTFTeamColors[pPlayer->TeamNumber()]);
+
+		g_engfuncs.pfnSetClientKeyValue(
+			pPlayer->entindex(),
+			infobuffer,
+			"bottomcolor",
+			sTFTeamColors[pPlayer->TeamNumber()]);
     }
 }
 
