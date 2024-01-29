@@ -311,6 +311,10 @@ public:
 		m_hInfector = infector;
 		m_flNextInfectionTime = gpGlobals->time + 1.0F;
 	}
+
+	float m_flNextSpeakTime;
+
+	void SaveMe();
 #endif
 
 	void ClearEffects()

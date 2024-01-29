@@ -1872,6 +1872,57 @@ void CBasePlayer::ThrowGrenade()
 }
 
 
+void CBasePlayer::SaveMe()
+{
+	if (!IsAlive() || !IsPlayer())
+	{
+		return;
+	}
+
+	if (m_flNextSpeakTime > gpGlobals->time)
+	{
+		return;
+	}
+
+	char* sample = "speech/saveme1.wav";
+
+	if (g_engfuncs.pfnRandomLong(0, 4) == 0)
+	{
+		sample = "speech/saveme2.wav";
+	}
+	else if (g_engfuncs.pfnRandomLong(0, 99) == 0)
+	{
+		sample = "speech/saveme3.wav";
+	}
+
+	EmitSound(sample, CHAN_VOICE);
+
+	int index = entindex();
+	
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBaseEntity* player = util::PlayerByIndex(i);
+
+		if (player != nullptr
+		 && player != this
+		 && player->IsAlive()
+		 && player->PCNumber() == PC_MEDIC
+		 && g_pGameRules->PlayerRelationship(player, this) >= GR_ALLY)
+		{
+			MessageBegin(MSG_ONE, SVC_TEMPENTITY, player);
+			WriteByte(TE_PLAYERATTACHMENT);
+			WriteByte(index);
+			WriteCoord(50);
+			WriteShort(g_sModelIndexSaveMe);
+			WriteShort(40);
+			MessageEnd();
+		}
+	}
+
+	m_flNextSpeakTime = gpGlobals->time + 4;
+}
+
+
 class CStripWeapons : public CPointEntity
 {
 public:

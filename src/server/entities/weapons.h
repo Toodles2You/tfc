@@ -215,6 +215,7 @@ inline short g_sModelIndexBloodDrop;
 inline short g_sModelIndexBloodSpray;
 inline short g_sModelIndexSmokeTrail;
 inline short g_sModelIndexNail;
+inline short g_sModelIndexSaveMe;
 
 class CTFWeapon : public CBasePlayerWeapon
 {

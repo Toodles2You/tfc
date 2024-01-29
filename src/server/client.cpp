@@ -154,6 +154,7 @@ void ClientPutInServer(edict_t* pEntity)
 	pPlayer->InstallGameMovement(new CHalfLifeMovement{pmove, pPlayer});
 	pPlayer->SetCustomDecalFrames(-1);
 	pPlayer->m_flNextChatTime = gpGlobals->time + CHAT_INTERVAL;
+	pPlayer->m_flNextSpeakTime = gpGlobals->time;
 
 	g_pGameRules->ClientPutInServer(pPlayer);
 
@@ -489,6 +490,10 @@ void ClientCommand(edict_t* pEntity)
 	}
 	else if (FStrEq(pcmd, "closemenus"))
 	{
+	}
+	else if (FStrEq(pcmd, "saveme"))
+	{
+		player->SaveMe();
 	}
 	else if (g_pGameRules->ClientCommand(player, pcmd))
 	{
@@ -931,6 +936,10 @@ void ClientPrecache()
 	PRECACHE_SOUND("common/null.wav");
 
 	PRECACHE_SOUND("player/plyrjmp8.wav");
+
+	PRECACHE_SOUND("speech/saveme1.wav");
+	PRECACHE_SOUND("speech/saveme2.wav");
+	PRECACHE_SOUND("speech/saveme3.wav");
 
 	g_usGibbed = PRECACHE_EVENT(1, "events/gibs.sc");
 	g_usTeleport = PRECACHE_EVENT(1, "events/teleport.sc");
