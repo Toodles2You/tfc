@@ -534,6 +534,7 @@ private:
 	float m_flOffsetY;
 	byte m_bIsWidescreen;
 	HSPRITE m_hSprDummy;
+	HSPRITE m_hSniperScope;
 
 public:
 	float m_flTime;		  // the current client time
@@ -594,6 +595,8 @@ public:
 	int DrawHudString(const char* string, int x, int y);
 	void GetHudStringSize(const char* string, int& width, int& height);
 	int HudStringLen(const char* string);
+
+	void RedrawZoomOverlay(float time);
 
 	void GetChatInputPosition(int& x, int& y);
 

@@ -517,6 +517,7 @@ void CHud::VidInit()
 	m_HUD_number_0 = GetSpriteIndex("number_0");
 
 	m_hSprDummy = SPR_Load("sprites/tile.spr");
+	m_hSniperScope = SPR_Load("sprites/sniper_scope.spr");
 
 	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
 

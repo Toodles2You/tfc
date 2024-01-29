@@ -189,6 +189,11 @@ redraw the HUD.
 
 int HUD_Redraw(float time, int intermission)
 {
+	if (gHUD.IsViewZoomed())
+	{
+		gHUD.RedrawZoomOverlay(time);
+	}
+
 	gHUD.Redraw(time, 0 != intermission);
 
 	return 1;
