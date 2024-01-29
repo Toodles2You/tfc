@@ -551,6 +551,7 @@ public:
 	cvar_t* m_pCvarDraw;
 	cvar_t* m_pCvarWidescreen;
 	cvar_t* m_pCvarColor;
+	cvar_t *m_pCvarTeamColor;
 	cvar_t *m_pCvarCrosshair;
 	cvar_t *m_pCvarSuitVolume;
 
@@ -702,8 +703,8 @@ public:
 
 	bool ImpulseCommands(int impulse);
 
-	float* GetTeamColor(int teamNumber);
-	float* GetClientColor(int clientIndex);
+	float* GetTeamColor(int teamNumber) const;
+	float* GetClientColor(int clientIndex) const;
 
 	bool IsAlive();
 	int GetObserverMode();
