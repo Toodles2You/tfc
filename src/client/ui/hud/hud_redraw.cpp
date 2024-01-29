@@ -78,10 +78,20 @@ bool CHud::Redraw(float flTime, bool intermission)
 		m_bIsWidescreen = bWantWidescreen;
 	}
 
-	auto ulRGB = strtoul(m_pCvarColor->string, NULL, 16);
-	m_cColors[CHud::COLOR_PRIMARY].r = (ulRGB & 0xFF0000) >> 16;
-	m_cColors[CHud::COLOR_PRIMARY].g = (ulRGB & 0xFF00) >> 8;
-	m_cColors[CHud::COLOR_PRIMARY].b = (ulRGB & 0xFF);
+	if (m_gameMode >= kGamemodeTeamplay && m_pCvarTeamColor->value != 0)
+	{
+		auto color = GetTeamColor(g_iTeamNumber);
+		m_cColors[CHud::COLOR_PRIMARY].r = color[0] * 255;
+		m_cColors[CHud::COLOR_PRIMARY].g = color[1] * 255;
+		m_cColors[CHud::COLOR_PRIMARY].b = color[2] * 255;
+	}
+	else
+	{
+		auto ulRGB = strtoul(m_pCvarColor->string, NULL, 16);
+		m_cColors[CHud::COLOR_PRIMARY].r = (ulRGB & 0xFF0000) >> 16;
+		m_cColors[CHud::COLOR_PRIMARY].g = (ulRGB & 0xFF00) >> 8;
+		m_cColors[CHud::COLOR_PRIMARY].b = (ulRGB & 0xFF);
+	}
 
 	// Bring up the scoreboard during intermission
 	if (gViewPort)
