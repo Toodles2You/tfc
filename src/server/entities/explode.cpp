@@ -105,6 +105,7 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	tent::Explosion(
 		pev->origin,
 		g_vecZero,
+		tent::ExplosionType::Normal,
 		(pev->spawnflags & SF_ENVEXPLOSION_NOFIREBALL) == 0 ? m_spriteScale : 0,
 		(pev->spawnflags & SF_ENVEXPLOSION_NOSMOKE) == 0,
 		(pev->spawnflags & SF_ENVEXPLOSION_NOSPARKS) == 0);

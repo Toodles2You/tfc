@@ -509,7 +509,15 @@ namespace tent
 void Sparks(const Vector& position);
 void Ricochet(const Vector& position, float scale);
 void TeleportSplash(CBaseEntity* entity);
-void Explosion(const Vector& origin, const Vector& velocity, float damage = 100.0F, bool smoke = true, bool sparks = true);
+
+enum class ExplosionType
+{
+	Normal = 0,
+	Concussion,
+};
+
+void Explosion(const Vector& origin, const Vector& velocity, ExplosionType type = ExplosionType::Normal, float damage = 100.0F, bool smoke = true, bool sparks = true);
+
 void SpawnCorpse(CBaseEntity* entity, const int gibMode);
 void RocketTrail(CBaseEntity* entity, const bool flare = true);
 

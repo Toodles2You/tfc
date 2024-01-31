@@ -392,7 +392,7 @@ public:
 	static CGrenade* ShootContact(CBaseEntity* owner, Vector vecStart, Vector vecVelocity);
 
 	void Explode(Vector vecSrc, Vector vecAim);
-	void Explode(TraceResult* pTrace, int bitsDamageType);
+	virtual void Explode(TraceResult* pTrace, int bitsDamageType);
 
 	void EXPORT BounceTouch(CBaseEntity* pOther);
 	void EXPORT ExplodeTouch(CBaseEntity* pOther);
@@ -409,6 +409,8 @@ public:
 	bool Spawn() override;
 	void EXPORT PrimedThink();
 
+	virtual const char* GetModelName() { return "models/w_grenade.mdl"; }
+
 	static CPrimeGrenade* PrimeGrenade(CBaseEntity* owner);
 
 protected:
@@ -420,6 +422,16 @@ protected:
 	} throw_e;
 
 	void Throw(throw_e mode);
+};
+
+class CConcussionGrenade : public CPrimeGrenade
+{
+public:
+	void Explode(TraceResult* pTrace, int bitsDamageType) override;
+
+	const char* GetModelName() override { return "models/conc_grenade.mdl"; }
+
+	static CConcussionGrenade* ConcussionGrenade(CBaseEntity* owner);
 };
 
 class CRocket : public CGrenade

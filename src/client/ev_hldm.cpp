@@ -1036,6 +1036,46 @@ void EV_Explosion(event_args_t* args)
 	}
 }
 
+void EV_ConcBlast(event_args_t* args)
+{
+	const char* sample;
+
+	switch (gEngfuncs.pfnRandomLong(0, 2))
+	{
+	case 0: sample = "weapons/concgren_blast1.wav"; break;
+	case 1: sample = "weapons/concgren_blast2.wav"; break;
+	case 2: sample = "weapons/concgren_blast3.wav"; break;
+	}
+
+	gEngfuncs.pEventAPI->EV_PlaySound(
+		-1,
+		args->origin,
+		CHAN_STATIC,
+		sample,
+		VOL_NORM,
+		ATTN_NORM,
+		0,
+		PITCH_NORM);
+	
+	gEngfuncs.pEfxAPI->R_SparkEffect(args->origin, 8, -100, 100);
+
+	gEngfuncs.pEfxAPI->R_BeamCirclePoints(
+		TE_BEAMCYLINDER,
+		args->origin,
+		Vector(0, 0, 600) + args->origin,
+		gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/shockwave.spr"),
+		0.2F,
+		70,
+		0,
+		1,
+		0,
+		0,
+		0,
+		1,
+		1,
+		1);
+}
+
 static void EV_TrailCallback(TEMPENTITY* ent, float frametime, float currenttime)
 {
 	if (ent->entity.baseline.fuser1 <= currenttime && ent->entity.origin == ent->entity.attachment[0])
@@ -1158,6 +1198,7 @@ void EV_HookEvents()
 	gEngfuncs.pfnHookEvent("events/gibs.sc", EV_Gibbed);
 	gEngfuncs.pfnHookEvent("events/teleport.sc", EV_Teleport);
 	gEngfuncs.pfnHookEvent("events/explosion.sc", EV_Explosion);
+	gEngfuncs.pfnHookEvent("events/explode/tf_concuss.sc", EV_ConcBlast);
 	gEngfuncs.pfnHookEvent("events/trail.sc", EV_Trail);
 	gEngfuncs.pfnHookEvent("events/train.sc", EV_TrainPitchAdjust);
 

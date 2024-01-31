@@ -62,19 +62,23 @@ void CBasePlayer::WeaponPostFrame()
 	{
 		if (m_bGrenadeToggle)
 		{
-			if ((m_afButtonPressed & IN_GRENADE) != 0)
+			if ((m_afButtonPressed & (IN_GRENADE | IN_GRENADE2)) != 0)
 			{
 				ThrowGrenade();
 			}
 		}
-		else if ((pev->button & IN_GRENADE) == 0)
+		else if ((pev->button & (IN_GRENADE | IN_GRENADE2)) == 0)
 		{
 			ThrowGrenade();
 		}
 	}
 	else if ((m_afButtonPressed & IN_GRENADE) != 0)
 	{
-		PrimeGrenade();
+		PrimeGrenade(0);
+	}
+	else if ((m_afButtonPressed & IN_GRENADE2) != 0)
+	{
+		PrimeGrenade(1);
 	}
 
 #ifdef GAME_DLL

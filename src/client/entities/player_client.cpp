@@ -113,7 +113,7 @@ void CBasePlayer::SetPrefsFromUserinfo(char* infobuffer)
 }
 
 
-void CBasePlayer::PrimeGrenade()
+void CBasePlayer::PrimeGrenade(const int grenadeType)
 {
 	if ((m_TFState & (kTFStateGrenadePrime | kTFStateGrenadeThrowing)) != 0)
 	{

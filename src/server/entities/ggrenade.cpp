@@ -46,7 +46,7 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 		pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
 	}
 
-	tent::Explosion(pev->origin, -pTrace->vecPlaneNormal, pev->dmg);
+	tent::Explosion(pev->origin, -pTrace->vecPlaneNormal, tent::ExplosionType::Normal, pev->dmg);
 
 	CBaseEntity* owner;
 	if (pev->owner)
@@ -269,7 +269,7 @@ void CPrimeGrenade::Throw(throw_e mode)
 		pev->gravity = 0.81;
 		pev->friction = 0.6;
 
-		SetModel("models/w_grenade.mdl");
+		SetModel(GetModelName());
 		SetSize(g_vecZero, g_vecZero);
 
 		if (mode == kDrop)
@@ -303,6 +303,76 @@ void CPrimeGrenade::Throw(throw_e mode)
 CPrimeGrenade* CPrimeGrenade::PrimeGrenade(CBaseEntity* owner)
 {
 	auto grenade = GetClassPtr((CPrimeGrenade*)nullptr);
+
+	grenade->pev->owner = owner->edict();
+	grenade->Spawn();
+
+	return grenade;
+}
+
+
+void CConcussionGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
+{
+	if (pTrace->flFraction != 1.0)
+	{
+		pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
+	}
+
+	tent::Explosion(pev->origin, -pTrace->vecPlaneNormal, tent::ExplosionType::Concussion, pev->dmg);
+
+	CBaseEntity* owner = this;
+	if (pev->owner)
+	{
+		owner = CBaseEntity::Instance(pev->owner);
+	}
+
+	pev->owner = nullptr;
+
+	CBaseEntity* entity = nullptr;
+	TraceResult tr;
+	Vector difference;
+	float length;
+	float ajdusted;
+
+	while ((entity = util::FindEntityInSphere(entity, pev->origin, 280)) != nullptr)
+	{
+		if (!entity->IsPlayer())
+		{
+			continue;
+		}
+
+		util::TraceLine(pev->origin, entity->EyePosition(), &tr, owner, util::kTraceBox);
+
+		if (tr.flFraction != 1.0F && tr.pHit != entity->edict())
+		{
+			continue;
+		}
+
+		difference = entity->pev->origin - pev->origin;
+
+		length = difference.Length();
+
+		if (length < 16.0F)
+		{
+			difference = entity->pev->velocity * 0.33F;
+		}
+
+		entity->pev->velocity = difference;
+
+		ajdusted = (240 - length * 0.5F) * 0.03F;
+
+		entity->pev->velocity.x *= ajdusted;
+		entity->pev->velocity.y *= ajdusted;
+		entity->pev->velocity.z *= ajdusted * 1.5F;
+	}
+
+	Remove();
+}
+
+
+CConcussionGrenade* CConcussionGrenade::ConcussionGrenade(CBaseEntity* owner)
+{
+	auto grenade = GetClassPtr((CConcussionGrenade*)nullptr);
 
 	grenade->pev->owner = owner->edict();
 	grenade->Spawn();

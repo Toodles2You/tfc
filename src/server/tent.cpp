@@ -17,6 +17,7 @@
 
 unsigned short g_usTeleport;
 unsigned short g_usExplosion;
+unsigned short g_usConcBlast;
 unsigned short g_usGibbed;
 unsigned short g_usTrail;
 
@@ -65,14 +66,28 @@ void tent::TeleportSplash(CBaseEntity* entity)
 void tent::Explosion(
 	const Vector& origin,
 	const Vector& velocity,
+	ExplosionType type,
 	float damage,
 	bool smoke,
 	bool sparks)
 {
+	unsigned short eventIndex;
+
+	switch (type)
+	{
+		default:
+		case ExplosionType::Normal:
+			eventIndex = g_usExplosion;
+			break;
+		case ExplosionType::Concussion:
+			eventIndex = g_usConcBlast;
+			break;
+	}
+
 	g_engfuncs.pfnPlaybackEvent(
 		FEV_GLOBAL | FEV_RELIABLE,
 		CWorld::World->edict(),
-		g_usExplosion,
+		eventIndex,
 		0.0F,
 		origin,
 		velocity,

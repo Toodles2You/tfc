@@ -98,6 +98,7 @@ kbutton_t in_score;
 kbutton_t in_break;
 kbutton_t in_graph; // Display the netgraph
 kbutton_t in_gren1;
+kbutton_t in_gren2;
 
 typedef struct kblist_s
 {
@@ -500,6 +501,9 @@ void IN_ScoreUp()
 void IN_Gren1Down() { KeyDown(&in_gren1); }
 void IN_Gren1Up() { KeyUp(&in_gren1); }
 
+void IN_Gren2Down() { KeyDown(&in_gren2); }
+void IN_Gren2Up() { KeyUp(&in_gren2); }
+
 /*
 ===============
 CL_KeyState
@@ -723,6 +727,11 @@ int CL_ButtonBits(bool bResetState)
 		bits |= IN_GRENADE;
 	}
 
+	if ((in_gren2.state & 3) != 0)
+	{
+		bits |= IN_GRENADE2;
+	}
+
 	if (bResetState)
 	{
 		in_attack.state &= ~2;
@@ -740,6 +749,7 @@ int CL_ButtonBits(bool bResetState)
 		in_reload.state &= ~2;
 		in_score.state &= ~2;
 		in_gren1.state &= ~2;
+		in_gren2.state &= ~2;
 	}
 
 	return bits;
@@ -829,6 +839,8 @@ void InitInput()
 	gEngfuncs.pfnAddCommand("-break", IN_BreakUp);
 	gEngfuncs.pfnAddCommand("+gren1", IN_Gren1Down);
 	gEngfuncs.pfnAddCommand("-gren1", IN_Gren1Up);
+	gEngfuncs.pfnAddCommand("+gren2", IN_Gren2Down);
+	gEngfuncs.pfnAddCommand("-gren2", IN_Gren2Up);
 
 	cl_anglespeedkey = gEngfuncs.pfnRegisterVariable("cl_anglespeedkey", "0.67", 0);
 	cl_yawspeed = gEngfuncs.pfnRegisterVariable("cl_yawspeed", "210", 0);

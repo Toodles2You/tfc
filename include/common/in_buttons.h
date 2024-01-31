@@ -31,4 +31,5 @@ enum
     IN_ATTACK2   = 1 << 11,
     IN_GRENADE   = 1 << 12,
     IN_RELOAD    = 1 << 13,
+    IN_GRENADE2  = 1 << 14,
 };

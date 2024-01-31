@@ -308,6 +308,11 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		}
 	}
 
+	if ((bitsDamageType & DMG_CONCUSS) != 0)
+	{
+		return true;
+	}
+
 	if ((bitsDamageType & DMG_ARMOR_PIERCING) == 0)
 	{
 		pev->dmg_inflictor = inflictor->edict();
@@ -1845,16 +1850,56 @@ void CBasePlayer::GetEntityState(entity_state_t& state)
 }
 
 
-void CBasePlayer::PrimeGrenade()
+void CBasePlayer::PrimeGrenade(const int grenadeType)
 {
 	if ((m_TFState & (kTFStateGrenadePrime | kTFStateGrenadeThrowing)) != 0)
 	{
 		return;
 	}
 
-	m_TFState |= kTFStateGrenadePrime;
+	if (grenadeType == 0)
+	{
+		switch (PCNumber())
+		{
+			case PC_SCOUT:
+			case PC_SNIPER:
+				break;
+			default:
+				CPrimeGrenade::PrimeGrenade(this);
+				break;
+		}
+	}
+	else
+	{
+		switch (PCNumber())
+		{
+		case PC_SCOUT:
+			CConcussionGrenade::ConcussionGrenade(this);
+			break;
+		case PC_SNIPER:
+			break;
+		case PC_SOLDIER:
+			break;
+		case PC_DEMOMAN:
+			break;
+		case PC_MEDIC:
+			CConcussionGrenade::ConcussionGrenade(this);
+			break;
+		case PC_HVYWEAP:
+			break;
+		case PC_PYRO:
+			break;
+		case PC_SPY:
+			break;
+		case PC_ENGINEER:
+			break;
+		default:
+		case PC_CIVILIAN:
+			break;
+		}
+	}
 
-	CPrimeGrenade::PrimeGrenade(this);
+	m_TFState |= kTFStateGrenadePrime;
 
 	MessageBegin(MSG_ONE, gmsgStatusIcon, this);
 	WriteByte(2);
