@@ -380,3 +380,75 @@ CConcussionGrenade* CConcussionGrenade::ConcussionGrenade(CBaseEntity* owner)
 	return grenade;
 }
 
+
+void CMirv::Explode(TraceResult* pTrace, int bitsDamageType)
+{
+	auto owner = CBaseEntity::Instance(pev->owner);
+
+	CPrimeGrenade::Explode(pTrace, bitsDamageType);
+
+	for (int i = 0; i < kNumBomblets; i++)
+	{
+		CBomblet::Bomblet(
+			owner,
+			pev->origin,
+			pev->angles.y + (360 / static_cast<float>(kNumBomblets)) * i);
+	}
+}
+
+
+CMirv* CMirv::Mirv(CBaseEntity* owner)
+{
+	auto grenade = GetClassPtr((CMirv*)nullptr);
+
+	grenade->pev->owner = owner->edict();
+	grenade->Spawn();
+
+	return grenade;
+}
+
+
+bool CBomblet::Spawn()
+{
+	pev->movetype = MOVETYPE_BOUNCE;
+	pev->solid = SOLID_TRIGGER;
+
+	SetOrigin(pev->origin);
+	pev->angles = Vector(0, pev->angles.y, 0);
+
+	pev->gravity = 0.5;
+	pev->friction = 0.8;
+
+	SetModel(GetModelName());
+	SetSize(g_vecZero, g_vecZero);
+
+	util::MakeVectors(pev->angles);
+	pev->velocity = gpGlobals->v_forward * 75 + gpGlobals->v_up * 200;
+
+	SetTouch(&CPrimeGrenade::BounceTouch);
+	SetThink(&CPrimeGrenade::TumbleThink);
+	pev->nextthink = gpGlobals->time + 0.1;
+	pev->dmgtime = pev->nextthink + 2.5;
+
+	pev->sequence = g_engfuncs.pfnRandomLong(3, 6);
+	pev->framerate = 1.0;
+	ResetSequenceInfo();
+
+	pev->dmg = 180;
+
+	return true;
+}
+
+
+CBomblet* CBomblet::Bomblet(CBaseEntity* owner, const Vector& origin, const float yaw)
+{
+	auto grenade = GetClassPtr((CBomblet*)nullptr);
+
+	grenade->pev->owner = owner->edict();
+	grenade->pev->origin = origin;
+	grenade->pev->angles = Vector(0, yaw, 0);
+	grenade->Spawn();
+
+	return grenade;
+}
+

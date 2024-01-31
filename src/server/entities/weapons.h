@@ -434,6 +434,30 @@ public:
 	static CConcussionGrenade* ConcussionGrenade(CBaseEntity* owner);
 };
 
+class CMirv : public CPrimeGrenade
+{
+public:
+	void Explode(TraceResult* pTrace, int bitsDamageType) override;
+
+	const char* GetModelName() override { return "models/mirv_grenade.mdl"; }
+
+	static CMirv* Mirv(CBaseEntity* owner);
+
+private:
+	static constexpr int kNumBomblets = 4;
+};
+
+/* Toodles: This had a bunch of stupid randomness that I got rid of. */
+class CBomblet : public CPrimeGrenade
+{
+public:
+	bool Spawn() override;
+
+	const char* GetModelName() override { return "models/bomblet.mdl"; }
+
+	static CBomblet* Bomblet(CBaseEntity* owner, const Vector& origin, const float yaw);
+};
+
 class CRocket : public CGrenade
 {
 public:

@@ -1881,11 +1881,13 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 		case PC_SOLDIER:
 			break;
 		case PC_DEMOMAN:
+			CMirv::Mirv(this);
 			break;
 		case PC_MEDIC:
 			CConcussionGrenade::ConcussionGrenade(this);
 			break;
 		case PC_HVYWEAP:
+			CMirv::Mirv(this);
 			break;
 		case PC_PYRO:
 			break;
