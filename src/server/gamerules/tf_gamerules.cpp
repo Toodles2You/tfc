@@ -266,7 +266,7 @@ CTeamFortress::CTeamFortress()
 
 bool CTeamFortress::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 {
-    for (int i = PC_SCOUT; i <= PC_ENGINEER; i++)
+    for (int i = PC_SCOUT; i <= PC_MEDIC; i++)
     {
         if (strcmp(pcmd, sTFClassSelection[i]) == 0)
         {
@@ -294,7 +294,7 @@ void CTeamFortress::InitHUD(CBasePlayer* pPlayer)
     MessageBegin(MSG_ONE, gmsgValClass, pPlayer);
     for (int i = 0; i < 5; i++)
     {
-        WriteShort(0);
+        WriteShort(992);
     }
     MessageEnd();
 }
