@@ -315,6 +315,143 @@ CPrimeGrenade* CPrimeGrenade::PrimeGrenade(CBaseEntity* owner)
 }
 
 
+bool CCaltropCanister::Spawn()
+{
+	if (CPrimeGrenade::Spawn())
+	{
+		pev->nextthink = gpGlobals->time + 0.5;
+		pev->dmgtime = gpGlobals->time + 0.5;
+		return true;
+	}
+	return false;
+}
+
+
+CCaltropCanister* CCaltropCanister::CaltropCanister(CBaseEntity* owner)
+{
+	auto grenade = GetClassPtr((CCaltropCanister*)nullptr);
+
+	grenade->pev->owner = owner->edict();
+	grenade->Spawn();
+
+	return grenade;
+}
+
+
+void CCaltropCanister::Throw(throw_e mode)
+{
+	auto owner = dynamic_cast<CBasePlayer*>(CBaseEntity::Instance(pev->owner));
+
+	SetOrigin(owner->pev->origin);
+	pev->angles = Vector(0, owner->pev->angles.y, 0);
+
+	for (int i = 0; i < kNumCaltrops; i++)
+	{
+		CCaltrop::Caltrop(
+			owner,
+			pev->origin,
+			pev->angles.y + (360 / static_cast<float>(kNumCaltrops)) * i);
+	}
+
+	MessageBegin(MSG_ONE, gmsgStatusIcon, owner);
+	WriteByte(0);
+	WriteString("grenade");
+	MessageEnd();
+	
+	owner->m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
+
+	Remove();
+}
+
+
+bool CCaltrop::Spawn()
+{
+	pev->movetype = MOVETYPE_TOSS;
+	pev->solid = SOLID_TRIGGER;
+
+	SetOrigin(pev->origin);
+	pev->angles = Vector(0, pev->angles.y, 0);
+
+	pev->gravity = 0.5;
+	pev->friction = 0.5;
+
+	SetModel(GetModelName());
+	SetSize(g_vecZero, g_vecZero);
+
+	util::MakeVectors(pev->angles);
+	pev->velocity = gpGlobals->v_forward * 100 + gpGlobals->v_up * 200;
+	pev->avelocity = Vector(400, 400, 400);
+
+	pev->health = 10;
+	SetThink(&CCaltrop::CaltropThink);
+	pev->nextthink = gpGlobals->time + 0.2;
+
+	pev->dmg = 10;
+
+	return true;
+}
+
+
+void CCaltrop::CaltropThink()
+{
+	if (pev->velocity == g_vecZero || (pev->flags & FL_ONGROUND) != 0)
+	{
+		EmitSound("weapons/tink1.wav", CHAN_AUTO, VOL_NORM, ATTN_IDLE);
+
+		pev->angles.x = pev->angles.z = 0;
+		pev->avelocity = g_vecZero;
+
+		SetTouch(&CCaltrop::CaltropTouch);
+		SetThink(&CBaseEntity::Remove);
+		pev->nextthink = gpGlobals->time + 15;
+
+		SetOrigin(pev->origin);
+	}
+	else
+	{
+		pev->health--;
+
+		if (pev->health < 0)
+		{
+			Remove();
+			return;
+		}
+
+		pev->nextthink = gpGlobals->time + 0.2;
+	}
+}
+
+void CCaltrop::CaltropTouch(CBaseEntity* other)
+{
+	if (!other->IsPlayer() || !other->IsAlive())
+	{
+		return;
+	}
+
+	if (other->TakeDamage(this, CBaseEntity::Instance(pev->owner), pev->dmg, DMG_CALTROP))
+	{
+		CBasePlayer* player = dynamic_cast<CBasePlayer*>(other);
+
+		player->m_nLegDamage = std::min(player->m_nLegDamage + 1, 6);
+	}
+
+	Remove();
+}
+
+
+CCaltrop* CCaltrop::Caltrop(CBaseEntity* owner, const Vector& origin, const float yaw)
+{
+	auto grenade = GetClassPtr((CCaltrop*)nullptr);
+
+	grenade->pev->owner = owner->edict();
+	grenade->pev->origin = origin;
+	grenade->pev->angles = Vector(0, yaw, 0);
+	grenade->Spawn();
+
+	return grenade;
+}
+
+
 void CConcussionGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 {
 	if (pTrace->flFraction != 1.0)

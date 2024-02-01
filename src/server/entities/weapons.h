@@ -421,7 +421,35 @@ protected:
 		kOvercook,
 	} throw_e;
 
-	void Throw(throw_e mode);
+	virtual void Throw(throw_e mode);
+};
+
+class CCaltropCanister : public CPrimeGrenade
+{
+public:
+	bool Spawn() override;
+
+	const char* GetModelName() override { return "models/conc_grenade.mdl"; }
+
+	static CCaltropCanister* CaltropCanister(CBaseEntity* owner);
+
+protected:
+	void Throw(throw_e mode) override;
+
+private:
+	static constexpr int kNumCaltrops = 6;
+};
+
+class CCaltrop : public CPrimeGrenade
+{
+public:
+	bool Spawn() override;
+	void EXPORT CaltropThink();
+	void EXPORT CaltropTouch(CBaseEntity* other);
+
+	const char* GetModelName() override { return "models/caltrop.mdl"; }
+
+	static CCaltrop* Caltrop(CBaseEntity* owner, const Vector& origin, const float yaw);
 };
 
 class CConcussionGrenade : public CPrimeGrenade

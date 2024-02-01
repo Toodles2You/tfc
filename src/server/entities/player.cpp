@@ -1863,6 +1863,7 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 		{
 			case PC_SCOUT:
 			case PC_SNIPER:
+				CCaltropCanister::CaltropCanister(this);
 				break;
 			default:
 				CPrimeGrenade::PrimeGrenade(this);
