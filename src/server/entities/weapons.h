@@ -409,6 +409,8 @@ public:
 	bool Spawn() override;
 	void EXPORT PrimedThink();
 
+	virtual void Explode(TraceResult* pTrace, int bitsDamageType) override;
+
 	virtual const char* GetModelName() { return "models/w_grenade.mdl"; }
 
 	static CPrimeGrenade* PrimeGrenade(CBaseEntity* owner);

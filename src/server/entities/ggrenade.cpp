@@ -251,6 +251,30 @@ void CPrimeGrenade::PrimedThink()
 }
 
 
+void CPrimeGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
+{
+	// Pull out of the wall a bit
+	if (pTrace->flFraction != 1.0)
+	{
+		pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
+	}
+
+	tent::Explosion(pev->origin, -pTrace->vecPlaneNormal, tent::ExplosionType::Normal, pev->dmg);
+
+	CBaseEntity* owner;
+	if (pev->owner)
+		owner = CBaseEntity::Instance(pev->owner);
+	else
+		owner = this;
+
+	pev->owner = nullptr; // can't traceline attack owner if this is set
+
+	RadiusDamage(pev->origin, this, owner, pev->dmg, pev->dmg * 2.5, bitsDamageType);
+
+	Remove();
+}
+
+
 void CPrimeGrenade::Throw(throw_e mode)
 {
 	auto owner = dynamic_cast<CBasePlayer*>(CBaseEntity::Instance(pev->owner));
