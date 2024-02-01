@@ -1864,7 +1864,7 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 			case PC_SCOUT:
 			case PC_SNIPER:
 				CCaltropCanister::CaltropCanister(this);
-				break;
+				goto no_icon;
 			default:
 				CPrimeGrenade::PrimeGrenade(this);
 				break;
@@ -1878,7 +1878,7 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 			CConcussionGrenade::ConcussionGrenade(this);
 			break;
 		case PC_SNIPER:
-			break;
+			return;
 		case PC_SOLDIER:
 			CNailGrenade::NailGrenade(this);
 			break;
@@ -1892,24 +1892,24 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 			CMirv::Mirv(this);
 			break;
 		case PC_PYRO:
-			break;
+			return;
 		case PC_SPY:
-			break;
+			return;
 		case PC_ENGINEER:
-			break;
+			return;
 		default:
 		case PC_CIVILIAN:
-			break;
+			return;
 		}
 	}
-
-	m_TFState |= kTFStateGrenadePrime;
 
 	MessageBegin(MSG_ONE, gmsgStatusIcon, this);
 	WriteByte(2);
 	WriteString("grenade");
 	MessageEnd();
 
+no_icon:
+	m_TFState |= kTFStateGrenadePrime;
 	EmitSoundPredicted("weapons/ax1.wav", CHAN_WEAPON);
 }
 

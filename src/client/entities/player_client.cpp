@@ -120,13 +120,52 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 		return;
 	}
 
-	m_TFState |= kTFStateGrenadePrime;
+	if (grenadeType == 0)
+	{
+		switch (PCNumber())
+		{
+			case PC_SCOUT:
+			case PC_SNIPER:
+				goto no_icon;
+			default:
+				break;
+		}
+	}
+	else
+	{
+		switch (PCNumber())
+		{
+		case PC_SCOUT:
+			break;
+		case PC_SNIPER:
+			return;
+		case PC_SOLDIER:
+			break;
+		case PC_DEMOMAN:
+			break;
+		case PC_MEDIC:
+			break;
+		case PC_HVYWEAP:
+			break;
+		case PC_PYRO:
+			return;
+		case PC_SPY:
+			return;
+		case PC_ENGINEER:
+			return;
+		default:
+		case PC_CIVILIAN:
+			return;
+		}
+	}
 
 	if (HUD_FirstTimePredicting())
 	{
 		gHUD.m_StatusIcons.EnableIcon("grenade");
 	}
 
+no_icon:
+	m_TFState |= kTFStateGrenadePrime;
 	EmitSoundPredicted("weapons/ax1.wav", CHAN_WEAPON);
 }
 
