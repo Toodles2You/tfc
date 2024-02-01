@@ -515,6 +515,7 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
 
     pPlayer->pev->armorvalue = info.initArmor;
     pPlayer->pev->armortype = info.initArmorType;
+    pPlayer->m_afArmorClass = info.initArmorClasses;
 
     for (int i = 0; i < 4; i++)
     {

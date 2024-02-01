@@ -308,11 +308,6 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		}
 	}
 
-	if ((bitsDamageType & DMG_CONCUSS) != 0)
-	{
-		return true;
-	}
-
 	if ((bitsDamageType & DMG_ARMOR_PIERCING) == 0)
 	{
 		pev->dmg_inflictor = inflictor->edict();
@@ -348,7 +343,23 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	float flArmour = 0.0f;
 	if ((bitsDamageType & DMG_ARMOR_PIERCING) == 0)
 	{
+		/* Toodles: These used to stack but, I doubt that was intentional. */
+		if (((m_afArmorClass & AT_SAVESHOT) != 0 && (bitsDamageType & DMG_BULLET) != 0)
+		|| ((m_afArmorClass & AT_SAVENAIL) != 0 && (bitsDamageType & DMG_NAIL) != 0)
+		|| ((m_afArmorClass & AT_SAVEEXPLOSION) != 0 && (bitsDamageType & DMG_BLAST) != 0)
+		|| ((m_afArmorClass & AT_SAVEELECTRICITY) != 0 && (bitsDamageType & DMG_SHOCK) != 0)
+		|| ((m_afArmorClass & AT_SAVEFIRE) != 0 && (bitsDamageType & DMG_BURN) != 0))
+		{
+			flDamage *= 0.5F;
+		}
+
 		flArmour = ArmourBonus(flDamage, pev->armorvalue, 1.0f - pev->armortype);
+
+		if (flArmour >= pev->armorvalue)
+		{
+			pev->armortype = 0.0F;
+			m_afArmorClass = 0;
+		}
 	}
 
 	// Do the damage!
@@ -1015,6 +1026,8 @@ bool CBasePlayer::Spawn()
 	pev->classname = MAKE_STRING("player");
 	pev->health = 100;
 	pev->armorvalue = 0;
+	pev->armortype = 0.0F;
+	m_afArmorClass = 0;
 	pev->takedamage = DAMAGE_AIM;
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_WALK;

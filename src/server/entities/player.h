@@ -53,11 +53,11 @@ enum
 
 enum
 {
-	AT_SAVESHOT = 1,		// Kevlar  	 : Reduces bullet damage by 15%
-	AT_SAVENAIL = 2,		// Wood :) 	 : Reduces nail damage by 15%
-	AT_SAVEEXPLOSION = 4,	// Blast   	 : Reduces explosion damage by 15%
-	AT_SAVEELECTRICITY = 8, // Shock	 : Reduces electricity damage by 15%
-	AT_SAVEFIRE = 16,		// Asbestos	 : Reduces fire damage by 15%
+	AT_SAVESHOT = 1,		// Kevlar  	 : Reduces bullet damage
+	AT_SAVENAIL = 2,		// Wood :) 	 : Reduces nail damage
+	AT_SAVEEXPLOSION = 4,	// Blast   	 : Reduces explosion damage
+	AT_SAVEELECTRICITY = 8, // Shock	 : Reduces electricity damage
+	AT_SAVEFIRE = 16,		// Asbestos	 : Reduces fire damage
 };
 
 #define CHAT_INTERVAL 1.0f
@@ -293,6 +293,7 @@ public:
 
 	CBasePlayerWeapon* GetNextBestWeapon(CBasePlayerWeapon* current);
 
+	byte m_afArmorClass;
 	byte m_nLegDamage;
 #ifdef GAME_DLL
 protected:
