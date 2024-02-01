@@ -568,6 +568,11 @@ void CNailGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 		pev->velocity = Vector(0, 0, 272);
 		pev->avelocity = Vector(0, 500, 0);
 
+		if ((pev->flags & FL_ONGROUND) != 0)
+		{
+			BounceSound();
+		}
+
 		SetThink(&CNailGrenade::GetReadyToNail);
 		pev->nextthink = gpGlobals->time + 0.7F;
 	}
