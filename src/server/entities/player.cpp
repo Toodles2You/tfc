@@ -400,7 +400,7 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		return false;
 	}
 
-	if ((bitsDamageType & DMG_FALL) == 0)
+	if (flDamage >= 1.0F && (bitsDamageType & DMG_FALL) == 0)
 	{
 		Pain();
 	}
