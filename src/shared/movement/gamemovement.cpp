@@ -524,7 +524,8 @@ void CHalfLifeMovement::CheckVelocity()
 
     float maxSpeed = pmove->maxspeed;
 
-    if (pmove->onground == -1)
+    if (pmove->onground == -1
+     || player->pev->playerclass == PC_SCOUT)
     {
         maxSpeed = pmove->movevars->maxvelocity;
     }
