@@ -1879,6 +1879,7 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 		case PC_SNIPER:
 			break;
 		case PC_SOLDIER:
+			CNailGrenade::NailGrenade(this);
 			break;
 		case PC_DEMOMAN:
 			CMirv::Mirv(this);

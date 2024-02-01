@@ -1076,6 +1076,40 @@ void EV_ConcBlast(event_args_t* args)
 		1);
 }
 
+void EV_GetNailedIdiot(event_args_t* args)
+{
+	for (int i = 0; i < 6; i++)
+	{
+		Vector angles =
+			Vector(
+				0,
+				(360 / static_cast<float>(40)) * args->iparam1
+					+ (360 / static_cast<float>(6)) * i,
+				0);
+
+		Vector up, right, forward;
+		AngleVectors(angles, forward, right, up);
+
+		gEngfuncs.pEfxAPI->R_Projectile(
+			forward * 12 + args->origin,
+			forward * 1000.0F,
+			g_sModelIndexNail,
+			5.0F,
+			args->entindex,
+			EV_NailTouch);
+	}
+
+	gEngfuncs.pEventAPI->EV_PlaySound(
+		-1,
+		args->origin,
+		CHAN_WEAPON,
+		"weapons/spike2.wav",
+		VOL_NORM,
+		ATTN_NORM,
+		0,
+		PITCH_NORM);
+}
+
 static void EV_TrailCallback(TEMPENTITY* ent, float frametime, float currenttime)
 {
 	if (ent->entity.baseline.fuser1 <= currenttime && ent->entity.origin == ent->entity.attachment[0])
@@ -1199,6 +1233,7 @@ void EV_HookEvents()
 	gEngfuncs.pfnHookEvent("events/teleport.sc", EV_Teleport);
 	gEngfuncs.pfnHookEvent("events/explosion.sc", EV_Explosion);
 	gEngfuncs.pfnHookEvent("events/explode/tf_concuss.sc", EV_ConcBlast);
+	gEngfuncs.pfnHookEvent("events/explode/tf_nailgren.sc", EV_GetNailedIdiot);
 	gEngfuncs.pfnHookEvent("events/trail.sc", EV_Trail);
 	gEngfuncs.pfnHookEvent("events/train.sc", EV_TrainPitchAdjust);
 

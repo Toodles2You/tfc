@@ -140,6 +140,9 @@ void W_Precache()
 	PRECACHE_SOUND("weapons/concgren_blast2.wav");
 	PRECACHE_SOUND("weapons/concgren_blast3.wav");
 
+	PRECACHE_MODEL("models/ngrenade.mdl");
+	PRECACHE_SOUND("weapons/spike2.wav");
+
 	PRECACHE_MODEL("models/mirv_grenade.mdl");
 	PRECACHE_MODEL("models/bomblet.mdl");
 }

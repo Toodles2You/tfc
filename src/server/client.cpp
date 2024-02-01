@@ -54,6 +54,7 @@ extern unsigned short g_usGibbed;
 extern unsigned short g_usTeleport;
 extern unsigned short g_usExplosion;
 extern unsigned short g_usConcBlast;
+extern unsigned short g_usGetNailedIdiot;
 extern unsigned short g_usTrail;
 
 
@@ -946,6 +947,7 @@ void ClientPrecache()
 	g_usTeleport = PRECACHE_EVENT(1, "events/teleport.sc");
 	g_usExplosion = PRECACHE_EVENT(1, "events/explosion.sc");
 	g_usConcBlast = PRECACHE_EVENT(1, "events/explode/tf_concuss.sc");
+	g_usGetNailedIdiot = PRECACHE_EVENT(1, "events/explode/tf_nailgren.sc");
 	g_usTrail = PRECACHE_EVENT(1, "events/trail.sc");
 }
 

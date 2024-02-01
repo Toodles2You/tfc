@@ -25,6 +25,10 @@
 #include "weapons.h"
 #include "UserMessages.h"
 
+
+unsigned short g_usGetNailedIdiot;
+
+
 LINK_ENTITY_TO_CLASS(grenade, CGrenade);
 
 //
@@ -373,6 +377,108 @@ void CConcussionGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 CConcussionGrenade* CConcussionGrenade::ConcussionGrenade(CBaseEntity* owner)
 {
 	auto grenade = GetClassPtr((CConcussionGrenade*)nullptr);
+
+	grenade->pev->owner = owner->edict();
+	grenade->Spawn();
+
+	return grenade;
+}
+
+
+bool CNailGrenade::Spawn()
+{
+	pev->health = kNumBursts;
+	return CPrimeGrenade::Spawn();
+}
+
+
+void CNailGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
+{
+	if (pev->health <= 0)
+	{
+		CPrimeGrenade::Explode(pTrace, bitsDamageType);
+	}
+	else
+	{
+		SetModel(GetModelName());
+		SetSize(g_vecZero, g_vecZero);
+
+		pev->oldorigin = pev->origin;
+		pev->velocity = Vector(0, 0, 272);
+		pev->avelocity = Vector(0, 500, 0);
+
+		SetThink(&CNailGrenade::GetReadyToNail);
+		pev->nextthink = gpGlobals->time + 0.7F;
+	}
+}
+
+
+void CNailGrenade::GetReadyToNail()
+{
+	pev->movetype = MOVETYPE_FLY;
+	pev->solid = SOLID_NOT;
+
+	SetOrigin(pev->oldorigin + Vector(0, 0, 32));
+	pev->velocity = g_vecZero;
+
+	SetThink(&CNailGrenade::GetNailedIdiot);
+	pev->nextthink = gpGlobals->time + 0.1F;
+}
+
+
+void CNailGrenade::GetNailedIdiot()
+{
+	auto owner = CBaseEntity::Instance(pev->owner);
+
+	for (int i = 0; i < kNumNails; i++)
+	{
+		Vector angles =
+			Vector(
+				0,
+				(360 / static_cast<float>(kNumBursts)) * pev->health
+					+ (360 / static_cast<float>(kNumNails)) * i,
+				0);
+
+		Vector dir;
+		util::MakeVectorsPrivate(angles, dir, nullptr, nullptr);
+
+		CNail::CreateNailGrenadeNail(
+			pev->origin + dir * 12,
+			dir,
+			18,
+			owner
+		);
+	}
+
+	g_engfuncs.pfnPlaybackEvent(
+		FEV_GLOBAL | FEV_RELIABLE,
+		owner->edict(),
+		g_usGetNailedIdiot,
+		0.0F,
+		pev->origin,
+		pev->angles,
+		0.0F,
+		0.0F,
+		pev->health,
+		0,
+		false,
+		false
+	);
+
+	pev->health--;
+
+	if (pev->health <= 0)
+	{
+		SetThink(&CNailGrenade::Detonate);
+	}
+
+	pev->nextthink = gpGlobals->time + 0.1F;
+}
+
+
+CNailGrenade* CNailGrenade::NailGrenade(CBaseEntity* owner)
+{
+	auto grenade = GetClassPtr((CNailGrenade*)nullptr);
 
 	grenade->pev->owner = owner->edict();
 	grenade->Spawn();

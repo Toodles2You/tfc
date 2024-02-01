@@ -434,6 +434,23 @@ public:
 	static CConcussionGrenade* ConcussionGrenade(CBaseEntity* owner);
 };
 
+class CNailGrenade : public CPrimeGrenade
+{
+public:
+	bool Spawn() override;
+	void Explode(TraceResult* pTrace, int bitsDamageType) override;
+	void EXPORT GetReadyToNail();
+	void EXPORT GetNailedIdiot();
+
+	const char* GetModelName() override { return "models/ngrenade.mdl"; }
+
+	static CNailGrenade* NailGrenade(CBaseEntity* owner);
+
+private:
+	static constexpr int kNumNails = 6;
+	static constexpr int kNumBursts = 40;
+};
+
 class CMirv : public CPrimeGrenade
 {
 public:
@@ -473,6 +490,7 @@ public:
 	bool Spawn() override;
 
 	static CNail* CreateNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
+	static CNail* CreateNailGrenadeNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
 	void EXPORT NailTouch(CBaseEntity *pOther);
 };
 

@@ -28,6 +28,20 @@ CNail* CNail::CreateNail(const Vector& origin, const Vector& dir, const float da
 }
 
 
+CNail* CNail::CreateNailGrenadeNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner)
+{
+	auto nail = GetClassPtr((CNail*)nullptr);
+
+	nail->pev->origin = origin;
+	nail->pev->angles = dir;
+	nail->pev->dmg = damage;
+	nail->pev->dmg_inflictor = owner->edict();
+	nail->Spawn();
+
+	return nail;
+}
+
+
 bool CNail::Spawn()
 {
 	pev->classname = MAKE_STRING("nail");
@@ -60,7 +74,11 @@ void CNail::NailTouch(CBaseEntity* pOther)
 	{
 		CBaseEntity* owner = this;
 
-		if (pev->owner != nullptr)
+		if (pev->dmg_inflictor != nullptr)
+		{
+			owner = CBaseEntity::Instance(pev->dmg_inflictor);
+		}
+		else if (pev->owner != nullptr)
 		{
 			owner = CBaseEntity::Instance(pev->owner);
 
