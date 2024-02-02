@@ -524,7 +524,14 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 
 			EV_GetGunPosition(args, gun, args->origin);
 
-			gun = gun + right * 4 + up * -4;
+			int rightOffset = 4;
+
+			if (g_PlayerExtraInfo[args->entindex].lefthanded)
+			{
+				rightOffset = -4;
+			}
+
+			gun = gun + right * rightOffset + up * -4;
 
 			gEngfuncs.pEfxAPI->R_Projectile(gun, forward * 1000.0F, g_sModelIndexNail, 5.0F, args->entindex, EV_NailTouch);
 			break;

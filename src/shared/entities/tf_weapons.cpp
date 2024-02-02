@@ -131,11 +131,18 @@ void CTFWeapon::PrimaryAttack()
 			const auto aim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
 			util::MakeVectors(aim);
 
+			int rightOffset = 8;
+
+			if (m_pPlayer->m_bLeftHanded)
+			{
+				rightOffset = -8;
+			}
+
 			const auto gun =
 				m_pPlayer->pev->origin
 					+ m_pPlayer->pev->view_ofs
 					+ gpGlobals->v_forward * 16
-					+ gpGlobals->v_right * 8
+					+ gpGlobals->v_right * rightOffset
 					+ gpGlobals->v_up * -8;
 
 			CRocket::CreateRocket(gun, gpGlobals->v_forward, info.iProjectileDamage, m_pPlayer);
@@ -146,10 +153,17 @@ void CTFWeapon::PrimaryAttack()
 			const auto aim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
 			util::MakeVectors(aim);
 
+			int rightOffset = 4;
+
+			if (m_pPlayer->m_bLeftHanded)
+			{
+				rightOffset = -4;
+			}
+
 			const auto gun =
 				m_pPlayer->pev->origin
 					+ m_pPlayer->pev->view_ofs
-					+ gpGlobals->v_right * 4
+					+ gpGlobals->v_right * rightOffset
 					+ gpGlobals->v_up * -4;
 
 			CNail::CreateNail(gun, gpGlobals->v_forward, info.iProjectileDamage, m_pPlayer);
@@ -161,10 +175,17 @@ void CTFWeapon::PrimaryAttack()
 			const auto aim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
 			util::MakeVectors(aim);
 
+			int rightOffset = 8;
+
+			if (m_pPlayer->m_bLeftHanded)
+			{
+				rightOffset = -8;
+			}
+
 			const auto gun =
 				m_pPlayer->pev->origin
 					+ m_pPlayer->pev->view_ofs
-					+ gpGlobals->v_right * 8
+					+ gpGlobals->v_right * rightOffset
 					+ gpGlobals->v_up * -16;
 
 			CPipeBombLauncher* launcher = nullptr;
