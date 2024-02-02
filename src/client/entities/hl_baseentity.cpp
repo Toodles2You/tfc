@@ -28,7 +28,7 @@ This file contains "stubs" of class member implementations so that we can predic
 #include "weapons.h"
 
 bool CBaseEntity::KeyValue(KeyValueData* pkvd) { return false; }
-bool CBaseEntity::TakeHealth(float flHealth, int bitsDamageType) { return true; }
+bool CBaseEntity::GiveHealth(float flHealth, int bitsDamageType) { return true; }
 bool CBaseEntity::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) { return true; }
 CBaseEntity* CBaseEntity::GetNextTarget() { return NULL; }
 #ifdef HALFLIFE_SAVERESTORE
@@ -59,7 +59,7 @@ void CBaseEntity::StopSound(const char* sample, int channel) {}
 void CBaseEntity::DelayThink() {}
 
 void CBasePlayer::DeathSound() {}
-bool CBasePlayer::TakeHealth(float flHealth, int bitsDamageType) { return false; }
+bool CBasePlayer::GiveHealth(float flHealth, int bitsDamageType) { return false; }
 void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, int hitgroup, int bitsDamageType) {}
 bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) { return false; }
 void CBasePlayer::PackDeadPlayerWeapons() {}

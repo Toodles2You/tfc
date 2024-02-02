@@ -181,7 +181,7 @@ bool CHealthKit::MyTouch(CBasePlayer* pPlayer)
 		return false;
 	}
 
-	if (pPlayer->TakeHealth(15, DMG_GENERIC))
+	if (pPlayer->GiveHealth(15, DMG_GENERIC))
 	{
 		MessageBegin(MSG_ONE, gmsgItemPickup, pPlayer);
 		WriteString(STRING(pev->classname));
