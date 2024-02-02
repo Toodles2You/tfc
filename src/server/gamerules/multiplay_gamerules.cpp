@@ -80,12 +80,7 @@ void CTeam::AddPlayer(CBasePlayer *player)
 
 	player->m_team = this;
 
-	MessageBegin(MSG_ALL, gmsgExtraInfo);
-	WriteByte(player->entindex());
-	WriteByte(player->PCNumber());
-	WriteByte(player->TeamNumber());
-	WriteByte(player->IsPlayer() && !player->IsAlive());
-	MessageEnd();
+	player->SendExtraInfo();
 
 	m_players.push_back(player);
 	m_numPlayers = m_players.size();
@@ -397,12 +392,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 	WriteShort(0);
 	MessageEnd();
 
-	MessageBegin(MSG_ONE, gmsgExtraInfo, pl);
-	WriteByte(pl->entindex());
-	WriteByte(PC_UNDEFINED);
-	WriteByte(TEAM_UNASSIGNED);
-	WriteByte(false);
-	MessageEnd();
+	pl->SendExtraInfo(pl);
 
 	SendMOTDToClient(pl);
 
@@ -419,12 +409,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 			WriteShort(plr->m_iDeaths);
 			MessageEnd();
 
-			MessageBegin(MSG_ONE, gmsgExtraInfo, pl);
-			WriteByte(i);
-			WriteByte(plr->PCNumber());
-			WriteByte(plr->TeamNumber());
-			WriteByte(plr->IsPlayer() && !plr->IsAlive());
-			MessageEnd();
+			plr->SendExtraInfo(pl);
 		}
 	}
 
@@ -508,12 +493,7 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer* pPlayer)
 
 void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 {
-	MessageBegin(MSG_ALL, gmsgExtraInfo);
-	WriteByte(pPlayer->entindex());
-	WriteByte(pPlayer->PCNumber());
-	WriteByte(pPlayer->TeamNumber());
-	WriteByte(false);
-	MessageEnd();
+	pPlayer->SendExtraInfo();
 
 	if (pPlayer->TeamNumber() == TEAM_UNASSIGNED)
 	{
@@ -631,12 +611,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer,
 		((CBasePlayer *)killer)->m_flNextDecalTime = -decalfrequency.value;
 	}
 
-	MessageBegin(MSG_ALL, gmsgExtraInfo);
-	WriteByte(pVictim->entindex());
-	WriteByte(pVictim->PCNumber());
-	WriteByte(pVictim->TeamNumber());
-	WriteByte(true);
-	MessageEnd();
+	pVictim->SendExtraInfo();
 }
 
 

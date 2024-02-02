@@ -65,6 +65,7 @@ CStudioModelRenderer::CStudioModelRenderer()
 {
 	m_fDoInterp = true;
 	m_fGaitEstimation = true;
+	m_fFlipModel = false;
 	m_pCurrentEntity = NULL;
 	m_pCvarHiModels = NULL;
 	m_pCvarDeveloper = NULL;
@@ -946,6 +947,14 @@ void CStudioModelRenderer::StudioSetupBones()
 		{
 			if (0 != IEngineStudio.IsHardware())
 			{
+				if (m_fFlipModel)
+				{
+					bonematrix[1][0] = -bonematrix[1][0];
+					bonematrix[1][1] = -bonematrix[1][1];
+					bonematrix[1][2] = -bonematrix[1][2];
+					bonematrix[1][3] = -bonematrix[1][3];
+				}
+
 				ConcatTransforms((*m_protationmatrix), bonematrix, (*m_pbonetransform)[i]);
 
 				// MatrixCopy should be faster...
@@ -1151,10 +1160,12 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 
 	if (m_pCurrentEntity->curstate.movetype == MOVETYPE_FOLLOW)
 	{
+		m_fFlipModel = false;
 		StudioMergeBones(m_pRenderModel);
 	}
 	else
 	{
+		m_fFlipModel = StudioShouldFlipModel();
 		StudioSetupBones();
 	}
 	StudioSaveBones();
@@ -1329,6 +1340,11 @@ void CStudioModelRenderer::StudioProcessGait(entity_state_t* pplayer)
 	if (flYaw > 180)
 		flYaw = flYaw - 360;
 
+	if (m_fFlipModel)
+	{
+		flYaw = -flYaw;
+	}
+
 	if (flYaw > 120)
 	{
 		m_pPlayerInfo->gaityaw = m_pPlayerInfo->gaityaw - 180;
@@ -1419,6 +1435,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 	{
 		Vector orig_angles;
 		m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
+		m_fFlipModel = StudioShouldFlipModel();
 
 		VectorCopy(m_pCurrentEntity->angles, orig_angles);
 
@@ -1461,6 +1478,12 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 	}
 
 	m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
+
+	if (0 == pplayer->gaitsequence)
+	{
+		m_fFlipModel = StudioShouldFlipModel();
+	}
+
 	StudioSetupBones();
 	StudioSaveBones();
 	m_pPlayerInfo->renderframe = m_nFrameCount;
@@ -1704,7 +1727,19 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware()
 			}
 
 			IEngineStudio.GL_SetRenderMode(rendermode);
+
+			if (m_fFlipModel)
+			{
+				gEngfuncs.pTriAPI->CullFace(TRI_NONE);
+			}
+
 			IEngineStudio.StudioDrawPoints();
+
+			if (m_fFlipModel)
+			{
+				gEngfuncs.pTriAPI->CullFace(TRI_NONE);
+			}
+
 			IEngineStudio.GL_StudioDrawShadow();
 		}
 	}
@@ -1734,5 +1769,27 @@ void CStudioModelRenderer::StudioRenderFinal()
 	else
 	{
 		StudioRenderFinal_Software();
+	}
+}
+
+/*
+====================
+StudioShouldFlipModel
+
+====================
+*/
+bool CStudioModelRenderer::StudioShouldFlipModel()
+{
+	if (gEngfuncs.GetViewModel() == m_pCurrentEntity)
+	{
+		return g_PlayerExtraInfo[gEngfuncs.GetLocalPlayer()->index].lefthanded;
+	}
+	else if (m_pPlayerInfo != nullptr)
+	{
+		return g_PlayerExtraInfo[m_pCurrentEntity->index].lefthanded;
+	}
+	else
+	{
+		return false;
 	}
 }

@@ -94,6 +94,8 @@ public:
 	// Process movement of player
 	virtual void StudioProcessGait(entity_state_t* pplayer);
 
+	virtual bool StudioShouldFlipModel();
+
 public:
 	// Client clock
 	double m_clTime;
@@ -104,6 +106,8 @@ public:
 	bool m_fDoInterp;
 	// Do gait estimation?
 	bool m_fGaitEstimation;
+	// Do model flipping?
+	bool m_fFlipModel;
 
 	// Current render frame #
 	int m_nFrameCount;

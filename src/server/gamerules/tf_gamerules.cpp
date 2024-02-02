@@ -485,12 +485,7 @@ void CTeamFortress::SendMenusToClient(CBasePlayer* player)
 
 void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
 {
-	MessageBegin(MSG_ALL, gmsgExtraInfo);
-	WriteByte(pPlayer->entindex());
-	WriteByte(pPlayer->PCNumber());
-	WriteByte(pPlayer->TeamNumber());
-	WriteByte(false);
-	MessageEnd();
+    pPlayer->SendExtraInfo();
 
 	if (pPlayer->TeamNumber() == TEAM_UNASSIGNED || pPlayer->PCNumber() == PC_UNDEFINED)
 	{

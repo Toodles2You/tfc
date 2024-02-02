@@ -91,6 +91,7 @@ cvar_t* violence_hblood = nullptr;
 cvar_t* violence_hgibs = nullptr;
 cvar_t* cl_autowepswitch = nullptr;
 cvar_t* cl_grenadetoggle = nullptr;
+cvar_t* cl_righthand = nullptr;
 
 void ShutdownInput();
 
@@ -346,6 +347,7 @@ void CHud::Init()
 
 	cl_autowepswitch = CVAR_CREATE("cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO);
 	cl_grenadetoggle = gEngfuncs.pfnRegisterVariable("cl_grenadetoggle", "0", FCVAR_ARCHIVE | FCVAR_USERINFO);
+	cl_righthand = gEngfuncs.pfnRegisterVariable("cl_righthand", "1", FCVAR_ARCHIVE | FCVAR_USERINFO);
 
 	m_pSpriteList = NULL;
 

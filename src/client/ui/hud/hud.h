@@ -245,6 +245,7 @@ struct extra_player_info_t
 	bool dead;
 	short teamnumber;
 	char teamname[MAX_TEAM_NAME];
+	bool lefthanded;
 };
 
 struct team_info_t
