@@ -357,7 +357,8 @@ static void EV_DecalGunshot(pmtrace_t* pTrace, Vector vecDir)
 		return;
 	}
 
-	if (pe->solid == SOLID_BSP)
+	if (pe->solid == SOLID_BSP
+	 && gEngfuncs.PM_PointContents(pTrace->endpos, nullptr) != CONTENTS_SKY)
 	{
 		EV_GunshotDecalTrace(pTrace, EV_DamageDecal(pe));
 	}

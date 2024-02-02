@@ -24,6 +24,7 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "view.h"
 #include <string.h>
 
 
@@ -137,6 +138,11 @@ bool CHudHealth::MsgFunc_Damage(const char* pszName, int iSize, void* pbuf)
 	// Actually took damage?
 	if (damageTaken > 0 || armor > 0)
 		CalcDamageDirection(vecFrom);
+
+	if (damageTaken > 0)
+	{
+		V_PunchAxis(0, -2.0F);
+	}
 
 	return true;
 }
