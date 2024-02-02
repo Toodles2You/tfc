@@ -2117,7 +2117,7 @@ bool TeamFortressViewport::MsgFunc_ExtraInfo(const char* pszName, int iSize, voi
 	{
 		extra_player_info_t& info = g_PlayerExtraInfo[cl];
 
-		info.playerclass = role & 32;
+		info.playerclass = role & 31;
 		info.teamnumber = role >> 5;
 		info.dead = (flags & 1) != 0;
 		info.lefthanded = (flags & 2) != 0;

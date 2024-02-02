@@ -1788,7 +1788,7 @@ void CBasePlayer::SendExtraInfo(CBaseEntity* toWhom)
 	WriteByte(entindex());
 
 	byte role = 0;
-	role |= PCNumber() & 32;
+	role |= PCNumber();
 	role |= TeamNumber() << 5;
 	WriteByte(role);
 
