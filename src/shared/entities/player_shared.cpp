@@ -218,6 +218,9 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 
 	data.tfstate = m_TFState;
 	data.vuser4.y = static_cast<float>(m_nLegDamage);
+#ifdef GAME_DLL
+	data.iuser4 = m_iConcussionTime;
+#endif
 
 	data.m_iId = (m_pActiveWeapon != nullptr) ? m_pActiveWeapon->GetID() : WEAPON_NONE;
 
@@ -262,6 +265,7 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 
 	m_TFState = data.tfstate;
 	m_nLegDamage = static_cast<byte>(data.vuser4.y);
+	m_iConcussionTime = data.iuser4;
 
 	if (m_pActiveWeapon == nullptr)
 	{
@@ -299,6 +303,8 @@ void CBasePlayer::DecrementTimers(const int msec)
 		len = std::max(len, 0.0F);
 		pev->punchangle = pev->punchangle * len;
 	}
+
+	m_iConcussionTime = std::max(m_iConcussionTime - msec, 0);
 }
 
 

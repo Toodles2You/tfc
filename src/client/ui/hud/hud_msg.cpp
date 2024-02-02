@@ -111,18 +111,28 @@ bool CHud::MsgFunc_GameMode(const char* pszName, int iSize, void* pbuf)
 }
 
 
+void CHud::Update_Concuss(int iConcuss)
+{
+	if ((0 != m_iConcussionEffect) != (0 != iConcuss))
+	{
+		if (0 != iConcuss)
+		{
+			this->m_StatusIcons.EnableIcon("dmg_concuss");
+		}
+		else
+		{
+			this->m_StatusIcons.DisableIcon("dmg_concuss");
+		}
+	}
+
+	m_iConcussionEffect = iConcuss;
+}
+
+
 bool CHud::MsgFunc_Concuss(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
-	m_iConcussionEffect = READ_BYTE();
-	if (0 != m_iConcussionEffect)
-	{
-		this->m_StatusIcons.EnableIcon("dmg_concuss");
-	}
-	else
-	{
-		this->m_StatusIcons.DisableIcon("dmg_concuss");
-	}
+	Update_Concuss(READ_BYTE());
 	return true;
 }
 

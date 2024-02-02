@@ -678,6 +678,7 @@ public:
 	~CHud(); // destructor, frees allocated memory
 
 	void Update_SetFOV(int iFov);
+	void Update_Concuss(int iConcuss);
 	// user messages
 	bool MsgFunc_GameMode(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_ResetHUD(const char* pszName, int iSize, void* pbuf);

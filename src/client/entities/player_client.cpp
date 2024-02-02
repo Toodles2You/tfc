@@ -85,6 +85,22 @@ void CBasePlayer::UpdateHudData()
 	{
 		gHUD.m_Ammo.Update_AmmoX(i, m_rgAmmo[i]);
 	}
+
+	if (m_iConcussionTime > 0)
+	{
+		if (m_iConcussionTime > 7000)
+		{
+			gHUD.Update_Concuss(100);
+		}
+		else
+		{
+			gHUD.Update_Concuss(m_iConcussionTime / 70);
+		}
+	}
+	else
+	{
+		gHUD.Update_Concuss(0);
+	}
 }
 
 

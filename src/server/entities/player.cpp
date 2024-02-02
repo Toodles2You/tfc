@@ -180,6 +180,7 @@ bool CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
 
 	m_TFState &= ~kTFStateInfected;
 	m_nLegDamage = 0;
+	m_iConcussionTime = 0;
 
 	return CBaseAnimating::TakeHealth(flHealth, bitsDamageType);
 }

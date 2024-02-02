@@ -318,10 +318,27 @@ public:
 	void SaveMe();
 #endif
 
+protected:
+	int m_iConcussionTime;
+
+public:
+	void BecomeConcussed(CBaseEntity* attacker)
+	{
+		if (PCNumber() == PC_MEDIC)
+		{
+			m_iConcussionTime = 7000;
+		}
+		else
+		{
+			m_iConcussionTime = 15000;
+		}
+	}
+
 	void ClearEffects()
 	{
 		m_TFState = 0;
 		m_nLegDamage = 0;
+		m_iConcussionTime = 0;
 	}
 
 protected:

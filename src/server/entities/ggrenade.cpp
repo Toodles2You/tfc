@@ -24,6 +24,7 @@
 #include "player.h"
 #include "weapons.h"
 #include "UserMessages.h"
+#include "gamerules.h"
 
 
 unsigned short g_usGetNailedIdiot;
@@ -529,6 +530,12 @@ void CConcussionGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 		entity->pev->velocity.x *= ajdusted;
 		entity->pev->velocity.y *= ajdusted;
 		entity->pev->velocity.z *= ajdusted * 1.5F;
+
+		if ((entity == owner && !FStringNull(pev->model))
+		 || (g_pGameRules->PlayerRelationship(entity, owner) < GR_ALLY))
+		{
+			dynamic_cast<CBasePlayer*>(entity)->BecomeConcussed(owner);
+		}
 	}
 
 	Remove();
