@@ -1340,6 +1340,11 @@ void CStudioModelRenderer::StudioProcessGait(entity_state_t* pplayer)
 	if (flYaw > 180)
 		flYaw = flYaw - 360;
 
+	if (m_fFlipModel)
+	{
+		flYaw = -flYaw;
+	}
+
 	if (flYaw > 120)
 	{
 		m_pPlayerInfo->gaityaw = m_pPlayerInfo->gaityaw - 180;
@@ -1430,6 +1435,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 	{
 		Vector orig_angles;
 		m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
+		m_fFlipModel = StudioShouldFlipModel();
 
 		VectorCopy(m_pCurrentEntity->angles, orig_angles);
 
@@ -1472,7 +1478,12 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 	}
 
 	m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
-	m_fFlipModel = StudioShouldFlipModel();
+
+	if (0 == pplayer->gaitsequence)
+	{
+		m_fFlipModel = StudioShouldFlipModel();
+	}
+
 	StudioSetupBones();
 	StudioSaveBones();
 	m_pPlayerInfo->renderframe = m_nFrameCount;
@@ -1765,7 +1776,6 @@ void CStudioModelRenderer::StudioRenderFinal()
 ====================
 StudioShouldFlipModel
 
-Toodles FIXME: Gait animation gets screwed up when flipping players.
 ====================
 */
 bool CStudioModelRenderer::StudioShouldFlipModel()
@@ -1774,12 +1784,10 @@ bool CStudioModelRenderer::StudioShouldFlipModel()
 	{
 		return g_PlayerExtraInfo[gEngfuncs.GetLocalPlayer()->index].lefthanded;
 	}
-#if 0
 	else if (m_pPlayerInfo != nullptr)
 	{
 		return g_PlayerExtraInfo[m_pCurrentEntity->index].lefthanded;
 	}
-#endif
 	else
 	{
 		return false;
