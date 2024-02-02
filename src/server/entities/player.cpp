@@ -970,6 +970,18 @@ bool CBasePlayer::Spawn()
 
 	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
 
+	char* infobuffer = g_engfuncs.pfnGetInfoKeyBuffer(edict());
+	char* value = g_engfuncs.pfnInfoKeyValue(infobuffer, "cl_righthand");
+
+	if ('\0' != *value)
+	{
+		m_bLeftHanded = atoi(value) == 0;
+	}
+	else
+	{
+		m_bLeftHanded = false;
+	}
+
 	g_pGameRules->PlayerSpawn(this);
 
 	return true;
@@ -1759,6 +1771,39 @@ void CBasePlayer::ThrowGrenade()
 {
 	m_TFState &= ~kTFStateGrenadePrime;
 	m_TFState |= kTFStateGrenadeThrowing;
+}
+
+
+void CBasePlayer::SendExtraInfo(CBaseEntity* toWhom)
+{
+	if (toWhom != nullptr)
+	{
+		MessageBegin(MSG_ONE, gmsgExtraInfo, toWhom);
+	}
+	else
+	{
+		MessageBegin(MSG_ALL, gmsgExtraInfo);
+	}
+
+	WriteByte(entindex());
+
+	byte role = 0;
+	role |= PCNumber() & 32;
+	role |= TeamNumber() << 5;
+	WriteByte(role);
+
+	byte flags = 0;
+	if (IsPlayer() && !IsAlive())
+	{
+		flags |= 1;
+	}
+	if (m_bLeftHanded)
+	{
+		flags |= 2;
+	}
+	WriteByte(flags);
+
+	MessageEnd();
 }
 
 

@@ -244,9 +244,13 @@ public:
 	float m_flNextChatTime;
 
 	void SetPrefsFromUserinfo(char* infobuffer);
+#ifdef GAME_DLL
+	void SendExtraInfo(CBaseEntity* toWhom = nullptr);
+#endif
 
 	int m_iAutoWepSwitch;
 	bool m_bGrenadeToggle;
+	bool m_bLeftHanded;
 
 	//True if the player is currently spawning.
 	bool m_bIsSpawning = false;

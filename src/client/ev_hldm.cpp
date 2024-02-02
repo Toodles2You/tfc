@@ -373,6 +373,12 @@ static void EV_CheckTracer(
 	int frequency)
 {
 	Vector muzzle;
+	int rightOffset = 2;
+
+	if (g_PlayerExtraInfo[entindex].lefthanded)
+	{
+		rightOffset = -2;
+	}
 
 #if 0
 	if (EV_IsLocal(entindex) && CL_IsThirdPerson() == 0)
@@ -382,7 +388,7 @@ static void EV_CheckTracer(
 	else
 #endif
 	{
-		muzzle = start + Vector(0, 0, -4) + right * 2 + forward * 16;
+		muzzle = start + Vector(0, 0, -4) + right * rightOffset + forward * 16;
 	}
 
 	EV_BubbleTrail(muzzle, end, distance / 64.0F);

@@ -20,6 +20,7 @@ Features
     - Weapon events sync up with where you're actually aiming
     - Millisecond integer timers
     - Crosshair compensates for recoil
+- Left handed weapon option, see `cl_righthand`
 - Bot system with dummy bots
 - Removed Half-Life single-player content
     - Monster code removed (No stub classes!)

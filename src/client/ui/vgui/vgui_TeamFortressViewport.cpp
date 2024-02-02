@@ -2110,24 +2110,22 @@ bool TeamFortressViewport::MsgFunc_ExtraInfo(const char* pszName, int iSize, voi
 	BEGIN_READ(pbuf, iSize);
 
 	auto cl = READ_BYTE();
-	auto playerclass = READ_BYTE();
-	auto teamnumber = READ_BYTE();
-	auto dead = READ_BYTE() != 0;
+	auto role = READ_BYTE();
+	auto flags = READ_BYTE();
 
 	if (cl > 0 && cl <= MAX_PLAYERS_HUD)
 	{
-		g_PlayerExtraInfo[cl].playerclass = playerclass;
-		g_PlayerExtraInfo[cl].teamnumber = teamnumber;
-		g_PlayerExtraInfo[cl].dead = dead;
+		extra_player_info_t& info = g_PlayerExtraInfo[cl];
 
-		//Dont go bellow 0!
-		if (g_PlayerExtraInfo[cl].teamnumber < 0)
-			g_PlayerExtraInfo[cl].teamnumber = 0;
+		info.playerclass = role & 32;
+		info.teamnumber = role >> 5;
+		info.dead = (flags & 1) != 0;
+		info.lefthanded = (flags & 2) != 0;
 
 		if (cl == gEngfuncs.GetLocalPlayer()->index)
 		{
-			g_iPlayerClass = playerclass;
-			g_iTeamNumber = teamnumber;
+			g_iPlayerClass = info.playerclass;
+			g_iTeamNumber = info.teamnumber;
 		}
 
 		UpdateOnPlayerInfo();

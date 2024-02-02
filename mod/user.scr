@@ -55,6 +55,17 @@ DESCRIPTION INFO_OPTIONS
 		{ "90" }
     }
 
+	"cl_righthand"
+	{
+		"#Mod_Weapon_Alignment"
+		{
+			LIST
+			"#Mod_Left_Handed" "0"
+			"#Mod_Right_Handed" "1"
+		}
+		{ "1" }
+	}
+
 	"hud_fastswitch"
 	{
 		"#Valve_Switch_Weapons_Immediately"

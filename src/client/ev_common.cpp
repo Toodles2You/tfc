@@ -155,6 +155,9 @@ void EV_GetDefaultShellInfo(event_args_t* args, float* origin, float* velocity, 
 
 	Vector view_ofs = VEC_VIEW;
 
+	fR = gEngfuncs.pfnRandomFloat(50, 70);
+	fU = gEngfuncs.pfnRandomFloat(100, 150);
+
 	if (EV_IsPlayer(idx))
 	{
 		if (EV_IsLocal(idx))
@@ -165,10 +168,13 @@ void EV_GetDefaultShellInfo(event_args_t* args, float* origin, float* velocity, 
 		{
 			view_ofs = VEC_DUCK_VIEW;
 		}
-	}
 
-	fR = gEngfuncs.pfnRandomFloat(50, 70);
-	fU = gEngfuncs.pfnRandomFloat(100, 150);
+		if (g_PlayerExtraInfo[idx].lefthanded)
+		{
+			rightScale = -rightScale;
+			fR = -fR;
+		}
+	}
 
 	for (i = 0; i < 3; i++)
 	{

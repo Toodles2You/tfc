@@ -96,8 +96,18 @@ void CMP5::SecondaryAttack()
 #ifndef CLIENT_DLL
 	util::MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
+	int rightOffset = 4;
+
+	if (m_pPlayer->m_bLeftHanded)
+	{
+		rightOffset = -4;
+	}
+
 	CGrenade::ShootContact(m_pPlayer,
-		m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_forward * 16,
+		m_pPlayer->pev->origin
+			+ m_pPlayer->pev->view_ofs
+			+ gpGlobals->v_right * rightOffset
+			+ gpGlobals->v_forward * 16,
 		gpGlobals->v_forward * 800);
 #endif
 

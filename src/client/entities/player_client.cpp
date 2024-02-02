@@ -27,6 +27,7 @@
 
 extern cvar_t* cl_autowepswitch;
 extern cvar_t* cl_grenadetoggle;
+extern cvar_t* cl_righthand;
 
 
 void CBasePlayer::FireBullets(
@@ -56,6 +57,9 @@ bool CBasePlayer::Spawn()
 	SetAction(Action::Idle, true);
 
 	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
+
+	m_bLeftHanded = static_cast<int>(floorf(cl_righthand->value)) == 0;
+
 	return true;
 }
 

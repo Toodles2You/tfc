@@ -42,7 +42,7 @@ void LinkUserMessages()
 	gmsgShowGameTitle = REG_USER_MSG("GameTitle", 1);
 	gmsgDeathMsg = REG_USER_MSG("DeathMsg", -1);
 	gmsgScoreInfo = REG_USER_MSG("ScoreInfo", 5);
-	gmsgExtraInfo = REG_USER_MSG("ExtraInfo", 4);
+	gmsgExtraInfo = REG_USER_MSG("ExtraInfo", 3);
 	gmsgTeamScore = REG_USER_MSG("TeamScore", 3); // sets the score of a team on the scoreboard
 	gmsgGameMode = REG_USER_MSG("GameMode", 1);
 	gmsgMOTD = REG_USER_MSG("MOTD", -1);
