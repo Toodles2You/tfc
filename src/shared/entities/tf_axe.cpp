@@ -234,11 +234,11 @@ int CMedikit::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& 
 		{
 			if (hit->pev->health >= hit->pev->max_health)
 			{
-				hit->TakeHealth(5, DMG_IGNORE_MAXHEALTH);
+				hit->GiveHealth(5, DMG_IGNORE_MAXHEALTH);
 			}
 			else
 			{
-				hit->TakeHealth(hit->pev->max_health - hit->pev->health, DMG_IGNORE_MAXHEALTH);
+				hit->GiveHealth(hit->pev->max_health - hit->pev->health, DMG_IGNORE_MAXHEALTH);
 			}
 		}
 		else

@@ -171,7 +171,7 @@ void CBasePlayer::DeathSound()
 // override takehealth
 // bitsDamageType indicates type of damage healed.
 
-bool CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
+bool CBasePlayer::GiveHealth(float flHealth, int bitsDamageType)
 {
 	if (pev->takedamage == DAMAGE_NO)
 	{
@@ -182,7 +182,7 @@ bool CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
 	m_nLegDamage = 0;
 	m_iConcussionTime = 0;
 
-	return CBaseAnimating::TakeHealth(flHealth, bitsDamageType);
+	return CBaseAnimating::GiveHealth(flHealth, bitsDamageType);
 }
 
 //=========================================================

@@ -124,7 +124,7 @@ enum
 #define DMG_CALTROP (1 << 30)
 #define DMG_HALLUC (1 << 31)
 
-// TF Healing Additions for TakeHealth
+// TF Healing Additions for GiveHealth
 #define DMG_IGNORE_MAXHEALTH DMG_IGNITE
 // TF Redefines since we never use the originals
 #define DMG_NAIL DMG_SLASH
