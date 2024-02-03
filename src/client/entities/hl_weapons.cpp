@@ -64,13 +64,12 @@ static CGrenadeLauncher tf_weapon_gl;
 static CRocketLauncher tf_weapon_rpg;
 static CPipeBombLauncher tf_weapon_pl;
 
-static CTFWeapon* weapons[] =
+static CTFWeapon* weapons[WEAPON_TYPES] =
 {
-	nullptr,
-	nullptr,
-	nullptr,
+	// nullptr,
+	// nullptr,
 	&tf_weapon_medikit,
-	nullptr,
+	// nullptr,
 	&tf_weapon_axe,
 	&tf_weapon_sniperrifle,
 	&tf_weapon_autorifle,
@@ -79,16 +78,16 @@ static CTFWeapon* weapons[] =
 	&tf_weapon_ng,
 	&tf_weapon_superng,
 	&tf_weapon_gl,
-	nullptr,
+	// nullptr,
 	&tf_weapon_rpg,
-	nullptr,
-	nullptr,
-	nullptr,
-	nullptr,
-	nullptr,
-	nullptr,
+	// nullptr,
+	// nullptr,
+	// nullptr,
+	// nullptr,
+	// nullptr,
+	// nullptr,
 	&tf_weapon_pl,
-	nullptr,
+	// nullptr,
 };
 
 static Vector previousorigin;
@@ -269,7 +268,7 @@ static void HUD_InitClientWeapons()
 	}
 
 	// Allocate slots for each weapon that we are going to be predicting
-	for (auto i = 1; i < ARRAYSIZE(weapons); i++)
+	for (auto i = 0; i < ARRAYSIZE(weapons); i++)
 	{
 		if (weapons[i] != nullptr)
 		{
@@ -439,7 +438,7 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 	player->SetEntityState(from->playerstate);
 	player->SetClientData(from->client);
 
-	for (i = 1; i < ARRAYSIZE(weapons); i++)
+	for (i = 0; i < ARRAYSIZE(weapons); i++)
 	{
 		if (weapons[i] != nullptr)
 		{
@@ -452,7 +451,7 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 
 	player->PostThink();
 
-	for (i = 1; i < ARRAYSIZE(weapons); i++)
+	for (i = 0; i < ARRAYSIZE(weapons); i++)
 	{
 		if (weapons[i] != nullptr)
 		{
@@ -471,7 +470,7 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 
 	g_finalstate = *to;
 
-	g_CurrentWeaponId = to->client.m_iId;
+	g_CurrentWeaponId = to->client.m_iId - 1;
 	g_PunchAngle = to->client.punchangle * 2;
 }
 
@@ -526,7 +525,7 @@ void WeaponsResource::Init()
 	memset(rgWeapons, 0, sizeof(rgWeapons));
 	Reset();
 
-	for (auto i = 1; i < ARRAYSIZE(weapons); i++)
+	for (auto i = 0; i < ARRAYSIZE(weapons); i++)
 	{
 		if (weapons[i] != nullptr)
 		{
@@ -561,7 +560,7 @@ Associate script file name with callback functions.
 */
 void EV_HookWeaponEvents()
 {
-	for (auto i = 1; i < ARRAYSIZE(weapons); i++)
+	for (auto i = 0; i < ARRAYSIZE(weapons); i++)
 	{
 		if (weapons[i] != nullptr)
 		{

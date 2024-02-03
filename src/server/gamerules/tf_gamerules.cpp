@@ -342,7 +342,7 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
 
     for (int i = 0; i < 4; i++)
     {
-        if (info.weapons[i] != WEAPON_NONE
+        if (info.weapons[i] != -1
          && g_szWeaponNames[info.weapons[i]] != nullptr)
         {
             pPlayer->GiveNamedItem(g_szWeaponNames[info.weapons[i]]);

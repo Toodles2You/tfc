@@ -98,7 +98,7 @@ void HUD_TxferPredictionData(struct entity_state_s* ps, const struct entity_stat
 		pcd->iuser3 = g_iObserverTarget2; // second target
 	}
 
-	memcpy(wd, pwd, WEAPON_LAST * sizeof(weapon_data_t));
+	memcpy(wd, pwd, WEAPON_TYPES * sizeof(weapon_data_t));
 }
 
 /*

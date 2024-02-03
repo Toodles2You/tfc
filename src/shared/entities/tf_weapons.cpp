@@ -46,7 +46,7 @@ CTFWeapon* CTFWeapon::GetSibling()
 {
 	const auto info = GetInfo();
 
-	if (info.iSibling != WEAPON_NONE)
+	if (info.iSibling != -1)
 	{
 		return dynamic_cast<CTFWeapon*>(m_pPlayer->m_rgpPlayerWeapons[info.iSibling]);
 	}
@@ -373,7 +373,7 @@ void CShotgun::GetWeaponInfo(WeaponInfo& i)
 	i.pszAlternateSound = nullptr;
 	i.pszReloadSound = "weapons/reload1.wav";
 	i.flPunchAngle = -2.0F;
-	i.iSibling = WEAPON_NONE;
+	i.iSibling = -1;
 }
 
 
@@ -419,7 +419,7 @@ void CSuperShotgun::GetWeaponInfo(WeaponInfo& i)
 	i.pszAlternateSound = nullptr;
 	i.pszReloadSound = "weapons/reload1.wav";
 	i.flPunchAngle = -4.0F;
-	i.iSibling = WEAPON_NONE;
+	i.iSibling = -1;
 }
 
 
@@ -465,7 +465,7 @@ void CNailgun::GetWeaponInfo(WeaponInfo& i)
 	i.pszAlternateSound = nullptr;
 	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -2.0F;
-	i.iSibling = WEAPON_NONE;
+	i.iSibling = -1;
 }
 
 
@@ -511,7 +511,7 @@ void CSuperNailgun::GetWeaponInfo(WeaponInfo& i)
 	i.pszAlternateSound = nullptr;
 	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -2.0F;
-	i.iSibling = WEAPON_NONE;
+	i.iSibling = -1;
 }
 
 
@@ -557,6 +557,6 @@ void CRocketLauncher::GetWeaponInfo(WeaponInfo& i)
 	i.pszAlternateSound = nullptr;
 	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -4.0F;
-	i.iSibling = WEAPON_NONE;
+	i.iSibling = -1;
 }
 

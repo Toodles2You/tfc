@@ -167,7 +167,7 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEEXPLOSION | AT_SAVEELECTRICITY | AT_SAVEFIRE,
         .initArmorClasses = 0,
         .weapons = {
-            WEAPON_ASSAULT_CANNON,
+            // WEAPON_ASSAULT_CANNON,
             WEAPON_SUPER_SHOTGUN,
             WEAPON_TF_SHOTGUN,
             WEAPON_AXE,
@@ -196,8 +196,8 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEELECTRICITY | AT_SAVEFIRE,
         .initArmorClasses = AT_SAVEFIRE,
         .weapons = {
-            WEAPON_FLAMETHROWER,
-            WEAPON_INCENDIARY,
+            // WEAPON_FLAMETHROWER,
+            // WEAPON_INCENDIARY,
             WEAPON_TF_SHOTGUN,
             WEAPON_AXE,
         },
@@ -225,10 +225,10 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEELECTRICITY | AT_SAVEFIRE,
         .initArmorClasses = 0,
         .weapons = {
-            WEAPON_KNIFE,
+            // WEAPON_KNIFE,
             WEAPON_SUPER_SHOTGUN,
             WEAPON_NAILGUN,
-            WEAPON_TRANQ,
+            // WEAPON_TRANQ,
         },
         .maxAmmo = {
             40,
@@ -254,9 +254,9 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEEXPLOSION | AT_SAVEELECTRICITY | AT_SAVEFIRE,
         .initArmorClasses = 0,
         .weapons = {
-            WEAPON_SPANNER,
+            // WEAPON_SPANNER,
             WEAPON_SUPER_SHOTGUN,
-            WEAPON_LASER,
+            // WEAPON_LASER,
         },
         .maxAmmo = {
             50,

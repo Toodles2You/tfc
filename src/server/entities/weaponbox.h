@@ -36,7 +36,7 @@ public:
 	bool PackWeapon(CBasePlayerWeapon* pWeapon);
 	bool PackAmmo(int iType, int iCount);
 
-	EHANDLE m_hPlayerWeapons[WEAPON_LAST]; // one slot for each
+	EHANDLE m_hPlayerWeapons[WEAPON_TYPES]; // one slot for each
 
 	byte m_rgAmmo[AMMO_TYPES];	 // ammo quantities
 

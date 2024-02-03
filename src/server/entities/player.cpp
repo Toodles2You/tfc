@@ -63,7 +63,7 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 	DEFINE_FIELD(CBasePlayer, m_afButtonPressed, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayer, m_afButtonReleased, FIELD_INTEGER),
 
-	DEFINE_ARRAY(CBasePlayer, m_rgpPlayerWeapons, FIELD_CLASSPTR, WEAPON_LAST),
+	DEFINE_ARRAY(CBasePlayer, m_rgpPlayerWeapons, FIELD_CLASSPTR, WEAPON_TYPES),
 	DEFINE_FIELD(CBasePlayer, m_pActiveWeapon, FIELD_CLASSPTR),
 	DEFINE_FIELD(CBasePlayer, m_WeaponBits, FIELD_INT64),
 
@@ -429,7 +429,7 @@ void CBasePlayer::PackDeadPlayerWeapons()
 	int iWeaponRules;
 	int iAmmoRules;
 	int i;
-	CBasePlayerWeapon* rgpPackWeapons[WEAPON_LAST];
+	CBasePlayerWeapon* rgpPackWeapons[WEAPON_TYPES];
 	int iPackAmmo[AMMO_TYPES];
 	int iPW = 0; // index into packweapons array
 	int iPA = 0; // index into packammo array
@@ -557,7 +557,7 @@ void CBasePlayer::RemoveAllWeapons()
 		m_pTank = NULL;
 	}
 
-	for (int i = 0; i < WEAPON_LAST; i++)
+	for (int i = 0; i < WEAPON_TYPES; i++)
 	{
 		if (m_rgpPlayerWeapons[i] != nullptr)
 		{

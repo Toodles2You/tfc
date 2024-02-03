@@ -109,7 +109,6 @@ public:
 	bool DrawWList(float flTime);
 	void Update_AmmoX(int iIndex, int iCount);
 	void Update_CurWeapon(int iState, int iId, int iClip);
-	bool MsgFunc_CurWeapon(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_AmmoPickup(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_WeapPickup(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_ItemPickup(const char* pszName, int iSize, void* pbuf);
