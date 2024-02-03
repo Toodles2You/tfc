@@ -62,12 +62,14 @@ static void GetCrosshairTarget(pmtrace_t* tr, float distance)
 
 static void UpdateLaserDot(const float time, const pmtrace_t *tr)
 {
-	// if (g_CurrentWeaponId != WEAPON_RPG)
-	// {
-	// 	pLaserDot->die = time;
-	// 	pLaserDot = nullptr;
-	// 	return;
-	// }
+#if 0
+	if (g_CurrentWeaponId != WEAPON_RPG)
+	{
+		pLaserDot->die = time;
+		pLaserDot = nullptr;
+		return;
+	}
+#endif
 
 	pLaserDot->die = time + 0.1f;
 

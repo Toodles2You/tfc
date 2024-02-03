@@ -207,7 +207,7 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 
 	data.tfstate = m_TFState;
 
-	data.m_iId = (m_pActiveWeapon != nullptr) ? m_pActiveWeapon->GetID() : WEAPON_NONE;
+	data.m_iId = (m_pActiveWeapon != nullptr) ? m_pActiveWeapon->GetID() + 1 : 0;
 
 	byte* ammo = reinterpret_cast<byte*>(&data.ammo_shells);
 	for (int i = 0; i < AMMO_TYPES; i++)
@@ -252,14 +252,14 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 
 	if (m_pActiveWeapon == nullptr)
 	{
-		if (data.m_iId != WEAPON_NONE)
+		if (data.m_iId != 0)
 		{
-			m_pActiveWeapon = m_rgpPlayerWeapons[data.m_iId];
+			m_pActiveWeapon = m_rgpPlayerWeapons[data.m_iId - 1];
 		}
 	}
-	else if (data.m_iId != m_pActiveWeapon->GetID())
+	else if (data.m_iId - 1 != m_pActiveWeapon->GetID())
 	{
-		m_pActiveWeapon = m_rgpPlayerWeapons[data.m_iId];
+		m_pActiveWeapon = m_rgpPlayerWeapons[data.m_iId - 1];
 	}
 
 	const byte* ammo = reinterpret_cast<const byte*>(&data.ammo_shells);
@@ -314,10 +314,10 @@ void CBasePlayer::SelectWeapon(int id)
 
 void CBasePlayer::CmdStart(const usercmd_t& cmd, unsigned int randomSeed)
 {
-	if (cmd.weaponselect != WEAPON_NONE)
+	if (cmd.weaponselect != 0)
 	{
-        SelectWeapon(cmd.weaponselect);
-		((usercmd_t*)&cmd)->weaponselect = WEAPON_NONE;
+        SelectWeapon(cmd.weaponselect - 1);
+		((usercmd_t*)&cmd)->weaponselect = 0;
 	}
 
 	m_randomSeed = randomSeed;
@@ -326,7 +326,7 @@ void CBasePlayer::CmdStart(const usercmd_t& cmd, unsigned int randomSeed)
 
 CBasePlayerWeapon* CBasePlayer::GetNextBestWeapon(CBasePlayerWeapon* current)
 {
-	const int currentID = (current != nullptr) ? current->GetID() : WEAPON_NONE;
+	const int currentID = (current != nullptr) ? current->GetID() : -1;
 	const int currentWeight = (current != nullptr) ? current->iWeight() : -1;
 
 	CBasePlayerWeapon* best = nullptr;

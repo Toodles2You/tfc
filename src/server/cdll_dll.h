@@ -37,11 +37,10 @@ constexpr int MAX_PLAYERS = 32;
 
 enum WeaponId
 {
-	WEAPON_NONE = 0,
 	WEAPON_CROWBAR,
 	WEAPON_MP5,
 
-	WEAPON_LAST = 64
+	WEAPON_TYPES
 };
 
 enum AmmoId

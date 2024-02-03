@@ -25,7 +25,7 @@ class WeaponsResource
 {
 private:
 	// Information about weapons & ammo
-	WEAPON rgWeapons[WEAPON_LAST]; // Weapons Array
+	WEAPON rgWeapons[WEAPON_TYPES]; // Weapons Array
 
 	// counts of weapons * ammo
 	WEAPON* rgSlots[MAX_WEAPON_SLOTS + 1][MAX_WEAPON_POSITIONS + 1]; // The slots currently in use by weapons.  The value is a pointer to the weapon;  if it's NULL, no weapon is there
@@ -64,10 +64,9 @@ public:
 
 	void DropAllWeapons()
 	{
-		for (int i = 0; i < WEAPON_LAST; i++)
+		for (int i = 0; i < WEAPON_TYPES; i++)
 		{
-			if (rgWeapons[i].iId)
-				DropWeapon(&rgWeapons[i]);
+			DropWeapon(&rgWeapons[i]);
 		}
 	}
 

@@ -433,7 +433,7 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 
 	g_finalstate = *to;
 
-	g_CurrentWeaponId = to->client.m_iId;
+	g_CurrentWeaponId = to->client.m_iId - 1;
 	g_PunchAngle = to->client.punchangle * 2;
 }
 

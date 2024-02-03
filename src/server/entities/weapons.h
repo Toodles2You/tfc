@@ -100,7 +100,7 @@ public:
 	virtual void SetWeaponData(const weapon_data_t& data);
 	virtual void DecrementTimers(const int msec);
 
-	static inline WeaponInfo WeaponInfoArray[WEAPON_LAST];
+	static inline WeaponInfo WeaponInfoArray[WEAPON_TYPES];
 
 	CBasePlayer* m_pPlayer;
 

@@ -84,7 +84,7 @@ LINK_ENTITY_TO_CLASS(weaponbox, CWeaponBox);
 #ifdef HALFLIFE_SAVERESTORE
 IMPLEMENT_SAVERESTORE(CWeaponBox)
 	DEFINE_ARRAY(CWeaponBox, m_rgAmmo, FIELD_INTEGER, AMMO_TYPES),
-	DEFINE_ARRAY(CWeaponBox, m_rgpPlayerWeapons, FIELD_CLASSPTR, WEAPON_LAST),
+	DEFINE_ARRAY(CWeaponBox, m_rgpPlayerWeapons, FIELD_CLASSPTR, WEAPON_TYPES),
 	DEFINE_FIELD(CWeaponBox, m_cAmmoTypes, FIELD_INTEGER),
 END_SAVERESTORE(CWeaponBox, CBaseEntity)
 #endif
@@ -143,15 +143,14 @@ void CWeaponBox::RemoveWeapons()
 	int i;
 
 	// destroy the weapons
-	for (i = 0; i < WEAPON_LAST; i++)
+	for (i = 0; i < WEAPON_TYPES; i++)
 	{
 		pWeapon = m_hPlayerWeapons[i];
-		if (!pWeapon)
+		if (pWeapon != nullptr)
 		{
-			continue;
+			pWeapon->Remove();
+			m_hPlayerWeapons[i] = nullptr;
 		}
-		pWeapon->Remove();
-		m_hPlayerWeapons[i] = nullptr;
 	}
 }
 
@@ -195,20 +194,18 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 	// go through my weapons and try to give the usable ones to the player.
 	// it's important the the player be given ammo first, so the weapons code doesn't refuse
 	// to deploy a better weapon that the player may pick up because he has no ammo for it.
-	for (int i = 0; i < WEAPON_LAST; i++)
+	for (int i = 0; i < WEAPON_TYPES; i++)
 	{
 		pWeapon = m_hPlayerWeapons[i];
 
-		if (!pWeapon)
+		if (pWeapon != nullptr)
 		{
-			continue;
-		}
+			//ALERT ( at_console, "trying to give %s\n", STRING( pWeapon[ i ]->pev->classname ) );
 
-		//ALERT ( at_console, "trying to give %s\n", STRING( pWeapon[ i ]->pev->classname ) );
-
-		if (dynamic_cast<CBasePlayerWeapon*>(pWeapon)->AddToPlayer(pPlayer))
-		{
-			m_hPlayerWeapons[i] = nullptr;
+			if (dynamic_cast<CBasePlayerWeapon*>(pWeapon)->AddToPlayer(pPlayer))
+			{
+				m_hPlayerWeapons[i] = nullptr;
+			}
 		}
 	}
 
@@ -274,7 +271,7 @@ bool CWeaponBox::HasWeapon(CBasePlayerWeapon* pCheckWeapon)
 //=========================================================
 bool CWeaponBox::IsEmpty()
 {
-	for (int i = 0; i < WEAPON_LAST; i++)
+	for (int i = 0; i < WEAPON_TYPES; i++)
 	{
 		if (m_hPlayerWeapons[i] != nullptr)
 		{

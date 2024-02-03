@@ -38,15 +38,14 @@ client_sprite_t* GetSpriteList(client_sprite_t* pList, const char* psz, int iRes
 
 WeaponsResource gWR;
 
-int g_weaponselect = WEAPON_NONE;
-int g_lastselect = WEAPON_NONE;
+int g_weaponselect = -1;
+int g_lastselect = -1;
 
 void WeaponsResource::LoadAllWeaponSprites()
 {
-	for (int i = 0; i < WEAPON_LAST; i++)
+	for (int i = 0; i < WEAPON_TYPES; i++)
 	{
-		if (0 != rgWeapons[i].iId)
-			LoadWeaponSprites(&rgWeapons[i]);
+		LoadWeaponSprites(&rgWeapons[i]);
 	}
 }
 
@@ -237,7 +236,6 @@ int giBucketHeight, giBucketWidth, giABHeight, giABWidth; // Ammo Bar width and 
 
 HSPRITE ghsprBuckets; // Sprite for top row of weapons menu
 
-DECLARE_MESSAGE(m_Ammo, CurWeapon);	 // Current weapon and clip
 DECLARE_MESSAGE(m_Ammo, AmmoPickup); // flashes an ammo pickup record
 DECLARE_MESSAGE(m_Ammo, WeapPickup); // flashes a weapon pickup record
 DECLARE_MESSAGE(m_Ammo, HideWeapon); // hides the weapon, ammo, and crosshair displays temporarily
@@ -263,7 +261,6 @@ bool CHudAmmo::Init()
 {
 	gHUD.AddHudElem(this);
 
-	HOOK_MESSAGE(CurWeapon);
 	HOOK_MESSAGE(AmmoPickup);
 	HOOK_MESSAGE(WeapPickup);
 	HOOK_MESSAGE(ItemPickup);
@@ -354,16 +351,20 @@ void CHudAmmo::Think()
 	{
 		gWR.iOldWeaponBits = gHUD.m_iWeaponBits;
 
-		for (int i = WEAPON_LAST - 1; i > 0; i--)
+		for (int i = WEAPON_TYPES - 1; i >= 0; i--)
 		{
 			WEAPON* p = gWR.GetWeapon(i);
 
-			if (p && WEAPON_NONE != p->iId)
+			if (p != nullptr)
 			{
-				if (gHUD.HasWeapon(p->iId))
+				if (gHUD.HasWeapon(i))
+				{
 					gWR.PickupWeapon(p);
+				}
 				else
+				{
 					gWR.DropWeapon(p);
+				}
 			}
 		}
 	}
@@ -393,7 +394,7 @@ void CHudAmmo::Think()
 
 HSPRITE* WeaponsResource::GetAmmoPicFromWeapon(int iAmmoId, Rect& rect)
 {
-	for (int i = 0; i < WEAPON_LAST; i++)
+	for (int i = 0; i < WEAPON_TYPES; i++)
 	{
 		if (rgWeapons[i].iAmmoType == iAmmoId)
 		{
@@ -521,16 +522,10 @@ void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip)
 		fOnTarget = true;
 	}
 
-	if (iId < 1)
+	if (iId == -1)
 	{
 		m_pWeapon = nullptr;
-		g_lastselect = WEAPON_NONE;
-		return;
-	}
-
-	if (iId == -1 && iClip == -1)
-	{
-		gpActiveSel = nullptr;
+		g_lastselect = -1;
 		return;
 	}
 
@@ -619,23 +614,6 @@ bool CHudAmmo::MsgFunc_HideWeapon(const char* pszName, int iSize, void* pbuf)
 	return true;
 }
 
-//
-//  CurWeapon: Update hud state with the current weapon and clip count. Ammo
-//  counts are updated with AmmoX. Server assures that the Weapon ammo type
-//  numbers match a real ammo type.
-//
-bool CHudAmmo::MsgFunc_CurWeapon(const char* pszName, int iSize, void* pbuf)
-{
-	BEGIN_READ(pbuf, iSize);
-
-	int iState = READ_BYTE();
-	int iId = READ_CHAR();
-	int iClip = READ_CHAR();
-
-	Update_CurWeapon(iState, iId, iClip);
-
-	return true;
-}
 
 bool CHudAmmo::MsgFunc_HitFeedback(const char* pszName, int iSize, void* pbuf)
 {
@@ -888,8 +866,10 @@ void CHudAmmo::UserCmd_PrevWeapon()
 // Selects the previous item in the menu
 void CHudAmmo::UserCmd_LastWeapon()
 {
-	if (g_lastselect <= WEAPON_NONE)
+	if (g_lastselect == -1)
+	{
 		return;
+	}
 
 	auto pWeapon = gWR.GetWeapon(g_lastselect);
 
@@ -1243,8 +1223,10 @@ bool CHudAmmo::DrawWList(float flTime)
 			{
 				p = gWR.GetWeaponSlot(i, iPos);
 
-				if (!p || 0 == p->iId)
+				if (p == nullptr)
+				{
 					continue;
+				}
 
 				// Draw Weapon if Red if no ammo
 				auto ammo = gWR.HasAmmo(p);
@@ -1279,8 +1261,10 @@ bool CHudAmmo::DrawWList(float flTime)
 			{
 				WEAPON* p = gWR.GetWeaponSlot(i, iPos);
 
-				if (!p || 0 == p->iId)
+				if (p == nullptr)
+				{
 					continue;
+				}
 
 				bool ammo = gWR.HasAmmo(p);
 

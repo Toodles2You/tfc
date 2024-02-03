@@ -614,8 +614,8 @@ void CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 	cmd->impulse = in_impulse;
 	in_impulse = 0;
 
-	cmd->weaponselect = g_weaponselect;
-	g_weaponselect = 0;
+	cmd->weaponselect = g_weaponselect + 1;
+	g_weaponselect = -1;
 	//
 	// set button and flag bits
 	//

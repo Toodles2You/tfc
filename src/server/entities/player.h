@@ -98,7 +98,7 @@ public:
 	int m_iClientHideHUD;
 	int m_iFOV;		  // field of view
 	// usable player weapons
-	CBasePlayerWeapon* m_rgpPlayerWeapons[WEAPON_LAST];
+	CBasePlayerWeapon* m_rgpPlayerWeapons[WEAPON_TYPES];
 	std::forward_list<CBasePlayerWeapon *> m_lpPlayerWeapons;
 	CBasePlayerWeapon* m_pActiveWeapon;
 
