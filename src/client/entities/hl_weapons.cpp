@@ -537,13 +537,13 @@ void WeaponsResource::Init()
 			WEAPON w;
 			memset(&w, 0, sizeof(w));
 
-		strcpy(w.szName, info.pszName);
-		w.iAmmoType = info.iAmmo1;
-		w.iAmmo2Type = info.iAmmo2;
-		w.iSlot = info.iSlot;
-		w.iSlotPos = info.iPosition;
-		w.iFlags = info.iFlags;
-		w.iId = weapons[i]->GetID();
+			strcpy(w.szName, info.pszName);
+			w.iAmmoType = info.iAmmo1;
+			w.iAmmo2Type = info.iAmmo2;
+			w.iSlot = info.iSlot;
+			w.iSlotPos = info.iPosition;
+			w.iFlags = info.iFlags;
+			w.iId = weapons[i]->GetID();
 
 			rgWeapons[weapons[i]->GetID()] = w;
 		}
