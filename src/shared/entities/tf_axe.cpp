@@ -176,10 +176,8 @@ LINK_ENTITY_TO_CLASS(tf_weapon_medikit, CMedikit);
 void CMedikit::GetWeaponInfo(WeaponInfo& i)
 {
 	i.pszName = "tf_weapon_medikit";
-	i.iAmmo1 = AMMO_NONE;
-	i.iMaxAmmo1 = -1;
-	i.iAmmo2 = AMMO_NONE;
-	i.iMaxAmmo2 = -1;
+	i.iAmmo1 = -1;
+	i.iAmmo2 = -1;
 	i.iMaxClip = -1;
 	i.iSlot = 0;
 	i.iPosition = 1;
@@ -268,10 +266,8 @@ LINK_ENTITY_TO_CLASS(tf_weapon_axe, CAxe);
 void CAxe::GetWeaponInfo(WeaponInfo& i)
 {
 	i.pszName = "tf_weapon_axe";
-	i.iAmmo1 = AMMO_NONE;
-	i.iMaxAmmo1 = -1;
-	i.iAmmo2 = AMMO_NONE;
-	i.iMaxAmmo2 = -1;
+	i.iAmmo1 = -1;
+	i.iAmmo2 = -1;
 	i.iMaxClip = -1;
 	i.iSlot = 0;
 	i.iPosition = 0;

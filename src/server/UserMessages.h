@@ -49,6 +49,7 @@ inline int gmsgTeamNames = 0;
 inline int gmsgAllowSpec = 0;
 
 inline int gmsgWeapons = 0;
+inline int gmsgAmmo = 0;
 
 inline int gmsgHitFeedback = 0;
 inline int gmsgBlood = 0;

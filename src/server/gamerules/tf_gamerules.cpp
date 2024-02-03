@@ -347,8 +347,11 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
         {
             pPlayer->GiveNamedItem(g_szWeaponNames[info.weapons[i]]);
         }
+    }
 
-        pPlayer->GiveAmmo(info.initAmmo[i], 1 + i, info.maxAmmo[i]);
+    for (int i = 0; i < AMMO_TYPES; i++)
+    {
+        pPlayer->GiveAmmo(info.initAmmo[i], i);
     }
 
 	pPlayer->m_iAutoWepSwitch = originalAutoWepSwitch;
@@ -389,5 +392,12 @@ void CTeamFortress::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 
     m_numSpawnPoints++;
     m_validSpawnPoints.reserve(m_numSpawnPoints);
+}
+
+
+int CTeamFortress::GetMaxAmmo(CBasePlayer* pPlayer, int iAmmoType)
+{
+    PCInfo& info = sTFClassInfo[pPlayer->PCNumber()];
+    return info.maxAmmo[iAmmoType];
 }
 

@@ -66,13 +66,12 @@ enum WeaponId
 
 enum AmmoId
 {
-	AMMO_NONE = 0,
 	AMMO_SHELLS,
 	AMMO_NAILS,
 	AMMO_ROCKETS,
 	AMMO_CELLS,
 
-	AMMO_LAST = 16
+	AMMO_TYPES
 };
 
 enum

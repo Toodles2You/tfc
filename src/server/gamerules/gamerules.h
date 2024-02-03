@@ -180,7 +180,8 @@ public:
 	virtual Vector VecItemRespawnSpot(CItem* pItem) = 0; // where in the world should this item respawn?
 
 	// Ammo retrieval
-	virtual bool CanHaveAmmo(CBasePlayer* pPlayer, int iAmmoType, int iMaxCarry); // can this player take more of this ammo?
+	virtual int GetMaxAmmo(CBasePlayer* pPlayer, int iAmmoType);
+	virtual bool CanHaveAmmo(CBasePlayer* pPlayer, int iAmmoType); // can this player take more of this ammo?
 	virtual void PlayerGotAmmo(CBasePlayer* pPlayer, char* szName, int iCount) {}	// called each time a player picks up some ammo in the world
 
 	// Ammo spawn/respawn control

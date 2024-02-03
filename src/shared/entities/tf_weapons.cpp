@@ -121,7 +121,7 @@ void CTFWeapon::PrimaryAttack()
 
 		m_iClip -= info.iShots * rounds;
 	}
-	else if (info.iAmmo1 != AMMO_NONE)
+	else if (info.iAmmo1 != -1)
 	{
 		if (info.iShots * rounds > m_pPlayer->m_rgAmmo[info.iAmmo1])
 		{
@@ -241,9 +241,9 @@ void CTFWeapon::WeaponPostFrame()
 			{
 				int iShots = info.iShots;
 
-				if (info.iAmmo1 != AMMO_NONE)
+				if (info.iAmmo1 != -1)
 				{
-					iShots = std::min(iShots, m_pPlayer->m_rgAmmo[info.iAmmo1]);
+					iShots = std::min(iShots, static_cast<int>(m_pPlayer->m_rgAmmo[info.iAmmo1]));
 
 					m_pPlayer->m_rgAmmo[info.iAmmo1] -= iShots;
 				}
@@ -260,7 +260,7 @@ void CTFWeapon::WeaponPostFrame()
 		else if (m_iNextPrimaryAttack <= 0)
 		{
 			if (m_iClip < info.iMaxClip
-			 && (info.iAmmo1 == AMMO_NONE || m_pPlayer->m_rgAmmo[info.iAmmo1] != 0))
+			 && (info.iAmmo1 == -1 || m_pPlayer->m_rgAmmo[info.iAmmo1] != 0))
 			{
 				m_pPlayer->SetAction(CBasePlayer::Action::Reload);
 
@@ -294,7 +294,7 @@ void CTFWeapon::WeaponPostFrame()
 					return;
 				}
 			}
-			else if (info.iAmmo1 != AMMO_NONE)
+			else if (info.iAmmo1 != -1)
 			{
 				if (m_pPlayer->m_rgAmmo[info.iAmmo1] >= info.iShots)
 				{
@@ -315,7 +315,7 @@ void CTFWeapon::WeaponPostFrame()
 		}
 
 		if (m_iClip < info.iMaxClip
-		 && (info.iAmmo1 == AMMO_NONE || m_pPlayer->m_rgAmmo[info.iAmmo1] != 0))
+		 && (info.iAmmo1 == -1 || m_pPlayer->m_rgAmmo[info.iAmmo1] != 0))
 		{
 			SendWeaponAnim(info.iAnims[kWeaponAnimStartReload]);
 
@@ -336,10 +336,8 @@ LINK_ENTITY_TO_CLASS(tf_weapon_shotgun, CShotgun);
 void CShotgun::GetWeaponInfo(WeaponInfo& i)
 {
 	i.pszName = "tf_weapon_shotgun";
-	i.iAmmo1 = AMMO_NONE;
-	i.iMaxAmmo1 = -1;
-	i.iAmmo2 = AMMO_NONE;
-	i.iMaxAmmo2 = -1;
+	i.iAmmo1 = AMMO_SHELLS;
+	i.iAmmo2 = -1;
 	i.iMaxClip = 8;
 	i.iSlot = 1;
 	i.iPosition = 0;
@@ -384,10 +382,8 @@ LINK_ENTITY_TO_CLASS(tf_weapon_supershotgun, CSuperShotgun);
 void CSuperShotgun::GetWeaponInfo(WeaponInfo& i)
 {
 	i.pszName = "tf_weapon_supershotgun";
-	i.iAmmo1 = AMMO_NONE;
-	i.iMaxAmmo1 = -1;
-	i.iAmmo2 = AMMO_NONE;
-	i.iMaxAmmo2 = -1;
+	i.iAmmo1 = AMMO_SHELLS;
+	i.iAmmo2 = -1;
 	i.iMaxClip = 16;
 	i.iSlot = 2;
 	i.iPosition = 1;
@@ -432,10 +428,8 @@ LINK_ENTITY_TO_CLASS(tf_weapon_ng, CNailgun);
 void CNailgun::GetWeaponInfo(WeaponInfo& i)
 {
 	i.pszName = "tf_weapon_ng";
-	i.iAmmo1 = AMMO_NONE;
-	i.iMaxAmmo1 = -1;
-	i.iAmmo2 = AMMO_NONE;
-	i.iMaxAmmo2 = -1;
+	i.iAmmo1 = AMMO_NAILS;
+	i.iAmmo2 = -1;
 	i.iMaxClip = -1;
 	i.iSlot = 3;
 	i.iPosition = 0;
@@ -480,10 +474,8 @@ LINK_ENTITY_TO_CLASS(tf_weapon_superng, CSuperNailgun);
 void CSuperNailgun::GetWeaponInfo(WeaponInfo& i)
 {
 	i.pszName = "tf_weapon_superng";
-	i.iAmmo1 = AMMO_NONE;
-	i.iMaxAmmo1 = -1;
-	i.iAmmo2 = AMMO_NONE;
-	i.iMaxAmmo2 = -1;
+	i.iAmmo1 = AMMO_NAILS;
+	i.iAmmo2 = -1;
 	i.iMaxClip = -1;
 	i.iSlot = 3;
 	i.iPosition = 2;
@@ -528,10 +520,8 @@ LINK_ENTITY_TO_CLASS(tf_weapon_rpg, CRocketLauncher);
 void CRocketLauncher::GetWeaponInfo(WeaponInfo& i)
 {
 	i.pszName = "tf_weapon_rpg";
-	i.iAmmo1 = AMMO_NONE;
-	i.iMaxAmmo1 = -1;
-	i.iAmmo2 = AMMO_NONE;
-	i.iMaxAmmo2 = -1;
+	i.iAmmo1 = AMMO_ROCKETS;
+	i.iAmmo2 = -1;
 	i.iMaxClip = 4;
 	i.iSlot = 4;
 	i.iPosition = 0;

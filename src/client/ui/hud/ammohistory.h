@@ -29,7 +29,8 @@ private:
 
 	// counts of weapons * ammo
 	WEAPON* rgSlots[MAX_WEAPON_SLOTS + 1][MAX_WEAPON_POSITIONS + 1]; // The slots currently in use by weapons.  The value is a pointer to the weapon;  if it's NULL, no weapon is there
-	int riAmmo[AMMO_LAST];										 // count of each ammo type
+	byte riAmmo[AMMO_TYPES];										 // count of each ammo type
+	byte riMaxAmmo[AMMO_TYPES];
 
 public:
 	void Init();
@@ -82,8 +83,10 @@ public:
 
 	///// AMMO /////
 	void SetAmmo(int iId, int iCount) { riAmmo[iId] = iCount; }
+	void SetMaxAmmo(int iId, int iCount) { riMaxAmmo[iId] = std::max(iCount, 1); }
 
 	int CountAmmo(int iId);
+	int MaxAmmo(int iId);
 
 	HSPRITE* GetAmmoPicFromWeapon(int iAmmoId, Rect& rect);
 };

@@ -22,8 +22,6 @@ struct WEAPON
 	char szName[MAX_WEAPON_NAME];
 	int iAmmoType;
 	int iAmmo2Type;
-	int iMax1;
-	int iMax2;
 	int iSlot;
 	int iSlotPos;
 	int iFlags;

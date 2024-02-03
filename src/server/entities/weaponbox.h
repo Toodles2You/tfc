@@ -28,7 +28,6 @@ public:
 	void Touch(CBaseEntity* pOther) override;
 	bool KeyValue(KeyValueData* pkvd) override;
 	bool IsEmpty();
-	int GiveAmmo(int iCount, int iType, int iMax, int* pIndex = NULL);
 	void SetObjectCollisionBox() override;
 
 	void RemoveWeapons();
@@ -39,7 +38,7 @@ public:
 
 	EHANDLE m_hPlayerWeapons[WEAPON_LAST]; // one slot for each
 
-	int m_rgAmmo[AMMO_LAST];	 // ammo quantities
+	byte m_rgAmmo[AMMO_TYPES];	 // ammo quantities
 
 	int m_cAmmoTypes; // how many ammo types packed into this box (if packed by a level designer)
 };

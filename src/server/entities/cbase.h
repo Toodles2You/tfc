@@ -181,7 +181,7 @@ public:
 	virtual int GetToggleState() { return TS_AT_TOP; }
 	virtual void AddPoints(float score, bool bAllowNegativeScore) {}
 	virtual void AddPointsToTeam(float score, bool bAllowNegativeScore) {}
-	virtual int GiveAmmo(int iAmount, int iType, int iMax) { return -1; }
+	virtual bool GiveAmmo(int iAmount, int iType) { return false; }
 	virtual float GetDelay() { return 0; }
 	virtual bool IsMoving() { return pev->velocity != g_vecZero; }
 	virtual void OverrideReset() {}

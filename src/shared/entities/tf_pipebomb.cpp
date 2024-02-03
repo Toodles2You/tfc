@@ -20,10 +20,8 @@ LINK_ENTITY_TO_CLASS(tf_weapon_gl, CGrenadeLauncher);
 void CGrenadeLauncher::GetWeaponInfo(WeaponInfo& i)
 {
 	i.pszName = "tf_weapon_gl";
-	i.iAmmo1 = AMMO_NONE;
-	i.iMaxAmmo1 = -1;
-	i.iAmmo2 = AMMO_NONE;
-	i.iMaxAmmo2 = -1;
+	i.iAmmo1 = AMMO_ROCKETS;
+	i.iAmmo2 = -1;
 	i.iMaxClip = 6;
 	i.iSlot = 3;
 	i.iPosition = 1;
@@ -68,10 +66,8 @@ LINK_ENTITY_TO_CLASS(tf_weapon_pl, CPipeBombLauncher);
 void CPipeBombLauncher::GetWeaponInfo(WeaponInfo& i)
 {
 	i.pszName = "tf_weapon_pl";
-	i.iAmmo1 = AMMO_NONE;
-	i.iMaxAmmo1 = -1;
-	i.iAmmo2 = AMMO_NONE;
-	i.iMaxAmmo2 = -1;
+	i.iAmmo1 = AMMO_ROCKETS;
+	i.iAmmo2 = -1;
 	i.iMaxClip = 6;
 	i.iSlot = 4;
 	i.iPosition = 1;

@@ -84,7 +84,7 @@ void CBasePlayer::SetCustomDecalFrames(int nFrames) {}
 int CBasePlayer::GetCustomDecalFrames() { return -1; }
 void CBasePlayer::DropPlayerWeapon(char* pszWeaponName) {}
 const char* CBasePlayer::TeamID() { return ""; }
-int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax) { return 0; }
+bool CBasePlayer::GiveAmmo(int iCount, int iType) { return false; }
 void CBasePlayer::AddPoints(float score, bool bAllowNegativeScore) {}
 void CBasePlayer::AddPointsToTeam(float score, bool bAllowNegativeScore) {}
 

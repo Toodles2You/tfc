@@ -73,9 +73,7 @@ typedef struct
 	int iSlot;
 	int iPosition;
 	int iAmmo1;
-	int iMaxAmmo1;
 	int iAmmo2;
-	int iMaxAmmo2;
 	const char* pszName;
 	int iMaxClip;
 	int iFlags;
@@ -178,9 +176,7 @@ public:
 
 	WeaponInfo& GetInfo() { return WeaponInfoArray[GetID()]; }
 	int iAmmo1() { return GetInfo().iAmmo1; }
-	int iMaxAmmo1() { return GetInfo().iMaxAmmo1; }
 	int iAmmo2() { return GetInfo().iAmmo2; }
-	int iMaxAmmo2() { return GetInfo().iMaxAmmo2; }
 	const char* pszName() { return GetInfo().pszName; }
 	int iMaxClip() { return GetInfo().iMaxClip; }
 	int iWeight() { return GetInfo().iWeight; }

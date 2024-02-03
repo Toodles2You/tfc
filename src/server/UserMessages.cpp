@@ -61,6 +61,7 @@ void LinkUserMessages()
 	gmsgAllowSpec = REG_USER_MSG("AllowSpec", 1);
 
 	gmsgWeapons = REG_USER_MSG("Weapons", 8);
+	gmsgAmmo = REG_USER_MSG("Ammo", AMMO_TYPES);
 
 	gmsgHitFeedback = REG_USER_MSG("HitFeedback", 4);
 	gmsgBlood = REG_USER_MSG("Blood", -1);

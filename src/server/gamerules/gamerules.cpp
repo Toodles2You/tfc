@@ -97,9 +97,15 @@ void CGameRules::InitHUD(CBasePlayer* pl)
 }
 
 
-bool CGameRules::CanHaveAmmo(CBasePlayer* pPlayer, int iAmmoType, int iMaxCarry)
+int CGameRules::GetMaxAmmo(CBasePlayer* pPlayer, int iAmmoType)
 {
-	return pPlayer->AmmoInventory(iAmmoType) < iMaxCarry;
+	return 0;
+}
+
+
+bool CGameRules::CanHaveAmmo(CBasePlayer* pPlayer, int iAmmoType)
+{
+	return pPlayer->m_rgAmmo[iAmmoType] < GetMaxAmmo(pPlayer, iAmmoType);
 }
 
 

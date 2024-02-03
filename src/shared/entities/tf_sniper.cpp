@@ -24,10 +24,8 @@ LINK_ENTITY_TO_CLASS(tf_weapon_sniperrifle, CSniperRifle);
 void CSniperRifle::GetWeaponInfo(WeaponInfo& i)
 {
 	i.pszName = "tf_weapon_sniperrifle";
-	i.iAmmo1 = AMMO_NONE;
-	i.iMaxAmmo1 = -1;
-	i.iAmmo2 = AMMO_NONE;
-	i.iMaxAmmo2 = -1;
+	i.iAmmo1 = AMMO_SHELLS;
+	i.iAmmo2 = -1;
 	i.iMaxClip = -1;
 	i.iSlot = 1;
 	i.iPosition = 1;
@@ -338,10 +336,8 @@ LINK_ENTITY_TO_CLASS(tf_weapon_autorifle, CAutoRifle);
 void CAutoRifle::GetWeaponInfo(WeaponInfo& i)
 {
 	i.pszName = "tf_weapon_autorifle";
-	i.iAmmo1 = AMMO_NONE;
-	i.iMaxAmmo1 = -1;
-	i.iAmmo2 = AMMO_NONE;
-	i.iMaxAmmo2 = -1;
+	i.iAmmo1 = AMMO_SHELLS;
+	i.iAmmo2 = -1;
 	i.iMaxClip = -1;
 	i.iSlot = 2;
 	i.iPosition = 0;

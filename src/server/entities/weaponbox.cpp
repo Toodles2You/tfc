@@ -14,25 +14,6 @@
 #include "UserMessages.h"
 #include "weaponbox.h"
 
-//=========================================================
-// MaxAmmoCarry - pass in a name and this function will tell
-// you the maximum amount of that type of ammunition that a
-// player can carry.
-//=========================================================
-static int MaxAmmoCarry(int iType)
-{
-	for (int i = 0; i < WEAPON_LAST; i++)
-	{
-		if (CBasePlayerWeapon::WeaponInfoArray[i].iAmmo1 == iType)
-			return CBasePlayerWeapon::WeaponInfoArray[i].iMaxAmmo1;
-		if (CBasePlayerWeapon::WeaponInfoArray[i].iAmmo2 == iType)
-			return CBasePlayerWeapon::WeaponInfoArray[i].iMaxAmmo2;
-	}
-
-	ALERT(at_console, "MaxAmmoCarry() doesn't recognize '%i'!\n", iType);
-	return -1;
-}
-
 bool CBasePlayerAmmo::Spawn()
 {
 	pev->movetype = MOVETYPE_TOSS;
@@ -102,7 +83,7 @@ LINK_ENTITY_TO_CLASS(weaponbox, CWeaponBox);
 
 #ifdef HALFLIFE_SAVERESTORE
 IMPLEMENT_SAVERESTORE(CWeaponBox)
-	DEFINE_ARRAY(CWeaponBox, m_rgAmmo, FIELD_INTEGER, AMMO_LAST),
+	DEFINE_ARRAY(CWeaponBox, m_rgAmmo, FIELD_INTEGER, AMMO_TYPES),
 	DEFINE_ARRAY(CWeaponBox, m_rgpPlayerWeapons, FIELD_CLASSPTR, WEAPON_LAST),
 	DEFINE_FIELD(CWeaponBox, m_cAmmoTypes, FIELD_INTEGER),
 END_SAVERESTORE(CWeaponBox, CBaseEntity)
@@ -125,17 +106,11 @@ void CWeaponBox::Precache()
 //=========================================================
 bool CWeaponBox::KeyValue(KeyValueData* pkvd)
 {
-	if (m_cAmmoTypes < AMMO_LAST)
+	if (m_cAmmoTypes != AMMO_TYPES)
 	{
 		// Toodles FIXME:
-		// PackAmmo(ALLOC_STRING(pkvd->szKeyName), atoi(pkvd->szValue));
 		m_cAmmoTypes++; // count this new ammo type.
-
 		return true;
-	}
-	else
-	{
-		ALERT(at_console, "WeaponBox too full! only %d ammotypes allowed\n", AMMO_LAST);
 	}
 
 	return false;
@@ -208,19 +183,19 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 	int i;
 
 	// dole out ammo
-	for (i = 0; i < AMMO_LAST; i++)
+	for (int i = 0; i < AMMO_TYPES; i++)
 	{
-		if (m_rgAmmo[i] > 0)
+		if (m_rgAmmo[i] != 0)
 		{
 			// there's some ammo of this type.
-			pPlayer->GiveAmmo(m_rgAmmo[i], i, MaxAmmoCarry(i));
+			pPlayer->GiveAmmo(m_rgAmmo[i], i);
 		}
 	}
 
 	// go through my weapons and try to give the usable ones to the player.
 	// it's important the the player be given ammo first, so the weapons code doesn't refuse
 	// to deploy a better weapon that the player may pick up because he has no ammo for it.
-	for (i = 0; i < WEAPON_LAST; i++)
+	for (int i = 0; i < WEAPON_LAST; i++)
 	{
 		pWeapon = m_hPlayerWeapons[i];
 
@@ -275,38 +250,14 @@ bool CWeaponBox::PackWeapon(CBasePlayerWeapon* pWeapon)
 //=========================================================
 bool CWeaponBox::PackAmmo(int iType, int iCount)
 {
-	int iMaxCarry;
-
-	if (iType <= AMMO_NONE)
-	{
-		return false;
-	}
-
-	iMaxCarry = MaxAmmoCarry(iType);
-
-	if (iMaxCarry != -1 && iCount > 0)
+	if (iCount != 0)
 	{
 		//ALERT ( at_console, "Packed %d rounds of %i\n", iCount, iType );
-		GiveAmmo(iCount, iType, iMaxCarry);
+		m_rgAmmo[iType] += iCount;
 		return true;
 	}
 
 	return false;
-}
-
-//=========================================================
-// CWeaponBox - GiveAmmo
-//=========================================================
-int CWeaponBox::GiveAmmo(int iCount, int iType, int iMax, int* pIndex /* = nullptr*/)
-{
-	int iAdd = std::min(iCount, iMax - m_rgAmmo[iType]);
-	if (iCount == 0 || iAdd > 0)
-	{
-		m_rgAmmo[iType] += iAdd;
-
-		return iType;
-	}
-	return -1;
 }
 
 //=========================================================
@@ -323,9 +274,7 @@ bool CWeaponBox::HasWeapon(CBasePlayerWeapon* pCheckWeapon)
 //=========================================================
 bool CWeaponBox::IsEmpty()
 {
-	int i;
-
-	for (i = 0; i < WEAPON_LAST; i++)
+	for (int i = 0; i < WEAPON_LAST; i++)
 	{
 		if (m_hPlayerWeapons[i] != nullptr)
 		{
@@ -333,9 +282,9 @@ bool CWeaponBox::IsEmpty()
 		}
 	}
 
-	for (i = 0; i < AMMO_LAST; i++)
+	for (int i = 0; i < AMMO_TYPES; i++)
 	{
-		if (m_rgAmmo[i] > 0)
+		if (m_rgAmmo[i] != 0)
 		{
 			// still have a bit of this type of ammo
 			return false;

@@ -225,7 +225,7 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 	data.m_iId = (m_pActiveWeapon != nullptr) ? m_pActiveWeapon->GetID() : WEAPON_NONE;
 
 	byte* ammo = reinterpret_cast<byte*>(&data.ammo_shells);
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < AMMO_TYPES; i++)
 	{
 		ammo[i] = m_rgAmmo[i];
 	}
@@ -280,7 +280,7 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 	}
 
 	const byte* ammo = reinterpret_cast<const byte*>(&data.ammo_shells);
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < AMMO_TYPES; i++)
 	{
 		m_rgAmmo[i] = ammo[i];
 	}
