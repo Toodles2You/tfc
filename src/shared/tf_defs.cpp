@@ -26,6 +26,7 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             WEAPON_NAILGUN,
             WEAPON_TF_SHOTGUN,
             WEAPON_AXE,
+            -1,
         },
         .maxAmmo = {
             50,
@@ -168,6 +169,7 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .initArmorClasses = 0,
         .weapons = {
             // WEAPON_ASSAULT_CANNON,
+            -1,
             WEAPON_SUPER_SHOTGUN,
             WEAPON_TF_SHOTGUN,
             WEAPON_AXE,
@@ -198,6 +200,8 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .weapons = {
             // WEAPON_FLAMETHROWER,
             // WEAPON_INCENDIARY,
+            -1,
+            -1,
             WEAPON_TF_SHOTGUN,
             WEAPON_AXE,
         },
@@ -226,9 +230,11 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .initArmorClasses = 0,
         .weapons = {
             // WEAPON_KNIFE,
+            -1,
             WEAPON_SUPER_SHOTGUN,
             WEAPON_NAILGUN,
             // WEAPON_TRANQ,
+            -1,
         },
         .maxAmmo = {
             40,
@@ -255,8 +261,10 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .initArmorClasses = 0,
         .weapons = {
             // WEAPON_SPANNER,
+            -1,
             WEAPON_SUPER_SHOTGUN,
             // WEAPON_LASER,
+            -1,
         },
         .maxAmmo = {
             50,
@@ -285,6 +293,9 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .initArmorClasses = 0,
         .weapons = {
             WEAPON_AXE,
+            -1,
+            -1,
+            -1,
         },
         .maxAmmo = {
             0,

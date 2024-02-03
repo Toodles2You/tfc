@@ -63,12 +63,9 @@ void W_Precache()
 {
 	memset(CBasePlayerWeapon::WeaponInfoArray, 0, sizeof(CBasePlayerWeapon::WeaponInfoArray));
 
-	for (int i = 0; i < sizeof(g_szWeaponNames) / sizeof(*g_szWeaponNames); i++)
+	for (int i = 0; i < ARRAYSIZE(g_szWeaponNames); i++)
 	{
-		if (g_szWeaponNames[i] != nullptr)
-		{
-			util::PrecacheWeapon(g_szWeaponNames[i]);
-		}
+		util::PrecacheWeapon(g_szWeaponNames[i]);
 	}
 
 	if (util::IsMultiplayer())
