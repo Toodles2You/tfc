@@ -128,6 +128,8 @@ void W_Precache()
 	PRECACHE_SOUND("weapons/ric4.wav");
 	PRECACHE_SOUND("weapons/ric5.wav");
 
+	PRECACHE_SOUND("weapons/357_cock1.wav");
+
 	PRECACHE_SOUND("weapons/ax1.wav");
 	PRECACHE_SOUND("weapons/timer.wav");
 

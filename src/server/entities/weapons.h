@@ -196,6 +196,7 @@ public:
 	enum
 	{
 		kWpnStateReloading = 1,
+		kWpnStateEmptySound = 2,
 	};
 
 	int m_iWeaponState;

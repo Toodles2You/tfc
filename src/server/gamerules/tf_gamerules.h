@@ -9,21 +9,6 @@
 
 class CHLBot;
 
-struct PCInfo
-{
-	int maxHealth;		  // Maximum Health Level
-	int maxSpeed;		  // Maximum movement speed
-	int maxArmor;		  // Maximum Armor Level, of any armor class
-	int initArmor;		  // Armor level when respawned
-	float maxArmorType;	  // Maximum level of Armor absorption
-	float initArmorType;  // Absorption Level of armor when respawned
-	int armorClasses;	  // Armor Classes allowed for this class
-	int initArmorClasses; // Armorclass worn when respawned
-	int weapons[4];
-};
-
-extern PCInfo sTFClassInfo[PC_LASTCLASS];
-
 class CTFSpawnPoint : public CSpawnPoint
 {
 public:

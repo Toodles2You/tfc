@@ -14,6 +14,7 @@
 #include "tf_gamerules.h"
 #include "game.h"
 #include "UserMessages.h"
+#include "tf_defs.h"
 
 
 static const char* sTFClassModels[] =
@@ -52,179 +53,6 @@ static const char* sTFTeamColors[] =
     "0",
     "159",
     "0",
-};
-
-
-PCInfo sTFClassInfo[PC_LASTCLASS] =
-{
-    [PC_UNDEFINED] = {},
-
-    [PC_SCOUT] = {
-        .maxHealth        = 75,
-        .maxSpeed         = 400,
-        .maxArmor         = 50,
-        .initArmor        = 25,
-        .maxArmorType     = 0.3,
-        .initArmorType    = 0.3,
-        .armorClasses     = AT_SAVESHOT | AT_SAVENAIL,
-        .initArmorClasses = 0,
-        .weapons = {
-            WEAPON_NAILGUN,
-            WEAPON_TF_SHOTGUN,
-            WEAPON_AXE,
-        },
-    },
-
-    [PC_SNIPER] = {
-        .maxHealth        = 90,
-        .maxSpeed         = 300,
-        .maxArmor         = 50,
-        .initArmor        = 25,
-        .maxArmorType     = 0.3,
-        .initArmorType    = 0.3,
-        .armorClasses     = AT_SAVESHOT | AT_SAVENAIL,
-        .initArmorClasses = 0,
-        .weapons = {
-            WEAPON_SNIPER_RIFLE,
-            WEAPON_AUTO_RIFLE,
-            WEAPON_NAILGUN,
-            WEAPON_AXE,
-        },
-    },
-    
-    [PC_SOLDIER] = {
-        .maxHealth        = 100,
-        .maxSpeed         = 240,
-        .maxArmor         = 200,
-        .initArmor        = 100,
-        .maxArmorType     = 0.8,
-        .initArmorType    = 0.8,
-        .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEEXPLOSION | AT_SAVEELECTRICITY | AT_SAVEFIRE,
-        .initArmorClasses = 0,
-        .weapons = {
-            WEAPON_ROCKET_LAUNCHER,
-            WEAPON_SUPER_SHOTGUN,
-            WEAPON_TF_SHOTGUN,
-            WEAPON_AXE,
-        },
-    },
-
-    [PC_DEMOMAN] = {
-        .maxHealth        = 90,
-        .maxSpeed         = 280,
-        .maxArmor         = 120,
-        .initArmor        = 50,
-        .maxArmorType     = 0.6,
-        .initArmorType    = 0.6,
-        .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEEXPLOSION | AT_SAVEELECTRICITY | AT_SAVEFIRE,
-        .initArmorClasses = 0,
-        .weapons = {
-            WEAPON_GRENADE_LAUNCHER,
-            WEAPON_PIPEBOMB_LAUNCHER,
-            WEAPON_TF_SHOTGUN,
-            WEAPON_AXE,
-        },
-    },
-    
-    [PC_MEDIC] = {
-        .maxHealth        = 90,
-        .maxSpeed         = 320,
-        .maxArmor         = 100,
-        .initArmor        = 50,
-        .maxArmorType     = 0.6,
-        .initArmorType    = 0.3,
-        .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEELECTRICITY | AT_SAVEFIRE,
-        .initArmorClasses = 0,
-        .weapons = {
-            WEAPON_MEDIKIT,
-            WEAPON_SUPER_NAILGUN,
-            WEAPON_SUPER_SHOTGUN,
-            WEAPON_TF_SHOTGUN,
-        },
-    },
-
-    [PC_HVYWEAP] = {
-        .maxHealth        = 100,
-        .maxSpeed         = 230,
-        .maxArmor         = 300,
-        .initArmor        = 150,
-        .maxArmorType     = 0.8,
-        .initArmorType    = 0.8,
-        .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEEXPLOSION | AT_SAVEELECTRICITY | AT_SAVEFIRE,
-        .initArmorClasses = 0,
-        .weapons = {
-            WEAPON_ASSAULT_CANNON,
-            WEAPON_SUPER_SHOTGUN,
-            WEAPON_TF_SHOTGUN,
-            WEAPON_AXE,
-        },
-    },
-
-    [PC_PYRO] = {
-        .maxHealth        = 100,
-        .maxSpeed         = 300,
-        .maxArmor         = 150,
-        .initArmor        = 50,
-        .maxArmorType     = 0.6,
-        .initArmorType    = 0.6,
-        .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEELECTRICITY | AT_SAVEFIRE,
-        .initArmorClasses = AT_SAVEFIRE,
-        .weapons = {
-            WEAPON_FLAMETHROWER,
-            WEAPON_INCENDIARY,
-            WEAPON_TF_SHOTGUN,
-            WEAPON_AXE,
-        },
-    },
-
-    [PC_SPY] = {
-        .maxHealth        = 90,
-        .maxSpeed         = 300,
-        .maxArmor         = 100,
-        .initArmor        = 25,
-        .maxArmorType     = 0.6,
-        .initArmorType    = 0.6,
-        .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEELECTRICITY | AT_SAVEFIRE,
-        .initArmorClasses = 0,
-        .weapons = {
-            WEAPON_KNIFE,
-            WEAPON_SUPER_SHOTGUN,
-            WEAPON_NAILGUN,
-            WEAPON_TRANQ,
-        },
-    },
-
-    [PC_ENGINEER] = {
-        .maxHealth        = 80,
-        .maxSpeed         = 300,
-        .maxArmor         = 50,
-        .initArmor        = 25,
-        .maxArmorType     = 0.6,
-        .initArmorType    = 0.3,
-        .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEEXPLOSION | AT_SAVEELECTRICITY | AT_SAVEFIRE,
-        .initArmorClasses = 0,
-        .weapons = {
-            WEAPON_SPANNER,
-            WEAPON_SUPER_SHOTGUN,
-            WEAPON_LASER,
-        },
-    },
-
-    [PC_RANDOM] = {},
-
-    [PC_CIVILIAN] = {
-        .maxHealth        = 50,
-        .maxSpeed         = 240,
-        .maxArmor         = 0,
-        .initArmor        = 0,
-        .maxArmorType     = 0,
-        .initArmorType    = 0,
-        .armorClasses     = 0,
-        .initArmorClasses = 0,
-        .weapons = {
-            WEAPON_AXE,
-        },
-    }
 };
 
 
@@ -519,6 +347,8 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
         {
             pPlayer->GiveNamedItem(g_szWeaponNames[info.weapons[i]]);
         }
+
+        pPlayer->GiveAmmo(info.initAmmo[i], 1 + i, info.maxAmmo[i]);
     }
 
 	pPlayer->m_iAutoWepSwitch = originalAutoWepSwitch;

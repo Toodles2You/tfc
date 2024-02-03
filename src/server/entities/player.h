@@ -24,6 +24,7 @@
 #include "pm_movevars.h"
 #include "pm_debug.h"
 #include "gamemovement.h"
+#include "tf_defs.h"
 
 #include <forward_list>
 
@@ -49,15 +50,6 @@ enum
 	kTFStateGrenadeThrowing = 2,
 	kTFStateAiming			= 4,
 	kTFStateInfected		= 8,
-};
-
-enum
-{
-	AT_SAVESHOT = 1,		// Kevlar  	 : Reduces bullet damage
-	AT_SAVENAIL = 2,		// Wood :) 	 : Reduces nail damage
-	AT_SAVEEXPLOSION = 4,	// Blast   	 : Reduces explosion damage
-	AT_SAVEELECTRICITY = 8, // Shock	 : Reduces electricity damage
-	AT_SAVEFIRE = 16,		// Asbestos	 : Reduces fire damage
 };
 
 #define CHAT_INTERVAL 1.0f

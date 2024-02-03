@@ -44,6 +44,7 @@ set(SHARED_SRC
     ${SHARED_SRC_DIR}/animation.cpp
     ${SHARED_SRC_DIR}/interface.cpp
     ${SHARED_SRC_DIR}/trace.cpp
+    ${SHARED_SRC_DIR}/tf_defs.cpp
 
     ${SHARED_SRC_DIR}/utils/filesystem_utils.cpp
     ${SHARED_SRC_DIR}/utils/shared_util.cpp

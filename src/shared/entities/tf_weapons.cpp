@@ -83,6 +83,7 @@ void CTFWeapon::Deploy()
 {
 	CBasePlayerWeapon::Deploy();
 	UpdateSiblingInfo(false);
+	m_iWeaponState &= ~kWpnStateEmptySound;
 }
 
 
@@ -119,6 +120,15 @@ void CTFWeapon::PrimaryAttack()
 		}
 
 		m_iClip -= info.iShots * rounds;
+	}
+	else if (info.iAmmo1 != AMMO_NONE)
+	{
+		if (info.iShots * rounds > m_pPlayer->m_rgAmmo[info.iAmmo1])
+		{
+			rounds = m_pPlayer->m_rgAmmo[info.iAmmo1] / info.iShots;
+		}
+
+		m_pPlayer->m_rgAmmo[info.iAmmo1] -= info.iShots * rounds;
 	}
 
 	m_pPlayer->SetAction(CBasePlayer::Action::Attack);
@@ -229,7 +239,16 @@ void CTFWeapon::WeaponPostFrame()
 			}
 			else
 			{
-				m_iClip = std::min(m_iClip + info.iShots, info.iMaxClip);
+				int iShots = info.iShots;
+
+				if (info.iAmmo1 != AMMO_NONE)
+				{
+					iShots = std::min(iShots, m_pPlayer->m_rgAmmo[info.iAmmo1]);
+
+					m_pPlayer->m_rgAmmo[info.iAmmo1] -= iShots;
+				}
+
+				m_iClip = std::min(m_iClip + iShots, info.iMaxClip);
 			}
 		}
 		if ((m_pPlayer->pev->button & IN_ATTACK) != 0 && m_iClip >= info.iShots)
@@ -240,7 +259,8 @@ void CTFWeapon::WeaponPostFrame()
 		}
 		else if (m_iNextPrimaryAttack <= 0)
 		{
-			if (m_iClip < info.iMaxClip)
+			if (m_iClip < info.iMaxClip
+			 && (info.iAmmo1 == AMMO_NONE || m_pPlayer->m_rgAmmo[info.iAmmo1] != 0))
 			{
 				m_pPlayer->SetAction(CBasePlayer::Action::Reload);
 
@@ -264,16 +284,42 @@ void CTFWeapon::WeaponPostFrame()
 	}
 	else if (m_iNextPrimaryAttack <= 0)
 	{
-		if ((m_pPlayer->pev->button & IN_ATTACK) != 0
-		 && (info.iMaxClip <= 0 || m_iClip >= info.iShots))
+		if ((m_pPlayer->pev->button & IN_ATTACK) != 0)
 		{
-			PrimaryAttack();
+			if (info.iMaxClip > 0)
+			{
+				if (m_iClip >= info.iShots)
+				{
+					PrimaryAttack();
+					return;
+				}
+			}
+			else if (info.iAmmo1 != AMMO_NONE)
+			{
+				if (m_pPlayer->m_rgAmmo[info.iAmmo1] >= info.iShots)
+				{
+					PrimaryAttack();
+					return;
+				}
+			}
+			else
+			{
+				PrimaryAttack();
+				return;
+			}
+			if ((m_iWeaponState & kWpnStateEmptySound) == 0)
+			{
+				m_pPlayer->EmitSoundPredicted("weapons/357_cock1.wav", CHAN_ITEM, VOL_NORM, ATTN_IDLE);
+				m_iWeaponState |= kWpnStateEmptySound;
+			}
 		}
-		else if (m_iClip < info.iMaxClip)
+
+		if (m_iClip < info.iMaxClip
+		 && (info.iAmmo1 == AMMO_NONE || m_pPlayer->m_rgAmmo[info.iAmmo1] != 0))
 		{
 			SendWeaponAnim(info.iAnims[kWeaponAnimStartReload]);
 
-			m_iWeaponState &= ~kWpnStateReloading;
+			m_iWeaponState &= ~(kWpnStateReloading | kWpnStateEmptySound);
 			m_fInReload = true;
 			m_iNextPrimaryAttack = 100;
 		}
