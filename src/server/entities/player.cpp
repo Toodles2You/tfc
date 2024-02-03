@@ -67,7 +67,7 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 	DEFINE_FIELD(CBasePlayer, m_pActiveWeapon, FIELD_CLASSPTR),
 	DEFINE_FIELD(CBasePlayer, m_WeaponBits, FIELD_INT64),
 
-	DEFINE_ARRAY(CBasePlayer, m_rgAmmo, FIELD_INTEGER, AMMO_LAST),
+	DEFINE_ARRAY(CBasePlayer, m_rgAmmo, FIELD_INTEGER, AMMO_TYPES),
 
 	DEFINE_FIELD(CBasePlayer, m_iTrain, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayer, m_bitsHUDDamage, FIELD_INTEGER),
@@ -345,7 +345,7 @@ void CBasePlayer::PackDeadPlayerWeapons()
 	int iAmmoRules;
 	int i;
 	CBasePlayerWeapon* rgpPackWeapons[WEAPON_LAST];
-	int iPackAmmo[AMMO_LAST + 1];
+	int iPackAmmo[AMMO_TYPES];
 	int iPW = 0; // index into packweapons array
 	int iPA = 0; // index into packammo array
 
@@ -388,9 +388,9 @@ void CBasePlayer::PackDeadPlayerWeapons()
 	// now go through ammo and make a list of which types to pack.
 	if (iAmmoRules != GR_PLR_DROP_AMMO_NO)
 	{
-		for (i = 0; i < AMMO_LAST; i++)
+		for (i = 0; i < AMMO_TYPES; i++)
 		{
-			if (m_rgAmmo[i] > 0)
+			if (m_rgAmmo[i] != 0)
 			{
 				// player has some ammo of this type.
 				switch (iAmmoRules)
@@ -474,10 +474,7 @@ void CBasePlayer::RemoveAllWeapons()
 		}
 	}
 
-	for (int i = 0; i < AMMO_LAST; i++)
-	{
-		m_rgAmmo[i] = 0;
-	}
+	memset(m_rgAmmo, 0, sizeof(m_rgAmmo));
 
 	UpdateClientData();
 }
@@ -963,10 +960,14 @@ bool CBasePlayer::Spawn()
 	m_ClientWeaponBits = 0;
 
 	// reset all ammo values to 0
-	for (int i = 0; i < AMMO_LAST; i++)
+	memset(m_rgAmmo, 0, sizeof(m_rgAmmo));
+
+	MessageBegin(MSG_ONE, gmsgAmmo, this);
+	for (int i = 0; i < AMMO_TYPES; i++)
 	{
-		m_rgAmmo[i] = 0;
+		WriteByte(g_pGameRules->GetMaxAmmo(this, i));
 	}
+	MessageEnd();
 
 	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
 
@@ -1394,46 +1395,33 @@ void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* weapon)
 }
 
 
-//
-// Returns the unique ID for the ammo, or -1 if error
-//
-int CBasePlayer::GiveAmmo(int iCount, int iType, int iMax)
+bool CBasePlayer::GiveAmmo(int iCount, int iType)
 {
-	if (!g_pGameRules->CanHaveAmmo(this, iType, iMax))
+	if (!g_pGameRules->CanHaveAmmo(this, iType))
 	{
 		// game rules say I can't have any more of this ammo type.
-		return -1;
+		return false;
 	}
 
-	int iAdd = std::min(iCount, iMax - m_rgAmmo[iType]);
+	int iAdd = std::min(iCount, g_pGameRules->GetMaxAmmo(this, iType) - m_rgAmmo[iType]);
+
 	if (iAdd < 1)
-		return iType;
-
-	// Toodles FIXME:
-	// If this is an exhaustible weapon make sure the player has it.
-	/*
-	if (const auto& ammoType = CBasePlayerWeapon::AmmoInfoArray[i]; ammoType.WeaponName != nullptr)
 	{
-		if (!HasNamedPlayerWeapon(ammoType.WeaponName))
-		{
-			GiveNamedItem(ammoType.WeaponName, 0);
-		}
+		return true;
 	}
-	*/
 
 	m_rgAmmo[iType] += iAdd;
-
 
 	if (0 != gmsgAmmoPickup) // make sure the ammo messages have been linked first
 	{
 		// Send the message that ammo has been picked up
 		MessageBegin(MSG_ONE, gmsgAmmoPickup, this);
 		WriteByte(iType); // ammo ID
-		WriteByte(iAdd);				  // amount
+		WriteByte(iAdd); // amount
 		MessageEnd();
 	}
 
-	return iType;
+	return true;
 }
 
 /*
@@ -1658,7 +1646,7 @@ void CBasePlayer::DropPlayerWeapon(char* pszWeaponName)
 	// drop half of the ammo for this weapon.
 	int iAmmoIndex = pWeapon->iAmmo1();
 
-	if (iAmmoIndex > AMMO_NONE)
+	if (iAmmoIndex != -1)
 	{
 		// this weapon weapon uses ammo, so pack an appropriate amount.
 		if ((pWeapon->iFlags() & WEAPON_FLAG_EXHAUSTIBLE) != 0)

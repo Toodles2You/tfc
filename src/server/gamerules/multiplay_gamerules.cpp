@@ -526,6 +526,11 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 	{
 		pPlayer->GiveNamedItem("weapon_crowbar");
 		pPlayer->GiveNamedItem("weapon_9mmAR");
+
+		for (int i = 0; i < AMMO_TYPES; i++)
+		{
+			pPlayer->m_rgAmmo[i] = GetMaxAmmo(pPlayer, i);
+		}
 	}
 
 	pPlayer->m_iAutoWepSwitch = originalAutoWepSwitch;

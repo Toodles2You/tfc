@@ -501,8 +501,6 @@ void WeaponsResource::Init()
 		strcpy(w.szName, info.pszName);
 		w.iAmmoType = info.iAmmo1;
 		w.iAmmo2Type = info.iAmmo2;
-		w.iMax1 = info.iMaxAmmo1;
-		w.iMax2 = info.iMaxAmmo2;
 		w.iSlot = info.iSlot;
 		w.iSlotPos = info.iPosition;
 		w.iFlags = info.iFlags;

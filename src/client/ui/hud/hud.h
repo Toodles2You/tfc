@@ -135,6 +135,10 @@ public:
 	friend class WeaponsResource;
 
 protected:
+	void DrawCrosshair(WEAPON *pWeapon, int a = 255, bool zoom = false, bool autoaim = false);
+	int DrawBar(int x, int y, int width, int height, float f, int color, int a);
+	void DrawAmmoBar(WEAPON* p, int x, int y, int width, int height, int color, int a);
+
 	float m_fFade;
 	RGBA m_rgba;
 	WEAPON* m_pWeapon;
@@ -683,6 +687,7 @@ public:
 	void MsgFunc_ViewMode(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_Concuss(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_Weapons(const char* pszName, int iSize, void* pbuf);
+	bool MsgFunc_Ammo(const char* pszName, int iSize, void* pbuf);
 
 	// Screen information
 	SCREENINFO m_scrinfo;

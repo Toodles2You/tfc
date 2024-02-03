@@ -17,6 +17,7 @@
 //
 
 #include "hud.h"
+#include "ammohistory.h"
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "r_efx.h"
@@ -126,6 +127,7 @@ bool CHud::MsgFunc_Concuss(const char* pszName, int iSize, void* pbuf)
 	return true;
 }
 
+
 bool CHud::MsgFunc_Weapons(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
@@ -134,6 +136,20 @@ bool CHud::MsgFunc_Weapons(const char* pszName, int iSize, void* pbuf)
 	const std::uint64_t upperBits = READ_LONG();
 
 	m_iWeaponBits = (lowerBits & 0XFFFFFFFF) | ((upperBits & 0XFFFFFFFF) << 32ULL);
+
+	return true;
+}
+
+
+bool CHud::MsgFunc_Ammo(const char* pszName, int iSize, void* pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	for (int i = 0; i < AMMO_TYPES; i++)
+	{
+		int count = READ_BYTE();
+		gWR.SetMaxAmmo(i, count);
+	}
 
 	return true;
 }

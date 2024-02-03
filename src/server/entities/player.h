@@ -111,7 +111,7 @@ public:
 	unsigned int m_TFState;
 
 	// shared ammo slots
-	int m_rgAmmo[AMMO_LAST];
+	byte m_rgAmmo[AMMO_TYPES];
 
 	int m_iDeaths;
 
@@ -216,7 +216,7 @@ public:
 	void GiveNamedItem(const char* szName);
 	void EnableControl(bool fControl);
 
-	int GiveAmmo(int iAmount, int iType, int iMax) override;
+	bool GiveAmmo(int iAmount, int iType) override;
 
 	void PlaybackEvent(
 		unsigned short event,
@@ -231,8 +231,6 @@ public:
 public:
 	void PlayerDeathFrame();
 	void PlayerUse();
-
-	int AmmoInventory(int iAmmoIndex) { return m_rgAmmo[iAmmoIndex]; }
 
 	Vector GetAimVector();
 

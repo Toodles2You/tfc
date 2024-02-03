@@ -53,9 +53,15 @@ void WeaponsResource::LoadAllWeaponSprites()
 int WeaponsResource::CountAmmo(int iId)
 {
 	if (iId < 0)
+	{
 		return 0;
-
+	}
 	return riAmmo[iId];
+}
+
+int WeaponsResource::MaxAmmo(int iId)
+{
+	return riMaxAmmo[iId];
 }
 
 bool WeaponsResource::HasAmmo(WEAPON* p)
@@ -63,11 +69,7 @@ bool WeaponsResource::HasAmmo(WEAPON* p)
 	if (!p)
 		return false;
 
-	// weapons with no max ammo can always be selected
-	if (p->iMax1 == -1)
-		return true;
-
-	return (p->iAmmoType <= AMMO_NONE)
+	return p->iAmmoType == -1
 		 || (p->iFlags & WEAPON_FLAG_SELECTONEMPTY) != 0
 		 || p->iClip > 0
 		 || 0 != CountAmmo(p->iAmmoType)
@@ -257,12 +259,6 @@ DECLARE_COMMAND(m_Ammo, NextWeapon);
 DECLARE_COMMAND(m_Ammo, PrevWeapon);
 DECLARE_COMMAND(m_Ammo, LastWeapon);
 
-// width of ammo fonts
-#define AMMO_SMALL_WIDTH 10
-#define AMMO_LARGE_WIDTH 20
-
-#define HISTORY_DRAW_TIME "5"
-
 bool CHudAmmo::Init()
 {
 	gHUD.AddHudElem(this);
@@ -291,7 +287,7 @@ bool CHudAmmo::Init()
 
 	Reset();
 
-	CVAR_CREATE("hud_drawhistory_time", HISTORY_DRAW_TIME, 0);
+	CVAR_CREATE("hud_drawhistory_time", "5", 0);
 	hud_fastswitch = CVAR_CREATE("hud_fastswitch", "0", FCVAR_ARCHIVE); // controls whether or not weapons can be selected in one keypress
 	hud_selection_fadeout = CVAR_CREATE("hud_selection_fadeout", "0.5", FCVAR_ARCHIVE);
 	hud_selection_timeout = CVAR_CREATE("hud_selection_timeout", "1.5", FCVAR_ARCHIVE);
@@ -910,7 +906,7 @@ void CHudAmmo::UserCmd_LastWeapon()
 
 extern Vector g_CrosshairTarget;
 
-static void DrawCrosshair(WEAPON *pWeapon, int a = 255, bool zoom = false, bool autoaim = false)
+void CHudAmmo::DrawCrosshair(WEAPON *pWeapon, int a, bool zoom, bool autoaim)
 {
 	HSPRITE pic = pWeapon->hCrosshair;
 	Rect *rc = &pWeapon->rcCrosshair;
@@ -998,8 +994,8 @@ bool CHudAmmo::Draw(float flTime)
 
 	// SPR_Draw Ammo
 	if (pw->iClip < 0
-	 && pw->iAmmoType <= AMMO_NONE
-	 && pw->iAmmo2Type <= AMMO_NONE)
+	 && pw->iAmmoType == -1
+	 && pw->iAmmo2Type == -1)
 	{
 		return false;
 	}
@@ -1013,11 +1009,11 @@ bool CHudAmmo::Draw(float flTime)
 	y = gHUD.GetHeight() - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
 
 	// Does weapon have any ammo at all?
-	if (pw->iClip >= 0 || m_pWeapon->iAmmoType > AMMO_NONE)
+	if (pw->iClip >= 0 || m_pWeapon->iAmmoType != -1)
 	{
 		int iIconWidth = m_pWeapon->rcAmmo.right - m_pWeapon->rcAmmo.left;
 
-		if (pw->iClip >= 0 && m_pWeapon->iAmmoType > AMMO_NONE)
+		if (pw->iClip >= 0 && m_pWeapon->iAmmoType != -1)
 		{
 			// room for the number and the '|' and the current ammo
 
@@ -1052,7 +1048,7 @@ bool CHudAmmo::Draw(float flTime)
 	}
 
 	// Does weapon have seconday ammo?
-	if (pw->iAmmo2Type > AMMO_NONE)
+	if (pw->iAmmo2Type != -1)
 	{
 		int iIconWidth = m_pWeapon->rcAmmo2.right - m_pWeapon->rcAmmo2.left;
 
@@ -1075,7 +1071,7 @@ bool CHudAmmo::Draw(float flTime)
 //
 // Draws the ammo bar on the hud
 //
-static int DrawBar(int x, int y, int width, int height, float f, CHud::hudcolor_e color, int a)
+int CHudAmmo::DrawBar(int x, int y, int width, int height, float f, int color, int a)
 {
 	if (f < 0)
 		f = 0;
@@ -1094,23 +1090,23 @@ static int DrawBar(int x, int y, int width, int height, float f, CHud::hudcolor_
 		width -= w;
 	}
 
-	gHUD.DrawHudFill(x, y, width, height, color, a / 2);
+	gHUD.DrawHudFill(x, y, width, height, static_cast<CHud::hudcolor_e>(color), a / 2);
 
 	return (x + width);
 }
 
 
 
-static void DrawAmmoBar(WEAPON* p, int x, int y, int width, int height, CHud::hudcolor_e color, int a)
+void CHudAmmo::DrawAmmoBar(WEAPON* p, int x, int y, int width, int height, int color, int a)
 {
 	if (!p)
 		return;
 
 	float f;
 
-	if (p->iAmmoType > AMMO_NONE)
+	if (p->iAmmoType != -1)
 	{
-		f = (float)gWR.CountAmmo(p->iAmmoType) / (float)p->iMax1;
+		f =gWR.CountAmmo(p->iAmmoType) / (float)gWR.MaxAmmo(p->iAmmoType);
 
 		x = DrawBar(
 			x,
@@ -1127,9 +1123,9 @@ static void DrawAmmoBar(WEAPON* p, int x, int y, int width, int height, CHud::hu
 
 	// Do we have secondary ammo too?
 
-	if (p->iAmmo2Type > AMMO_NONE)
+	if (p->iAmmo2Type != -1)
 	{
-		f = (float)gWR.CountAmmo(p->iAmmo2Type) / (float)p->iMax2;
+		f = gWR.CountAmmo(p->iAmmo2Type) / (float)gWR.MaxAmmo(p->iAmmo2Type);
 
 		x = DrawBar(
 			x,

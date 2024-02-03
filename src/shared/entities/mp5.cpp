@@ -41,10 +41,8 @@ void CMP5::Precache()
 void CMP5::GetWeaponInfo(WeaponInfo& i)
 {
 	i.pszName = "weapon_9mmAR";
-	i.iAmmo1 = AMMO_NONE;
-	i.iMaxAmmo1 = -1;
-	i.iAmmo2 = AMMO_NONE;
-	i.iMaxAmmo2 = -1;
+	i.iAmmo1 = AMMO_9MM;
+	i.iAmmo2 = AMMO_ARGRENADES;
 	i.iMaxClip = 30;
 	i.iSlot = 2;
 	i.iPosition = 0;
@@ -91,6 +89,8 @@ void CMP5::PrimaryAttack()
 
 void CMP5::SecondaryAttack()
 {
+	m_pPlayer->m_rgAmmo[iAmmo2()]--;
+
 	m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
 #ifndef CLIENT_DLL
@@ -119,7 +119,7 @@ void CMP5::SecondaryAttack()
 
 void CMP5::WeaponPostFrame()
 {
-	if ((m_pPlayer->pev->button & IN_ATTACK2) != 0)
+	if ((m_pPlayer->pev->button & IN_ATTACK2) != 0 && m_pPlayer->m_rgAmmo[iAmmo2()] != 0)
 	{
 		if (m_iNextPrimaryAttack <= 0 || m_fInReload)
 		{
@@ -133,11 +133,14 @@ void CMP5::WeaponPostFrame()
 	{
 		if (m_fInReload)
 		{
-			m_iClip = iMaxClip();
+			int shots = std::min(iMaxClip() - m_iClip, static_cast<int>(m_pPlayer->m_rgAmmo[iAmmo1()]));
+			m_pPlayer->m_rgAmmo[iAmmo1()] -= shots;
+			m_iClip += shots;
 			m_fInReload = false;
 		}
-		else if (m_iClip == 0
+		else if ((m_iClip == 0
 		 || ((m_pPlayer->pev->button & IN_RELOAD) != 0 && m_iClip < iMaxClip()))
+		 && m_pPlayer->m_rgAmmo[iAmmo1()] != 0)
 		{
 			SendWeaponAnim(kAnimReload);
 			m_pPlayer->SetAction(CBasePlayer::Action::Reload);

@@ -46,11 +46,10 @@ enum WeaponId
 
 enum AmmoId
 {
-	AMMO_NONE = 0,
 	AMMO_9MM,
 	AMMO_ARGRENADES,
 
-	AMMO_LAST = 16
+	AMMO_TYPES
 };
 
 enum

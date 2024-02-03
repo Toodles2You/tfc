@@ -210,8 +210,10 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 	data.m_iId = (m_pActiveWeapon != nullptr) ? m_pActiveWeapon->GetID() : WEAPON_NONE;
 
 	byte* ammo = reinterpret_cast<byte*>(&data.ammo_shells);
-	ammo[0] = m_rgAmmo[AMMO_9MM];
-	ammo[1] = m_rgAmmo[AMMO_ARGRENADES];
+	for (int i = 0; i < AMMO_TYPES; i++)
+	{
+		ammo[i] = m_rgAmmo[i];
+	}
 
 	data.viewmodel = pev->viewmodel;
     data.maxspeed = pev->maxspeed;
@@ -261,8 +263,10 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 	}
 
 	const byte* ammo = reinterpret_cast<const byte*>(&data.ammo_shells);
-	m_rgAmmo[AMMO_9MM] = ammo[0];
-	m_rgAmmo[AMMO_ARGRENADES] = ammo[1];
+	for (int i = 0; i < AMMO_TYPES; i++)
+	{
+		m_rgAmmo[i] = ammo[i];
+	}
 
 	pev->viewmodel = data.viewmodel;
 	pev->maxspeed = data.maxspeed;

@@ -85,7 +85,7 @@ void CBasePlayer::UpdateHudData()
 		gHUD.m_Ammo.Update_CurWeapon(0, -1, -1);
 	}
 
-	for (int i = AMMO_NONE + 1; i < AMMO_LAST; i++)
+	for (int i = 0; i < AMMO_TYPES; i++)
 	{
 		gHUD.m_Ammo.Update_AmmoX(i, m_rgAmmo[i]);
 	}
