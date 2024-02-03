@@ -260,7 +260,7 @@ void CTFWeapon::WeaponPostFrame()
 		else if (m_iNextPrimaryAttack <= 0)
 		{
 			if (m_iClip < info.iMaxClip
-			 && (info.iAmmo1 == -1 || m_pPlayer->m_rgAmmo[info.iAmmo1] != 0))
+			 && (info.iAmmo1 == -1 || m_pPlayer->m_rgAmmo[info.iAmmo1] >= info.iShots))
 			{
 				m_pPlayer->SetAction(CBasePlayer::Action::Reload);
 
@@ -315,7 +315,7 @@ void CTFWeapon::WeaponPostFrame()
 		}
 
 		if (m_iClip < info.iMaxClip
-		 && (info.iAmmo1 == -1 || m_pPlayer->m_rgAmmo[info.iAmmo1] != 0))
+		 && (info.iAmmo1 == -1 || m_pPlayer->m_rgAmmo[info.iAmmo1] >= info.iShots))
 		{
 			SendWeaponAnim(info.iAnims[kWeaponAnimStartReload]);
 
