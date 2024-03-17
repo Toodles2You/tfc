@@ -435,7 +435,10 @@ void CBasePlayer::PackDeadPlayerWeapons()
 	int iPA = 0; // index into packammo array
 
 	memset(rgpPackWeapons, 0, sizeof(rgpPackWeapons));
-	memset(iPackAmmo, -1, sizeof(iPackAmmo));
+	for (i = 0; i < AMMO_TYPES; i++)
+	{
+		iPackAmmo[i] = -1;
+	}
 
 	// get the game rules
 	iWeaponRules = g_pGameRules->DeadPlayerWeapons(this);
@@ -525,23 +528,18 @@ void CBasePlayer::PackDeadPlayerWeapons()
 	pWeaponBox->pev->nextthink = gpGlobals->time + 120;
 
 	// back these two lists up to their first elements
-	iPA = 0;
-	iPW = 0;
 
 	// pack the ammo
-	while (iPackAmmo[iPA] != -1)
+	for (iPA = 0; iPA < AMMO_TYPES && iPackAmmo[iPA] != -1; iPA++)
 	{
 		pWeaponBox->PackAmmo(iPackAmmo[iPA], m_rgAmmo[iPackAmmo[iPA]]);
-		iPA++;
 	}
 
 	// now pack all of the weapons in the lists
-	while (rgpPackWeapons[iPW])
+	for (iPW = 0; iPW < WEAPON_TYPES && rgpPackWeapons[iPW]; iPW++)
 	{
 		// weapon unhooked from the player. Pack it into der box.
 		pWeaponBox->PackWeapon(rgpPackWeapons[iPW]);
-
-		iPW++;
 	}
 
 	pWeaponBox->pev->velocity = pev->velocity * 1.2; // weaponbox has player's velocity, then some.
