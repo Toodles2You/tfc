@@ -102,7 +102,12 @@ void CHalfLifeMovement::CheckParameters()
         pmove->maxspeed = pmove->clientmaxspeed;
     }
 
-    if ((pmove->flags & (FL_FROZEN | FL_ONTRAIN)) != 0 || pmove->dead != 0)
+#ifdef HALFLIFE_TRAINCONTROL
+    if ((pmove->flags & (FL_FROZEN | FL_ONTRAIN)) != 0
+#else
+    if ((pmove->flags & FL_FROZEN) != 0
+#endif
+     || pmove->dead != 0)
     {
         move = g_vecZero;
     }

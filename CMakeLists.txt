@@ -20,6 +20,8 @@ option(HALFLIFE_SAVERESTORE "Enable singleplayer game save system" OFF)
 option(HALFLIFE_NODEGRAPH "Enable node graphs for monster AI" OFF)
 option(HALFLIFE_BOTS "Enable multiplayer bots" ON)
 option(HALFLIFE_JOYSTICK "Enable joystick support" OFF)
+option(HALFLIFE_TANKCONTROL "Half-Life player tank control" OFF)
+option(HALFLIFE_TRAINCONTROL "Half-Life player train control" OFF)
 
 set(HL_SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 set(SHARED_SRC_DIR ${HL_SRC_DIR}/shared)
@@ -115,7 +117,6 @@ set(CLIENT_SRC
     ${CLIENT_SRC_DIR}/ui/hud/status_icons.cpp
     ${CLIENT_SRC_DIR}/ui/hud/statusbar.cpp
     ${CLIENT_SRC_DIR}/ui/hud/text_message.cpp
-    ${CLIENT_SRC_DIR}/ui/hud/train.cpp
 
     ${CLIENT_SRC_DIR}/ui/vgui/vgui_ClassMenu.cpp
     ${CLIENT_SRC_DIR}/ui/vgui/vgui_CustomObjects.cpp
@@ -223,6 +224,22 @@ if(HALFLIFE_JOYSTICK)
     list(APPEND CLIENT_SRC
         ${CLIENT_SRC_DIR}/input/in_joystick.cpp
     )
+
+endif()
+
+if(HALFLIFE_TANKCONTROL)
+
+    list(APPEND HL_COMPILE_DEFS HALFLIFE_TANKCONTROL)
+
+endif()
+
+if(HALFLIFE_TRAINCONTROL)
+
+    list(APPEND CLIENT_SRC
+        ${CLIENT_SRC_DIR}/ui/hud/train.cpp
+    )
+
+    list(APPEND HL_COMPILE_DEFS HALFLIFE_TRAINCONTROL)
 
 endif()
 

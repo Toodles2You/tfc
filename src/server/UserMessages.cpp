@@ -32,7 +32,9 @@ void LinkUserMessages()
 	gmsgHealth = REG_USER_MSG("Health", 2);
 	gmsgDamage = REG_USER_MSG("Damage", 12);
 	gmsgBattery = REG_USER_MSG("Battery", 2);
+#ifdef HALFLIFE_TRAINCONTROL
 	gmsgTrain = REG_USER_MSG("Train", 1);
+#endif
 	//gmsgHudText = REG_USER_MSG( "HudTextPro", -1 );
 	gmsgHudText = REG_USER_MSG("HudText", -1); // we don't use the message but 3rd party addons may!
 	gmsgSayText = REG_USER_MSG("SayText", -1);

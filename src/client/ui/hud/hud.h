@@ -201,6 +201,7 @@ private:
 //
 //-----------------------------------------------------
 //
+#ifdef HALFLIFE_TRAINCONTROL
 class CHudTrain : public CHudBase
 {
 public:
@@ -213,6 +214,7 @@ private:
 	HSPRITE m_hSprite;
 	int m_iPos;
 };
+#endif
 
 //
 //-----------------------------------------------------
@@ -658,7 +660,9 @@ public:
 	CHudSpectator m_Spectator;
 	CHudGeiger m_Geiger;
 	CHudBattery m_Battery;
+#ifdef HALFLIFE_TRAINCONTROL
 	CHudTrain m_Train;
+#endif
 	CHudFlashlight m_Flash;
 	CHudMessage m_Message;
 	CHudStatusBar m_StatusBar;

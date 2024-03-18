@@ -421,7 +421,7 @@ void CFuncTank::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 {
 	if ((pev->spawnflags & SF_TANK_CANCONTROL) != 0)
 	{ // player controlled turret
-
+#ifdef HALFLIFE_TANKCONTROL
 		if (!pActivator->IsPlayer())
 			return;
 
@@ -438,6 +438,7 @@ void CFuncTank::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 		{
 			StopControl();
 		}
+#endif
 	}
 	else
 	{
@@ -961,6 +962,9 @@ void CFuncTankMortar::Fire(const Vector& barrelEnd, const Vector& forward, CBase
 //============================================================================
 // FUNC TANK CONTROLS
 //============================================================================
+
+#ifdef HALFLIFE_TANKCONTROL
+
 class CFuncTankControls : public CBaseEntity
 {
 public:
@@ -1026,3 +1030,5 @@ bool CFuncTankControls::Spawn()
 
 	return true;
 }
+
+#endif

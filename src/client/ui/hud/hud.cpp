@@ -376,7 +376,9 @@ void CHud::Init()
 	m_SayText.Init();
 	m_Spectator.Init();
 	m_Geiger.Init();
+#ifdef HALFLIFE_TRAINCONTROL
 	m_Train.Init();
+#endif
 	m_Battery.Init();
 	m_Flash.Init();
 	m_Message.Init();
@@ -531,7 +533,9 @@ void CHud::VidInit()
 	m_Health.VidInit();
 	m_Spectator.VidInit();
 	m_Geiger.VidInit();
+#ifdef HALFLIFE_TRAINCONTROL
 	m_Train.VidInit();
+#endif
 	m_Battery.VidInit();
 	m_Flash.VidInit();
 	m_Message.VidInit();

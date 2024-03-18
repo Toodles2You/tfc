@@ -51,11 +51,13 @@ void CBasePlayer::WeaponPostFrame()
 	ImpulseCommands();
 
 	// check if the player is using a tank
+#ifdef HALFLIFE_TANKCONTROL
 #ifdef GAME_DLL
 	if (m_pTank != nullptr)
 	{
 		return;
 	}
+#endif
 #endif
 
 	if ((m_TFState & kTFStateGrenadePrime) != 0)
@@ -111,6 +113,7 @@ void CBasePlayer::PostThink()
 		goto pt_end;
 	}
 
+#ifdef HALFLIFE_TANKCONTROL
 #ifdef GAME_DLL
 	if (m_pTank != NULL)
 	{
@@ -124,6 +127,7 @@ void CBasePlayer::PostThink()
 			m_pTank = NULL;
 		}
 	}
+#endif
 #endif
 
 	WeaponPostFrame();
