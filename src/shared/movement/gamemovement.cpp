@@ -407,13 +407,15 @@ void CHalfLifeMovement::Accelerate(const Vector& wishDir, float wishSpeed)
         return;
     }
 
-    if (pmove->onground == -1 && wishSpeed > 30)
+    float testSpeed = wishSpeed;
+
+    if (pmove->onground == -1 && testSpeed > 30)
     {
-        wishSpeed = 30;
+        testSpeed = 30;
     }
 
     const float addSpeed =
-        wishSpeed - DotProduct(pmove->velocity, wishDir);
+        testSpeed - DotProduct(pmove->velocity, wishDir);
 
     if (addSpeed <= 0)
     {
