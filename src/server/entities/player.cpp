@@ -527,7 +527,7 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 
 	m_iFOV = 0;
 
-	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
+	m_TFState = 0;
 
 	m_iObserverLastMode = OBS_CHASE_FREE;
 	pev->iuser1 = OBS_DEATHCAM;
@@ -989,7 +989,7 @@ bool CBasePlayer::Spawn()
 	}
 	MessageEnd();
 
-	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
+	m_TFState = 0;
 
 	char* infobuffer = g_engfuncs.pfnGetInfoKeyBuffer(edict());
 	char* value = g_engfuncs.pfnInfoKeyValue(infobuffer, "cl_righthand");
@@ -1761,6 +1761,8 @@ void CBasePlayer::GetEntityState(entity_state_t& state)
 }
 
 
+#ifdef HALFLIFE_GRENADES
+
 void CBasePlayer::PrimeGrenade()
 {
 	if ((m_TFState & (kTFStateGrenadePrime | kTFStateGrenadeThrowing)) != 0)
@@ -1786,6 +1788,8 @@ void CBasePlayer::ThrowGrenade()
 	m_TFState &= ~kTFStateGrenadePrime;
 	m_TFState |= kTFStateGrenadeThrowing;
 }
+
+#endif
 
 
 void CBasePlayer::SendExtraInfo(CBaseEntity* toWhom)

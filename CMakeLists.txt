@@ -22,6 +22,7 @@ option(HALFLIFE_BOTS "Enable multiplayer bots" ON)
 option(HALFLIFE_JOYSTICK "Enable joystick support" OFF)
 option(HALFLIFE_TANKCONTROL "Half-Life player tank control" OFF)
 option(HALFLIFE_TRAINCONTROL "Half-Life player train control" OFF)
+option(HALFLIFE_GRENADES "Team Fortress style grenade priming" OFF)
 
 set(HL_SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 set(SHARED_SRC_DIR ${HL_SRC_DIR}/shared)
@@ -240,6 +241,12 @@ if(HALFLIFE_TRAINCONTROL)
     )
 
     list(APPEND HL_COMPILE_DEFS HALFLIFE_TRAINCONTROL)
+
+endif()
+
+if(HALFLIFE_GRENADES)
+
+    list(APPEND HL_COMPILE_DEFS HALFLIFE_GRENADES)
 
 endif()
 

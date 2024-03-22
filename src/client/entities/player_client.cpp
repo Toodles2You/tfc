@@ -47,7 +47,7 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 		m_pActiveWeapon = nullptr;
     }
 
-	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
+	m_TFState = 0;
 }
 
 
@@ -56,7 +56,7 @@ bool CBasePlayer::Spawn()
 	SetModel("models/player.mdl");
 	SetAction(Action::Idle, true);
 
-	m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
+	m_TFState = 0;
 
 	m_bLeftHanded = static_cast<int>(floorf(cl_righthand->value)) == 0;
 
@@ -117,6 +117,8 @@ void CBasePlayer::SetPrefsFromUserinfo(char* infobuffer)
 }
 
 
+#ifdef HALFLIFE_GRENADES
+
 void CBasePlayer::PrimeGrenade()
 {
 	if ((m_TFState & (kTFStateGrenadePrime | kTFStateGrenadeThrowing)) != 0)
@@ -145,6 +147,8 @@ void CBasePlayer::ThrowGrenade()
 	m_TFState &= ~kTFStateGrenadePrime;
 	m_TFState |= kTFStateGrenadeThrowing;
 }
+
+#endif
 
 
 void CBaseEntity::GetEntityState(entity_state_t& state)

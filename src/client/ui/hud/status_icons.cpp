@@ -40,11 +40,13 @@ bool CHudStatusIcons::Init()
 
 bool CHudStatusIcons::VidInit()
 {
+#ifdef HALFLIFE_GRENADES
 	m_hTimer = SPR_Load("sprites/timer.spr");
 	
 	int i = gHUD.GetSpriteIndex("d_grenade");
 	m_hGrenade = gHUD.GetSprite(i);
 	m_rcGrenade = gHUD.GetSpriteRect(i);
+#endif
 
 	return true;
 }
@@ -53,8 +55,10 @@ void CHudStatusIcons::Reset()
 {
 	memset(m_IconList, 0, sizeof m_IconList);
 
+#ifdef HALFLIFE_GRENADES
 	m_bTimerActive = false;
 	m_flTimerStart = -1000;
+#endif
 
 	m_iFlags &= ~HUD_ACTIVE;
 }
@@ -79,13 +83,20 @@ bool CHudStatusIcons::Draw(float flTime)
 		}
 	}
 
+#ifdef HALFLIFE_GRENADES
 	if (!m_bTimerActive)
 	{
 		return true;
 	}
 
 	return DrawTimer(flTime);
+#else
+	return true;
+#endif
 }
+
+
+#ifdef HALFLIFE_GRENADES
 
 bool CHudStatusIcons::DrawTimer(float flTime)
 {	
@@ -138,6 +149,9 @@ bool CHudStatusIcons::DrawTimer(float flTime)
 
 	return true;
 }
+
+#endif
+
 
 // Message handler for StatusIcon message
 // accepts five values:
@@ -219,6 +233,7 @@ void CHudStatusIcons::EnableIcon(const char* pszIconName, int red, int green, in
 	m_IconList[i].b = blue;
 	strcpy(m_IconList[i].szSpriteName, pszIconName);
 
+#ifdef HALFLIFE_GRENADES
 	// Hack: Play Timer sound when a grenade icon is played (in 0.8 seconds)
 	if (added && strstr(m_IconList[i].szSpriteName, "grenade"))
 	{
@@ -242,6 +257,7 @@ void CHudStatusIcons::EnableIcon(const char* pszIconName, int red, int green, in
 		m_bTimerActive = true;
 		m_flTimerStart = gHUD.m_flTime;
 	}
+#endif
 
 	m_iFlags |= HUD_ACTIVE;
 }

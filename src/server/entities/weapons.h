@@ -230,6 +230,8 @@ public:
 	virtual void BounceSound();
 };
 
+#ifdef HALFLIFE_GRENADES
+
 /* Team Fortress style timed grenade */
 class CPrimeGrenade : public CGrenade
 {
@@ -249,6 +251,8 @@ protected:
 
 	void Throw(throw_e mode);
 };
+
+#endif
 
 void RadiusDamage(
 	const Vector& origin,

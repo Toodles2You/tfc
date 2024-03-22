@@ -45,8 +45,10 @@ typedef enum
 
 enum
 {
+#ifdef HALFLIFE_GRENADES
 	kTFStateGrenadePrime    = 1,
 	kTFStateGrenadeThrowing = 2,
+#endif
 };
 
 #define CHAT_INTERVAL 1.0f
@@ -294,8 +296,10 @@ protected:
 	CGameMovement* m_gameMovement = nullptr;
 	EHANDLE m_hLastAttacker[2];
 
+#ifdef HALFLIFE_GRENADES
 	void PrimeGrenade();
 	void ThrowGrenade();
+#endif
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

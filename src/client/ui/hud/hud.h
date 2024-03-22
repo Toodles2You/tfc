@@ -497,7 +497,9 @@ public:
 	void DisableIcon(const char* pszIconName);
 
 private:
+#ifdef HALFLIFE_GRENADES
 	bool DrawTimer(float flTime);
+#endif
 
 	typedef struct
 	{
@@ -509,6 +511,7 @@ private:
 
 	icon_sprite_t m_IconList[MAX_ICONSPRITES];
 
+#ifdef HALFLIFE_GRENADES
 	bool m_bTimerActive;
 	float m_flTimerStart;
 
@@ -516,6 +519,7 @@ private:
 	
 	HSPRITE m_hGrenade;
 	Rect m_rcGrenade;
+#endif
 };
 
 //

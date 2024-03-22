@@ -60,6 +60,7 @@ void CBasePlayer::WeaponPostFrame()
 #endif
 #endif
 
+#ifdef HALFLIFE_GRENADES
 	if ((m_TFState & kTFStateGrenadePrime) != 0)
 	{
 		if (m_bGrenadeToggle)
@@ -78,6 +79,7 @@ void CBasePlayer::WeaponPostFrame()
 	{
 		PrimeGrenade();
 	}
+#endif
 
 	if (m_pActiveWeapon == nullptr)
 	{
