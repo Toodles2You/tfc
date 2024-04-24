@@ -58,6 +58,7 @@ void CGrenadeLauncher::GetWeaponInfo(WeaponInfo& i)
 	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -2.0F;
 	i.iSibling = WEAPON_PIPEBOMB_LAUNCHER;
+	i.bShouldIdle = false;
 }
 
 
@@ -104,6 +105,7 @@ void CPipeBombLauncher::GetWeaponInfo(WeaponInfo& i)
 	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -2.0F;
 	i.iSibling = WEAPON_GRENADE_LAUNCHER;
+	i.bShouldIdle = false;
 }
 
 

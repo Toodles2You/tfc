@@ -98,6 +98,7 @@ typedef struct
 	const char* pszReloadSound;
 	float flPunchAngle;
 	int iSibling;
+	bool bShouldIdle;
 } WeaponInfo;
 
 #ifdef GAME_DLL
@@ -192,6 +193,7 @@ public:
 	{
 		kWpnStateReloading = 1,
 		kWpnStateEmptySound = 2,
+		kWpnStateIdle = 4,
 	};
 
 	int m_iWeaponState;

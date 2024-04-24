@@ -214,6 +214,7 @@ void CMedikit::GetWeaponInfo(WeaponInfo& i)
 	i.pszReloadSound = "items/medshotno1.wav";
 	i.flPunchAngle = 0.0F;
 	i.iSibling = -1;
+	i.bShouldIdle = false;
 }
 
 
@@ -304,5 +305,6 @@ void CAxe::GetWeaponInfo(WeaponInfo& i)
 	i.pszReloadSound = "weapons/cbar_miss1.wav";
 	i.flPunchAngle = 0.0F;
 	i.iSibling = -1;
+	i.bShouldIdle = false;
 }
 

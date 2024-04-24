@@ -62,6 +62,7 @@ void CSniperRifle::GetWeaponInfo(WeaponInfo& i)
 	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -4.0F;
 	i.iSibling = WEAPON_AUTO_RIFLE;
+	i.bShouldIdle = false;
 }
 
 
@@ -374,5 +375,6 @@ void CAutoRifle::GetWeaponInfo(WeaponInfo& i)
 	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -2.0F;
 	i.iSibling = WEAPON_SNIPER_RIFLE;
+	i.bShouldIdle = true;
 }
 

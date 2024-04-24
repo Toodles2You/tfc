@@ -83,7 +83,7 @@ void CTFWeapon::Deploy()
 {
 	CBasePlayerWeapon::Deploy();
 	UpdateSiblingInfo(false);
-	m_iWeaponState &= ~kWpnStateEmptySound;
+	m_iWeaponState &= ~(kWpnStateEmptySound | kWpnStateIdle);
 }
 
 
@@ -222,6 +222,8 @@ void CTFWeapon::PrimaryAttack()
 #endif
 
 	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), 0.0F, m_pPlayer->m_randomSeed, rounds);
+
+	m_iWeaponState &= ~kWpnStateIdle;
 }
 
 
@@ -236,6 +238,7 @@ void CTFWeapon::WeaponPostFrame()
 			if ((m_iWeaponState & kWpnStateReloading) == 0)
 			{
 				m_iWeaponState |= kWpnStateReloading;
+				m_iWeaponState &= ~kWpnStateIdle;
 			}
 			else
 			{
@@ -313,6 +316,11 @@ void CTFWeapon::WeaponPostFrame()
 				m_iWeaponState |= kWpnStateEmptySound;
 			}
 		}
+		else if ((m_iWeaponState & kWpnStateIdle) == 0 && info.bShouldIdle)
+		{
+			SendWeaponAnim(info.iAnims[kWeaponAnimIdle]);
+			m_iWeaponState |= kWpnStateIdle;
+		}
 
 		if (m_iClip < info.iMaxClip
 		 && (info.iAmmo1 == -1 || m_pPlayer->m_rgAmmo[info.iAmmo1] >= info.iShots))
@@ -374,6 +382,7 @@ void CShotgun::GetWeaponInfo(WeaponInfo& i)
 	i.pszReloadSound = "weapons/reload1.wav";
 	i.flPunchAngle = -2.0F;
 	i.iSibling = -1;
+	i.bShouldIdle = false;
 }
 
 
@@ -420,6 +429,7 @@ void CSuperShotgun::GetWeaponInfo(WeaponInfo& i)
 	i.pszReloadSound = "weapons/reload1.wav";
 	i.flPunchAngle = -4.0F;
 	i.iSibling = -1;
+	i.bShouldIdle = false;
 }
 
 
@@ -466,6 +476,7 @@ void CNailgun::GetWeaponInfo(WeaponInfo& i)
 	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -2.0F;
 	i.iSibling = -1;
+	i.bShouldIdle = false;
 }
 
 
@@ -512,6 +523,7 @@ void CSuperNailgun::GetWeaponInfo(WeaponInfo& i)
 	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -2.0F;
 	i.iSibling = -1;
+	i.bShouldIdle = false;
 }
 
 
@@ -558,5 +570,6 @@ void CRocketLauncher::GetWeaponInfo(WeaponInfo& i)
 	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -4.0F;
 	i.iSibling = -1;
+	i.bShouldIdle = false;
 }
 
