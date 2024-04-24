@@ -475,15 +475,7 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 		{
 			gpActiveSel = weapon;
 			gHUD.m_Ammo.m_flSelectionTime = gEngfuncs.GetClientTime();
-
-			if (newSlot)
-			{
-				PlaySound("common/wpn_hudon.wav", 1);
-			}
-			else
-			{
-				PlaySound("common/wpn_moveselect.wav", 1);
-			}
+			PlaySound("common/wpn_moveselect.wav", 1);
 		}
 	}
 }
@@ -774,14 +766,7 @@ void CHudAmmo::UserCmd_NextWeapon()
 						gHUD.m_iKeyBits &= ~IN_ATTACK;
 						return;
 					}
-					if (open || gpActiveSel->iSlot != wsp->iSlot)
-					{
-						PlaySound("common/wpn_hudon.wav", 1);
-					}
-					else
-					{
-						PlaySound("common/wpn_moveselect.wav", 1);
-					}
+					PlaySound("common/wpn_moveselect.wav", 1);
 					gpActiveSel = wsp;
 					m_flSelectionTime = gEngfuncs.GetClientTime();
 					return;
@@ -839,14 +824,7 @@ void CHudAmmo::UserCmd_PrevWeapon()
 						gHUD.m_iKeyBits &= ~IN_ATTACK;
 						return;
 					}
-					if (open || gpActiveSel->iSlot != wsp->iSlot)
-					{
-						PlaySound("common/wpn_hudon.wav", 1);
-					}
-					else
-					{
-						PlaySound("common/wpn_moveselect.wav", 1);
-					}
+					PlaySound("common/wpn_moveselect.wav", 1);
 					gpActiveSel = wsp;
 					m_flSelectionTime = gEngfuncs.GetClientTime();
 					return;
