@@ -316,11 +316,6 @@ void CTFWeapon::WeaponPostFrame()
 				m_iWeaponState |= kWpnStateEmptySound;
 			}
 		}
-		else if ((m_iWeaponState & kWpnStateIdle) == 0 && info.bShouldIdle)
-		{
-			SendWeaponAnim(info.iAnims[kWeaponAnimIdle]);
-			m_iWeaponState |= kWpnStateIdle;
-		}
 
 		if (m_iClip < info.iMaxClip
 		 && (info.iAmmo1 == -1 || m_pPlayer->m_rgAmmo[info.iAmmo1] >= info.iShots))
@@ -333,6 +328,12 @@ void CTFWeapon::WeaponPostFrame()
 		}
 		else
 		{
+			if (info.bShouldIdle && (m_iWeaponState & kWpnStateIdle) == 0)
+			{
+				SendWeaponAnim(info.iAnims[kWeaponAnimIdle]);
+				m_iWeaponState |= kWpnStateIdle;
+			}
+
 			m_iNextPrimaryAttack = std::max(m_iNextPrimaryAttack, 0);
 		}
 	}
