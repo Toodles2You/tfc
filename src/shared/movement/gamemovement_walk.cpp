@@ -24,6 +24,11 @@ void CHalfLifeMovement::Walk()
 {
     AddCorrectGravity();
 
+    if (pmove->onground == -1)
+    {
+        pmove->flFallVelocity = -pmove->velocity.z;
+    }
+
     if ((pmove->cmd.buttons & IN_JUMP) != 0
      && (pmove->oldbuttons & IN_JUMP) == 0)
     {

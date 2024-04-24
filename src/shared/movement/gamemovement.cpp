@@ -360,8 +360,6 @@ void CHalfLifeMovement::CategorizePosition()
     pmove->waterlevel = 0;
     pmove->watertype = CONTENTS_EMPTY;
 
-    pmove->flFallVelocity = -pmove->velocity.z;
-
     if (pmove->velocity.z > 180)
     {
         pmove->onground = -1;
