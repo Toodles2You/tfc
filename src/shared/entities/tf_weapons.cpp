@@ -501,7 +501,7 @@ void CSuperNailgun::GetWeaponInfo(WeaponInfo& i)
 	i.iReloadTime = 1500;
 
 	i.iProjectileType = kProjNail;
-	i.iProjectileDamage = 18;
+	i.iProjectileDamage = 13;
 	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
 	i.iProjectileCount = 1;
 	i.iProjectileChargeDamage = 0;
