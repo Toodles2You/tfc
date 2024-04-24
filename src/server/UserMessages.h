@@ -25,7 +25,9 @@ inline int gmsgShowGameTitle = 0;
 inline int gmsgHealth = 0;
 inline int gmsgDamage = 0;
 inline int gmsgBattery = 0;
+#ifdef HALFLIFE_TRAINCONTROL
 inline int gmsgTrain = 0;
+#endif
 inline int gmsgHudText = 0;
 inline int gmsgDeathMsg = 0;
 inline int gmsgScoreInfo = 0;

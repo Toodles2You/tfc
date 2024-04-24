@@ -193,6 +193,8 @@ CGrenade* CGrenade::ShootContact(CBaseEntity* owner, Vector vecStart, Vector vec
 }
 
 
+#ifdef HALFLIFE_GRENADES
+
 bool CPrimeGrenade::Spawn()
 {
 	pev->classname = MAKE_STRING("grenade");
@@ -731,3 +733,4 @@ CBomblet* CBomblet::Bomblet(CBaseEntity* owner, const Vector& origin, const floa
 	return grenade;
 }
 
+#endif

@@ -28,7 +28,9 @@
 
 #include "cbase.h"
 #include "player.h"
+#ifdef HALFLIFE_TRAINCONTROL
 #include "trains.h"
+#endif
 #include "weapons.h"
 #include "shake.h"
 #include "gamerules.h"
@@ -43,14 +45,18 @@
 #include "nodes.h"
 #endif
 
-#define TRAIN_ACTIVE 0x80
-#define TRAIN_NEW 0xc0
-#define TRAIN_OFF 0x00
-#define TRAIN_NEUTRAL 0x01
-#define TRAIN_SLOW 0x02
-#define TRAIN_MEDIUM 0x03
-#define TRAIN_FAST 0x04
-#define TRAIN_BACK 0x05
+#ifdef HALFLIFE_TRAINCONTROL
+enum {
+	TRAIN_ACTIVE  = 0x80,
+	TRAIN_NEW     = 0xc0,
+	TRAIN_OFF     = 0x00,
+	TRAIN_NEUTRAL = 0x01,
+	TRAIN_SLOW    = 0x02,
+	TRAIN_MEDIUM  = 0x03,
+	TRAIN_FAST    = 0x04,
+	TRAIN_BACK    = 0x05,
+};
+#endif
 
 #define FLASH_DRAIN_TIME 1.2  //100 units/3 minutes
 #define FLASH_CHARGE_TIME 0.2 // 100 units/20 seconds  (seconds per unit)
@@ -69,12 +75,16 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 
 	DEFINE_ARRAY(CBasePlayer, m_rgAmmo, FIELD_INTEGER, AMMO_TYPES),
 
+#ifdef HALFLIFE_TRAINCONTROL
 	DEFINE_FIELD(CBasePlayer, m_iTrain, FIELD_INTEGER),
+#endif
 	DEFINE_FIELD(CBasePlayer, m_bitsHUDDamage, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayer, m_flFallVelocity, FIELD_FLOAT),
 	DEFINE_FIELD(CBasePlayer, m_fInitHUD, FIELD_BOOLEAN),
 
+#ifdef HALFLIFE_TANKCONTROL
 	DEFINE_FIELD(CBasePlayer, m_pTank, FIELD_EHANDLE),
+#endif
 	DEFINE_FIELD(CBasePlayer, m_iHideHUD, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayer, m_iFOV, FIELD_INTEGER),
 
@@ -117,7 +127,7 @@ void CBasePlayer::Pain()
 	EmitSound(sample, CHAN_VOICE);
 }
 
-
+#ifdef HALFLIFE_TRAINCONTROL
 static int TrainSpeed(int iSpeed, int iMax)
 {
 	float fSpeed, fMax;
@@ -141,6 +151,7 @@ static int TrainSpeed(int iSpeed, int iMax)
 
 	return iRet;
 }
+#endif
 
 void CBasePlayer::DeathSound()
 {
@@ -549,11 +560,13 @@ void CBasePlayer::PackDeadPlayerWeapons()
 
 void CBasePlayer::RemoveAllWeapons()
 {
+#ifdef HALFLIFE_TANKCONTROL
 	if (m_pTank != NULL)
 	{
 		m_pTank->Use(this, this, USE_OFF, 0);
 		m_pTank = NULL;
 	}
+#endif
 
 	for (int i = 0; i < WEAPON_TYPES; i++)
 	{
@@ -587,11 +600,13 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 
 	g_pGameRules->PlayerKilled(this, attacker, inflictor, accomplice, bitsDamageType);
 
+#ifdef HALFLIFE_TANKCONTROL
 	if (m_pTank != NULL)
 	{
 		m_pTank->Use(this, this, USE_OFF, 0);
 		m_pTank = NULL;
 	}
+#endif
 
 	SetAction(Action::Die);
 
@@ -694,11 +709,13 @@ void CBasePlayer::StartObserver()
 	if (m_pActiveWeapon)
 		m_pActiveWeapon->Holster();
 
+#ifdef HALFLIFE_TANKCONTROL
 	if (m_pTank != NULL)
 	{
 		m_pTank->Use(this, this, USE_OFF, 0);
 		m_pTank = NULL;
 	}
+#endif
 
 	// Remove all the player's stuff
 	if (HasWeapons())
@@ -746,6 +763,7 @@ void CBasePlayer::PlayerUse()
 	// Hit Use on a train?
 	if ((m_afButtonPressed & IN_USE) != 0)
 	{
+#ifdef HALFLIFE_TANKCONTROL
 		if (m_pTank != NULL)
 		{
 			// Stop controlling the tank
@@ -755,7 +773,9 @@ void CBasePlayer::PlayerUse()
 			return;
 		}
 		else
+#endif
 		{
+#ifdef HALFLIFE_TRAINCONTROL
 			if ((pev->flags & FL_ONTRAIN) != 0)
 			{
 				pev->flags &= ~FL_ONTRAIN;
@@ -775,6 +795,7 @@ void CBasePlayer::PlayerUse()
 					return;
 				}
 			}
+#endif
 		}
 	}
 
@@ -821,8 +842,8 @@ void CBasePlayer::PlayerUse()
 		if ((m_afButtonPressed & IN_USE) != 0)
 			EmitSound("common/wpn_select.wav", CHAN_VOICE);
 
-		if (((pev->button & IN_USE) != 0 && (caps & FCAP_CONTINUOUS_USE) != 0) ||
-			((m_afButtonPressed & IN_USE) != 0 && (caps & FCAP_IMPULSE_USE) != 0))
+		if (((pev->button & IN_USE) != 0 && (caps & FCAP_CONTINUOUS_USE) != 0)
+		 || ((m_afButtonPressed & IN_USE) != 0 && (caps & FCAP_IMPULSE_USE) != 0))
 		{
 			pObject->Use(this, this, USE_SET, 1);
 		}
@@ -922,6 +943,7 @@ void CBasePlayer::PreThink()
 	}
 
 	// Train speed control
+#ifdef HALFLIFE_TRAINCONTROL
 	if ((pev->flags & FL_ONTRAIN) != 0)
 	{
 		CBaseEntity* pTrain = CBaseEntity::Instance(pev->groundentity);
@@ -975,6 +997,7 @@ void CBasePlayer::PreThink()
 	}
 	else if ((m_iTrain & TRAIN_ACTIVE) != 0)
 		m_iTrain = TRAIN_NEW; // turn off train
+#endif
 
 	if ((pev->flags & FL_ONGROUND) == 0)
 	{
@@ -1030,7 +1053,6 @@ bool CBasePlayer::Spawn()
 	pev->max_health = pev->health;
 	pev->flags &= FL_PROXY | FL_FAKECLIENT; // keep proxy and fakeclient flags set by engine
 	pev->flags |= FL_CLIENT;
-	pev->flags &= ~FL_ONTRAIN;
 	pev->air_finished = gpGlobals->time + 12;
 	pev->dmg = 2; // initial water damage
 	pev->effects = EF_NOINTERP;
@@ -1114,7 +1136,9 @@ void CBasePlayer::Precache()
 	m_bitsDamageType = 0;
 	m_bitsHUDDamage = -1;
 
+#ifdef HALFLIFE_TRAINCONTROL
 	m_iTrain |= TRAIN_NEW;
+#endif
 
 	// Make sure any necessary user messages have been registered
 	LinkUserMessages();
@@ -1294,7 +1318,10 @@ void CBasePlayer::ForceClientDllUpdate()
 	m_ClientWeaponBits = 0;
 	m_ClientSndRoomtype = -1;
 
+#ifdef HALFLIFE_TRAINCONTROL
 	m_iTrain |= TRAIN_NEW; // Force new train message.
+#endif
+
 	m_fInitHUD = true;	   // Force HUD gmsgResetHUD message
 
 	// Now force all the necessary messages
@@ -1642,7 +1669,7 @@ void CBasePlayer::UpdateClientData()
 		m_bitsHUDDamage = m_bitsDamageType;
 	}
 
-
+#ifdef HALFLIFE_TRAINCONTROL
 	if ((m_iTrain & TRAIN_NEW) != 0)
 	{
 		// send "health" update message
@@ -1652,6 +1679,7 @@ void CBasePlayer::UpdateClientData()
 
 		m_iTrain &= ~TRAIN_NEW;
 	}
+#endif
 
 	// Send new room type to client.
 	if (m_ClientSndRoomtype != m_SndRoomtype)
@@ -1862,6 +1890,8 @@ void CBasePlayer::GetEntityState(entity_state_t& state)
 }
 
 
+#ifdef HALFLIFE_GRENADES
+
 void CBasePlayer::PrimeGrenade(const int grenadeType)
 {
 	if ((m_TFState & (kTFStateGrenadePrime | kTFStateGrenadeThrowing)) != 0)
@@ -1931,6 +1961,8 @@ void CBasePlayer::ThrowGrenade()
 	m_TFState &= ~kTFStateGrenadePrime;
 	m_TFState |= kTFStateGrenadeThrowing;
 }
+
+#endif
 
 
 void CBasePlayer::SaveMe()

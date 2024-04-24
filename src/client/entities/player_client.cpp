@@ -132,6 +132,7 @@ void CBasePlayer::SetPrefsFromUserinfo(char* infobuffer)
 	m_bGrenadeToggle = (int)cl_grenadetoggle->value != 0;
 }
 
+#ifdef HALFLIFE_GRENADES
 
 void CBasePlayer::PrimeGrenade(const int grenadeType)
 {
@@ -200,6 +201,8 @@ void CBasePlayer::ThrowGrenade()
 	m_TFState &= ~kTFStateGrenadePrime;
 	m_TFState |= kTFStateGrenadeThrowing;
 }
+
+#endif
 
 
 void CBaseEntity::GetEntityState(entity_state_t& state)

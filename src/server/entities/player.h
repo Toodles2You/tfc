@@ -46,8 +46,10 @@ typedef enum
 
 enum
 {
+#ifdef HALFLIFE_GRENADES
 	kTFStateGrenadePrime    = 1,
 	kTFStateGrenadeThrowing = 2,
+#endif
 	kTFStateAiming			= 4,
 	kTFStateInfected		= 8,
 };
@@ -92,9 +94,15 @@ public:
 						 // the hude via the DAMAGE message
 	bool m_fInitHUD;	 // True when deferred HUD restart msg needs to be sent
 	bool m_fGameHUDInitialized;
-	int m_iTrain;	// Train control position
 
+#ifdef HALFLIFE_TRAINCONTROL
+	int m_iTrain;	// Train control position
+#endif
+
+#ifdef HALFLIFE_TANKCONTROL
 	EHANDLE m_pTank;		 // the tank which the player is currently controlling,  NULL if no tank
+#endif
+
 	float m_fDeadTime;		 // the time at which the player died  (used in PlayerDeathFrame())
 
 	int m_iHideHUD;		  // the players hud weapon info is to be hidden
@@ -339,8 +347,10 @@ protected:
 	CGameMovement* m_gameMovement = nullptr;
 	EHANDLE m_hLastAttacker[2];
 
+#ifdef HALFLIFE_GRENADES
 	void PrimeGrenade(const int grenadeType);
 	void ThrowGrenade();
+#endif
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

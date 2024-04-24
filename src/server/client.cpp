@@ -93,11 +93,13 @@ void ClientDisconnect(edict_t* pEntity)
 	{
 		pPlayer->InstallGameMovement(nullptr);
 
+#ifdef HALFLIFE_TANKCONTROL
 		if (pPlayer->m_pTank != NULL)
 		{
 			pPlayer->m_pTank->Use(pPlayer, pPlayer, USE_OFF, 0);
 			pPlayer->m_pTank = NULL;
 		}
+#endif
 	}
 
 	g_pGameRules->ClientDisconnected(pEntity);

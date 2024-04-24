@@ -108,7 +108,12 @@ void CHalfLifeMovement::CheckParameters()
         pmove->maxspeed = pmove->clientmaxspeed;
     }
 
-    if ((pmove->flags & (FL_FROZEN | FL_ONTRAIN)) != 0 || pmove->dead != 0)
+#ifdef HALFLIFE_TRAINCONTROL
+    if ((pmove->flags & (FL_FROZEN | FL_ONTRAIN)) != 0
+#else
+    if ((pmove->flags & FL_FROZEN) != 0
+#endif
+     || pmove->dead != 0)
     {
         move = g_vecZero;
     }
@@ -406,13 +411,15 @@ void CHalfLifeMovement::Accelerate(const Vector& wishDir, float wishSpeed)
         return;
     }
 
-    if (pmove->onground == -1 && wishSpeed > 30)
+    float testSpeed = wishSpeed;
+
+    if (pmove->onground == -1 && testSpeed > 30)
     {
-        wishSpeed = 30;
+        testSpeed = 30;
     }
 
     const float addSpeed =
-        wishSpeed - DotProduct(pmove->velocity, wishDir);
+        testSpeed - DotProduct(pmove->velocity, wishDir);
 
     if (addSpeed <= 0)
     {

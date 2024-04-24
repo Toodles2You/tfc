@@ -33,13 +33,10 @@ void CHalfLifeMovement::Walk()
         pmove->flFallVelocity = -pmove->velocity.z;
     }
 
-    if ((pmove->cmd.buttons & IN_JUMP) != 0)
+    if ((pmove->cmd.buttons & IN_JUMP) != 0
+     && (pmove->oldbuttons & IN_JUMP) == 0)
     {
         Jump();
-    }
-    else if ((pmove->flags & FL_JUMPING) != 0)
-    {
-        pmove->flags &= ~FL_JUMPING;
     }
 
     if (pmove->onground != -1)
@@ -216,13 +213,12 @@ void CHalfLifeMovement::Jump()
         return;
     }
 
-    if (pmove->onground == -1 || (pmove->flags & FL_JUMPING) != 0)
+    if (pmove->onground == -1)
     {
         return;
     }
 
     pmove->onground = -1;
-    pmove->flags |= FL_JUMPING;
 
     player->SetAction(CBasePlayer::Action::Jump);
 

@@ -42,13 +42,15 @@
 #define FL_GRAPHED (1 << 16)	   // worldgraph has this ent listed as something that blocks a connection
 #endif
 
-#define FL_JUMPING (1 << 17)
-
 #define FL_PROXY (1 << 20)		  // This is a spectator proxy
 #define FL_ALWAYSTHINK (1 << 21)  // Brush model flag -- call think every frame regardless of nextthink - ltime (for constantly changing velocity/path)
 #define FL_BASEVELOCITY (1 << 22) // Base velocity has been applied this frame (used to convert base velocity into momentum)
 #define FL_MONSTERCLIP (1 << 23)  // Only collide in with monsters who have FL_MONSTERCLIP set
+
+#ifdef HALFLIFE_TRAINCONTROL
 #define FL_ONTRAIN (1 << 24)	  // Player is _controlling_ a train, so movement commands should be ignored on client during prediction.
+#endif
+
 #define FL_WORLDBRUSH (1 << 25)	  // Not moveable/removeable brush entity (really part of the world, but represented as an entity for transparency or something)
 #define FL_SPECTATOR (1 << 26)	  // This client is a spectator, don't run touch functions, etc.
 #define FL_CUSTOMENTITY (1 << 29) // This is a custom entity

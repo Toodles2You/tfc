@@ -398,6 +398,8 @@ public:
 	virtual void BounceSound();
 };
 
+#ifdef HALFLIFE_GRENADES
+
 /* Team Fortress style timed grenade */
 class CPrimeGrenade : public CGrenade
 {
@@ -528,6 +530,8 @@ public:
 	static CPipeBomb* CreatePipeBomb(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner, CPipeBombLauncher* launcher);
 	void EXPORT PipeBombTouch(CBaseEntity *pOther);
 };
+
+#endif
 
 void RadiusDamage(
 	const Vector& origin,
