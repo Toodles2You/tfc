@@ -705,7 +705,7 @@ CBaseEntity* EHANDLE::operator->()
 
 
 // give health
-bool CBaseEntity::GiveHealth(float flHealth, int bitsDamageType)
+bool CBaseEntity::GiveHealth(float flHealth, int bitsDamageType, bool bClearEffects)
 {
 	if (pev->takedamage == DAMAGE_NO)
 	{

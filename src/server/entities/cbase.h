@@ -175,7 +175,7 @@ public:
 
 	virtual void TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, int hitgroup, int bitsDamageType);
 	virtual bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType);
-	virtual bool GiveHealth(float flHealth, int bitsDamageType);
+	virtual bool GiveHealth(float flHealth, int bitsDamageType, bool bClearEffects = true);
 	virtual void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType);
 	virtual bool IsTriggered(CBaseEntity* pActivator) { return true; }
 	virtual int GetToggleState() { return TS_AT_TOP; }

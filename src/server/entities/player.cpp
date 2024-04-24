@@ -182,18 +182,21 @@ void CBasePlayer::DeathSound()
 // override takehealth
 // bitsDamageType indicates type of damage healed.
 
-bool CBasePlayer::GiveHealth(float flHealth, int bitsDamageType)
+bool CBasePlayer::GiveHealth(float flHealth, int bitsDamageType, bool bClearEffects)
 {
+	if (bClearEffects)
+	{
+		m_TFState &= ~kTFStateInfected;
+		m_nLegDamage = 0;
+		m_iConcussionTime = 0;
+	}
+
 	if (pev->takedamage == DAMAGE_NO)
 	{
 		return false;
 	}
 
-	m_TFState &= ~kTFStateInfected;
-	m_nLegDamage = 0;
-	m_iConcussionTime = 0;
-
-	return CBaseAnimating::GiveHealth(flHealth, bitsDamageType);
+	return CBaseAnimating::GiveHealth(flHealth, bitsDamageType, bClearEffects);
 }
 
 //=========================================================
@@ -416,6 +419,8 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	{
 		Pain();
 	}
+
+	m_flNextRegenerationTime = gpGlobals->time + 3.0F;
 
 	MessageBegin(MSG_SPEC, SVC_DIRECTOR);
 		WriteByte(9);							  // command length in bytes
@@ -1028,6 +1033,12 @@ void CBasePlayer::PreThink()
 		}
 
 		m_flNextInfectionTime = gpGlobals->time + 3.0F;
+	}
+
+	if (PCNumber() == PC_MEDIC && m_flNextRegenerationTime <= gpGlobals->time)
+	{
+		GiveHealth(2, DMG_GENERIC, false);
+		m_flNextRegenerationTime = gpGlobals->time + 3.0F;
 	}
 }
 
