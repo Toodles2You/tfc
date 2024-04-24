@@ -72,6 +72,8 @@ void CSniperRifle::PrimaryAttack()
 
 	m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
+	m_pPlayer->m_rgAmmo[info.iAmmo1] = std::max ((int)m_pPlayer->m_rgAmmo[info.iAmmo1] - info.iShots, 0);
+
 	float damageScale = std::clamp(1.0F - (float)m_iNextPrimaryAttack / info.iReloadTime, 0.0F, 1.0F);
 	float damageMod = (info.iProjectileChargeDamage - info.iProjectileDamage) * damageScale;
 	int damage = std::roundf(info.iProjectileDamage + damageMod);
@@ -191,7 +193,7 @@ void CSniperRifle::WeaponPostFrame()
 
 	if ((m_pPlayer->pev->button & IN_ATTACK) != 0)
 	{
-		if ((m_pPlayer->m_TFState & kTFStateAiming) == 0 && m_iNextPrimaryAttack <= 0)
+		if ((m_pPlayer->m_TFState & kTFStateAiming) == 0 && m_iNextPrimaryAttack <= 0 && m_pPlayer->m_rgAmmo[info.iAmmo1] >= info.iShots)
 		{
 			SendWeaponAnim(info.iAnims[kWeaponAnimReload]);
 			m_pPlayer->m_TFState |= kTFStateAiming;
