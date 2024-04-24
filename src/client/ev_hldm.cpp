@@ -305,21 +305,24 @@ static inline char* EV_DamageDecal(physent_t* pe)
 	return EV_DecalName("{shot%i", 5);
 }
 
-static void EV_GunshotDecalTrace(pmtrace_t* pTrace, char* decalName)
+static void EV_GunshotDecalTrace(pmtrace_t* pTrace, char* decalName, bool bPlaySound)
 {
 	gEngfuncs.pEfxAPI->R_BulletImpactParticles(pTrace->endpos);
 
-	int iRand = gEngfuncs.pfnRandomLong(0, 0x7FFF);
-	if (iRand < (0x7fff / 2)) // not every bullet makes a sound.
+	if (bPlaySound)
 	{
-		switch (iRand % 5)
+		int iRand = gEngfuncs.pfnRandomLong(0, 0x7FFF);
+		if (iRand < (0x7fff / 2)) // not every bullet makes a sound.
 		{
-		case 0: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-		case 1: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-		case 2: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-		case 3: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-		case 4: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-		}
+			switch (iRand % 5)
+			{
+			case 0: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+			case 1: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+			case 2: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+			case 3: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+			case 4: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+			}
+		}	
 	}
 
 	EV_DecalTrace(pTrace, decalName);
@@ -348,7 +351,7 @@ static void EV_BloodTrace(Vector pos, Vector dir, int damage)
 	}
 }
 
-static void EV_DecalGunshot(pmtrace_t* pTrace, Vector vecDir)
+static void EV_DecalGunshot(pmtrace_t* pTrace, Vector vecDir, bool bPlaySound)
 {
 	physent_t* pe = gEngfuncs.pEventAPI->EV_GetPhysent(pTrace->ent);
 
@@ -360,7 +363,7 @@ static void EV_DecalGunshot(pmtrace_t* pTrace, Vector vecDir)
 	if (pe->solid == SOLID_BSP
 	 && gEngfuncs.PM_PointContents(pTrace->endpos, nullptr) != CONTENTS_SKY)
 	{
-		EV_GunshotDecalTrace(pTrace, EV_DamageDecal(pe));
+		EV_GunshotDecalTrace(pTrace, EV_DamageDecal(pe), bPlaySound);
 	}
 }
 
@@ -401,6 +404,53 @@ static void EV_CheckTracer(
 }
 
 
+static void EV_SniperTracer(
+	int entindex,
+	Vector& start,
+	Vector& end,
+	const Vector& forward,
+	const Vector& right,
+	float fraction)
+{	
+	Vector muzzle;
+	int rightOffset = 2;
+
+	if (g_PlayerExtraInfo[entindex].lefthanded)
+	{
+		rightOffset = -2;
+	}
+
+	if (EV_IsLocal(entindex) && CL_IsThirdPerson() == 0)
+	{
+		muzzle = gEngfuncs.GetViewModel()->attachment[0];
+	}
+	else
+	{
+		muzzle = start + Vector(0, 0, -4) + right * rightOffset + forward * 16;
+	}
+
+	auto trail = gEngfuncs.pEfxAPI->R_BeamPoints(
+		muzzle,
+		end,
+		g_sModelIndexSmokeTrail,
+		0.5F + fraction,
+		1.5F,
+		0,
+		0.5F,
+		0,
+		0,
+		10,
+		1,
+		1,
+		1);
+
+	if (trail != nullptr)
+	{
+		trail->flags |= FBEAM_FADEIN | FBEAM_SHADEIN;
+	}
+}
+
+
 /*
 ================
 FireBullets
@@ -415,7 +465,8 @@ static void EV_FireBullets(
 	const unsigned int count = 1,
 	const float distance = 8192,
 	const bool playTextureSounds = true,
-	const int tracerFrequency = 0)
+	const int tracerFrequency = 0,
+	const bool sniperTracer = false)
 {
 	Vector gun;
 	Vector aim = args->angles;
@@ -450,6 +501,17 @@ static void EV_FireBullets(
 		pmtrace_t tr;
 		gEngfuncs.pEventAPI->EV_PlayerTrace(gun, gun + forward * distance, PM_NORMAL, -1, &tr);
 
+		if (sniperTracer)
+		{
+			EV_SniperTracer(
+				args->entindex,
+				gun,
+				tr.endpos,
+				forward,
+				right,
+				tr.fraction);
+		}
+
 		EV_CheckTracer(
 			args->entindex,
 			gun,
@@ -465,7 +527,7 @@ static void EV_FireBullets(
 			{
 				EV_PlayTextureSound(args->entindex, &tr, gun, tr.endpos);
 			}
-			EV_DecalGunshot(&tr, forward);
+			EV_DecalGunshot(&tr, forward, false);
 		}
 	}
 
@@ -474,7 +536,7 @@ static void EV_FireBullets(
 
 static void EV_NailTouch(TEMPENTITY* ent, pmtrace_t* tr)
 {
-	EV_DecalGunshot(tr, ent->entity.curstate.origin - ent->entity.prevstate.origin);
+	EV_DecalGunshot(tr, ent->entity.curstate.origin - ent->entity.prevstate.origin, true);
 }
 
 void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
@@ -561,7 +623,29 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 				EV_EjectBrass(shellOrigin, shellVelocity, args->angles[YAW], g_sModelIndexShell, TE_BOUNCE_SHELL);
 			}
 
-			EV_FireBullets(args, args->iparam1, info.vecProjectileSpread, info.iProjectileCount * args->iparam2, 2048, false, 0);
+			if ((int)args->fparam1 == WEAPON_SNIPER_RIFLE)
+			{
+				EV_FireBullets(
+					args,
+					args->iparam1,
+					info.vecProjectileSpread,
+					info.iProjectileCount * args->iparam2,
+					8192,
+					false,
+					1,
+					true);
+			}
+			else
+			{
+				EV_FireBullets(
+					args,
+					args->iparam1,
+					info.vecProjectileSpread,
+					info.iProjectileCount * args->iparam2,
+					2048,
+					false,
+					0);
+			}
 			break;
 		}
 	}
