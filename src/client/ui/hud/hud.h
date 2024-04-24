@@ -606,6 +606,8 @@ public:
 	void GetHudStringSize(const char* string, int& width, int& height);
 	int HudStringLen(const char* string);
 
+	void DrawWorldSprite(HSPRITE pic, int frame, Rect *rect, Vector origin, hudcolor_e color, int a);
+
 	void GetChatInputPosition(int& x, int& y);
 
 	bool HasWeapon(int id) const

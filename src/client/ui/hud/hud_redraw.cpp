@@ -501,3 +501,80 @@ void CHud::GetChatInputPosition(int& x, int& y)
 	x = roundf (m_flOffsetX + m_SayText.m_iBaseX * m_flScaleX);
 	y = roundf (m_flOffsetY + (m_SayText.m_iBaseY + m_SayText.m_iLineHeight) * m_flScaleY);
 }
+
+void CHud::DrawWorldSprite(HSPRITE pic, int frame, Rect *rect, Vector origin, hudcolor_e color, int a)
+{
+	Vector screen;
+	if (gEngfuncs.pTriAPI->WorldToScreen(origin, screen) != 0)
+	{
+		return;
+	}
+
+	int x = (1.0f + screen.x) * ScreenWidth * 0.5f;
+	int y = (1.0f - screen.y) * ScreenHeight * 0.5f;
+
+	int r, g, b;
+	GetColor(r, g, b, color);
+
+	auto sprw = gEngfuncs.pfnSPR_Width (pic, frame);
+	auto sprh = gEngfuncs.pfnSPR_Height (pic, frame);
+
+	if (!rect)
+	{
+		static Rect rc;
+		rc.left = 0;
+		rc.right = sprw;
+		rc.top = 0;
+		rc.bottom = sprh;
+		rect = &rc;
+	}
+
+	float xf = x;
+	float yf = y;
+	auto width = rect->right - rect->left;
+	auto height = rect->bottom - rect->top;
+
+	if (!IEngineStudio.IsHardware())
+	{
+		ScaleColors(r, g, b, a);
+		gEngfuncs.pfnSPR_Set(pic, r, g, b);
+		gEngfuncs.pfnSPR_DrawHoles(frame, x, y, rect);
+		return;
+	}
+
+	xf -= (width / 2.0F - 0.5F) * m_flScaleX; 
+	yf -= (height / 2.0F - 0.5F) * m_flScaleY; 
+
+	auto pSprite = const_cast<model_t *>(gEngfuncs.GetSpritePointer (pic));
+
+	auto x1 = roundf (xf);
+	auto y1 = roundf (yf);
+	auto x2 = roundf (xf + width * m_flScaleX);
+	auto y2 = roundf (yf + height * m_flScaleY);
+
+	auto left = rect->left / (float)sprw;
+	auto right = rect->right / (float)sprw;
+	auto top = rect->top / (float)sprh;
+	auto bottom = rect->bottom / (float)sprh;
+	
+	gEngfuncs.pTriAPI->SpriteTexture (pSprite, frame);
+
+	gEngfuncs.pTriAPI->Color4fRendermode (r / 255.0F, g / 255.0F, b / 255.0F, a / 255.0F, kRenderTransAlpha);
+	gEngfuncs.pTriAPI->RenderMode (kRenderTransAlpha);
+
+	gEngfuncs.pTriAPI->Begin (TRI_QUADS);
+
+	gEngfuncs.pTriAPI->TexCoord2f (left, top);
+	gEngfuncs.pTriAPI->Vertex3f (x1, y1, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (right, top);
+	gEngfuncs.pTriAPI->Vertex3f (x2, y1, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (right, bottom);
+	gEngfuncs.pTriAPI->Vertex3f (x2, y2, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (left, bottom);
+	gEngfuncs.pTriAPI->Vertex3f (x1, y2, 0);
+
+	gEngfuncs.pTriAPI->End ();
+}

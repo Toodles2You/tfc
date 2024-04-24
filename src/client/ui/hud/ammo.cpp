@@ -22,7 +22,6 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "pm_shared.h"
-#include "triangleapi.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -912,24 +911,7 @@ void CHudAmmo::DrawCrosshair(WEAPON *pWeapon, int a, bool zoom, bool autoaim)
 		return;
 	}
 
-	Vector screen;
-	if (gEngfuncs.pTriAPI->WorldToScreen(g_CrosshairTarget, screen) != 0)
-	{
-		return;
-	}
-
-	screen.x = (1.0f + screen.x) * gHUD.GetWidth() * 0.5f;
-	screen.y = (1.0f - screen.y) * gHUD.GetHeight() * 0.5f;
-	gHUD.DrawHudSprite(
-		pic,
-		0,
-		rc,
-		(int)screen.x,
-		(int)screen.y,
-		CHud::COLOR_DEFAULT,
-		a,
-		CHud::a_center
-	);
+	gHUD.DrawWorldSprite(pic, 0, rc, g_CrosshairTarget, CHud::COLOR_DEFAULT, a);
 }
 
 //-------------------------------------------------------------------------
