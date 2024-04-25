@@ -55,7 +55,6 @@ public:
 	bool MsgFunc_Damage(const char* pszName, int iSize, void* pbuf);
 	int m_iHealth;
 	int m_HUD_dmg_bio;
-	int m_HUD_cross;
 	float m_fAttackFront, m_fAttackRear, m_fAttackLeft, m_fAttackRight;
 	void GetPainColor(int& r, int& g, int& b);
 	float m_fFade;
@@ -63,6 +62,11 @@ public:
 private:
 	HSPRITE m_hSprite;
 	HSPRITE m_hDamage;
+	HSPRITE m_hSprite1;
+	HSPRITE m_hSprite2;
+	Rect* m_prc1;
+	Rect* m_prc2;
+	int m_iHeight;
 
 	DAMAGE_IMAGE m_dmg[NUM_DMG_TYPES];
 	int m_bitsDamage;

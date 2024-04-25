@@ -20,6 +20,7 @@
 
 #include "stdio.h"
 #include "stdlib.h"
+#include "tf_defs.h"
 
 #include "hud.h"
 #include "cl_util.h"
@@ -89,7 +90,16 @@ bool CHudHealth::VidInit()
 	m_hSprite = 0;
 
 	m_HUD_dmg_bio = gHUD.GetSpriteIndex("dmg_bio") + 1;
-	m_HUD_cross = gHUD.GetSpriteIndex("cross");
+
+	/* Toodles FIXME: Need separate sprites. */
+	int HUD_cross_empty = gHUD.GetSpriteIndex("cross");
+	int HUD_cross_full = gHUD.GetSpriteIndex("cross");
+
+	m_hSprite1 = gHUD.GetSprite(HUD_cross_empty);
+	m_hSprite2 = gHUD.GetSprite(HUD_cross_full);
+	m_prc1 = &gHUD.GetSpriteRect(HUD_cross_empty);
+	m_prc2 = &gHUD.GetSpriteRect(HUD_cross_full);
+	m_iHeight = m_prc2->bottom - m_prc1->top;
 
 	giDmgHeight = gHUD.GetSpriteRect(m_HUD_dmg_bio).right - gHUD.GetSpriteRect(m_HUD_dmg_bio).left;
 	giDmgWidth = gHUD.GetSpriteRect(m_HUD_dmg_bio).bottom - gHUD.GetSpriteRect(m_HUD_dmg_bio).top;
@@ -176,14 +186,20 @@ void CHudHealth::GetPainColor(int& r, int& g, int& b)
 
 bool CHudHealth::Draw(float flTime)
 {
+	const auto iHealthMax = sTFClassInfo[g_iPlayerClass].maxHealth;
 	int a, x, y;
 	int HealthWidth;
+	Rect rc;
 
 	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) != 0 || 0 != gEngfuncs.IsSpectateOnly())
 		return true;
 
 	if (0 == m_hSprite)
 		m_hSprite = LoadSprite(PAIN_NAME);
+
+	rc = *m_prc2;
+
+	rc.top += m_iHeight * ((float)(iHealthMax - (std::min(iHealthMax, m_iHealth))) * (1.0F / iHealthMax));
 
 	// Has health changed? Flash the health #
 	if (0 != m_fFade)
@@ -202,19 +218,26 @@ bool CHudHealth::Draw(float flTime)
 	else
 		a = MIN_ALPHA;
 
+	int iOffset = (m_prc1->bottom - m_prc1->top) / 6;
+
 	// If health is getting low, make it bright red
-	if (m_iHealth <= 15)
+	if (m_iHealth <= iHealthMax / 4)
 		a = 255;
 	
-	auto color = (m_iHealth <= 25) ? CHud::COLOR_WARNING : CHud::COLOR_PRIMARY;
+	auto color = (m_iHealth <= iHealthMax / 4) ? CHud::COLOR_WARNING : CHud::COLOR_PRIMARY;
 
 	HealthWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
-	int CrossWidth = gHUD.GetSpriteRect(m_HUD_cross).right - gHUD.GetSpriteRect(m_HUD_cross).left;
+	int CrossWidth = m_prc1->right - m_prc1->left;
 
 	y = gHUD.GetHeight() - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
 	x = CrossWidth / 2;
 
-	gHUD.DrawHudSpriteIndex(m_HUD_cross, x, y, color, a);
+	gHUD.DrawHudSprite(m_hSprite1, 0, m_prc1, x, y - iOffset, color, a / 3);
+
+	if (rc.bottom > rc.top)
+	{
+		gHUD.DrawHudSprite(m_hSprite2, 0, &rc, x, y - iOffset + (rc.top - m_prc2->top), color, a - a / 3);
+	}
 
 	x = CrossWidth + HealthWidth / 2;
 
