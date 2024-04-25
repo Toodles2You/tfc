@@ -80,10 +80,15 @@ void CSniperRifle::PrimaryAttack()
 
 	int damageType = DMG_BULLET;
 
+	/*
+		Charge damage, headshots & legshots are only checked if the
+		sniper rifle has been charging for at least a third of a second.
+	*/
 	if (damageScale > 0.0F)
 	{
 		damageType |= DMG_CALTROP;
 
+		/* Headshot players if the sniper rifle has been scoped in for at least half of a second. */
 		if (m_pPlayer->m_iFOV != 0 && m_iScopeTime <= 0)
 		{
 			damageType |= DMG_AIMED;
@@ -112,21 +117,30 @@ void CSniperRifle::PrimaryAttack()
 		{
 			float distance = (hit->pev->origin - m_pPlayer->pev->origin).Length();
 
+			/*
+				Don't headshot or legshot players who are very far away.
+				Unless they're a sniper, to keep those epic sniper duels.
+			*/
 			if (distance > 1536.0F && dynamic_cast<CBasePlayer*>(hit)->PCNumber() != PC_SNIPER)
 			{
-				damage *= 0.5F;
-				damageType &= ~DMG_AIMED | DMG_CALTROP;
 #ifndef NDEBUG
-				ALERT(at_console, "SNIPER TOO FAR\n");
+				if ((damageType & (DMG_AIMED | DMG_CALTROP)) != 0)
+				{
+					ALERT(at_console, "SNIPER TOO FAR\n");
+				}
 #endif
+				damageType &= ~(DMG_AIMED | DMG_CALTROP);
 			}
+			/* Don't headshot players who are very close. */
 			else if (distance < 512.0F)
 			{
-				damage *= 0.8F;
-				damageType &= ~DMG_AIMED;
 #ifndef NDEBUG
-				ALERT(at_console, "SNIPER TOO CLOSE\n");
+				if ((damageType & DMG_AIMED) != 0)
+				{
+					ALERT(at_console, "SNIPER TOO CLOSE\n");
+				}
 #endif
+				damageType &= ~DMG_AIMED;
 			}
 		}
 
