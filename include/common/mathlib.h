@@ -109,6 +109,8 @@ int InvertMatrix(const float* m, float* out);
 int BoxOnPlaneSide(const Vector& emins, const Vector& emaxs, struct mplane_s* plane);
 float anglemod(float a);
 
+float SplineFraction(float value, float scale = 1.0F);
+
 
 
 #define BOX_ON_PLANE_SIDE(emins, emaxs, p)                                                                 \

@@ -77,7 +77,7 @@ void CHalfLifeMovement::CheckDucking()
         }
 
         pmove->view_ofs.z =
-            VEC_VIEW.z + (flDuckView - VEC_VIEW.z) * flFraction;
+            VEC_VIEW.z + (flDuckView - VEC_VIEW.z) * SplineFraction(flFraction);
     }
 }
 

@@ -420,3 +420,21 @@ void ConcatTransforms(float in1[3][4], float in2[3][4], float out[3][4])
 	out[2][3] = in1[2][0] * in2[0][3] + in1[2][1] * in2[1][3] +
 				in1[2][2] * in2[2][3] + in1[2][3];
 }
+
+/*
+==================
+SplineFraction
+
+Use for ease-in, ease-out style interpolation (accel/decel)
+==================
+*/
+float SplineFraction(float value, float scale)
+{
+	float valueSquared;
+
+	value = scale * value;
+	valueSquared = value * value;
+
+	// Nice little ease-in, ease-out spline-like curve
+	return 3 * valueSquared - 2 * valueSquared * value;
+}
