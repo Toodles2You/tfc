@@ -113,8 +113,11 @@ void CHalfLifeMovement::FinishDucking()
 
     CategorizePosition();
 
-    player->pev->flags |= FL_DUCKING;
-    player->SetAction(CBasePlayer::Action::Idle, true);
+    if (player->m_Action != CBasePlayer::Action::Jump || player->m_fSequenceFinished)
+    {
+        player->pev->flags |= FL_DUCKING;
+        player->SetAction(CBasePlayer::Action::Idle, true);
+    }
 }
 
 
@@ -200,8 +203,11 @@ bool CHalfLifeMovement::BeginUnducking()
 
     CategorizePosition();
 
-    player->pev->flags &= ~FL_DUCKING;
-    player->SetAction(CBasePlayer::Action::Idle, true);
+    if (player->m_Action != CBasePlayer::Action::Jump || player->m_fSequenceFinished)
+    {
+        player->pev->flags &= ~FL_DUCKING;
+        player->SetAction(CBasePlayer::Action::Idle, true);
+    }
 
     return true;
 }
