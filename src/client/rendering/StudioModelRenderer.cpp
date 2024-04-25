@@ -1230,13 +1230,9 @@ StudioEstimateGait
 void CStudioModelRenderer::StudioEstimateGait(entity_state_t* pplayer)
 {
 	float dt;
-	Vector est_velocity;
+	Vector2D est_velocity;
 
-	dt = (m_clTime - m_clOldTime);
-	if (dt < 0)
-		dt = 0;
-	else if (dt > 1.0)
-		dt = 1;
+	dt = std::clamp(m_clTime - m_clOldTime, 0.0, 1.0);
 
 	if (dt == 0 || m_pPlayerInfo->renderframe == m_nFrameCount)
 	{
@@ -1246,25 +1242,20 @@ void CStudioModelRenderer::StudioEstimateGait(entity_state_t* pplayer)
 
 	if (m_fGaitEstimation)
 	{
-		VectorSubtract(m_pCurrentEntity->origin, m_pPlayerInfo->prevgaitorigin, est_velocity);
-		VectorCopy(m_pCurrentEntity->origin, m_pPlayerInfo->prevgaitorigin);
-		est_velocity[2] = 0.0F;
-		m_flGaitMovement = Length(est_velocity);
-		if (dt <= 0 || m_flGaitMovement / dt < 5)
-		{
-			m_flGaitMovement = 0;
-			est_velocity[0] = 0;
-			est_velocity[1] = 0;
-		}
+		est_velocity = (m_pCurrentEntity->origin - m_pPlayerInfo->prevgaitorigin).Make2D();
+
+		m_pPlayerInfo->prevgaitorigin = m_pCurrentEntity->origin;
+
+		m_flGaitMovement = est_velocity.Length();
 	}
 	else
 	{
-		VectorCopy(pplayer->velocity, est_velocity);
-		est_velocity[2] = 0.0F;
-		m_flGaitMovement = Length(est_velocity) * dt;
+		est_velocity = pplayer->velocity.Make2D();
+
+		m_flGaitMovement = est_velocity.Length() * dt;
 	}
 
-	if (est_velocity[1] == 0 && est_velocity[0] == 0)
+	if (m_flGaitMovement / dt < 5.0F)
 	{
 		float flYawDiff = m_pCurrentEntity->angles[YAW] - m_pPlayerInfo->gaityaw;
 		flYawDiff = flYawDiff - (int)(flYawDiff / 360) * 360;
@@ -1280,16 +1271,10 @@ void CStudioModelRenderer::StudioEstimateGait(entity_state_t* pplayer)
 
 		m_pPlayerInfo->gaityaw += flYawDiff;
 		m_pPlayerInfo->gaityaw = m_pPlayerInfo->gaityaw - (int)(m_pPlayerInfo->gaityaw / 360) * 360;
-
-		m_flGaitMovement = 0;
 	}
 	else
 	{
-		m_pPlayerInfo->gaityaw = (atan2(est_velocity[1], est_velocity[0]) * 180 / M_PI);
-		if (m_pPlayerInfo->gaityaw > 180)
-			m_pPlayerInfo->gaityaw = 180;
-		if (m_pPlayerInfo->gaityaw < -180)
-			m_pPlayerInfo->gaityaw = -180;
+		m_pPlayerInfo->gaityaw = std::clamp(atan2f(est_velocity.y, est_velocity.x) * 180.0F / M_PIf, -180.0F, 180.0F);
 	}
 }
 
