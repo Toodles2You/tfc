@@ -112,6 +112,9 @@ void CHalfLifeMovement::FinishDucking()
     pmove->view_ofs.z = VEC_DUCK_VIEW.z;
 
     CategorizePosition();
+
+    player->pev->flags |= FL_DUCKING;
+    player->SetAction(CBasePlayer::Action::Idle, true);
 }
 
 
@@ -196,6 +199,9 @@ bool CHalfLifeMovement::BeginUnducking()
     pmove->origin = vecOrigin;
 
     CategorizePosition();
+
+    player->pev->flags &= ~FL_DUCKING;
+    player->SetAction(CBasePlayer::Action::Idle, true);
 
     return true;
 }

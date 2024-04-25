@@ -571,11 +571,12 @@ int CBasePlayer::GetGaitSequence()
 
     if (ducking)
     {
-        if (speed == 0)
+        if (speed > 5)
         {
-            return LookupActivity(ACT_CROUCHIDLE);
+	        return LookupActivity(ACT_CROUCH);
         }
-        return LookupActivity(ACT_CROUCH);
+
+		return LookupActivity(ACT_CROUCHIDLE);
     }
 
     if (speed > 220)
@@ -583,7 +584,7 @@ int CBasePlayer::GetGaitSequence()
         return LookupActivity(ACT_RUN);
     }
 
-    if (speed > 0)
+    if (speed > 5)
     {
         return LookupActivity(ACT_WALK);
     }
