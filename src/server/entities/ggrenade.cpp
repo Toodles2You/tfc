@@ -107,6 +107,12 @@ void CGrenade::BounceTouch(CBaseEntity* pOther)
 	}
 	else
 	{
+		if (pev->velocity.z > 0
+		 && util::GetGlobalTrace().vecPlaneNormal.z >= kGroundPlaneMinZ)
+		{
+			pev->velocity = pev->velocity * 0.8;
+		}
+
 		// play bounce sound
 		BounceSound();
 	}
