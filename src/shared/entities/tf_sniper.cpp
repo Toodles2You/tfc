@@ -66,6 +66,14 @@ void CSniperRifle::GetWeaponInfo(WeaponInfo& i)
 }
 
 
+void CSniperRifle::Precache()
+{
+	CTFWeapon::Precache();
+	m_usLaserDotOn = g_engfuncs.pfnPrecacheEvent(1, "events/laser_on.sc");
+	m_usLaserDotOff = g_engfuncs.pfnPrecacheEvent(1, "events/laser_off.sc");
+}
+
+
 void CSniperRifle::PrimaryAttack()
 {
 	const auto info = GetInfo();
@@ -223,9 +231,7 @@ void CSniperRifle::WeaponPostFrame()
 			SendWeaponAnim(info.iAnims[kWeaponAnimReload]);
 			m_pPlayer->m_TFState |= kTFStateAiming;
 			m_iNextPrimaryAttack = 333 + info.iReloadTime;
-#ifdef GAME_DLL
 			CreateLaserEffect();
-#endif
 		}
 	}
 	else if ((m_pPlayer->m_TFState & kTFStateAiming) != 0)
@@ -233,9 +239,7 @@ void CSniperRifle::WeaponPostFrame()
 		PrimaryAttack();
 		m_pPlayer->m_TFState &= ~kTFStateAiming;
 		m_iNextPrimaryAttack = info.iAttackTime;
-#ifdef GAME_DLL
 		DestroyLaserEffect();
-#endif
 	}
 
 #ifdef GAME_DLL
@@ -247,9 +251,7 @@ void CSniperRifle::WeaponPostFrame()
 void CSniperRifle::Holster()
 {
 	CTFWeapon::Holster();
-#ifdef GAME_DLL
 	DestroyLaserEffect();
-#endif
 }
 
 
@@ -277,17 +279,15 @@ void CSniperRifle::DecrementTimers(const int msec)
 }
 
 
-#ifdef GAME_DLL
 void CSniperRifle::CreateLaserEffect()
 {
-	DestroyLaserEffect();
+#ifdef GAME_DLL
+	DestroyLaserEffect(false);
 
 	m_pLaserDot = CSprite::SpriteCreate("sprites/laserdot.spr", pev->origin, false);
 	m_pLaserDot->pev->scale = 1.0;
 	m_pLaserDot->pev->spawnflags |= SF_SPRITE_TEMPORARY;
-#ifdef NDEBUG
 	m_pLaserDot->pev->flags |= FL_SKIPLOCALHOST;
-#endif
 	m_pLaserDot->pev->owner = m_pPlayer->edict();
 
 	m_pLaserBeam = CBeam::BeamCreate("sprites/laserbeam.spr", 16);
@@ -295,9 +295,7 @@ void CSniperRifle::CreateLaserEffect()
 	m_pLaserBeam->SetFlags(BEAM_FSHADEOUT);
 	m_pLaserBeam->SetEndAttachment(1);
 	m_pLaserBeam->pev->spawnflags |= SF_BEAM_TEMPORARY;
-#ifdef NDEBUG
 	m_pLaserBeam->pev->flags |= FL_SKIPLOCALHOST;
-#endif
 	m_pLaserBeam->pev->owner = m_pPlayer->edict();
 
 	if (m_pPlayer->TeamNumber() == TEAM_BLUE)
@@ -312,8 +310,17 @@ void CSniperRifle::CreateLaserEffect()
 		m_pLaserBeam->SetColor(255, 0, 0);
 		m_pLaserBeam->SetBrightness(63);
 	}
+
+	MessageBegin(MSG_ONE, gmsgLaserDot, m_pPlayer);
+	WriteByte(1);
+	MessageEnd();
+#else
+	m_pPlayer->PlaybackEvent(m_usLaserDotOn);
+#endif
 }
 
+
+#ifdef GAME_DLL
 
 void CSniperRifle::UpdateLaserEffect()
 {
@@ -341,9 +348,12 @@ void CSniperRifle::UpdateLaserEffect()
 	}
 }
 
+#endif
 
-void CSniperRifle::DestroyLaserEffect()
+
+void CSniperRifle::DestroyLaserEffect(const bool sendMessage)
 {
+#ifdef GAME_DLL
 	if (m_pLaserDot != nullptr)
 	{
 		m_pLaserDot->Remove();
@@ -355,8 +365,17 @@ void CSniperRifle::DestroyLaserEffect()
 		m_pLaserBeam->Remove();
 		m_pLaserBeam = nullptr;
 	}
-}
+
+	if (sendMessage)
+	{
+		MessageBegin(MSG_ONE, gmsgLaserDot, m_pPlayer);
+		WriteByte(0);
+		MessageEnd();
+	}
+#else
+	m_pPlayer->PlaybackEvent(m_usLaserDotOff);
 #endif
+}
 
 
 LINK_ENTITY_TO_CLASS(tf_weapon_autorifle, CAutoRifle);

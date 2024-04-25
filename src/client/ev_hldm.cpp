@@ -728,13 +728,12 @@ TEMPENTITY* pLaserDot;
 
 void EV_LaserDotOn(event_args_t* args)
 {
-	#if 0
 	const auto bMakeNoise = args->iparam1 != 0;
 	
 	if (!EV_IsLocal(args->entindex))
 		return;
 
-	if (g_CurrentWeaponId != WEAPON_RPG)
+	if (g_CurrentWeaponId != WEAPON_SNIPER_RIFLE)
 	{
 		if (pLaserDot != nullptr)
 		{
@@ -778,12 +777,10 @@ void EV_LaserDotOn(event_args_t* args)
 		pLaserDot->entity.baseline.fuser4 = gEngfuncs.GetClientTime() + flSuspendTime;
 		pLaserDot->flags |= FTENT_NOMODEL;
 	}
-	#endif
 }
 
 void EV_LaserDotOff(event_args_t* args)
 {
-	#if 0
 	const auto bMakeNoise = args->iparam1 != 0;
 
 	if (!EV_IsLocal(args->entindex))
@@ -807,7 +804,6 @@ void EV_LaserDotOff(event_args_t* args)
 		pLaserDot->die = gEngfuncs.GetClientTime();
 		pLaserDot = nullptr;
 	}
-	#endif
 }
 
 void EV_TrainPitchAdjust(event_args_t* args)
@@ -1324,6 +1320,31 @@ int MSG_Blood(const char* name, int size, void* buf)
 	return true;
 }
 
+int MSG_LaserDot(const char* name, int size, void* buf)
+{
+	BEGIN_READ(buf, size);
+
+	const auto bOn = READ_BYTE() != 0;
+
+	auto player = gEngfuncs.GetLocalPlayer();
+
+	event_args_t args = {};
+	args.flags = FEV_HOSTONLY;
+	args.entindex = player->index;
+	VectorCopy(player->curstate.origin, args.origin);
+
+	if (bOn)
+	{
+		EV_LaserDotOn(&args);
+	}
+	else
+	{
+		EV_LaserDotOff(&args);
+	}
+
+	return true;
+}
+
 /*
 ======================
 EV_HookEvents
@@ -1344,6 +1365,7 @@ void EV_HookEvents()
 	gEngfuncs.pfnHookEvent("events/train.sc", EV_TrainPitchAdjust);
 
 	gEngfuncs.pfnHookUserMsg("blood", MSG_Blood);
+	gEngfuncs.pfnHookUserMsg("Laser", MSG_LaserDot);
 }
 
 void EV_Init()

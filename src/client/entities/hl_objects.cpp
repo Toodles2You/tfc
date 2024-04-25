@@ -62,14 +62,12 @@ static void GetCrosshairTarget(pmtrace_t* tr, float distance)
 
 static void UpdateLaserDot(const float time, const pmtrace_t *tr)
 {
-#if 0
-	if (g_CurrentWeaponId != WEAPON_RPG)
+	if (g_CurrentWeaponId != WEAPON_SNIPER_RIFLE)
 	{
 		pLaserDot->die = time;
 		pLaserDot = nullptr;
 		return;
 	}
-#endif
 
 	pLaserDot->die = time + 0.1f;
 
@@ -84,6 +82,21 @@ static void UpdateLaserDot(const float time, const pmtrace_t *tr)
 	}
 
 	pLaserDot->entity.origin = tr->endpos;
+
+	if (g_iTeamNumber == TEAM_BLUE)
+	{
+		pLaserDot->entity.curstate.rendercolor.r = 51;
+		pLaserDot->entity.curstate.rendercolor.g = 51;
+		pLaserDot->entity.curstate.rendercolor.b = 255;
+		pLaserDot->entity.curstate.renderamt = 255;
+	}
+	else
+	{
+		pLaserDot->entity.curstate.rendercolor.r = 255;
+		pLaserDot->entity.curstate.rendercolor.g = 0;
+		pLaserDot->entity.curstate.rendercolor.b = 0;
+		pLaserDot->entity.curstate.renderamt = 255;
+	}
 }
 
 /*

@@ -67,6 +67,7 @@ void LinkUserMessages()
 
 	gmsgHitFeedback = REG_USER_MSG("HitFeedback", 4);
 	gmsgBlood = REG_USER_MSG("Blood", -1);
+	gmsgLaserDot = REG_USER_MSG("Laser", 1);
 
 	gmsgStatusIcon = REG_USER_MSG("StatusIcon", -1);
 }

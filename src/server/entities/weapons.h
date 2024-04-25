@@ -288,6 +288,8 @@ public:
 	int GetID() const override { return WEAPON_SNIPER_RIFLE; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 
+	void Precache() override;
+
 	void PrimaryAttack() override;
 	void WeaponPostFrame() override;
 
@@ -300,14 +302,18 @@ public:
 protected:
 	int m_iScopeTime;
 
-#ifdef GAME_DLL
 	void CreateLaserEffect();
-	void UpdateLaserEffect();
-	void DestroyLaserEffect();
+	void DestroyLaserEffect(const bool sendMessage = true);
 
+#ifdef GAME_DLL
 	CSprite* m_pLaserDot = nullptr;
 	CBeam* m_pLaserBeam = nullptr;
+
+	void UpdateLaserEffect();
 #endif
+
+	unsigned short m_usLaserDotOn;
+	unsigned short m_usLaserDotOff;
 };
 
 class CAutoRifle : public CTFWeapon
