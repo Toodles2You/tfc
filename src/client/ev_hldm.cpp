@@ -675,6 +675,8 @@ void CTFMelee::EV_MeleeAttack(event_args_t* args)
 			V_PunchAxis(0, info.flPunchAngle);
 		}
 
+		gEngfuncs.pEventAPI->EV_StopSound(args->entindex, CHAN_AUTO, info.pszReloadSound);
+
 		if (args->iparam2 == kResultHit)
 		{
 			gEngfuncs.pEventAPI->EV_PlaySound(
@@ -714,7 +716,7 @@ void CTFMelee::EV_MeleeAttack(event_args_t* args)
 	gEngfuncs.pEventAPI->EV_PlaySound(
 		args->entindex,
 		args->origin,
-		CHAN_WEAPON,
+		CHAN_AUTO,
 		info.pszReloadSound,
 		VOL_NORM,
 		ATTN_NORM,
