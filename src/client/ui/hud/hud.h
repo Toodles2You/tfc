@@ -608,6 +608,7 @@ public:
 	int HudStringLen(const char* string);
 
 	void RedrawZoomOverlay(float time);
+	void DrawWorldSprite(HSPRITE pic, int frame, Rect *rect, Vector origin, hudcolor_e color, int a);
 
 	void GetChatInputPosition(int& x, int& y);
 
