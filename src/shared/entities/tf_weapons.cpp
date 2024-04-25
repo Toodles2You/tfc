@@ -221,7 +221,7 @@ void CTFWeapon::PrimaryAttack()
 	}
 #endif
 
-	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), 0.0F, m_pPlayer->m_randomSeed, rounds);
+	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), m_pPlayer->pev->view_ofs.z, m_pPlayer->m_randomSeed, rounds);
 
 	m_iWeaponState &= ~kWpnStateIdle;
 }

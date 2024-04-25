@@ -57,6 +57,13 @@ protected:
     virtual void ApplyFriction();
     void StayOnGround();
 
+    virtual void CheckDucking();
+    bool BeginDucking();
+    void FinishDucking();
+    void FixDuckStuck(int direction);
+    bool BeginUnducking();
+    void FinishUnducking();
+
 public:
     static void ClipVelocity(const Vector& in, const Vector& normal, Vector& out, const float overbounce);
 

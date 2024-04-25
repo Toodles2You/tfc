@@ -44,6 +44,7 @@ void CHalfLifeMovement::Move()
 
     CheckParameters();
     CategorizePosition();
+    CheckDucking();
 
     if (pmove->movetype != MOVETYPE_NOCLIP && IsStuck())
     {
@@ -99,6 +100,11 @@ void CHalfLifeMovement::CheckParameters()
      || (player->m_TFState & kTFStateAiming) != 0)
     {
         speedScale = std::min(speedScale, 0.3F);
+    }
+
+    if ((pmove->flags & FL_DUCKING) != 0 || pmove->usehull == 1)
+    {
+        speedScale /= 3.0F;
     }
 
     float speed = move.Length();

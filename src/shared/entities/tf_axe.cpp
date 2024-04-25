@@ -88,7 +88,7 @@ void CTFMelee::PrimaryAttack()
 	}
 
 finished:
-	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), 0.0F, m_pPlayer->m_randomSeed, result, true, false, FEV_RELIABLE);
+	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), m_pPlayer->pev->view_ofs.z, m_pPlayer->m_randomSeed, result, true, false, FEV_RELIABLE);
 #endif
 }
 
@@ -109,7 +109,7 @@ void CTFMelee::WeaponPostFrame()
 		{
 			m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
-			m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), 0.0F, m_pPlayer->m_randomSeed, 0, false, false);
+			m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), m_pPlayer->pev->view_ofs.z, m_pPlayer->m_randomSeed, 0, false, false);
 
 			if (info.iReloadTime > 0)
 			{
