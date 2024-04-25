@@ -140,6 +140,13 @@ public:
 	bool GiveHealth(float flHealth, int bitsDamageType, bool bClearEffects = true) override;
 	void TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, int hitgroup, int bitsDamageType) override;
 	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
+
+protected:
+	float ArmourBonus(float damage, const int bitsDamageType);
+	float DamageForce(CBaseEntity* attacker, const float damage);
+	void SendHitFeedback(CBaseEntity* victim, const float flDamage, const int bitsDamageType);
+
+public:
 	void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType) override;
 	Vector BodyTarget() override { return Center() + pev->view_ofs * 0.8; } // position to shoot at
 	bool IsAlive() override { return (pev->deadflag == DEAD_NO) && pev->health > 0; }

@@ -249,43 +249,94 @@ void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecD
 	AddMultiDamage(flDamage, bitsDamageType);
 }
 
-static inline float DamageForce(CBasePlayer* player, CBaseEntity* attacker, int damage)
+float CBasePlayer::DamageForce(CBaseEntity* attacker, float damage)
 {
-	float force = 8.0F;
-
-	if (player->PCNumber() == PC_HVYWEAP)
+	if (PCNumber() == PC_HVYWEAP)
 	{
-		if (damage < 50)
+		if (damage < 50.0F)
 		{
 			return 0.0F;
 		}
 
-		damage /= 4;
+		damage /= 4.0F;
 	}
 
-	if (damage < 60 && attacker->IsClient() && attacker != player)
+	if ((pev->flags & FL_DUCKING) != 0)
 	{
-		force = 11.0F;
+		damage *= 2.0F;
 	}
 
-	return damage * force;
+	return std::min(damage * 5.0F, 1000.0F);
 }
 
-static float ArmourBonus(float &damage, float armour, float ratio)
+float CBasePlayer::ArmourBonus(float damage, const int bitsDamageType)
 {
-	if (armour <= 0)
+	if (pev->armorvalue <= 0 || (bitsDamageType & DMG_ARMOR_PIERCING) != 0)
 	{
-		return 0.0f;
+		return damage;
 	}
+
+	/* Toodles: These used to stack but, I doubt that was intentional. */
+	if (((m_afArmorClass & AT_SAVESHOT) != 0 && (bitsDamageType & DMG_BULLET) != 0)
+	 || ((m_afArmorClass & AT_SAVENAIL) != 0 && (bitsDamageType & DMG_NAIL) != 0)
+	 || ((m_afArmorClass & AT_SAVEEXPLOSION) != 0 && (bitsDamageType & DMG_BLAST) != 0)
+	 || ((m_afArmorClass & AT_SAVEELECTRICITY) != 0 && (bitsDamageType & DMG_SHOCK) != 0)
+	 || ((m_afArmorClass & AT_SAVEFIRE) != 0 && (bitsDamageType & DMG_BURN) != 0))
+	{
+		damage *= 0.5F;
+	}
+
+	/*
+		Toodles: Each point of armour is equivalent to one point of health.
+		Armour type is the percent of damage that will be taken from armour, rather than health.
+	*/
+	float ratio = 1.0F - pev->armortype;
 	float newDamage = damage * ratio;
-	float take = damage - newDamage;
-	if (take > armour)
+	float takeArmour = damage - newDamage;
+
+	/* Absorbing this much damage would take more armour than the player has. */
+	if (takeArmour >= pev->armorvalue)
 	{
-		damage -= armour;
-		return armour;
+		/* Add the difference back into the damage. */
+		newDamage += takeArmour - pev->armorvalue;
+		takeArmour = pev->armorvalue;
+
+		/* All armour has been used up. Clear any types. */
+		pev->armortype = 0.0F;
+		m_afArmorClass = 0;
 	}
-	damage = newDamage;
-	return take;
+
+	pev->armorvalue -= takeArmour;
+
+	return newDamage;
+}
+
+void CBasePlayer::SendHitFeedback(CBaseEntity* victim, const float flDamage, const int bitsDamageType)
+{
+	int flags = 0;
+
+	if (victim->pev->health <= 0)
+	{
+		flags |= kDamageFlagDead;
+	}
+
+	if ((bitsDamageType & DMG_AIMED) != 0
+	 && victim->IsPlayer()
+	 && dynamic_cast<CBasePlayer *>(victim)->m_LastHitGroup == HITGROUP_HEAD)
+	{
+		flags |= kDamageFlagHeadshot;
+	}
+
+	if (victim == this)
+	{
+		flags |= kDamageFlagSelf;
+	}
+
+	MessageBegin(MSG_ONE, gmsgHitFeedback, this);
+	WriteByte(victim->entindex());
+	WriteByte(flags);
+	WriteShort(flDamage);
+	MessageEnd();
 }
 
 bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType)
@@ -308,7 +359,7 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		// Move them around!
 		g_vecAttackDir = (inflictor->Center() - Vector(0, 0, 10) - Center()).Normalize();
 
-		float force = DamageForce(this, attacker, flDamage);
+		float force = DamageForce(attacker, flDamage);
 
 		if (force > 0.0F)
 		{
@@ -355,58 +406,17 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		m_hLastAttacker[0] = attacker;
 	}
 
-	float flArmour = 0.0f;
-	if ((bitsDamageType & DMG_ARMOR_PIERCING) == 0)
-	{
-		/* Toodles: These used to stack but, I doubt that was intentional. */
-		if (((m_afArmorClass & AT_SAVESHOT) != 0 && (bitsDamageType & DMG_BULLET) != 0)
-		|| ((m_afArmorClass & AT_SAVENAIL) != 0 && (bitsDamageType & DMG_NAIL) != 0)
-		|| ((m_afArmorClass & AT_SAVEEXPLOSION) != 0 && (bitsDamageType & DMG_BLAST) != 0)
-		|| ((m_afArmorClass & AT_SAVEELECTRICITY) != 0 && (bitsDamageType & DMG_SHOCK) != 0)
-		|| ((m_afArmorClass & AT_SAVEFIRE) != 0 && (bitsDamageType & DMG_BURN) != 0))
-		{
-			flDamage *= 0.5F;
-		}
+	flDamage = ArmourBonus(flDamage, bitsDamageType);
 
-		flArmour = ArmourBonus(flDamage, pev->armorvalue, 1.0f - pev->armortype);
-
-		if (flArmour >= pev->armorvalue)
-		{
-			pev->armortype = 0.0F;
-			m_afArmorClass = 0;
-		}
-	}
+	flDamage = ceilf(flDamage);
 
 	// Do the damage!
 	pev->dmg_take += flDamage;
 	pev->health -= flDamage;
-	pev->armorvalue -= flArmour;
 
 	if (attacker->IsNetClient())
 	{
-		int flags = 0;
-
-		if (pev->health <= 0)
-		{
-			flags |= kDamageFlagDead;
-		}
-
-		if ((bitsDamageType & DMG_AIMED) != 0
-		 && m_LastHitGroup == HITGROUP_HEAD)
-		{
-			flags |= kDamageFlagHeadshot;
-		}
-
-		if (attacker == this)
-		{
-			flags |= kDamageFlagSelf;
-		}
-
-		MessageBegin(MSG_ONE, gmsgHitFeedback, attacker);
-		WriteByte(entindex());
-		WriteByte(flags);
-		WriteShort(flDamage);
-		MessageEnd();
+		dynamic_cast<CBasePlayer*>(attacker)->SendHitFeedback(this, flDamage, bitsDamageType);
 	}
 
 	if (pev->health <= 0)
