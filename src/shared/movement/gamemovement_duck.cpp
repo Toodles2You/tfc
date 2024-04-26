@@ -31,22 +31,19 @@ void CHalfLifeMovement::CheckDucking()
     const auto bIsFullyDucked = pmove->usehull == 1;
 
     /* Check if the player wants to change duck state. */
-    if (pmove->flDuckTime == 0 && bWantToDuck != bIsFullyDucked)
+    if (bWantToDuck)
     {
-        /* Begin changing duck state. */
-        if (bWantToDuck ? BeginDucking() : BeginUnducking())
+        if (BeginDucking())
         {
-            if (pmove->onground == -1)
-            {
-                /* If the player isn't on the ground, immediately change duck state. */
-                bWantToDuck ? FinishDucking() : FinishUnducking();
-            }
-            else
-            {
-                pmove->bInDuck = bWantToDuck;
-                pmove->flDuckTime = pmove->bInDuck ? 400.0F : 150.0F;
-            }
+            pmove->bInDuck = true;
+            pmove->flDuckTime = 400.0F;
         }
+    }
+    else if ((bIsFullyDucked || pmove->bInDuck) && BeginUnducking())
+    {
+        pmove->bInDuck = false;
+        /* Invert the duck time so the view smoothly lerps. */
+        pmove->flDuckTime = 150.0F * (1.0F - (pmove->flDuckTime / 400.0F));
     }
 
     if (pmove->flDuckTime != 0)
@@ -84,7 +81,7 @@ void CHalfLifeMovement::CheckDucking()
 
 bool CHalfLifeMovement::BeginDucking()
 {
-    return true;
+    return (pmove->flags & FL_DUCKING) == 0 && pmove->flDuckTime == 0;
 }
 
 
@@ -159,6 +156,11 @@ void CHalfLifeMovement::FixDuckStuck(int direction)
 
 bool CHalfLifeMovement::BeginUnducking()
 {
+    if (pmove->usehull != 1)
+    {
+        return true;
+    }
+
     Vector vecOrigin = pmove->origin;
 
     if (pmove->onground != -1)
