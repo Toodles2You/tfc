@@ -50,7 +50,10 @@ void CHudAmmoSecondary::Reset()
 
 bool CHudAmmoSecondary::VidInit()
 {
-	m_HUD_ammoicon = gHUD.GetSpriteIndex("grenade");
+	if (m_HUD_ammoicon == 0)
+	{
+		m_HUD_ammoicon = gHUD.GetSpriteIndex("grenade");
+	}
 	return true;
 }
 
@@ -139,6 +142,12 @@ void CHudAmmoSecondary::Update_SecAmmoVal(int iIndex, int iCount)
 	}
 	else
 	{
+		if ((m_iFlags & HUD_ACTIVE) == 0)
+		{
+			// make the icons light up
+			m_fFade = 200.0F;
+		}
+
 		m_iFlags |= HUD_ACTIVE;
 	}
 }
