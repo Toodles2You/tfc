@@ -85,9 +85,14 @@ void CBasePlayer::UpdateHudData()
 		gHUD.m_Ammo.Update_CurWeapon(0, -1, -1);
 	}
 
-	for (int i = 0; i < AMMO_TYPES; i++)
+	for (int i = 0; i < AMMO_SECONDARY; i++)
 	{
 		gHUD.m_Ammo.Update_AmmoX(i, m_rgAmmo[i]);
+	}
+
+	for (int i = AMMO_SECONDARY; i < AMMO_TYPES; i++)
+	{
+		gHUD.m_AmmoSecondary.Update_SecAmmoVal(i - AMMO_SECONDARY, m_rgAmmo[i]);
 	}
 
 	if (m_iConcussionTime > 0)
@@ -140,6 +145,14 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 	{
 		return;
 	}
+
+	if (m_rgAmmo[AMMO_GRENADES1 + grenadeType] == 0)
+	{
+		EmitSoundPredicted("common/wpn_denyselect.wav", CHAN_ITEM, VOL_NORM, ATTN_IDLE);
+		return;
+	}
+
+	m_rgAmmo[AMMO_GRENADES1 + grenadeType]--;
 
 	if (grenadeType == 0)
 	{

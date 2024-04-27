@@ -1875,6 +1875,13 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 		return;
 	}
 
+	if (m_rgAmmo[AMMO_GRENADES1 + grenadeType] == 0)
+	{
+		return;
+	}
+
+	m_rgAmmo[AMMO_GRENADES1 + grenadeType]--;
+
 	if (grenadeType == 0)
 	{
 		switch (PCNumber())
