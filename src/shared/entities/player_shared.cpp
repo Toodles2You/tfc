@@ -694,3 +694,42 @@ void CBasePlayer::SetEntityState(const entity_state_t& state)
 	pev->health = state.health;
 }
 
+
+const char* CBasePlayer::GetGrenadeIconName(const int grenadeType)
+{
+	if (grenadeType == 0)
+	{
+		switch (PCNumber())
+		{
+			case PC_SCOUT:
+				return "d_caltrop";
+			default:
+				return "grenade";
+		}
+	}
+
+	switch (PCNumber())
+	{
+		case PC_SCOUT:
+			return "d_concussiongrenade";
+		case PC_SNIPER:
+			return nullptr;
+		case PC_SOLDIER:
+			return "d_nailgrenade";
+		case PC_DEMOMAN:
+			return "d_mirvgrenade";
+		case PC_MEDIC:
+			return "d_concussiongrenade";
+		case PC_HVYWEAP:
+			return "d_mirvgrenade";
+		case PC_PYRO:
+			return nullptr;
+		case PC_SPY:
+			return nullptr;
+		case PC_ENGINEER:
+			return nullptr;
+		default:
+		case PC_CIVILIAN:
+			return nullptr;
+	}
+}

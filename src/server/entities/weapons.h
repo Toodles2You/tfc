@@ -418,6 +418,7 @@ public:
 	virtual void Explode(TraceResult* pTrace, int bitsDamageType) override;
 
 	virtual const char* GetModelName() { return "models/w_grenade.mdl"; }
+	virtual const char* GetIconName() { return "grenade"; }
 
 	static CPrimeGrenade* PrimeGrenade(CBaseEntity* owner);
 
@@ -437,7 +438,8 @@ class CCaltropCanister : public CPrimeGrenade
 public:
 	bool Spawn() override;
 
-	const char* GetModelName() override { return "models/conc_grenade.mdl"; }
+	const char* GetModelName() override { return "models/caltrop.mdl"; }
+	const char* GetIconName() override { return "d_caltrop"; }
 
 	static CCaltropCanister* CaltropCanister(CBaseEntity* owner);
 
@@ -456,6 +458,7 @@ public:
 	void EXPORT CaltropTouch(CBaseEntity* other);
 
 	const char* GetModelName() override { return "models/caltrop.mdl"; }
+	const char* GetIconName() override { return "d_caltrop"; }
 
 	static CCaltrop* Caltrop(CBaseEntity* owner, const Vector& origin, const float yaw);
 };
@@ -466,6 +469,7 @@ public:
 	void Explode(TraceResult* pTrace, int bitsDamageType) override;
 
 	const char* GetModelName() override { return "models/conc_grenade.mdl"; }
+	const char* GetIconName() override { return "d_concussiongrenade"; }
 
 	static CConcussionGrenade* ConcussionGrenade(CBaseEntity* owner);
 };
@@ -496,6 +500,7 @@ public:
 	void EXPORT GetNailedIdiot();
 
 	const char* GetModelName() override { return "models/ngrenade.mdl"; }
+	const char* GetIconName() override { return "d_nailgrenade"; }
 
 	static CNailGrenade* NailGrenade(CBaseEntity* owner);
 
@@ -510,6 +515,7 @@ public:
 	void Explode(TraceResult* pTrace, int bitsDamageType) override;
 
 	const char* GetModelName() override { return "models/mirv_grenade.mdl"; }
+	const char* GetIconName() override { return "d_mirvgrenade"; }
 
 	static CMirv* Mirv(CBaseEntity* owner);
 
@@ -524,6 +530,7 @@ public:
 	bool Spawn() override;
 
 	const char* GetModelName() override { return "models/bomblet.mdl"; }
+	const char* GetIconName() override { return "d_mirvgrenade"; }
 
 	static CBomblet* Bomblet(CBaseEntity* owner, const Vector& origin, const float yaw);
 };

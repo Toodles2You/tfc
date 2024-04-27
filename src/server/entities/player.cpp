@@ -1103,6 +1103,16 @@ bool CBasePlayer::Spawn()
 
 	g_pGameRules->PlayerSpawn(this);
 
+	const char *icon = GetGrenadeIconName(1);
+	if (icon == nullptr)
+	{
+		icon = GetGrenadeIconName(0);
+	}
+
+	MessageBegin(MSG_ONE, gmsgSecAmmoIcon, this);
+	WriteString(icon);
+	MessageEnd();
+
 	return true;
 }
 
@@ -1888,7 +1898,7 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 		{
 			case PC_SCOUT:
 				CCaltropCanister::CaltropCanister(this);
-				goto no_icon;
+				break;
 			default:
 				CPrimeGrenade::PrimeGrenade(this);
 				break;
@@ -1927,10 +1937,15 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 		}
 	}
 
-	MessageBegin(MSG_ONE, gmsgStatusIcon, this);
-	WriteByte(2);
-	WriteString("grenade");
-	MessageEnd();
+	const char* icon = GetGrenadeIconName(grenadeType);
+
+	if (icon != nullptr)
+	{
+		MessageBegin(MSG_ONE, gmsgStatusIcon, this);
+		WriteByte(2);
+		WriteString(icon);
+		MessageEnd();
+	}
 
 no_icon:
 	m_TFState |= kTFStateGrenadePrime;

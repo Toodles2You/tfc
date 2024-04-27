@@ -1,4 +1,4 @@
-123
+132
 
 selection		640 640hud3	0	180	170	45
 
@@ -74,6 +74,16 @@ d_snark			640	640hud1	192	208	32	16
 d_skull			640	640hud1	192	224	32	16
 d_tracktrain	640	640hud1	192	240	32	16
 d_headshot      640 640hud7 192 24 48 16
+
+d_genericprimedgrenade	640	640hud1	192	160	32	16
+d_normalgrenade			640	640hud1	192	160	32	16
+d_nailgrenade			640	tfc_dmsg 60	0	24	24
+d_napalmgrenade			640	tfc_dmsg 60	24	24	24
+d_caltrop				640	tfc_dmsg 60	48	24	24
+d_mirvgrenade			640	tfc_dmsg 60	72	24	24
+d_gasgrenade			640	tfc_dmsg 60	96	24	24
+d_empgrenade			640	tfc_dmsg 60	120	24	24
+d_concussiongrenade		640	tfc_dmsg 60	144	24	24
 
 item_battery	640 640hud2	176	0	44	44
 item_healthkit	640 640hud2	176	48	44	44

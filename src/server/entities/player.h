@@ -360,6 +360,7 @@ protected:
 #ifdef HALFLIFE_GRENADES
 	void PrimeGrenade(const int grenadeType);
 	void ThrowGrenade();
+	const char* GetGrenadeIconName(const int grenadeType);
 #endif
 
 public:

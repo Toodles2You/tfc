@@ -60,6 +60,16 @@ bool CBasePlayer::Spawn()
 
 	m_bLeftHanded = static_cast<int>(floorf(cl_righthand->value)) == 0;
 
+#if 0
+	const char *icon = GetGrenadeIconName(1);
+	if (icon == nullptr)
+	{
+		icon = GetGrenadeIconName(0);
+	}
+
+	gHUD.m_AmmoSecondary.Update_SecAmmoIcon(icon);
+#endif
+
 	return true;
 }
 
@@ -159,7 +169,7 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 		switch (PCNumber())
 		{
 			case PC_SCOUT:
-				goto no_icon;
+				break;
 			default:
 				break;
 		}
@@ -194,7 +204,12 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 
 	if (HUD_FirstTimePredicting())
 	{
-		gHUD.m_StatusIcons.EnableIcon("grenade");
+		const char* icon = GetGrenadeIconName(grenadeType);
+
+		if (icon != nullptr)
+		{
+			gHUD.m_StatusIcons.EnableIcon(icon);
+		}
 	}
 
 no_icon:

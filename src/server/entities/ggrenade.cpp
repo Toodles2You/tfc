@@ -332,7 +332,7 @@ void CPrimeGrenade::Throw(throw_e mode)
 
 	MessageBegin(MSG_ONE, gmsgStatusIcon, owner);
 	WriteByte(0);
-	WriteString("grenade");
+	WriteString(GetIconName());
 	MessageEnd();
 	
 	owner->m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
@@ -390,7 +390,7 @@ void CCaltropCanister::Throw(throw_e mode)
 
 	MessageBegin(MSG_ONE, gmsgStatusIcon, owner);
 	WriteByte(0);
-	WriteString("grenade");
+	WriteString(GetIconName());
 	MessageEnd();
 	
 	owner->m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
