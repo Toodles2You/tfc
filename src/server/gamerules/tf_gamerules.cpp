@@ -30,6 +30,7 @@ static const char* sTFClassModels[] =
     "spy",
     "engineer",
     "civilian",
+    "civilian",
 };
 
 static const char* sTFClassSelection[] =
@@ -53,6 +54,17 @@ static const char* sTFTeamColors[] =
     "0",
     "159",
     "0",
+    "127",
+    "63",
+    "0",
+};
+
+static const char* sTFTeamNames[] =
+{
+    "Team_Blue",
+    "Team_Red",
+    "Team_Green",
+    "Team_Yellow"
 };
 
 
