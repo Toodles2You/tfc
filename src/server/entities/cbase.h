@@ -252,7 +252,7 @@ public:
 
 	virtual CBaseEntity* Respawn() { return NULL; }
 
-	void UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value);
+	virtual void UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value);
 	// Do the bounding boxes of these two intersect?
 	bool Intersects(CBaseEntity* pOther);
 
@@ -442,7 +442,10 @@ class CBaseToggle : public CBaseEntity
 public:
 	DECLARE_SAVERESTORE()
 
+	bool EntvarsKeyvalue(KeyValueData *pkvd) override;
 	bool KeyValue(KeyValueData* pkvd) override;
+
+	void UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value) override;
 
 	TOGGLE_STATE m_toggle_state;
 	float m_flActivateFinished; //like attack_finished, but for doors

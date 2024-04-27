@@ -246,13 +246,13 @@ public:
 LINK_ENTITY_TO_CLASS(func_plat, CFuncPlat);
 
 
-class CPlatTrigger : public CBaseEntity
+class CPlatTrigger : public CBaseToggle
 {
 public:
 #ifdef HALFLIFE_SAVERESTORE
-	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_DONT_SAVE; }
+	int ObjectCaps() override { return (CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_DONT_SAVE; }
 #else
-	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION); }
+	int ObjectCaps() override { return (CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION); }
 #endif
 	void SpawnInsideTrigger(CFuncPlat* pPlatform);
 	void Touch(CBaseEntity* pOther) override;

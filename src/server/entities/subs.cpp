@@ -336,6 +336,12 @@ END_SAVERESTORE(CBaseToggle, CBaseDelay)
 #endif
 
 
+bool CBaseToggle::EntvarsKeyvalue(KeyValueData* pkvd)
+{
+	return CBaseEntity::EntvarsKeyvalue(pkvd);
+}
+
+
 bool CBaseToggle::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "lip"))
@@ -361,6 +367,13 @@ bool CBaseToggle::KeyValue(KeyValueData* pkvd)
 
 	return CBaseEntity::KeyValue(pkvd);
 }
+
+
+void CBaseToggle::UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value)
+{
+	CBaseEntity::UseTargets(pActivator, useType, value);
+}
+
 
 /*
 =============
