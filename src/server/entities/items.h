@@ -20,7 +20,12 @@ class CItem : public CBaseEntity
 public:
 	bool Spawn() override;
 	CBaseEntity* Respawn() override;
+
 	void EXPORT ItemTouch(CBaseEntity* pOther);
 	void EXPORT Materialize();
+
 	virtual bool MyTouch(CBasePlayer* pPlayer) { return false; }
+
+protected:
+	bool CanHaveItem(CBaseEntity* other);
 };
