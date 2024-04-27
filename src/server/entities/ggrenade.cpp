@@ -563,6 +563,63 @@ CConcussionGrenade* CConcussionGrenade::ConcussionGrenade(CBaseEntity* owner)
 }
 
 
+void CFlare::StickyTouch(CBaseEntity* pOther)
+{
+	BounceTouch(pOther);
+
+	if (util::GetGlobalTrace().vecPlaneNormal.z >= kGroundPlaneMinZ)
+	{
+		pev->velocity = g_vecZero;
+		pev->movetype = MOVETYPE_TOSS;
+		SetTouch(nullptr);
+	}
+}
+
+
+void CFlare::Explode(TraceResult* pTrace, int bitsDamageType)
+{
+	pev->effects |= EF_LIGHT;
+	SetThink(&CFlare::Remove);
+	pev->nextthink = gpGlobals->time + 40.0F;
+}
+
+
+bool CFlare::Spawn()
+{
+	if (CPrimeGrenade::Spawn())
+	{
+		pev->nextthink = gpGlobals->time + 0.5;
+		pev->dmgtime = gpGlobals->time + 0.5;
+		return true;
+	}
+	return false;
+}
+
+
+CFlare* CFlare::Flare(CBaseEntity* owner)
+{
+	auto grenade = GetClassPtr((CFlare*)nullptr);
+
+	grenade->pev->owner = owner->edict();
+	grenade->Spawn();
+
+	return grenade;
+}
+
+
+void CFlare::Throw(throw_e mode)
+{
+	if (mode == kOvercook)
+	{
+		mode = kThrow;
+	}
+
+	CPrimeGrenade::Throw(mode);
+	
+	SetTouch(&CFlare::StickyTouch);
+}
+
+
 bool CNailGrenade::Spawn()
 {
 	pev->health = kNumBursts;

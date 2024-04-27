@@ -470,6 +470,23 @@ public:
 	static CConcussionGrenade* ConcussionGrenade(CBaseEntity* owner);
 };
 
+class CFlare : public CPrimeGrenade
+{
+public:
+	bool Spawn() override;
+
+	void EXPORT StickyTouch(CBaseEntity* pOther);
+
+	void Explode(TraceResult* pTrace, int bitsDamageType) override;
+
+	const char* GetModelName() override { return "models/w_flare.mdl"; }
+
+	static CFlare* Flare(CBaseEntity* owner);
+
+protected:
+	void Throw(throw_e mode) override;
+};
+
 class CNailGrenade : public CPrimeGrenade
 {
 public:
