@@ -190,6 +190,10 @@ bool CBasePlayer::GiveHealth(float flHealth, int bitsDamageType, bool bClearEffe
 		m_TFState &= ~kTFStateInfected;
 		m_nLegDamage = 0;
 		m_iConcussionTime = 0;
+		MessageBegin(MSG_ONE, gmsgStatusIcon, this);
+		WriteByte(0);
+		WriteString("dmg_caltrop");
+		MessageEnd();
 	}
 
 	if (pev->takedamage == DAMAGE_NO)
@@ -238,6 +242,10 @@ void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecD
 		{
 			flDamage *= 0.5F;
 			m_nLegDamage = std::min(m_nLegDamage + 1, 6);
+			MessageBegin(MSG_ONE, gmsgStatusIcon, this);
+			WriteByte(2);
+			WriteString("dmg_caltrop");
+			MessageEnd();
 #ifndef NDEBUG
 			ALERT(at_console, "LEG SHOT\n");
 #endif

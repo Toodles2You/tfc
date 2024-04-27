@@ -695,6 +695,20 @@ void CBasePlayer::SetEntityState(const entity_state_t& state)
 }
 
 
+void CBasePlayer::ClearEffects()
+{
+	m_TFState = 0;
+	m_nLegDamage = 0;
+	m_iConcussionTime = 0;
+#ifdef GAME_DLL
+	MessageBegin(MSG_ONE, gmsgStatusIcon, this);
+	WriteByte(0);
+	WriteString("dmg_caltrop");
+	MessageEnd();
+#endif
+}
+
+
 const char* CBasePlayer::GetGrenadeIconName(const int grenadeType)
 {
 	if (grenadeType == 0)

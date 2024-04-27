@@ -468,6 +468,10 @@ void CCaltrop::CaltropTouch(CBaseEntity* other)
 		CBasePlayer* player = dynamic_cast<CBasePlayer*>(other);
 
 		player->m_nLegDamage = std::min(player->m_nLegDamage + 1, 6);
+		MessageBegin(MSG_ONE, gmsgStatusIcon, player);
+		WriteByte(2);
+		WriteString("dmg_caltrop");
+		MessageEnd();
 	}
 
 	Remove();

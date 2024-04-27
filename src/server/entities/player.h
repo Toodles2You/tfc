@@ -346,12 +346,7 @@ public:
 		}
 	}
 
-	void ClearEffects()
-	{
-		m_TFState = 0;
-		m_nLegDamage = 0;
-		m_iConcussionTime = 0;
-	}
+	void ClearEffects();
 
 protected:
 	CGameMovement* m_gameMovement = nullptr;

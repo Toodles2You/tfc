@@ -22,6 +22,11 @@ dmg_gas			640 640hud9	0	0	64	64
 dmg_rad			640 640hud9	192 0	64	64
 dmg_shock		640 640hud8	192	0	64	64
 
+dmg_caltrop		640 tfchud05	192	192	64	64
+dmg_tranq		640 tfchud05	192	128	64	64
+dmg_concuss		640 tfchud05	192	64	64	64
+dmg_haluc		640 tfchud05	192	0	64	64
+
 number_0		640 640hud7	0	0	20	24
 number_1		640 640hud7	24	0	20	24
 number_2		640 640hud7	48	0	20	24
