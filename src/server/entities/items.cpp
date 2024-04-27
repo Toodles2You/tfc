@@ -20,6 +20,8 @@
 
 */
 
+#include <algorithm>
+
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
@@ -32,13 +34,15 @@
 
 bool CItem::Spawn()
 {
+	Precache();
+
 	pev->movetype = MOVETYPE_TOSS;
 	pev->solid = SOLID_TRIGGER;
 	SetOrigin(pev->origin);
 	SetSize(Vector(-16, -16, 0), Vector(16, 16, 16));
 	SetTouch(&CItem::ItemTouch);
 
-	if (DROP_TO_FLOOR(ENT(pev)) == 0)
+	if (g_engfuncs.pfnDropToFloor(pev->pContainingEntity) == 0)
 	{
 		ALERT(at_error, "Item %s fell out of level at %f,%f,%f", STRING(pev->classname), pev->origin.x, pev->origin.y, pev->origin.z);
 		return false;
@@ -47,22 +51,29 @@ bool CItem::Spawn()
 	return true;
 }
 
+bool CItem::CanHaveItem(CBaseEntity* other)
+{
+	if (!other->IsPlayer())
+	{
+		return false;
+	}
+
+	if (!g_pGameRules->CanHaveItem(dynamic_cast<CBasePlayer*>(other), this))
+	{
+		return false;
+	}
+
+	return true;
+}
+
 void CItem::ItemTouch(CBaseEntity* pOther)
 {
-	// if it's not a player, ignore
-	if (!pOther->IsPlayer())
+	if (!CanHaveItem(pOther))
 	{
 		return;
 	}
 
-	CBasePlayer* pPlayer = (CBasePlayer*)pOther;
-
-	// ok, a player is touching this item, but can he have it?
-	if (!g_pGameRules->CanHaveItem(pPlayer, this))
-	{
-		// no? Ignore the touch.
-		return;
-	}
+	CBasePlayer* pPlayer = dynamic_cast<CBasePlayer*>(pOther);
 
 	if (MyTouch(pPlayer))
 	{
@@ -109,87 +120,79 @@ void CItem::Materialize()
 	SetTouch(&CItem::ItemTouch);
 }
 
-class CItemBattery : public CItem
+
+class CItemBackpack : public CItem
 {
-	bool Spawn() override
-	{
-		Precache();
-		SetModel("models/w_battery.mdl");
-		return CItem::Spawn();
-	}
+public:
 	void Precache() override
 	{
-		PRECACHE_MODEL("models/w_battery.mdl");
-		PRECACHE_SOUND("items/gunpickup2.wav");
+		const auto classname = STRING(pev->classname);
+
+		if (FStrEq("item_healthkit", classname))
+		{
+			pev->health = 15.0F;
+			pev->model = MAKE_STRING("models/w_medkit.mdl");
+			pev->noise = MAKE_STRING("items/smallmedkit1.wav");
+			pev->netname = pev->classname;
+		}
+		else if (FStrEq("item_battery", classname))
+		{
+			pev->armorvalue = 15.0F;
+			pev->model = MAKE_STRING("models/w_battery.mdl");
+			pev->noise = MAKE_STRING("items/gunpickup2.wav");
+			pev->netname = pev->classname;
+		}
+
+		g_engfuncs.pfnPrecacheModel(STRING(pev->model));
+		g_engfuncs.pfnPrecacheSound(STRING(pev->noise));
+
+		SetModel(STRING(pev->model));
 	}
-	bool MyTouch(CBasePlayer* pPlayer) override
+
+protected:
+	bool GiveHealth(CBasePlayer* player)
 	{
-		if (pPlayer->pev->deadflag != DEAD_NO)
+		return pev->health != 0.0F && player->GiveHealth(pev->health, DMG_GENERIC);
+	}
+
+	bool GiveArmor(CBasePlayer* player)
+	{
+		if (pev->armorvalue == 0.0F)
 		{
 			return false;
 		}
 
-		if (pPlayer->pev->armorvalue < 100.0F)
+		if (player->pev->armorvalue >= 100)
 		{
-			int pct;
-			char szcharge[64];
-
-			pPlayer->pev->armorvalue += 15;
-			pPlayer->pev->armorvalue = std::min(pPlayer->pev->armorvalue, 100.0F);
-
-			pPlayer->EmitSound("items/gunpickup2.wav", CHAN_ITEM);
-
-			MessageBegin(MSG_ONE, gmsgItemPickup, pPlayer);
-			WriteString(STRING(pev->classname));
-			MessageEnd();
-			return true;
+			return false;
 		}
-		return false;
-	}
-};
 
-LINK_ENTITY_TO_CLASS(item_battery, CItemBattery);
-
-
-class CHealthKit : public CItem
-{
-	bool Spawn() override;
-	void Precache() override;
-	bool MyTouch(CBasePlayer* pPlayer) override;
-};
-
-LINK_ENTITY_TO_CLASS(item_healthkit, CHealthKit);
-
-bool CHealthKit::Spawn()
-{
-	Precache();
-	SetModel("models/w_medkit.mdl");
-
-	return CItem::Spawn();
-}
-
-void CHealthKit::Precache()
-{
-	PRECACHE_MODEL("models/w_medkit.mdl");
-	PRECACHE_SOUND("items/smallmedkit1.wav");
-}
-
-bool CHealthKit::MyTouch(CBasePlayer* pPlayer)
-{
-	if (pPlayer->pev->deadflag != DEAD_NO)
-	{
-		return false;
-	}
-
-	if (pPlayer->GiveHealth(15, DMG_GENERIC))
-	{
-		MessageBegin(MSG_ONE, gmsgItemPickup, pPlayer);
-		WriteString(STRING(pev->classname));
-		MessageEnd();
-
-		pPlayer->EmitSound("items/smallmedkit1.wav", CHAN_ITEM);
+		player->pev->armorvalue = std::clamp(player->pev->armorvalue, 0.0F, 100.0F);
 		return true;
 	}
 
-	return false;
-}
+public:
+	bool MyTouch(CBasePlayer* player) override
+	{
+		if (!GiveHealth(player)
+		 && !GiveArmor(player))
+		{
+			return false;
+		}
+
+		EmitSound(STRING(pev->noise), CHAN_ITEM);
+
+		if (!FStringNull(pev->netname))
+		{
+			MessageBegin(MSG_ONE, gmsgItemPickup, player);
+			WriteString(STRING(pev->netname));
+			MessageEnd();
+		}
+
+		return true;
+	}
+};
+
+LINK_ENTITY_TO_CLASS(item_healthkit, CItemBackpack);
+LINK_ENTITY_TO_CLASS(item_battery, CItemBackpack);
+
