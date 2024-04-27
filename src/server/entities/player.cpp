@@ -190,9 +190,15 @@ bool CBasePlayer::GiveHealth(float flHealth, int bitsDamageType, bool bClearEffe
 		m_TFState &= ~kTFStateInfected;
 		m_nLegDamage = 0;
 		m_iConcussionTime = 0;
+
 		MessageBegin(MSG_ONE, gmsgStatusIcon, this);
 		WriteByte(0);
 		WriteString("dmg_caltrop");
+		MessageEnd();
+
+		MessageBegin(MSG_ONE, gmsgStatusIcon, this);
+		WriteByte(0);
+		WriteString("dmg_poison");
 		MessageEnd();
 	}
 
@@ -1965,6 +1971,24 @@ void CBasePlayer::ThrowGrenade()
 }
 
 #endif
+
+
+void CBasePlayer::BecomeInfected(CBaseEntity* infector)
+{
+	if (PCNumber() == PC_MEDIC)
+	{
+		return;
+	}
+
+	m_TFState |= kTFStateInfected;
+	m_hInfector = infector;
+	m_flNextInfectionTime = gpGlobals->time + 1.0F;
+
+	MessageBegin(MSG_ONE, gmsgStatusIcon, this);
+	WriteByte(2);
+	WriteString("dmg_poison");
+	MessageEnd();
+}
 
 
 void CBasePlayer::SaveMe()

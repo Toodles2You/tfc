@@ -700,10 +700,16 @@ void CBasePlayer::ClearEffects()
 	m_TFState = 0;
 	m_nLegDamage = 0;
 	m_iConcussionTime = 0;
+
 #ifdef GAME_DLL
 	MessageBegin(MSG_ONE, gmsgStatusIcon, this);
 	WriteByte(0);
 	WriteString("dmg_caltrop");
+	MessageEnd();
+
+	MessageBegin(MSG_ONE, gmsgStatusIcon, this);
+	WriteByte(0);
+	WriteString("dmg_poison");
 	MessageEnd();
 #endif
 }

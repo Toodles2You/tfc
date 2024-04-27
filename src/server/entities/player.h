@@ -310,17 +310,7 @@ protected:
 	float m_flNextInfectionTime;
 
 public:
-	void BecomeInfected(CBaseEntity* infector)
-	{
-		if (PCNumber() == PC_MEDIC)
-		{
-			return;
-		}
-
-		m_TFState |= kTFStateInfected;
-		m_hInfector = infector;
-		m_flNextInfectionTime = gpGlobals->time + 1.0F;
-	}
+	void BecomeInfected(CBaseEntity* infector);
 
 	float m_flNextSpeakTime;
 
