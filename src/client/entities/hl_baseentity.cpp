@@ -86,8 +86,6 @@ int CBasePlayer::GetCustomDecalFrames() { return -1; }
 void CBasePlayer::DropPlayerWeapon(char* pszWeaponName) {}
 const char* CBasePlayer::TeamID() { return ""; }
 bool CBasePlayer::GiveAmmo(int iCount, int iType) { return false; }
-void CBasePlayer::AddPoints(float score, bool bAllowNegativeScore) {}
-void CBasePlayer::AddPointsToTeam(float score, bool bAllowNegativeScore) {}
 
 #ifdef HALFLIFE_SAVERESTORE
 bool CBasePlayerWeapon::Restore(class CRestore&) { return true; }

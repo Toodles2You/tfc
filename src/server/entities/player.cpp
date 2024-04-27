@@ -762,57 +762,6 @@ void CBasePlayer::PlayerUse()
 }
 
 
-void CBasePlayer::AddPoints(float score, bool bAllowNegativeScore)
-{
-	// Positive score always adds
-	if (score < 0)
-	{
-		if (!bAllowNegativeScore)
-		{
-			if (pev->frags < 0) // Can't go more negative
-				return;
-
-			if (-score > pev->frags) // Will this go negative?
-			{
-				score = -pev->frags; // Sum will be 0
-			}
-		}
-	}
-
-	pev->frags += score;
-
-	if (g_pGameRules->IsTeamplay() && m_team != nullptr)
-	{
-		m_team->AddPoints(score);
-	}
-
-	MessageBegin(MSG_ALL, gmsgScoreInfo);
-	WriteByte(entindex());
-	WriteShort(pev->frags);
-	WriteShort(m_iDeaths);
-	MessageEnd();
-}
-
-
-void CBasePlayer::AddPointsToTeam(float score, bool bAllowNegativeScore)
-{
-	int index = entindex();
-
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
-	{
-		CBaseEntity* pPlayer = util::PlayerByIndex(i);
-
-		if (pPlayer && i != index)
-		{
-			if (g_pGameRules->PlayerRelationship(this, pPlayer) == GR_TEAMMATE)
-			{
-				pPlayer->AddPoints(score, bAllowNegativeScore);
-			}
-		}
-	}
-}
-
-
 void CBasePlayer::PreThink()
 {
 	int buttonsChanged = (m_afButtonLast ^ pev->button); // These buttons have changed this frame

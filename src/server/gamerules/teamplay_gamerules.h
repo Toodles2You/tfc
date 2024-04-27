@@ -37,6 +37,7 @@ public:
 	gamemode_e GetGameMode() override { return kGamemodeTeamplay; }
 	int GetDefaultPlayerTeam(CBasePlayer* pPlayer) override;
 	bool ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib, bool bAutoTeam) override;
+	void AddPointsToPlayer(CBasePlayer* player, float score = 1, bool allowNegative = false) override;
 
 protected:
 	virtual void Enter_RND_RUNNING() override;

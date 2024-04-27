@@ -222,3 +222,13 @@ void CHalfLifeTeamplay::SendMenusToClient(CBasePlayer* player)
 	MessageEnd();
 }
 
+void CHalfLifeTeamplay::AddPointsToPlayer(CBasePlayer* player, float score, bool allowNegative)
+{
+	CHalfLifeMultiplay::AddPointsToPlayer(player, score, allowNegative);
+
+	if (score > 0)
+	{
+		AddPointsToTeam(player->TeamNumber(), score);
+	}
+}
+

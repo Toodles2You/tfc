@@ -180,8 +180,6 @@ public:
 	virtual void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType);
 	virtual bool IsTriggered(CBaseEntity* pActivator) { return true; }
 	virtual int GetToggleState() { return TS_AT_TOP; }
-	virtual void AddPoints(float score, bool bAllowNegativeScore) {}
-	virtual void AddPointsToTeam(float score, bool bAllowNegativeScore) {}
 	virtual bool GiveAmmo(int iAmount, int iType) { return false; }
 	virtual float GetDelay() { return 0; }
 	virtual bool IsMoving() { return pev->velocity != g_vecZero; }
