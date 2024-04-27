@@ -429,6 +429,9 @@ inline void CenterPrintAll(const char* msg_name, const char* param1 = NULL, cons
 // prints messages through the HUD
 void ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL);
 
+void ClientHearVox(CBaseEntity* client, const char* sentence);
+void ClientHearVoxAll(const char* sentence);
+
 
 
 typedef struct hudtextparms_s
