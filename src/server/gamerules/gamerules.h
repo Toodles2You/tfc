@@ -211,7 +211,7 @@ public:
 	virtual void EnterState(gamerules_state_e state) { m_state = state; }
 
 	// Immediately end a multiplayer game
-	virtual void EndMultiplayerGame() {}
+	virtual void EndMultiplayerGame(float intermissionTime = 0) {}
 	virtual float GetMapTimeLeft() { return -1.0F; }
 
 	virtual bool IsPlayerPrivileged(CBasePlayer* pPlayer);
@@ -403,7 +403,7 @@ public:
 	bool FAllowMonsters() override { return m_allowMonsters; }
 
 	// Immediately end a multiplayer game
-	void EndMultiplayerGame() override { EnterState(GR_STATE_GAME_OVER); }
+	void EndMultiplayerGame(float intermissionTime = 0) override;
 	float GetMapTimeLeft() override;
 
 	virtual void EnterState(gamerules_state_e state) override;
@@ -429,6 +429,7 @@ protected:
 	int m_numTeams;
 	std::vector<CTeam> m_teams;
 	CTeam m_spectators;
+	float m_intermissionTime;
 
 	bool AllowSpectators() { return m_allowSpectators; }
 

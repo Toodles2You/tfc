@@ -140,6 +140,8 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	m_teams.push_back(CTeam{TEAM_DEFAULT, "players"});
 	m_numTeams = 1;
 
+	m_intermissionTime = 0.0F;
+
 	if (!g_engfuncs.pfnIsDedicatedServer())
 	{
 		char* lservercfgfile = (char*)CVAR_GET_STRING("lservercfgfile");
@@ -1213,6 +1215,13 @@ bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTea
 }
 
 
+void CHalfLifeMultiplay::EndMultiplayerGame(float intermissionTime)
+{
+	m_intermissionTime = intermissionTime;
+	EnterState(GR_STATE_GAME_OVER);
+}
+
+
 float CHalfLifeMultiplay::GetMapTimeLeft()
 {
 	if (timelimit.value <= 0.0F)
@@ -1292,6 +1301,11 @@ void CHalfLifeMultiplay::Think_RND_RUNNING()
 
 void CHalfLifeMultiplay::Enter_GAME_OVER()
 {
+	if (m_intermissionTime <= 0.0F)
+	{
+		m_intermissionTime = mp_chattime.value;
+	}
+
 	MessageBegin(MSG_ALL, SVC_INTERMISSION);
 	MessageEnd();
 }
@@ -1299,7 +1313,7 @@ void CHalfLifeMultiplay::Enter_GAME_OVER()
 
 void CHalfLifeMultiplay::Think_GAME_OVER()
 {
-	if (m_stateChangeTime + mp_chattime.value <= gpGlobals->time)
+	if (m_stateChangeTime + m_intermissionTime <= gpGlobals->time)
 	{
 		ChangeLevel();
 	}
