@@ -132,6 +132,7 @@ public:
 	void Precache() override
 	{
 		const auto classname = STRING(pev->classname);
+		const auto large = (pev->spawnflags & 1) != 0;
 
 		if (FStrEq("item_healthkit", classname))
 		{
@@ -167,6 +168,40 @@ public:
 			pev->armortype = 0.8F;
 			pev->model = MAKE_STRING("models/r_armor.mdl");
 			pev->noise = MAKE_STRING("items/armoron_1.wav");
+		}
+		else if (FStrEq("item_shells", classname))
+		{
+			tfv.ammo_shells = large ? 40 : 20;
+			pev->model = MAKE_STRING("models/w_shotbox.mdl");
+			pev->noise = MAKE_STRING("items/9mmclip1.wav");
+		}
+		else if (FStrEq("item_spikes", classname))
+		{
+			tfv.ammo_nails = large ? 50 : 25;
+			pev->model = MAKE_STRING("models/w_crossbow_clip.mdl");
+			pev->noise = MAKE_STRING("items/9mmclip1.wav");
+		}
+		else if (FStrEq("item_rockets", classname))
+		{
+			tfv.ammo_rockets = large ? 10 : 5;
+			/* Toodles: This was random. And that's stupid! */
+			tfv.no_grenades_1 = 1;
+			tfv.no_grenades_2 = 1;
+			pev->model = MAKE_STRING("models/w_rpgammo.mdl");
+			pev->noise = MAKE_STRING("items/9mmclip1.wav");
+		}
+		else if (FStrEq("item_cells", classname))
+		{
+			tfv.ammo_cells = large ? 12 : 5; /* It should be six but, it just isn't. Why?! */
+			/* Toodles: This was w_battery.mdl but, I'm pedantic. */
+			pev->model = MAKE_STRING("models/w_gaussammo.mdl");
+			pev->noise = MAKE_STRING("items/9mmclip1.wav");
+		}
+		else
+		{
+			pev->classname = MAKE_STRING("item_backpack");
+			pev->model = MAKE_STRING("models/backpack.mdl");
+			pev->noise = MAKE_STRING("items/ammopickup2.wav");
 		}
 
 		g_engfuncs.pfnPrecacheModel(STRING(pev->model));
@@ -204,11 +239,59 @@ protected:
 		return true;
 	}
 
+	bool GiveAmmo(CBasePlayer* player)
+	{
+		bool result = false;
+
+		if (tfv.ammo_shells != 0
+		 && player->GiveAmmo(tfv.ammo_shells, AMMO_SHELLS))
+		{
+			result = true;
+		}
+		if (tfv.ammo_nails != 0
+		 && player->GiveAmmo(tfv.ammo_nails, AMMO_NAILS))
+		{
+			result = true;
+		}
+		if (tfv.ammo_rockets != 0
+		 && player->GiveAmmo(tfv.ammo_rockets, AMMO_ROCKETS))
+		{
+			result = true;
+		}
+		if (tfv.ammo_cells != 0
+		 && player->GiveAmmo(tfv.ammo_cells, AMMO_CELLS))
+		{
+			result = true;
+		}
+
+		return result;
+	}
+
+	bool GiveGrenades(CBasePlayer* player)
+	{
+		bool result = false;
+
+		if (tfv.no_grenades_1 != 0
+		 && player->GiveAmmo(tfv.no_grenades_1, AMMO_GRENADES1))
+		{
+			result = true;
+		}
+		if (tfv.no_grenades_2 != 0
+		 && player->GiveAmmo(tfv.no_grenades_2, AMMO_GRENADES2))
+		{
+			result = true;
+		}
+
+		return result;
+	}
+
 public:
 	bool MyTouch(CBasePlayer* player) override
 	{
 		if (!GiveHealth(player)
-		 && !GiveArmor(player))
+		 && !GiveArmor(player)
+		 && !GiveAmmo(player)
+		 && !GiveGrenades(player))
 		{
 			return false;
 		}
@@ -231,4 +314,8 @@ LINK_ENTITY_TO_CLASS(item_battery, CItemBackpack);
 LINK_ENTITY_TO_CLASS(item_armor1, CItemBackpack);
 LINK_ENTITY_TO_CLASS(item_armor2, CItemBackpack);
 LINK_ENTITY_TO_CLASS(item_armor3, CItemBackpack);
+LINK_ENTITY_TO_CLASS(item_shells, CItemBackpack);
+LINK_ENTITY_TO_CLASS(item_spikes, CItemBackpack);
+LINK_ENTITY_TO_CLASS(item_rockets, CItemBackpack);
+LINK_ENTITY_TO_CLASS(item_cells, CItemBackpack);
 
