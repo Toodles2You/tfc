@@ -117,7 +117,7 @@ static float V_CalcBob(
 	// (don't count Z, or jumping messes it up)
 	vel = Vector2D(pparams->simvel[0], pparams->simvel[1]);
 
-	bob.value = vel.Length() * clBob;
+	bob.value = std::min(vel.Length(), 400.0F) * clBob;
 	bob.cycleValue = bob.value * sin(cycle);
 
 	return bob.value;
@@ -453,7 +453,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 
 	for (i = 0; i < 3; i++)
 	{
-		view->origin[i] += bob * 0.4 * pparams->forward[i];
+		view->origin[i] += bob * 0.4 * pparams->forward[i] - pparams->up[i];
 	}
 
 	if (0 != cl_bobview->value)
@@ -470,8 +470,6 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 
 		VectorCopy(view->angles, view->curstate.angles);
 	}
-
-	view->origin[2] -= 1;
 
 	// Add in the punchangle, if any
 	VectorAdd(pparams->viewangles, pparams->punchangle, pparams->viewangles);
