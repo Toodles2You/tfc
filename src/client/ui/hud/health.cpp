@@ -133,13 +133,14 @@ bool CHudHealth::MsgFunc_Damage(const char* pszName, int iSize, void* pbuf)
 	for (int i = 0; i < 3; i++)
 		vecFrom[i] = READ_COORD();
 
-	UpdateTiles(gHUD.m_flTime, bitsDamage);
+	// only send down damage type that have hud art
+	UpdateTiles(gHUD.m_flTime, bitsDamage & DMG_SHOWNHUD);
 
 	// Actually took damage?
 	if (damageTaken > 0 || armor > 0)
 		CalcDamageDirection(vecFrom);
 
-	if (damageTaken > 0)
+	if (damageTaken > 0 && (bitsDamage & DMG_ARMOR_PIERCING) == 0)
 	{
 		V_PunchAxis(0, -2.0F);
 	}
