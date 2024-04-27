@@ -288,6 +288,8 @@ void CPrimeGrenade::Throw(throw_e mode)
 		{
 			util::MakeVectors(owner->pev->v_angle);
 			pev->velocity = gpGlobals->v_forward * 600 + gpGlobals->v_up * 200;
+
+			EmitSound("weapons/grenade.wav", CHAN_BODY, VOL_NORM, ATTN_IDLE);
 		}
 
 		SetTouch(&CPrimeGrenade::BounceTouch);
