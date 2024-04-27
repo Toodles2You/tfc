@@ -178,11 +178,11 @@ void CGameScore::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE use
 	{
 		if (AwardToTeam())
 		{
-			pActivator->AddPointsToTeam(Points(), AllowNegativeScore());
+			g_pGameRules->AddPointsToTeam(pActivator->TeamNumber(), Points(), AllowNegativeScore());
 		}
 		else
 		{
-			pActivator->AddPoints(Points(), AllowNegativeScore());
+			g_pGameRules->AddPointsToPlayer(dynamic_cast<CBasePlayer*>(pActivator), Points(), AllowNegativeScore());
 		}
 	}
 }

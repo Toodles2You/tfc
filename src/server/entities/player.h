@@ -222,8 +222,6 @@ public:
 
 	void StartObserver();
 
-	void AddPoints(float score, bool bAllowNegativeScore) override;
-	void AddPointsToTeam(float score, bool bAllowNegativeScore) override;
 	void AddPlayerWeapon(CBasePlayerWeapon* weapon);
 	void RemovePlayerWeapon(CBasePlayerWeapon* weapon);
 	void DropPlayerWeapon(char* pszWeaponName);

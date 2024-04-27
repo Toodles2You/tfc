@@ -101,11 +101,20 @@ void CTeam::RemovePlayer(CBasePlayer *player)
 }
 
 
-void CTeam::AddPoints(float score)
+void CTeam::AddPoints(float score, bool allowNegative)
 {
-	if (score < 0)
+	// Positive score always adds
+	if (score <= 0 && !allowNegative)
 	{
-		return;
+		if (m_score <= 0) // Can't go more negative
+		{
+			return;
+		}
+
+		if (-score > m_score) // Will this go negative?
+		{
+			score = -m_score; // Sum will be 0
+		}
 	}
 
 	m_score += score;
@@ -130,6 +139,8 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	m_teams.clear();
 	m_teams.push_back(CTeam{TEAM_DEFAULT, "players"});
 	m_numTeams = 1;
+
+	m_intermissionTime = 0.0F;
 
 	if (!g_engfuncs.pfnIsDedicatedServer())
 	{
@@ -582,11 +593,17 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer,
 	if (killer->IsClient())
 	{
 		// if a player dies in a deathmatch game and the killer is a client, award the killer some points
-		killer->AddPoints(GetPointsForKill((CBasePlayer *)killer, pVictim), false);
+		g_pGameRules->AddPointsToPlayer(
+			dynamic_cast<CBasePlayer*>(killer),
+			GetPointsForKill(dynamic_cast<CBasePlayer*>(killer), pVictim),
+			false);
 
 		if (accomplice != nullptr && accomplice->IsClient())
 		{
-			killer->AddPoints(GetPointsForKill((CBasePlayer *)accomplice, pVictim, true), false);
+			g_pGameRules->AddPointsToPlayer(
+				dynamic_cast<CBasePlayer*>(accomplice),
+				GetPointsForKill(dynamic_cast<CBasePlayer*>(accomplice), pVictim, true),
+				false);
 		}
 
 		if (pVictim != killer)
@@ -723,6 +740,45 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 	WriteShort(inflictor->entindex()); // index number of secondary entity
 	WriteLong(7 | DRC_FLAG_DRAMATIC);		 // eventflags (priority and flags)
 	MessageEnd();
+}
+
+
+void CHalfLifeMultiplay::AddPointsToPlayer(CBasePlayer* player, float score, bool allowNegative)
+{
+	// Positive score always adds
+	if (score <= 0 && !allowNegative)
+	{
+		if (player->pev->frags <= 0) // Can't go more negative
+		{
+			return;
+		}
+
+		if (-score > player->pev->frags) // Will this go negative?
+		{
+			score = -player->pev->frags; // Sum will be 0
+		}
+	}
+
+	player->pev->frags += score;
+
+	MessageBegin(MSG_ALL, gmsgScoreInfo);
+	WriteByte(player->entindex());
+	WriteShort(player->pev->frags);
+	WriteShort(player->m_iDeaths);
+	MessageEnd();
+}
+
+
+void CHalfLifeMultiplay::AddPointsToTeam(int teamIndex, float score, bool allowNegative)
+{
+	for (auto t = m_teams.begin(); t != m_teams.end(); t++)
+	{
+		if ((*t).m_index == teamIndex)
+		{
+			(*t).AddPoints(score, allowNegative);
+			break;
+		}
+	}
 }
 
 
@@ -1159,6 +1215,13 @@ bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTea
 }
 
 
+void CHalfLifeMultiplay::EndMultiplayerGame(float intermissionTime)
+{
+	m_intermissionTime = intermissionTime;
+	EnterState(GR_STATE_GAME_OVER);
+}
+
+
 float CHalfLifeMultiplay::GetMapTimeLeft()
 {
 	if (timelimit.value <= 0.0F)
@@ -1238,6 +1301,11 @@ void CHalfLifeMultiplay::Think_RND_RUNNING()
 
 void CHalfLifeMultiplay::Enter_GAME_OVER()
 {
+	if (m_intermissionTime <= 0.0F)
+	{
+		m_intermissionTime = mp_chattime.value;
+	}
+
 	MessageBegin(MSG_ALL, SVC_INTERMISSION);
 	MessageEnd();
 }
@@ -1245,7 +1313,7 @@ void CHalfLifeMultiplay::Enter_GAME_OVER()
 
 void CHalfLifeMultiplay::Think_GAME_OVER()
 {
-	if (m_stateChangeTime + mp_chattime.value <= gpGlobals->time)
+	if (m_stateChangeTime + m_intermissionTime <= gpGlobals->time)
 	{
 		ChangeLevel();
 	}

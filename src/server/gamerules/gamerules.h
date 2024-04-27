@@ -163,6 +163,8 @@ public:
 																									// Weapon retrieval
 	virtual bool CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) { return true; }	// The player is touching an CBasePlayerWeapon, do I give it to him?
 	virtual void PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) = 0;				// Called each time a player picks up a weapon from the ground
+	virtual void AddPointsToPlayer(CBasePlayer* player, float score = 1, bool allowNegative = false) {}
+	virtual void AddPointsToTeam(int teamIndex, float score = 1, bool allowNegative = false) {}
 
 	// Weapon spawn/respawn control
 	virtual int WeaponShouldRespawn(CBasePlayerWeapon* pWeapon) = 0;	   // should this weapon respawn?
@@ -209,7 +211,7 @@ public:
 	virtual void EnterState(gamerules_state_e state) { m_state = state; }
 
 	// Immediately end a multiplayer game
-	virtual void EndMultiplayerGame() {}
+	virtual void EndMultiplayerGame(float intermissionTime = 0) {}
 	virtual float GetMapTimeLeft() { return -1.0F; }
 
 	virtual bool IsPlayerPrivileged(CBasePlayer* pPlayer);
@@ -300,7 +302,7 @@ public:
 	void AddPlayer(CBasePlayer *player);
 	void RemovePlayer(CBasePlayer *player);
 
-	void AddPoints(float score = 1);
+	void AddPoints(float score = 1, bool allowNegative = false);
 
 public:
 	short m_index;
@@ -362,6 +364,8 @@ public:
 	float GetPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled, bool assist = false) override;
 	void PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, CBaseEntity* accomplice, int bitsDamageType) override;
 	void DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, CBaseEntity* inflictor, CBaseEntity* accomplice, int bitsDamageType) override;
+	void AddPointsToPlayer(CBasePlayer* player, float score = 1, bool allowNegative = false) override;
+	void AddPointsToTeam(int teamIndex, float score = 1, bool allowNegative = false) override;
 
 	// Weapon retrieval
 	void PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon* pWeapon) override;
@@ -399,7 +403,7 @@ public:
 	bool FAllowMonsters() override { return m_allowMonsters; }
 
 	// Immediately end a multiplayer game
-	void EndMultiplayerGame() override { EnterState(GR_STATE_GAME_OVER); }
+	void EndMultiplayerGame(float intermissionTime = 0) override;
 	float GetMapTimeLeft() override;
 
 	virtual void EnterState(gamerules_state_e state) override;
@@ -425,6 +429,7 @@ protected:
 	int m_numTeams;
 	std::vector<CTeam> m_teams;
 	CTeam m_spectators;
+	float m_intermissionTime;
 
 	bool AllowSpectators() { return m_allowSpectators; }
 

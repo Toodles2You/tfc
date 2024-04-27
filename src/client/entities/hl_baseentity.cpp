@@ -27,6 +27,7 @@ This file contains "stubs" of class member implementations so that we can predic
 #include "player.h"
 #include "weapons.h"
 
+bool CBaseEntity::EntvarsKeyvalue(struct KeyValueData_s*) { return false; }
 bool CBaseEntity::KeyValue(KeyValueData* pkvd) { return false; }
 bool CBaseEntity::GiveHealth(float flHealth, int bitsDamageType, bool bClearEffects) { return true; }
 bool CBaseEntity::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) { return true; }
@@ -46,6 +47,7 @@ bool CBaseEntity::IsDormant() { return false; }
 #endif
 bool CBaseEntity::ShouldToggle(USE_TYPE useType, bool currentState) { return false; }
 CBaseEntity* CBaseEntity::Create(const char* szName, const Vector& vecOrigin, const Vector& vecAngles, edict_t* pentOwner) { return NULL; }
+void CBaseEntity::UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value) {}
 void CBaseEntity::Remove() {}
 bool CBaseEntity::FInViewCone(CBaseEntity* pEntity) { return false; }
 bool CBaseEntity::FInViewCone(const Vector& vecOrigin) { return false; }
@@ -85,8 +87,6 @@ int CBasePlayer::GetCustomDecalFrames() { return -1; }
 void CBasePlayer::DropPlayerWeapon(char* pszWeaponName) {}
 const char* CBasePlayer::TeamID() { return ""; }
 bool CBasePlayer::GiveAmmo(int iCount, int iType) { return false; }
-void CBasePlayer::AddPoints(float score, bool bAllowNegativeScore) {}
-void CBasePlayer::AddPointsToTeam(float score, bool bAllowNegativeScore) {}
 
 #ifdef HALFLIFE_SAVERESTORE
 bool CBasePlayerWeapon::Restore(class CRestore&) { return true; }

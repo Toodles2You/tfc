@@ -149,6 +149,7 @@ public:
 	// initialization functions
 	virtual bool Spawn() { return false; }
 	virtual void Precache() {}
+	virtual bool EntvarsKeyvalue(KeyValueData *pkvd);
 	virtual bool KeyValue(KeyValueData* pkvd);
 
 	enum { kEntvarsCount = 86 };
@@ -179,8 +180,6 @@ public:
 	virtual void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType);
 	virtual bool IsTriggered(CBaseEntity* pActivator) { return true; }
 	virtual int GetToggleState() { return TS_AT_TOP; }
-	virtual void AddPoints(float score, bool bAllowNegativeScore) {}
-	virtual void AddPointsToTeam(float score, bool bAllowNegativeScore) {}
 	virtual bool GiveAmmo(int iAmount, int iType) { return false; }
 	virtual float GetDelay() { return 0; }
 	virtual bool IsMoving() { return pev->velocity != g_vecZero; }
@@ -253,7 +252,7 @@ public:
 
 	virtual CBaseEntity* Respawn() { return NULL; }
 
-	void UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value);
+	virtual void UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value);
 	// Do the bounding boxes of these two intersect?
 	bool Intersects(CBaseEntity* pOther);
 
@@ -443,7 +442,10 @@ class CBaseToggle : public CBaseEntity
 public:
 	DECLARE_SAVERESTORE()
 
+	bool EntvarsKeyvalue(KeyValueData *pkvd) override;
 	bool KeyValue(KeyValueData* pkvd) override;
+
+	void UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value) override;
 
 	TOGGLE_STATE m_toggle_state;
 	float m_flActivateFinished; //like attack_finished, but for doors

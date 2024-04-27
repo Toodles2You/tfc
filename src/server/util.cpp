@@ -706,6 +706,26 @@ void util::ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, 
 	MessageEnd();
 }
 
+void util::ClientHearVox(CBaseEntity* client, const char* sentence)
+{
+	MessageBegin(MSG_ONE, SVC_STUFFTEXT, client);
+	if (sentence[0] == '#')
+		WriteString(util::VarArgs("spk %s\n", sentence));
+	else
+		WriteString(util::VarArgs("spk \"%s\"\n", sentence));
+	MessageEnd();
+}
+
+void util::ClientHearVoxAll(const char* sentence)
+{
+	MessageBegin(MSG_ALL, SVC_STUFFTEXT);
+	if (sentence[0] == '#')
+		WriteString(util::VarArgs("spk %s\n", sentence));
+	else
+		WriteString(util::VarArgs("spk \"%s\"\n", sentence));
+	MessageEnd();
+}
+
 char* util::dtos1(int d)
 {
 	static char buf[8];

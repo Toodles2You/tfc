@@ -354,23 +354,28 @@ static void EntvarsKeyvalue(entvars_t* pev, KeyValueData* pkvd)
 }
 
 
+/*
+The only time EntvarsKeyvalue should get called prior to entity creation is for the classname.
+*/
 void DispatchKeyValue(edict_t* pentKeyvalue, KeyValueData* pkvd)
 {
-	if (!pkvd || !pentKeyvalue)
+	if (pkvd == nullptr || pentKeyvalue == nullptr)
+	{
 		return;
+	}
 
-	EntvarsKeyvalue(VARS(pentKeyvalue), pkvd);
-
-	// If the key was an entity variable, or there's no class set yet, don't look for the object, it may
-	// not exist yet.
-	if (0 != pkvd->fHandled || pkvd->szClassName == NULL)
-		return;
-
-	// Get the actualy entity object
 	CBaseEntity* pEntity = (CBaseEntity*)GET_PRIVATE(pentKeyvalue);
 
-	if (!pEntity)
+	if (pkvd->szClassName == nullptr || pEntity == nullptr)
+	{
+		EntvarsKeyvalue(VARS(pentKeyvalue), pkvd);
 		return;
+	}
+
+	if (pEntity->EntvarsKeyvalue(pkvd))
+	{
+		return;
+	}
 
 	pkvd->fHandled = static_cast<int32>(pEntity->KeyValue(pkvd));
 }
@@ -701,6 +706,13 @@ CBaseEntity* EHANDLE::operator=(CBaseEntity* pEntity)
 CBaseEntity* EHANDLE::operator->()
 {
 	return (CBaseEntity*)GET_PRIVATE(Get());
+}
+
+
+bool CBaseEntity::EntvarsKeyvalue(KeyValueData *pkvd)
+{
+	::EntvarsKeyvalue(pev, pkvd);
+	return pkvd->fHandled != 0;
 }
 
 
