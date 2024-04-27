@@ -122,9 +122,11 @@ void W_Precache()
 	PRECACHE_SOUND("weapons/ric4.wav");
 	PRECACHE_SOUND("weapons/ric5.wav");
 
+#ifdef HALFLIFE_GRENADES
 	PRECACHE_SOUND("weapons/ax1.wav");
 	PRECACHE_SOUND("weapons/grenade.wav");
 	PRECACHE_SOUND("weapons/timer.wav");
+#endif
 }
 
 
