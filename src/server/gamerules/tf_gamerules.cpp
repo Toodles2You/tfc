@@ -338,6 +338,8 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
 
     pPlayer->pev->armorvalue = info.initArmor;
     pPlayer->pev->armortype = info.initArmorType;
+	pPlayer->m_flArmorMax = info.maxArmor;
+	pPlayer->m_flArmorTypeMax = info.maxArmorType;
     pPlayer->m_afArmorClass = info.initArmorClasses;
 
     for (int i = 0; i < 4; i++)
@@ -350,7 +352,10 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
 
     for (int i = 0; i < AMMO_TYPES; i++)
     {
-        pPlayer->GiveAmmo(info.initAmmo[i], i);
+		if (info.initAmmo[i] != 0)
+		{
+            pPlayer->GiveAmmo(info.initAmmo[i], i);
+        }
     }
 
 	pPlayer->m_iAutoWepSwitch = originalAutoWepSwitch;

@@ -1067,6 +1067,8 @@ bool CBasePlayer::Spawn()
 	pev->health = 100;
 	pev->armorvalue = 0;
 	pev->armortype = 0.0F;
+	m_flArmorMax = 100;
+	m_flArmorTypeMax = 0.8F;
 	m_afArmorClass = 0;
 	pev->takedamage = DAMAGE_AIM;
 	pev->solid = SOLID_SLIDEBOX;

@@ -302,6 +302,8 @@ public:
 
 	CBasePlayerWeapon* GetNextBestWeapon(CBasePlayerWeapon* current);
 
+	float m_flArmorMax;
+	float m_flArmorTypeMax;
 	byte m_afArmorClass;
 	byte m_nLegDamage;
 #ifdef GAME_DLL
