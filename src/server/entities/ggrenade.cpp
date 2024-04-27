@@ -539,7 +539,7 @@ void CConcussionGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 		entity->pev->velocity.y *= ajdusted;
 		entity->pev->velocity.z *= ajdusted * 1.5F;
 
-		if ((entity == owner && !FStringNull(pev->model))
+		if ((entity == owner && (!FStringNull(pev->model) || (owner->pev->flags & FL_ONGROUND) != 0))
 		 || (g_pGameRules->PlayerRelationship(entity, owner) < GR_ALLY))
 		{
 			dynamic_cast<CBasePlayer*>(entity)->BecomeConcussed(owner);
