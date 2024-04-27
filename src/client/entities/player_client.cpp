@@ -159,7 +159,6 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 		switch (PCNumber())
 		{
 			case PC_SCOUT:
-			case PC_SNIPER:
 				goto no_icon;
 			default:
 				break;

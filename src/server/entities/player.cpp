@@ -1887,7 +1887,6 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 		switch (PCNumber())
 		{
 			case PC_SCOUT:
-			case PC_SNIPER:
 				CCaltropCanister::CaltropCanister(this);
 				goto no_icon;
 			default:
