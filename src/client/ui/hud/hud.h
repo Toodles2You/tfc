@@ -162,6 +162,8 @@ public:
 	void Reset() override;
 	bool Draw(float flTime) override;
 
+	void Update_SecAmmoVal(int iIndex, int iCount);
+	void Update_SecAmmoIcon(const char* pszIcon);
 	bool MsgFunc_SecAmmoVal(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_SecAmmoIcon(const char* pszName, int iSize, void* pbuf);
 

@@ -50,6 +50,7 @@ void CHudAmmoSecondary::Reset()
 
 bool CHudAmmoSecondary::VidInit()
 {
+	m_HUD_ammoicon = gHUD.GetSpriteIndex("grenade");
 	return true;
 }
 
@@ -66,8 +67,8 @@ bool CHudAmmoSecondary::Draw(float flTime)
 
 	AmmoWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
 
-	y = ScreenHeight - (gHUD.m_iFontHeight * 4); // this is one font height higher than the weapon ammo values
-	x = ScreenWidth - AmmoWidth;
+	y = gHUD.GetHeight() - (gHUD.m_iFontHeight * 4); // this is one font height higher than the weapon ammo values
+	x = gHUD.GetWidth() - AmmoWidth;
 
 	if (0 != m_HUD_ammoicon)
 	{
@@ -107,32 +108,23 @@ bool CHudAmmoSecondary::Draw(float flTime)
 	return true;
 }
 
-// Message handler for Secondary Ammo Value
-// accepts one value:
-//		string:  sprite name
-bool CHudAmmoSecondary::MsgFunc_SecAmmoIcon(const char* pszName, int iSize, void* pbuf)
+void CHudAmmoSecondary::Update_SecAmmoIcon(const char* pszIcon)
 {
-	BEGIN_READ(pbuf, iSize);
-	m_HUD_ammoicon = gHUD.GetSpriteIndex(READ_STRING());
-
-	return true;
+	m_HUD_ammoicon = gHUD.GetSpriteIndex(pszIcon);
 }
 
-// Message handler for Secondary Ammo Icon
-// Sets an ammo value
-// takes two values:
-//		byte:  ammo index
-//		byte:  ammo value
-bool CHudAmmoSecondary::MsgFunc_SecAmmoVal(const char* pszName, int iSize, void* pbuf)
+void CHudAmmoSecondary::Update_SecAmmoVal(int iIndex, int iCount)
 {
-	BEGIN_READ(pbuf, iSize);
+	if (iIndex < 0 || iIndex >= MAX_SEC_AMMO_VALUES)
+		return;
 
-	int index = READ_BYTE();
-	if (index < 0 || index >= MAX_SEC_AMMO_VALUES)
-		return true;
+	if (m_iAmmoAmounts[iIndex] != iCount)
+	{
+		// make the icons light up
+		m_fFade = 200.0F;
+	}
 
-	m_iAmmoAmounts[index] = READ_BYTE();
-	m_iFlags |= HUD_ACTIVE;
+	m_iAmmoAmounts[iIndex] = iCount;
 
 	// check to see if there is anything left to draw
 	int count = 0;
@@ -144,11 +136,31 @@ bool CHudAmmoSecondary::MsgFunc_SecAmmoVal(const char* pszName, int iSize, void*
 	if (count == 0)
 	{ // the ammo fields are all empty, so turn off this hud area
 		m_iFlags &= ~HUD_ACTIVE;
-		return true;
 	}
+	else
+	{
+		m_iFlags |= HUD_ACTIVE;
+	}
+}
 
-	// make the icons light up
-	m_fFade = 200.0f;
+// Message handler for Secondary Ammo Value
+// accepts one value:
+//		string:  sprite name
+bool CHudAmmoSecondary::MsgFunc_SecAmmoIcon(const char* pszName, int iSize, void* pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+	Update_SecAmmoIcon(READ_STRING());
+	return true;
+}
 
+// Message handler for Secondary Ammo Icon
+// Sets an ammo value
+// takes two values:
+//		byte:  ammo index
+//		byte:  ammo value
+bool CHudAmmoSecondary::MsgFunc_SecAmmoVal(const char* pszName, int iSize, void* pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+	Update_SecAmmoVal(READ_BYTE(), READ_BYTE());
 	return true;
 }
