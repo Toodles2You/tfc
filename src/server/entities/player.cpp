@@ -1646,13 +1646,10 @@ void CBasePlayer::UpdateClientData()
 			pev->dmg_inflictor = nullptr;
 		}
 
-		// only send down damage type that have hud art
-		int visibleDamageBits = m_bitsDamageType & DMG_SHOWNHUD;
-
 		MessageBegin(MSG_ONE, gmsgDamage, this);
 		WriteByte(pev->dmg_save);
 		WriteByte(pev->dmg_take);
-		WriteLong(visibleDamageBits);
+		WriteLong(m_bitsDamageType);
 		WriteCoord(damageOrigin.x);
 		WriteCoord(damageOrigin.y);
 		WriteCoord(damageOrigin.z);
