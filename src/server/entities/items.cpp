@@ -63,6 +63,11 @@ bool CItem::CanHaveItem(CBaseEntity* other)
 		return false;
 	}
 
+	if (!AttemptToActivate(other))
+	{
+		return false;
+	}
+
 	return true;
 }
 
@@ -142,6 +147,27 @@ public:
 			pev->noise = MAKE_STRING("items/gunpickup2.wav");
 			pev->netname = pev->classname;
 		}
+		else if (FStrEq("item_armor1", classname))
+		{
+			pev->armorvalue = 150.0F;
+			pev->armortype = 0.3F;
+			pev->model = MAKE_STRING("models/g_armor.mdl");
+			pev->noise = MAKE_STRING("items/armoron_1.wav");
+		}
+		else if (FStrEq("item_armor2", classname))
+		{
+			pev->armorvalue = 200.0F;
+			pev->armortype = 0.6F;
+			pev->model = MAKE_STRING("models/y_armor.mdl");
+			pev->noise = MAKE_STRING("items/armoron_1.wav");
+		}
+		else if (FStrEq("item_armor3", classname))
+		{
+			pev->armorvalue = 250.0F;
+			pev->armortype = 0.8F;
+			pev->model = MAKE_STRING("models/r_armor.mdl");
+			pev->noise = MAKE_STRING("items/armoron_1.wav");
+		}
 
 		g_engfuncs.pfnPrecacheModel(STRING(pev->model));
 		g_engfuncs.pfnPrecacheSound(STRING(pev->noise));
@@ -162,12 +188,19 @@ protected:
 			return false;
 		}
 
-		if (player->pev->armorvalue >= 100)
+		if (pev->armortype != 0.0F)
+		{
+			/* Team Fortress armor */
+			return player->GiveArmor(pev->armortype, pev->armorvalue);
+		}
+
+		/* Half-Life battery */
+		if (player->pev->armorvalue >= player->m_flArmorMax)
 		{
 			return false;
 		}
 
-		player->pev->armorvalue = std::clamp(player->pev->armorvalue, 0.0F, 100.0F);
+		player->pev->armorvalue = std::clamp(player->pev->armorvalue, 0.0F, player->m_flArmorMax);
 		return true;
 	}
 
@@ -195,4 +228,7 @@ public:
 
 LINK_ENTITY_TO_CLASS(item_healthkit, CItemBackpack);
 LINK_ENTITY_TO_CLASS(item_battery, CItemBackpack);
+LINK_ENTITY_TO_CLASS(item_armor1, CItemBackpack);
+LINK_ENTITY_TO_CLASS(item_armor2, CItemBackpack);
+LINK_ENTITY_TO_CLASS(item_armor3, CItemBackpack);
 

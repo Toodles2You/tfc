@@ -2044,6 +2044,11 @@ bool CBasePlayer::GiveArmor(float type, float amount)
 
 	if (type == pev->armortype)
 	{
+		if (pev->armorvalue >= m_flArmorMax)
+		{
+			return false;
+		}
+
 		if (pev->armortype * pev->armorvalue >= type * amount)
 		{
 			return false;
