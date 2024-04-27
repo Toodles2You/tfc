@@ -42,8 +42,8 @@ bool CHudStatusIcons::VidInit()
 {
 #ifdef HALFLIFE_GRENADES
 	m_hTimer = SPR_Load("sprites/timer.spr");
-	
-	int i = gHUD.GetSpriteIndex("d_grenade");
+
+	int i = gHUD.GetSpriteIndex("grenade");
 	m_hGrenade = gHUD.GetSprite(i);
 	m_rcGrenade = gHUD.GetSpriteRect(i);
 #endif
@@ -253,9 +253,12 @@ void CHudStatusIcons::EnableIcon(const char* pszIconName, int red, int green, in
 			ATTN_NORM,
 			0,
 			PITCH_NORM);
-		
+
 		m_bTimerActive = true;
 		m_flTimerStart = gHUD.m_flTime;
+
+		m_hGrenade = m_IconList[i].spr;
+		m_rcGrenade = m_IconList[i].rc;
 	}
 #endif
 
