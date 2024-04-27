@@ -388,6 +388,12 @@ typedef enum _fieldtypes
 #define DEFINE_ENTITY_GLOBAL_FIELD(name, fieldtype) _FIELD(entvars_t, name, fieldtype, 1, FTYPEDESC_GLOBAL)
 #define DEFINE_GLOBAL_FIELD(type, name, fieldtype) _FIELD(type, name, fieldtype, 1, FTYPEDESC_GLOBAL)
 
+#define _FIELD_ALIAS(type, name, alias, fieldtype, count, flags)               \
+	{                                                                          \
+		fieldtype, alias, static_cast<int>(offsetof(type, name)), count, flags \
+	}
+#define DEFINE_FIELD_ALIAS(type, name, alias, fieldtype) _FIELD_ALIAS(type, name, alias, fieldtype, 1, 0)
+
 
 #define FTYPEDESC_GLOBAL 0x0001 // This field is masked for global entity save/restore
 
