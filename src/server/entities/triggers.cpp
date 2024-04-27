@@ -912,6 +912,11 @@ void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 	if ((pev->spawnflags & SF_TRIGGER_HURT_NO_CLIENTS) != 0 && pOther->IsPlayer())
 		return;
 
+	if (!AttemptToActivate(pOther))
+	{
+		return;
+	}
+
 	static_assert(MAX_PLAYERS <= 32, "Rework the player mask logic to support more than 32 players");
 
 	// HACKHACK -- In multiplayer, players touch this based on packet receipt.
@@ -1081,6 +1086,11 @@ void CBaseTrigger::ActivateMultiTrigger(CBaseEntity* pActivator)
 
 	if (!util::IsMasterTriggered(m_sMaster, pActivator))
 		return;
+
+	if (!AttemptToActivate(pActivator))
+	{
+		return;
+	}
 
 	if (FClassnameIs(pev, "trigger_secret"))
 	{
@@ -1645,6 +1655,11 @@ void CTriggerPush::Touch(CBaseEntity* pOther)
 		return;
 	}
 
+	if (!AttemptToActivate(pOther))
+	{
+		return;
+	}
+
 	if (pevToucher->solid != SOLID_NOT && pevToucher->solid != SOLID_BSP)
 	{
 		// Instant trigger, just transfer velocity and remove
@@ -1700,6 +1715,11 @@ void CBaseTrigger::TeleportTouch(CBaseEntity* pOther)
 		{
 			return;
 		}
+	}
+
+	if (!AttemptToActivate(pOther))
+	{
+		return;
 	}
 
 	pentTarget = FIND_ENTITY_BY_TARGETNAME(pentTarget, STRING(pev->target));

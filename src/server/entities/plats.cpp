@@ -385,6 +385,11 @@ void CPlatTrigger::Touch(CBaseEntity* pOther)
 	if (!pOther->IsAlive())
 		return;
 
+	if (!AttemptToActivate(pOther))
+	{
+		return;
+	}
+
 	CFuncPlat* platform = static_cast<CFuncPlat*>(static_cast<CBaseEntity*>(m_hPlatform));
 
 	// Make linked platform go up/down.

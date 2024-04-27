@@ -44,6 +44,7 @@
 #ifdef HALFLIFE_NODEGRAPH
 #include "nodes.h"
 #endif
+#include "tf_goal.h"
 
 #ifdef HALFLIFE_TRAINCONTROL
 enum {
@@ -623,6 +624,8 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 	}
 #endif
 
+	RemoveGoalItems();
+
 	SetAction(Action::Die);
 
 	m_fDeadTime = gpGlobals->time;
@@ -1038,6 +1041,7 @@ bool CBasePlayer::Spawn()
 	pev->iuser1 = OBS_NONE;
 	pev->iuser2 = pev->iuser3 = 0;
 	m_hLastAttacker[0] = m_hLastAttacker[1] = nullptr;
+	m_TFItems = 0;
 
 	m_iFOV = 0;
 	m_ClientSndRoomtype = -1;
@@ -2020,6 +2024,51 @@ void CBasePlayer::SendExtraInfo(CBaseEntity* toWhom)
 	MessageEnd();
 }
 
+
+void CBasePlayer::RemoveGoalItems(bool force)
+{
+	CTFGoalItem* goal = nullptr;
+	while ((goal = (CTFGoalItem*)util::FindEntityByClassname(goal, "item_tfgoal")))
+	{
+		if (goal->pev->owner == edict() && (force || goal->IsGoalActivatedBy(TFGI_CANBEDROPPED)))
+		{
+			goal->RemoveFromPlayer(this, GI_DROP_PLAYERDROP);
+		}
+	}
+}
+
+
+bool CBasePlayer::GiveArmor(float type, float amount)
+{
+	/* Don't pickup if this armor isn't as good as the stuff we've got. */
+
+	if (type == pev->armortype)
+	{
+		if (pev->armortype * pev->armorvalue >= type * amount)
+		{
+			return false;
+		}
+
+		pev->armorvalue = std::clamp(pev->armorvalue + amount, 0.0F, m_flArmorMax);
+	}
+	else
+	{
+		/* Upgrade our armor if a type is not specified. */
+		type = (type > 0.0F) ? std::min(type, m_flArmorTypeMax) : m_flArmorTypeMax;
+
+		amount = std::clamp(amount, 0.0F, m_flArmorMax);
+
+		if (pev->armortype * pev->armorvalue >= type * amount)
+		{
+			return false;
+		}
+
+		pev->armorvalue = amount;
+		pev->armortype = type;
+	}
+
+	return true;
+}
 
 class CStripWeapons : public CPointEntity
 {

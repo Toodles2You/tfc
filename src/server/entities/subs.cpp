@@ -29,6 +29,7 @@
 #ifdef HALFLIFE_NODEGRAPH
 #include "nodes.h"
 #endif
+#include "tf_goal.h"
 
 // Landmark class
 bool CPointEntity::Spawn()
@@ -49,9 +50,6 @@ public:
 // These are the new entry points to entities.
 LINK_ENTITY_TO_CLASS(info_player_deathmatch, CBaseDMStart);
 LINK_ENTITY_TO_CLASS(info_player_start, CBaseDMStart);
-
-LINK_ENTITY_TO_CLASS(info_player_teamspawn, CBaseDMStart);
-LINK_ENTITY_TO_CLASS(i_p_t, CBaseDMStart);
 
 bool CBaseDMStart::KeyValue(KeyValueData* pkvd)
 {
@@ -346,6 +344,7 @@ END_SAVERESTORE(CBaseToggle, CBaseDelay)
 
 bool CBaseToggle::EntvarsKeyvalue(KeyValueData* pkvd)
 {
+	tfv.KeyValue(pkvd);
 	return CBaseEntity::EntvarsKeyvalue(pkvd);
 }
 
@@ -379,7 +378,45 @@ bool CBaseToggle::KeyValue(KeyValueData* pkvd)
 
 void CBaseToggle::UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value)
 {
+	if (pActivator != nullptr && pActivator->IsClient())
+	{
+		tfv.DoGroupWork(pActivator);
+		tfv.DoGoalWork(pActivator);
+	}
+
 	CBaseEntity::UseTargets(pActivator, useType, value);
+}
+
+
+/*
+==============================
+AttemptToActivate
+
+Toodles: World objects that can be owned by teams (i.e. triggers, doors, buttons) will run this test prior to triggering.
+==============================
+*/
+bool CBaseToggle::AttemptToActivate(CBaseEntity* activator)
+{
+	if (activator == nullptr || !activator->IsClient())
+	{
+		return true;
+	}
+
+	if (!tfv.Activated(activator))
+	{
+		if (tfv.else_goal != 0)
+		{
+			CTFGoal* goal = util::FindGoal(tfv.else_goal);
+			if (goal != nullptr)
+			{
+				goal->AttemptToActivate(activator, &tfv);
+			}
+		}
+
+		return false;
+	}
+
+	return true;
 }
 
 

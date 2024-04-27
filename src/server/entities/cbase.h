@@ -433,6 +433,8 @@ public:
 	string_t m_globalstate;
 };
 
+#include "tf_map.h"
+
 //
 // generic Toggle entity.
 //
@@ -442,10 +444,14 @@ class CBaseToggle : public CBaseEntity
 public:
 	DECLARE_SAVERESTORE()
 
+	CTFVars tfv;
+
 	bool EntvarsKeyvalue(KeyValueData *pkvd) override;
 	bool KeyValue(KeyValueData* pkvd) override;
 
 	void UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value) override;
+
+	bool AttemptToActivate(CBaseEntity* activator);
 
 	TOGGLE_STATE m_toggle_state;
 	float m_flActivateFinished; //like attack_finished, but for doors

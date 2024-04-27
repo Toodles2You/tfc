@@ -15,6 +15,7 @@
 #include "game.h"
 #include "UserMessages.h"
 #include "tf_defs.h"
+#include "tf_goal.h"
 
 
 static const char* sTFClassModels[] =
@@ -68,29 +69,69 @@ static const char* sTFTeamNames[] =
 };
 
 
-CTFSpawnPoint::CTFSpawnPoint(int iTeamNumber)
+CTFSpawnPoint::CTFSpawnPoint()
     : CSpawnPoint()
 {
-    m_teamNumber = iTeamNumber;
+    m_TFSpawn = nullptr;
 }
 
 
-CTFSpawnPoint::CTFSpawnPoint(CBaseEntity *pEntity, int iTeamNumber)
+CTFSpawnPoint::CTFSpawnPoint(CBaseEntity *pEntity)
     : CSpawnPoint(pEntity)
 {
-    m_teamNumber = iTeamNumber;
+    m_TFSpawn = (CTFSpawn*)pEntity;
 }
 
 
 bool CTFSpawnPoint::IsValid(CBasePlayer *pPlayer, int attempt)
-{	
-    if (m_teamNumber != TEAM_UNASSIGNED
-     && pPlayer->TeamNumber() != m_teamNumber)
+{
+    /* Inactive means... valid. :v */
+    if (!m_TFSpawn->InGoalState(TFGS_INACTIVE))
+    {
+        return false;
+    }
+
+    int team = m_TFSpawn->tfv.GetTeam();
+
+    if (team != TEAM_UNASSIGNED && team != pPlayer->TeamNumber())
+    {
+        return false;
+    }
+
+    int pc = m_TFSpawn->tfv.playerclass;
+
+    if (pc != PC_UNDEFINED && pc != pPlayer->PCNumber())
     {
         return false;
     }
 
 	return CSpawnPoint::IsValid(pPlayer, attempt);
+}
+
+
+/* Called by info_tfdetect if one is present in the map. */
+void CTeamFortress::InitializeTeams()
+{
+    m_teams.clear();
+
+    for (int i = 0; i < m_numTeams; i++)
+    {
+        auto& info = m_TFTeamInfo[i];
+
+        char c = info.m_szTeamName[0];
+        if (c == '\0')
+        {
+            /* Use the default name. */
+            strcpy (info.m_szTeamName, sTFTeamNames[i]);
+        }
+        else if (c == '#')
+        {
+            /* Remove the # prefix. */
+            memmove (info.m_szTeamName, info.m_szTeamName + 1, 15);
+        }
+
+        m_teams.push_back(CTeam {TEAM_DEFAULT + i, info.m_szTeamName});
+    }
 }
 
 
@@ -114,6 +155,11 @@ bool CTeamFortress::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
             return true;
         }
     }
+    if (strcmp(pcmd, sTFClassSelection[PC_CIVILIAN]) == 0)
+    {
+        ChangePlayerClass(pPlayer, PC_CIVILIAN);
+        return true;
+    }
 
     return CHalfLifeMultiplay::ClientCommand(pPlayer, pcmd);
 }
@@ -132,9 +178,11 @@ void CTeamFortress::InitHUD(CBasePlayer* pPlayer)
     }
 
     MessageBegin(MSG_ONE, gmsgValClass, pPlayer);
-    for (int i = 0; i < 5; i++)
+    WriteShort(0);
+    for (int i = 0; i < 4; i++)
     {
-        WriteShort(992);
+        /* Toodles TODO: */
+        WriteShort(992 | m_TFTeamInfo[i].m_afInvalidClasses);
     }
     MessageEnd();
 }
@@ -142,6 +190,17 @@ void CTeamFortress::InitHUD(CBasePlayer* pPlayer)
 
 bool CTeamFortress::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib, bool bAutoTeam)
 {
+    if (teamIndex > TEAM_UNASSIGNED && teamIndex <= m_numTeams)
+    {
+        const auto& info = m_TFTeamInfo[teamIndex - 1];
+
+        if (info.m_iMaxPlayers > 0
+         && m_teams[teamIndex - 1].m_numPlayers >= info.m_iMaxPlayers)
+        {
+            return false;
+        }
+    }
+
     if (!CHalfLifeMultiplay::ChangePlayerTeam(pPlayer, teamIndex, bKill, bGib, bAutoTeam))
     {
         return false;
@@ -189,6 +248,28 @@ bool CTeamFortress::ChangePlayerClass(CBasePlayer* pPlayer, int classIndex)
 	{
 		return true;
 	}
+
+    const auto invalidClasses = m_TFTeamInfo[pPlayer->TeamNumber() - 1].m_afInvalidClasses;
+
+    if (classIndex == PC_CIVILIAN)
+    {
+        if (invalidClasses != -1)
+        {
+            return false;
+        }
+    }
+    else if (invalidClasses != 0)
+    {
+        int check_flag = classIndex - 1;
+        if (classIndex >= PC_SPY)
+        {
+            check_flag++;
+        }
+        if (invalidClasses != 0)
+        {
+            return false;
+        }
+    }
 
     bool bKill = true;
 
@@ -284,6 +365,11 @@ int CTeamFortress::PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget
     if (pPlayer->TeamNumber() == pTarget->TeamNumber())
     {
         return GR_TEAMMATE;
+    }
+
+    if ((m_TFTeamInfo[pPlayer->TeamNumber() - 1].m_afAlliedTeams & (1 << (pTarget->TeamNumber() - 1))) != 0)
+    {
+        return GR_ALLY;
     }
 
     return GR_NOTTEAMMATE;
@@ -384,21 +470,23 @@ void CTeamFortress::AddPlayerSpawnSpot(CBaseEntity *pEntity)
         return;
     }
 
-    if (!FStrEq(STRING(pEntity->pev->classname), "info_player_teamspawn")
-     && !FStrEq(STRING(pEntity->pev->classname), "i_p_t"))
+    if (!FStrEq(STRING(pEntity->pev->classname), "info_player_teamspawn"))
     {
         return;
     }
 
-    auto spawn = new CTFSpawnPoint {pEntity, pEntity->pev->team};
+    auto spawn = new CTFSpawnPoint {pEntity};
 
 #if 1
     ALERT(
         at_aiconsole,
-        "%s %lu for team %i at (%g, %g, %g)\n",
+        "%s %lu for team %i (state %i, goal %i, group %i), at (%g, %g, %g)\n",
         STRING(pEntity->pev->classname),
         m_numSpawnPoints,
-        spawn->m_teamNumber,
+        spawn->m_TFSpawn->tfv.GetTeam(),
+        spawn->m_TFSpawn->tfv.goal_state,
+        spawn->m_TFSpawn->GetNumber(),
+        spawn->m_TFSpawn->GetGroup(),
         spawn->m_origin.x,
         spawn->m_origin.y,
         spawn->m_origin.z);

@@ -441,6 +441,11 @@ bool CBaseButton::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	if (m_hActivator == NULL)
 		return false;
 
+	if (!AttemptToActivate(attacker))
+	{
+		return false;
+	}
+
 	if (code == BUTTON_RETURN)
 	{
 		EmitSound(STRING(pev->noise), CHAN_VOICE);
@@ -650,6 +655,12 @@ void CBaseButton::ButtonUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_T
 	if (m_toggle_state == TS_GOING_UP || m_toggle_state == TS_GOING_DOWN)
 		return;
 
+	if (!AttemptToActivate(pActivator))
+	{
+		PlayLockSounds(this, &m_ls, true, true);
+		return;
+	}
+
 	m_hActivator = pActivator;
 	if (m_toggle_state == TS_AT_TOP)
 	{
@@ -706,6 +717,12 @@ void CBaseButton::ButtonTouch(CBaseEntity* pOther)
 	if (!util::IsMasterTriggered(m_sMaster, pOther))
 	{
 		// play button locked sound
+		PlayLockSounds(this, &m_ls, true, true);
+		return;
+	}
+
+	if (!AttemptToActivate(pOther))
+	{
 		PlayLockSounds(this, &m_ls, true, true);
 		return;
 	}

@@ -8,22 +8,48 @@
 #pragma once
 
 class CHLBot;
+class CTFSpawn;
+class CTFDetect;
 
 class CTFSpawnPoint : public CSpawnPoint
 {
 public:
-	CTFSpawnPoint(int iTeamNumber = TEAM_UNASSIGNED);
-	CTFSpawnPoint(CBaseEntity *pEntity, int iTeamNumber = TEAM_UNASSIGNED);
+	CTFSpawnPoint();
+	CTFSpawnPoint(CBaseEntity *pEntity);
 
 	bool IsValid(CBasePlayer *pPlayer, int attempt) override;
 
-	int m_teamNumber;
+	CTFSpawn* m_TFSpawn;
+};
+
+class CTFTeamInfo
+{
+public:
+	CTFTeamInfo()
+	{
+		m_szTeamName[0] = '\0';
+
+		m_iLives = 0;
+		m_iMaxPlayers = 0;
+
+		m_afInvalidClasses = 0;
+		m_afAlliedTeams = 0;
+	}
+
+	char m_szTeamName[16];
+
+	int m_iLives;
+	int m_iMaxPlayers;
+
+	int m_afInvalidClasses;
+	int m_afAlliedTeams;
 };
 
 class CTeamFortress : public CHalfLifeMultiplay
 {
 public:
 	friend class CHLBot;
+	friend class CTFDetect;
 
 	CTeamFortress();
 
@@ -49,4 +75,10 @@ protected:
 	virtual void Think_RND_RUNNING() override;
 
 	virtual void SendMenusToClient(CBasePlayer* player) override;
+
+protected:
+	void InitializeTeams();
+
+	int m_afToggleFlags;
+	CTFTeamInfo m_TFTeamInfo[TEAM_SPECTATORS - 1];
 };

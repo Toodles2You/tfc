@@ -499,6 +499,13 @@ void ClientCommand(edict_t* pEntity)
 	{
 		player->SaveMe();
 	}
+	else if (FStrEq(pcmd, "dropitems"))
+	{
+		if (player->IsPlayer())
+		{
+			player->RemoveGoalItems(false);
+		}
+	}
 	else if (g_pGameRules->ClientCommand(player, pcmd))
 	{
 	}

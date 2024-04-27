@@ -361,6 +361,14 @@ protected:
 	void PrimeGrenade(const int grenadeType);
 	void ThrowGrenade();
 #endif
+
+public:
+#ifdef GAME_DLL
+	unsigned int m_TFItems;
+
+	void RemoveGoalItems(bool force = true);
+	bool GiveArmor(float type, float amount);
+#endif
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)
