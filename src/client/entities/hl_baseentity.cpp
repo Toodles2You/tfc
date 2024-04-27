@@ -27,6 +27,7 @@ This file contains "stubs" of class member implementations so that we can predic
 #include "player.h"
 #include "weapons.h"
 
+bool CBaseEntity::EntvarsKeyvalue(struct KeyValueData_s*) { return false; }
 bool CBaseEntity::KeyValue(KeyValueData* pkvd) { return false; }
 bool CBaseEntity::GiveHealth(float flHealth, int bitsDamageType) { return true; }
 bool CBaseEntity::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) { return true; }

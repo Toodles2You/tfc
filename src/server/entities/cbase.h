@@ -149,6 +149,7 @@ public:
 	// initialization functions
 	virtual bool Spawn() { return false; }
 	virtual void Precache() {}
+	virtual bool EntvarsKeyvalue(KeyValueData *pkvd);
 	virtual bool KeyValue(KeyValueData* pkvd);
 
 	enum { kEntvarsCount = 86 };
