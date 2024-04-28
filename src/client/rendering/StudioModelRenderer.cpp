@@ -1506,9 +1506,39 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 
 		m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 
-		// get remap colors
-		m_nTopColor = std::clamp(m_pPlayerInfo->topcolor, 0, 360);
-		m_nBottomColor = std::clamp(m_pPlayerInfo->bottomcolor, 0, 360);
+		/* Toodles: Hack to render player corpses with the correct remap colors. */
+		if (m_pCurrentEntity->curstate.renderfx == kRenderFxDeadPlayer)
+		{
+			/* Save the state of the engine's current entity. */
+			cl_entity_t *currentEntity = IEngineStudio.GetCurrentEntity();
+			const auto currentIndex = currentEntity->index;
+
+			/* Ensure the player exists, just to be safe. */
+			cl_entity_t *playerEntity = gEngfuncs.GetEntityByIndex(pplayer->number);
+			if (playerEntity != nullptr)
+			{
+				/* Fill the state of the engine's current entity with that of the actual player entity. */
+				currentEntity->index = pplayer->number;
+				currentEntity->player = true;
+			}
+
+			IEngineStudio.StudioSetRemapColors(m_nTopColor, m_nBottomColor);
+
+			StudioRenderModel();
+
+			/* Restore the previous state. */
+			currentEntity->index = currentIndex;
+			currentEntity->player = false;
+		}
+		else
+		{
+			// get remap colors
+			IEngineStudio.StudioSetRemapColors(m_nTopColor, m_nBottomColor);
+
+			StudioRenderModel();
+		}
+
+		m_pPlayerInfo = NULL;
 
 		IEngineStudio.StudioSetRemapColors(m_nTopColor, m_nBottomColor);
 
