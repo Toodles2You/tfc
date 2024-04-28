@@ -193,6 +193,9 @@ void V_AddIdle(ref_params_t* pparams)
 
 static void V_CalcViewRoll(ref_params_t* pparams)
 {
+	if (cl_rollangle->value == 0.0F || cl_rollspeed->value == 0.0F)
+		return;
+
 	float side;
 	cl_entity_t* viewentity;
 

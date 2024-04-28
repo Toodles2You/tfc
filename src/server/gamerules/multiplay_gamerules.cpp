@@ -1179,7 +1179,7 @@ bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, b
 	{
 		m_teams[pPlayer->pev->team - 1].AddPlayer(pPlayer);
 
-		if (!bKill)
+		if (!bKill && g_pGameRules->FPlayerCanRespawn(pPlayer))
 		{
 			pPlayer->Spawn();
 		}
