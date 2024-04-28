@@ -1197,7 +1197,7 @@ void EV_GetNailedIdiot(event_args_t* args)
 			g_sModelIndexNail,
 			5.0F,
 			args->entindex,
-			EV_NailTouch);
+			nullptr);
 	}
 
 	gEngfuncs.pEventAPI->EV_PlaySound(
