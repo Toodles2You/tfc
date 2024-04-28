@@ -245,13 +245,23 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 				autoTeam = true;
 			}
 
-			ChangePlayerTeam(pPlayer, teamIndex, true, false, autoTeam);
+			if (!ChangePlayerTeam(pPlayer, teamIndex, true, false, autoTeam))
+			{
+				MessageBegin(MSG_ONE, gmsgVGUIMenu, pPlayer);
+				WriteByte(MENU_TEAM);
+				MessageEnd();
+			}
 		}
 		return true;
 	}
 	else if (strcmp(pcmd, "spectate") == 0)
 	{
-		ChangePlayerTeam(pPlayer, TEAM_SPECTATORS, true, false, false);
+		if (!ChangePlayerTeam(pPlayer, TEAM_SPECTATORS, true, false, false))
+		{
+            MessageBegin(MSG_ONE, gmsgVGUIMenu, pPlayer);
+            WriteByte(MENU_TEAM);
+            MessageEnd();
+		}
 		return true;
 	}
 	else if (pPlayer->IsObserver())
@@ -360,6 +370,7 @@ void CHalfLifeMultiplay::ClientPutInServer(CBasePlayer* pPlayer)
 	pPlayer->m_team = nullptr;
 	pPlayer->pev->team = TEAM_UNASSIGNED;
 	pPlayer->pev->playerclass = PC_UNDEFINED;
+	pPlayer->m_fDeadTime = gpGlobals->time - 60.0F;
 }
 
 
