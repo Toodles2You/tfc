@@ -117,10 +117,12 @@ void CHalfLifeMovement::BuildFreeWishMove(const Vector& move)
     {
         moveZed = 1.0F;
     }
+#if 0
     else if ((pmove->cmd.buttons & IN_DUCK) != 0)
     {
         moveZed = -1.0F;
     }
+#endif
 
     m_freeWishDir =
         pmove->forward * move.x + pmove->right * move.y + Vector(0.0F, 0.0F, moveZed);
@@ -159,7 +161,7 @@ float CHalfLifeMovement::GetSpeedModifier()
         speed = std::min(speed, 0.3F);
     }
 
-    if (!IsSubmerged() && (pmove->flags & FL_DUCKING) != 0)
+    if ((pmove->flags & FL_DUCKING) != 0)
     {
         speed /= 3.0F;
     }

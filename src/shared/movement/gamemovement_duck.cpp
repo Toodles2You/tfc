@@ -27,7 +27,7 @@ void CHalfLifeMovement::CheckDucking()
         return;
     }
 
-    const auto bWantToDuck = (pmove->cmd.buttons & IN_DUCK) != 0 || IsSubmerged() || pmove->waterjumptime != 0;
+    const auto bWantToDuck = (pmove->cmd.buttons & IN_DUCK) != 0;
     const auto bIsFullyDucked = pmove->usehull == 1;
 
     /* Check if the player wants to change duck state. */
@@ -51,7 +51,7 @@ void CHalfLifeMovement::CheckDucking()
         pmove->flDuckTime = std::max((int)pmove->flDuckTime - pmove->cmd.msec, 0);
 
         /* Check if the duck time has elapsed, or the player has left the ground during the duck. */
-        if (pmove->flDuckTime == 0 || (!IsSubmerged() && pmove->onground == -1))
+        if (pmove->flDuckTime == 0 || pmove->onground == -1)
         {
             /* Finish changing duck state. */
             pmove->bInDuck ? FinishDucking() : FinishUnducking();
@@ -89,7 +89,7 @@ void CHalfLifeMovement::FinishDucking()
 {
     pmove->usehull = 1;
 
-    if (IsSubmerged() || pmove->onground != -1)
+    if (pmove->onground != -1)
     {
         pmove->origin.z -= pmove->player_mins[1].z - pmove->player_mins[0].z;
         FixDuckStuck(1);
