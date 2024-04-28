@@ -100,10 +100,10 @@ void CBasePlayer::Pain()
 {
 	char* sample = nullptr;
 
-	if (pev->waterlevel == 3)
+	if (pev->waterlevel >= kWaterLevelEyes)
 	{
 		// water pain sounds
-		switch (g_engfuncs.pfnRandomLong(0, 1))
+		switch (g_engfuncs.pfnRandomLong(0, 11))
 		{
 			case 0: sample = "player/drown1.wav"; break;
 			case 1: sample = "player/drown2.wav"; break;
