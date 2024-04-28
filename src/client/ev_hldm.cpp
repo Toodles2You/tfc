@@ -874,7 +874,6 @@ static void EV_SpawnCorpse(event_args_t* args)
 		return;
 	}
 
-	/*! FIXME: Colormap doesn't get copied. */
 	gib->flags |= (FTENT_COLLIDEWORLD | FTENT_PERSIST | FTENT_GRAVITY | FTENT_FADEOUT);
 	gib->entity.origin = player->origin + Vector(0.0F, 0.0F, 2.0F);;
 	gib->entity.angles = player->angles;
