@@ -1510,6 +1510,10 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 
 		m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 
+		// get remap colors
+		m_nTopColor = std::clamp(m_pPlayerInfo->topcolor, 0, 360);
+		m_nBottomColor = std::clamp(m_pPlayerInfo->bottomcolor, 0, 360);
+
 		/* Toodles: Hack to render player corpses with the correct remap colors. */
 		if (m_pCurrentEntity->curstate.renderfx == kRenderFxDeadPlayer)
 		{
@@ -1536,17 +1540,11 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		}
 		else
 		{
-			// get remap colors
 			IEngineStudio.StudioSetRemapColors(m_nTopColor, m_nBottomColor);
 
 			StudioRenderModel();
 		}
 
-		m_pPlayerInfo = NULL;
-
-		IEngineStudio.StudioSetRemapColors(m_nTopColor, m_nBottomColor);
-
-		StudioRenderModel();
 		m_pPlayerInfo = NULL;
 
 		if (0 != pplayer->weaponmodel)
