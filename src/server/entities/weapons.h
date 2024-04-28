@@ -542,6 +542,7 @@ public:
 
 	static CRocket* CreateRocket(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
 	void EXPORT RocketTouch(CBaseEntity *pOther);
+	void EXPORT PleaseGoInTheRightDirection();
 };
 
 class CNail : public CBaseEntity
@@ -552,6 +553,7 @@ public:
 	static CNail* CreateNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
 	static CNail* CreateNailGrenadeNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
 	void EXPORT NailTouch(CBaseEntity *pOther);
+	void EXPORT PleaseGoInTheRightDirection();
 };
 
 class CPipeBomb : public CGrenade

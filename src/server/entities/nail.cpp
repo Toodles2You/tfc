@@ -61,8 +61,12 @@ bool CNail::Spawn()
 
 	SetTouch(&CNail::NailTouch);
 
-	SetThink(&CNail::Remove);
-	pev->nextthink = gpGlobals->time + 5.0F;
+	pev->radsuit_finished = pev->waterlevel;
+	pev->v_angle = pev->velocity;
+
+	SetThink(&CNail::PleaseGoInTheRightDirection);
+	pev->nextthink = gpGlobals->time + 1.0F / 30.0F;
+	pev->pain_finished = gpGlobals->time + 5.0F;
 
 	return true;
 }
@@ -100,3 +104,20 @@ void CNail::NailTouch(CBaseEntity* pOther)
 
 	Remove();
 }
+
+
+void CNail::PleaseGoInTheRightDirection()
+{
+	if (pev->pain_finished <= gpGlobals->time)
+	{
+		Remove();
+		return;
+	}
+	if (pev->waterlevel > pev->radsuit_finished)
+	{
+		pev->velocity = pev->v_angle;
+		pev->radsuit_finished = pev->waterlevel;
+	}
+	pev->nextthink = gpGlobals->time + 1.0F / 30.0F;
+}
+

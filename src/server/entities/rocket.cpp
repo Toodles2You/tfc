@@ -42,8 +42,12 @@ bool CRocket::Spawn()
 
 	SetTouch(&CRocket::RocketTouch);
 
-	SetThink(&CRocket::Remove);
-	pev->nextthink = gpGlobals->time + 5.0F;
+	pev->radsuit_finished = pev->waterlevel;
+	pev->v_angle = pev->velocity;
+
+	SetThink(&CRocket::PleaseGoInTheRightDirection);
+	pev->nextthink = gpGlobals->time + 1.0F / 30.0F;
+	pev->pain_finished = gpGlobals->time + 5.0F;
 
 	tent::RocketTrail(this);
 
@@ -72,3 +76,20 @@ void CRocket::RocketTouch(CBaseEntity* pOther)
 
 	Remove();
 }
+
+
+void CRocket::PleaseGoInTheRightDirection()
+{
+	if (pev->pain_finished <= gpGlobals->time)
+	{
+		Remove();
+		return;
+	}
+	if (pev->waterlevel > pev->radsuit_finished)
+	{
+		pev->velocity = pev->v_angle;
+		pev->radsuit_finished = pev->waterlevel;
+	}
+	pev->nextthink = gpGlobals->time + 1.0F / 30.0F;
+}
+
