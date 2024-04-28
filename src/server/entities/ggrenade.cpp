@@ -763,8 +763,10 @@ bool CBomblet::Spawn()
 	pev->movetype = MOVETYPE_BOUNCE;
 	pev->solid = SOLID_TRIGGER;
 
-	SetOrigin(pev->origin);
 	pev->angles = Vector(0, pev->angles.y, 0);
+
+	util::MakeVectors(pev->angles);
+	SetOrigin(pev->origin + gpGlobals->v_forward * 2 + Vector(0.0F, 0.0F, 2.0F));
 
 	pev->gravity = 0.5;
 	pev->friction = 0.8;
@@ -772,7 +774,6 @@ bool CBomblet::Spawn()
 	SetModel(GetModelName());
 	SetSize(g_vecZero, g_vecZero);
 
-	util::MakeVectors(pev->angles);
 	pev->velocity = gpGlobals->v_forward * 75 + gpGlobals->v_up * 200;
 
 	SetTouch(&CPrimeGrenade::BounceTouch);
