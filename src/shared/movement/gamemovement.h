@@ -37,12 +37,17 @@ public:
     virtual void Move() override;
 
 protected:
+    void BuildWishMove(const Vector& move);
+    void BuildFreeWishMove(const Vector& move);
+    float GetSpeedModifier();
     virtual void CheckParameters();
     virtual void NoClip();
     virtual int FlyMove();
     virtual void CategorizePosition();
+    virtual void CheckContents();
     virtual void Accelerate(const Vector& wishDir, float wishSpeed);
 
+    bool IsSubmerged() { return pmove->waterlevel >= kWaterLevelWaist; }
     bool IsStuck();
     void CheckVelocity();
     void AddCorrectGravity();
@@ -64,6 +69,8 @@ protected:
     bool BeginUnducking();
     void FinishUnducking();
 
+    virtual void Swim();
+
 public:
     static void ClipVelocity(const Vector& in, const Vector& normal, Vector& out, const float overbounce);
 
@@ -73,6 +80,8 @@ protected:
     Vector m_wishVel;
     Vector m_wishDir;
     float m_wishSpeed;
+    Vector m_freeWishDir;
+    float m_freeWishSpeed;
 };
 
 

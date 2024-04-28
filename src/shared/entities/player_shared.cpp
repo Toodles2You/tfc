@@ -569,6 +569,16 @@ int CBasePlayer::GetGaitSequence()
     const auto ducking = (pev->flags & FL_DUCKING) != 0;
     const auto speed = pev->velocity.Length2D();
 
+	if (pev->waterlevel >= kWaterLevelWaist)
+	{
+		if (speed > 220)
+		{
+			return LookupActivity(ACT_SWIM);
+		}
+
+		return LookupActivity(ACT_HOVER);
+	}
+
     if (ducking)
     {
         if (speed > 5)

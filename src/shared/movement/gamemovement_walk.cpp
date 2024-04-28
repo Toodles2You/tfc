@@ -249,7 +249,19 @@ void CHalfLifeMovement::ApplyFriction()
 
     float drop = 0.0F;
 
-    if (pmove->onground != -1)
+    if (IsSubmerged())
+    {
+        float friction =
+            pmove->movevars->friction
+                * pmove->movevars->waterfriction
+                * pmove->friction;
+
+        drop +=
+            std::max(speed, pmove->movevars->stopspeed)
+            * friction
+            * pmove->frametime;
+    }
+    else if (pmove->onground != -1)
     {
         Vector start, stop;
 
@@ -278,6 +290,8 @@ void CHalfLifeMovement::ApplyFriction()
             * pmove->frametime;
     }
 
+    float oldZed = pmove->velocity.z;
+
     float newSpeed = speed - drop;
     if (newSpeed < 0)
     {
@@ -285,6 +299,20 @@ void CHalfLifeMovement::ApplyFriction()
     }
     newSpeed /= speed;
     pmove->velocity = pmove->velocity * newSpeed;
+
+    /* FIXME: */
+    if (IsSubmerged() && oldZed <= 0.0F)
+    {
+        float gravity =pmove->gravity;
+        if (gravity == 0)
+        {
+            gravity = 1;
+        }
+        if (oldZed >= gravity * -pmove->movevars->gravity * 0.075F)
+        {
+            pmove->velocity.z = oldZed;
+        }
+    }
 }
 
 
@@ -327,7 +355,7 @@ void CHalfLifeMovement::CheckFalling()
     {
         if (pmove->dead == 0
          && pmove->flFallVelocity >= PLAYER_FALL_PUNCH_THRESHHOLD
-         && pmove->waterlevel == 0)
+         && pmove->waterlevel <= kWaterLevelNone)
         {
             if (pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED)
             {

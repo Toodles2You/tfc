@@ -30,6 +30,8 @@ CHalfLifeMovement::CHalfLifeMovement(playermove_t* _pmove, CBasePlayer* _player)
     m_wishVel = g_vecZero;
     m_wishDir = g_vecZero;
     m_wishSpeed = 0.0F;
+    m_freeWishDir = g_vecZero;
+    m_freeWishSpeed = 0.0F;
 }
 
 
@@ -57,7 +59,14 @@ void CHalfLifeMovement::Move()
         NoClip();
         break;
     case MOVETYPE_WALK:
-        Walk();
+        if (IsSubmerged())
+        {
+            Swim();
+        }
+        else
+        {
+            Walk();
+        }
         break;
     default:
         break;
@@ -79,9 +88,82 @@ void CHalfLifeMovement::Move()
 }
 
 
+void CHalfLifeMovement::BuildWishMove(const Vector& move)
+{
+    /* Direction for walking movement. */
+
+    m_wishVel =
+        m_flatForward * move.x + m_flatRight * move.y;
+
+    m_wishVel = m_wishVel * pmove->maxspeed;
+
+    m_wishDir = m_wishVel.Normalize();
+    m_wishSpeed = m_wishVel.Length();
+
+    if (m_wishSpeed > pmove->maxspeed)
+    {
+        m_wishSpeed = pmove->maxspeed;
+        m_wishVel = m_wishDir * m_wishSpeed;
+    }
+}
+
+
+void CHalfLifeMovement::BuildFreeWishMove(const Vector& move)
+{
+    /* Direction for flying & swimming movement. */
+
+    float moveZed = move.z;
+    if ((pmove->cmd.buttons & IN_JUMP) != 0)
+    {
+        moveZed = 1.0F;
+    }
+    else if ((pmove->cmd.buttons & IN_DUCK) != 0)
+    {
+        moveZed = -1.0F;
+    }
+
+    m_freeWishDir =
+        pmove->forward * move.x + pmove->right * move.y + Vector(0.0F, 0.0F, moveZed);
+
+    m_freeWishDir = m_freeWishDir * pmove->maxspeed;
+
+    m_freeWishSpeed = std::min(m_freeWishDir.Length(), pmove->maxspeed);
+
+    if (IsSubmerged())
+    {
+        m_freeWishSpeed *= 0.8F;
+    }
+
+    m_freeWishDir = m_freeWishDir.Normalize();
+}
+
+
+float CHalfLifeMovement::GetSpeedModifier()
+{
+    float speed = 1.0F;
+
+    if (player->m_nLegDamage != 0)
+    {
+        speed *= (10.0F - player->m_nLegDamage) / 10.0F;
+    }
+
+    if ((pmove->cmd.buttons & IN_SPEED) != 0
+     || (player->m_TFState & kTFStateAiming) != 0)
+    {
+        speed = std::min(speed, 0.3F);
+    }
+
+    if (!IsSubmerged() && (pmove->flags & FL_DUCKING) != 0)
+    {
+        speed /= 3.0F;
+    }
+
+    return speed;
+}
+
+
 void CHalfLifeMovement::CheckParameters()
 {
-    float speedScale = 1.0F;
     Vector move =
     {
         *reinterpret_cast<int*>(&pmove->cmd.forwardmove),
@@ -90,24 +172,6 @@ void CHalfLifeMovement::CheckParameters()
     };
 
     move = move / 100.0F;
-
-    if (player->m_nLegDamage != 0)
-    {
-        speedScale *= (10.0F - player->m_nLegDamage) / 10.0F;
-    }
-
-    if ((pmove->cmd.buttons & IN_SPEED) != 0
-     || (player->m_TFState & kTFStateAiming) != 0)
-    {
-        speedScale = std::min(speedScale, 0.3F);
-    }
-
-    if ((pmove->flags & FL_DUCKING) != 0 || pmove->usehull == 1)
-    {
-        speedScale /= 3.0F;
-    }
-
-    float speed = move.Length();
 
     if (pmove->clientmaxspeed != 0)
     {
@@ -123,16 +187,21 @@ void CHalfLifeMovement::CheckParameters()
     {
         move = g_vecZero;
     }
-    else if (speed > speedScale)
+    else
     {
-        speed = speedScale;
-        move = move.Normalize() * speedScale;
+        const auto speed = move.Length();
+        const auto speedModifier = GetSpeedModifier();
+
+        if (speed > speedModifier)
+        {
+            move = move.Normalize() * speedModifier;
+        }
     }
 
     pmove->angles = pmove->cmd.viewangles;
-    if (pmove->angles.y > 180.0f)
+    if (pmove->angles.y > 180.0F)
     {
-        pmove->angles.y -= 360.0f;
+        pmove->angles.y -= 360.0F;
     }
 
     if (pmove->dead != 0)
@@ -144,40 +213,16 @@ void CHalfLifeMovement::CheckParameters()
     pmove->frametime = pmove->cmd.msec / 1000.0F;
 
     AngleVectors(pmove->angles, &pmove->forward, &pmove->right, &pmove->up);
-    AngleVectors(Vector(0, pmove->angles.y, 0), &m_flatForward, &m_flatRight, nullptr);
+    AngleVectors(Vector(0.0F, pmove->angles.y, 0.0F), &m_flatForward, &m_flatRight, nullptr);
 
-    if (pmove->movetype == MOVETYPE_NOCLIP
-     || pmove->movetype == MOVETYPE_FLY)
-    {
-        m_wishVel =
-            pmove->forward * move.x
-            + pmove->right * move.y;
-    }
-    else
-    {
-        m_wishVel =
-            m_flatForward * move.x
-            + m_flatRight * move.y;
-    }
-
-    m_wishVel.z += move.z;
-
-    m_wishVel = m_wishVel * pmove->maxspeed;
-
-    m_wishDir = m_wishVel.Normalize();
-    m_wishSpeed = m_wishVel.Length();
-
-    if (m_wishSpeed > pmove->maxspeed)
-    {
-        m_wishSpeed = pmove->maxspeed;
-        m_wishVel = m_wishDir * m_wishSpeed;
-    }
+    BuildWishMove(move);
+    BuildFreeWishMove(move);
 }
 
 
 void CHalfLifeMovement::NoClip()
 {
-    pmove->origin = pmove->origin + pmove->frametime * m_wishVel;
+    pmove->origin = pmove->origin + pmove->frametime * m_freeWishDir * m_freeWishSpeed;
     pmove->velocity = g_vecZero;
 }
 
@@ -369,8 +414,13 @@ int CHalfLifeMovement::FlyMove()
 
 void CHalfLifeMovement::CategorizePosition()
 {
-    pmove->waterlevel = kWaterLevelNone;
-    pmove->watertype = CONTENTS_EMPTY;
+    CheckContents();
+
+    if (IsSubmerged())
+    {
+        pmove->onground = -1;
+        return;
+    }
 
     if (pmove->velocity.z > 180)
     {
@@ -419,7 +469,7 @@ void CHalfLifeMovement::Accelerate(const Vector& wishDir, float wishSpeed)
 
     float testSpeed = wishSpeed;
 
-    if (pmove->onground == -1 && testSpeed > 30)
+    if (!IsSubmerged() && pmove->onground == -1 && testSpeed > 30)
     {
         testSpeed = 30;
     }
@@ -433,7 +483,11 @@ void CHalfLifeMovement::Accelerate(const Vector& wishDir, float wishSpeed)
     }
 
     float acceleration = pmove->movevars->accelerate;
-    if (pmove->onground == -1)
+    if (IsSubmerged())
+    {
+        acceleration = pmove->movevars->wateraccelerate;
+    }
+    else if (pmove->onground == -1)
     {
         acceleration = pmove->movevars->airaccelerate;
     }
@@ -572,8 +626,14 @@ void CHalfLifeMovement::AddCorrectGravity()
         gravity = 1;
     }
 
+    float envGravity = pmove->movevars->gravity;
+    if (IsSubmerged())
+    {
+        envGravity *= 0.075F;
+    }
+
     pmove->velocity.z -=
-        gravity * pmove->movevars->gravity * pmove->frametime * 0.5F;
+        gravity * envGravity * pmove->frametime * 0.5F;
 
     CheckVelocity();
 }
@@ -587,8 +647,14 @@ void CHalfLifeMovement::FixUpGravity()
         gravity = 1;
     }
 
+    float envGravity = pmove->movevars->gravity;
+    if (IsSubmerged())
+    {
+        envGravity *= 0.075F;
+    }
+
     pmove->velocity.z -=
-        gravity * pmove->movevars->gravity * pmove->frametime * 0.5F;
+        gravity * envGravity * pmove->frametime * 0.5F;
 
     CheckVelocity();
 }

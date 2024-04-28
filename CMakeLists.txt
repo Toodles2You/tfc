@@ -39,6 +39,7 @@ set(SHARED_SRC
     ${SHARED_SRC_DIR}/entities/weapons_shared.cpp
 
     ${SHARED_SRC_DIR}/movement/gamemovement_duck.cpp
+    ${SHARED_SRC_DIR}/movement/gamemovement_swim.cpp
     ${SHARED_SRC_DIR}/movement/gamemovement_walk.cpp
     ${SHARED_SRC_DIR}/movement/gamemovement.cpp
     ${SHARED_SRC_DIR}/movement/pm_debug.cpp
