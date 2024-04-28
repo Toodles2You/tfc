@@ -352,7 +352,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	// -- this prevents drawing errors in GL due to waves
 
 	waterOffset = 0;
-	if (pparams->waterlevel >= 2)
+	if (pparams->waterlevel >= kWaterLevelWaist)
 	{
 		int i, contents, waterDist, waterEntity;
 		Vector point;
@@ -378,7 +378,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 		VectorCopy(pparams->vieworg, point);
 
 		// Eyes are above water, make sure we're above the waves
-		if (pparams->waterlevel == 2)
+		if (pparams->waterlevel == kWaterLevelWaist)
 		{
 			point[2] -= waterDist;
 			for (i = 0; i < waterDist; i++)

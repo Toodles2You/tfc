@@ -357,7 +357,7 @@ int CHalfLifeMovement::FlyMove()
 
 void CHalfLifeMovement::CategorizePosition()
 {
-    pmove->waterlevel = 0;
+    pmove->waterlevel = kWaterLevelNone;
     pmove->watertype = CONTENTS_EMPTY;
 
     if (pmove->velocity.z > 180)

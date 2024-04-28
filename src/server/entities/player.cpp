@@ -139,7 +139,7 @@ void CBasePlayer::DeathSound()
 {
 	// water death sounds
 	/*
-	if (pev->waterlevel == 3)
+	if (pev->waterlevel >= kWaterLevelEyes)
 	{
 		EmitSound("player/h2odeath.wav", CHAN_VOICE);
 		return;

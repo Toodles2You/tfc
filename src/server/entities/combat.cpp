@@ -157,7 +157,7 @@ bool CBaseEntity::FVisible(CBaseEntity* pEntity)
 		return false;
 
 	// don't look through water
-	if ((pev->waterlevel != 3 && pEntity->pev->waterlevel == 3) || (pev->waterlevel == 3 && pEntity->pev->waterlevel == 0))
+	if ((pev->waterlevel >= kWaterLevelEyes) != (pEntity->pev->waterlevel >= kWaterLevelEyes))
 		return false;
 
 	vecLookerOrigin = pev->origin + pev->view_ofs; //look through the caller's 'eyes'

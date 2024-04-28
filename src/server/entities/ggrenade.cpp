@@ -143,7 +143,7 @@ void CGrenade::TumbleThink()
 	{
 		SetThink(&CGrenade::Detonate);
 	}
-	if (pev->waterlevel != 0)
+	if (pev->waterlevel > kWaterLevelNone)
 	{
 		pev->velocity = pev->velocity * 0.5;
 		pev->framerate = 0.2;
