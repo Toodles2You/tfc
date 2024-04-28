@@ -39,14 +39,14 @@ void CHalfLifeMovement::Move()
 {
     CGameMovement::Move();
 
+    CheckParameters();
+    CategorizePosition();
+    CheckDucking();
+
     if (pmove->movetype == MOVETYPE_NONE)
     {
         return;
     }
-
-    CheckParameters();
-    CategorizePosition();
-    CheckDucking();
 
     if (pmove->movetype != MOVETYPE_NOCLIP && IsStuck())
     {
@@ -59,7 +59,11 @@ void CHalfLifeMovement::Move()
         NoClip();
         break;
     case MOVETYPE_WALK:
-        if (IsSubmerged())
+        if (pmove->waterjumptime != 0)
+        {
+            WaterJump();
+        }
+        else if (IsSubmerged())
         {
             Swim();
         }
@@ -67,6 +71,7 @@ void CHalfLifeMovement::Move()
         {
             Walk();
         }
+        pmove->friction = 1;
         break;
     default:
         break;
@@ -79,11 +84,6 @@ void CHalfLifeMovement::Move()
     else
     {
         pmove->flags &= ~FL_ONGROUND;
-    }
-
-    if (pmove->movetype == MOVETYPE_WALK)
-    {
-        pmove->friction = 1;
     }
 }
 
@@ -140,6 +140,12 @@ void CHalfLifeMovement::BuildFreeWishMove(const Vector& move)
 
 float CHalfLifeMovement::GetSpeedModifier()
 {
+    if (pmove->movetype == MOVETYPE_NOCLIP
+     || pmove->movetype == MOVETYPE_FLY)
+    {
+        return 1.0F;
+    }
+
     float speed = 1.0F;
 
     if (player->m_nLegDamage != 0)
@@ -414,6 +420,16 @@ int CHalfLifeMovement::FlyMove()
 
 void CHalfLifeMovement::CategorizePosition()
 {
+    if (pmove->movetype == MOVETYPE_NONE
+     || pmove->movetype == MOVETYPE_NOCLIP
+     || pmove->movetype == MOVETYPE_FLY)
+    {
+        pmove->waterlevel = kWaterLevelNone;
+        pmove->watertype = CONTENTS_EMPTY;
+        pmove->onground = -1;
+        return;
+    }
+
     CheckContents();
 
     if (IsSubmerged())

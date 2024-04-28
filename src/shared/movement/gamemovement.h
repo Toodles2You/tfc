@@ -70,6 +70,8 @@ protected:
     void FinishUnducking();
 
     virtual void Swim();
+    bool BeginWaterJump();
+    bool WaterJump();
 
 public:
     static void ClipVelocity(const Vector& in, const Vector& normal, Vector& out, const float overbounce);

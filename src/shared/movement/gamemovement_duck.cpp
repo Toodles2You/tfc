@@ -27,7 +27,7 @@ void CHalfLifeMovement::CheckDucking()
         return;
     }
 
-    const auto bWantToDuck = (pmove->cmd.buttons & IN_DUCK) != 0 || IsSubmerged();
+    const auto bWantToDuck = (pmove->cmd.buttons & IN_DUCK) != 0 || IsSubmerged() || pmove->waterjumptime != 0;
     const auto bIsFullyDucked = pmove->usehull == 1;
 
     /* Check if the player wants to change duck state. */

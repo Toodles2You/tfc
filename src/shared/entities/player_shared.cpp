@@ -571,7 +571,7 @@ int CBasePlayer::GetGaitSequence()
 
 	if (pev->waterlevel >= kWaterLevelWaist)
 	{
-		if (speed > 220)
+		if (pev->waterlevel >= kWaterLevelEyes && speed > 220)
 		{
 			return LookupActivity(ACT_SWIM);
 		}

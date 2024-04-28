@@ -87,6 +87,12 @@ void CHalfLifeMovement::CheckContents()
 
 void CHalfLifeMovement::Swim()
 {
+    if (BeginWaterJump())
+    {
+        WaterJump();
+        return;
+    }
+
     /* If ye ain't swimmin', drift down towards Davy Jones's locker! */
     if (m_freeWishSpeed == 0.0F)
     {
@@ -111,3 +117,98 @@ void CHalfLifeMovement::Swim()
     }
 }
 
+
+static constexpr float kWaterJumpHeight = 8.0F;
+
+bool CHalfLifeMovement::BeginWaterJump()
+{
+	/* Don't hop out if we just jumped in. */
+	if (pmove->velocity.z < -180)
+    {
+		return false;
+    }
+
+	/* See if we are backing up and moving. */
+    Vector flatVelocity = pmove->velocity;
+    flatVelocity.z = 0.0F;
+
+	float flatSpeed = flatVelocity.NormalizeInPlace();
+
+	/* Are we backing into water from steps or something? If so, don't pop forward. */
+	if (flatSpeed != 0.0F && DotProduct(flatVelocity, m_flatForward) < 0.0F)
+    {
+		return false;
+    }
+
+	/* This trace should use the point sized collision hull. */
+	const auto savehull = pmove->usehull;
+	pmove->usehull = 2;
+
+	/* See if near an edge. */
+	Vector vecStart = pmove->origin + Vector(0.0F, 0.0F, kWaterJumpHeight);
+    Vector vecEnd = vecStart + m_flatForward * 24.0F;
+
+	pmtrace_t trace = pmove->PM_PlayerTraceEx(
+        vecStart,
+        vecEnd,
+        PM_STUDIO_BOX,
+        CHalfLifeMovement::g_ShouldIgnore);
+
+    /* Facing a near vertical wall? */
+	if (trace.fraction != 1.0F && fabsf(trace.plane.normal.z) < 0.1F)
+	{
+		vecStart.z += pmove->player_maxs[savehull].z - kWaterJumpHeight;
+        vecEnd = vecStart + m_flatForward * 24.0F;
+
+        pmove->movedir = trace.plane.normal * -50.0F;
+
+		trace = pmove->PM_PlayerTraceEx(
+            vecStart,
+            vecEnd,
+            PM_STUDIO_BOX,
+            CHalfLifeMovement::g_ShouldIgnore);
+
+		if (trace.fraction == 1.0F)
+		{
+			pmove->waterjumptime = 2000;
+			pmove->velocity.z = 225;
+		}
+	}
+
+	/* Reset the collision hull. */
+	pmove->usehull = savehull;
+
+    return pmove->waterjumptime != 0;
+}
+
+
+bool CHalfLifeMovement::WaterJump()
+{
+    pmove->waterjumptime = std::max(pmove->waterjumptime - pmove->cmd.msec, 0.0F);
+
+	pmove->velocity.x = pmove->movedir.x;
+	pmove->velocity.y = pmove->movedir.y;
+
+    if (pmove->waterlevel <= kWaterLevelNone)
+    {
+        AddCorrectGravity();
+    }
+
+    FlyMove();
+    CheckContents();
+
+    if (pmove->waterlevel <= kWaterLevelNone)
+    {
+        FixUpGravity();
+    }
+
+    if (pmove->waterjumptime != 0
+     && pmove->velocity.z >= 0
+     && pmove->onground == -1)
+    {
+        return true;
+    }
+
+    pmove->waterjumptime = 0;
+    return false;
+}
