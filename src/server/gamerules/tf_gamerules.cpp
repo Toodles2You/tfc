@@ -151,13 +151,23 @@ bool CTeamFortress::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
     {
         if (strcmp(pcmd, sTFClassSelection[i]) == 0)
         {
-            ChangePlayerClass(pPlayer, i);
+            if (!ChangePlayerClass(pPlayer, i))
+            {
+                MessageBegin(MSG_ONE, gmsgVGUIMenu, pPlayer);
+                WriteByte(MENU_CLASS);
+                MessageEnd();
+            }
             return true;
         }
     }
     if (strcmp(pcmd, sTFClassSelection[PC_CIVILIAN]) == 0)
     {
-        ChangePlayerClass(pPlayer, PC_CIVILIAN);
+        if (!ChangePlayerClass(pPlayer, PC_CIVILIAN))
+        {
+            MessageBegin(MSG_ONE, gmsgVGUIMenu, pPlayer);
+            WriteByte(MENU_CLASS);
+            MessageEnd();
+        }
         return true;
     }
 
@@ -299,7 +309,7 @@ bool CTeamFortress::ChangePlayerClass(CBasePlayer* pPlayer, int classIndex)
         "model",
         sTFClassModels[pPlayer->PCNumber()]);
 
-    if (!bKill)
+    if (!bKill && g_pGameRules->FPlayerCanRespawn(pPlayer))
     {
         pPlayer->Spawn();
     }
