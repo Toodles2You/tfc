@@ -155,7 +155,13 @@ void CTFWeapon::PrimaryAttack()
 					+ gpGlobals->v_right * rightOffset
 					+ gpGlobals->v_up * -8;
 
-			CRocket::CreateRocket(gun, gpGlobals->v_forward, info.iProjectileDamage, m_pPlayer);
+			CRocket::CreateRocket(
+				gun,
+				gpGlobals->v_forward,
+				info.iProjectileDamage,
+				info.iProjectileDamageMin,
+				info.iProjectileRadius,
+				m_pPlayer);
 			break;
 		}
 		case kProjNail:
@@ -209,6 +215,8 @@ void CTFWeapon::PrimaryAttack()
 				gun,
 				gpGlobals->v_forward * 0.75F + gpGlobals->v_up * 0.25F,
 				info.iProjectileDamage,
+				info.iProjectileDamageMin,
+				info.iProjectileRadius,
 				m_pPlayer,
 				launcher);
 			break;
@@ -375,7 +383,6 @@ void CShotgun::GetWeaponInfo(WeaponInfo& i)
 	i.iProjectileDamage = 4;
 	i.vecProjectileSpread = Vector2D(2.3F, 2.3F);
 	i.iProjectileCount = 6;
-	i.iProjectileChargeDamage = 0;
 
 	i.pszEvent = "events/wpn/tf_sg.sc";
 	i.pszAttackSound = "weapons/sbarrel1.wav";
@@ -422,7 +429,6 @@ void CSuperShotgun::GetWeaponInfo(WeaponInfo& i)
 	i.iProjectileDamage = 4;
 	i.vecProjectileSpread = Vector2D(8.0F, 4.6F);
 	i.iProjectileCount = 14;
-	i.iProjectileChargeDamage = 0;
 
 	i.pszEvent = "events/wpn/tf_ssg.sc";
 	i.pszAttackSound = "weapons/shotgn2.wav";
@@ -469,7 +475,6 @@ void CNailgun::GetWeaponInfo(WeaponInfo& i)
 	i.iProjectileDamage = 9;
 	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
 	i.iProjectileCount = 1;
-	i.iProjectileChargeDamage = 0;
 
 	i.pszEvent = "events/wpn/tf_nail.sc";
 	i.pszAttackSound = "weapons/airgun_1.wav";
@@ -516,7 +521,6 @@ void CSuperNailgun::GetWeaponInfo(WeaponInfo& i)
 	i.iProjectileDamage = 13;
 	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
 	i.iProjectileCount = 1;
-	i.iProjectileChargeDamage = 0;
 
 	i.pszEvent = "events/wpn/tf_snail.sc";
 	i.pszAttackSound = "weapons/spike2.wav";
@@ -561,9 +565,10 @@ void CRocketLauncher::GetWeaponInfo(WeaponInfo& i)
 
 	i.iProjectileType = kProjRocket;
 	i.iProjectileDamage = 100;
+	i.iProjectileDamageMin = 50;
+	i.iProjectileRadius = 100;
 	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
 	i.iProjectileCount = 1;
-	i.iProjectileChargeDamage = 0;
 
 	i.pszEvent = "events/wpn/tf_rpg.sc";
 	i.pszAttackSound = "weapons/rocketfire1.wav";

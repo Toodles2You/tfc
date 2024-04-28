@@ -11,13 +11,21 @@
 #include "weapons.h"
 
 
-CRocket* CRocket::CreateRocket(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner)
+CRocket* CRocket::CreateRocket(
+	const Vector& origin,
+	const Vector& dir,
+	const float damageMax,
+	const float damageMin,
+	const float radius,
+	CBaseEntity* owner)
 {
 	auto rocket = GetClassPtr((CRocket*)nullptr);
 
 	rocket->pev->origin = origin;
 	rocket->pev->angles = dir;
-	rocket->pev->dmg = damage;
+	rocket->pev->dmg = damageMax;
+	rocket->pev->dmg_save = damageMin;
+	rocket->pev->dmg_take = radius;
 	rocket->pev->owner = owner->edict();
 	rocket->Spawn();
 

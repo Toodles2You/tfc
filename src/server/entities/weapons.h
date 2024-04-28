@@ -91,7 +91,11 @@ typedef struct
 	int iProjectileDamage;
 	Vector2D vecProjectileSpread;
 	int iProjectileCount;
-	int iProjectileChargeDamage;
+	union {
+		int iProjectileChargeDamage;
+		int iProjectileDamageMin;
+	};
+	int iProjectileRadius;
 	const char* pszEvent;
 	const char* pszAttackSound;
 	const char* pszAlternateSound;
@@ -540,7 +544,13 @@ class CRocket : public CGrenade
 public:
 	bool Spawn() override;
 
-	static CRocket* CreateRocket(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
+	static CRocket* CreateRocket(
+		const Vector& origin,
+		const Vector& dir,
+		const float damageMax,
+		const float damageMin,
+		const float radius,
+		CBaseEntity* owner);
 	void EXPORT RocketTouch(CBaseEntity *pOther);
 	void EXPORT PleaseGoInTheRightDirection();
 };
@@ -561,7 +571,14 @@ class CPipeBomb : public CGrenade
 public:
 	bool Spawn() override;
 
-	static CPipeBomb* CreatePipeBomb(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner, CPipeBombLauncher* launcher);
+	static CPipeBomb* CreatePipeBomb(
+		const Vector& origin,
+		const Vector& dir,
+		const float damageMax,
+		const float damageMin,
+		const float radius,
+		CBaseEntity* owner,
+		CPipeBombLauncher* launcher);
 	void EXPORT PipeBombTouch(CBaseEntity *pOther);
 };
 
@@ -571,7 +588,8 @@ void RadiusDamage(
 	const Vector& origin,
 	CBaseEntity* inflictor,
 	CBaseEntity* attacker,
-	const float damage,
+	const float damageMax,
+	const float damageMin,
 	const float radius,
 	const int damageType);
 

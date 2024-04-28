@@ -20,6 +20,8 @@
 
 */
 
+#include <algorithm>
+
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
@@ -59,10 +61,12 @@ void RadiusDamage(
 	const Vector& origin,
 	CBaseEntity* inflictor,
 	CBaseEntity* attacker,
-	const float damage,
+	const float damageMax,
+	const float damageMin,
 	const float radius,
 	const int damageType)
 {
+	const float damageFalloff = damageMin - damageMax;
 	CBaseEntity* entity = nullptr;
 	TraceResult tr;
 	float ajdusted;
@@ -81,8 +85,13 @@ void RadiusDamage(
 			continue;
 		}
 
+#if 1
+		ajdusted = (origin - entity->BodyTarget()).Length() / radius;
+		ajdusted = std::max(damageMax + damageFalloff * ajdusted, 0.0F);
+#else
 		ajdusted = 0.5F * (origin - entity->BodyTarget()).Length();
-		ajdusted = std::max(damage - ajdusted, 0.0F);
+		ajdusted = std::max(damageMax - ajdusted, 0.0F);
+#endif
 
 		entity->TakeDamage(inflictor, attacker, ajdusted, damageType);
 	}

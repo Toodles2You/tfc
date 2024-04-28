@@ -413,7 +413,6 @@ void CAutoRifle::GetWeaponInfo(WeaponInfo& i)
 	i.iProjectileDamage = 8;
 	i.vecProjectileSpread = Vector2D(2.3F, 2.3F);
 	i.iProjectileCount = 1;
-	i.iProjectileChargeDamage = 0;
 
 	i.pszEvent = "events/wpn/tf_ar.sc";
 	i.pszAttackSound = "weapons/sniper.wav";

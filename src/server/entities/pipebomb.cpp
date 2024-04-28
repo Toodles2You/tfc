@@ -13,13 +13,22 @@
 #include "gamerules.h"
 
 
-CPipeBomb* CPipeBomb::CreatePipeBomb(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner, CPipeBombLauncher* launcher)
+CPipeBomb* CPipeBomb::CreatePipeBomb(
+	const Vector& origin,
+	const Vector& dir,
+	const float damageMax,
+	const float damageMin,
+	const float radius,
+	CBaseEntity* owner,
+	CPipeBombLauncher* launcher)
 {
 	auto pipebomb = GetClassPtr((CPipeBomb*)nullptr);
 
 	pipebomb->pev->origin = origin;
 	pipebomb->pev->angles = dir;
-	pipebomb->pev->dmg = damage;
+	pipebomb->pev->dmg = damageMax;
+	pipebomb->pev->dmg_save = damageMin;
+	pipebomb->pev->dmg_take = radius;
     if (launcher != nullptr)
     {
         launcher->AddPipeBomb(pipebomb);

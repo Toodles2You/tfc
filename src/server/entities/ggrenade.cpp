@@ -61,7 +61,7 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 
 	pev->owner = nullptr; // can't traceline attack owner if this is set
 
-	RadiusDamage(pev->origin, this, owner, pev->dmg, pev->dmg, bitsDamageType);
+	RadiusDamage(pev->origin, this, owner, pev->dmg, pev->dmg_save, pev->dmg_take, bitsDamageType);
 
 	Remove();
 }
@@ -171,6 +171,8 @@ bool CGrenade::Spawn()
 	SetSize(g_vecZero, g_vecZero);
 
 	pev->dmg = 100;
+	pev->dmg_save = 0;
+	pev->dmg_take = 250;
 
 	return true;
 }
@@ -194,6 +196,8 @@ CGrenade* CGrenade::ShootContact(CBaseEntity* owner, Vector vecStart, Vector vec
 	pGrenade->SetTouch(&CGrenade::ExplodeTouch);
 
 	pGrenade->pev->dmg = 100;
+	pGrenade->pev->dmg_save = 0;
+	pGrenade->pev->dmg_take = 250;
 
 	return pGrenade;
 }
@@ -216,6 +220,8 @@ bool CPrimeGrenade::Spawn()
 	pev->dmgtime = pev->nextthink + 3.0;
 
 	pev->dmg = 180;
+	pev->dmg_save = 0;
+	pev->dmg_take = 360;
 
 	return true;
 }
@@ -278,7 +284,7 @@ void CPrimeGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 
 	pev->owner = nullptr; // can't traceline attack owner if this is set
 
-	RadiusDamage(pev->origin, this, owner, pev->dmg, pev->dmg * 2.5, bitsDamageType);
+	RadiusDamage(pev->origin, this, owner, pev->dmg, pev->dmg_save, pev->dmg_take, bitsDamageType);
 
 	Remove();
 }
@@ -786,6 +792,8 @@ bool CBomblet::Spawn()
 	ResetSequenceInfo();
 
 	pev->dmg = 180;
+	pev->dmg_save = 0;
+	pev->dmg_take = 360;
 
 	return true;
 }
