@@ -73,6 +73,26 @@ Team_Yellow
 {
 YELLOW
 }
+Hunted_team1
+{
+The Hunted
+}
+Hunted_team2
+{
+Bodyguards
+}
+Hunted_team3
+{
+Assassins
+}
+Dustbowl_team1
+{
+Attackers
+}
+Dustbowl_team2
+{
+Defenders
+}
 
 Map_Description_not_available
 {
@@ -349,4 +369,1193 @@ Player %s wants to change levels
 Vote_level_nominate
 {
 Player %s has nominated '%s'
+}
+
+// All centered for now
+$position -1 0.7
+$effect 2
+// This is the final color
+$color 200 200 200
+// This is the highlight color
+$color2 240 110 0
+// This is the time it takes to fade each character
+$fadein 0.01
+// This is the amount of time the highlight lags behind the leading edge of the text
+$fxtime 0.25
+// How long to hold the message on the screen (after it scans out)
+$holdtime 3.5
+// How long it takes to fade out the message after holding
+$fadeout 1.5
+
+cz_bcap1
+{
+%s [Blue Team] captures Command Point 1
+}
+cz_bcap2
+{
+%s [Blue Team] captures Command Point 2
+}
+cz_bcap3
+{
+%s [Blue Team] captures Command Point 3
+}
+cz_bcap4
+{
+%s [Blue Team] captures Command Point 4
+}
+cz_bcap5
+{
+%s [Blue Team] captures Command Point 5
+}
+cz_rcap1
+{
+%s [Red Team] captures Command Point 1
+}
+cz_rcap2
+{
+%s [Red Team] captures Command Point 2
+}
+cz_rcap3
+{
+%s [Red Team] captures Command Point 3
+}
+cz_rcap4
+{
+%s [Red Team] captures Command Point 4
+}
+cz_rcap5
+{
+%s [Red Team] captures Command Point 5
+}
+cz_ccdefend
+{
+This is your Control Center.
+Defend it at all costs.
+}
+cz_rwins
+{
+Red has Captured the Blue Base!
+RED TEAM WINS!!!
+}
+cz_bwins
+{
+Blue has Captured the Red Base!
+BLUE TEAM WINS!!!
+}
+cz_b_tooearly
+{
+You can't take over Blue Base without
+owning all of the Command Points.
+}
+cz_r_tooearly
+{
+You can't take over Red Base without
+owning all of the Command Points.
+}
+cz_bluedoors
+{
+You open the Blue doors.
+}
+cz_reddoors
+{
+You open the Red doors.
+}
+cz_cant_use_item
+{
+Your team can't use this item without
+control of this command point.
+}
+cz_cant_use_door
+{
+This door won't open for your team.
+}
+cz_cap_all_1
+{
+Your team just captured all of the
+Command Points! Your team gets 25
+bonus points!
+}
+cz_cap_all_2
+{
+The ENEMY just captured all of the
+Command Points! They get 25 bonus
+points.
+}
+cz_base_open
+{
+Your Base is open to attack!
+}
+cz_blue_base_open
+{
+Blue base is open to attack!
+}
+cz_red_base_open
+{
+Red Base is open to attack!
+}
+cz_blue_holds_base
+{
+BLUE has held their base!
+Command Points reset.
+}
+cz_red_holds_base
+{
+RED has held their base!
+Command Points reset.
+}
+cz_cant_capture
+{
+You can't capture command points
+while your base is open to attack.
+}
+cz_b_cc_destroy_1
+{
+Blue's Command Center
+has been destroyed!
+}
+cz_b_cc_destroy_2
+{
+%s destroys the Blue Command Center!
+}
+cz_r_cc_destroy_1
+{
+Red's Command Center
+has been destroyed!
+}
+cz_r_cc_destroy_2
+{
+%s destroys the Red Command Center!
+}
+cz_restock
+{
+Restocking grenades.
+}
+
+2fort_you_capped_flag
+{
+You captured the ENEMY flag!
+}
+2fort_your_team_capped
+{
+Your team captured the ENEMY flag!
+}
+2fort_your_flag_capped
+{
+YOUR flag was CAPTURED!
+}
+2fort_your_flag_returned
+{
+Your FLAG was RETURNED!!
+}
+2fort_enemy_flag_returned
+{
+The ENEMY flag was RETURNED!
+}
+2fort_got_enemy_flag
+{
+%s GOT the ENEMY flag!
+}
+2fort_team_takes_enemy_flag
+{
+Your team has TAKEN the ENEMY flag!
+}
+2fort_enemy_takes_flag
+{
+%s has TAKEN your flag!
+}
+2fort_your_flag_taken
+{
+Your FLAG was taken!
+}
+2fort_you_take_enemy_flag
+{
+You have the ENEMY flag!
+Take it to your BATTLEMENTS!
+}
+2fort_enemy_lost_flag
+{
+The ENEMY lost your FLAG!
+}
+2fort_lost_red_flag
+{
+%s LOST the RED flag!
+}
+2fort_lost_blue_flag
+{
+%s LOST the BLUE flag!
+}
+2fort_lost_enemy_flag
+{
+Your team lost the ENEMY flag!
+}
+2fort_elevator
+{
+This elevator won't
+work for your team.
+}
+2fort_door
+{
+This door won't open for your team.
+}
+2fort_flag_in_base
+{
+Your flag is in your base.
+}
+2fort_flag_loose
+{
+Your flag is lying around.
+}
+2fort_flag_carried
+{
+Your flag is being carried by %s
+}
+2fort_enemy_flag_in_base
+{
+The enemy flag is in their base.
+}
+2fort_enemy_flag_loose
+{
+The enemy flag is lying around.
+}
+2fort_enemy_flag_carried
+{
+The enemy flag is being carried by %s
+}
+
+well_got_enemy_flag
+{
+You have the ENEMY FLAG!
+Return it to your SILO!
+}
+well_enemy_flag_returned
+{
+The ENEMY FLAG was RETURNED to base!
+}
+well_your_flag_returned
+{
+Your FLAG has been RETURNED!
+}
+well_team_got_enemy_flag
+{
+Your team has the ENEMY FLAG!
+}
+well_your_flag_taken
+{
+Your FLAG has been STOLEN!
+}
+well_capture
+{
+Good Capture!
+Go For It Again!
+}
+well_blue_scores
+{
+Red is no match for the mighty Blue!
+Blue team scores!
+}
+well_blue_scores_2
+{
+Blue team has captured your flag.
+}
+well_red_scores
+{
+Blue is no match for the mighty Red!
+Red team scores!
+}
+well_red_scores_2
+{
+Red team has captured your flag.
+}
+well_you_det_bgrate
+{
+You destroyed BLUE'S grate!
+}
+well_bgrate_destroyed
+{
+Blue's GRATE has been destroyed.
+}
+well_you_det_rgrate
+{
+You destroyed RED'S grate!
+}
+well_rgrate_destroyed
+{
+Red's GRATE has been destroyed.
+}
+well_flag_in_base
+{
+Your flag is in your base.
+}
+well_flag_loose
+{
+Your flag has been dropped somewhere.
+}
+well_flag_carried
+{
+Your flag is being carried by %s
+}
+well_enemy_flag_in_base
+{
+The enemy flag is in their base.
+}
+well_enemy_flag_loose
+{
+The enemy flag has been dropped somewhere.
+}
+well_enemy_flag_carried
+{
+The enemy flag is being carried by %s
+}
+well_door
+{
+This door won't open for your team.
+}
+
+hunted_target_welcome
+{
+You must survive!
+}
+hunted_bodyguard_welcome
+{
+Protect The Hunted!
+}
+hunted_assassin_welcome
+{
+Eliminate The Hunted!
+}
+hunted_target_scores
+{
+THE HUNTED ESCAPED!
+The Good Guys score!
+}
+hunted_netname_target_scores
+{
+THE HUNTED [%S] ESCAPED!
+The Good Guys score!
+}
+hunted_target_killed
+{
+The Hunted was ELIMINATED!
+The Assassins score!
+}
+hunted_netname_target_killed
+{
+The Hunted [%s] was ELIMINATED!
+The Assassins score!
+}
+hunted_status_ruins_roof
+{
+%s is on TOP of the RUINS!
+}
+hunted_status_field
+{
+%s is in the FIELD!
+}
+hunted_status_fuel
+{
+%s is by the FUEL STORAGE ROOM!
+}
+hunted_status_tower
+{
+%s is IN THE TOWER!
+}
+hunted_status_warehouse_tunnel
+{
+%s is in the WAREHOUSE TUNNEL!
+}
+hunted_status_warehouse
+{
+%s is in the WAREHOUSE!
+}
+hunted_status_approaching_warehouse
+{
+%s is APPROACHING THE WAREHOUSE RAMP!
+}
+hunted_status_storage_3
+{
+%s is in STORAGE AREA 3.
+}
+hunted_status_upper_storage_3
+{
+%s is in UPPER LEVEL of STORAGE AREA 3.
+}
+hunted_status_upper_ruins
+{
+%s is in the UPPER RUINS!
+}
+hunted_status_lower_ruins
+{
+%s is in the LOWER RUINS!
+}
+hunted_status_ruins_exit
+{
+%s is by the RUINS EXIT!
+}
+hunted_status_behind_red
+{
+%s is BEHIND the RED CONTAINERS!
+}
+hunted_status_alley
+{
+%s is in the ALLEY!
+}
+hunted_status_perimeter
+{
+%s is on the PERIMETER of BUILDING 1.
+}
+hunted_status_roof1
+{
+%s is on the ROOF of BUILDING ONE 1!
+}
+hunted_status_main_road
+{
+%s is on the MAIN ROAD.
+}
+hunted_status_above_road
+{
+%s is ABOVE the MAIN ROAD.
+}
+hunted_status_road_end
+{
+%s is hiding at the END of the MAIN ROAD.
+}
+hunted_status_sewers
+{
+%s is in the SEWERS.
+}
+hunted_status_entry_1
+{
+%s is by the ENTRY of BUILDING 1.
+}
+hunted_status_building1
+{
+%s is in BUILDING 1.
+}
+
+rock_falling_death
+{
+%s fell to their death.
+}
+rock_you_got_key
+{
+You've got the key!
+Take it to the enemy gas chamber!
+}
+rock_team_dropped_key
+{
+Your team dropped the enemy key!
+}
+rock_enemy_dropped_key
+{
+The enemy has dropped your key!
+}
+rock_your_key_returned
+{
+Your key has been returned.
+}
+rock_enemy_key_returned
+{
+The enemy key has been returned.
+}
+rock_blue_scores
+{
+Blue team scores!
+Nerve gas released!
+}
+rock_red_scores
+{
+Red team scores!
+Nerve gas released!
+}
+rock_gasmask_message
+{
+Better get a protective suit.
+They're going quick!
+}
+rock_cant_use_door
+{
+This door won't open for your team.
+}
+rock_enemy_key_carry
+{
+The enemy key is being carried by %s
+}
+rock_enemy_key_moved
+{
+The enemy key has been dropped somewhere.
+}
+rock_enemy_key_home
+{
+The enemy key is in their Warden's Office.
+}
+rock_your_key_carry
+{
+Your key is being carried by %s
+}
+rock_your_key_moved
+{
+Your key has been dropped somewhere.
+}
+rock_your_key_home
+{
+Your key is in your Warden's Office.
+}
+rock_protected
+{
+You're now protected from the nerve gas.
+}
+rock_access_denied
+{
+You can't enter the enemy supply rooms.
+}
+rock_you_opened_red_yard
+{
+You blew a hole in Red's yard.
+}
+rock_red_yard_opened
+{
+Red's yard has a hole in it!
+}
+rock_you_opened_blue_yard
+{
+You blew a hole in Blue's yard.
+}
+rock_blue_yard_opened
+{
+Blue's yard has a hole in it!
+}
+rock_gas_kill
+{
+%s was killed by a lethal dose of nerve gas.
+}
+rock_laser_kill
+{
+%s tried to invade an enemy spawnroom.
+}
+rock_team_got_key
+{
+Your team has the enemy key!
+}
+rock_enemy_got_key
+{
+The enemy has your key!
+}
+
+football_blue_scores
+{
+Blue team scores!
+}
+football_blue_netname_scores
+{
+%s [Blue Team] scores!
+}
+football_red_scores
+{
+Red team scores!
+}
+football_red_netname_scores
+{
+%s [Red Team] scores!
+}
+football_flag_drop
+{
+The ball has been dropped!
+}
+football_flag_netname_drop
+{
+%s dropped the ball!
+}
+football_needflag
+{
+You need the ball to score here.
+}
+football_wronggoal
+{
+Take the ball to the ENEMY goal.
+}
+football_flag_home
+{
+No one has the ball yet. Get it!
+}
+football_flag_moved
+{
+The ball is loose!
+}
+football_flag_carried
+{
+The ball is being carried by %s!
+}
+
+dustbowl_you_secure_one
+{
+You secured
+Command Point ONE !!
+}
+dustbowl_you_secure_two
+{
+You secured
+Command Point TWO !!
+}
+dustbowl_protect_HQ
+{
+Protect your HQ from
+the Blue Team !!
+}
+dustbowl_bring_flag
+{
+Bring your flag to
+Red's HQ !!
+}
+dustbowl_take_flag_one
+{
+Take the flag to
+Command Point ONE.
+}
+dustbowl_take_flag_two
+{
+Take the flag to
+Command Point TWO.
+}
+dustbowl_take_flag_HQ
+{
+Take the flag to Red's HQ!
+}
+dustbowl_grenades
+{
+Grenades!!
+}
+dustbowl_blue_secures_one
+{
+Blue Team Secures
+Command Point ONE !!
+}
+dustbowl_blue_secures_two
+{
+Blue Team Secures
+Command Point TWO !!
+}
+dustbowl_flag_returned
+{
+Flag has returned to base
+}
+dustbowl_blue_caps
+{
+Blue team captured Red's
+Headquarters!
+}
+dustbowl_90_secs
+{
+90 seconds till gates open.
+}
+dustbowl_60_secs
+{
+60 seconds till gates open.
+}
+dustbowl_30_secs
+{
+30 seconds till gates open.
+}
+dustbowl_10_secs
+{
+10 seconds till gates open.
+}
+dustbowl_gates_open
+{
+Gates are open !!.
+}
+dustbowl_red_defends
+{
+Red team successfully defended
+their Headquarters!
+}
+dustbowl_five_minutes_left
+{
+Time remaining:
+Five minutes
+}
+dustbowl_four_minutes_left
+{
+Time remaining:
+Four minutes
+}
+dustbowl_three_minutes_left
+{
+Time remaining:
+Three minutes
+}
+dustbowl_two_minutes_left
+{
+Time remaining:
+Two minutes
+}
+dustbowl_sixty_seconds_left
+{
+Time remaining:
+Sixty seconds
+}
+dustbowl_thirty_seconds_left
+{
+Time remaining:
+Thirty seconds
+}
+
+dblmint_you_got_flag
+{
+You have the flag!
+Take it to your APC.
+}
+dblmint_x_has_flag
+{
+%s has your team's flag.
+}
+dblmint_you_capped_flag
+{
+You escaped with your team's flag!
+Good job!
+}
+dblmint_enemy_capped_flag
+{
+The enemy captured the flag!
+}
+dblmint_team_capped_flag
+{
+Your team captured the flag!
+}
+dblmint_flagcage
+{
+This cage will open within 45 seconds.
+}
+
+warpath_cap_1_first
+{
+Your team must capture point 1 first!
+}
+warpath_cap_2_first
+{
+Your team must capture point 2 first!
+}
+warpath_cap_3_first
+{
+Your team must capture point 3 first!
+}
+warpath_cap_4_first
+{
+Your team must capture point 4 first!
+}
+warpath_cap_5_first
+{
+Your team must capture point 5 first!
+}
+warpath_enemy_in_base
+{
+The enemy is inside your base!
+}
+warpath_45_secs
+{
+45 seconds till gates open.
+}
+warpath_30_secs
+{
+30 seconds till gates open.
+}
+warpath_20_secs
+{
+20 seconds till gates open.
+}
+warpath_10_secs
+{
+10 seconds till gates open.
+}
+warpath_gates_open
+{
+Gates are open !!
+}
+warpath_red_wins
+{
+Red team wins the round!
+}
+warpath_blue_wins
+{
+Blue team wins the round!
+}
+
+war_u_stole_1
+{
+You stole flag 1!
+Return it to your capture point!
+}
+war_tm_stole_1
+{
+Your team has stolen FLAG 1!
+}
+war_en_stole_1
+{
+The enemy has stolen FLAG 1!
+}
+war_u_stole_2
+{
+You stole flag 2!
+Return it to your capture point!
+}
+war_tm_stole_2
+{
+Your team has stolen FLAG 2!
+}
+war_en_stole_2
+{
+The enemy has stolen FLAG 2!
+}
+war_u_stole_3
+{
+You stole flag 3!
+Return it to your capture point!
+}
+war_tm_stole_3
+{
+Your team has stolen FLAG 3!
+}
+war_en_stole_3
+{
+The enemy has stolen FLAG 3!
+}
+war_u_stole_4
+{
+You stole flag 4!
+Return it to your capture point!
+}
+war_tm_stole_4
+{
+Your team has stolen FLAG 4!
+}
+war_en_stole_4
+{
+The enemy has stolen FLAG 4!
+}
+war_uhave_flag_1
+{
+You have FLAG 1
+Return it to your capture point!
+}
+war_uhave_flag1
+{
+You have FLAG 1
+Return it to your capture point!
+}
+war_uhave_flag_2
+{
+You have FLAG 2
+Return it to your capture point!
+}
+war_uhave_flag_3
+{
+You have FLAG 3
+Return it to your capture point!
+}
+war_uhave_flag_4
+{
+You have FLAG 4
+Return it to your capture point!
+}
+war_tmsec_flag1
+{
+Your team secured FLAG 1
+}
+war_tmsec_flag2
+{
+Your team secured FLAG 2
+}
+war_tmsec_flag3
+{
+Your team secured FLAG 3
+}
+war_tmsec_3
+{
+Your team secured FLAG 3
+}
+war_tmsec_flag4
+{
+Your team secured FLAG 4
+}
+war_usec_flag1
+{
+You secured FLAG 1
+}
+war_usec_flag2
+{
+You secured FLAG 2
+}
+war_usec_flag3
+{
+You secured FLAG 3
+}
+war_usec_flag4
+{
+You secured FLAG 4
+}
+war_uret_flag1
+{
+You returned FLAG 1
+}
+war_uret_flag2
+{
+You returned FLAG 2
+}
+war_uret_flag3
+{
+You returned FLAG 3
+}
+war_uret_flag4
+{
+You returned FLAG 4
+}
+war_tret_flag1
+{
+Your team returned FLAG 1
+}
+war_tret_flag2
+{
+Your team returned FLAG 2
+}
+war_tret_flag3
+{
+Your team returned FLAG 3
+}
+war_tret_flag4
+{
+Your team returned FLAG 4
+}
+war_eret_flag1
+{
+The ENEMY returned FLAG 1
+}
+war_eret_flag2
+{
+The ENEMY returned FLAG 2
+}
+war_eret_flag3
+{
+The ENEMY returned FLAG 3
+}
+war_eret_flag4
+{
+The ENEMY returned FLAG 4
+}
+war_esec_flag1
+{
+The ENEMY team secured FLAG 1!
+}
+war_esec_flag2
+{
+The ENEMY team secured FLAG 2!
+}
+war_esec_flag3
+{
+The ENEMY team secured FLAG 3!
+}
+war_esec_flag4
+{
+The ENEMY team secured FLAG 4!
+}
+war_avail
+{
+Neutral flags are now available!
+}
+war_removedflag
+{
+!!! You lost the flag because 
+you entered the spawn room !!!
+}
+war_cant_withflag
+{
+You can't enter the spawn 
+room while carrying the flag 
+}
+
+$color 0 225 0
+
+italy_take_flag_to_1
+{
+Take this flag to Command Point 1.
+}
+italy_take_flag_to_2
+{
+Take this flag to Command Point 2.
+}
+italy_take_flag_to_3
+{
+Take this flag to Command Point 3.
+}
+italy_take_flag_to_4
+{
+Take this flag to the church.
+}
+
+$position -1 0.75
+
+italy_yourflag_at_0
+{
+Your flag has returned to the bottom of the town.
+}
+italy_yourflag_at_1
+{
+Your flag has returned to Command Point 1.
+}
+italy_yourflag_at_2
+{
+Your flag has returned to Command Point 2.
+}
+italy_yourflag_at_3
+{
+Your flag has returned to Command Point 3.
+}
+italy_eflag_at_0
+{
+The enemy flag has returned to bottom of the town.
+}
+italy_eflag_at_1
+{
+The enemy flag has returned to Command Point 1.
+}
+italy_eflag_at_2
+{
+The enemy flag has returned to Command Point 2.
+}
+italy_eflag_at_3
+{
+The enemy flag has returned to Command Point 3.
+}
+
+$position -1 0.7
+
+italy_you_secure_cp1
+{
+You secured Command Point 1!
+Take the next flag to Command Point 2.
+}
+italy_team_secured_cp1
+{
+Your team secured Command Point 1!
+Take the next flag to Command Point 2.
+}
+italy_lost_cp1
+{
+The enemy team secured Command Point 1!
+Defend Command Point 2.
+}
+italy_you_secure_cp2
+{
+You secured Command Point 2!
+Take the next flag to Command Point 3.
+}
+italy_team_secured_cp2
+{
+Your team secured Command Point 2!
+Take the next flag to Command Point 3.
+}
+italy_lost_cp2
+{
+The enemy team secured Command Point 2!
+Defend Command Point 3.
+}
+italy_you_secure_cp3
+{
+You secured Command Point 3!
+Take the next flag to the church.
+}
+italy_team_secured_cp3
+{
+Your team secured Command Point 3!
+Take the next flag to the church.
+}
+italy_lost_cp3
+{
+The enemy team secured Command Point 3!
+Defend the church.
+}
+italy_you_secure_cp4
+{
+You secured the church!
+Victory is yours!
+}
+italy_team_secured_cp4
+{
+Your team secured the church!
+Victory is yours!
+}
+italy_lost_cp4
+{
+The enemy team secured the church!
+You've lost control of the town!
+}
+italy_endround_win
+{
+Your team secured all 4 Command Points.
+You now control the town!
+
+Prepare for a counterattack. Defend the town!
+}
+italy_endround_lose
+{
+The enemy team secured all 4 Command Points.
+You've lost control of the town!
+
+Prepare to counterattack. Take back the town!
+}
+italy_attacker_1
+{
+You're on the attacking team.
+Move uphill and capture Command Point 1!
+}
+italy_attacker_2
+{
+You're on the attacking team.
+Move uphill and capture Command Point 2!
+}
+italy_attacker_3
+{
+You're on the attacking team.
+Move uphill and capture Command Point 3!
+}
+italy_attacker_4
+{
+You're on the attacking team.
+Move uphill and capture the church!
+}
+italy_defender_1
+{
+You're on the defending team.
+Move downhill and defend Command Point 1!
+}
+italy_defender_2
+{
+You're on the defending team.
+Move downhill and defend Command Point 2!
+}
+italy_defender_3
+{
+You're on the defending team.
+Move downhill and defend Command Point 3!
+}
+italy_defender_4
+{
+You're on the defending team.
+Move downhill and defend the church!
+}
+italy_hole_text
+{
+Command Point 4 has been breached!
+}
+
+ctf_yougotflag
+{
+You have the enemy flag!
+Take it back to your base!
+}
+ctf_cantuseitem
+{
+Your team can't use this item.
+}
+ctf_cant_use_door
+{
+This door won't open for your team.
 }
