@@ -420,6 +420,11 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 			m_hLastAttacker[1] = m_hLastAttacker[0];
 		}
 		m_hLastAttacker[0] = attacker;
+
+		if ((bitsDamageType & DMG_RESIST_SELF) != 0 && attacker == this && (pev->flags & FL_ONGROUND) == 0)
+		{
+			flDamage *= 0.6F;
+		}
 	}
 
 	flDamage = ArmourBonus(flDamage, bitsDamageType);

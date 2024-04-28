@@ -67,7 +67,7 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 
 	pev->owner = nullptr; // can't traceline attack owner if this is set
 
-	RadiusDamage(pev->origin, this, owner, pev->dmg, pev->dmg_save, pev->dmg_take, bitsDamageType);
+	RadiusDamage(pev->origin, this, owner, pev->dmg, pev->dmg_save, pev->dmg_take, DMG_RESIST_SELF | bitsDamageType);
 
 	Remove();
 }
