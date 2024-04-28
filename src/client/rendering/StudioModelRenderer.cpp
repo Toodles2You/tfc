@@ -1117,7 +1117,7 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 			return false;
 
 		// get copy of player
-		deadplayer = *(IEngineStudio.GetPlayerState(m_pCurrentEntity->curstate.iuser4 - 1)); //cl.frames[cl.parsecount & CL_UPDATE_MASK].playerstate[m_pCurrentEntity->curstate.renderamt-1];
+		deadplayer = *(IEngineStudio.GetPlayerState(m_pCurrentEntity->curstate.iuser4 - 1));
 
 		// clear weapon, movement state
 		deadplayer.number = m_pCurrentEntity->curstate.iuser4;
