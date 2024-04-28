@@ -1194,22 +1194,26 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 		IEngineStudio.StudioSetupLighting(&lighting);
 
 		// get remap colors
+		m_nTopColor = m_pCurrentEntity->curstate.colormap & 0xFF;
+		m_nBottomColor = (m_pCurrentEntity->curstate.colormap & 0xFF00) >> 8;
+
 		if (m_pCurrentEntity == IEngineStudio.GetViewEntity())
 		{
-			auto player = gEngfuncs.GetLocalPlayer();
+			cl_entity_t* player = gEngfuncs.GetLocalPlayer();
 
-			m_pCurrentEntity->curstate.rendermode = player->curstate.rendermode;
-			m_pCurrentEntity->curstate.renderfx = player->curstate.renderfx;
-			m_pCurrentEntity->curstate.renderamt = player->curstate.renderamt;
-			m_pCurrentEntity->curstate.rendercolor = player->curstate.rendercolor;
+			if (player != nullptr)
+			{
+				m_pCurrentEntity->curstate.rendermode = player->curstate.rendermode;
+				m_pCurrentEntity->curstate.renderfx = player->curstate.renderfx;
+				m_pCurrentEntity->curstate.renderamt = player->curstate.renderamt;
+				m_pCurrentEntity->curstate.rendercolor = player->curstate.rendercolor;
 
-			m_nTopColor = player->curstate.colormap & 0xFF;
-			m_nBottomColor = (player->curstate.colormap & 0xFF00) >> 8;
-		}
-		else
-		{
-			m_nTopColor = m_pCurrentEntity->curstate.colormap & 0xFF;
-			m_nBottomColor = (m_pCurrentEntity->curstate.colormap & 0xFF00) >> 8;
+				m_nPlayerIndex = player->index - 1;
+				m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
+
+				m_nTopColor = std::clamp(m_pPlayerInfo->topcolor, 0, 360);
+				m_nBottomColor = std::clamp(m_pPlayerInfo->bottomcolor, 0, 360);
+			}
 		}
 
 
