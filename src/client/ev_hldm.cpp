@@ -395,7 +395,7 @@ static void EV_CheckTracer(
 		muzzle = start + Vector(0, 0, -4) + right * rightOffset + forward * 16;
 	}
 
-	EV_BubbleTrail(muzzle, end, distance / 64.0F);
+	EV_BubbleTrail(muzzle, end, distance / 256.0F);
 
 	if (frequency != 0 && ((tracerCount[entindex - 1])++ % frequency) == 0)
 	{
