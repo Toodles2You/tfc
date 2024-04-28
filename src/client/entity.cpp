@@ -478,7 +478,7 @@ void HUD_TempEntUpdate(
 						pTemp->die = client_time;
 						gTempEntCount--;
 					}
-					else
+					else if (pTemp->entity.curstate.renderfx != kRenderFxDeadPlayer)
 					{
 						// Reflect velocity
 						if (damp != 0)

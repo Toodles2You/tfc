@@ -876,15 +876,15 @@ static void EV_SpawnCorpse(event_args_t* args)
 
 	/*! FIXME: Colormap doesn't get copied. */
 	gib->flags |= (FTENT_COLLIDEWORLD | FTENT_PERSIST | FTENT_GRAVITY | FTENT_FADEOUT);
-	gib->entity.origin = player->origin;
+	gib->entity.origin = player->origin + Vector(0.0F, 0.0F, 2.0F);;
 	gib->entity.angles = player->angles;
 	gib->entity.curstate.sequence = args->iparam1;
-	gib->entity.curstate.frame = 0.0f;
-	gib->entity.curstate.framerate = 1.0f;
+	gib->entity.curstate.frame = 0.0F;
+	gib->entity.curstate.framerate = 1.0F;
 	gib->entity.curstate.renderfx = kRenderFxDeadPlayer;
 	gib->entity.curstate.iuser4 = args->entindex;
 	gib->entity.baseline = gib->entity.curstate;
-	gib->die = gEngfuncs.GetClientTime() + 15.0f;
+	gib->die = gEngfuncs.GetClientTime() + 15.0F;
 }
 
 void EV_Gibbed(event_args_t* args)
