@@ -327,18 +327,21 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	// view is the weapon model (only visible from inside body )
 	view = gEngfuncs.GetViewModel();
 
-	// transform the view offset by the model's matrix to get the offset from
-	// model origin for the view
-	V_CalcBob(pparams, bobParams, cl_bob->value, cl_bobcycle->value, cl_bobup->value);
-
-	bob = bobParams.value * 0.3 + bobParams.cycleValue * 0.7;
-
 	// refresh position
 	VectorCopy(pparams->simorg, pparams->vieworg);
 
-	if (0 != cl_bobview->value)
+	if (cl_bob->value != 0.0F)
 	{
-		pparams->vieworg[2] += bob;
+		// transform the view offset by the model's matrix to get the offset from
+		// model origin for the view
+		V_CalcBob(pparams, bobParams, cl_bob->value, cl_bobcycle->value, cl_bobup->value);
+
+		bob = bobParams.value * 0.3 + bobParams.cycleValue * 0.7;
+
+		if (0 != cl_bobview->value)
+		{
+			pparams->vieworg[2] += bob;
+		}
 	}
 
 	VectorAdd(pparams->vieworg, pparams->viewheight, pparams->vieworg);
@@ -352,7 +355,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	// -- this prevents drawing errors in GL due to waves
 
 	waterOffset = 0;
-	if (pparams->waterlevel >= 2)
+	if (pparams->waterlevel >= kWaterLevelWaist)
 	{
 		int i, contents, waterDist, waterEntity;
 		Vector point;
@@ -378,7 +381,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 		VectorCopy(pparams->vieworg, point);
 
 		// Eyes are above water, make sure we're above the waves
-		if (pparams->waterlevel == 2)
+		if (pparams->waterlevel == kWaterLevelWaist)
 		{
 			point[2] -= waterDist;
 			for (i = 0; i < waterDist; i++)
@@ -451,24 +454,34 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	// Let the viewmodel shake at about 10% of the amplitude
 	gEngfuncs.V_ApplyShake(view->origin, view->angles, 0.9);
 
-	for (i = 0; i < 3; i++)
+	if (cl_bob->value != 0.0F)
 	{
-		view->origin[i] += bob * 0.4 * pparams->forward[i] - pparams->up[i];
+		for (i = 0; i < 3; i++)
+		{
+			view->origin[i] += bob * 0.4 * pparams->forward[i] - pparams->up[i];
+		}
+
+		if (0 != cl_bobview->value)
+		{
+			view->origin[2] += bob;
+		}
+
+		// throw in a little tilt.
+		if (0 != cl_bobtilt->value)
+		{
+			view->angles[YAW] -= bob * 0.5;
+			view->angles[ROLL] -= bob * 1;
+			view->angles[PITCH] -= bob * 0.3;
+
+			VectorCopy(view->angles, view->curstate.angles);
+		}
 	}
-
-	if (0 != cl_bobview->value)
+	else
 	{
-		view->origin[2] += bob;
-	}
-
-	// throw in a little tilt.
-	if (0 != cl_bobtilt->value)
-	{
-		view->angles[YAW] -= bob * 0.5;
-		view->angles[ROLL] -= bob * 1;
-		view->angles[PITCH] -= bob * 0.3;
-
-		VectorCopy(view->angles, view->curstate.angles);
+		for (i = 0; i < 3; i++)
+		{
+			view->origin[i] += -pparams->up[i];
+		}
 	}
 
 	// Add in the punchangle, if any

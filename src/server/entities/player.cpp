@@ -158,7 +158,8 @@ void CBasePlayer::DeathSound()
 {
 	char* sample = nullptr;
 
-	if (pev->waterlevel == 3)
+	// water death sounds
+	if (pev->waterlevel >= kWaterLevelEyes)
 	{
 		// water death sounds
 		sample = "player/h2odeath.wav";

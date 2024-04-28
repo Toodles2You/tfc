@@ -621,6 +621,14 @@ enum {
 #define CONTENT_LAVA -5
 #define CONTENT_SKY -6
 
+enum
+{
+	kWaterLevelNone = 0,
+	kWaterLevelFeet,
+	kWaterLevelWaist,
+	kWaterLevelEyes,
+};
+
 // channels
 #define CHAN_AUTO 0
 #define CHAN_WEAPON 1
