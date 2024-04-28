@@ -342,7 +342,7 @@ void CHud::Init()
 	m_pCvarWidescreen = CVAR_CREATE("hud_widescreen", "1", FCVAR_ARCHIVE);
 	m_pCvarColor = CVAR_CREATE("hud_color", "FFA000", FCVAR_ARCHIVE);
 	m_pCvarTeamColor = CVAR_CREATE("hud_teamcolor", "1", FCVAR_ARCHIVE);
-	cl_rollangle = CVAR_CREATE("cl_rollangle", "2.0", FCVAR_ARCHIVE);
+	cl_rollangle = CVAR_CREATE("cl_rollangle", "0.0", FCVAR_ARCHIVE);
 	cl_rollspeed = CVAR_CREATE("cl_rollspeed", "200", FCVAR_ARCHIVE);
 	cl_bobtilt = CVAR_CREATE("cl_bobtilt", "0", FCVAR_ARCHIVE);
 	r_decals = gEngfuncs.pfnGetCvarPointer("r_decals");

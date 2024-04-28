@@ -567,7 +567,7 @@ void V_Init()
 	v_oldpunch = gEngfuncs.pfnRegisterVariable("v_oldpunch", "0", 0);
 
 	cl_bobcycle = gEngfuncs.pfnRegisterVariable("cl_bobcycle", "0.8", 0);
-	cl_bob = gEngfuncs.pfnRegisterVariable("cl_bob", "0.01", 0);
+	cl_bob = gEngfuncs.pfnRegisterVariable("cl_bob", "0.00", 0);
 	cl_bobup = gEngfuncs.pfnRegisterVariable("cl_bobup", "0.5", 0);
 	cl_waterdist = gEngfuncs.pfnRegisterVariable("cl_waterdist", "4", 0);
 	cl_chasedist = gEngfuncs.pfnRegisterVariable("cl_chasedist", "112", 0);
