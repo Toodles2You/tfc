@@ -1384,6 +1384,7 @@ void EV_Init()
 	g_sModelIndexBloodDrop = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/blood.spr");
 	g_sModelIndexSmokeTrail = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/smoke.spr");
 	g_sModelIndexNail = gEngfuncs.pEventAPI->EV_FindModelIndex("models/nail.mdl");
+	g_sModelIndexFlare = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/xflare1.spr");
 
 	if (pLaserDot != nullptr)
 	{

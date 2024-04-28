@@ -218,6 +218,7 @@ inline short g_sModelIndexBloodSpray;
 inline short g_sModelIndexSmokeTrail;
 inline short g_sModelIndexNail;
 inline short g_sModelIndexSaveMe;
+inline short g_sModelIndexFlare;
 
 class CTFWeapon : public CBasePlayerWeapon
 {
@@ -402,6 +403,7 @@ public:
 	void Explode(Vector vecSrc, Vector vecAim);
 	virtual void Explode(TraceResult* pTrace, int bitsDamageType);
 
+	virtual bool CanDetonate() { return true; }
 	void EXPORT BounceTouch(CBaseEntity* pOther);
 	void EXPORT ExplodeTouch(CBaseEntity* pOther);
 	void EXPORT Detonate();
@@ -419,6 +421,7 @@ public:
 	bool Spawn() override;
 	void EXPORT PrimedThink();
 
+	bool CanDetonate() override;
 	virtual void Explode(TraceResult* pTrace, int bitsDamageType) override;
 
 	virtual const char* GetModelName() { return "models/w_grenade.mdl"; }

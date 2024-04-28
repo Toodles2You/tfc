@@ -37,6 +37,12 @@ LINK_ENTITY_TO_CLASS(grenade, CGrenade);
 //
 void CGrenade::Explode(Vector vecSrc, Vector vecAim)
 {
+	if (!CanDetonate())
+	{
+		Remove();
+		return;
+	}
+
 	TraceResult tr;
 	util::TraceLine(pev->origin, pev->origin + Vector(0, 0, -32), util::ignore_monsters, this, &tr);
 
@@ -69,6 +75,12 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 
 void CGrenade::Detonate()
 {
+	if (!CanDetonate())
+	{
+		Remove();
+		return;
+	}
+
 	TraceResult tr;
 	Vector vecSpot; // trace starts here!
 
@@ -266,6 +278,37 @@ void CPrimeGrenade::PrimedThink()
 }
 
 
+/* Toodles TODO: Point contents doesn't catch both "no grenades" and "no build". */
+bool CPrimeGrenade::CanDetonate()
+{
+	const auto contents = g_engfuncs.pfnPointContents(pev->origin);
+
+	if (contents != CONTENTS_SOLID
+	 && contents != CONTENTS_SKY
+	 && contents != CONTENTS_NO_GRENADES)
+	{
+		return true;
+	}
+
+	if (contents == CONTENTS_NO_GRENADES && !FStringNull(pev->model))
+	{
+		Vector origin = pev->origin + Vector(0.0F, 0.0F, 4.0F);
+
+		MessageBegin(MSG_PVS, SVC_TEMPENTITY, origin);
+		WriteByte(TE_SPRITE);
+		WriteCoord(origin.x);
+		WriteCoord(origin.y);
+		WriteCoord(origin.z);
+		WriteShort(g_sModelIndexFlare);
+		WriteByte(3);
+		WriteByte(255);
+		MessageEnd();
+	}
+
+	return false;
+}
+
+
 void CPrimeGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 {
 	// Pull out of the wall a bit
@@ -386,12 +429,15 @@ void CCaltropCanister::Throw(throw_e mode)
 	SetOrigin(owner->pev->origin);
 	pev->angles = Vector(0, owner->pev->angles.y, 0);
 
-	for (int i = 0; i < kNumCaltrops; i++)
+	if (CanDetonate())
 	{
-		CCaltrop::Caltrop(
-			owner,
-			pev->origin,
-			pev->angles.y + (360 / static_cast<float>(kNumCaltrops)) * i);
+		for (int i = 0; i < kNumCaltrops; i++)
+		{
+			CCaltrop::Caltrop(
+				owner,
+				pev->origin,
+				pev->angles.y + (360 / static_cast<float>(kNumCaltrops)) * i);
+		}
 	}
 
 	MessageBegin(MSG_ONE, gmsgStatusIcon, owner);

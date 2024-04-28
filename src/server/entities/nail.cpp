@@ -74,7 +74,7 @@ bool CNail::Spawn()
 
 void CNail::NailTouch(CBaseEntity* pOther)
 {
-	if (g_engfuncs.pfnPointContents(pev->origin) != CONTENT_SKY)
+	if (g_engfuncs.pfnPointContents(pev->origin) != CONTENTS_SKY)
 	{
 		CBaseEntity* owner = this;
 

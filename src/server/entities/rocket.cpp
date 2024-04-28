@@ -65,7 +65,7 @@ bool CRocket::Spawn()
 
 void CRocket::RocketTouch(CBaseEntity* pOther)
 {
-	if (g_engfuncs.pfnPointContents(pev->origin) != CONTENT_SKY)
+	if (g_engfuncs.pfnPointContents(pev->origin) != CONTENTS_SKY)
 	{
 		CBaseEntity* owner = this;
 

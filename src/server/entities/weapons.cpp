@@ -87,6 +87,7 @@ void W_Precache()
 	g_sModelIndexSmokeTrail = PRECACHE_MODEL("sprites/smoke.spr");
 	g_sModelIndexNail = PRECACHE_MODEL("models/nail.mdl");
 	g_sModelIndexSaveMe = PRECACHE_MODEL("sprites/saveme.spr");
+	g_sModelIndexFlare = PRECACHE_MODEL("sprites/xflare1.spr");
 
 	PRECACHE_MODEL("models/grenade.mdl");
 	PRECACHE_MODEL("models/rpgrocket.mdl");

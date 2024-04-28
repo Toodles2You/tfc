@@ -27,6 +27,7 @@
 #include "saverestore.h"
 #include "trains.h" // trigger_camera has train functionality
 #include "gamerules.h"
+#include "game.h"
 
 #define SF_TRIGGER_ALLOWMONSTERS 1 // monsters allowed to fire this trigger
 #define SF_TRIGGER_NOCLIENTS 2	   // players not allowed to fire this trigger
@@ -2051,3 +2052,57 @@ void CTriggerChangeTarget::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, US
 		pTarget->pev->target = m_iszNewTarget;
 	}
 }
+
+
+class CFuncArea : public CBaseEntity
+{
+public:
+	bool Spawn() override;
+#ifdef HALFLIFE_SAVERESTORE
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+#endif
+};
+
+LINK_ENTITY_TO_CLASS(func_nogrenades, CFuncArea);
+#if 0
+LINK_ENTITY_TO_CLASS(func_nobuild, CFuncArea);
+#endif
+
+
+bool CFuncArea::Spawn()
+{
+	const auto classname = STRING(pev->classname);
+
+	if (FStrEq("func_nogrenades", classname))
+	{
+		pev->skin = CONTENTS_NO_GRENADES;
+	}
+#if 0
+	else if (FStrEq("func_nobuild", classname))
+	{
+		pev->skin = CONTENTS_NO_BUILD;
+	}
+#endif
+	else
+	{
+		pev->skin = CONTENTS_EMPTY;
+	}
+
+	pev->angles = g_vecZero;
+	pev->movetype = MOVETYPE_NONE;
+	pev->solid = SOLID_NOT;
+	SetModel(STRING(pev->model));
+
+	if (!g_bDeveloperMode)
+	{
+		pev->effects |= EF_NODRAW;
+	}
+	else
+	{
+        pev->rendermode = kRenderTransAdd;
+        pev->renderamt = 64;
+	}
+
+	return true;
+}
+

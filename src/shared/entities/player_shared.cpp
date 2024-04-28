@@ -148,7 +148,7 @@ void CBasePlayer::PostThink()
 #ifdef GAME_DLL
 	if ((FBitSet(pev->flags, FL_ONGROUND)) && (pev->health > 0) && m_flFallVelocity >= PLAYER_FALL_PUNCH_THRESHHOLD)
 	{
-		if (pev->watertype == CONTENT_WATER)
+		if (pev->watertype == CONTENTS_WATER)
 		{
 			// Did he hit the world or a non-moving entity?
 			// BUG - this happens all the time in water, especially when
