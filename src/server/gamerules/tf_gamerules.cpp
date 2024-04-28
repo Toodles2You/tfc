@@ -472,6 +472,21 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
 }
 
 
+bool CTeamFortress::FPlayerCanRespawn(CBasePlayer* pPlayer)
+{
+    if (pPlayer->TeamNumber() == TEAM_UNASSIGNED)
+    {
+        return false;
+    }
+
+    if (pPlayer->PCNumber() == PC_UNDEFINED)
+    {
+        return false;
+    }
+
+    return CHalfLifeMultiplay::FPlayerCanRespawn(pPlayer);
+}
+
 void CTeamFortress::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 {
     if (FStrEq(STRING(pEntity->pev->classname), "info_player_start"))
