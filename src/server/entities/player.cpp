@@ -338,7 +338,7 @@ void CBasePlayer::SendHitFeedback(CBaseEntity* victim, const float flDamage, con
 	}
 
 	if ((bitsDamageType & DMG_AIMED) != 0
-	 && victim->IsPlayer()
+	 && victim->IsClient()
 	 && dynamic_cast<CBasePlayer *>(victim)->m_LastHitGroup == HITGROUP_HEAD)
 	{
 		flags |= kDamageFlagHeadshot;
