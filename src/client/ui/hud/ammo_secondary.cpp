@@ -155,15 +155,15 @@ bool CHudAmmoSecondary::MsgFunc_SecAmmoIcon(const char* pszName, int iSize, void
 {
 	BEGIN_READ(pbuf, iSize);
 
-	const char* pszIcon;
+	int iType = READ_BYTE();
+	const char* pszIcon = READ_STRING();
 
-	pszIcon = READ_STRING();
-	gWR.LoadAmmoSprites(AMMO_GRENADES1, pszIcon);
+	gWR.LoadAmmoSprites(iType, pszIcon);
 
-	pszIcon = READ_STRING();
-	gWR.LoadAmmoSprites(AMMO_GRENADES2, pszIcon);
-
-	m_HUD_ammoicon = gHUD.GetSpriteIndex(pszIcon);
+	if (iType == AMMO_GRENADES2)
+	{
+		m_HUD_ammoicon = gHUD.GetSpriteIndex(pszIcon);
+	}
 
 	return true;
 }

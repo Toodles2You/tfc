@@ -1011,21 +1011,19 @@ bool CBasePlayer::Spawn()
 
 	if (IsNetClient())
 	{
-		const char *icon1 = GetGrenadeIconName(0);
-		if (icon1 == nullptr)
+		for (auto i = 0; i < 2; i++)
 		{
-			icon1 = "grenade";
-		}
-		const char *icon2 = GetGrenadeIconName(1);
-		if (icon2 == nullptr)
-		{
-			icon2 = "grenade";
-		}
+			const char *icon = GetGrenadeIconName(i);
+			if (icon == nullptr)
+			{
+				icon = "grenade";
+			}
 
-		MessageBegin(MSG_ONE, gmsgSecAmmoIcon, this);
-		WriteString(icon1);
-		WriteString(icon2);
-		MessageEnd();
+			MessageBegin(MSG_ONE, gmsgSecAmmoIcon, this);
+			WriteByte(AMMO_SECONDARY + i);
+			WriteString(icon);
+			MessageEnd();
+		}
 	}
 
 	return true;
