@@ -87,15 +87,17 @@ void tent::Explosion(
 
 void tent::SpawnCorpse(CBaseEntity* entity, const int gibMode)
 {
+	Vector attackAngles = util::VecToAngles(g_vecAttackDir);
+
 	g_engfuncs.pfnPlaybackEvent(
 		FEV_GLOBAL | FEV_RELIABLE,
 		entity->edict(),
 		g_usGibbed,
 		0.0F,
 		entity->pev->origin,
-		util::VecToAngles(g_vecAttackDir),
+		attackAngles,
 		0.0F,
-		entity->pev->health,
+		std::max(entity->pev->health, -99.0F),
 		entity->pev->sequence,
 		gibMode,
 		false,
