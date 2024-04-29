@@ -232,9 +232,14 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 	data.m_iId = (m_pActiveWeapon != nullptr) ? m_pActiveWeapon->GetID() + 1 : 0;
 
 	byte* ammo = reinterpret_cast<byte*>(&data.ammo_shells);
-	for (int i = 0; i < AMMO_TYPES; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		ammo[i] = m_rgAmmo[i];
+	}
+	byte* ammo2 = reinterpret_cast<byte*>(&data.ammo_nails);
+	for (int i = 0; i < 2; i++)
+	{
+		ammo2[i] = m_rgAmmo[4 + i];
 	}
 
 	data.viewmodel = pev->viewmodel;
@@ -288,9 +293,14 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 	}
 
 	const byte* ammo = reinterpret_cast<const byte*>(&data.ammo_shells);
-	for (int i = 0; i < AMMO_TYPES; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		m_rgAmmo[i] = ammo[i];
+	}
+	const byte* ammo2 = reinterpret_cast<const byte*>(&data.ammo_nails);
+	for (int i = 0; i < 2; i++)
+	{
+		m_rgAmmo[4 + i] = ammo2[i];
 	}
 
 	pev->viewmodel = data.viewmodel;
