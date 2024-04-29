@@ -1419,7 +1419,6 @@ void CBasePlayer::UpdateClientData()
 		gInitHUD = false;
 
 		MessageBegin(MSG_ONE, gmsgResetHUD, this);
-		WriteByte(0);
 		MessageEnd();
 
 		if (!m_fGameHUDInitialized)
