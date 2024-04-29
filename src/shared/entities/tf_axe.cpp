@@ -137,6 +137,11 @@ int CTFMelee::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& 
 	const auto info = GetInfo();
 	int result = kResultHitWorld;
 
+	if (hit == nullptr || hit->pev->takedamage == DAMAGE_NO)
+	{
+		return result;
+	}
+
 	hit->TraceAttack(
 		m_pPlayer,
 		info.iProjectileDamage,
