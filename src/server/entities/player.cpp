@@ -297,6 +297,8 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	// Do the damage!
 	pev->dmg_take += flDamage;
 	pev->health -= flDamage;
+
+	pev->dmg_save += flArmour;
 	pev->armorvalue -= flArmour;
 
 	if (attacker->IsNetClient())
@@ -1470,18 +1472,20 @@ void CBasePlayer::UpdateClientData()
 		// send "damage" message
 		// causes screen to flash, and pain compass to show direction of damage
 		edict_t* other = pev->dmg_inflictor;
-		if (other)
+		if (other != nullptr)
 		{
 			CBaseEntity* pEntity = CBaseEntity::Instance(other);
-			if (pEntity)
+			if (pEntity != nullptr)
+			{
 				damageOrigin = pEntity->Center();
+			}
 
 			pev->dmg_inflictor = nullptr;
 		}
 
 		MessageBegin(MSG_ONE, gmsgDamage, this);
-		WriteByte(pev->dmg_save);
-		WriteByte(pev->dmg_take);
+		WriteByte(std::clamp(static_cast<int>(pev->dmg_save), 0, 255));
+		WriteByte(std::clamp(static_cast<int>(pev->dmg_take), 0, 255));
 		WriteLong(m_bitsDamageType);
 		WriteCoord(damageOrigin.x);
 		WriteCoord(damageOrigin.y);
