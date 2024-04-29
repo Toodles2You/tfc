@@ -31,6 +31,9 @@ DECLARE_MESSAGE(m_Battery, Battery)
 bool CHudBattery::Init()
 {
 	m_iBat = 0;
+	m_iBatMax = 0;
+	m_flType = 0.0F;
+	m_szString[0] = '\0';
 	m_fFade = 0;
 	m_iFlags = 0;
 
@@ -56,14 +59,37 @@ bool CHudBattery::VidInit()
 	return true;
 }
 
-void CHudBattery::Update_Battery(int iBat)
+void CHudBattery::Update_Battery(int iBat, float flType)
 {
 	m_iFlags |= HUD_ACTIVE;
 
-	if (iBat != m_iBat)
+	if (iBat != m_iBat || flType != m_flType)
 	{
 		m_fFade = FADE_TIME;
 		m_iBat = iBat;
+	}
+	
+	if (flType != m_flType)
+	{
+		m_fFade = FADE_TIME;
+		m_flType = flType;
+		m_szString[0] = '\0';
+
+		if (m_flType != 0.0F)
+		{
+			if (m_flType <= 0.3F)
+			{
+				CHudTextMessage::LocaliseTextString("#Game_light_armor", m_szString, sizeof(m_szString));
+			}
+			else if (m_flType >= 0.8F)
+			{
+				CHudTextMessage::LocaliseTextString("#Game_heavy_armor", m_szString, sizeof(m_szString));
+			}
+			else
+			{
+				CHudTextMessage::LocaliseTextString("#Game_medium_armor", m_szString, sizeof(m_szString));
+			}
+		}
 	}
 }
 
@@ -111,6 +137,8 @@ bool CHudBattery::Draw(float flTime)
 	else
 		a = MIN_ALPHA;
 
+	int r, g, b;
+
 	int iOffset = (m_prc1->bottom - m_prc1->top) / 6;
 
 	y = m_iAnchorY - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
@@ -124,7 +152,15 @@ bool CHudBattery::Draw(float flTime)
 	}
 
 	x += (m_prc1->right - m_prc1->left);
-	x = gHUD.DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iBat, CHud::COLOR_PRIMARY, a);
+	gHUD.DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iBat, CHud::COLOR_PRIMARY, a);
+
+	/* Toodles TODO: This looks like poop. */
+	if (m_szString[0] != '\0')
+	{
+		gHUD.GetColor(r, g, b, CHud::COLOR_PRIMARY);
+		ScaleColors(r, g, b, a);
+		gHUD.DrawHudString(x + 2, m_iAnchorY - (m_prc1->bottom - m_prc1->top) - 8, gHUD.GetWidth(), m_szString, r, g, b);
+	}
 
 	return true;
 }

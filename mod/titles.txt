@@ -371,6 +371,19 @@ Vote_level_nominate
 Player %s has nominated '%s'
 }
 
+Game_light_armor
+{
+Light Armor
+}
+Game_medium_armor
+{
+Medium Armor
+}
+Game_heavy_armor
+{
+Heavy Armor
+}
+
 // All centered for now
 $position -1 0.7
 $effect 2

@@ -83,7 +83,7 @@ void CBasePlayer::UpdateHudData()
 
 	gHUD.Update_SetFOV(m_iFOV);
 	gHUD.m_Health.Update_Health(pev->health);
-	gHUD.m_Battery.Update_Battery(pev->armorvalue);
+	gHUD.m_Battery.Update_Battery(pev->armorvalue, pev->armortype);
 
 	if (IsAlive() && m_pActiveWeapon != nullptr)
 	{

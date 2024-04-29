@@ -203,6 +203,7 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 	}
 	
 	data.vuser4.z = pev->armorvalue;
+	data.vuser4.x = pev->armortype * 10.0F;
 
 	data.waterlevel = pev->waterlevel;
 	data.watertype = pev->watertype;
@@ -251,6 +252,7 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
     pev->deadflag = data.deadflag;
 
 	pev->armorvalue = data.vuser4.z;
+	pev->armortype = data.vuser4.x / 10.0F;
 
 	pev->waterlevel = data.waterlevel;
 	pev->watertype = data.watertype;

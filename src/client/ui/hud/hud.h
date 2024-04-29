@@ -355,7 +355,7 @@ public:
 	bool Init() override;
 	bool VidInit() override;
 	bool Draw(float flTime) override;
-	void Update_Battery(int iBat);
+	void Update_Battery(int iBat, float flType = 0.0F);
 	bool MsgFunc_Battery(const char* pszName, int iSize, void* pbuf);
 
 private:
@@ -365,6 +365,8 @@ private:
 	Rect* m_prc2;
 	int m_iBat;
 	int m_iBatMax;
+	float m_flType;
+	char m_szString[32];
 	float m_fFade;
 	int m_iHeight; // width of the battery innards
 	int m_iAnchorX; // our x position, set by the health hud
