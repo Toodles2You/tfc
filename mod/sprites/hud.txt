@@ -1,4 +1,4 @@
-75
+77
 
 selection		640 640hud3	0	180	170	45
 
@@ -66,6 +66,8 @@ d_headshot		640	tfchud06	208	120	48	16
 d_axe			640	640hud1		192	0	48	16
 d_supershotgun	640	640hud1		192	64	48	16
 d_rocket		640	640hud1		192	96	48	16
+d_skull			640	640hud1		192	224	32	16
+d_tracktrain	640	640hud1		192	240	32	16
 
 d_grenade				640	640hud1		192	160	32	16
 d_genericprimedgrenade	640	640hud1		192	160	32	16
