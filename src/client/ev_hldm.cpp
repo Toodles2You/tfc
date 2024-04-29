@@ -1136,7 +1136,7 @@ void EV_HookEvents()
 	gEngfuncs.pfnHookEvent("events/explosion.sc", EV_Explosion);
 	gEngfuncs.pfnHookEvent("events/train.sc", EV_TrainPitchAdjust);
 
-	gEngfuncs.pfnHookUserMsg("blood", MSG_Blood);
+	gEngfuncs.pfnHookUserMsg("Blood", MSG_Blood);
 }
 
 void EV_Init()
