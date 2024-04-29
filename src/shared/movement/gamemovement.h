@@ -23,6 +23,10 @@ public:
 
     static int g_ShouldIgnore(physent_t* other);
 
+protected:
+    void InitTrace(trace_t* trace, const Vector& end);
+    void TraceModel(physent_t* physent, const Vector& start, const Vector& end, trace_t* trace);
+
 public:
     playermove_t* pmove;
     CBasePlayer* player;
@@ -73,6 +77,9 @@ protected:
     bool BeginWaterJump();
     bool WaterJump();
 
+    virtual bool Climb(physent_t* ladder);
+    bool CheckLadder();
+
 public:
     static void ClipVelocity(const Vector& in, const Vector& normal, Vector& out, const float overbounce);
 
@@ -90,5 +97,21 @@ protected:
 inline int CGameMovement::g_ShouldIgnore(physent_t* other)
 {
     return g_pCurrentMovement->ShouldCollide(other) ? 0 : 1;
+}
+
+
+inline void CGameMovement::InitTrace(trace_t* trace, const Vector& end)
+{
+	memset(trace, 0, sizeof(trace_t));
+    trace->endpos = end;
+	trace->allsolid = 1;
+	trace->fraction = 1.0F;
+}
+
+
+inline void CGameMovement::TraceModel(physent_t* physent, const Vector& start, const Vector& end, trace_t* trace)
+{
+	CGameMovement::InitTrace(trace, end);
+	pmove->PM_TraceModel(physent, start, end, trace);
 }
 

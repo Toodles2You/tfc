@@ -2063,6 +2063,7 @@ public:
 #endif
 };
 
+LINK_ENTITY_TO_CLASS(func_ladder, CFuncArea);
 LINK_ENTITY_TO_CLASS(func_nogrenades, CFuncArea);
 #if 0
 LINK_ENTITY_TO_CLASS(func_nobuild, CFuncArea);
@@ -2073,7 +2074,11 @@ bool CFuncArea::Spawn()
 {
 	const auto classname = STRING(pev->classname);
 
-	if (FStrEq("func_nogrenades", classname))
+	if (FStrEq("func_ladder", classname))
+	{
+		pev->skin = CONTENTS_LADDER;
+	}
+	else if (FStrEq("func_nogrenades", classname))
 	{
 		pev->skin = CONTENTS_NO_GRENADES;
 	}
@@ -2095,7 +2100,15 @@ bool CFuncArea::Spawn()
 
 	if (!g_bDeveloperMode)
 	{
-		pev->effects |= EF_NODRAW;
+		if (pev->skin == CONTENTS_LADDER)
+		{
+			pev->rendermode = kRenderTransTexture;
+			pev->renderamt = 0;
+		}
+		else
+		{
+			pev->effects |= EF_NODRAW;
+		}
 	}
 	else
 	{

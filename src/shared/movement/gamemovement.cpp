@@ -59,17 +59,20 @@ void CHalfLifeMovement::Move()
         NoClip();
         break;
     case MOVETYPE_WALK:
-        if (pmove->waterjumptime != 0)
+        if (!CheckLadder())
         {
-            WaterJump();
-        }
-        else if (IsSubmerged())
-        {
-            Swim();
-        }
-        else
-        {
-            Walk();
+            if (pmove->waterjumptime != 0)
+            {
+                WaterJump();
+            }
+            else if (IsSubmerged())
+            {
+                Swim();
+            }
+            else
+            {
+                Walk();
+            }
         }
         pmove->friction = 1;
         break;
@@ -216,6 +219,8 @@ void CHalfLifeMovement::CheckParameters()
     {
         pmove->view_ofs = VEC_DEAD_VIEW;
     }
+
+    pmove->flFallVelocity = 0.0F;
 
     pmove->numtouch = 0;
     pmove->frametime = pmove->cmd.msec / 1000.0F;
