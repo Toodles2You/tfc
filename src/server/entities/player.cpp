@@ -883,12 +883,18 @@ void CBasePlayer::PreThink()
 		CBaseEntity* infector;
 		infector = m_hInfector;
 		
-		if (TakeDamage(infector, infector, 8, DMG_IGNOREARMOR) && infector != nullptr)
+		if (infector == nullptr)
+		{
+			infector = CWorld::World;
+		}
+		
+		if (TakeDamage(infector, infector, 8, DMG_IGNOREARMOR) && infector != CWorld::World)
 		{
 			CBaseEntity* e = nullptr;
 			while ((e = util::FindEntityInSphere(e, pev->origin, 80.0F)) != nullptr)
 			{
 				if (e->IsPlayer()
+				 && e->IsAlive()
 				 && g_pGameRules->PlayerRelationship(this, e) >= GR_ALLY)
 				{
 					dynamic_cast<CBasePlayer*>(e)->BecomeInfected(infector);
