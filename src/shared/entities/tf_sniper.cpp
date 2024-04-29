@@ -119,6 +119,8 @@ void CSniperRifle::PrimaryAttack()
 	ALERT(at_console, "SNIPER RIFLE: %i (%i%%)\n", damage, (int)(damageScale * 100));
 #endif
 
+	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), m_pPlayer->pev->view_ofs.z, m_pPlayer->m_randomSeed, 1);
+
 #ifdef GAME_DLL
 	const auto gun = m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs;
 	const auto aim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
@@ -129,68 +131,70 @@ void CSniperRifle::PrimaryAttack()
 	TraceResult tr;
 	util::TraceLine(gun, gun + dir * info.iProjectileRange, &tr, m_pPlayer, util::kTraceBox | util::kTraceBoxModel);
 
-	if (tr.flFraction != 1.0F)
+	if (tr.flFraction == 1.0F)
 	{
-		const auto hit = CBaseEntity::Instance(tr.pHit);
+		return;
+	}
 
-		if (hit->IsClient())
+	const auto hit = CBaseEntity::Instance(tr.pHit);
+
+	if (hit == nullptr || hit->pev->takedamage == DAMAGE_NO)
+	{
+		return;
+	}
+
+	if (hit->IsClient())
+	{
+		float distance = (hit->pev->origin - m_pPlayer->pev->origin).Length();
+
+		/*
+			Don't headshot or legshot players who are very far away.
+			Unless they're a sniper, to keep those epic sniper duels.
+		*/
+		if (distance > 1536.0F && dynamic_cast<CBasePlayer*>(hit)->PCNumber() != PC_SNIPER)
 		{
-			float distance = (hit->pev->origin - m_pPlayer->pev->origin).Length();
-
-			/*
-				Don't headshot or legshot players who are very far away.
-				Unless they're a sniper, to keep those epic sniper duels.
-			*/
-			if (distance > 1536.0F && dynamic_cast<CBasePlayer*>(hit)->PCNumber() != PC_SNIPER)
-			{
 #ifndef NDEBUG
-				if ((damageType & (DMG_AIMED | DMG_CALTROP)) != 0)
-				{
-					ALERT(at_console, "SNIPER TOO FAR\n");
-				}
-#endif
-				damageType &= ~(DMG_AIMED | DMG_CALTROP);
-			}
-			/* Don't headshot players who are very close. */
-			else if (distance < 512.0F)
+			if ((damageType & (DMG_AIMED | DMG_CALTROP)) != 0)
 			{
-#ifndef NDEBUG
-				if ((damageType & DMG_AIMED) != 0)
-				{
-					ALERT(at_console, "SNIPER TOO CLOSE\n");
-				}
-#endif
-				damageType &= ~DMG_AIMED;
+				ALERT(at_console, "SNIPER TOO FAR\n");
 			}
+#endif
+			damageType &= ~(DMG_AIMED | DMG_CALTROP);
 		}
+		/* Don't headshot players who are very close. */
+		else if (distance < 512.0F)
+		{
+#ifndef NDEBUG
+			if ((damageType & DMG_AIMED) != 0)
+			{
+				ALERT(at_console, "SNIPER TOO CLOSE\n");
+			}
+#endif
+			damageType &= ~DMG_AIMED;
+		}
+	}
 
-		hit->TraceAttack(
-			m_pPlayer,
-			damage,
-			dir,
-			tr.iHitgroup,
-			damageType);
-		
-		hit->ApplyMultiDamage(m_pPlayer, m_pPlayer);
-		
-		if (hit->IsClient()
-		 && g_pGameRules->FPlayerCanTakeDamage(dynamic_cast<CBasePlayer*>(hit), m_pPlayer))
+	hit->TraceAttack(
+		m_pPlayer,
+		damage,
+		dir,
+		tr.iHitgroup,
+		damageType);
+	
+	hit->ApplyMultiDamage(m_pPlayer, m_pPlayer);
+	
+	if (hit->IsClient())
+	{
+		auto player = dynamic_cast<CBasePlayer*>(hit);
+
+		if (g_pGameRules->FPlayerCanTakeDamage(player, m_pPlayer))
 		{
 			MessageBegin(MSG_PVS, gmsgBlood, tr.vecEndPos);
 			WriteFloat(dir.x);
 			WriteFloat(dir.y);
 			WriteFloat(dir.z);
 			WriteByte(0);
-
-			if (dynamic_cast<CBasePlayer*>(hit)->m_LastHitGroup == HITGROUP_HEAD)
-			{
-				WriteByte(1);
-			}
-			else
-			{
-				WriteByte(0);
-			}
-
+			WriteByte(player->m_LastHitGroup == HITGROUP_HEAD ? 1 : 0);
 			WriteCoord(tr.vecEndPos.x);
 			WriteCoord(tr.vecEndPos.y);
 			WriteCoord(tr.vecEndPos.z);
@@ -198,8 +202,6 @@ void CSniperRifle::PrimaryAttack()
 		}
 	}
 #endif
-
-	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), m_pPlayer->pev->view_ofs.z, m_pPlayer->m_randomSeed, 1);
 }
 
 
