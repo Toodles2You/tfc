@@ -55,6 +55,7 @@ void CSniperRifle::GetWeaponInfo(WeaponInfo& i)
 	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
 	i.iProjectileCount = 1;
 	i.iProjectileChargeDamage = 400;
+	i.iProjectileRange = 4096;
 
 	i.pszEvent = "events/wpn/tf_sniper.sc";
 	i.pszAttackSound = "ambience/rifle1.wav";
@@ -126,7 +127,7 @@ void CSniperRifle::PrimaryAttack()
 	AngleVectors(aim, &dir, nullptr, nullptr);
 
 	TraceResult tr;
-	util::TraceLine(gun, gun + dir * 4096.0F, &tr, m_pPlayer, util::kTraceBox | util::kTraceBoxModel);
+	util::TraceLine(gun, gun + dir * info.iProjectileRange, &tr, m_pPlayer, util::kTraceBox | util::kTraceBoxModel);
 
 	if (tr.flFraction != 1.0F)
 	{
@@ -326,6 +327,7 @@ void CSniperRifle::UpdateLaserEffect()
 {
 	if (m_pLaserDot != nullptr || m_pLaserBeam != nullptr)
 	{
+		const auto info = GetInfo();
 		const auto gun = m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs;
 		const auto aim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
 
@@ -333,7 +335,7 @@ void CSniperRifle::UpdateLaserEffect()
 		AngleVectors(aim, &dir, nullptr, nullptr);
 
 		TraceResult tr;
-		util::TraceLine(gun, gun + dir * 4096.0F, &tr, m_pPlayer, util::kTraceBox);
+		util::TraceLine(gun, gun + dir * info.iProjectileRange, &tr, m_pPlayer, util::kTraceBox);
 
 		if (m_pLaserDot != nullptr)
 		{
@@ -413,6 +415,7 @@ void CAutoRifle::GetWeaponInfo(WeaponInfo& i)
 	i.iProjectileDamage = 8;
 	i.vecProjectileSpread = Vector2D(2.3F, 2.3F);
 	i.iProjectileCount = 1;
+	i.iProjectileRange = 2048;
 
 	i.pszEvent = "events/wpn/tf_ar.sc";
 	i.pszAttackSound = "weapons/sniper.wav";

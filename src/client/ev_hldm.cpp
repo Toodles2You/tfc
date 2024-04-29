@@ -630,7 +630,7 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 					args->iparam1,
 					info.vecProjectileSpread,
 					info.iProjectileCount * args->iparam2,
-					8192,
+					info.iProjectileRange,
 					false,
 					1,
 					true);
@@ -642,7 +642,7 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 					args->iparam1,
 					info.vecProjectileSpread,
 					info.iProjectileCount * args->iparam2,
-					2048,
+					info.iProjectileRange,
 					false,
 					0);
 			}

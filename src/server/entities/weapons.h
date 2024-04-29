@@ -95,7 +95,10 @@ typedef struct
 		int iProjectileChargeDamage;
 		int iProjectileDamageMin;
 	};
-	int iProjectileRadius;
+	union {
+		int iProjectileRange;
+		int iProjectileRadius;
+	};
 	const char* pszEvent;
 	const char* pszAttackSound;
 	const char* pszAlternateSound;

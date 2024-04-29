@@ -223,7 +223,11 @@ void CTFWeapon::PrimaryAttack()
 		}
 		default:
 		{
-			m_pPlayer->FireBullets(info.iProjectileDamage, info.vecProjectileSpread, info.iProjectileCount * rounds, 2048);
+			m_pPlayer->FireBullets(
+				info.iProjectileDamage,
+				info.vecProjectileSpread,
+				info.iProjectileCount * rounds,
+				info.iProjectileRange);
 			break;
 		}
 	}
@@ -383,6 +387,7 @@ void CShotgun::GetWeaponInfo(WeaponInfo& i)
 	i.iProjectileDamage = 4;
 	i.vecProjectileSpread = Vector2D(2.3F, 2.3F);
 	i.iProjectileCount = 6;
+	i.iProjectileRange = 2048;
 
 	i.pszEvent = "events/wpn/tf_sg.sc";
 	i.pszAttackSound = "weapons/sbarrel1.wav";
@@ -429,6 +434,7 @@ void CSuperShotgun::GetWeaponInfo(WeaponInfo& i)
 	i.iProjectileDamage = 4;
 	i.vecProjectileSpread = Vector2D(8.0F, 4.6F);
 	i.iProjectileCount = 14;
+	i.iProjectileRange = 2048;
 
 	i.pszEvent = "events/wpn/tf_ssg.sc";
 	i.pszAttackSound = "weapons/shotgn2.wav";
