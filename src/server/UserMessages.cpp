@@ -39,7 +39,7 @@ void LinkUserMessages()
 	gmsgHudText = REG_USER_MSG("HudText", -1); // we don't use the message but 3rd party addons may!
 	gmsgSayText = REG_USER_MSG("SayText", -1);
 	gmsgTextMsg = REG_USER_MSG("TextMsg", -1);
-	gmsgResetHUD = REG_USER_MSG("ResetHUD", 1); // called every respawn
+	gmsgResetHUD = REG_USER_MSG("ResetHUD", 0); // called every respawn
 	gmsgInitHUD = REG_USER_MSG("InitHUD", 0);	// called every time a new player joins the server
 	gmsgDeathMsg = REG_USER_MSG("DeathMsg", -1);
 	gmsgScoreInfo = REG_USER_MSG("ScoreInfo", 5);

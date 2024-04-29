@@ -323,6 +323,7 @@ float CBasePlayer::ArmourBonus(float damage, const int bitsDamageType)
 		m_afArmorClass = 0;
 	}
 
+	pev->dmg_save += takeArmour;
 	pev->armorvalue -= takeArmour;
 
 	return newDamage;
@@ -927,6 +928,8 @@ bool CBasePlayer::Spawn()
 			m_bIsSpawning = false;
 		}};
 
+	Precache();
+
 	pev->classname = MAKE_STRING("player");
 	pev->health = 100;
 	pev->armorvalue = 0;
@@ -983,7 +986,6 @@ bool CBasePlayer::Spawn()
 	}
 
 	pev->view_ofs = VEC_VIEW;
-	Precache();
 
 	m_fInitHUD = true;
 	m_iClientHideHUD = -1; // force this to be recalculated
@@ -1559,7 +1561,6 @@ void CBasePlayer::UpdateClientData()
 		gInitHUD = false;
 
 		MessageBegin(MSG_ONE, gmsgResetHUD, this);
-		WriteByte(0);
 		MessageEnd();
 
 		if (!m_fGameHUDInitialized)
@@ -1610,18 +1611,20 @@ void CBasePlayer::UpdateClientData()
 		// send "damage" message
 		// causes screen to flash, and pain compass to show direction of damage
 		edict_t* other = pev->dmg_inflictor;
-		if (other)
+		if (other != nullptr)
 		{
 			CBaseEntity* pEntity = CBaseEntity::Instance(other);
-			if (pEntity)
+			if (pEntity != nullptr)
+			{
 				damageOrigin = pEntity->Center();
+			}
 
 			pev->dmg_inflictor = nullptr;
 		}
 
 		MessageBegin(MSG_ONE, gmsgDamage, this);
-		WriteByte(pev->dmg_save);
-		WriteByte(pev->dmg_take);
+		WriteByte(std::clamp(static_cast<int>(pev->dmg_save), 0, 255));
+		WriteByte(std::clamp(static_cast<int>(pev->dmg_take), 0, 255));
 		WriteLong(m_bitsDamageType);
 		WriteCoord(damageOrigin.x);
 		WriteCoord(damageOrigin.y);

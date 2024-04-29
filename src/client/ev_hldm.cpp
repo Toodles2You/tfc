@@ -1363,7 +1363,7 @@ void EV_HookEvents()
 	gEngfuncs.pfnHookEvent("events/trail.sc", EV_Trail);
 	gEngfuncs.pfnHookEvent("events/train.sc", EV_TrainPitchAdjust);
 
-	gEngfuncs.pfnHookUserMsg("blood", MSG_Blood);
+	gEngfuncs.pfnHookUserMsg("Blood", MSG_Blood);
 	gEngfuncs.pfnHookUserMsg("Laser", MSG_LaserDot);
 }
 
