@@ -76,7 +76,7 @@ public:
 
 	unsigned int GetID( void ) const	{ return m_id; }	///< return bot's unique ID
 
-	virtual bool IsBot( void ) { return true; }	
+	virtual bool IsBot( void ) override { return true; }	
 
 	virtual void SpawnBot( void ) = 0;
 	virtual void Upkeep( void ) = 0;						///< lightweight maintenance, invoked frequently
@@ -130,13 +130,13 @@ public:
 	//
 
 	/// invoked when injured by something (EXTEND)
-	virtual bool TakeDamage( CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType )
+	virtual bool TakeDamage( CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType ) override
 	{
 		return CBasePlayer::TakeDamage( inflictor, attacker, flDamage, bitsDamageType );
 	}
 
 	/// invoked when killed (EXTEND)
-	virtual void Killed( CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType )
+	virtual void Killed( CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType ) override
 	{ 
 		CBasePlayer::Killed( inflictor, attacker, bitsDamageType );
 	}
@@ -187,14 +187,14 @@ public:
 	virtual void SetModel( const char *modelName );
 	virtual Vector GetAimVector( void );
 
-	bool Spawn( void );
+	bool Spawn( void ) override;
 	void BotThink( void );
-	bool IsNetClient( void ) const			{ return false; }
+	bool IsNetClient( void ) override			{ return false; }
 #ifdef HALFLIFE_SAVERESTORE
-	int Save( CSave &save )	const			{ return 0; }
-	int Restore( CRestore &restore ) const	{ return 0; }
+	int Save( CSave &save )	override			{ return 0; }
+	int Restore( CRestore &restore ) override	{ return 0; }
 #endif
-	virtual void Think( void ) { }
+	virtual void Think( void ) override { }
 
 	const BotProfile *GetProfile( void ) const		{ return m_profile; }	///< return our personality profile
 
