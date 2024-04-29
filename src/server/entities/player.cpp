@@ -1009,21 +1009,24 @@ bool CBasePlayer::Spawn()
 
 	g_pGameRules->PlayerSpawn(this);
 
-	const char *icon1 = GetGrenadeIconName(0);
-	if (icon1 == nullptr)
+	if (IsNetClient())
 	{
-		icon1 = "grenade";
-	}
-	const char *icon2 = GetGrenadeIconName(1);
-	if (icon2 == nullptr)
-	{
-		icon2 = "grenade";
-	}
+		const char *icon1 = GetGrenadeIconName(0);
+		if (icon1 == nullptr)
+		{
+			icon1 = "grenade";
+		}
+		const char *icon2 = GetGrenadeIconName(1);
+		if (icon2 == nullptr)
+		{
+			icon2 = "grenade";
+		}
 
-	MessageBegin(MSG_ONE, gmsgSecAmmoIcon, this);
-	WriteString(icon1);
-	WriteString(icon2);
-	MessageEnd();
+		MessageBegin(MSG_ONE, gmsgSecAmmoIcon, this);
+		WriteString(icon1);
+		WriteString(icon2);
+		MessageEnd();
+	}
 
 	return true;
 }
