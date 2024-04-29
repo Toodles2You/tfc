@@ -42,6 +42,15 @@ bool CItem::Spawn()
 	SetSize(Vector(-16, -16, 0), Vector(16, 16, 16));
 	SetTouch(&CItem::ItemTouch);
 
+	pev->air_finished = gpGlobals->time;
+
+	if ((pev->spawnflags & SF_NORESPAWN) != 0)
+	{
+		SetThink(&CItem::Remove);
+		pev->nextthink = gpGlobals->time + 30.0F;
+		return true;
+	}
+
 	if (g_engfuncs.pfnDropToFloor(pev->pContainingEntity) == 0)
 	{
 		ALERT(at_error, "Item %s fell out of level at %f,%f,%f", STRING(pev->classname), pev->origin.x, pev->origin.y, pev->origin.z);
@@ -53,6 +62,11 @@ bool CItem::Spawn()
 
 bool CItem::CanHaveItem(CBaseEntity* other)
 {
+	if (pev->air_finished > gpGlobals->time)
+	{
+		return false;
+	}
+
 	if (!other->IsPlayer())
 	{
 		return false;
@@ -318,4 +332,41 @@ LINK_ENTITY_TO_CLASS(item_shells, CItemBackpack);
 LINK_ENTITY_TO_CLASS(item_spikes, CItemBackpack);
 LINK_ENTITY_TO_CLASS(item_rockets, CItemBackpack);
 LINK_ENTITY_TO_CLASS(item_cells, CItemBackpack);
+
+
+CItem* CItem::DropBackpack(CBaseEntity* owner, int shells, int nails, int rockets, int cells)
+{
+	CItemBackpack *item = GetClassPtr((CItemBackpack*)nullptr);
+
+	item->pev->effects |= EF_NOINTERP;
+	item->pev->spawnflags |= SF_NORESPAWN;
+	item->pev->owner = owner->pev->pContainingEntity;
+	item->pev->origin = owner->pev->origin;
+
+	item->pev->health = 0;
+	item->pev->armorvalue = 0;
+	item->tfv.ammo_shells = shells;
+	item->tfv.ammo_nails = nails;
+	item->tfv.ammo_rockets = rockets;
+	item->tfv.ammo_cells = cells;
+
+	item->Spawn();
+
+	item->pev->air_finished = gpGlobals->time + 0.75F;
+
+	if (!owner->IsAlive())
+	{
+		item->pev->velocity = Vector(0.0F, 0.0F, 200.0F);
+	}
+	else
+	{
+		util::MakeVectors(owner->pev->v_angle);
+		item->pev->velocity = gpGlobals->v_forward * 600.0F + gpGlobals->v_up * 200.0F;
+
+		item->pev->angles = util::VecToAngles(item->pev->velocity);
+		item->pev->angles.x = item->pev->angles.z = 0.0F;
+
+		item->EmitSound("items/ammopickup1.wav", CHAN_ITEM);
+	}
+}
 

@@ -160,7 +160,6 @@ public:
 												 // Spectators should return true for this
 	const char* TeamID() override;
 
-	void PackDeadPlayerWeapons();
 	void RemoveAllWeapons();
 	/**
 	*	@brief Equips an appropriate weapon for the player if they don't have one equipped already.
@@ -233,6 +232,9 @@ public:
 	void EnableControl(bool fControl);
 
 	bool GiveAmmo(int iAmount, int iType) override;
+#ifdef GAME_DLL
+	void DiscardAmmo();
+#endif
 
 	void PlaybackEvent(
 		unsigned short event,

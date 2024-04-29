@@ -506,6 +506,10 @@ void ClientCommand(edict_t* pEntity)
 			player->RemoveGoalItems(false);
 		}
 	}
+	else if (FStrEq(pcmd, "discard"))
+	{
+		player->DiscardAmmo();
+	}
 	else if (g_pGameRules->ClientCommand(player, pcmd))
 	{
 	}
@@ -951,6 +955,10 @@ void ClientPrecache()
 	PRECACHE_SOUND("speech/saveme1.wav");
 	PRECACHE_SOUND("speech/saveme2.wav");
 	PRECACHE_SOUND("speech/saveme3.wav");
+
+	PRECACHE_MODEL("models/backpack.mdl");
+	PRECACHE_SOUND("items/ammopickup1.wav");
+	PRECACHE_SOUND("items/ammopickup2.wav");
 
 	g_usGibbed = PRECACHE_EVENT(1, "events/gibs.sc");
 	g_usTeleport = PRECACHE_EVENT(1, "events/teleport.sc");

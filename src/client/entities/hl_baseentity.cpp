@@ -64,7 +64,6 @@ void CBasePlayer::DeathSound() {}
 bool CBasePlayer::GiveHealth(float flHealth, int bitsDamageType, bool bClearEffects) { return false; }
 void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, int hitgroup, int bitsDamageType) {}
 bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) { return false; }
-void CBasePlayer::PackDeadPlayerWeapons() {}
 void CBasePlayer::RemoveAllWeapons() {}
 void CBasePlayer::PlayerDeathFrame() {}
 void CBasePlayer::StartObserver() {}

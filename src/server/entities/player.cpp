@@ -45,6 +45,7 @@
 #include "nodes.h"
 #endif
 #include "tf_goal.h"
+#include "items.h"
 
 #ifdef HALFLIFE_TRAINCONTROL
 enum {
@@ -464,136 +465,6 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	return true;
 }
 
-//=========================================================
-// PackDeadPlayerWeapons - call this when a player dies to
-// pack up the appropriate weapons and ammo items, and to
-// destroy anything that shouldn't be packed.
-//
-// This is pretty brute force :(
-//=========================================================
-void CBasePlayer::PackDeadPlayerWeapons()
-{
-	int iWeaponRules;
-	int iAmmoRules;
-	int i;
-	CBasePlayerWeapon* rgpPackWeapons[WEAPON_TYPES];
-	int iPackAmmo[AMMO_TYPES];
-	int iPW = 0; // index into packweapons array
-	int iPA = 0; // index into packammo array
-
-	memset(rgpPackWeapons, 0, sizeof(rgpPackWeapons));
-	for (i = 0; i < AMMO_TYPES; i++)
-	{
-		iPackAmmo[i] = -1;
-	}
-
-	// get the game rules
-	iWeaponRules = g_pGameRules->DeadPlayerWeapons(this);
-	iAmmoRules = g_pGameRules->DeadPlayerAmmo(this);
-
-	if (iWeaponRules == GR_PLR_DROP_GUN_NO && iAmmoRules == GR_PLR_DROP_AMMO_NO)
-	{
-		// nothing to pack. Remove the weapons and return. Don't call create on the box!
-		RemoveAllWeapons();
-		return;
-	}
-
-	// go through all of the weapons and make a list of the ones to pack
-	for (auto pWeapon : m_lpPlayerWeapons)
-	{
-		switch (iWeaponRules)
-		{
-		case GR_PLR_DROP_GUN_ACTIVE:
-			if (m_pActiveWeapon && pWeapon == m_pActiveWeapon)
-			{
-				// this is the active weapon. Pack it.
-				rgpPackWeapons[iPW++] = pWeapon;
-
-				CTFWeapon* pSibling = dynamic_cast<CTFWeapon*>(pWeapon)->GetSibling();
-				if (pSibling != nullptr)
-				{
-					rgpPackWeapons[iPW++] = pSibling;
-				}
-			}
-			break;
-
-		case GR_PLR_DROP_GUN_ALL:
-			rgpPackWeapons[iPW++] = pWeapon;
-			break;
-
-		default:
-			break;
-		}
-	}
-
-	// now go through ammo and make a list of which types to pack.
-	if (iAmmoRules != GR_PLR_DROP_AMMO_NO)
-	{
-		for (i = 0; i < AMMO_TYPES; i++)
-		{
-			if (m_rgAmmo[i] != 0)
-			{
-				// player has some ammo of this type.
-				switch (iAmmoRules)
-				{
-				case GR_PLR_DROP_AMMO_ALL:
-					iPackAmmo[iPA++] = i;
-					break;
-
-				case GR_PLR_DROP_AMMO_ACTIVE:
-					if (m_pActiveWeapon && i == m_pActiveWeapon->iAmmo1())
-					{
-						// this is the primary ammo type for the active weapon
-						iPackAmmo[iPA++] = i;
-					}
-					else if (m_pActiveWeapon && i == m_pActiveWeapon->iAmmo2())
-					{
-						// this is the secondary ammo type for the active weapon
-						iPackAmmo[iPA++] = i;
-					}
-					break;
-
-				default:
-					break;
-				}
-			}
-		}
-	}
-
-	// create a box to pack the stuff into.
-	CWeaponBox* pWeaponBox = (CWeaponBox*)CBaseEntity::Create("weaponbox", pev->origin, pev->angles, edict());
-
-	if (iWeaponRules == GR_PLR_DROP_GUN_ACTIVE && m_pActiveWeapon != nullptr)
-	{
-		pWeaponBox->SetModel(STRING(m_pActiveWeapon->pev->model));
-	}
-
-	pWeaponBox->pev->angles.x = 0; // don't let weaponbox tilt.
-	pWeaponBox->pev->angles.z = 0;
-
-	pWeaponBox->SetThink(&CWeaponBox::Remove);
-	pWeaponBox->pev->nextthink = gpGlobals->time + 120;
-
-	// back these two lists up to their first elements
-
-	// pack the ammo
-	for (iPA = 0; iPA < AMMO_TYPES && iPackAmmo[iPA] != -1; iPA++)
-	{
-		pWeaponBox->PackAmmo(iPackAmmo[iPA], m_rgAmmo[iPackAmmo[iPA]]);
-	}
-
-	// now pack all of the weapons in the lists
-	for (iPW = 0; iPW < WEAPON_TYPES && rgpPackWeapons[iPW]; iPW++)
-	{
-		// weapon unhooked from the player. Pack it into der box.
-		pWeaponBox->PackWeapon(rgpPackWeapons[iPW]);
-	}
-
-	pWeaponBox->pev->velocity = pev->velocity * 1.2; // weaponbox has player's velocity, then some.
-
-	RemoveAllWeapons(); // now strip off everything that wasn't handled by the code above.
-}
-
 void CBasePlayer::RemoveAllWeapons()
 {
 #ifdef HALFLIFE_TANKCONTROL
@@ -654,6 +525,21 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 	pev->health = std::min(pev->health, 0.0F);
 	pev->deadflag = DEAD_DYING;
 
+	if (g_pGameRules->DeadPlayerAmmo(this) != GR_PLR_DROP_AMMO_NO)
+	{
+		CItem::DropBackpack(
+			this,
+			m_rgAmmo[AMMO_SHELLS],
+			m_rgAmmo[AMMO_NAILS],
+			m_rgAmmo[AMMO_ROCKETS],
+			m_rgAmmo[AMMO_CELLS]);
+
+		m_rgAmmo[AMMO_SHELLS] = 0;
+		m_rgAmmo[AMMO_NAILS] = 0;
+		m_rgAmmo[AMMO_ROCKETS] = 0;
+		m_rgAmmo[AMMO_CELLS] = 0;
+	}
+
 	m_iFOV = 0;
 
 	ClearEffects();
@@ -692,7 +578,7 @@ void CBasePlayer::PlayerDeathFrame()
 
 	if (HasWeapons())
 	{
-		PackDeadPlayerWeapons();
+		RemoveAllWeapons();
 	}
 
 	// If the player has been dead for 5 seconds,
@@ -758,7 +644,7 @@ void CBasePlayer::StartObserver()
 	// Remove all the player's stuff
 	if (HasWeapons())
 	{
-		PackDeadPlayerWeapons();
+		RemoveAllWeapons();
 	}
 
 	// reset FOV
@@ -1565,7 +1451,7 @@ bool CBasePlayer::GiveAmmo(int iCount, int iType)
 
 	m_rgAmmo[iType] += iAdd;
 
-	if (0 != gmsgAmmoPickup) // make sure the ammo messages have been linked first
+	if (0 != gmsgAmmoPickup && iType < AMMO_SECONDARY) // make sure the ammo messages have been linked first
 	{
 		// Send the message that ammo has been picked up
 		MessageBegin(MSG_ONE, gmsgAmmoPickup, this);
@@ -1576,6 +1462,68 @@ bool CBasePlayer::GiveAmmo(int iCount, int iType)
 
 	return true;
 }
+
+
+/* Toodles TODO: Engineers convert cells into other ammo types. */
+void CBasePlayer::DiscardAmmo()
+{
+	if (!IsPlayer() || !IsAlive())
+	{
+		return;
+	}
+
+	bool shouldDiscard[AMMO_SECONDARY] =
+	{
+		true,
+		true,
+		true,
+		true,
+	};
+
+	byte discardAmmo[AMMO_SECONDARY];
+
+	memcpy(discardAmmo, m_rgAmmo, AMMO_SECONDARY);
+
+	for (auto weapon : m_lpPlayerWeapons)
+	{
+		const auto info = weapon->GetInfo();
+
+		if (info.iAmmo1 != -1 && info.iAmmo1 < AMMO_SECONDARY && info.iShots != 0)
+		{
+			shouldDiscard[info.iAmmo1] = false;
+			discardAmmo[info.iAmmo1] = 0;
+		}
+	}
+
+	int numDiscarded = 0;
+	for (int i = 0; i < AMMO_SECONDARY; i++)
+	{
+		if (!shouldDiscard[i])
+		{
+			continue;
+		}
+		if (discardAmmo[i] == 0)
+		{
+			shouldDiscard[i] = false;
+			continue;
+		}
+		m_rgAmmo[i] = 0;
+		numDiscarded++;
+	}
+
+	if (numDiscarded == 0)
+	{
+		return;
+	}
+
+	CItem::DropBackpack(
+		this,
+		discardAmmo[AMMO_SHELLS],
+		discardAmmo[AMMO_NAILS],
+		discardAmmo[AMMO_ROCKETS],
+		discardAmmo[AMMO_CELLS]);
+}
+
 
 /*
 =========================================================
