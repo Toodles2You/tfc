@@ -449,7 +449,6 @@ public:
 	bool Draw(float flTime) override;
 	bool MsgFunc_HudText(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_HudTextPro(const char* pszName, int iSize, void* pbuf);
-	bool MsgFunc_GameTitle(const char* pszName, int iSize, void* pbuf);
 
 	float FadeBlend(float fadein, float fadeout, float hold, float localTime);
 	int XPosition(float x, int width, int lineWidth);
@@ -466,11 +465,6 @@ private:
 	client_textmessage_t* m_pMessages[maxHUDMessages];
 	float m_startTime[maxHUDMessages];
 	message_parms_t m_parms;
-	float m_gameTitleTime;
-	client_textmessage_t* m_pGameTitle;
-
-	int m_HUD_title_life;
-	int m_HUD_title_half;
 };
 
 //
