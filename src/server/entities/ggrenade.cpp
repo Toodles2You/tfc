@@ -453,6 +453,7 @@ void CCaltropCanister::Throw(throw_e mode)
 
 bool CCaltrop::Spawn()
 {
+	pev->classname = MAKE_STRING("caltrop");
 	pev->movetype = MOVETYPE_TOSS;
 	pev->solid = SOLID_TRIGGER;
 
@@ -779,6 +780,8 @@ CNailGrenade* CNailGrenade::NailGrenade(CBaseEntity* owner)
 	grenade->pev->owner = owner->edict();
 	grenade->Spawn();
 
+	grenade->pev->classname = MAKE_STRING("nailgrenade");
+
 	return grenade;
 }
 
@@ -805,6 +808,8 @@ CMirv* CMirv::Mirv(CBaseEntity* owner)
 
 	grenade->pev->owner = owner->edict();
 	grenade->Spawn();
+
+	grenade->pev->classname = MAKE_STRING("mirvgrenade");
 
 	return grenade;
 }
@@ -853,6 +858,8 @@ CBomblet* CBomblet::Bomblet(CBaseEntity* owner, const Vector& origin, const floa
 	grenade->pev->origin = origin;
 	grenade->pev->angles = Vector(0, yaw, 0);
 	grenade->Spawn();
+
+	grenade->pev->classname = MAKE_STRING("mirvgrenade");
 
 	return grenade;
 }

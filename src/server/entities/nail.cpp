@@ -24,6 +24,11 @@ CNail* CNail::CreateNail(const Vector& origin, const Vector& dir, const float da
 	nail->pev->owner = owner->edict();
 	nail->Spawn();
 
+	if (damage > 9)
+	{
+		nail->pev->classname = MAKE_STRING("supernails");
+	}
+
 	return nail;
 }
 
@@ -38,13 +43,15 @@ CNail* CNail::CreateNailGrenadeNail(const Vector& origin, const Vector& dir, con
 	nail->pev->dmg_inflictor = owner->edict();
 	nail->Spawn();
 
+	nail->pev->classname = MAKE_STRING("nailgrenade");
+
 	return nail;
 }
 
 
 bool CNail::Spawn()
 {
-	pev->classname = MAKE_STRING("nail");
+	pev->classname = MAKE_STRING("nails");
 	pev->movetype = MOVETYPE_FLYMISSILE;
 	pev->solid = SOLID_TRIGGER; /* SOLID_BBOX */
 

@@ -47,15 +47,16 @@ CPipeBomb* CPipeBomb::CreatePipeBomb(
 
 bool CPipeBomb::Spawn()
 {
-	pev->classname = MAKE_STRING("pipebomb");
 	pev->movetype = MOVETYPE_BOUNCE;
 
 	if (pev->skin != 0)
 	{
+		pev->classname = MAKE_STRING("glgrenade");
 		pev->solid = SOLID_TRIGGER;
 	}
 	else
 	{
+		pev->classname = MAKE_STRING("pipebomb");
 		pev->solid = SOLID_BBOX;
 	}
 

@@ -35,7 +35,7 @@ CRocket* CRocket::CreateRocket(
 
 bool CRocket::Spawn()
 {
-	pev->classname = MAKE_STRING("missile");
+	pev->classname = MAKE_STRING("rocket");
 	pev->movetype = MOVETYPE_FLYMISSILE;
 	pev->solid = SOLID_TRIGGER; /* SOLID_BBOX */
 
