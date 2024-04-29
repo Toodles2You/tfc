@@ -247,33 +247,49 @@ void CBasePlayer::FireBullets(
 		AngleVectors(angles, &dir, nullptr, nullptr);
 
 		TraceResult tr;
-		util::TraceLine(gun, gun + dir * distance, util::dont_ignore_monsters, this, &tr);
+		util::TraceLine(gun, gun + dir * distance, &tr, this);
 		
-		if (tr.flFraction != 1.0F)
+		if (tr.flFraction == 1.0F)
 		{
-			const auto hit =
-				reinterpret_cast<CBasePlayer *>(CBaseEntity::Instance(tr.pHit));
-			
-			hit->TraceAttack(
-				this,
-				damage,
-				dir,
-				tr.iHitgroup,
-				DMG_BULLET | DMG_AIMED | DMG_NEVERGIB);
-
-			traceEntities[traceCount] = hit;
-			traceCount++;
-			
-			if (hit->IsClient() && g_pGameRules->FPlayerCanTakeDamage(hit, this))
-			{
-				traceEndPos[traceHits] = tr.vecEndPos;
-				traceHits++;
-				if (i < 8 && hit->m_LastHitGroup == HITGROUP_HEAD)
-				{
-					traceFlags |= 1 << i;
-				}
-			}
+			continue;
 		}
+
+		auto hit = CBaseEntity::Instance(tr.pHit);
+		
+		if (hit == nullptr || hit->pev->takedamage == DAMAGE_NO)
+		{
+			continue;
+		}
+		
+		hit->TraceAttack(
+			this,
+			damage,
+			dir,
+			tr.iHitgroup,
+			DMG_BULLET | DMG_NEVERGIB);
+
+		traceEntities[traceCount] = hit;
+		traceCount++;
+		
+		if (!hit->IsClient())
+		{
+			continue;
+		}
+
+		auto player = dynamic_cast<CBasePlayer*>(hit);
+
+		if (!g_pGameRules->FPlayerCanTakeDamage(player, this))
+		{
+			continue;
+		}
+
+		if (traceHits < 8 && player->m_LastHitGroup == HITGROUP_HEAD)
+		{
+			traceFlags |= 1 << traceHits;
+		}
+
+		traceEndPos[traceHits] = tr.vecEndPos;
+		traceHits++;
 	}
 
 	for (auto i = 0; i < traceCount; i++)
