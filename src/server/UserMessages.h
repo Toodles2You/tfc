@@ -21,7 +21,6 @@ inline int gmsgFlashlight = 0;
 inline int gmsgFlashBattery = 0;
 inline int gmsgResetHUD = 0;
 inline int gmsgInitHUD = 0;
-inline int gmsgShowGameTitle = 0;
 inline int gmsgHealth = 0;
 inline int gmsgDamage = 0;
 inline int gmsgBattery = 0;
