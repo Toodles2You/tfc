@@ -25,6 +25,7 @@
 #include "pm_defs.h"
 #include "pm_materials.h"
 #include "pm_shared.h"
+#include "game.h"
 
 #define AMBIENT_SOUND_EVERYWHERE 1
 #define AMBIENT_SOUND_SMALLRADIUS 2
@@ -1494,13 +1495,34 @@ void CBaseEntity::EmitSoundPredicted(
 	int pitch,
 	int flags)
 {
-	if (g_engfuncs.pfnCanSkipPlayer(pev->pContainingEntity) != 0)
+	const auto pas = g_engfuncs.pfnSetFatPAS(pev->origin);
+	const auto canSkipPlayer = g_engfuncs.pfnCanSkipPlayer(pev->pContainingEntity) != 0;
+
+	volume *= 255;
+	attenuation *= 127;
+
+	for (auto i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		pmove->PM_PlaySound(channel, sample, volume, attenuation, flags, pitch);
-	}
-	else
-	{
-		EmitSound(sample, channel, volume, attenuation, flags, pitch);
+		auto player = util::PlayerByIndex(i);
+
+		if (player == nullptr || (player == this && canSkipPlayer) || !player->IsNetClient())
+		{
+			continue;
+		}
+
+		if (!g_engfuncs.pfnCheckVisibility(player->pev->pContainingEntity, pas))
+		{
+			continue;
+		}
+
+		MessageBegin(MSG_ONE_UNRELIABLE, gmsgPredictedSound, player);
+		WriteByte(entindex());
+		WriteByte(channel);
+		WriteByte(volume);
+		WriteByte(attenuation);
+		WriteByte(pitch);
+		WriteString(sample);
+		MessageEnd();
 	}
 }
 
