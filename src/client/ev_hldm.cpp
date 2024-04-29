@@ -1117,6 +1117,35 @@ int MSG_Blood(const char* name, int size, void* buf)
 	return true;
 }
 
+int MSG_PredictedSound(const char* name, int size, void* buf)
+{
+	BEGIN_READ(buf, size);
+
+	int entindex = READ_BYTE();
+	int channel = READ_BYTE();
+	int volume = READ_BYTE();
+	int attenuation = READ_BYTE();
+	int pitch = READ_BYTE();
+	const char* sample = READ_STRING();
+
+	auto entity = gEngfuncs.GetEntityByIndex(entindex);
+
+	if (entity != nullptr)
+	{
+		gEngfuncs.pEventAPI->EV_PlaySound(
+			entindex,
+			entity->origin,
+			channel,
+			sample,
+			volume / 255.0F,
+			attenuation / 127.0F,
+			0,
+			pitch);
+	}
+
+	return true;
+}
+
 /*
 ======================
 EV_HookEvents
@@ -1137,6 +1166,7 @@ void EV_HookEvents()
 	gEngfuncs.pfnHookEvent("events/train.sc", EV_TrainPitchAdjust);
 
 	gEngfuncs.pfnHookUserMsg("Blood", MSG_Blood);
+	gEngfuncs.pfnHookUserMsg("PredSound", MSG_PredictedSound);
 }
 
 void EV_Init()

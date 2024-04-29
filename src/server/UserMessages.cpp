@@ -66,6 +66,7 @@ void LinkUserMessages()
 
 	gmsgHitFeedback = REG_USER_MSG("HitFeedback", 4);
 	gmsgBlood = REG_USER_MSG("Blood", -1);
+	gmsgPredictedSound = REG_USER_MSG("PredSound", -1);
 
 	gmsgStatusIcon = REG_USER_MSG("StatusIcon", -1);
 }
