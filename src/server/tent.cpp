@@ -123,7 +123,7 @@ void tent::SpawnCorpse(CBaseEntity* entity, const int gibMode)
 void tent::RocketTrail(CBaseEntity* entity, const bool flare)
 {
 	g_engfuncs.pfnPlaybackEvent(
-		FEV_GLOBAL | FEV_RELIABLE,
+		FEV_GLOBAL,
 		entity->edict(),
 		g_usTrail,
 		0.0F,
