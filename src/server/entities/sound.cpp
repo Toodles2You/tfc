@@ -25,7 +25,7 @@
 #include "pm_defs.h"
 #include "pm_materials.h"
 #include "pm_shared.h"
-#include "game.h"
+#include "UserMessages.h"
 
 #define AMBIENT_SOUND_EVERYWHERE 1
 #define AMBIENT_SOUND_SMALLRADIUS 2
