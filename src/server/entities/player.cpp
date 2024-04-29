@@ -871,6 +871,8 @@ bool CBasePlayer::Spawn()
 			m_bIsSpawning = false;
 		}};
 
+	Precache();
+
 	pev->classname = MAKE_STRING("player");
 	pev->health = 100;
 	pev->armorvalue = 0;
@@ -922,7 +924,6 @@ bool CBasePlayer::Spawn()
 	}
 
 	pev->view_ofs = VEC_VIEW;
-	Precache();
 
 	m_fInitHUD = true;
 	m_iClientHideHUD = -1; // force this to be recalculated
