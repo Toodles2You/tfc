@@ -46,6 +46,20 @@ void WeaponsResource::LoadAllWeaponSprites()
 	{
 		LoadWeaponSprites(&rgWeapons[i]);
 	}
+
+	LoadAmmoSprites(AMMO_SHELLS, "shell");
+	LoadAmmoSprites(AMMO_NAILS, "nail");
+	LoadAmmoSprites(AMMO_ROCKETS, "rocket");
+	LoadAmmoSprites(AMMO_CELLS, "cell");
+	LoadAmmoSprites(AMMO_GRENADES1, "grenade");
+	LoadAmmoSprites(AMMO_GRENADES2, "grenade");
+}
+
+void WeaponsResource::LoadAmmoSprites(int iType, const char* pszIcon)
+{
+	int i = gHUD.GetSpriteIndex(pszIcon);
+	rgAmmo[iType].sprite = gHUD.GetSprite(i);
+	rgAmmo[iType].rect = gHUD.GetSpriteRect(i);
 }
 
 int WeaponsResource::CountAmmo(int iId)
@@ -54,12 +68,16 @@ int WeaponsResource::CountAmmo(int iId)
 	{
 		return 0;
 	}
-	return riAmmo[iId];
+	return rgAmmo[iId].iCount;
 }
 
 int WeaponsResource::MaxAmmo(int iId)
 {
-	return riMaxAmmo[iId];
+	if (iId < 0)
+	{
+		return 0;
+	}
+	return rgAmmo[iId].iMax;
 }
 
 bool WeaponsResource::HasAmmo(WEAPON* p)
@@ -91,12 +109,8 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 
 	memset(&pWeapon->rcActive, 0, sizeof(Rect));
 	memset(&pWeapon->rcInactive, 0, sizeof(Rect));
-	memset(&pWeapon->rcAmmo, 0, sizeof(Rect));
-	memset(&pWeapon->rcAmmo2, 0, sizeof(Rect));
 	pWeapon->hInactive = 0;
 	pWeapon->hActive = 0;
-	pWeapon->hAmmo = 0;
-	pWeapon->hAmmo2 = 0;
 
 	sprintf(sz, "sprites/%s.txt", pWeapon->szName);
 	client_sprite_t* pList = SPR_GetList(sz, &i);
@@ -173,30 +187,6 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 	}
 	else
 		pWeapon->hActive = 0;
-
-	p = GetSpriteList(pList, "ammo", iRes, i);
-	if (p)
-	{
-		sprintf(sz, "sprites/%s.spr", p->szSprite);
-		pWeapon->hAmmo = SPR_Load(sz);
-		pWeapon->rcAmmo = p->rc;
-
-		gHR.iHistoryGap = std::max(gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top);
-	}
-	else
-		pWeapon->hAmmo = 0;
-
-	p = GetSpriteList(pList, "ammo2", iRes, i);
-	if (p)
-	{
-		sprintf(sz, "sprites/%s.spr", p->szSprite);
-		pWeapon->hAmmo2 = SPR_Load(sz);
-		pWeapon->rcAmmo2 = p->rc;
-
-		gHR.iHistoryGap = std::max(gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top);
-	}
-	else
-		pWeapon->hAmmo2 = 0;
 }
 
 // Returns the first weapon for a given slot.
@@ -393,21 +383,13 @@ void CHudAmmo::Think()
 
 HSPRITE* WeaponsResource::GetAmmoPicFromWeapon(int iAmmoId, Rect& rect)
 {
-	for (int i = 0; i < WEAPON_TYPES; i++)
+	if (iAmmoId < 0 || iAmmoId >= AMMO_TYPES)
 	{
-		if (rgWeapons[i].iAmmoType == iAmmoId)
-		{
-			rect = rgWeapons[i].rcAmmo;
-			return &rgWeapons[i].hAmmo;
-		}
-		else if (rgWeapons[i].iAmmo2Type == iAmmoId)
-		{
-			rect = rgWeapons[i].rcAmmo2;
-			return &rgWeapons[i].hAmmo2;
-		}
+		return nullptr;
 	}
 
-	return NULL;
+	rect = rgAmmo[iAmmoId].rect;
+	return &rgAmmo[iAmmoId].sprite;
 }
 
 
@@ -951,7 +933,10 @@ bool CHudAmmo::Draw(float flTime)
 	// Does weapon have any ammo at all?
 	if (pw->iClip >= 0 || m_pWeapon->iAmmoType != -1)
 	{
-		int iIconWidth = m_pWeapon->rcAmmo.right - m_pWeapon->rcAmmo.left;
+		Rect rcAmmo;
+		HSPRITE* hAmmo = gWR.GetAmmoPicFromWeapon(m_pWeapon->iAmmoType, rcAmmo);
+
+		int iIconWidth = rcAmmo.right - rcAmmo.left;
 
 		if (pw->iClip >= 0 && m_pWeapon->iAmmoType != -1)
 		{
@@ -983,14 +968,17 @@ bool CHudAmmo::Draw(float flTime)
 		}
 
 		// Draw the ammo Icon
-		int iOffset = (m_pWeapon->rcAmmo.bottom - m_pWeapon->rcAmmo.top) / 8;
-		gHUD.DrawHudSprite(m_pWeapon->hAmmo, 0, &m_pWeapon->rcAmmo, x, y - iOffset, CHud::COLOR_PRIMARY, a);
+		int iOffset = (rcAmmo.bottom - rcAmmo.top) / 8;
+		gHUD.DrawHudSprite(*hAmmo, 0, &rcAmmo, x, y - iOffset, CHud::COLOR_PRIMARY, a);
 	}
 
 	// Does weapon have seconday ammo?
 	if (pw->iAmmo2Type != -1)
 	{
-		int iIconWidth = m_pWeapon->rcAmmo2.right - m_pWeapon->rcAmmo2.left;
+		Rect rcAmmo2;
+		HSPRITE* hAmmo2 = gWR.GetAmmoPicFromWeapon(m_pWeapon->iAmmo2Type, rcAmmo2);
+
+		int iIconWidth = rcAmmo2.right - rcAmmo2.left;
 
 		// Do we have secondary ammo?
 		if (gWR.CountAmmo(pw->iAmmo2Type) > 0)
@@ -1000,8 +988,8 @@ bool CHudAmmo::Draw(float flTime)
 			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, gWR.CountAmmo(pw->iAmmo2Type), CHud::COLOR_PRIMARY, a);
 
 			// Draw the ammo Icon
-			int iOffset = (m_pWeapon->rcAmmo2.bottom - m_pWeapon->rcAmmo2.top) / 8;
-			gHUD.DrawHudSprite(m_pWeapon->hAmmo2, 0, &m_pWeapon->rcAmmo2, x, y - iOffset, CHud::COLOR_PRIMARY, a);
+			int iOffset = (rcAmmo2.bottom - rcAmmo2.top) / 8;
+			gHUD.DrawHudSprite(*hAmmo2, 0, &rcAmmo2, x, y - iOffset, CHud::COLOR_PRIMARY, a);
 		}
 	}
 	return true;

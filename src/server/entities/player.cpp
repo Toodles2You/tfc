@@ -1009,14 +1009,20 @@ bool CBasePlayer::Spawn()
 
 	g_pGameRules->PlayerSpawn(this);
 
-	const char *icon = GetGrenadeIconName(1);
-	if (icon == nullptr)
+	const char *icon1 = GetGrenadeIconName(0);
+	if (icon1 == nullptr)
 	{
-		icon = GetGrenadeIconName(0);
+		icon1 = "grenade";
+	}
+	const char *icon2 = GetGrenadeIconName(1);
+	if (icon2 == nullptr)
+	{
+		icon2 = "grenade";
 	}
 
 	MessageBegin(MSG_ONE, gmsgSecAmmoIcon, this);
-	WriteString(icon);
+	WriteString(icon1);
+	WriteString(icon2);
 	MessageEnd();
 
 	return true;
@@ -1451,7 +1457,7 @@ bool CBasePlayer::GiveAmmo(int iCount, int iType)
 
 	m_rgAmmo[iType] += iAdd;
 
-	if (0 != gmsgAmmoPickup && iType < AMMO_SECONDARY) // make sure the ammo messages have been linked first
+	if (0 != gmsgAmmoPickup) // make sure the ammo messages have been linked first
 	{
 		// Send the message that ammo has been picked up
 		MessageBegin(MSG_ONE, gmsgAmmoPickup, this);

@@ -26,11 +26,10 @@ class WeaponsResource
 private:
 	// Information about weapons & ammo
 	WEAPON rgWeapons[WEAPON_TYPES]; // Weapons Array
+	AMMO rgAmmo[AMMO_TYPES];
 
 	// counts of weapons * ammo
 	WEAPON* rgSlots[MAX_WEAPON_SLOTS + 1][MAX_WEAPON_POSITIONS + 1]; // The slots currently in use by weapons.  The value is a pointer to the weapon;  if it's NULL, no weapon is there
-	byte riAmmo[AMMO_TYPES];										 // count of each ammo type
-	byte riMaxAmmo[AMMO_TYPES];
 
 public:
 	void Init();
@@ -38,8 +37,12 @@ public:
 	void Reset()
 	{
 		iOldWeaponBits = 0;
-		memset(rgSlots, 0, sizeof rgSlots);
-		memset(riAmmo, 0, sizeof riAmmo);
+		memset(rgSlots, 0, sizeof (rgSlots));
+
+		for (int i = 0; i < AMMO_TYPES; i++)
+		{
+			rgAmmo[i].iCount = 0;
+		}
 	}
 
 	///// WEAPON /////
@@ -74,6 +77,7 @@ public:
 
 	void LoadWeaponSprites(WEAPON* wp);
 	void LoadAllWeaponSprites();
+	void LoadAmmoSprites(int iType, const char* pszIcon);
 	WEAPON* GetFirstPos(int iSlot);
 	void SelectSlot(int iSlot, bool fAdvance, int iDirection);
 	WEAPON* GetNextActivePos(int iSlot, int iSlotPos);
@@ -81,8 +85,8 @@ public:
 	bool HasAmmo(WEAPON* p);
 
 	///// AMMO /////
-	void SetAmmo(int iId, int iCount) { riAmmo[iId] = iCount; }
-	void SetMaxAmmo(int iId, int iCount) { riMaxAmmo[iId] = std::max(iCount, 1); }
+	void SetAmmo(int iId, int iCount) { rgAmmo[iId].iCount = iCount; }
+	void SetMaxAmmo(int iId, int iCount) { rgAmmo[iId].iMax = std::max(iCount, 1); }
 
 	int CountAmmo(int iId);
 	int MaxAmmo(int iId);

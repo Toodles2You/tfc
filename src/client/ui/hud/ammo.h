@@ -32,10 +32,6 @@ struct WEAPON
 	Rect rcActive;
 	HSPRITE hInactive;
 	Rect rcInactive;
-	HSPRITE hAmmo;
-	Rect rcAmmo;
-	HSPRITE hAmmo2;
-	Rect rcAmmo2;
 	HSPRITE hCrosshair;
 	Rect rcCrosshair;
 	HSPRITE hAutoaim;
@@ -44,4 +40,12 @@ struct WEAPON
 	Rect rcZoomedCrosshair;
 	HSPRITE hZoomedAutoaim;
 	Rect rcZoomedAutoaim;
+};
+
+struct AMMO
+{
+	byte iCount;
+	byte iMax;
+	HSPRITE sprite;
+	Rect rect;
 };

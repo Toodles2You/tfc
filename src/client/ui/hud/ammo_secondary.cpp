@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "parsemsg.h"
+#include "ammohistory.h"
 
 DECLARE_MESSAGE(m_AmmoSecondary, SecAmmoVal);
 DECLARE_MESSAGE(m_AmmoSecondary, SecAmmoIcon);
@@ -111,11 +112,6 @@ bool CHudAmmoSecondary::Draw(float flTime)
 	return true;
 }
 
-void CHudAmmoSecondary::Update_SecAmmoIcon(const char* pszIcon)
-{
-	m_HUD_ammoicon = gHUD.GetSpriteIndex(pszIcon);
-}
-
 void CHudAmmoSecondary::Update_SecAmmoVal(int iIndex, int iCount)
 {
 	if (iIndex < 0 || iIndex >= MAX_SEC_AMMO_VALUES)
@@ -158,7 +154,17 @@ void CHudAmmoSecondary::Update_SecAmmoVal(int iIndex, int iCount)
 bool CHudAmmoSecondary::MsgFunc_SecAmmoIcon(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
-	Update_SecAmmoIcon(READ_STRING());
+
+	const char* pszIcon;
+
+	pszIcon = READ_STRING();
+	gWR.LoadAmmoSprites(AMMO_GRENADES1, pszIcon);
+
+	pszIcon = READ_STRING();
+	gWR.LoadAmmoSprites(AMMO_GRENADES2, pszIcon);
+
+	m_HUD_ammoicon = gHUD.GetSpriteIndex(pszIcon);
+
 	return true;
 }
 

@@ -60,16 +60,6 @@ bool CBasePlayer::Spawn()
 
 	m_bLeftHanded = static_cast<int>(floorf(cl_righthand->value)) == 0;
 
-#if 0
-	const char *icon = GetGrenadeIconName(1);
-	if (icon == nullptr)
-	{
-		icon = GetGrenadeIconName(0);
-	}
-
-	gHUD.m_AmmoSecondary.Update_SecAmmoIcon(icon);
-#endif
-
 	return true;
 }
 
