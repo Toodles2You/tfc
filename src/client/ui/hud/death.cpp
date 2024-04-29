@@ -71,8 +71,16 @@ bool CHudDeathNotice::VidInit()
 	m_HUD_d_skull = gHUD.GetSpriteIndex("d_skull");
 	m_HUD_d_headshot = gHUD.GetSpriteIndex("d_headshot");
 
+	int string_width;
+	gHUD.GetHudStringSize("Player", string_width, m_string_height);
+
+	m_string_height = ceilf(m_string_height / 2.0F);
+
 	auto rect = gHUD.GetSpriteRect(m_HUD_d_headshot);
 	m_headshot_width = rect.right - rect.left;
+	m_headshot_height = rect.bottom - rect.top;
+
+	m_headshot_height = ceilf(m_headshot_height / 2.0F);
 
 	return true;
 }
@@ -85,6 +93,8 @@ bool CHudDeathNotice::Draw(float flTime)
 	{
 		return true;
 	}
+
+	y = DEATHNOTICE_TOP + 2;
 
 	DeathNoticeItem* item;
 	for (int i = 0; i < MAX_DEATHNOTICES; i++)
@@ -111,7 +121,6 @@ bool CHudDeathNotice::Draw(float flTime)
 		}
 
 		// Draw the death notice
-		y = DEATHNOTICE_TOP + 2 + (20 * i);
 
 		int id = (item->iId == -1) ? m_HUD_d_skull : item->iId;
 
@@ -119,22 +128,11 @@ bool CHudDeathNotice::Draw(float flTime)
 		int weaponWidth = rect.right - rect.left;
 		int weaponHeight = rect.bottom - rect.top;
 
-#if 0
-		if (item->KillerColor)
-		{
-			r = 255 * item->KillerColor[0];
-			g = 255 * item->KillerColor[1];
-			b = 255 * item->KillerColor[2];
-		}
-		else
-#endif
-		{
-			r = 255;
-			g = 80;
-			b = 0;
-		}
+		int centerY = y + (weaponHeight >> 1);
+
+		gHUD.GetColor(r, g, b, CHud::COLOR_PRIMARY);
 		
-		int w = gHUD.HudStringLen(item->szVictim) + weaponWidth;
+		int w = gHUD.HudStringLen(item->szVictim) + 2 + weaponWidth;
 
 		if (item->bHeadshot)
 		{
@@ -143,10 +141,14 @@ bool CHudDeathNotice::Draw(float flTime)
 
 		if (!item->bSuicide)
 		{
-			w +=
-				gHUD.HudStringLen(item->szKiller)
-				+ gHUD.HudStringLen(" + ")
-				+ gHUD.HudStringLen(item->szAccomplice);
+			w += 2 + gHUD.HudStringLen(item->szKiller);
+			
+			if (item->szAccomplice[0] != '\0')
+			{
+				w +=
+					gHUD.HudStringLen(" + ")
+					+ gHUD.HudStringLen(item->szAccomplice);
+			}
 		}
 		else if (item->szAccomplice[0] != '\0')
 		{
@@ -165,7 +167,7 @@ bool CHudDeathNotice::Draw(float flTime)
 				w + 4,
 				weaponHeight + 4,
 				CHud::COLOR_WARNING,
-				MIN_ALPHA * (1.0F - (deltaTime / displayTime)));
+				(MIN_ALPHA + MIN_ALPHA * (1.0F - (deltaTime / displayTime))) / 2);
 		}
 
 		if (!item->bSuicide)
@@ -178,13 +180,13 @@ bool CHudDeathNotice::Draw(float flTime)
 					item->KillerColor[1],
 					item->KillerColor[2]);
 			}
-			x = gHUD.DrawHudString(item->szKiller, x, y);
+			x = gHUD.DrawHudString(item->szKiller, x, centerY - m_string_height);
 
 			// Draw accomplices name, if any
 			if (item->szAccomplice[0] != '\0')
 			{
 				gEngfuncs.pfnDrawSetTextColor(r / 255.0F, g / 255.0F, b / 255.0F);
-				x = gHUD.DrawHudString(" + ", x, y);
+				x = gHUD.DrawHudString(" + ", x, centerY - m_string_height);
 
 				if (item->AccompliceColor)
 				{
@@ -193,8 +195,10 @@ bool CHudDeathNotice::Draw(float flTime)
 						item->AccompliceColor[1],
 						item->AccompliceColor[2]);
 				}
-				x = gHUD.DrawHudString(item->szAccomplice, x, y);
+				x = gHUD.DrawHudString(item->szAccomplice, x, centerY - m_string_height);
 			}
+
+			x += 2;
 		}
 
 		// Draw death weapon
@@ -203,9 +207,11 @@ bool CHudDeathNotice::Draw(float flTime)
 
 		if (item->bHeadshot)
 		{
-			gHUD.DrawHudSpriteIndex(m_HUD_d_headshot, x, y, r, g, b);
+			gHUD.DrawHudSpriteIndex(m_HUD_d_headshot, x, centerY - m_headshot_height, r, g, b);
 			x += m_headshot_width;
 		}
+
+		x += 2;
 
 		// Someone attacked the player before they fell or something
 		if (item->bSuicide
@@ -218,10 +224,10 @@ bool CHudDeathNotice::Draw(float flTime)
 					item->AccompliceColor[1],
 					item->AccompliceColor[2]);
 			}
-			x = gHUD.DrawHudString(item->szAccomplice, x, y);
+			x = gHUD.DrawHudString(item->szAccomplice, x, centerY - m_string_height);
 
 			gEngfuncs.pfnDrawSetTextColor(r / 255.0F, g / 255.0F, b / 255.0F);
-			x = gHUD.DrawHudString(" finished off ", x, y);
+			x = gHUD.DrawHudString(" finished off ", x, centerY - m_string_height);
 		}
 
 		// Draw victims name
@@ -232,7 +238,9 @@ bool CHudDeathNotice::Draw(float flTime)
 				item->VictimColor[1],
 				item->VictimColor[2]);
 		}
-		x = gHUD.DrawHudString(item->szVictim, x, y);
+		x = gHUD.DrawHudString(item->szVictim, x, centerY - m_string_height);
+
+		y += weaponHeight + 6;
 	}
 
 	return true;
@@ -260,7 +268,8 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 
 	char killedwith[32];
 	strcpy(killedwith, "d_");
-	strncat(killedwith, READ_STRING(), 32);
+	strncat(killedwith, READ_STRING(), 29);
+	killedwith[31] = '\0';
 
 	gHUD.m_Spectator.DeathMessage(victim);
 	int i, j;
@@ -313,7 +322,7 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 	else
 	{
 		item->KillerColor = gHUD.GetClientColor(killer);
-		strncpy(item->szKiller, killerName, MAX_PLAYER_NAME_LENGTH);
+		strncpy(item->szKiller, killerName, MAX_PLAYER_NAME_LENGTH - 1);
 		item->szKiller[MAX_PLAYER_NAME_LENGTH - 1] = '\0';
 	}
 
@@ -327,7 +336,7 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 		else
 		{
 			item->AccompliceColor = gHUD.GetClientColor(accomplice);
-			strncpy(item->szAccomplice, accompliceName, MAX_PLAYER_NAME_LENGTH);
+			strncpy(item->szAccomplice, accompliceName, MAX_PLAYER_NAME_LENGTH - 1);
 			item->szAccomplice[MAX_PLAYER_NAME_LENGTH - 1] = '\0';
 		}
 	}
@@ -345,7 +354,7 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 	else
 	{
 		item->VictimColor = gHUD.GetClientColor(victim);
-		strncpy(item->szVictim, victimName, MAX_PLAYER_NAME_LENGTH);
+		strncpy(item->szVictim, victimName, MAX_PLAYER_NAME_LENGTH - 1);
 		item->szVictim[MAX_PLAYER_NAME_LENGTH - 1] = '\0';
 	}
 
@@ -370,63 +379,5 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 	item->flDisplayTime = gHUD.m_flTime;
 	item->bLocalPlayerInvolved = localPlayerInvolved;
 
-#if 0
-	PrintDeathMsg(item, killedwith);
-#endif
-
 	return true;
 }
-
-#if 0
-void CHudDeathNotice::PrintDeathMsg(const DeathNoticeItem* item, const char* weapon)
-{
-	if (item->bSuicide)
-	{
-		if (item->szAccomplice[0] != '\0')
-		{
-			ConsolePrint(item->szAccomplice);
-			ConsolePrint(" finished off ");
-			ConsolePrint(item->szVictim);
-		}
-		else
-		{
-			ConsolePrint(item->szVictim);
-
-			if (strcmp(weapon, "d_world") == 0)
-			{
-				ConsolePrint(" died");
-			}
-			else
-			{
-				ConsolePrint(" killed self");
-			}
-		}
-	}
-	else
-	{
-		ConsolePrint(item->szKiller);
-		if (item->szAccomplice[0] != '\0')
-		{
-			ConsolePrint(" + ");
-			ConsolePrint(item->szAccomplice);
-		}
-		if (item->bTeamKill)
-		{
-			ConsolePrint(" killed their teammate ");
-		}
-		else
-		{
-			ConsolePrint(" killed ");
-		}
-		ConsolePrint(item->szVictim);
-	}
-
-	if (weapon[0] != '\0' && strcmp(weapon, "d_world") != 0)
-	{
-		ConsolePrint(" with ");
-		ConsolePrint(weapon + 2);
-	}
-
-	ConsolePrint("\n");
-}
-#endif
