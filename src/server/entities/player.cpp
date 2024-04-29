@@ -108,7 +108,7 @@ void CBasePlayer::Pain()
 		{
 			case 0: sample = "player/drown1.wav"; break;
 			case 1: sample = "player/drown2.wav"; break;
-			default: return;
+			default: break;
 		}
 	}
 	else
@@ -122,8 +122,13 @@ void CBasePlayer::Pain()
 			case 3: sample = "player/pain4.wav"; break;
 			case 4: sample = "player/pain5.wav"; break;
 			case 5: sample = "player/pain6.wav"; break;
-			default: return;
+			default: break;
 		}
+	}
+
+	if (sample == nullptr)
+	{
+		return;
 	}
 
 	EmitSound(sample, CHAN_VOICE);
@@ -175,8 +180,13 @@ void CBasePlayer::DeathSound()
 			case 2: sample = "player/death3.wav"; break;
 			case 3: sample = "player/death4.wav"; break;
 			case 4: sample = "player/death5.wav"; break;
-			default: return;
+			default: break;
 		}
+	}
+
+	if (sample == nullptr)
+	{
+		return;
 	}
 
 	EmitSound(sample, CHAN_VOICE);
