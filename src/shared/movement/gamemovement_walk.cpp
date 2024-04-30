@@ -348,11 +348,11 @@ void CHalfLifeMovement::CheckStepSound()
     }
     else if (isRunning)
     {
-        speed = 2.0F * (speed / 300.0F);
+        speed = 2.0F;
     }
     else
     {
-        speed = 1.5F * (speed / 100.0F);
+        speed = 1.5F;
     }
 
     pmove->flTimeStepSound = std::max((int)pmove->flTimeStepSound - (int)(pmove->cmd.msec * speed), -600);
@@ -478,7 +478,7 @@ void CHalfLifeMovement::StepSound()
 
     pmove->PM_PlaySound(CHAN_BODY, sample, isRunning ? 0.5F : 0.2F, ATTN_IDLE, 0, PITCH_NORM);
 
-    pmove->flTimeStepSound += 600;
+    pmove->flTimeStepSound += 600 * (300.0F / pmove->maxspeed);
 }
 
 
