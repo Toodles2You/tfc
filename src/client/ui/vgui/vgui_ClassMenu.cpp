@@ -298,12 +298,8 @@ void CClassMenuPanel::Update()
 		int iTotal = 0;
 		for (int j = 1; j < MAX_PLAYERS_HUD; j++)
 		{
-			if (g_PlayerInfoList[j].name == NULL)
+			if (g_PlayerInfoList[j].name == nullptr)
 				continue; // empty player slot, skip
-			if (g_PlayerExtraInfo[j].teamname[0] == 0)
-				continue; // skip over players who are not in a team
-			if (g_PlayerInfoList[j].thisplayer != 0)
-				continue; // skip this player
 			if (g_PlayerExtraInfo[j].teamnumber != g_iTeamNumber)
 				continue; // skip over players in other teams
 
