@@ -64,6 +64,8 @@ protected:
     virtual void AirMove();
     virtual void Jump();
     virtual void ApplyFriction();
+    void CheckStepSound();
+    virtual void StepSound();
     void StayOnGround();
 
     virtual void CheckDucking();

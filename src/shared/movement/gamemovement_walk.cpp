@@ -63,7 +63,11 @@ void CHalfLifeMovement::Walk()
     CheckVelocity();
     FixUpGravity();
 
-    CheckFalling();
+    if (pmove->onground != -1)
+    {
+        CheckStepSound();
+        CheckFalling();
+    }
 }
 
 
@@ -316,6 +320,65 @@ void CHalfLifeMovement::ApplyFriction()
 }
 
 
+void CHalfLifeMovement::CheckStepSound()
+{
+    if (pmove->movevars->footsteps == 0)
+    {
+        return;
+    }
+
+    if (pmove->velocity.x == 0.0F && pmove->velocity.y == 0.0F)
+    {
+        return;
+    }
+
+    auto speed = pmove->velocity.Make2D().Length();
+    const auto isRunning = speed > 200;
+
+    if (isRunning)
+    {
+        speed = (600.0F / 300.0F) * (speed / 300.0F);
+    }
+    else
+    {
+        speed = (600.0F / 400.0F) * (speed / 100.0F);
+    }
+
+    pmove->flTimeStepSound = std::max((int)pmove->flTimeStepSound - (int)(pmove->cmd.msec * speed), -600);
+
+    if (pmove->flTimeStepSound <= 0)
+    {
+        StepSound();
+    }
+}
+
+
+void CHalfLifeMovement::StepSound()
+{
+    auto speed = pmove->velocity.Make2D().Length();
+    const auto isRunning = speed > 200;
+
+    pmove->iStepLeft = (pmove->iStepLeft != 0) ? 0 : 1;
+
+    const auto random = 2 * pmove->iStepLeft + pmove->RandomLong(0, 1);
+    const char* sample;
+
+    switch (random)
+    {
+        /* Right */
+        default: sample = "player/pl_step1.wav"; break;
+        case 1: sample = "player/pl_step3.wav"; break;
+        /* Left */
+        case 2: sample = "player/pl_step2.wav"; break;
+        case 3: sample = "player/pl_step4.wav"; break;
+    }
+
+    pmove->PM_PlaySound(CHAN_BODY, sample, isRunning ? 0.5F : 0.2F, ATTN_IDLE, 0, PITCH_NORM);
+
+    pmove->flTimeStepSound += 600;
+}
+
+
 void CHalfLifeMovement::StayOnGround()
 {
     pmtrace_t trace;
@@ -351,31 +414,28 @@ void CHalfLifeMovement::StayOnGround()
 
 void CHalfLifeMovement::CheckFalling()
 {
-    if (pmove->onground != -1)
+    if (pmove->dead == 0
+     && pmove->flFallVelocity >= PLAYER_FALL_PUNCH_THRESHHOLD
+     && pmove->waterlevel <= kWaterLevelNone)
     {
-        if (pmove->dead == 0
-         && pmove->flFallVelocity >= PLAYER_FALL_PUNCH_THRESHHOLD
-         && pmove->waterlevel <= kWaterLevelNone)
+        if (pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED)
         {
-            if (pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED)
-            {
-                pmove->PM_PlaySound(CHAN_VOICE, "player/pl_fallpain3.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+            pmove->PM_PlaySound(CHAN_VOICE, "player/pl_fallpain3.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
 #ifdef CLIENT_DLL
-                V_PunchAxis(2, std::min(pmove->flFallVelocity * 0.013F, 8.0F));
+            V_PunchAxis(2, std::min(pmove->flFallVelocity * 0.013F, 8.0F));
 #endif
-            }
-            else if (pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED / 2)
-            {
-                pmove->PM_PlaySound(CHAN_VOICE, "player/pl_jumpland2.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+        }
+        else if (pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED / 2)
+        {
+            pmove->PM_PlaySound(CHAN_VOICE, "player/pl_jumpland2.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
 #ifdef CLIENT_DLL
-                V_PunchAxis(2, std::min(pmove->flFallVelocity * 0.0065F, 4.0F));
+            V_PunchAxis(2, std::min(pmove->flFallVelocity * 0.0065F, 4.0F));
 #endif
-            }
-
-            pmove->flTimeStepSound = 0;
         }
 
-        pmove->velocity.z = 0;
-        pmove->flFallVelocity = 0;
+        pmove->flTimeStepSound = 0;
     }
+
+    pmove->velocity.z = 0;
+    pmove->flFallVelocity = 0;
 }
