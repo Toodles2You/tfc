@@ -172,9 +172,14 @@ void CTeamFortress::InitHUD(CBasePlayer* pPlayer)
 }
 
 
-bool CTeamFortress::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib, bool bAutoTeam)
+bool CTeamFortress::CanJoinTeam(CBasePlayer* player, int teamIndex)
 {
-    if (teamIndex > TEAM_UNASSIGNED && teamIndex <= m_numTeams)
+    if (!CHalfLifeMultiplay::CanJoinTeam(player, teamIndex))
+    {
+        return false;
+    }
+
+    if (teamIndex != TEAM_SPECTATORS)
     {
         const auto& info = m_TFTeamInfo[teamIndex - 1];
 
@@ -184,6 +189,17 @@ bool CTeamFortress::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool b
             return false;
         }
     }
+
+    return true;
+}
+
+
+bool CTeamFortress::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib, bool bAutoTeam)
+{
+	if (teamIndex == pPlayer->TeamNumber())
+	{
+		return true;
+	}
 
     if (!CHalfLifeMultiplay::ChangePlayerTeam(pPlayer, teamIndex, bKill, bGib, bAutoTeam))
     {

@@ -61,6 +61,7 @@ public:
 	float GetPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled, bool assist = false) override;
 	void InitHUD(CBasePlayer* pl) override;
 	gamemode_e GetGameMode() override { return kGamemodeTeamFortress; }
+	bool CanJoinTeam(CBasePlayer* pPlayer, int teamIndex) override;
 	bool ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib, bool bAutoTeam) override;
 	void PlayerSpawn(CBasePlayer* pPlayer) override;
 	bool FPlayerCanRespawn(CBasePlayer* pPlayer) override;
