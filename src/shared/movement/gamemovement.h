@@ -66,6 +66,7 @@ protected:
     virtual void ApplyFriction();
     void CheckStepSound();
     virtual void StepSound();
+    virtual void CategorizeGround();
     void StayOnGround();
 
     virtual void CheckDucking();

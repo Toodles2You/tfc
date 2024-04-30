@@ -155,6 +155,7 @@ bool CHalfLifeMovement::Climb(physent_t* ladder)
     }
 
     FlyMove();
+    CheckStepSound();
     return true;
 }
 

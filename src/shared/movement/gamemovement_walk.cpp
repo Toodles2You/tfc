@@ -327,7 +327,14 @@ void CHalfLifeMovement::CheckStepSound()
         return;
     }
 
-    if (pmove->velocity.x == 0.0F && pmove->velocity.y == 0.0F)
+    if (pmove->onground != -1)
+    {
+        if (pmove->velocity.x == 0.0F && pmove->velocity.y == 0.0F)
+        {
+            return;
+        }
+    }
+    else if (pmove->velocity.z == 0.0F)
     {
         return;
     }
@@ -335,13 +342,17 @@ void CHalfLifeMovement::CheckStepSound()
     auto speed = pmove->velocity.Make2D().Length();
     const auto isRunning = speed > 200;
 
-    if (isRunning)
+    if (pmove->onground == -1)
     {
-        speed = (600.0F / 300.0F) * (speed / 300.0F);
+        speed = 1.5F;
+    }
+    else if (isRunning)
+    {
+        speed = 2.0F * (speed / 300.0F);
     }
     else
     {
-        speed = (600.0F / 400.0F) * (speed / 100.0F);
+        speed = 1.5F * (speed / 100.0F);
     }
 
     pmove->flTimeStepSound = std::max((int)pmove->flTimeStepSound - (int)(pmove->cmd.msec * speed), -600);
@@ -355,27 +366,152 @@ void CHalfLifeMovement::CheckStepSound()
 
 void CHalfLifeMovement::StepSound()
 {
-    auto speed = pmove->velocity.Make2D().Length();
-    const auto isRunning = speed > 200;
+    const auto speed = pmove->velocity.Make2D().Length();
+    const auto isRunning = speed > 200 || pmove->onground == -1;
 
     pmove->iStepLeft = (pmove->iStepLeft != 0) ? 0 : 1;
 
     const auto random = 2 * pmove->iStepLeft + pmove->RandomLong(0, 1);
     const char* sample;
 
-    switch (random)
+    char c;
+    if (pmove->onground == -1)
     {
-        /* Right */
-        default: sample = "player/pl_step1.wav"; break;
-        case 1: sample = "player/pl_step3.wav"; break;
-        /* Left */
-        case 2: sample = "player/pl_step2.wav"; break;
-        case 3: sample = "player/pl_step4.wav"; break;
+        c = 'L';
+    }
+    else if (pmove->waterlevel > kWaterLevelNone)
+    {
+        c = CHAR_TEX_SLOSH;
+    }
+    else
+    {
+        CategorizeGround();
+        c = pmove->chtexturetype;
+    }
+
+    switch (c)
+    {
+        default:
+        case CHAR_TEX_CONCRETE:
+            switch (random)
+            {
+                default: sample = "player/pl_step1.wav"; break;
+                case 1:  sample = "player/pl_step3.wav"; break;
+                case 2:  sample = "player/pl_step2.wav"; break;
+                case 3:  sample = "player/pl_step4.wav"; break;
+            }
+            break;
+        case CHAR_TEX_METAL:
+            switch (random)
+            {
+                default: sample = "player/pl_metal1.wav"; break;
+                case 1:  sample = "player/pl_metal3.wav"; break;
+                case 2:  sample = "player/pl_metal2.wav"; break;
+                case 3:  sample = "player/pl_metal4.wav"; break;
+            }
+            break;
+        case CHAR_TEX_DIRT:
+            switch (random)
+            {
+                default: sample = "player/pl_dirt1.wav"; break;
+                case 1:  sample = "player/pl_dirt3.wav"; break;
+                case 2:  sample = "player/pl_dirt2.wav"; break;
+                case 3:  sample = "player/pl_dirt4.wav"; break;
+            }
+            break;
+        case CHAR_TEX_VENT:
+            switch (random)
+            {
+                default: sample = "player/pl_duct1.wav"; break;
+                case 1:  sample = "player/pl_duct3.wav"; break;
+                case 2:  sample = "player/pl_duct2.wav"; break;
+                case 3:  sample = "player/pl_duct4.wav"; break;
+            }
+            break;
+        case CHAR_TEX_TILE:
+            if (pmove->RandomLong(0, 4) == 0)
+            {
+                sample = "player/pl_tile5.wav";
+                break;
+            }
+
+            switch (random)
+            {
+                default: sample = "player/pl_tile1.wav"; break;
+                case 1:  sample = "player/pl_tile3.wav"; break;
+                case 2:  sample = "player/pl_tile2.wav"; break;
+                case 3:  sample = "player/pl_tile4.wav"; break;
+            }
+            break;
+        case CHAR_TEX_SLOSH:
+            if (pmove->waterlevel >= kWaterLevelWaist)
+            {
+                switch (random)
+                {
+                    default: sample = "player/pl_wade1.wav"; break;
+                    case 1:  sample = "player/pl_wade3.wav"; break;
+                    case 2:  sample = "player/pl_wade2.wav"; break;
+                    case 3:  sample = "player/pl_wade4.wav"; break;
+                }
+            }
+            else
+            {
+                switch (random)
+                {
+                    default: sample = "player/pl_slosh1.wav"; break;
+                    case 1:  sample = "player/pl_slosh3.wav"; break;
+                    case 2:  sample = "player/pl_slosh2.wav"; break;
+                    case 3:  sample = "player/pl_slosh4.wav"; break;
+                }
+            }
+            break;
+        case 'L':
+            switch (random)
+            {
+                default: sample = "player/pl_ladder1.wav"; break;
+                case 1:  sample = "player/pl_ladder3.wav"; break;
+                case 2:  sample = "player/pl_ladder2.wav"; break;
+                case 3:  sample = "player/pl_ladder4.wav"; break;
+            }
+            break;
     }
 
     pmove->PM_PlaySound(CHAN_BODY, sample, isRunning ? 0.5F : 0.2F, ATTN_IDLE, 0, PITCH_NORM);
 
     pmove->flTimeStepSound += 600;
+}
+
+
+void CHalfLifeMovement::CategorizeGround()
+{   
+    Vector start = pmove->origin;
+    Vector end = start + Vector(0.0F, 0.0F, -64.0F);
+
+    /* Fill in default values, just in case. */
+    pmove->sztexturename[0] = '\0';
+    pmove->chtexturetype = CHAR_TEX_CONCRETE;
+
+    const char* name = pmove->PM_TraceTexture(pmove->onground, start, end);
+
+    if (name == nullptr || name[0] == '\0')
+    {
+        return;
+    }
+
+    /* Strip leading characters. */
+    if (*name == '-' || *name == '+')
+    {
+        name += 2;
+    }
+    if (*name == '{' || *name == '!' || *name == '~' || *name == ' ')
+    {
+        name++;
+    }
+
+    strncpy(pmove->sztexturename, name, CBTEXTURENAMEMAX - 1);
+    pmove->sztexturename[CBTEXTURENAMEMAX - 1] = '\0';
+
+    pmove->chtexturetype = PM_FindTextureType(pmove->sztexturename);
 }
 
 
