@@ -22,6 +22,8 @@
 
 void CHalfLifeMovement::CheckContents()
 {
+    const auto wasWet = pmove->waterlevel > kWaterLevelNone;
+
     pmove->waterlevel = kWaterLevelNone;
     pmove->watertype = CONTENTS_EMPTY;
 
@@ -81,6 +83,24 @@ void CHalfLifeMovement::CheckContents()
             /* The deeper we are, the stronger the current. */
             pmove->basevelocity = current_table[CONTENTS_CURRENT_0 - trueContents] * 50.0F * pmove->waterlevel;
         }
+    }
+
+    const auto isWet = pmove->waterlevel > kWaterLevelNone;
+
+    if (isWet != wasWet)
+    {
+        const auto random = pmove->RandomLong(0, 4);
+        const char* sample;
+
+        switch (random)
+        {
+            default: sample = "player/pl_wade1.wav"; break;
+            case 1:  sample = "player/pl_wade3.wav"; break;
+            case 2:  sample = "player/pl_wade2.wav"; break;
+            case 3:  sample = "player/pl_wade4.wav"; break;
+        }
+
+        pmove->PM_PlaySound(CHAN_BODY, sample, VOL_NORM, ATTN_IDLE, 0, PITCH_NORM);
     }
 }
 
