@@ -44,6 +44,11 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             2,
             3,
         },
+        .model = "scout",
+        .colormap = {
+            {153, 139},
+            {255,  10},
+        },
     },
 
     [PC_SNIPER] = {
@@ -76,6 +81,11 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             0,
             2,
             0,
+        },
+        .model = "sniper",
+        .colormap = {
+            {153, 145},
+            {255,  10},
         },
     },
     
@@ -110,6 +120,11 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             2,
             1,
         },
+        .model = "soldier",
+        .colormap = {
+            {153, 130},
+            {250,  28},
+        },
     },
 
     [PC_DEMOMAN] = {
@@ -142,6 +157,11 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             0,
             2,
             2,
+        },
+        .model = "demo",
+        .colormap = {
+            {153, 145},
+            {255,  20},
         },
     },
     
@@ -176,6 +196,11 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             2,
             2,
         },
+        .model = "medic",
+        .colormap = {
+            {153, 140},
+            {255, 250},
+        },
     },
 
     [PC_HVYWEAP] = {
@@ -209,6 +234,11 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             30,
             2,
             1,
+        },
+        .model = "hvyweapon",
+        .colormap = {
+            {148, 138},
+            {255,  25},
         },
     },
 
@@ -245,6 +275,11 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             2,
             4,
         },
+        .model = "pyro",
+        .colormap = {
+            {140, 145},
+            {250,  25},
+        },
     },
 
     [PC_SPY] = {
@@ -280,6 +315,11 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             2,
             2,
         },
+        .model = "spy",
+        .colormap = {
+            {150, 145},
+            {250, 240},
+        },
     },
 
     [PC_ENGINEER] = {
@@ -313,6 +353,11 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             100,
             2,
             2,
+        },
+        .model = "engineer",
+        .colormap = {
+            {140, 148},
+            {  5, 250},
         },
     },
 
@@ -348,6 +393,11 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             0,
             0,
             0,
+        },
+        .model = "civilian",
+        .colormap = {
+            {150, 140},
+            {250, 240},
         },
     }
 };

@@ -70,6 +70,7 @@ public:
 	int GetMaxAmmo(CBasePlayer* pPlayer, int iAmmoType) override;
 
 protected:
+	void UpdatePlayerClass(CBasePlayer* player);
 	bool ChangePlayerClass(CBasePlayer* pPlayer, int classIndex);
 
 protected:

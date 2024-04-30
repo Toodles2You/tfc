@@ -34,6 +34,8 @@ struct PCInfo
 	int weapons[4];
 	int maxAmmo[AMMO_TYPES];
 	int initAmmo[AMMO_TYPES];
+	const char* model;
+	byte colormap[2][2];
 };
 
 extern PCInfo sTFClassInfo[PC_LASTCLASS];

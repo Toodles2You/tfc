@@ -18,22 +18,6 @@
 #include "tf_goal.h"
 
 
-static const char* sTFClassModels[] =
-{
-    "civilian",
-    "scout",
-    "sniper",
-    "soldier",
-    "demo",
-    "medic",
-    "hvyweapon",
-    "pyro",
-    "spy",
-    "engineer",
-    "civilian",
-    "civilian",
-};
-
 static const char* sTFClassSelection[] =
 {
     "civilian",
@@ -48,39 +32,6 @@ static const char* sTFClassSelection[] =
     "engineer",
     "randompc",
     "civilian",
-};
-
-static constexpr byte sTFTeamColors[3][12][2] =
-{
-    [TEAM_UNASSIGNED] = {},
-    [TEAM_BLUE] = {
-        [PC_UNDEFINED] = {},
-        [PC_SCOUT]     = {153, 139},
-        [PC_SNIPER]    = {153, 145},
-        [PC_SOLDIER]   = {153, 130},
-        [PC_DEMOMAN]   = {153, 145},
-        [PC_MEDIC]     = {153, 140},
-        [PC_HVYWEAP]   = {148, 138},
-        [PC_PYRO]      = {140, 145},
-        [PC_SPY]       = {150, 145},
-        [PC_ENGINEER]  = {140, 148},
-        [PC_RANDOM]    = {},
-        [PC_CIVILIAN]  = {150, 140},
-    },
-    [TEAM_RED] = {
-        [PC_UNDEFINED] = {},
-        [PC_SCOUT]     = {255,  10},
-        [PC_SNIPER]    = {255,  10},
-        [PC_SOLDIER]   = {250,  28},
-        [PC_DEMOMAN]   = {255,  20},
-        [PC_MEDIC]     = {255, 250},
-        [PC_HVYWEAP]   = {255,  25},
-        [PC_PYRO]      = {250,  25},
-        [PC_SPY]       = {250, 240},
-        [PC_ENGINEER]  = {  5, 250},
-        [PC_RANDOM]    = {},
-        [PC_CIVILIAN]  = {250, 240},
-    },
 };
 
 static const char* sTFTeamNames[] =
@@ -252,6 +203,36 @@ bool CTeamFortress::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool b
 }
 
 
+void CTeamFortress::UpdatePlayerClass(CBasePlayer* player)
+{
+    const auto index = player->entindex();
+    const auto team = player->TeamNumber() - TEAM_DEFAULT;
+    const auto playerclass = player->PCNumber();
+
+    char* infobuffer = g_engfuncs.pfnGetInfoKeyBuffer(player->pev->pContainingEntity);
+
+    PCInfo& info = sTFClassInfo[playerclass];
+
+    g_engfuncs.pfnSetClientKeyValue(
+        index,
+        infobuffer,
+        "model",
+        info.model);
+
+    g_engfuncs.pfnSetClientKeyValue(
+        index,
+        infobuffer,
+        "topcolor",
+        util::dtos1(info.colormap[team][0]));
+
+    g_engfuncs.pfnSetClientKeyValue(
+        index,
+        infobuffer,
+        "bottomcolor",
+        util::dtos2(info.colormap[team][1]));
+}
+
+
 bool CTeamFortress::ChangePlayerClass(CBasePlayer* pPlayer, int classIndex)
 {
     if (pPlayer->TeamNumber() <= TEAM_UNASSIGNED || pPlayer->TeamNumber() > m_numTeams)
@@ -312,27 +293,7 @@ bool CTeamFortress::ChangePlayerClass(CBasePlayer* pPlayer, int classIndex)
 
     pPlayer->pev->playerclass = classIndex;
 
-    char* infobuffer = g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict());
-
-    g_engfuncs.pfnSetClientKeyValue(
-        pPlayer->entindex(),
-        infobuffer,
-        "model",
-        sTFClassModels[pPlayer->PCNumber()]);
-
-    const auto colormap = sTFTeamColors[pPlayer->TeamNumber()][pPlayer->PCNumber()];
-
-    g_engfuncs.pfnSetClientKeyValue(
-        pPlayer->entindex(),
-        infobuffer,
-        "topcolor",
-        util::dtos1(colormap[0]));
-
-    g_engfuncs.pfnSetClientKeyValue(
-        pPlayer->entindex(),
-        infobuffer,
-        "bottomcolor",
-        util::dtos2(colormap[1]));
+    UpdatePlayerClass(pPlayer);
 
     if (!bKill && g_pGameRules->FPlayerCanRespawn(pPlayer))
     {
@@ -343,7 +304,7 @@ bool CTeamFortress::ChangePlayerClass(CBasePlayer* pPlayer, int classIndex)
 		STRING(pPlayer->pev->netname),
 		g_engfuncs.pfnGetPlayerUserId(pPlayer->edict()),
 		g_engfuncs.pfnGetPlayerAuthId(pPlayer->edict()),
-		sTFClassModels[pPlayer->PCNumber()]);
+		sTFClassSelection[pPlayer->PCNumber()]);
 
     return true;
 }
@@ -353,27 +314,11 @@ void CTeamFortress::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer
 {
     CHalfLifeMultiplay::ClientUserInfoChanged(pPlayer, infobuffer);
 
-    if (pPlayer->TeamNumber() != TEAM_SPECTATORS)
+    if (pPlayer->TeamNumber() != TEAM_UNASSIGNED
+     && pPlayer->TeamNumber() != TEAM_SPECTATORS
+     && pPlayer->PCNumber() != PC_UNDEFINED)
     {
-        g_engfuncs.pfnSetClientKeyValue(
-            pPlayer->entindex(),
-            infobuffer,
-            "model",
-            sTFClassModels[pPlayer->PCNumber()]);
-
-        const auto colormap = sTFTeamColors[pPlayer->TeamNumber()][pPlayer->PCNumber()];
-
-		g_engfuncs.pfnSetClientKeyValue(
-			pPlayer->entindex(),
-			infobuffer,
-			"topcolor",
-			util::dtos1(colormap[0]));
-
-		g_engfuncs.pfnSetClientKeyValue(
-			pPlayer->entindex(),
-			infobuffer,
-			"bottomcolor",
-			util::dtos2(colormap[1]));
+        UpdatePlayerClass(pPlayer);
     }
 }
 
