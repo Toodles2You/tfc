@@ -143,7 +143,7 @@ void CSniperRifle::PrimaryAttack()
 		return;
 	}
 
-	if (hit->IsClient())
+	if (hit->IsClient() && dynamic_cast<CBasePlayer*>(hit)->PCNumber() != PC_SNIPER)
 	{
 		float distance = (hit->pev->origin - m_pPlayer->pev->origin).Length();
 
@@ -151,7 +151,7 @@ void CSniperRifle::PrimaryAttack()
 			Don't headshot or legshot players who are very far away.
 			Unless they're a sniper, to keep those epic sniper duels.
 		*/
-		if (distance > 1536.0F && dynamic_cast<CBasePlayer*>(hit)->PCNumber() != PC_SNIPER)
+		if (distance > 1536.0F)
 		{
 #ifndef NDEBUG
 			if ((damageType & (DMG_AIMED | DMG_CALTROP)) != 0)
@@ -162,7 +162,7 @@ void CSniperRifle::PrimaryAttack()
 			damageType &= ~(DMG_AIMED | DMG_CALTROP);
 		}
 		/* Don't headshot players who are very close. */
-		else if (distance < 512.0F)
+		else if (distance < 448.0F)
 		{
 #ifndef NDEBUG
 			if ((damageType & DMG_AIMED) != 0)
@@ -417,8 +417,8 @@ void CAutoRifle::GetWeaponInfo(WeaponInfo& i)
 	i.iProjectileDamage = 8;
 	i.vecProjectileSpread = Vector2D(2.3F, 2.3F);
 	i.iProjectileCount = 1;
-	i.iProjectileRange = 2048;
 	i.iProjectileDamageMin = 8;
+	i.iProjectileRange = 1920;
 
 	i.pszEvent = "events/wpn/tf_ar.sc";
 	i.pszAttackSound = "weapons/sniper.wav";
