@@ -128,13 +128,10 @@ CTeamMenuPanel::CTeamMenuPanel(int iTrans, bool iRemoveMe, int x, int y, int wid
 		m_pButtons[i]->addActionSignal(new CMenuHandler_StringCommandWatch(sz, true));
 		m_pButtons[i]->addInputSignal(new CHandler_MenuButtonOver(this, i));
 
-		auto color = gHUD.GetTeamColor(i);
-
 		// Create the Team Info panel
 		m_pTeamInfoPanel[i] = new TextPanel("", TEAMMENU_WINDOW_INFO_X, TEAMMENU_WINDOW_INFO_Y, TEAMMENU_WINDOW_SIZE_X - TEAMMENU_WINDOW_INFO_X, TEAMMENU_WINDOW_SIZE_X - TEAMMENU_WINDOW_INFO_Y);
 		m_pTeamInfoPanel[i]->setParent(m_pTeamWindow);
 		m_pTeamInfoPanel[i]->setFont(pSchemes->getFont(hTeamInfoText));
-		m_pTeamInfoPanel[i]->setFgColor(color[0] * 255, color[1] * 255, color[2] * 255, 0);
 		m_pTeamInfoPanel[i]->setBgColor(0, 0, 0, 255);
 	}
 
@@ -200,10 +197,8 @@ void CTeamMenuPanel::Update()
 				int iTotal = 0;
 				for (int j = 1; j < MAX_PLAYERS_HUD; j++)
 				{
-					if (g_PlayerInfoList[j].name == NULL)
+					if (g_PlayerInfoList[j].name == nullptr)
 						continue; // empty player slot, skip
-					if (0 != g_PlayerInfoList[j].thisplayer)
-						continue; // skip this player
 					if (g_PlayerExtraInfo[j].teamnumber != i)
 						continue; // skip over players in other teams
 
@@ -219,13 +214,21 @@ void CTeamMenuPanel::Update()
 					// Set the text of the info Panel
 					char szText[((MAX_PLAYER_NAME_LENGTH + 3) * 31) + 256];
 					if (iTotal == 1)
-						sprintf(szText, "%s: %d Player (%d points)", gViewPort->GetTeamName(i), iTotal, g_TeamInfo[i].score);
+						sprintf(szText, "%s: %d Player", gViewPort->GetTeamName(i), iTotal);
 					else
-						sprintf(szText, "%s: %d Players (%d points)", gViewPort->GetTeamName(i), iTotal, g_TeamInfo[i].score);
+						sprintf(szText, "%s: %d Players", gViewPort->GetTeamName(i), iTotal);
 					strncat(szText, szPlayerList, sizeof(szText) - strlen(szText));
 					szText[sizeof(szText) - 1] = '\0';
 
 					m_pTeamInfoPanel[i]->setText(szText);
+
+					// Set the text color to the teamcolor
+					auto color = gHUD.GetTeamColor(i);
+					m_pTeamInfoPanel[i]->setFgColor(
+						color[0] * 255,
+						color[1] * 255,
+						color[2] * 255,
+						0);
 				}
 				else
 				{
