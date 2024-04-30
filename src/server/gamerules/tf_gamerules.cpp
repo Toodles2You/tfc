@@ -50,14 +50,37 @@ static const char* sTFClassSelection[] =
     "civilian",
 };
 
-static const char* sTFTeamColors[] =
+static constexpr byte sTFTeamColors[3][12][2] =
 {
-    "0",
-    "159",
-    "0",
-    "127",
-    "63",
-    "0",
+    [TEAM_UNASSIGNED] = {},
+    [TEAM_BLUE] = {
+        [PC_UNDEFINED] = {},
+        [PC_SCOUT]     = {153, 139},
+        [PC_SNIPER]    = {153, 145},
+        [PC_SOLDIER]   = {153, 130},
+        [PC_DEMOMAN]   = {153, 145},
+        [PC_MEDIC]     = {153, 140},
+        [PC_HVYWEAP]   = {148, 138},
+        [PC_PYRO]      = {140, 145},
+        [PC_SPY]       = {150, 145},
+        [PC_ENGINEER]  = {140, 148},
+        [PC_RANDOM]    = {},
+        [PC_CIVILIAN]  = {150, 140},
+    },
+    [TEAM_RED] = {
+        [PC_UNDEFINED] = {},
+        [PC_SCOUT]     = {255,  10},
+        [PC_SNIPER]    = {255,  10},
+        [PC_SOLDIER]   = {250,  28},
+        [PC_DEMOMAN]   = {255,  20},
+        [PC_MEDIC]     = {255, 250},
+        [PC_HVYWEAP]   = {255,  25},
+        [PC_PYRO]      = {250,  25},
+        [PC_SPY]       = {250, 240},
+        [PC_ENGINEER]  = {  5, 250},
+        [PC_RANDOM]    = {},
+        [PC_CIVILIAN]  = {250, 240},
+    },
 };
 
 static const char* sTFTeamNames[] =
@@ -220,20 +243,6 @@ bool CTeamFortress::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool b
 
     if (pPlayer->TeamNumber() != TEAM_SPECTATORS)
     {
-        char* infobuffer = g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict());
-
-        g_engfuncs.pfnSetClientKeyValue(
-            pPlayer->entindex(),
-            infobuffer,
-            "topcolor",
-            sTFTeamColors[pPlayer->TeamNumber()]);
-
-        g_engfuncs.pfnSetClientKeyValue(
-            pPlayer->entindex(),
-            infobuffer,
-            "bottomcolor",
-            sTFTeamColors[pPlayer->TeamNumber()]);
-
         MessageBegin(MSG_ONE, gmsgVGUIMenu, pPlayer);
         WriteByte(MENU_CLASS);
         MessageEnd();
@@ -303,18 +312,34 @@ bool CTeamFortress::ChangePlayerClass(CBasePlayer* pPlayer, int classIndex)
 
     pPlayer->pev->playerclass = classIndex;
 
+    char* infobuffer = g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict());
+
     g_engfuncs.pfnSetClientKeyValue(
         pPlayer->entindex(),
-        g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()),
+        infobuffer,
         "model",
         sTFClassModels[pPlayer->PCNumber()]);
+
+    const auto colormap = sTFTeamColors[pPlayer->TeamNumber()][pPlayer->PCNumber()];
+
+    g_engfuncs.pfnSetClientKeyValue(
+        pPlayer->entindex(),
+        infobuffer,
+        "topcolor",
+        util::dtos1(colormap[0]));
+
+    g_engfuncs.pfnSetClientKeyValue(
+        pPlayer->entindex(),
+        infobuffer,
+        "bottomcolor",
+        util::dtos2(colormap[1]));
 
     if (!bKill && g_pGameRules->FPlayerCanRespawn(pPlayer))
     {
         pPlayer->Spawn();
     }
 
-	util::LogPrintf("\"%s<%i><%s><>\" became a %s\n",
+	util::LogPrintf("\"%s<%i><%s><>\" changed role to \"%s\"\n",
 		STRING(pPlayer->pev->netname),
 		g_engfuncs.pfnGetPlayerUserId(pPlayer->edict()),
 		g_engfuncs.pfnGetPlayerAuthId(pPlayer->edict()),
@@ -336,17 +361,19 @@ void CTeamFortress::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer
             "model",
             sTFClassModels[pPlayer->PCNumber()]);
 
+        const auto colormap = sTFTeamColors[pPlayer->TeamNumber()][pPlayer->PCNumber()];
+
 		g_engfuncs.pfnSetClientKeyValue(
 			pPlayer->entindex(),
 			infobuffer,
 			"topcolor",
-			sTFTeamColors[pPlayer->TeamNumber()]);
+			util::dtos1(colormap[0]));
 
 		g_engfuncs.pfnSetClientKeyValue(
 			pPlayer->entindex(),
 			infobuffer,
 			"bottomcolor",
-			sTFTeamColors[pPlayer->TeamNumber()]);
+			util::dtos2(colormap[1]));
     }
 }
 
