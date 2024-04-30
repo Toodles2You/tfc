@@ -60,7 +60,7 @@ void CBaseEntity::EmitSound(const char* sample, int channel, float volume, float
 void CBaseEntity::StopSound(const char* sample, int channel) {}
 void CBaseEntity::DelayThink() {}
 
-void CBasePlayer::DeathSound() {}
+void CBasePlayer::DeathSound(const int damageType) {}
 bool CBasePlayer::GiveHealth(float flHealth, int bitsDamageType, bool bClearEffects) { return false; }
 void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, int hitgroup, int bitsDamageType) {}
 bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) { return false; }

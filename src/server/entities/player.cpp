@@ -97,11 +97,16 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 LINK_ENTITY_TO_CLASS(player, CBasePlayer);
 
 
-void CBasePlayer::Pain()
+void CBasePlayer::Pain(const int damageType)
 {
 	char* sample = nullptr;
 
-	if (pev->waterlevel >= kWaterLevelEyes)
+	if ((damageType & DMG_FALL) != 0)
+	{
+		return;
+	}
+
+	if ((damageType & DMG_DROWN) != 0)
 	{
 		// water pain sounds
 		switch (g_engfuncs.pfnRandomLong(0, 11))
@@ -160,12 +165,12 @@ static int TrainSpeed(int iSpeed, int iMax)
 }
 #endif
 
-void CBasePlayer::DeathSound()
+void CBasePlayer::DeathSound(const int damageType)
 {
 	char* sample = nullptr;
 
 	// water death sounds
-	if (pev->waterlevel >= kWaterLevelEyes)
+	if ((damageType & DMG_DROWN) != 0)
 	{
 		// water death sounds
 		sample = "player/h2odeath.wav";
@@ -458,9 +463,9 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		return false;
 	}
 
-	if (flDamage >= 1.0F && (bitsDamageType & DMG_FALL) == 0)
+	if (flDamage >= 1.0F)
 	{
-		Pain();
+		Pain(bitsDamageType);
 	}
 
 	m_flNextRegenerationTime = gpGlobals->time + 3.0F;
@@ -576,7 +581,7 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 
 	if (gibMode == GIB_NEVER || (gibMode != GIB_ALWAYS && pev->health >= -40.0f))
 	{
-		DeathSound();
+		DeathSound(bitsDamageType);
 	}
 
 	tent::SpawnCorpse(this, gibMode);

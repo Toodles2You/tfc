@@ -132,7 +132,7 @@ public:
 	CTeam *m_team = nullptr;
 
 	bool Spawn() override;
-	void Pain();
+	void Pain(const int damageType);
 
 	virtual void PreThink();
 	virtual void PostThink();
@@ -183,7 +183,7 @@ public:
 	int ObjectCaps() override { return (CBaseAnimating::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_NET_ALWAYS_SEND; }
 	void Precache() override;
 
-	void DeathSound();
+	void DeathSound(const int damageType);
 
 	virtual void HandleSequenceFinished() override;
 
