@@ -510,6 +510,10 @@ void ClientCommand(edict_t* pEntity)
 	{
 		player->DiscardAmmo();
 	}
+	else if (FStrEq(pcmd, "+det5") || FStrEq(pcmd, "+det20") || FStrEq(pcmd, "+det50"))
+	{
+		player->SetDetpack();
+	}
 	else if (g_pGameRules->ClientCommand(player, pcmd))
 	{
 	}

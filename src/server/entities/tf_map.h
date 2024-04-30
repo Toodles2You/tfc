@@ -137,6 +137,15 @@ enum
 	TFGI_ITEM_GREEN  = 33554432,
 };
 
+enum
+{
+    WEAP_DETPACK_DISARMTIME = 3,    // Time it takes to disarm a Detpack
+    WEAP_DETPACK_SETTIME    = 3,    // Time it takes to set a Detpack
+    WEAP_DETPACK_SIZE       = 700,  // Explosion Size
+    WEAP_DETPACK_GOAL_SIZE  = 1500, // Explosion Size for goal triggering
+    WEAP_DETPACK_BITS_NO    = 12,   // Bits that detpack explodes into
+};
+
 class CBaseEntity;
 class CTFVars;
 class CTFGoal;
@@ -154,6 +163,7 @@ bool GroupInState(int group_no, TFGoalState state, bool check_items = false);
 void SetGoalState(int goal_no, TFGoalState state, CBaseEntity* player = nullptr, CTFVars* activating_goal = nullptr);
 void SetGroupState(int group_no, TFGoalState state, CBaseEntity* player = nullptr, CTFVars* activating_goal = nullptr);
 void SetSpawnGroupActive(int group_no, bool active);
+void GoalDetpackUse(const Vector& origin, CBaseEntity* activator, CBaseEntity* caller);
 } /* namespace util */
 
 /* Toodles: I made these into their own class because multi-inheritence sucks. */

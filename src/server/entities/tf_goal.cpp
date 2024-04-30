@@ -215,6 +215,38 @@ void util::SetSpawnGroupActive(int group_no, bool active)
     }
 }
 
+void util::GoalDetpackUse(const Vector& origin, CBaseEntity* activator, CBaseEntity* caller)
+{
+    CTFGoal* goal = nullptr;
+    while ((goal = (CTFGoal*)util::FindEntityByClassname(goal, "info_tfgoal")))
+    {
+        if (goal->Classify() != CLASS_TFGOAL)
+        {
+            continue;
+        }
+
+        if (!goal->IsGoalActivatedBy(TFGA_TOUCH_DETPACK))
+        {
+            continue;
+        }
+
+        if ((goal->pev->origin - origin).Length() > WEAP_DETPACK_GOAL_SIZE)
+        {
+            continue;
+        }
+
+        TraceResult trace;
+        util::TraceLine(goal->pev->origin, origin, util::ignore_monsters, goal, &trace);
+
+        if (trace.flFraction != 1.0F && trace.pHit != activator->pev->pContainingEntity)
+        {
+            continue;
+        }
+
+        goal->GoalUse(activator, caller, USE_TOGGLE, 0.0F);
+    }
+}
+
 //==================================================
 // CTFGoal
 //==================================================
@@ -850,13 +882,10 @@ void CTFGoal::RemoveResults(CBaseEntity* player)
     pl->GiveAmmo(-tfv.ammo_nails, AMMO_NAILS);
     pl->GiveAmmo(-tfv.ammo_rockets, AMMO_ROCKETS);
     pl->GiveAmmo(-tfv.ammo_cells, AMMO_CELLS);
-#if 0
     if (pl->PCNumber() == PC_DEMOMAN && tfv.ammo_detpack != 0)
     {
-        pl->m_bDetpackReady = (tfv.ammo_detpack < 0);
-        pl->m_bUpdateBuildState = true;
+        pl->m_bDetpackReady = tfv.ammo_detpack < 0;
     }
-#endif
     pl->GiveAmmo(-tfv.no_grenades_1, AMMO_GRENADES1);
     pl->GiveAmmo(-tfv.no_grenades_2, AMMO_GRENADES2);
 
@@ -923,13 +952,10 @@ void CTFGoal::ApplyResults(CBaseEntity* player, CBaseEntity* activating_player, 
         pl->GiveAmmo(tfv.ammo_nails, AMMO_NAILS);
         pl->GiveAmmo(tfv.ammo_rockets, AMMO_ROCKETS);
         pl->GiveAmmo(tfv.ammo_cells, AMMO_CELLS);
-#if 0
         if (pl->PCNumber() == PC_DEMOMAN && tfv.ammo_detpack != 0)
         {
-            pl->m_bDetpackReady = (tfv.ammo_detpack > 0);
-            pl->m_bUpdateBuildState = true;
+            pl->m_bDetpackReady = tfv.ammo_detpack > 0;
         }
-#endif
         pl->GiveAmmo(tfv.no_grenades_1, AMMO_GRENADES1);
         pl->GiveAmmo(tfv.no_grenades_2, AMMO_GRENADES2);
 

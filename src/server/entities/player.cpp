@@ -2027,6 +2027,32 @@ void CBasePlayer::SaveMe()
 }
 
 
+void CBasePlayer::SetDetpack()
+{
+	if (!IsAlive() || !IsPlayer())
+	{
+		return;
+	}
+
+	if (!m_bDetpackReady)
+	{
+		return;
+	}
+
+	tent::Explosion(
+		pev->origin,
+		g_vecZero,
+		tent::ExplosionType::Normal,
+		100.0F,
+		false,
+		false);
+
+	util::GoalDetpackUse(pev->origin, this, this);
+
+	m_bDetpackReady = false;
+}
+
+
 void CBasePlayer::SendExtraInfo(CBaseEntity* toWhom)
 {
 	if (toWhom != nullptr)

@@ -450,6 +450,11 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
 	pPlayer->m_flArmorTypeMax = info.maxArmorType;
     pPlayer->m_afArmorClass = info.initArmorClasses;
 
+    if (pPlayer->PCNumber() == PC_DEMOMAN)
+    {
+        pPlayer->m_bDetpackReady = true;
+    }
+
     for (int i = 0; i < 4; i++)
     {
         if (info.weapons[i] != -1)

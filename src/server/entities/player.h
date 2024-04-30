@@ -356,6 +356,10 @@ public:
 
 	void RemoveGoalItems(bool force = true);
 	bool GiveArmor(float type, float amount);
+
+	void SetDetpack();
+
+	bool m_bDetpackReady;
 #endif
 };
 
