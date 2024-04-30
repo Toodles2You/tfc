@@ -200,6 +200,7 @@ public:
 	virtual int GetTeamIndex(const char* pTeamName) { return -1; }
 	virtual const char* GetIndexedTeamName(int teamIndex) { return ""; }
 	virtual bool IsValidTeam(const char* pTeamName) { return true; }
+	virtual bool CanJoinTeam(CBasePlayer* pPlayer, int teamIndex) { return true; }
 	virtual bool ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib, bool bAutoTeam) {}
 	virtual bool ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib, bool bAutoTeam) {}
 	virtual int GetDefaultPlayerTeam(CBasePlayer* pPlayer) {}
@@ -396,6 +397,7 @@ public:
 	const char* GetIndexedTeamName(int teamIndex) override;
 	bool IsValidTeam(const char* pTeamName) override;
 	int GetDefaultPlayerTeam(CBasePlayer* pPlayer) override;
+	bool CanJoinTeam(CBasePlayer* player, int teamIndex) override;
 	bool ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib, bool bAutoTeam) override;
 	bool ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib, bool bAutoTeam) override;
 

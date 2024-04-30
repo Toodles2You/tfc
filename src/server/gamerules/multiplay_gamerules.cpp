@@ -658,14 +658,14 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 	{
 		killerIndex = killer->entindex();
 
-		if (inflictor)
+		if (inflictor != nullptr)
 		{
 			if (inflictor == killer)
 			{
 				// If the inflictor is the killer, then it must be their current weapon doing the damage
-				if (((CBasePlayer *)killer)->m_pActiveWeapon)
+				if (dynamic_cast<CBasePlayer*>(killer)->m_pActiveWeapon != nullptr)
 				{
-					killerWeapon = ((CBasePlayer *)killer)->m_pActiveWeapon->pszName();
+					killerWeapon = dynamic_cast<CBasePlayer*>(killer)->m_pActiveWeapon->pszName();
 				}
 			}
 			else
@@ -1094,6 +1094,11 @@ int CHalfLifeMultiplay::GetDefaultPlayerTeam(CBasePlayer* pPlayer)
 
 	for (int i = 0; i < m_numTeams; i++)
 	{
+		if (!CanJoinTeam(pPlayer, i + 1))
+		{
+			continue;
+		}
+
 		/* The player is on this team */
 		bool currentTeam = (pPlayer->TeamNumber() == (i + 1));
 		int numPlayers = m_teams[i].m_numPlayers;
@@ -1136,7 +1141,7 @@ int CHalfLifeMultiplay::GetDefaultPlayerTeam(CBasePlayer* pPlayer)
 }
 
 
-bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib, bool bAutoTeam)
+bool CHalfLifeMultiplay::CanJoinTeam(CBasePlayer* player, int teamIndex)
 {
 	if (teamIndex == TEAM_SPECTATORS)
 	{
@@ -1150,9 +1155,20 @@ bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, b
 		return false;
 	}
 
+	return true;
+}
+
+
+bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool bKill, bool bGib, bool bAutoTeam)
+{
 	if (teamIndex == pPlayer->TeamNumber())
 	{
 		return true;
+	}
+
+	if (!bAutoTeam && !CanJoinTeam(pPlayer, teamIndex))
+	{
+		return false;
 	}
 
 	if (!pPlayer->IsPlayer() || !pPlayer->IsAlive())

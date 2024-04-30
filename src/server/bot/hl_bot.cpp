@@ -72,7 +72,7 @@ void CHLBot::Update()
 {
     if (TeamNumber() == TEAM_UNASSIGNED)
     {
-        g_pGameRules->ChangePlayerTeam(this, g_pGameRules->GetDefaultPlayerTeam(this), false, false, false);
+        g_pGameRules->ChangePlayerTeam(this, g_pGameRules->GetDefaultPlayerTeam(this), false, false, true);
         if (g_pGameRules->GetGameMode() >= kGamemodeTeamFortress)
         {
             dynamic_cast<CTeamFortress*>(g_pGameRules)->ChangePlayerClass(this, g_engfuncs.pfnRandomLong(PC_SCOUT, PC_MEDIC));
