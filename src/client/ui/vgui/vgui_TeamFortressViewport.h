@@ -1536,7 +1536,8 @@ public:
 		setVisible( false );
 		m_iIsActive = false;
 
-		if (g_iTeamNumber == TEAM_UNASSIGNED && GetNextMenu() == nullptr)
+		if ((GetMenuID() == MENU_INTRO || GetMenuID() == MENU_MAPBRIEFING)
+		 && g_iTeamNumber == TEAM_UNASSIGNED && GetNextMenu() == nullptr)
 		{
 			gEngfuncs.pfnClientCmd("jointeam 5\n");
 		}

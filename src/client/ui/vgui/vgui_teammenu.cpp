@@ -326,24 +326,38 @@ void CTeamMenuPanel::Update()
 bool CTeamMenuPanel::SlotInput(int iSlot)
 {
 	// AutoAssign
-	if (iSlot == 5 && m_pButtons[5]->isVisible())
+	if (iSlot == 5)
 	{
-		m_pButtons[5]->fireActionSignal();
-		return true;
+		if (m_pButtons[5]->isVisible())
+		{
+			m_pButtons[5]->fireActionSignal();
+			return true;
+		}
+
+		return false;
 	}
 
 	// Spectate
-	if (iSlot == 6 && m_pSpectateButton->isVisible())
+	if (iSlot == 6)
 	{
-		m_pSpectateButton->fireActionSignal();
-		return true;
+		if (m_pSpectateButton->isVisible())
+		{
+			m_pSpectateButton->fireActionSignal();
+			return true;
+		}
+
+		return false;
 	}
 
 	// Otherwise, see if a particular team is selectable
-	if ((iSlot < 1) || (iSlot > gViewPort->GetNumberOfTeams()))
+	if (iSlot < 1 || iSlot > gViewPort->GetNumberOfTeams())
+	{
 		return false;
-	if (!m_pButtons[iSlot])
+	}
+	if (m_pButtons[iSlot] == nullptr)
+	{
 		return false;
+	}
 
 	// Is the button pushable?
 	if (m_pButtons[iSlot]->isVisible())
