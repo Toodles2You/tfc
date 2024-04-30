@@ -31,7 +31,8 @@ extern cvar_t* cl_righthand;
 
 
 void CBasePlayer::FireBullets(
-	const float damage,
+	const float damageMax,
+	const float damageMin,
 	const Vector2D& spread,
 	const unsigned int count,
 	const float distance)

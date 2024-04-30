@@ -275,7 +275,7 @@ public:
 
 	int m_LastHitGroup; // the last body region that took damage
 
-	void FireBullets(const float damage, const Vector2D& spread, const unsigned int count = 1, const float distance = 8192);
+	void FireBullets(const float damageMax, const float damageMin, const Vector2D& spread, const unsigned int count = 1, const float distance = 8192);
 
 	virtual void GetClientData(clientdata_t& data, bool sendWeapons);
 	virtual void SetClientData(const clientdata_t& data);

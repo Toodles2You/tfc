@@ -219,14 +219,23 @@ void CBaseEntity::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecD
 	}
 }
 
+static inline float Bezier(float x)
+{
+	x = std::clamp(x, 0.0F, 1.0F);
+    return x * x * (3.0F - 2.0F * x);
+}
+
 void CBasePlayer::FireBullets(
-	const float damage,
+	const float damageMax,
+	const float damageMin,
 	const Vector2D& spread,
 	const unsigned int count,
 	const float distance)
 {
+	const float damageFalloff = damageMin - damageMax;
 	const auto gun = pev->origin + pev->view_ofs;
 	const auto aim = pev->v_angle + pev->punchangle;
+	float ajdusted;
 
 	auto traceHits = 0;
 	auto traceFlags = 0;
@@ -269,9 +278,19 @@ void CBasePlayer::FireBullets(
 			continue;
 		}
 		
+		if (damageFalloff == 0.0F)
+		{
+			ajdusted = damageMax;
+		}
+		else
+		{
+			ajdusted = (pev->origin - hit->BodyTarget()).Length() / 1024.0F;
+			ajdusted = damageMax + damageFalloff * Bezier(ajdusted);
+		}
+
 		hit->TraceAttack(
 			this,
-			damage,
+			ajdusted,
 			dir,
 			tr.iHitgroup,
 			DMG_BULLET | DMG_NEVERGIB);
