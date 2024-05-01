@@ -94,7 +94,7 @@ void tent::Explosion(
 		0.0F,
 		0.0F,
 		damage,
-		0,
+		static_cast<int>(type),
 		smoke,
 		sparks
 	);

@@ -1025,6 +1025,7 @@ static void EV_SmokeCallback(TEMPENTITY* ent, float frametime, float currenttime
 
 void EV_Explosion(event_args_t* args)
 {
+	const auto type = static_cast<tent::ExplosionType>(args->iparam2);
 	const auto simple = r_explosionstyle->value != 0.0F;
 	const auto underwater =
 		gEngfuncs.PM_PointContents(args->origin, nullptr) == CONTENTS_WATER;
@@ -1062,6 +1063,21 @@ void EV_Explosion(event_args_t* args)
 
 	auto sprite = g_sModelIndexFireball;
 	auto flags = TE_EXPLFLAG_NONE;
+
+	if (type == tent::ExplosionType::Detpack)
+	{
+		flags |= TE_EXPLFLAG_NOSOUND;
+
+		gEngfuncs.pEventAPI->EV_PlaySound(
+			-1,
+			tr.endpos,
+			CHAN_STATIC,
+			"weapons/mortarhit.wav",
+			VOL_NORM,
+			0.2F,
+			0,
+			PITCH_NORM);
+	}
 
 	if (simple)
 	{
@@ -1139,6 +1155,7 @@ void EV_Explosion(event_args_t* args)
 
 void EV_ConcBlast(event_args_t* args)
 {
+	const auto type = static_cast<tent::ExplosionType>(args->iparam2);
 	const char* sample;
 
 	switch (gEngfuncs.pfnRandomLong(0, 2))
