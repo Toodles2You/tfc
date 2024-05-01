@@ -69,7 +69,7 @@ clientdata_t none
 	DEFINE_DELTA( fuser3, DT_SIGNED | DT_FLOAT, 10, 128.0 ),
 	DEFINE_DELTA( fuser4, DT_SIGNED | DT_FLOAT, 2, 128.0 ),
 
-	DEFINE_DELTA( tfstate, DT_INTEGER, 4, 1.0 )
+	DEFINE_DELTA( tfstate, DT_INTEGER, 8, 1.0 )
 }
 
 entity_state_t gamedll Entity_Encode

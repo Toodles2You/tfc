@@ -152,6 +152,11 @@ void W_Precache()
 
 	PRECACHE_MODEL("models/mirv_grenade.mdl");
 	PRECACHE_MODEL("models/bomblet.mdl");
+
+	PRECACHE_MODEL("models/detpack.mdl");
+	PRECACHE_SOUND("weapons/mine_deploy.wav");
+	PRECACHE_SOUND("weapons/mine_activate.wav");
+	PRECACHE_SOUND("weapons/mine_charge.wav");
 }
 
 

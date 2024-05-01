@@ -517,6 +517,7 @@ enum class ExplosionType
 {
 	Normal = 0,
 	Concussion,
+	Detpack,
 };
 
 void Explosion(const Vector& origin, const Vector& velocity, ExplosionType type = ExplosionType::Normal, float damage = 100.0F, bool smoke = true, bool sparks = true);

@@ -83,6 +83,7 @@ set(SERVER_SRC
     ${SERVER_SRC_DIR}/entities/sound.cpp
     ${SERVER_SRC_DIR}/entities/spectator.cpp
     ${SERVER_SRC_DIR}/entities/subs.cpp
+    ${SERVER_SRC_DIR}/entities/tf_detpack.cpp
     ${SERVER_SRC_DIR}/entities/tf_goal_item.cpp
     ${SERVER_SRC_DIR}/entities/tf_goal_timer.cpp
     ${SERVER_SRC_DIR}/entities/tf_goal.cpp

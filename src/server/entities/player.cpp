@@ -558,6 +558,7 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 
 	m_iFOV = 0;
 
+	CancelDetpack();
 	ClearEffects();
 
 	m_iObserverLastMode = OBS_CHASE_FREE;
@@ -930,6 +931,11 @@ void CBasePlayer::PreThink()
 		GiveHealth(2, DMG_GENERIC, false);
 		m_flNextRegenerationTime = gpGlobals->time + 3.0F;
 	}
+
+	if ((m_TFState & kTFStateBuilding) != 0 && m_flBuildingFinished <= gpGlobals->time)
+	{
+		SetDetpack();
+	}
 }
 
 bool CBasePlayer::Spawn()
@@ -1015,6 +1021,9 @@ bool CBasePlayer::Spawn()
 		WriteByte(g_pGameRules->GetMaxAmmo(this, i));
 	}
 	MessageEnd();
+
+	m_bDetpackReady = false;
+	m_flBuildingFinished = 0.0F;
 
 	ClearEffects();
 
@@ -2024,32 +2033,6 @@ void CBasePlayer::SaveMe()
 	}
 
 	m_flNextSpeakTime = gpGlobals->time + 4;
-}
-
-
-void CBasePlayer::SetDetpack()
-{
-	if (!IsAlive() || !IsPlayer())
-	{
-		return;
-	}
-
-	if (!m_bDetpackReady)
-	{
-		return;
-	}
-
-	tent::Explosion(
-		pev->origin,
-		g_vecZero,
-		tent::ExplosionType::Normal,
-		100.0F,
-		false,
-		false);
-
-	util::GoalDetpackUse(pev->origin, this, this);
-
-	m_bDetpackReady = false;
 }
 
 

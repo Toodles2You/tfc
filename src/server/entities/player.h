@@ -52,6 +52,7 @@ enum
 #endif
 	kTFStateAiming			= 4,
 	kTFStateInfected		= 8,
+	kTFStateBuilding		= 16,
 };
 
 #define CHAT_INTERVAL 1.0f
@@ -357,10 +358,15 @@ public:
 	void RemoveGoalItems(bool force = true);
 	bool GiveArmor(float type, float amount);
 
+	void StartDetpack(const float timer);
 	void SetDetpack();
+	void CancelDetpack();
+
+	EHANDLE m_hDetpack;
+#endif
 
 	bool m_bDetpackReady;
-#endif
+	float m_flBuildingFinished;
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

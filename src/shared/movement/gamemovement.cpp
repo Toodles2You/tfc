@@ -194,7 +194,8 @@ void CHalfLifeMovement::CheckParameters()
 #else
     if ((pmove->flags & FL_FROZEN) != 0
 #endif
-     || pmove->dead != 0)
+     || pmove->dead != 0
+     || (player->m_TFState & kTFStateBuilding) != 0)
     {
         move = g_vecZero;
     }

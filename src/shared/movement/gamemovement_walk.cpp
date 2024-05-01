@@ -212,7 +212,7 @@ void CHalfLifeMovement::Jump()
         return;
     }
 
-    if ((player->m_TFState & kTFStateAiming) != 0)
+    if ((player->m_TFState & (kTFStateAiming | kTFStateBuilding)) != 0)
     {
         return;
     }
