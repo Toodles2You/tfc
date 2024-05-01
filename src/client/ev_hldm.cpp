@@ -1128,7 +1128,16 @@ int MSG_PredictedSound(const char* name, int size, void* buf)
 	int pitch = READ_BYTE();
 	const char* sample = READ_STRING();
 
-	auto entity = gEngfuncs.GetEntityByIndex(entindex);
+	cl_entity_t* entity;
+
+	if (EV_IsLocal(entindex))
+	{
+		entity = gEngfuncs.GetLocalPlayer();
+	}
+	else
+	{
+		entity = gEngfuncs.GetEntityByIndex(entindex);
+	}
 
 	if (entity != nullptr)
 	{
