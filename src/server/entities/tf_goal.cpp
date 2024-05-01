@@ -398,9 +398,10 @@ bool CTFGoal::Spawn()
 
     if (!bIsBSPModel)
     {
-        pev->sequence = 0;
+        pev->sequence = 1;
         pev->frame = 0;
-        // ResetSequenceInfo();
+        pev->framerate = 1.0F;
+        pev->animtime = gpGlobals->time;
     }
 
     return true;

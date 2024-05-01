@@ -179,9 +179,9 @@ void CTFGoalItem::GiveToPlayer(CBaseEntity* player, CTFGoal* activating_goal)
     pev->solid = SOLID_NOT;
     SetTouch(nullptr);
 
-    pev->sequence = 1;
+    pev->sequence = 2;
     pev->frame = 0;
-    // ResetSequenceInfo();
+    pev->animtime = gpGlobals->time;
 
     if (IsGoalActivatedBy(TFGI_GLOW))
     {
@@ -234,9 +234,9 @@ void CTFGoalItem::RemoveFromPlayer(CBaseEntity* activating_player, int method)
     pev->solid = SOLID_NOT;
     pev->angles.x = pev->angles.z = 0.0F;
 
-    pev->sequence = 2;
+    pev->sequence = 1;
     pev->frame = 0;
-    // ResetSequenceInfo();
+    pev->animtime = gpGlobals->time;
 
     CTFGoalItem* goal = nullptr;
     bool remove_glow = IsGoalActivatedBy(TFGI_GLOW);
