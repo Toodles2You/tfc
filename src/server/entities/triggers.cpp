@@ -2098,22 +2098,14 @@ bool CFuncArea::Spawn()
 	pev->solid = SOLID_NOT;
 	SetModel(STRING(pev->model));
 
-	if (!g_bDeveloperMode)
+	if (pev->skin == CONTENTS_LADDER)
 	{
-		if (pev->skin == CONTENTS_LADDER)
-		{
-			pev->rendermode = kRenderTransTexture;
-			pev->renderamt = 0;
-		}
-		else
-		{
-			pev->effects |= EF_NODRAW;
-		}
+		pev->rendermode = kRenderTransTexture;
+		pev->renderamt = 0;
 	}
 	else
 	{
-        pev->rendermode = kRenderTransAdd;
-        pev->renderamt = 64;
+		pev->effects |= EF_NODRAW;
 	}
 
 	return true;
