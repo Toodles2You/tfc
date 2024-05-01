@@ -786,7 +786,7 @@ void CBasePlayer::PlayerUse()
 		int caps = pObject->ObjectCaps();
 
 		if ((m_afButtonPressed & IN_USE) != 0)
-			EmitSound("common/wpn_select.wav", CHAN_VOICE);
+			EmitSoundHUD("common/wpn_select.wav", CHAN_VOICE);
 
 		if (((pev->button & IN_USE) != 0 && (caps & FCAP_CONTINUOUS_USE) != 0)
 		 || ((m_afButtonPressed & IN_USE) != 0 && (caps & FCAP_IMPULSE_USE) != 0))
@@ -797,7 +797,7 @@ void CBasePlayer::PlayerUse()
 	else
 	{
 		if ((m_afButtonPressed & IN_USE) != 0)
-			EmitSound("common/wpn_denyselect.wav", CHAN_VOICE);
+			EmitSoundHUD("common/wpn_denyselect.wav", CHAN_VOICE);
 	}
 }
 
@@ -2123,6 +2123,34 @@ bool CBasePlayer::GiveArmor(float type, float amount)
 
 	return true;
 }
+
+
+void CBasePlayer::EmitSoundHUD(
+	const char* sample,
+	int channel,
+	float volume,
+	float attenuation,
+	int pitch,
+	int flags)
+{
+	if (!IsNetClient())
+	{
+		return;
+	}
+
+	volume *= 255;
+	attenuation *= 127;
+
+	MessageBegin(MSG_ONE, gmsgPredictedSound, this);
+	WriteByte(entindex());
+	WriteByte(channel);
+	WriteByte(volume);
+	WriteByte(attenuation);
+	WriteByte(pitch);
+	WriteString(sample);
+	MessageEnd();
+}
+
 
 class CStripWeapons : public CPointEntity
 {

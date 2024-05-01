@@ -290,6 +290,16 @@ public:
 	virtual void GetEntityState(entity_state_t& state) override;
 	virtual void SetEntityState(const entity_state_t& state) override;
 
+#ifdef GAME_DLL
+	void EmitSoundHUD(
+		const char* sample,
+		int channel = CHAN_AUTO,
+		float volume = VOL_NORM,
+		float attenuation = ATTN_NORM,
+		int pitch = PITCH_NORM,
+		int flags = 0);
+#endif
+
 	void InstallGameMovement(CGameMovement* gameMovement)
 	{
 		if (m_gameMovement != nullptr)
