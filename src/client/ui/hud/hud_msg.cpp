@@ -106,6 +106,9 @@ bool CHud::MsgFunc_GameMode(const char* pszName, int iSize, void* pbuf)
 		case kGamemodeTeamplay:
 			gEngfuncs.Con_DPrintf("Teamplay\n");
 			break;
+		case kGamemodeTeamFortress:
+			gEngfuncs.Con_DPrintf("Team Fortress\n");
+			break;
 	}
 
 	return true;
