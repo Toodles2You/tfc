@@ -141,7 +141,7 @@ void CBasePlayer::StartDetpack(const float timer)
 		return;
 	}
 
-	if (!m_bDetpackReady || (pev->flags & FL_ONGROUND) == 0)
+	if (!m_bDetpackReady)
 	{
 		return;
 	}

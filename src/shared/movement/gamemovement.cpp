@@ -116,16 +116,14 @@ void CHalfLifeMovement::BuildFreeWishMove(const Vector& move)
     /* Direction for flying & swimming movement. */
 
     float moveZed = move.z;
-    if ((pmove->cmd.buttons & IN_JUMP) != 0)
+    if ((player->m_TFState & kTFStateBuilding) != 0)
     {
-        moveZed = 1.0F;
+        moveZed = 0.0F;
     }
-#if 0
-    else if ((pmove->cmd.buttons & IN_DUCK) != 0)
+    else if ((pmove->cmd.buttons & IN_JUMP) != 0)
     {
-        moveZed = -1.0F;
+        moveZed = 1.0F * GetSpeedModifier();
     }
-#endif
 
     m_freeWishDir =
         pmove->forward * move.x + pmove->right * move.y + Vector(0.0F, 0.0F, moveZed);
