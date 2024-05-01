@@ -450,8 +450,6 @@ void CHalfLifeMovement::CategorizePosition()
         return;
     }
 
-    const auto wasOnGround = pmove->onground != -1;
-
     Vector point = pmove->origin;
     point.z -= 2;
     pmtrace_t trace = pmove->PM_PlayerTraceEx(
@@ -474,11 +472,6 @@ void CHalfLifeMovement::CategorizePosition()
         if (trace.startsolid == 0 && trace.allsolid == 0)
         {
             pmove->origin = trace.endpos;
-        }
-
-        if (!wasOnGround)
-        {
-            pmove->flTimeStepSound = 0;
         }
     }
 
