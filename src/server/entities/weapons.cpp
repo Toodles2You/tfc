@@ -162,12 +162,24 @@ bool CBasePlayerWeapon::Spawn()
 void CBasePlayerWeapon::Precache()
 {
 	WeaponInfo info;
+	memset(&info, 0, sizeof(info));
 
 	GetWeaponInfo(info);
 
-	g_engfuncs.pfnPrecacheModel(info.pszView);
-	g_engfuncs.pfnPrecacheModel(info.pszWorld);
-	g_engfuncs.pfnPrecacheModel(info.pszPlayer);
+	if (info.pszView != nullptr)
+	{
+		g_engfuncs.pfnPrecacheModel(info.pszView);
+	}
+
+	if (info.pszWorld != nullptr)
+	{
+		g_engfuncs.pfnPrecacheModel(info.pszWorld);
+	}
+
+	if (info.pszPlayer != nullptr)
+	{
+		g_engfuncs.pfnPrecacheModel(info.pszPlayer);
+	}
 }
 
 
