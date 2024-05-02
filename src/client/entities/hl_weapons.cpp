@@ -62,6 +62,7 @@ static CNailgun tf_weapon_ng;
 static CSuperNailgun tf_weapon_superng;
 static CGrenadeLauncher tf_weapon_gl;
 static CRocketLauncher tf_weapon_rpg;
+static CDetpack tf_weapon_detpack;
 static CPipeBombLauncher tf_weapon_pl;
 
 static CTFWeapon* weapons[WEAPON_TYPES] =
@@ -83,7 +84,7 @@ static CTFWeapon* weapons[WEAPON_TYPES] =
 	// nullptr,
 	// nullptr,
 	// nullptr,
-	// nullptr,
+	&tf_weapon_detpack,
 	// nullptr,
 	// nullptr,
 	&tf_weapon_pl,

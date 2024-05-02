@@ -128,7 +128,7 @@ constexpr const char* g_szWeaponNames[WEAPON_TYPES] =
 	// "tf_weapon_ic",
 	// "tf_weapon_ac",
 	// nullptr,
-	// nullptr,
+	"tf_weapon_detpack",
 	// "tf_weapon_tranq",
 	// "tf_weapon_railgun",
 	"tf_weapon_pl",
@@ -371,6 +371,26 @@ class CRocketLauncher : public CTFWeapon
 public:
 	int GetID() const override { return WEAPON_ROCKET_LAUNCHER; }
 	void GetWeaponInfo(WeaponInfo& i) override;
+};
+
+class CDetpack : public CTFWeapon
+{
+public:
+	int GetID() const override { return WEAPON_DETPACK; }
+	void GetWeaponInfo(WeaponInfo& i) override;
+
+	void RemoveFromPlayer(bool forceSendAnimations = true) override;
+
+	void PrimaryAttack() override;
+	void WeaponPostFrame() override;
+
+	void Holster() override;
+
+	void Set();
+#ifdef GAME_DLL
+	void EXPORT FireInTheHole();
+	void EXPORT Detonate();
+#endif
 };
 
 class CPipeBombLauncher : public CTFWeapon

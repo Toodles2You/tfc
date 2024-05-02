@@ -514,20 +514,16 @@ void ClientCommand(edict_t* pEntity)
 	{
 		if (stricmp(pcmd + 4, "5") == 0)
 		{
-			player->StartDetpack(5.0F);
 		}
 		else if (stricmp(pcmd + 4, "20") == 0)
 		{
-			player->StartDetpack(20.0F);
 		}
 		else if (stricmp(pcmd + 4, "50") == 0)
 		{
-			player->StartDetpack(50.0F);
 		}
 	}
 	else if (strnicmp(pcmd, "-det", 4) == 0)
 	{
-		player->CancelDetpack();
 	}
 	else if (g_pGameRules->ClientCommand(player, pcmd))
 	{

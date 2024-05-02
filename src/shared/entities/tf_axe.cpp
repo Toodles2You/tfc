@@ -187,7 +187,7 @@ void CMedikit::GetWeaponInfo(WeaponInfo& i)
 	i.iSlot = 0;
 	i.iPosition = 1;
 	i.iFlags = 0;
-	i.iWeight = 15;
+	i.iWeight = 0;
 
 	i.pszWorld = "models/w_medkit.mdl";
 	i.pszView = "models/v_tfc_medkit.mdl";
@@ -277,7 +277,7 @@ void CAxe::GetWeaponInfo(WeaponInfo& i)
 	i.iSlot = 0;
 	i.iPosition = 0;
 	i.iFlags = 0;
-	i.iWeight = 15;
+	i.iWeight = 0;
 
 	i.pszWorld = "models/w_crowbar.mdl";
 	i.pszView = "models/v_tfc_crowbar.mdl";

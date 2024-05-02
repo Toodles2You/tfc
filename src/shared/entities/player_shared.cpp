@@ -85,11 +85,6 @@ void CBasePlayer::WeaponPostFrame()
 	}
 #endif
 
-	if ((m_TFState & kTFStateBuilding) != 0)
-	{
-		return;
-	}
-
 #ifdef GAME_DLL
 	if ((m_afButtonPressed & IN_ATTACK2) != 0 && m_rgpPlayerWeapons[WEAPON_PIPEBOMB_LAUNCHER] != nullptr)
 	{
@@ -247,8 +242,6 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 		ammo2[i] = m_rgAmmo[4 + i];
 	}
 
-	ammo2[2] = m_bDetpackReady ? 1 : 0;
-
 	data.viewmodel = pev->viewmodel;
     data.maxspeed = pev->maxspeed;
 	data.weaponanim = pev->weaponanim;
@@ -310,8 +303,6 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 		m_rgAmmo[4 + i] = ammo2[i];
 	}
 
-	m_bDetpackReady = ammo2[2] != 0;
-
 	pev->viewmodel = data.viewmodel;
 	pev->maxspeed = data.maxspeed;
 	pev->weaponanim = data.weaponanim;
@@ -346,12 +337,6 @@ void CBasePlayer::SelectWeapon(int id)
 
 	if (weapon == m_pActiveWeapon)
 	{
-		return;
-	}
-
-	if ((m_TFState & kTFStateBuilding) != 0)
-	{
-		m_pActiveWeapon = weapon;
 		return;
 	}
 

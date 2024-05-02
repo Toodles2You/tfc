@@ -883,9 +883,19 @@ void CTFGoal::RemoveResults(CBaseEntity* player)
     pl->GiveAmmo(-tfv.ammo_nails, AMMO_NAILS);
     pl->GiveAmmo(-tfv.ammo_rockets, AMMO_ROCKETS);
     pl->GiveAmmo(-tfv.ammo_cells, AMMO_CELLS);
-    if (pl->PCNumber() == PC_DEMOMAN && tfv.ammo_detpack != 0)
+    if (pl->PCNumber() == PC_DEMOMAN)
     {
-        pl->m_bDetpackReady = tfv.ammo_detpack < 0;
+        if (tfv.ammo_detpack < 0)
+        {
+            pl->GiveNamedItem("tf_weapon_detpack");
+        }
+        else if (tfv.ammo_detpack > 0)
+        {
+            if (pl->HasPlayerWeapon(WEAPON_DETPACK))
+            {
+                pl->RemovePlayerWeapon(pl->m_rgpPlayerWeapons[WEAPON_DETPACK]);
+            }
+        }
     }
     pl->GiveAmmo(-tfv.no_grenades_1, AMMO_GRENADES1);
     pl->GiveAmmo(-tfv.no_grenades_2, AMMO_GRENADES2);
@@ -953,9 +963,19 @@ void CTFGoal::ApplyResults(CBaseEntity* player, CBaseEntity* activating_player, 
         pl->GiveAmmo(tfv.ammo_nails, AMMO_NAILS);
         pl->GiveAmmo(tfv.ammo_rockets, AMMO_ROCKETS);
         pl->GiveAmmo(tfv.ammo_cells, AMMO_CELLS);
-        if (pl->PCNumber() == PC_DEMOMAN && tfv.ammo_detpack != 0)
+        if (pl->PCNumber() == PC_DEMOMAN)
         {
-            pl->m_bDetpackReady = tfv.ammo_detpack > 0;
+            if (tfv.ammo_detpack > 0)
+            {
+                pl->GiveNamedItem("tf_weapon_detpack");
+            }
+            else if (tfv.ammo_detpack < 0)
+            {
+                if (pl->HasPlayerWeapon(WEAPON_DETPACK))
+                {
+                    pl->RemovePlayerWeapon(pl->m_rgpPlayerWeapons[WEAPON_DETPACK]);
+                }
+            }
         }
         pl->GiveAmmo(tfv.no_grenades_1, AMMO_GRENADES1);
         pl->GiveAmmo(tfv.no_grenades_2, AMMO_GRENADES2);

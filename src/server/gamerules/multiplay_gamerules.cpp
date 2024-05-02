@@ -477,7 +477,6 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 				g_engfuncs.pfnGetPlayerUserId(pPlayer->edict()),
 				g_engfuncs.pfnGetPlayerAuthId(pPlayer->edict()));
 
-            pPlayer->CancelDetpack();
             pPlayer->RemoveGoalItems();
 			pPlayer->RemoveAllWeapons(); // destroy all of the players weapons and items
 		}

@@ -563,7 +563,6 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 
 	m_iFOV = 0;
 
-	CancelDetpack();
 	ClearEffects();
 
 	m_iObserverLastMode = OBS_CHASE_FREE;
@@ -936,11 +935,6 @@ void CBasePlayer::PreThink()
 		GiveHealth(2, DMG_GENERIC, false);
 		m_flNextRegenerationTime = gpGlobals->time + 3.0F;
 	}
-
-	if ((m_TFState & kTFStateBuilding) != 0 && m_flBuildingFinished <= gpGlobals->time)
-	{
-		SetDetpack();
-	}
 }
 
 bool CBasePlayer::Spawn()
@@ -1027,7 +1021,6 @@ bool CBasePlayer::Spawn()
 	}
 	MessageEnd();
 
-	m_bDetpackReady = false;
 	m_flBuildingFinished = 0.0F;
 
 	ClearEffects();

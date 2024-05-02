@@ -33,6 +33,7 @@ set(SHARED_SRC
     ${SHARED_SRC_DIR}/entities/animating.cpp
     ${SHARED_SRC_DIR}/entities/player_shared.cpp
     ${SHARED_SRC_DIR}/entities/tf_axe.cpp
+    ${SHARED_SRC_DIR}/entities/tf_detpack.cpp
     ${SHARED_SRC_DIR}/entities/tf_pipebomb.cpp
     ${SHARED_SRC_DIR}/entities/tf_sniper.cpp
     ${SHARED_SRC_DIR}/entities/tf_weapons.cpp
@@ -83,7 +84,6 @@ set(SERVER_SRC
     ${SERVER_SRC_DIR}/entities/sound.cpp
     ${SERVER_SRC_DIR}/entities/spectator.cpp
     ${SERVER_SRC_DIR}/entities/subs.cpp
-    ${SERVER_SRC_DIR}/entities/tf_detpack.cpp
     ${SERVER_SRC_DIR}/entities/tf_goal_item.cpp
     ${SERVER_SRC_DIR}/entities/tf_goal_timer.cpp
     ${SERVER_SRC_DIR}/entities/tf_goal.cpp

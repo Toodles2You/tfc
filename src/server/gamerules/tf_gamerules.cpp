@@ -440,7 +440,7 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
 
     if (pPlayer->PCNumber() == PC_DEMOMAN)
     {
-        pPlayer->m_bDetpackReady = true;
+        pPlayer->GiveNamedItem(g_szWeaponNames[WEAPON_DETPACK]);
     }
 
     for (int i = 0; i < 4; i++)

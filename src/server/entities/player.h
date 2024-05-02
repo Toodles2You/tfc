@@ -367,15 +367,8 @@ public:
 
 	void RemoveGoalItems(bool force = true);
 	bool GiveArmor(float type, float amount);
-
-	void StartDetpack(const float timer);
-	void SetDetpack();
-	void CancelDetpack();
-
-	EHANDLE m_hDetpack;
 #endif
 
-	bool m_bDetpackReady;
 	float m_flBuildingFinished;
 };
 
