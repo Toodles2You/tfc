@@ -1349,9 +1349,7 @@ void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* weapon)
 
 	if (isActive)
 	{
-		weapon->m_ForceSendAnimations = true;
 		weapon->Holster();
-		weapon->m_ForceSendAnimations = false;
 		m_pActiveWeapon = nullptr;
 	}
 
@@ -1364,9 +1362,7 @@ void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* weapon)
 		auto best = GetNextBestWeapon(weapon);
 		if (best != nullptr)
 		{
-			best->m_ForceSendAnimations = true;
 			SelectWeapon(best->GetID());
-			best->m_ForceSendAnimations = false;
 		}
 	}
 }

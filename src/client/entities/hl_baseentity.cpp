@@ -78,7 +78,6 @@ void CBasePlayer::ForceClientDllUpdate() {}
 void CBasePlayer::ImpulseCommands() {}
 void CBasePlayer::CheatImpulseCommands(int iImpulse) {}
 void CBasePlayer::AddPlayerWeapon(CBasePlayerWeapon* weapon) {}
-void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* weapon) {}
 void CBasePlayer::UpdateClientData() {}
 void CBasePlayer::EnableControl(bool fControl) {}
 Vector CBasePlayer::GetAimVector() { return g_vecZero; }
@@ -101,4 +100,3 @@ void CBasePlayerWeapon::CheckRespawn() {}
 CBaseEntity* CBasePlayerWeapon::Respawn() { return nullptr; }
 void CBasePlayerWeapon::DefaultTouch(CBaseEntity* pOther) {}
 bool CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer) { return false; }
-void CBasePlayerWeapon::RemoveFromPlayer() {}
