@@ -18,6 +18,7 @@
 void CTFWeapon::Precache()
 {
 	WeaponInfo info;
+	memset(&info, 0, sizeof(info));
 
 	GetWeaponInfo(info);
 
@@ -38,7 +39,10 @@ void CTFWeapon::Precache()
 	}
 #endif
 
-	m_usPrimaryAttack = g_engfuncs.pfnPrecacheEvent(1, info.pszEvent);
+	if (info.pszEvent != nullptr)
+	{
+		m_usPrimaryAttack = g_engfuncs.pfnPrecacheEvent(1, info.pszEvent);
+	}
 }
 
 
