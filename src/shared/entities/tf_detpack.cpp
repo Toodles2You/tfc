@@ -20,41 +20,15 @@ void CDetpack::GetWeaponInfo(WeaponInfo& i)
 	i.iAmmo1 = -1;
 	i.iAmmo2 = -1;
 	i.iMaxClip = -1;
-	i.iSlot = 2;
-	i.iPosition = 2;
+	i.iSlot = -1;
+	i.iPosition = -1;
 	i.iFlags = 0;
 	i.iWeight = -1;
 
 	i.pszWorld = "models/detpack.mdl";
-	i.pszView = "models/v_tripmine.mdl";
-	i.pszPlayer = "models/p_tripmine.mdl";
-	i.pszAnimExt = "knife";
-
-	i.iAnims[kWeaponAnimIdle] = 0;
-	i.iAnims[kWeaponAnimDeploy] = 6;
-	i.iAnims[kWeaponAnimHolster] = 5;
-	i.iAnims[kWeaponAnimAttack] = 2;
-	i.iAnims[kWeaponAnimReload] = -1;
-	i.iAnims[kWeaponAnimStartReload] = -1;
-	i.iAnims[kWeaponAnimEndReload] = -1;
-
-	i.iShots = 0;
 
 	i.iAttackTime = 5000;
 	i.iReloadTime = 5000;
-
-	i.iProjectileType = kProjKinetic;
-	i.iProjectileDamage = 0;
-	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
-	i.iProjectileCount = 0;
-
-	i.pszEvent = nullptr;
-	i.pszAttackSound = nullptr;
-	i.pszAlternateSound = nullptr;
-	i.pszReloadSound = nullptr;
-	i.flPunchAngle = 0.0F;
-	i.iSibling = -1;
-	i.bShouldIdle = false;
 }
 
 
@@ -70,13 +44,11 @@ void CDetpack::RemoveFromPlayer(bool forceSendAnimations)
 }
 
 
-void CDetpack::PrimaryAttack()
+void CDetpack::Deploy()
 {
 	const auto info = GetInfo();
 
 	m_pPlayer->EmitSoundPredicted("weapons/mine_deploy.wav", CHAN_BODY, VOL_NORM, ATTN_IDLE);
-
-	SendWeaponAnim(info.iAnims[kWeaponAnimAttack]);
 
 	m_pPlayer->m_TFState |= kTFStateBuilding;
 	m_iNextPrimaryAttack = info.iAttackTime;
@@ -85,27 +57,25 @@ void CDetpack::PrimaryAttack()
 
 void CDetpack::WeaponPostFrame()
 {
-	const auto info = GetInfo();
-
-	if ((m_pPlayer->pev->button & IN_ATTACK) != 0)
+	if ((m_pPlayer->pev->button & IN_SPECIAL) != 0)
 	{
-		if (m_iNextPrimaryAttack <= 0)
+		if ((m_pPlayer->m_TFState & kTFStateBuilding) == 0)
 		{
-			if ((m_pPlayer->m_TFState & kTFStateBuilding) != 0)
+			if (m_pPlayer->m_pActiveWeapon != nullptr)
 			{
-				Set();
+				m_pPlayer->m_pActiveWeapon->Holster();
 			}
-			else
-			{
-				PrimaryAttack();
-			}
+
+			Deploy();
+		}
+		else if (m_iNextPrimaryAttack <= 0)
+		{
+			Set();
 		}
 	}
 	else if ((m_pPlayer->m_TFState & kTFStateBuilding) != 0)
 	{
-		SendWeaponAnim(info.iAnims[kWeaponAnimDeploy]);
-		m_pPlayer->m_TFState &= ~kTFStateBuilding;
-		m_iNextPrimaryAttack = 0;
+		Holster();
 	}
 }
 
@@ -115,6 +85,11 @@ void CDetpack::Holster()
 	m_pPlayer->m_TFState &= ~kTFStateBuilding;
 	m_iNextPrimaryAttack = 0;
 	CTFWeapon::Holster();
+
+	if (m_pPlayer->m_pActiveWeapon != nullptr)
+	{
+		m_pPlayer->m_pActiveWeapon->Deploy();
+	}
 }
 
 
@@ -123,14 +98,19 @@ void CDetpack::Set()
 	const auto info = GetInfo();
 
 #ifdef GAME_DLL
-	SetOrigin(m_pPlayer->pev->origin);
+	auto player = m_pPlayer;
 #endif
 
+	Holster();
 	RemoveFromPlayer(false);
 
 #ifdef GAME_DLL
+	pev->owner = player->pev->pContainingEntity;
+
 	pev->solid = SOLID_TRIGGER;
 	pev->movetype = MOVETYPE_TOSS;
+
+	SetOrigin(player->pev->origin);
 
 	SetModel("models/detpack.mdl");
 	pev->effects &= ~EF_NODRAW;

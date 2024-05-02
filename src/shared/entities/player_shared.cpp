@@ -92,6 +92,16 @@ void CBasePlayer::WeaponPostFrame()
 	}
 #endif
 
+	if (HasPlayerWeapon(WEAPON_DETPACK))
+	{
+		dynamic_cast<CDetpack*>(m_rgpPlayerWeapons[WEAPON_DETPACK])->WeaponPostFrame();
+
+		if ((m_TFState & kTFStateBuilding) != 0)
+		{
+			return;
+		}
+	}
+
 	if (m_pActiveWeapon == nullptr)
 	{
 		return;
@@ -229,6 +239,7 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 	data.iuser4 = m_iConcussionTime;
 #endif
 
+	data.weapons = m_WeaponBits;
 	data.m_iId = (m_pActiveWeapon != nullptr) ? m_pActiveWeapon->GetID() + 1 : 0;
 
 	byte* ammo = reinterpret_cast<byte*>(&data.ammo_shells);
@@ -280,6 +291,7 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 	m_nLegDamage = static_cast<byte>(data.vuser4.y);
 	m_iConcussionTime = data.iuser4;
 
+	m_WeaponBits = data.weapons;
 	if (m_pActiveWeapon == nullptr)
 	{
 		if (data.m_iId != 0)
@@ -337,6 +349,12 @@ void CBasePlayer::SelectWeapon(int id)
 
 	if (weapon == m_pActiveWeapon)
 	{
+		return;
+	}
+
+	if ((m_TFState & kTFStateBuilding) != 0)
+	{
+		m_pActiveWeapon = weapon;
 		return;
 	}
 

@@ -512,18 +512,23 @@ void ClientCommand(edict_t* pEntity)
 	}
 	else if (strnicmp(pcmd, "+det", 4) == 0)
 	{
-		if (stricmp(pcmd + 4, "5") == 0)
+		if (player->HasPlayerWeapon(WEAPON_DETPACK))
 		{
+			auto detpack = dynamic_cast<CDetpack*>(player->m_rgpPlayerWeapons[WEAPON_DETPACK]);
+
+			if (stricmp(pcmd + 4, "5") == 0)
+			{
+				detpack->pev->pain_finished = 5;
+			}
+			else if (stricmp(pcmd + 4, "20") == 0)
+			{
+				detpack->pev->pain_finished = 20;
+			}
+			else if (stricmp(pcmd + 4, "50") == 0)
+			{
+				detpack->pev->pain_finished = 50;
+			}
 		}
-		else if (stricmp(pcmd + 4, "20") == 0)
-		{
-		}
-		else if (stricmp(pcmd + 4, "50") == 0)
-		{
-		}
-	}
-	else if (strnicmp(pcmd, "-det", 4) == 0)
-	{
 	}
 	else if (g_pGameRules->ClientCommand(player, pcmd))
 	{

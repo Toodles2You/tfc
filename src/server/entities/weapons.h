@@ -381,7 +381,9 @@ public:
 
 	void RemoveFromPlayer(bool forceSendAnimations = true) override;
 
-	void PrimaryAttack() override;
+	bool CanDeploy() override { return false; }
+	void Deploy() override;
+
 	void WeaponPostFrame() override;
 
 	void Holster() override;

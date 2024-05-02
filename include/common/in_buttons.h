@@ -32,4 +32,5 @@ enum
     IN_GRENADE   = 1 << 12,
     IN_RELOAD    = 1 << 13,
     IN_GRENADE2  = 1 << 14,
+    IN_SPECIAL   = 1 << 15,
 };

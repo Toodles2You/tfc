@@ -57,12 +57,18 @@ public:
 
 	void PickupWeapon(WEAPON* wp)
 	{
-		rgSlots[wp->iSlot][wp->iSlotPos] = wp;
+		if (wp->iSlot != -1)
+		{
+			rgSlots[wp->iSlot][wp->iSlotPos] = wp;
+		}
 	}
 
 	void DropWeapon(WEAPON* wp)
 	{
-		rgSlots[wp->iSlot][wp->iSlotPos] = NULL;
+		if (wp->iSlot != -1)
+		{
+			rgSlots[wp->iSlot][wp->iSlotPos] = NULL;
+		}
 	}
 
 	void DropAllWeapons()

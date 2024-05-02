@@ -435,7 +435,6 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 	gEngfuncs.GetViewAngles(player->pev->v_angle);
 	player->pev->button = cmd->buttons;
 	player->m_afButtonLast = from->playerstate.oldbuttons;
-	player->m_WeaponBits = gHUD.m_iWeaponBits;
 
 	player->SetEntityState(from->playerstate);
 	player->SetClientData(from->client);
