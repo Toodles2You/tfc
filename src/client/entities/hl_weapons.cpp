@@ -152,7 +152,8 @@ static void HUD_PrepEntity(CBaseEntity* entity, CBasePlayer* owner)
 
 		CBasePlayerWeapon::WeaponInfoArray[weapon->GetID()] = info;
 
-		owner->m_rgpPlayerWeapons[weapon->GetID()] = (CBasePlayerWeapon*)entity;
+		owner->m_rgpPlayerWeapons[weapon->GetID()] = weapon;
+		owner->m_lpPlayerWeapons.push_front(weapon);
 	}
 	else
 	{

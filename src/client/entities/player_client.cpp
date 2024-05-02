@@ -138,6 +138,30 @@ void CBasePlayer::SetPrefsFromUserinfo(char* infobuffer)
 	m_bGrenadeToggle = (int)cl_grenadetoggle->value != 0;
 }
 
+
+void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* weapon)
+{
+	const auto isActive = m_pActiveWeapon == weapon;
+
+	if (isActive)
+	{
+		weapon->Holster();
+		m_pActiveWeapon = nullptr;
+	}
+
+	ClearWeaponBit(weapon->GetID());
+
+	if (isActive)
+	{
+		auto best = GetNextBestWeapon(weapon);
+		if (best != nullptr)
+		{
+			SelectWeapon(best->GetID());
+		}
+	}
+}
+
+
 #ifdef HALFLIFE_GRENADES
 
 void CBasePlayer::PrimeGrenade(const int grenadeType)

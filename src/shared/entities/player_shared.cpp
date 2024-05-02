@@ -384,9 +384,21 @@ CBasePlayerWeapon* CBasePlayer::GetNextBestWeapon(CBasePlayerWeapon* current)
 	CBasePlayerWeapon* best = nullptr;
 	int bestWeight = -1;
 
-	for (auto weapon : m_lpPlayerWeapons)
+	for (auto i = 0; i < WEAPON_TYPES; i++)
 	{
-		if (weapon->GetID() == currentID)
+		if (i == currentID)
+		{
+			continue;
+		}
+
+		if (!HasPlayerWeapon(i))
+		{
+			continue;
+		}
+
+		auto weapon = m_rgpPlayerWeapons[i];
+
+		if (weapon == nullptr)
 		{
 			continue;
 		}

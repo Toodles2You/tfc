@@ -54,6 +54,19 @@ void CBasePlayerWeapon::Holster()
 }
 
 
+void CBasePlayerWeapon::RemoveFromPlayer(bool forceSendAnimations)
+{
+	if (m_pPlayer == nullptr)
+	{
+		return;
+	}
+
+	m_ForceSendAnimations = forceSendAnimations;
+	m_pPlayer->RemovePlayerWeapon(this);
+	m_ForceSendAnimations = false;
+}
+
+
 void CBasePlayerWeapon::SendWeaponAnim(int iAnim)
 {
 	if (iAnim < 0)

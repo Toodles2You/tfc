@@ -357,14 +357,16 @@ bool CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer)
 }
 
 
-void CBasePlayerWeapon::RemoveFromPlayer()
+void CBasePlayerWeapon::RemoveFromPlayer(bool forceSendAnimations)
 {
 	if (m_pPlayer == nullptr)
 	{
 		return;
 	}
 
+	m_ForceSendAnimations = forceSendAnimations;
 	m_pPlayer->RemovePlayerWeapon(this);
+	m_ForceSendAnimations = false;
 
 	pev->owner = pev->aiment = nullptr;
 	m_pPlayer = nullptr;

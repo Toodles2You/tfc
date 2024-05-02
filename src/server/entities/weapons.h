@@ -149,7 +149,7 @@ public:
 
 	// generic weapon versions of CBasePlayerWeapon calls
 	virtual bool AddToPlayer(CBasePlayer* pPlayer);
-	virtual void RemoveFromPlayer();
+	virtual void RemoveFromPlayer(bool forceSendAnimations = true);
 	virtual bool AddDuplicate(CBasePlayerWeapon* pOriginal) { return false; }
 #ifndef CLIENT_DLL
 	virtual void UpdateOnRemove() override;
