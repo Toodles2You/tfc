@@ -535,6 +535,12 @@ void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip)
 	m_iFlags |= HUD_ACTIVE;
 }
 
+void CHudAmmo::Update_Detpack(const int setting)
+{
+	/* Toodles FIXME: Stupid wrapper because spaghetti header files are killing me. */
+	gViewPort->Update_Detpack(setting);
+}
+
 bool CHudAmmo::MsgFunc_AmmoPickup(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);

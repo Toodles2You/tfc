@@ -2275,6 +2275,17 @@ bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurren
 	return true;
 }
 
+void TeamFortressViewport::Update_Detpack(const int setting)
+{
+	if (GetIsSettingDetpack() != setting)
+	{
+		m_iIsSettingDetpack = setting;
+
+		// Force the menu to update
+		UpdateCommandMenu(m_StandardMenu);
+	}
+}
+
 //================================================================
 // Message Handlers
 bool TeamFortressViewport::MsgFunc_ValClass(const char* pszName, int iSize, void* pbuf)
@@ -2338,10 +2349,7 @@ bool TeamFortressViewport::MsgFunc_Detpack(const char* pszName, int iSize, void*
 {
 	BEGIN_READ(pbuf, iSize);
 
-	m_iIsSettingDetpack = READ_BYTE();
-
-	// Force the menu to update
-	UpdateCommandMenu(m_StandardMenu);
+	Update_Detpack(READ_BYTE());
 
 	return true;
 }

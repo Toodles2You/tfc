@@ -571,6 +571,8 @@ public:
 	char *GetTeamName( int iTeam ) { return g_TeamInfo[iTeam].name; };
 	bool GetAllowSpectators() { return m_iAllowSpectators; };
 
+	void Update_Detpack(const int setting);
+
 	// Message Handlers
 	bool MsgFunc_ValClass(const char *pszName, int iSize, void *pbuf );
 	bool MsgFunc_TeamNames(const char *pszName, int iSize, void *pbuf );
