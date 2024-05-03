@@ -445,7 +445,7 @@ void CCaltropCanister::Throw(throw_e mode)
 	WriteString(GetIconName());
 	MessageEnd();
 	
-	owner->InState(CBasePlayer::State::Grenade);
+	owner->LeaveState(CBasePlayer::State::Grenade);
 
 	Remove();
 }
