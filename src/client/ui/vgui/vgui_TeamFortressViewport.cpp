@@ -197,6 +197,11 @@ void Viewport_MapBriefing()
 	Viewport_VGUIMenu(MENU_MAPBRIEFING);
 }
 
+void Viewport_ClassHelp()
+{
+	Viewport_VGUIMenu(MENU_CLASSHELP);
+}
+
 void Viewport_ChangeTeam()
 {
 	if (gHUD.m_gameMode < kGamemodeTeamplay)
@@ -654,6 +659,7 @@ TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : P
 
 	gEngfuncs.pfnAddCommand("servermotd", Viewport_ServerMOTD);
 	gEngfuncs.pfnAddCommand("missionbriefing", Viewport_MapBriefing);
+	gEngfuncs.pfnAddCommand("classhelp", Viewport_ClassHelp);
 	gEngfuncs.pfnAddCommand("changeteam", Viewport_ChangeTeam);
 	gEngfuncs.pfnAddCommand("changeclass", Viewport_ChangeClass);
 }
