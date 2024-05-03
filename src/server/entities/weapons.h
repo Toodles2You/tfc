@@ -376,6 +376,15 @@ public:
 class CDetpack : public CTFWeapon
 {
 public:
+	int ObjectCaps() override
+	{
+		if (m_pPlayer != nullptr)
+		{
+			return CTFWeapon::ObjectCaps();
+		}
+		return CTFWeapon::ObjectCaps() | FCAP_CONTINUOUS_USE;
+	}
+
 	int GetID() const override { return WEAPON_DETPACK; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 
@@ -392,6 +401,7 @@ public:
 #ifdef GAME_DLL
 	void EXPORT FireInTheHole();
 	void EXPORT Detonate();
+	void EXPORT Disarm(CBaseEntity* activator, CBaseEntity* caller, USE_TYPE useType, float value);
 #endif
 };
 

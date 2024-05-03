@@ -155,9 +155,10 @@ void W_Precache()
 
 	PRECACHE_MODEL("models/detpack.mdl");
 	PRECACHE_SOUND("weapons/mortarhit.wav");
-	PRECACHE_SOUND("weapons/mine_deploy.wav");
 	PRECACHE_SOUND("weapons/mine_activate.wav");
 	PRECACHE_SOUND("weapons/mine_charge.wav");
+	PRECACHE_SOUND("weapons/mine_disarm.wav");
+	PRECACHE_SOUND("weapons/mine_disarmed.wav");
 }
 
 

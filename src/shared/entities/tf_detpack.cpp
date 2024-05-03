@@ -10,6 +10,9 @@
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
+#ifdef GAME_DLL
+#include "gamerules.h"
+#endif
 
 
 LINK_ENTITY_TO_CLASS(tf_weapon_detpack, CDetpack);
@@ -27,7 +30,7 @@ void CDetpack::GetWeaponInfo(WeaponInfo& i)
 
 	i.pszWorld = "models/detpack.mdl";
 
-	i.iAttackTime = 5000;
+	i.iAttackTime = 3000;
 	i.iReloadTime = 5000;
 }
 
@@ -39,7 +42,7 @@ void CDetpack::RemoveFromPlayer(bool forceSendAnimations)
 		return;
 	}
 
-	m_pPlayer->LeaveState(CBasePlayer::State::Holstered);
+	m_pPlayer->SetWeaponHolstered(false);
 	CTFWeapon::RemoveFromPlayer(forceSendAnimations);
 }
 
@@ -48,9 +51,7 @@ void CDetpack::Deploy()
 {
 	const auto info = GetInfo();
 
-	m_pPlayer->EmitSoundPredicted("weapons/mine_deploy.wav", CHAN_BODY, VOL_NORM, ATTN_IDLE);
-
-	m_pPlayer->EnterState(CBasePlayer::State::Holstered);
+	m_pPlayer->SetWeaponHolstered(true);
 	m_iNextPrimaryAttack = info.iAttackTime;
 }
 
@@ -77,7 +78,7 @@ void CDetpack::WeaponPostFrame()
 
 void CDetpack::Holster()
 {
-	m_pPlayer->LeaveState(CBasePlayer::State::Holstered);
+	m_pPlayer->SetWeaponHolstered(false);
 	m_iNextPrimaryAttack = 0;
 	CTFWeapon::Holster();
 }
@@ -91,7 +92,6 @@ void CDetpack::Set()
 	auto player = m_pPlayer;
 #endif
 
-	Holster();
 	RemoveFromPlayer(false);
 
 #ifdef GAME_DLL
@@ -120,6 +120,8 @@ void CDetpack::Set()
 		SetThink(&CDetpack::FireInTheHole);
 		pev->nextthink = gpGlobals->time + pev->pain_finished - 6.0F;
 	}
+
+	SetUse(&CDetpack::Disarm);
 #endif
 }
 
@@ -165,6 +167,58 @@ void CDetpack::Detonate()
 
 	Remove();
 }
+
+void CDetpack::Disarm(CBaseEntity* activator, CBaseEntity* caller, USE_TYPE useType, float value)
+{
+	if (!caller->IsPlayer())
+	{
+		return;
+	}
+
+	auto player = dynamic_cast<CBasePlayer*>(caller);
+
+	if (player->PCNumber() != PC_SCOUT)
+	{
+		return;
+	}
+
+	auto owner = dynamic_cast<CBasePlayer*>(CBaseEntity::Instance(pev->owner));
+
+	if (g_pGameRules->PlayerRelationship(player, owner) >= GR_ALLY)
+	{
+		return;
+	}
+
+	const auto info = GetInfo();
+
+	switch (useType)
+	{
+		case USE_CONTINUOUS_BEGIN:
+		{
+			pev->pain_finished = gpGlobals->time + info.iReloadTime / 1000.0F;
+			EmitSound("weapons/mine_disarm.wav", CHAN_ITEM);
+			player->SetWeaponHolstered(true);
+			break;
+		}
+		case USE_CONTINUOUS:
+		{
+			if (pev->pain_finished <= gpGlobals->time)
+			{
+	            g_pGameRules->AddPointsToPlayer(player, 1);
+				EmitSound("weapons/mine_disarmed.wav", CHAN_ITEM);
+				player->SetWeaponHolstered(false);
+				Remove();
+			}
+			break;
+		}
+		case USE_CONTINUOUS_END:
+		{
+			player->SetWeaponHolstered(false);
+			break;
+		}
+	}
+}
+
 
 #endif /* GAME_DLL */
 
