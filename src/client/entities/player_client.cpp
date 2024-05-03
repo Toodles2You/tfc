@@ -282,15 +282,9 @@ void CBasePlayer::ConcussionJump(Vector& velocity)
 			true);
 	}
 
-	const auto length = 5.5F;
-
-	const auto ajdusted = (240 - length * 0.5F) * 0.03F;
-
-	velocity = velocity * 0.33F;
-
-	velocity.x *= ajdusted;
-	velocity.y *= ajdusted;
-	velocity.z *= ajdusted * 1.5F;
+	velocity.x *= 2.36F;
+	velocity.y *= 2.36F;
+	velocity.z *= 3.53F;
 }
 
 

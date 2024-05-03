@@ -573,9 +573,6 @@ void CConcussionGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 	pev->owner = nullptr;
 
 	tent::Explosion(pev->origin, -pTrace->vecPlaneNormal, tent::ExplosionType::Concussion, pev->dmg, true, true, predictionOwner);
-#ifndef NDEBUG
-	g_engfuncs.pfnAlertMessage(at_console, "conc gren: %g\n", gpGlobals->time);
-#endif
 
 	CBaseEntity* entity = nullptr;
 	TraceResult tr;
