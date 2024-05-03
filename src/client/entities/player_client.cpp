@@ -166,7 +166,7 @@ void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* weapon)
 
 void CBasePlayer::PrimeGrenade(const int grenadeType)
 {
-	if (InState(State::GrenadePrime | State::GrenadeThrowing))
+	if (InState(State::Grenade))
 	{
 		return;
 	}

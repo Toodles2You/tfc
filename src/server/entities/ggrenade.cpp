@@ -384,7 +384,7 @@ void CPrimeGrenade::Throw(throw_e mode)
 	WriteString(GetIconName());
 	MessageEnd();
 	
-	owner->LeaveState(CBasePlayer::State::GrenadePrime | CBasePlayer::State::GrenadeThrowing);
+	owner->LeaveState(CBasePlayer::State::Grenade);
 }
 
 
@@ -445,7 +445,7 @@ void CCaltropCanister::Throw(throw_e mode)
 	WriteString(GetIconName());
 	MessageEnd();
 	
-	owner->InState(CBasePlayer::State::GrenadePrime | CBasePlayer::State::GrenadeThrowing);
+	owner->InState(CBasePlayer::State::Grenade);
 
 	Remove();
 }

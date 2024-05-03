@@ -56,6 +56,7 @@ public:
 	#ifdef HALFLIFE_GRENADES
 		GrenadePrime    = 1,
 		GrenadeThrowing = 2,
+		Grenade         = 3,
 	#endif
 		Holstered       = 4,
 		Aiming          = 8,
