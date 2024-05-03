@@ -1760,7 +1760,7 @@ void CBasePlayer::GetEntityState(entity_state_t& state)
 
 void CBasePlayer::PrimeGrenade()
 {
-	if (InState(State::GrenadePrime | State::GrenadeThrowing))
+	if (InState(State::Grenade))
 	{
 		return;
 	}

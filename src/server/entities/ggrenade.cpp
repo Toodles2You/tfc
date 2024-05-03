@@ -306,7 +306,7 @@ void CPrimeGrenade::Throw(throw_e mode)
 	WriteString("grenade");
 	MessageEnd();
 	
-	owner->LeaveState(CBasePlayer::State::GrenadePrime | CBasePlayer::State::GrenadeThrowing);
+	owner->LeaveState(CBasePlayer::State::Grenade);
 }
 
 
