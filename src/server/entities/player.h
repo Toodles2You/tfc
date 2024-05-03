@@ -237,6 +237,11 @@ public:
 public:
 	void PlayerDeathFrame();
 	void PlayerUse();
+#ifdef GAME_DLL
+	EHANDLE m_hUseObject;
+	bool CanUseObject(CBaseEntity* object, const float maxDot = 0.0F, const float maxDistance = 0.0F);
+	void SetUseObject(CBaseEntity* object);
+#endif
 
 	Vector GetAimVector();
 
