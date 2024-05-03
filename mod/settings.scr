@@ -62,13 +62,6 @@ DESCRIPTION SERVER_OPTIONS
 		{ "" }
 	}
 
-	"mp_teamlist"
-	{
-		"#Valve_Valid_Teams"
-		{ STRING }
-		{ "hgrunt;scientist" }
-	}
-
 	"mp_fraglimit"
 	{
 		"#Valve_Frag_Limit"
@@ -80,38 +73,6 @@ DESCRIPTION SERVER_OPTIONS
 	{
 		"#Valve_Time_Limit"
 		{ NUMBER 0 -1 }
-		{ "0" }
-	}
-
-	"mp_falldamage"
-	{
-		"#Valve_Falling_Damage"
-		{
-			LIST
-			"#Valve_Normal" "0"
-			"#Valve_Realistic" "1"
-		}
-		{ "0" }
-	}
-
-	"mp_teamplay"
-	{
-		"#Valve_Teamplay"
-		{ BOOL }
-		{ "0" }
-	}
-
-	"mp_friendlyfire"
-	{
-		"#Valve_Friendly_Fire"
-		{ BOOL }
-		{ "0" }
-	}
-
-	"mp_weaponstay"
-	{
-		"#Valve_Weapons_Stay"
-		{ BOOL }
 		{ "0" }
 	}
 
