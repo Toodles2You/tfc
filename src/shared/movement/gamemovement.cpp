@@ -116,7 +116,11 @@ void CHalfLifeMovement::BuildFreeWishMove(const Vector& move)
     /* Direction for flying & swimming movement. */
 
     float moveZed = move.z;
-    if ((pmove->cmd.buttons & IN_JUMP) != 0)
+    if (player->InState(CBasePlayer::State::CannotMove))
+    {
+        moveZed = 0.0F;
+    }
+    else if ((pmove->cmd.buttons & IN_JUMP) != 0)
     {
         moveZed = 1.0F * GetSpeedModifier();
     }
@@ -143,6 +147,11 @@ float CHalfLifeMovement::GetSpeedModifier()
      || pmove->movetype == MOVETYPE_FLY)
     {
         return 1.0F;
+    }
+
+    if (player->InState(CBasePlayer::State::CannotMove))
+    {
+        return 0.0F;
     }
 
     float speed = 1.0F;

@@ -283,6 +283,11 @@ void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecD
 
 float CBasePlayer::DamageForce(CBaseEntity* attacker, float damage)
 {
+	if (InState(State::CannotMove))
+	{
+		return 0.0F;
+	}
+
 	if (PCNumber() == PC_HVYWEAP)
 	{
 		if (damage < 50.0F)

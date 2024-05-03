@@ -42,7 +42,8 @@ void CDetpack::RemoveFromPlayer(bool forceSendAnimations)
 		return;
 	}
 
-	m_pPlayer->SetWeaponHolstered(false);
+	m_pPlayer->SetWeaponHolstered(false, false);
+	m_pPlayer->LeaveState(CBasePlayer::State::CannotMove);
 	CTFWeapon::RemoveFromPlayer(forceSendAnimations);
 }
 
@@ -51,7 +52,8 @@ void CDetpack::Deploy()
 {
 	const auto info = GetInfo();
 
-	m_pPlayer->SetWeaponHolstered(true);
+	m_pPlayer->SetWeaponHolstered(true, false);
+	m_pPlayer->EnterState(CBasePlayer::State::CannotMove);
 	m_iNextPrimaryAttack = info.iAttackTime;
 }
 
@@ -78,9 +80,9 @@ void CDetpack::WeaponPostFrame()
 
 void CDetpack::Holster()
 {
-	m_pPlayer->SetWeaponHolstered(false);
+	m_pPlayer->SetWeaponHolstered(false, false);
+	m_pPlayer->LeaveState(CBasePlayer::State::CannotMove);
 	m_iNextPrimaryAttack = 0;
-	CTFWeapon::Holster();
 }
 
 

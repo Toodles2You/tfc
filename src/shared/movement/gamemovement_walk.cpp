@@ -212,7 +212,8 @@ void CHalfLifeMovement::Jump()
         return;
     }
 
-    if (player->InState(CBasePlayer::State::Aiming))
+    if (player->InState(CBasePlayer::State::Aiming)
+     || player->InState(CBasePlayer::State::CannotMove))
     {
         return;
     }

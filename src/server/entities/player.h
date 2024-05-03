@@ -61,6 +61,7 @@ public:
 		Holstered       = 4,
 		Aiming          = 8,
 		Infected        = 16,
+		CannotMove      = 32,
 	};
 
 public:

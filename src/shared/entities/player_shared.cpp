@@ -259,6 +259,7 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 
 void CBasePlayer::SetClientData(const clientdata_t& data)
 {
+	pev->flags = data.flags;
 	pev->health = data.health;
     pev->deadflag = data.deadflag;
 
