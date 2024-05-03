@@ -59,6 +59,7 @@
 #include "screenfade.h"
 
 extern bool g_iVisibleMouse;
+extern bool g_bForceSpecialDown;
 class CCommandMenu;
 int g_iPlayerClass;
 int g_iTeamNumber;
@@ -2277,6 +2278,12 @@ bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurren
 
 void TeamFortressViewport::Update_Detpack(const int setting)
 {
+	if (setting != 1)
+	{
+		/* Release the special key. */
+		g_bForceSpecialDown = false;
+	}
+
 	if (GetIsSettingDetpack() != setting)
 	{
 		m_iIsSettingDetpack = setting;

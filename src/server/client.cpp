@@ -512,24 +512,20 @@ void ClientCommand(edict_t* pEntity)
 	{
 		player->DiscardAmmo();
 	}
-	else if (strnicmp(pcmd, "+det", 4) == 0)
+	else if (FStrEq(pcmd, "detstart"))
 	{
 		if (player->HasPlayerWeapon(WEAPON_DETPACK))
 		{
 			auto detpack = dynamic_cast<CDetpack*>(player->m_rgpPlayerWeapons[WEAPON_DETPACK]);
+			auto fuse = 5;
 
-			if (stricmp(pcmd + 4, "5") == 0)
+			if (CMD_ARGC() > 1)
 			{
-				detpack->pev->pain_finished = 5;
+				/* Clamp the user fuse value. */
+				fuse = std::clamp(atoi(CMD_ARGV(1)), 5, 50);
 			}
-			else if (stricmp(pcmd + 4, "20") == 0)
-			{
-				detpack->pev->pain_finished = 20;
-			}
-			else if (stricmp(pcmd + 4, "50") == 0)
-			{
-				detpack->pev->pain_finished = 50;
-			}
+
+			detpack->pev->pain_finished = fuse;
 		}
 	}
 	else if (g_pGameRules->ClientCommand(player, pcmd))

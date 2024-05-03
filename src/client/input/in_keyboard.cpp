@@ -45,6 +45,8 @@ void V_Init();
 void VectorAngles(const float* forward, float* angles);
 int CL_ButtonBits(bool);
 
+bool g_bForceSpecialDown = false;
+
 static int in_impulse = 0;
 
 cvar_t* cl_pitchup;
@@ -505,10 +507,38 @@ void IN_Gren1Up() { KeyUp(&in_gren1); }
 void IN_Gren2Down() { KeyDown(&in_gren2); }
 void IN_Gren2Up() { KeyUp(&in_gren2); }
 
-void IN_Det5Down() { KeyDown(&in_det); gEngfuncs.pfnServerCmd("+det5"); }
-void IN_Det20Down() { KeyDown(&in_det); gEngfuncs.pfnServerCmd("+det20"); }
-void IN_Det50Down() { KeyDown(&in_det); gEngfuncs.pfnServerCmd("+det50"); }
+void IN_Det5Down() { KeyDown(&in_det); gEngfuncs.pfnServerCmd("detstart 5"); }
+void IN_Det20Down() { KeyDown(&in_det); gEngfuncs.pfnServerCmd("detstart 20"); }
+void IN_Det50Down() { KeyDown(&in_det); gEngfuncs.pfnServerCmd("detstart 50"); }
 void IN_DetUp() { KeyUp(&in_det); }
+
+void DetStart()
+{
+	/* Force the special key down. */
+	g_bForceSpecialDown = true;
+
+	auto fuse = 5;
+
+	if (gEngfuncs.Cmd_Argc() > 1)
+	{
+		/* Clamp the user fuse value. */
+		fuse = std::clamp(atoi(gEngfuncs.Cmd_Argv(1)), 5, 50);
+	}
+
+	/* Forward the command to the server to set the fuse. */
+	char detstart[32];
+
+	snprintf(detstart, sizeof(detstart) - 1, "detstart %i", fuse);
+	detstart[sizeof(detstart) - 1] = '\0';
+
+	gEngfuncs.pfnServerCmd(detstart);
+}
+
+void DetStop()
+{
+	/* Release the special key. */
+	g_bForceSpecialDown = false;
+}
 
 /*
 ===============
@@ -738,7 +768,8 @@ int CL_ButtonBits(bool bResetState)
 		bits |= IN_GRENADE2;
 	}
 
-	if ((in_det.state & 3) != 0)
+	if ((in_det.state & 3) != 0
+	 || g_bForceSpecialDown)
 	{
 		bits |= IN_SPECIAL;
 	}
@@ -859,6 +890,9 @@ void InitInput()
 	gEngfuncs.pfnAddCommand("-det20", IN_DetUp);
 	gEngfuncs.pfnAddCommand("+det50", IN_Det50Down);
 	gEngfuncs.pfnAddCommand("-det50", IN_DetUp);
+
+	gEngfuncs.pfnAddCommand("detstart", DetStart);
+	gEngfuncs.pfnAddCommand("detstop", DetStop);
 
 	cl_anglespeedkey = gEngfuncs.pfnRegisterVariable("cl_anglespeedkey", "0.67", 0);
 	cl_yawspeed = gEngfuncs.pfnRegisterVariable("cl_yawspeed", "210", 0);
