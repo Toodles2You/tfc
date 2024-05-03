@@ -60,6 +60,8 @@
 
 extern bool g_iVisibleMouse;
 extern bool g_bForceSpecialDown;
+extern int g_weaponselect;
+extern int g_lastselect;
 class CCommandMenu;
 int g_iPlayerClass;
 int g_iTeamNumber;
@@ -1440,11 +1442,25 @@ void TeamFortressViewport::InputPlayerSpecial()
 			m_pCurrentCommandMenu->KeyInput('7');
 		}
 	}
+	else if (g_iPlayerClass == PC_MEDIC)
+	{
+		/* Switch between the Medikit & the previous weapon. */
+		if (g_CurrentWeaponId != WEAPON_MEDIKIT)
+		{
+			g_weaponselect = WEAPON_MEDIKIT;
+		}
+		else
+		{
+			g_weaponselect = g_lastselect;
+		}
+	}
+#if 0
 	else
 	{
 		// if it's any other class, just send the command down to the server
 		EngineClientCmd("_special");
 	}
+#endif
 }
 
 // Set the submenu of the Command Menu
