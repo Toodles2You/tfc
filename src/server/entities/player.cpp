@@ -1936,6 +1936,8 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 
 	m_rgAmmo[AMMO_GRENADES1 + grenadeType]--;
 
+	m_iGrenadeExplodeTime = 0;
+
 	if (grenadeType == 0)
 	{
 		switch (PCNumber())
@@ -1954,6 +1956,7 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 		{
 		case PC_SCOUT:
 			CConcussionGrenade::ConcussionGrenade(this);
+			m_iGrenadeExplodeTime = 3800;
 			break;
 		case PC_SNIPER:
 			return;
@@ -1965,6 +1968,7 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 			break;
 		case PC_MEDIC:
 			CConcussionGrenade::ConcussionGrenade(this);
+			m_iGrenadeExplodeTime = 3800;
 			break;
 		case PC_HVYWEAP:
 			CMirv::Mirv(this);
@@ -2001,9 +2005,33 @@ void CBasePlayer::ThrowGrenade()
 {
 	LeaveState(State::GrenadePrime);
 	EnterState(State::GrenadeThrowing);
+	m_iGrenadeExplodeTime = 0;
 }
 
 #endif
+
+
+void CBasePlayer::ConcussionJump(Vector& velocity)
+{
+	const auto length = 5.5F;
+
+	const auto ajdusted = (240 - length * 0.5F) * 0.03F;
+
+	velocity = velocity * 0.33F;
+
+	velocity.x *= ajdusted;
+	velocity.y *= ajdusted;
+	velocity.z *= ajdusted * 1.5F;
+
+	if ((pev->flags & FL_ONGROUND) != 0)
+	{
+		BecomeConcussed(this);
+	}
+
+#ifndef NDEBUG
+	g_engfuncs.pfnAlertMessage(at_console, "conc plyr: %g\n", gpGlobals->time);
+#endif
+}
 
 
 void CBasePlayer::BecomeInfected(CBaseEntity* infector)

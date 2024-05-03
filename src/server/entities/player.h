@@ -345,6 +345,9 @@ protected:
 
 protected:
 	int m_iConcussionTime;
+public:
+	int m_iGrenadeExplodeTime;
+	void ConcussionJump(Vector& velocity);
 
 public:
 	void BecomeConcussed(CBaseEntity* attacker)

@@ -1440,6 +1440,8 @@ void EV_Init()
 	g_sModelIndexNail = gEngfuncs.pEventAPI->EV_FindModelIndex("models/nail.mdl");
 	g_sModelIndexFlare = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/xflare1.spr");
 
+	g_usConcBlast = gEngfuncs.pfnPrecacheEvent(1, "events/explode/tf_concuss.sc");
+
 	if (pLaserDot != nullptr)
 	{
 		pLaserDot->die = -1000;

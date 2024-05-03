@@ -143,6 +143,13 @@ void CGrenade::BounceTouch(CBaseEntity* pOther)
 
 void CGrenade::BounceSound()
 {
+	if (pev->radsuit_finished > gpGlobals->time)
+	{
+		return;
+	}
+
+	pev->radsuit_finished = gpGlobals->time + (1.0F / 15.0F);
+
 	switch (RANDOM_LONG(0, 2))
 	{
 	case 0: EmitSound("weapons/grenade_hit1.wav", CHAN_VOICE, 0.25F); break;
@@ -551,15 +558,24 @@ void CConcussionGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 		pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
 	}
 
-	tent::Explosion(pev->origin, -pTrace->vecPlaneNormal, tent::ExplosionType::Concussion, pev->dmg);
-
 	CBaseEntity* owner = this;
+	CBaseEntity* predictionOwner = nullptr;
 	if (pev->owner)
 	{
 		owner = CBaseEntity::Instance(pev->owner);
+
+		if (FStringNull(pev->model))
+		{
+			predictionOwner = owner;
+		}
 	}
 
 	pev->owner = nullptr;
+
+	tent::Explosion(pev->origin, -pTrace->vecPlaneNormal, tent::ExplosionType::Concussion, pev->dmg, true, true, predictionOwner);
+#ifndef NDEBUG
+	g_engfuncs.pfnAlertMessage(at_console, "conc gren: %g\n", gpGlobals->time);
+#endif
 
 	CBaseEntity* entity = nullptr;
 	TraceResult tr;
@@ -569,7 +585,8 @@ void CConcussionGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 
 	while ((entity = util::FindEntityInSphere(entity, pev->origin, 280)) != nullptr)
 	{
-		if (!entity->IsPlayer())
+		if (!entity->IsPlayer()
+		 || entity == predictionOwner)
 		{
 			continue;
 		}
@@ -598,8 +615,7 @@ void CConcussionGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 		entity->pev->velocity.y *= ajdusted;
 		entity->pev->velocity.z *= ajdusted * 1.5F;
 
-		if ((entity == owner && (!FStringNull(pev->model) || (owner->pev->flags & FL_ONGROUND) != 0))
-		 || (g_pGameRules->PlayerRelationship(entity, owner) < GR_ALLY))
+		if (entity == owner || g_pGameRules->PlayerRelationship(entity, owner) < GR_ALLY)
 		{
 			dynamic_cast<CBasePlayer*>(entity)->BecomeConcussed(owner);
 		}

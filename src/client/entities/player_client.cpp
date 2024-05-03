@@ -195,6 +195,8 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 
 	m_rgAmmo[AMMO_GRENADES1 + grenadeType]--;
 
+	m_iGrenadeExplodeTime = 0;
+
 	if (grenadeType == 0)
 	{
 		switch (PCNumber())
@@ -210,6 +212,7 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 		switch (PCNumber())
 		{
 		case PC_SCOUT:
+			m_iGrenadeExplodeTime = 3800;
 			break;
 		case PC_SNIPER:
 			return;
@@ -218,6 +221,7 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 		case PC_DEMOMAN:
 			break;
 		case PC_MEDIC:
+			m_iGrenadeExplodeTime = 3800;
 			break;
 		case PC_HVYWEAP:
 			break;
@@ -258,9 +262,36 @@ void CBasePlayer::ThrowGrenade()
 
 	LeaveState(State::GrenadePrime);
 	EnterState(State::GrenadeThrowing);
+	m_iGrenadeExplodeTime = 0;
 }
 
 #endif
+
+
+void CBasePlayer::ConcussionJump(Vector& velocity)
+{
+	if (HUD_FirstTimePredicting())
+	{
+		PlaybackEvent(
+			g_usConcBlast,
+			0.0F,
+			0.0F,
+			180.0F,
+			static_cast<int>(tent::ExplosionType::Concussion),
+			true,
+			true);
+	}
+
+	const auto length = 5.5F;
+
+	const auto ajdusted = (240 - length * 0.5F) * 0.03F;
+
+	velocity = velocity * 0.33F;
+
+	velocity.x *= ajdusted;
+	velocity.y *= ajdusted;
+	velocity.z *= ajdusted * 1.5F;
+}
 
 
 void CBaseEntity::GetEntityState(entity_state_t& state)

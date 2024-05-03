@@ -18,6 +18,10 @@
 #include "trace.h"
 #include <string>
 
+#ifdef CLIENT_DLL
+static bool g_bRunConcussionPrediction = false;
+#endif
+
 
 void
 CBasePlayer::PlaybackEvent(
@@ -233,6 +237,7 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 #ifdef GAME_DLL
 	data.iuser4 = m_iConcussionTime;
 #endif
+	data.ammo_rockets = m_iGrenadeExplodeTime;
 
 	data.weapons = m_WeaponBits;
 	data.m_iId = (m_pActiveWeapon != nullptr) ? m_pActiveWeapon->GetID() + 1 : 0;
@@ -254,6 +259,14 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 	data.punchangle = pev->punchangle;
 
 	data.fov = m_iFOV;
+
+#ifdef CLIENT_DLL
+	if (g_bRunConcussionPrediction)
+	{
+		ConcussionJump(data.velocity);
+		g_bRunConcussionPrediction = false;
+	}
+#endif
 }
 
 
@@ -286,6 +299,7 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 	m_StateBits = data.tfstate;
 	m_nLegDamage = static_cast<byte>(data.vuser4.y);
 	m_iConcussionTime = data.iuser4;
+	m_iGrenadeExplodeTime = data.ammo_rockets;
 
 	m_WeaponBits = data.weapons;
 	if (m_pActiveWeapon == nullptr)
@@ -331,6 +345,20 @@ void CBasePlayer::DecrementTimers(const int msec)
 	}
 
 	m_iConcussionTime = std::max(m_iConcussionTime - msec, 0);
+
+	if (m_iGrenadeExplodeTime != 0 && m_iGrenadeExplodeTime <= msec)
+	{
+		if (PCNumber() == PC_SCOUT || PCNumber() == PC_MEDIC)
+		{
+#ifdef GAME_DLL
+			ConcussionJump(pev->velocity);
+#else
+			g_bRunConcussionPrediction = true;
+#endif
+		}
+	}
+
+	m_iGrenadeExplodeTime = std::max(m_iGrenadeExplodeTime - msec, 0);
 }
 
 

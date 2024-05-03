@@ -53,7 +53,6 @@ void LinkUserMessages();
 extern unsigned short g_usGibbed;
 extern unsigned short g_usTeleport;
 extern unsigned short g_usExplosion;
-extern unsigned short g_usConcBlast;
 extern unsigned short g_usGetNailedIdiot;
 extern unsigned short g_usTrail;
 

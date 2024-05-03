@@ -223,6 +223,8 @@ inline short g_sModelIndexNail;
 inline short g_sModelIndexSaveMe;
 inline short g_sModelIndexFlare;
 
+inline unsigned short g_usConcBlast;
+
 class CTFWeapon : public CBasePlayerWeapon
 {
 public:

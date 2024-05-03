@@ -17,7 +17,6 @@
 
 unsigned short g_usTeleport;
 unsigned short g_usExplosion;
-unsigned short g_usConcBlast;
 unsigned short g_usGibbed;
 unsigned short g_usTrail;
 
@@ -69,7 +68,8 @@ void tent::Explosion(
 	ExplosionType type,
 	float damage,
 	bool smoke,
-	bool sparks)
+	bool sparks,
+	CBaseEntity* entity)
 {
 	unsigned short eventIndex;
 
@@ -84,9 +84,20 @@ void tent::Explosion(
 			break;
 	}
 
+	auto flags = FEV_GLOBAL | FEV_RELIABLE;
+
+	if (entity != nullptr)
+	{
+		flags |= FEV_NOTHOST;
+	}
+	else
+	{
+		entity = CWorld::World;
+	}
+
 	g_engfuncs.pfnPlaybackEvent(
-		FEV_GLOBAL | FEV_RELIABLE,
-		CWorld::World->edict(),
+		flags,
+		entity->pev->pContainingEntity,
 		eventIndex,
 		0.0F,
 		origin,
