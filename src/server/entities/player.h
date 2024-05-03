@@ -43,20 +43,22 @@ typedef enum
 	PLAYER_ATTACK1,
 } PLAYER_ANIM;
 
-enum
-{
-#ifdef HALFLIFE_GRENADES
-	kTFStateGrenadePrime    = 1,
-	kTFStateGrenadeThrowing = 2,
-#endif
-};
-
 #define CHAT_INTERVAL 1.0f
 
 class CTeam;
 
 class CBasePlayer : public CBaseAnimating
 {
+public:
+	enum class State
+	{
+	#ifdef HALFLIFE_GRENADES
+		GrenadePrime    = 1,
+		GrenadeThrowing = 2,
+	#endif
+		Holstered       = 4,
+	};
+
 public:
 	// Spectator camera
 	void Observer_FindNextPlayer(bool bReverse);
@@ -116,7 +118,12 @@ public:
 	std::uint64_t m_ClientWeaponBits;
 
 	/* Player state flags synchronized between the client & server. */
-	unsigned int m_TFState;
+protected:
+	std::uint64_t m_StateBits;
+public:
+	inline bool InState(const State state) { return (m_StateBits & static_cast<std::uint64_t>(state)) != 0; }
+	inline void EnterState(const State state) { m_StateBits |= static_cast<std::uint64_t>(state); }
+	inline void LeaveState(const State state) { m_StateBits &= ~static_cast<std::uint64_t>(state); }
 
 	// shared ammo slots
 	byte m_rgAmmo[AMMO_TYPES];
@@ -152,10 +159,6 @@ public:
 
 	void PackDeadPlayerWeapons();
 	void RemoveAllWeapons();
-	/**
-	*	@brief Equips an appropriate weapon for the player if they don't have one equipped already.
-	*/
-	void EquipWeapon();
 
 	void SetWeaponBit(int id);
 	void ClearWeaponBit(int id);
@@ -221,6 +224,7 @@ public:
 	void WeaponPostFrame();
 	void GiveNamedItem(const char* szName);
 	void EnableControl(bool fControl);
+	bool SetWeaponHolstered(const bool holstered, const bool forceSendAnimations = true);
 
 	bool GiveAmmo(int iAmount, int iType) override;
 

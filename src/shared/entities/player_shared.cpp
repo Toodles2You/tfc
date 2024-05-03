@@ -61,7 +61,7 @@ void CBasePlayer::WeaponPostFrame()
 #endif
 
 #ifdef HALFLIFE_GRENADES
-	if ((m_TFState & kTFStateGrenadePrime) != 0)
+	if (InState(State::GrenadePrime))
 	{
 		if (m_bGrenadeToggle)
 		{
@@ -81,7 +81,7 @@ void CBasePlayer::WeaponPostFrame()
 	}
 #endif
 
-	if (m_pActiveWeapon == nullptr)
+	if (m_pActiveWeapon == nullptr || InState(State::Holstered))
 	{
 		return;
 	}
@@ -211,7 +211,7 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 	data.iuser3 = pev->iuser3;
 #endif
 
-	data.tfstate = m_TFState;
+	data.tfstate = m_StateBits;
 
 	data.m_iId = (m_pActiveWeapon != nullptr) ? m_pActiveWeapon->GetID() + 1 : 0;
 
@@ -254,7 +254,7 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 	pev->iuser2 = data.iuser2;
 	pev->iuser3 = data.iuser3;
 
-	m_TFState = data.tfstate;
+	m_StateBits = data.tfstate;
 
 	if (m_pActiveWeapon == nullptr)
 	{
@@ -309,12 +309,74 @@ void CBasePlayer::SelectWeapon(int id)
 		return;
 	}
 
+	if (InState(State::Holstered))
+	{
+		/* Switch weapons without holstering & deploying. */
+		m_pActiveWeapon = weapon;
+		return;
+	}
+
 	if (m_pActiveWeapon != nullptr)
 	{
 		m_pActiveWeapon->Holster();
 	}
 	m_pActiveWeapon = weapon;
 	m_pActiveWeapon->Deploy();
+}
+
+
+bool CBasePlayer::SetWeaponHolstered(const bool holstered, const bool forceSendAnimations)
+{
+	const auto alreadyHolstered = InState(State::Holstered);
+
+	/* The weapon is already where we want it. */
+	if (alreadyHolstered == holstered)
+	{
+		return true;
+	}
+
+	const auto hasActiveWeapon = m_pActiveWeapon != nullptr;
+
+	if (hasActiveWeapon)
+	{
+		m_pActiveWeapon->m_ForceSendAnimations = forceSendAnimations;
+	}
+
+	if (holstered)
+	{
+		/* Holster! */
+		if (hasActiveWeapon)
+		{
+			/* Ensure the weapon can be holstered. */
+			if (!m_pActiveWeapon->CanHolster())
+			{
+				return false;
+			}
+			m_pActiveWeapon->Holster();
+		}
+		EnterState(State::Holstered);
+	}
+	else
+	{
+		/* Deploy! */
+		if (hasActiveWeapon)
+		{
+			/* Ensure the weapon can be deployed. */
+			if (!m_pActiveWeapon->CanDeploy())
+			{
+				return false;
+			}
+			m_pActiveWeapon->Deploy();
+		}
+		LeaveState(State::Holstered);
+	}
+
+	if (hasActiveWeapon)
+	{
+		m_pActiveWeapon->m_ForceSendAnimations = false;
+	}
+
+	return true;
 }
 
 

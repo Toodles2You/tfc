@@ -240,7 +240,7 @@ void CPrimeGrenade::PrimedThink()
 		return;
 	}
 
-	if ((owner->m_TFState & kTFStateGrenadeThrowing) == 0)
+	if (!owner->InState(CBasePlayer::State::GrenadeThrowing))
 	{
 		if (pev->dmgtime <= gpGlobals->time)
 		{
@@ -306,7 +306,7 @@ void CPrimeGrenade::Throw(throw_e mode)
 	WriteString("grenade");
 	MessageEnd();
 	
-	owner->m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
+	owner->LeaveState(CBasePlayer::State::GrenadePrime | CBasePlayer::State::GrenadeThrowing);
 }
 
 

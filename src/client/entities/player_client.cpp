@@ -47,7 +47,7 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 		m_pActiveWeapon = nullptr;
     }
 
-	m_TFState = 0;
+	m_StateBits = 0;
 }
 
 
@@ -56,7 +56,7 @@ bool CBasePlayer::Spawn()
 	SetModel("models/player.mdl");
 	SetAction(Action::Idle, true);
 
-	m_TFState = 0;
+	m_StateBits = 0;
 
 	m_bLeftHanded = static_cast<int>(floorf(cl_righthand->value)) == 0;
 
@@ -144,12 +144,12 @@ void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* weapon)
 
 void CBasePlayer::PrimeGrenade()
 {
-	if ((m_TFState & (kTFStateGrenadePrime | kTFStateGrenadeThrowing)) != 0)
+	if (InState(State::GrenadePrime | State::GrenadeThrowing))
 	{
 		return;
 	}
 
-	m_TFState |= kTFStateGrenadePrime;
+	EnterState(State::GrenadePrime);
 
 	if (HUD_FirstTimePredicting())
 	{
@@ -167,8 +167,8 @@ void CBasePlayer::ThrowGrenade()
 		return;
 	}
 
-	m_TFState &= ~kTFStateGrenadePrime;
-	m_TFState |= kTFStateGrenadeThrowing;
+	LeaveState(State::GrenadePrime);
+	EnterState(State::GrenadeThrowing);
 }
 
 #endif

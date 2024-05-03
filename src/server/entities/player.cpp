@@ -531,7 +531,7 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 
 	m_iFOV = 0;
 
-	m_TFState = 0;
+	m_StateBits = 0;
 
 	m_iObserverLastMode = OBS_CHASE_FREE;
 	pev->iuser1 = OBS_DEATHCAM;
@@ -1006,7 +1006,7 @@ bool CBasePlayer::Spawn()
 	}
 	MessageEnd();
 
-	m_TFState = 0;
+	m_StateBits = 0;
 
 	char* infobuffer = g_engfuncs.pfnGetInfoKeyBuffer(edict());
 	char* value = g_engfuncs.pfnInfoKeyValue(infobuffer, "cl_righthand");
@@ -1701,22 +1701,6 @@ void CBasePlayer::DropPlayerWeapon(char* pszWeaponName)
 	}
 }
 
-void CBasePlayer::EquipWeapon()
-{
-	if (m_pActiveWeapon == nullptr)
-	{
-		return;
-	}
-
-	if ((!FStringNull(pev->viewmodel) || !FStringNull(pev->weaponmodel)))
-	{
-		return;
-	}
-
-	m_pActiveWeapon->m_ForceSendAnimations = true;
-	m_pActiveWeapon->Deploy();
-	m_pActiveWeapon->m_ForceSendAnimations = false;
-}
 
 void CBasePlayer::SetPrefsFromUserinfo(char* infobuffer)
 {
@@ -1776,12 +1760,12 @@ void CBasePlayer::GetEntityState(entity_state_t& state)
 
 void CBasePlayer::PrimeGrenade()
 {
-	if ((m_TFState & (kTFStateGrenadePrime | kTFStateGrenadeThrowing)) != 0)
+	if (InState(State::GrenadePrime | State::GrenadeThrowing))
 	{
 		return;
 	}
 
-	m_TFState |= kTFStateGrenadePrime;
+	EnterState(State::GrenadePrime);
 
 	CPrimeGrenade::PrimeGrenade(this);
 
@@ -1796,8 +1780,8 @@ void CBasePlayer::PrimeGrenade()
 
 void CBasePlayer::ThrowGrenade()
 {
-	m_TFState &= ~kTFStateGrenadePrime;
-	m_TFState |= kTFStateGrenadeThrowing;
+	LeaveState(State::GrenadePrime);
+	EnterState(State::GrenadeThrowing);
 }
 
 #endif
