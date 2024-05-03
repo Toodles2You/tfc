@@ -380,12 +380,12 @@ public:
 	bool VidInit() override;
 	bool Draw(float flTime) override;
 	void Reset() override;
-	void Update_Flashlight(bool bOn);
-	bool MsgFunc_Flashlight(const char* pszName, int iSize, void* pbuf);
-	bool MsgFunc_FlashBat(const char* pszName, int iSize, void* pbuf);
+	void Update_Flashlight(const bool on);
 	bool IsFlashlightOn() { return m_fOn; }
 
 private:
+	bool m_fOn;
+#ifdef HALFLIFE_HUD_FLASHLIGHT
 	HSPRITE m_hSprite1;
 	HSPRITE m_hSprite2;
 	HSPRITE m_hBeam;
@@ -394,9 +394,9 @@ private:
 	Rect* m_prcBeam;
 	float m_flBat;
 	int m_iBat;
-	bool m_fOn;
 	float m_fFade;
 	int m_iWidth; // width of the battery innards
+#endif
 };
 
 //

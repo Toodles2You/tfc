@@ -26,39 +26,37 @@
 #include <stdio.h>
 
 
-
-DECLARE_MESSAGE(m_Flash, FlashBat)
-DECLARE_MESSAGE(m_Flash, Flashlight)
-
-#define BAT_NAME "sprites/%d_Flashlight.spr"
-
 bool CHudFlashlight::Init()
 {
-	m_fFade = 0;
 	m_fOn = false;
+#ifdef HALFLIFE_HUD_FLASHLIGHT
+	m_fFade = 0;
 	m_iBat = 100;
 	m_flBat = 1.0;
 
-	HOOK_MESSAGE(Flashlight);
-	HOOK_MESSAGE(FlashBat);
-
 	m_iFlags |= HUD_ACTIVE;
+#endif
 
 	gHUD.AddHudElem(this);
 
 	return true;
 }
 
+
 void CHudFlashlight::Reset()
 {
-	m_fFade = 0;
 	m_fOn = false;
+#ifdef HALFLIFE_HUD_FLASHLIGHT
+	m_fFade = 0;
 	m_iBat = 100;
 	m_flBat = 1.0;
+#endif
 }
+
 
 bool CHudFlashlight::VidInit()
 {
+#ifdef HALFLIFE_HUD_FLASHLIGHT
 	int HUD_flash_empty = gHUD.GetSpriteIndex("flash_empty");
 	int HUD_flash_full = gHUD.GetSpriteIndex("flash_full");
 	int HUD_flash_beam = gHUD.GetSpriteIndex("flash_beam");
@@ -70,56 +68,34 @@ bool CHudFlashlight::VidInit()
 	m_prc2 = &gHUD.GetSpriteRect(HUD_flash_full);
 	m_prcBeam = &gHUD.GetSpriteRect(HUD_flash_beam);
 	m_iWidth = m_prc2->right - m_prc2->left;
-
+#endif
 	return true;
 }
 
-void CHudFlashlight::Update_Flashlight(bool bOn)
-{
-	if (m_fOn == bOn)
-		return;
 
-	m_fOn = bOn;
+void CHudFlashlight::Update_Flashlight(const bool on)
+{
+	if (m_fOn == on)
+	{
+		return;
+	}
+
+	m_fOn = on;
 
 	if (m_fOn)
 	{
-		PlaySound("items/flashlight1.wav", 1.0);
+		PlaySound("items/flashlight1.wav", VOL_NORM);
 	}
 	else
 	{
-		PlaySound("items/flashlight2.wav", 1.0);
+		PlaySound("items/flashlight2.wav", VOL_NORM);
 	}
 }
 
-bool CHudFlashlight::MsgFunc_FlashBat(const char* pszName, int iSize, void* pbuf)
-{
-
-
-	BEGIN_READ(pbuf, iSize);
-	int x = READ_BYTE();
-	m_iBat = x;
-	m_flBat = ((float)x) / 100.0;
-
-	return true;
-}
-
-bool CHudFlashlight::MsgFunc_Flashlight(const char* pszName, int iSize, void* pbuf)
-{
-
-	BEGIN_READ(pbuf, iSize);
-	bool bOn = READ_BYTE() != 0;
-	int x = READ_BYTE();
-
-	Update_Flashlight(bOn);
-
-	m_iBat = x;
-	m_flBat = ((float)x) / 100.0;
-
-	return true;
-}
 
 bool CHudFlashlight::Draw(float flTime)
 {
+#ifdef HALFLIFE_HUD_FLASHLIGHT
 	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_FLASHLIGHT) != 0)
 		return true;
 
@@ -156,7 +132,6 @@ bool CHudFlashlight::Draw(float flTime)
 
 		gHUD.DrawHudSprite(m_hSprite2, 0, &rc, x + iOffset, y, color, a);
 	}
-
-
+#endif
 	return true;
 }

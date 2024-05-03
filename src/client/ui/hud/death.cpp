@@ -44,7 +44,11 @@ struct DeathNoticeItem
 
 #define MAX_DEATHNOTICES 4
 
+#ifdef HALFLIFE_HUD_FLASHLIGHT
 #define DEATHNOTICE_TOP 64
+#else
+#define DEATHNOTICE_TOP 4
+#endif
 
 DeathNoticeItem rgDeathNoticeList[MAX_DEATHNOTICES + 1];
 

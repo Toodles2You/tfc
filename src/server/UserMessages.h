@@ -17,8 +17,6 @@
 
 inline int gmsgShake = 0;
 inline int gmsgFade = 0;
-inline int gmsgFlashlight = 0;
-inline int gmsgFlashBattery = 0;
 inline int gmsgResetHUD = 0;
 inline int gmsgInitHUD = 0;
 inline int gmsgShowGameTitle = 0;
