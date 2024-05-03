@@ -263,7 +263,7 @@ void CPrimeGrenade::PrimedThink()
 		return;
 	}
 
-	if ((owner->m_TFState & kTFStateGrenadeThrowing) == 0)
+	if (!owner->InState(CBasePlayer::State::GrenadeThrowing))
 	{
 		if (pev->dmgtime <= gpGlobals->time)
 		{
@@ -384,7 +384,7 @@ void CPrimeGrenade::Throw(throw_e mode)
 	WriteString(GetIconName());
 	MessageEnd();
 	
-	owner->m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
+	owner->LeaveState(CBasePlayer::State::GrenadePrime | CBasePlayer::State::GrenadeThrowing);
 }
 
 
@@ -445,7 +445,7 @@ void CCaltropCanister::Throw(throw_e mode)
 	WriteString(GetIconName());
 	MessageEnd();
 	
-	owner->m_TFState &= ~(kTFStateGrenadePrime | kTFStateGrenadeThrowing);
+	owner->InState(CBasePlayer::State::GrenadePrime | CBasePlayer::State::GrenadeThrowing);
 
 	Remove();
 }

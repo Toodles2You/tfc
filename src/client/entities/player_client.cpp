@@ -166,7 +166,7 @@ void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* weapon)
 
 void CBasePlayer::PrimeGrenade(const int grenadeType)
 {
-	if ((m_TFState & (kTFStateGrenadePrime | kTFStateGrenadeThrowing)) != 0)
+	if (InState(State::GrenadePrime | State::GrenadeThrowing))
 	{
 		return;
 	}
@@ -228,7 +228,7 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 	}
 
 no_icon:
-	m_TFState |= kTFStateGrenadePrime;
+	EnterState(State::GrenadePrime);
 	EmitSoundPredicted("weapons/ax1.wav", CHAN_WEAPON);
 }
 
@@ -240,8 +240,8 @@ void CBasePlayer::ThrowGrenade()
 		return;
 	}
 
-	m_TFState &= ~kTFStateGrenadePrime;
-	m_TFState |= kTFStateGrenadeThrowing;
+	LeaveState(State::GrenadePrime);
+	EnterState(State::GrenadeThrowing);
 }
 
 #endif

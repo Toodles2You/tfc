@@ -93,11 +93,11 @@ void CTFWeapon::Deploy()
 
 void CTFWeapon::Holster()
 {
-	if (m_fInReload || (m_pPlayer->m_TFState & kTFStateAiming) != 0)
+	if (m_fInReload || m_pPlayer->InState(CBasePlayer::State::Aiming))
 	{
 		m_iNextPrimaryAttack = 0;
 		m_fInReload = false;
-		m_pPlayer->m_TFState &= ~kTFStateAiming;
+		m_pPlayer->LeaveState(CBasePlayer::State::Aiming);
 	}
 
 	CBasePlayerWeapon::Holster();

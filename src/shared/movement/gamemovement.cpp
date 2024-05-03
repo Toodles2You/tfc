@@ -116,11 +116,7 @@ void CHalfLifeMovement::BuildFreeWishMove(const Vector& move)
     /* Direction for flying & swimming movement. */
 
     float moveZed = move.z;
-    if ((player->m_TFState & kTFStateBuilding) != 0)
-    {
-        moveZed = 0.0F;
-    }
-    else if ((pmove->cmd.buttons & IN_JUMP) != 0)
+    if ((pmove->cmd.buttons & IN_JUMP) != 0)
     {
         moveZed = 1.0F * GetSpeedModifier();
     }
@@ -157,7 +153,7 @@ float CHalfLifeMovement::GetSpeedModifier()
     }
 
     if ((pmove->cmd.buttons & IN_SPEED) != 0
-     || (player->m_TFState & kTFStateAiming) != 0)
+     || player->InState(CBasePlayer::State::Aiming))
     {
         speed = std::min(speed, 0.3F);
     }
@@ -192,8 +188,7 @@ void CHalfLifeMovement::CheckParameters()
 #else
     if ((pmove->flags & FL_FROZEN) != 0
 #endif
-     || pmove->dead != 0
-     || (player->m_TFState & kTFStateBuilding) != 0)
+     || pmove->dead != 0)
     {
         move = g_vecZero;
     }

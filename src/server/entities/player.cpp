@@ -204,7 +204,7 @@ bool CBasePlayer::GiveHealth(float flHealth, int bitsDamageType, bool bClearEffe
 {
 	if (bClearEffects)
 	{
-		m_TFState &= ~kTFStateInfected;
+		LeaveState(State::Infected);
 		m_nLegDamage = 0;
 		m_iConcussionTime = 0;
 
@@ -283,11 +283,6 @@ void CBasePlayer::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecD
 
 float CBasePlayer::DamageForce(CBaseEntity* attacker, float damage)
 {
-	if ((m_TFState & kTFStateBuilding) != 0)
-	{
-		return 0.0F;
-	}
-
 	if (PCNumber() == PC_HVYWEAP)
 	{
 		if (damage < 50.0F)
@@ -536,6 +531,7 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 	}
 #endif
 
+	SetUseObject(nullptr);
 	RemoveGoalItems();
 
 	SetAction(Action::Die);
@@ -662,6 +658,8 @@ void CBasePlayer::StartObserver()
 	}
 #endif
 
+	SetUseObject(nullptr);
+
 	// Remove all the player's stuff
 	if (HasWeapons())
 	{
@@ -698,105 +696,166 @@ void CBasePlayer::StartObserver()
 
 void CBasePlayer::PlayerUse()
 {
-	if (IsObserver())
-		return;
-
-	// Was use pressed or released?
-	if (((pev->button | m_afButtonPressed | m_afButtonReleased) & IN_USE) == 0)
-		return;
-
-	// Hit Use on a train?
-	if ((m_afButtonPressed & IN_USE) != 0)
+	if ((m_afButtonReleased & IN_USE) != 0)
 	{
-#ifdef HALFLIFE_TANKCONTROL
-		if (m_pTank != NULL)
-		{
-			// Stop controlling the tank
-			// TODO: Send HUD Update
-			m_pTank->Use(this, this, USE_OFF, 0);
-			m_pTank = NULL;
-			return;
-		}
-		else
-#endif
-		{
-#ifdef HALFLIFE_TRAINCONTROL
-			if ((pev->flags & FL_ONTRAIN) != 0)
-			{
-				pev->flags &= ~FL_ONTRAIN;
-				m_iTrain = TRAIN_NEW | TRAIN_OFF;
-				return;
-			}
-			else
-			{ // Start controlling the train!
-				CBaseEntity* pTrain = CBaseEntity::Instance(pev->groundentity);
-
-				if (pTrain && (pev->button & IN_JUMP) == 0 && (pev->flags & FL_ONGROUND) != 0 && (pTrain->ObjectCaps() & FCAP_DIRECTIONAL_USE) != 0 && pTrain->OnControls(pev))
-				{
-					pev->flags |= FL_ONTRAIN;
-					m_iTrain = TrainSpeed(pTrain->pev->speed, pTrain->pev->impulse);
-					m_iTrain |= TRAIN_NEW;
-					EmitSound("plats/train_use1.wav", CHAN_VOICE);
-					return;
-				}
-			}
-#endif
-		}
+		SetUseObject(nullptr);
+		return;
 	}
 
-	CBaseEntity* pObject = NULL;
-	CBaseEntity* pClosest = NULL;
-	Vector vecLOS;
-	float flMaxDot = VIEW_FIELD_NARROW;
-	float flDot;
+	if (m_hUseObject != nullptr)
+	{
+		if ((pev->button & IN_USE) != 0
+	 	 && CanUseObject(m_hUseObject, PLAYER_SEARCH_RADIUS * 1.5F, VIEW_FIELD_NARROW))
+		{
+			CBaseEntity* object = m_hUseObject;
+			object->Use(this, this, USE_CONTINUOUS, 1);
+			return;
+		}
+
+		SetUseObject(nullptr);
+	}
+
+	if (!IsPlayer())
+	{
+		return;
+	}
+
+	// Was use pressed or released?
+	if ((m_afButtonPressed & IN_USE) == 0)
+	{
+		return;
+	}
+
+#ifdef HALFLIFE_TANKCONTROL
+	if (m_pTank != nullptr)
+	{
+		// Stop controlling the tank
+		// TODO: Send HUD Update
+		m_pTank->Use(this, this, USE_OFF, 0);
+		m_pTank = nullptr;
+		return;
+	}
+#endif
+
+#ifdef HALFLIFE_TRAINCONTROL
+	// Hit Use on a train?
+	if ((pev->flags & FL_ONTRAIN) != 0)
+	{
+		pev->flags &= ~FL_ONTRAIN;
+		m_iTrain = TRAIN_NEW | TRAIN_OFF;
+		return;
+	}
+	
+	// Start controlling the train!
+	CBaseEntity* pTrain = CBaseEntity::Instance(pev->groundentity);
+
+	if (pTrain != nullptr
+	 && (pev->button & IN_JUMP) == 0
+	 && (pev->flags & FL_ONGROUND) != 0
+	 && (pTrain->ObjectCaps() & FCAP_DIRECTIONAL_USE) != 0
+	 && pTrain->OnControls(pev))
+	{
+		pev->flags |= FL_ONTRAIN;
+		m_iTrain = TrainSpeed(pTrain->pev->speed, pTrain->pev->impulse);
+		m_iTrain |= TRAIN_NEW;
+		EmitSound("plats/train_use1.wav", CHAN_VOICE);
+		return;
+	}
+#endif
+
+	CBaseEntity* current = nullptr;
+	CBaseEntity* closest = nullptr;
+	auto maxDot = VIEW_FIELD_NARROW;
 
 	util::MakeVectors(pev->v_angle); // so we know which way we are facing
 
-	while ((pObject = util::FindEntityInSphere(pObject, pev->origin, PLAYER_SEARCH_RADIUS)) != NULL)
+	while ((current = util::FindEntityInSphere(current, pev->origin, PLAYER_SEARCH_RADIUS)) != nullptr)
 	{
-
-		if ((pObject->ObjectCaps() & FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE) != 0)
+		if ((current->ObjectCaps() & (FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE)) == 0)
 		{
-			// !!!PERFORMANCE- should this check be done on a per case basis AFTER we've determined that
-			// this object is actually usable? This dot is being done for every object within PLAYER_SEARCH_RADIUS
-			// when player hits the use key. How many objects can be in that area, anyway? (sjb)
-			vecLOS = (pObject->Center() - (pev->origin + pev->view_ofs));
+			continue;
+		}
 
-			// This essentially moves the origin of the target to the corner nearest the player to test to see
-			// if it's "hull" is in the view cone
-			vecLOS = util::ClampVectorToBox(vecLOS, pObject->pev->size * 0.5);
+		// This essentially moves the origin of the target to the corner nearest the player to test to see
+		// if it's "hull" is in the view cone
+		const auto eyeDelta = current->Center() - EyePosition();
+		const auto los = util::ClampVectorToBox(eyeDelta, current->pev->size / 2.0F);
 
-			flDot = DotProduct(vecLOS, gpGlobals->v_forward);
-			if (flDot > flMaxDot)
-			{ // only if the item is in front of the user
-				pClosest = pObject;
-				flMaxDot = flDot;
-				//				ALERT( at_console, "%s : %f\n", STRING( pObject->pev->classname ), flDot );
-			}
-			//			ALERT( at_console, "%s : %f\n", STRING( pObject->pev->classname ), flDot );
+		auto dot = DotProduct(los, gpGlobals->v_forward);
+
+		// only if the item is in front of the user
+		if (dot > maxDot)
+		{
+			closest = current;
+			maxDot = dot;
 		}
 	}
-	pObject = pClosest;
 
-	// Found an object
-	if (pObject)
+	SetUseObject(closest);
+
+	if (closest != nullptr)
 	{
-		//!!!UNDONE: traceline here to prevent USEing buttons through walls
-		int caps = pObject->ObjectCaps();
-
-		if ((m_afButtonPressed & IN_USE) != 0)
-			EmitSoundHUD("common/wpn_select.wav", CHAN_VOICE);
-
-		if (((pev->button & IN_USE) != 0 && (caps & FCAP_CONTINUOUS_USE) != 0)
-		 || ((m_afButtonPressed & IN_USE) != 0 && (caps & FCAP_IMPULSE_USE) != 0))
-		{
-			pObject->Use(this, this, USE_SET, 1);
-		}
+		EmitSoundHUD("common/wpn_select.wav", CHAN_VOICE);
 	}
 	else
 	{
-		if ((m_afButtonPressed & IN_USE) != 0)
-			EmitSoundHUD("common/wpn_denyselect.wav", CHAN_VOICE);
+		EmitSoundHUD("common/wpn_denyselect.wav", CHAN_VOICE);
+	}
+}
+
+
+bool CBasePlayer::CanUseObject(CBaseEntity* object, const float maxDistance, const float maxDot)
+{
+	if ((object->ObjectCaps() & (FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE)) == 0)
+	{
+		return false;
+	}
+
+	const auto distance = (object->pev->origin - pev->origin).Length();
+
+	if (distance > maxDistance)
+	{
+		return false;
+	}
+
+	const auto eyeDelta = object->Center() - EyePosition();
+	const auto los = util::ClampVectorToBox(eyeDelta, object->pev->size / 2.0F);
+
+	util::MakeVectors(pev->v_angle);
+
+	const auto dot = DotProduct(los, gpGlobals->v_forward);
+
+	return dot > maxDot;
+}
+
+
+void CBasePlayer::SetUseObject(CBaseEntity* object)
+{
+	if (m_hUseObject != nullptr)
+	{
+		/* End the previous continuous use. */
+		CBaseEntity* current = m_hUseObject;
+		current->Use(this, this, USE_CONTINUOUS_END, 1);
+	}
+
+	if (object == nullptr)
+	{
+		/* Clear the previous object. */
+		m_hUseObject = nullptr;
+	}
+	else
+	{
+		if ((object->ObjectCaps() & FCAP_CONTINUOUS_USE) != 0)
+		{
+			/* Begin continuous use. */
+			m_hUseObject = object;
+			object->Use(this, this, USE_CONTINUOUS_BEGIN, 1);
+		}
+		else
+		{
+			/* One-time impulse use. */
+			object->Use(this, this, USE_SET, 1);
+		}
 	}
 }
 
@@ -898,8 +957,7 @@ void CBasePlayer::PreThink()
 		m_flFallVelocity = -pev->velocity.z;
 	}
 
-	if ((m_TFState & kTFStateInfected) != 0
-	 && m_flNextInfectionTime <= gpGlobals->time)
+	if (InState(State::Infected) != 0 && m_flNextInfectionTime <= gpGlobals->time)
 	{
 		CBaseEntity* infector;
 		infector = m_hInfector;
@@ -924,7 +982,7 @@ void CBasePlayer::PreThink()
 		}
 		else
 		{
-			m_TFState &= ~kTFStateInfected;
+			LeaveState(State::Infected);
 		}
 
 		m_flNextInfectionTime = gpGlobals->time + 3.0F;
@@ -1020,8 +1078,6 @@ bool CBasePlayer::Spawn()
 		WriteByte(g_pGameRules->GetMaxAmmo(this, i));
 	}
 	MessageEnd();
-
-	m_flBuildingFinished = 0.0F;
 
 	ClearEffects();
 
@@ -1804,22 +1860,6 @@ void CBasePlayer::DropPlayerWeapon(char* pszWeaponName)
 	}
 }
 
-void CBasePlayer::EquipWeapon()
-{
-	if (m_pActiveWeapon == nullptr)
-	{
-		return;
-	}
-
-	if ((!FStringNull(pev->viewmodel) || !FStringNull(pev->weaponmodel)))
-	{
-		return;
-	}
-
-	m_pActiveWeapon->m_ForceSendAnimations = true;
-	m_pActiveWeapon->Deploy();
-	m_pActiveWeapon->m_ForceSendAnimations = false;
-}
 
 void CBasePlayer::SetPrefsFromUserinfo(char* infobuffer)
 {
@@ -1879,7 +1919,7 @@ void CBasePlayer::GetEntityState(entity_state_t& state)
 
 void CBasePlayer::PrimeGrenade(const int grenadeType)
 {
-	if ((m_TFState & (kTFStateGrenadePrime | kTFStateGrenadeThrowing)) != 0)
+	if (InState(State::GrenadePrime | State::GrenadeThrowing))
 	{
 		return;
 	}
@@ -1947,15 +1987,15 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 	}
 
 no_icon:
-	m_TFState |= kTFStateGrenadePrime;
+	EnterState(State::GrenadePrime);
 	EmitSoundPredicted("weapons/ax1.wav", CHAN_WEAPON);
 }
 
 
 void CBasePlayer::ThrowGrenade()
 {
-	m_TFState &= ~kTFStateGrenadePrime;
-	m_TFState |= kTFStateGrenadeThrowing;
+	LeaveState(State::GrenadePrime);
+	EnterState(State::GrenadeThrowing);
 }
 
 #endif
@@ -1968,7 +2008,7 @@ void CBasePlayer::BecomeInfected(CBaseEntity* infector)
 		return;
 	}
 
-	m_TFState |= kTFStateInfected;
+	EnterState(State::Infected);
 	m_hInfector = infector;
 	m_flNextInfectionTime = gpGlobals->time + 1.0F;
 

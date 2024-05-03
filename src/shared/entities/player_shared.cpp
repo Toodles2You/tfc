@@ -61,7 +61,7 @@ void CBasePlayer::WeaponPostFrame()
 #endif
 
 #ifdef HALFLIFE_GRENADES
-	if ((m_TFState & kTFStateGrenadePrime) != 0)
+	if (InState(State::GrenadePrime))
 	{
 		if (m_bGrenadeToggle)
 		{
@@ -95,14 +95,9 @@ void CBasePlayer::WeaponPostFrame()
 	if (HasPlayerWeapon(WEAPON_DETPACK))
 	{
 		dynamic_cast<CDetpack*>(m_rgpPlayerWeapons[WEAPON_DETPACK])->WeaponPostFrame();
-
-		if ((m_TFState & kTFStateBuilding) != 0)
-		{
-			return;
-		}
 	}
 
-	if (m_pActiveWeapon == nullptr)
+	if (m_pActiveWeapon == nullptr || InState(State::Holstered))
 	{
 		return;
 	}
@@ -233,7 +228,7 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 	data.iuser3 = pev->iuser3;
 #endif
 
-	data.tfstate = m_TFState;
+	data.tfstate = m_StateBits;
 	data.vuser4.y = static_cast<float>(m_nLegDamage);
 #ifdef GAME_DLL
 	data.iuser4 = m_iConcussionTime;
@@ -287,7 +282,7 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 	pev->iuser2 = data.iuser2;
 	pev->iuser3 = data.iuser3;
 
-	m_TFState = data.tfstate;
+	m_StateBits = data.tfstate;
 	m_nLegDamage = static_cast<byte>(data.vuser4.y);
 	m_iConcussionTime = data.iuser4;
 
@@ -352,8 +347,9 @@ void CBasePlayer::SelectWeapon(int id)
 		return;
 	}
 
-	if ((m_TFState & kTFStateBuilding) != 0)
+	if (InState(State::Holstered))
 	{
+		/* Switch weapons without holstering & deploying. */
 		m_pActiveWeapon = weapon;
 		return;
 	}
@@ -364,6 +360,61 @@ void CBasePlayer::SelectWeapon(int id)
 	}
 	m_pActiveWeapon = weapon;
 	m_pActiveWeapon->Deploy();
+}
+
+
+bool CBasePlayer::SetWeaponHolstered(const bool holstered, const bool forceSendAnimations)
+{
+	const auto alreadyHolstered = InState(State::Holstered);
+
+	/* The weapon is already where we want it. */
+	if (alreadyHolstered == holstered)
+	{
+		return true;
+	}
+
+	const auto hasActiveWeapon = m_pActiveWeapon != nullptr;
+
+	if (hasActiveWeapon)
+	{
+		m_pActiveWeapon->m_ForceSendAnimations = forceSendAnimations;
+	}
+
+	if (holstered)
+	{
+		/* Holster! */
+		if (hasActiveWeapon)
+		{
+			/* Ensure the weapon can be holstered. */
+			if (!m_pActiveWeapon->CanHolster())
+			{
+				return false;
+			}
+			m_pActiveWeapon->Holster();
+		}
+		EnterState(State::Holstered);
+	}
+	else
+	{
+		/* Deploy! */
+		if (hasActiveWeapon)
+		{
+			/* Ensure the weapon can be deployed. */
+			if (!m_pActiveWeapon->CanDeploy())
+			{
+				return false;
+			}
+			m_pActiveWeapon->Deploy();
+		}
+		LeaveState(State::Holstered);
+	}
+
+	if (hasActiveWeapon)
+	{
+		m_pActiveWeapon->m_ForceSendAnimations = false;
+	}
+
+	return true;
 }
 
 
@@ -749,7 +800,7 @@ void CBasePlayer::SetEntityState(const entity_state_t& state)
 
 void CBasePlayer::ClearEffects()
 {
-	m_TFState = 0;
+	m_StateBits = 0;
 	m_nLegDamage = 0;
 	m_iConcussionTime = 0;
 

@@ -39,7 +39,7 @@ void CDetpack::RemoveFromPlayer(bool forceSendAnimations)
 		return;
 	}
 
-	m_pPlayer->m_TFState &= ~kTFStateBuilding;
+	m_pPlayer->LeaveState(CBasePlayer::State::Holstered);
 	CTFWeapon::RemoveFromPlayer(forceSendAnimations);
 }
 
@@ -50,7 +50,7 @@ void CDetpack::Deploy()
 
 	m_pPlayer->EmitSoundPredicted("weapons/mine_deploy.wav", CHAN_BODY, VOL_NORM, ATTN_IDLE);
 
-	m_pPlayer->m_TFState |= kTFStateBuilding;
+	m_pPlayer->EnterState(CBasePlayer::State::Holstered);
 	m_iNextPrimaryAttack = info.iAttackTime;
 }
 
@@ -59,13 +59,8 @@ void CDetpack::WeaponPostFrame()
 {
 	if ((m_pPlayer->pev->button & IN_SPECIAL) != 0)
 	{
-		if ((m_pPlayer->m_TFState & kTFStateBuilding) == 0)
+		if (!m_pPlayer->InState(CBasePlayer::State::Holstered))
 		{
-			if (m_pPlayer->m_pActiveWeapon != nullptr)
-			{
-				m_pPlayer->m_pActiveWeapon->Holster();
-			}
-
 			Deploy();
 		}
 		else if (m_iNextPrimaryAttack <= 0)
@@ -73,7 +68,7 @@ void CDetpack::WeaponPostFrame()
 			Set();
 		}
 	}
-	else if ((m_pPlayer->m_TFState & kTFStateBuilding) != 0)
+	else if (m_pPlayer->InState(CBasePlayer::State::Holstered))
 	{
 		Holster();
 	}
@@ -82,14 +77,9 @@ void CDetpack::WeaponPostFrame()
 
 void CDetpack::Holster()
 {
-	m_pPlayer->m_TFState &= ~kTFStateBuilding;
+	m_pPlayer->LeaveState(CBasePlayer::State::Holstered);
 	m_iNextPrimaryAttack = 0;
 	CTFWeapon::Holster();
-
-	if (m_pPlayer->m_pActiveWeapon != nullptr)
-	{
-		m_pPlayer->m_pActiveWeapon->Deploy();
-	}
 }
 
 

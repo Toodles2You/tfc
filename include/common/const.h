@@ -769,9 +769,12 @@ typedef struct
 typedef enum
 {
 	USE_OFF = 0,
-	USE_ON = 1,
-	USE_SET = 2,
-	USE_TOGGLE = 3
+	USE_ON,
+	USE_SET,
+	USE_TOGGLE,
+	USE_CONTINUOUS_BEGIN,
+	USE_CONTINUOUS,
+	USE_CONTINUOUS_END,
 } USE_TYPE;
 
 enum

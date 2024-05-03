@@ -100,6 +100,8 @@ void ClientDisconnect(edict_t* pEntity)
 			pPlayer->m_pTank = NULL;
 		}
 #endif
+
+		pPlayer->SetUseObject(nullptr);
 	}
 
 	g_pGameRules->ClientDisconnected(pEntity);

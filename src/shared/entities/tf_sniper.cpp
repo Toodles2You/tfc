@@ -229,18 +229,20 @@ void CSniperRifle::WeaponPostFrame()
 
 	if ((m_pPlayer->pev->button & IN_ATTACK) != 0)
 	{
-		if ((m_pPlayer->m_TFState & kTFStateAiming) == 0 && m_iNextPrimaryAttack <= 0 && m_pPlayer->m_rgAmmo[info.iAmmo1] >= info.iShots)
+		if (!m_pPlayer->InState(CBasePlayer::State::Aiming)
+		 && m_iNextPrimaryAttack <= 0
+		 && m_pPlayer->m_rgAmmo[info.iAmmo1] >= info.iShots)
 		{
 			SendWeaponAnim(info.iAnims[kWeaponAnimReload]);
-			m_pPlayer->m_TFState |= kTFStateAiming;
+			m_pPlayer->EnterState(CBasePlayer::State::Aiming);
 			m_iNextPrimaryAttack = 333 + info.iReloadTime;
 			CreateLaserEffect();
 		}
 	}
-	else if ((m_pPlayer->m_TFState & kTFStateAiming) != 0)
+	else if (m_pPlayer->InState(CBasePlayer::State::Aiming))
 	{
 		PrimaryAttack();
-		m_pPlayer->m_TFState &= ~kTFStateAiming;
+		m_pPlayer->LeaveState(CBasePlayer::State::Aiming);
 		m_iNextPrimaryAttack = info.iAttackTime;
 		DestroyLaserEffect();
 	}
