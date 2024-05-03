@@ -1015,6 +1015,8 @@ public:
 	virtual bool IsNotValid()
 	{
 		// Only visible for spies
+		if (g_iPlayerClass != PC_SPY)
+			return true;
 
 		if (m_iFeignState == gViewPort->GetIsFeigning())
 			return false;
@@ -1057,6 +1059,9 @@ public:
 
 	virtual bool IsNotValid()
 	{
+		// Only visible for spies
+		if (g_iPlayerClass != PC_SPY)
+			return true;
 
 		// if it's not tied to a specific team, then always show (for spies)
 		if ( !m_iValidTeamsBits )
@@ -1082,6 +1087,9 @@ public:
 
 	virtual bool IsNotValid()
 	{
+		// Only visible for demomen
+		if (g_iPlayerClass != PC_DEMOMAN)
+			return true;
 
 		if (m_iDetpackState == gViewPort->GetIsSettingDetpack())
 			return false;
@@ -1119,6 +1127,66 @@ public:
 
 	virtual bool IsNotValid()
 	{
+		/* Toodles FIXME: */
+#if 1
+		return true;
+#else
+		// Only visible for engineers
+		if (g_iPlayerClass != PC_ENGINEER)
+			return true;
+
+		// If this isn't set, it's only active when they're not building
+		if (m_iBuildState & BUILDSTATE_BUILDING)
+		{
+			// Make sure the player's building
+			if (!(gViewPort->GetBuildState() & BS_BUILDING))
+				return true;
+		}
+		else
+		{
+			// Make sure the player's not building
+			if (gViewPort->GetBuildState() & BS_BUILDING)
+				return true;
+		}
+
+		if (m_iBuildState & BUILDSTATE_BASE)
+		{
+			// Only appear if we've got enough metal to build something, or something already built
+			if (gViewPort->GetBuildState() & (BS_HAS_SENTRYGUN | BS_HAS_DISPENSER | BS_CANB_SENTRYGUN | BS_CANB_DISPENSER | BS_HAS_ENTRY_TELEPORTER | BS_HAS_EXIT_TELEPORTER | BS_CANB_ENTRY_TELEPORTER | BS_CANB_EXIT_TELEPORTER))
+				return false;
+
+			return true;
+		}
+
+		// Must have a building
+		if (m_iBuildState & BUILDSTATE_HASBUILDING)
+		{
+			if (m_iBuildData == BuildButton::DISPENSER && !(gViewPort->GetBuildState() & BS_HAS_DISPENSER))
+				return true;
+			if (m_iBuildData == BuildButton::SENTRYGUN && !(gViewPort->GetBuildState() & BS_HAS_SENTRYGUN))
+				return true;
+			if (m_iBuildData == BuildButton::ENTRY_TELEPORTER && !(gViewPort->GetBuildState() & BS_HAS_ENTRY_TELEPORTER))
+				return true;
+			if (m_iBuildData == BuildButton::EXIT_TELEPORTER && !(gViewPort->GetBuildState() & BS_HAS_EXIT_TELEPORTER))
+				return true;
+		}
+
+		// Can build something
+		if (m_iBuildState & BUILDSTATE_CANBUILD)
+		{
+			// Make sure they've got the ammo and don't have one already
+			if (m_iBuildData == BuildButton::DISPENSER && (gViewPort->GetBuildState() & BS_CANB_DISPENSER))
+				return false;
+			if (m_iBuildData == BuildButton::SENTRYGUN && (gViewPort->GetBuildState() & BS_CANB_SENTRYGUN))
+				return false;
+			if (m_iBuildData == BuildButton::ENTRY_TELEPORTER && (gViewPort->GetBuildState() & BS_CANB_ENTRY_TELEPORTER))
+				return false;
+			if (m_iBuildData == BuildButton::EXIT_TELEPORTER && (gViewPort->GetBuildState() & BS_CANB_EXIT_TELEPORTER))
+				return false;
+
+			return true;
+		}
+#endif
 		return false;
 	}
 };
