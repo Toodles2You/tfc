@@ -151,7 +151,7 @@ public:
 	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
 
 protected:
-	float ArmourBonus(float damage, const int bitsDamageType);
+	float ArmorBonus(float damage, const int bitsDamageType);
 	float DamageForce(CBaseEntity* attacker, const float damage);
 	void SendHitFeedback(CBaseEntity* victim, const float flDamage, const int bitsDamageType);
 

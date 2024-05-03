@@ -306,7 +306,7 @@ float CBasePlayer::DamageForce(CBaseEntity* attacker, float damage)
 	return std::min(damage * 5.0F, 1000.0F);
 }
 
-float CBasePlayer::ArmourBonus(float damage, const int bitsDamageType)
+float CBasePlayer::ArmorBonus(float damage, const int bitsDamageType)
 {
 	if (pev->armorvalue <= 0 || (bitsDamageType & DMG_ARMOR_PIERCING) != 0)
 	{
@@ -324,27 +324,27 @@ float CBasePlayer::ArmourBonus(float damage, const int bitsDamageType)
 	}
 
 	/*
-		Toodles: Each point of armour is equivalent to one point of health.
-		Armour type is the percent of damage that will be taken from armour, rather than health.
+		Toodles: Each point of armor is equivalent to one point of health.
+		Armor type is the percent of damage that will be taken from armor, rather than health.
 	*/
 	float ratio = 1.0F - pev->armortype;
 	float newDamage = damage * ratio;
-	float takeArmour = damage - newDamage;
+	float takeArmor = damage - newDamage;
 
-	/* Absorbing this much damage would take more armour than the player has. */
-	if (takeArmour >= pev->armorvalue)
+	/* Absorbing this much damage would take more armor than the player has. */
+	if (takeArmor >= pev->armorvalue)
 	{
 		/* Add the difference back into the damage. */
-		newDamage += takeArmour - pev->armorvalue;
-		takeArmour = pev->armorvalue;
+		newDamage += takeArmor - pev->armorvalue;
+		takeArmor = pev->armorvalue;
 
-		/* All armour has been used up. Clear any types. */
+		/* All armor has been used up. Clear any types. */
 		pev->armortype = 0.0F;
 		m_afArmorClass = 0;
 	}
 
-	pev->dmg_save += takeArmour;
-	pev->armorvalue -= takeArmour;
+	pev->dmg_save += takeArmor;
+	pev->armorvalue -= takeArmor;
 
 	return newDamage;
 }
@@ -449,7 +449,7 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		}
 	}
 
-	flDamage = ArmourBonus(flDamage, bitsDamageType);
+	flDamage = ArmorBonus(flDamage, bitsDamageType);
 
 	flDamage = ceilf(flDamage);
 
