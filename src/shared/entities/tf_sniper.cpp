@@ -412,7 +412,7 @@ void CAutoRifle::GetWeaponInfo(WeaponInfo& i)
 
 	i.iShots = 1;
 
-	i.iAttackTime = 100;
+	i.iAttackTime = 115;
 	i.iReloadTime = 1500;
 
 	i.iProjectileType = kProjBullet;
