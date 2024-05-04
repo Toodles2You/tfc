@@ -36,8 +36,10 @@ bool CHud::MsgFunc_ResetHUD(const char* pszName, int iSize, void* pbuf)
 
 	while (pList)
 	{
-		if (pList->p)
+		if (pList->p != nullptr && pList->p->ShouldReset(false))
+		{
 			pList->p->Reset();
+		}
 		pList = pList->pNext;
 	}
 
@@ -67,8 +69,10 @@ void CHud::MsgFunc_InitHUD(const char* pszName, int iSize, void* pbuf)
 
 	while (pList)
 	{
-		if (pList->p)
-			pList->p->InitHUDData();
+		if (pList->p != nullptr && pList->p->ShouldReset(true))
+		{
+			pList->p->Reset();
+		}
 		pList = pList->pNext;
 	}
 

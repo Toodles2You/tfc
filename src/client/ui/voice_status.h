@@ -79,6 +79,8 @@ public:
 
 // CHudBase overrides.
 public:
+
+	bool IsActive() override { return true; }
 	
 	// Initialize the cl_dll's voice manager.
 	virtual int Init(
@@ -86,7 +88,7 @@ public:
 		vgui::Panel **pParentPanel);
 	
 	// ackPosition is the bottom position of where CVoiceStatus will draw the voice acknowledgement labels.
-	virtual bool VidInit();
+	virtual void VidInit();
 
 
 public:

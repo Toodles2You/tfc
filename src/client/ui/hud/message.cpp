@@ -37,19 +37,13 @@ bool CHudMessage::Init()
 	HOOK_MESSAGE(HudText);
 	HOOK_MESSAGE(GameTitle);
 
-	gHUD.AddHudElem(this);
-
-	Reset();
-
-	return true;
+	return CHudBase::Init();
 }
 
-bool CHudMessage::VidInit()
+void CHudMessage::VidInit()
 {
 	m_HUD_title_half = gHUD.GetSpriteIndex("title_half");
 	m_HUD_title_life = gHUD.GetSpriteIndex("title_life");
-
-	return true;
 }
 
 
@@ -314,7 +308,7 @@ void CHudMessage::MessageDrawScan(client_textmessage_t* pMessage, float time)
 }
 
 
-bool CHudMessage::Draw(float fTime)
+void CHudMessage::Draw(const float time)
 {
 	int i, drawn;
 	client_textmessage_t* pMessage;
@@ -387,9 +381,9 @@ bool CHudMessage::Draw(float fTime)
 				break;
 			}
 
-			if (fTime <= endTime)
+			if (time <= endTime)
 			{
-				float messageTime = fTime - m_startTime[i];
+				float messageTime = time - m_startTime[i];
 
 				// Draw the message
 				// effect 0 is fade in/fade out
@@ -411,9 +405,9 @@ bool CHudMessage::Draw(float fTime)
 	m_parms.time = gHUD.m_flTime;
 	// Don't call until we get another message
 	if (0 == drawn)
-		m_iFlags &= ~HUD_ACTIVE;
-
-	return true;
+	{
+		SetActive(false);
+	}
 }
 
 
@@ -493,8 +487,7 @@ bool CHudMessage::MsgFunc_HudText(const char* pszName, int iSize, void* pbuf)
 	m_parms.time = gHUD.m_flTime;
 
 	// Turn on drawing
-	if ((m_iFlags & HUD_ACTIVE) == 0)
-		m_iFlags |= HUD_ACTIVE;
+	SetActive(true);
 
 	return true;
 }
@@ -508,8 +501,7 @@ bool CHudMessage::MsgFunc_GameTitle(const char* pszName, int iSize, void* pbuf)
 		m_gameTitleTime = gHUD.m_flTime;
 
 		// Turn on drawing
-		if ((m_iFlags & HUD_ACTIVE) == 0)
-			m_iFlags |= HUD_ACTIVE;
+		SetActive(true);
 	}
 
 	return true;
@@ -520,8 +512,7 @@ void CHudMessage::MessageAdd(client_textmessage_t* newMessage)
 	m_parms.time = gHUD.m_flTime;
 
 	// Turn on drawing
-	if ((m_iFlags & HUD_ACTIVE) == 0)
-		m_iFlags |= HUD_ACTIVE;
+	SetActive(true);
 
 	for (int i = 0; i < maxHUDMessages; i++)
 	{

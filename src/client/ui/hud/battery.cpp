@@ -30,18 +30,14 @@ DECLARE_MESSAGE(m_Battery, Battery)
 bool CHudBattery::Init()
 {
 	m_iBat = 0;
-	m_fFade = 0;
-	m_iFlags = 0;
 
 	HOOK_MESSAGE(Battery);
 
-	gHUD.AddHudElem(this);
-
-	return true;
+	return CHudBase::Init();
 }
 
 
-bool CHudBattery::VidInit()
+void CHudBattery::VidInit()
 {
 	int HUD_suit_empty = gHUD.GetSpriteIndex("suit_empty");
 	int HUD_suit_full = gHUD.GetSpriteIndex("suit_full");
@@ -50,18 +46,16 @@ bool CHudBattery::VidInit()
 	m_prc1 = &gHUD.GetSpriteRect(HUD_suit_empty);
 	m_prc2 = &gHUD.GetSpriteRect(HUD_suit_full);
 	m_iHeight = m_prc2->bottom - m_prc1->top;
-	m_fFade = 0;
-	return true;
 }
 
 void CHudBattery::Update_Battery(int iBat)
 {
-	m_iFlags |= HUD_ACTIVE;
+	SetActive(true);
 
 	if (iBat != m_iBat)
 	{
-		m_fFade = FADE_TIME;
 		m_iBat = iBat;
+		Flash();
 	}
 }
 
@@ -76,11 +70,8 @@ bool CHudBattery::MsgFunc_Battery(const char* pszName, int iSize, void* pbuf)
 }
 
 
-bool CHudBattery::Draw(float flTime)
+void CHudBattery::Draw(const float time)
 {
-	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) != 0)
-		return true;
-
 	int x, y, a;
 	Rect rc;
 
@@ -88,25 +79,7 @@ bool CHudBattery::Draw(float flTime)
 
 	rc.top += m_iHeight * ((float)(100 - (std::min(100, m_iBat))) * 0.01); // battery can go from 0 to 100 so * 0.01 goes from 0 to 1
 
-	// Has health changed? Flash the health #
-	if (0 != m_fFade)
-	{
-		if (m_fFade > FADE_TIME)
-			m_fFade = FADE_TIME;
-
-		m_fFade -= (gHUD.m_flTimeDelta * 20);
-		if (m_fFade <= 0)
-		{
-			a = 128;
-			m_fFade = 0;
-		}
-
-		// Fade the health number back to dim
-
-		a = MIN_ALPHA + (m_fFade / FADE_TIME) * 128;
-	}
-	else
-		a = MIN_ALPHA;
+	a = GetAlpha();
 
 	int iOffset = (m_prc1->bottom - m_prc1->top) / 6;
 
@@ -128,6 +101,4 @@ bool CHudBattery::Draw(float flTime)
 
 	x += (m_prc1->right - m_prc1->left);
 	x = gHUD.DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iBat, CHud::COLOR_PRIMARY, a);
-
-	return true;
 }

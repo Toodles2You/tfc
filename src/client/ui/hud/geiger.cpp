@@ -33,19 +33,11 @@ bool CHudGeiger::Init()
 	HOOK_MESSAGE(Geiger);
 
 	m_iGeigerRange = 0;
-	m_iFlags = 0;
-
-	gHUD.AddHudElem(this);
 
 	srand((unsigned)time(NULL));
 
-	return true;
-};
-
-bool CHudGeiger::VidInit()
-{
-	return true;
-};
+	return CHudBase::Init();
+}
 
 bool CHudGeiger::MsgFunc_Geiger(const char* pszName, int iSize, void* pbuf)
 {
@@ -56,12 +48,12 @@ bool CHudGeiger::MsgFunc_Geiger(const char* pszName, int iSize, void* pbuf)
 	m_iGeigerRange = READ_BYTE();
 	m_iGeigerRange = m_iGeigerRange << 2;
 
-	m_iFlags |= HUD_ACTIVE;
+	SetActive(true);
 
 	return true;
 }
 
-bool CHudGeiger::Draw(float flTime)
+void CHudGeiger::Draw(const float time)
 {
 	int pct;
 	float flvol;
@@ -174,6 +166,4 @@ bool CHudGeiger::Draw(float flTime)
 			PlaySound(sz, flvol);
 		}
 	}
-
-	return true;
 }

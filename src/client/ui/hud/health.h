@@ -47,8 +47,8 @@ class CHudHealth : public CHudBase
 {
 public:
 	bool Init() override;
-	bool VidInit() override;
-	bool Draw(float fTime) override;
+	void VidInit() override;
+	void Draw(const float time) override;
 	void Reset() override;
 	void Update_Health(int iHealth);
 	bool MsgFunc_Health(const char* pszName, int iSize, void* pbuf);

@@ -31,14 +31,10 @@ bool CHudStatusIcons::Init()
 {
 	HOOK_MESSAGE(StatusIcon);
 
-	gHUD.AddHudElem(this);
-
-	Reset();
-
-	return true;
+	return CHudBase::Init();
 }
 
-bool CHudStatusIcons::VidInit()
+void CHudStatusIcons::VidInit()
 {
 #ifdef HALFLIFE_GRENADES
 	m_hTimer = SPR_Load("sprites/timer.spr");
@@ -47,8 +43,6 @@ bool CHudStatusIcons::VidInit()
 	m_hGrenade = gHUD.GetSprite(i);
 	m_rcGrenade = gHUD.GetSpriteRect(i);
 #endif
-
-	return true;
 }
 
 void CHudStatusIcons::Reset()
@@ -59,15 +53,16 @@ void CHudStatusIcons::Reset()
 	m_bTimerActive = false;
 	m_flTimerStart = -1000;
 #endif
-
-	m_iFlags &= ~HUD_ACTIVE;
 }
 
 // Draw status icons along the left-hand side of the screen
-bool CHudStatusIcons::Draw(float flTime)
+void CHudStatusIcons::Draw(const float time)
 {
 	if (0 != gEngfuncs.IsSpectateOnly())
-		return true;
+	{
+		return;
+	}
+
 	// find starting position to draw from, along right-hand side of screen
 	int x = 5;
 	int y = gHUD.GetHeight() / 2;
@@ -84,14 +79,10 @@ bool CHudStatusIcons::Draw(float flTime)
 	}
 
 #ifdef HALFLIFE_GRENADES
-	if (!m_bTimerActive)
+	if (m_bTimerActive)
 	{
-		return true;
+		DrawTimer(time);
 	}
-
-	return DrawTimer(flTime);
-#else
-	return true;
 #endif
 }
 
@@ -262,7 +253,7 @@ void CHudStatusIcons::EnableIcon(const char* pszIconName, int red, int green, in
 	}
 #endif
 
-	m_iFlags |= HUD_ACTIVE;
+	SetActive(true);
 }
 
 void CHudStatusIcons::DisableIcon(const char* pszIconName)

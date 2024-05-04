@@ -38,11 +38,7 @@ bool CHudTextMessage::Init()
 {
 	HOOK_MESSAGE(TextMsg);
 
-	gHUD.AddHudElem(this);
-
-	Reset();
-
-	return true;
+	return CHudBase::Init();
 }
 
 // Searches through the string for any msg names (indicated by a '#')

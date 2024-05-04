@@ -30,16 +30,11 @@ bool CHudFlashlight::Init()
 {
 	m_fOn = false;
 #ifdef HALFLIFE_HUD_FLASHLIGHT
-	m_fFade = 0;
 	m_iBat = 100;
 	m_flBat = 1.0;
-
-	m_iFlags |= HUD_ACTIVE;
 #endif
 
-	gHUD.AddHudElem(this);
-
-	return true;
+	return CHudBase::Init();
 }
 
 
@@ -47,14 +42,13 @@ void CHudFlashlight::Reset()
 {
 	m_fOn = false;
 #ifdef HALFLIFE_HUD_FLASHLIGHT
-	m_fFade = 0;
 	m_iBat = 100;
 	m_flBat = 1.0;
 #endif
 }
 
 
-bool CHudFlashlight::VidInit()
+void CHudFlashlight::VidInit()
 {
 #ifdef HALFLIFE_HUD_FLASHLIGHT
 	int HUD_flash_empty = gHUD.GetSpriteIndex("flash_empty");
@@ -69,7 +63,6 @@ bool CHudFlashlight::VidInit()
 	m_prcBeam = &gHUD.GetSpriteRect(HUD_flash_beam);
 	m_iWidth = m_prc2->right - m_prc2->left;
 #endif
-	return true;
 }
 
 
@@ -93,12 +86,9 @@ void CHudFlashlight::Update_Flashlight(const bool on)
 }
 
 
-bool CHudFlashlight::Draw(float flTime)
+void CHudFlashlight::Draw(const float time)
 {
 #ifdef HALFLIFE_HUD_FLASHLIGHT
-	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_FLASHLIGHT) != 0)
-		return true;
-
 	int x, y, a;
 	Rect rc;
 
@@ -133,5 +123,4 @@ bool CHudFlashlight::Draw(float flTime)
 		gHUD.DrawHudSprite(m_hSprite2, 0, &rc, x + iOffset, y, color, a);
 	}
 #endif
-	return true;
 }

@@ -42,19 +42,18 @@ static float flScrollTime = 0; // the time at which the lines next scroll up
 
 DECLARE_MESSAGE(m_SayText, SayText);
 
+bool CHudSayText::IsActive()
+{
+	return CHudBase::IsActive() || gHUD.m_iIntermission;
+}
+
 bool CHudSayText::Init()
 {
-	gHUD.AddHudElem(this);
-
 	HOOK_MESSAGE(SayText);
-
-	InitHUDData();
 
 	m_HUD_saytext = gEngfuncs.pfnRegisterVariable("hud_saytext", "1", 0);
 	m_HUD_saytext_time = gEngfuncs.pfnRegisterVariable("hud_saytext_time", "5", 0);
 	m_con_color = gEngfuncs.pfnGetCvarPointer("con_color");
-
-	m_iFlags |= HUD_INTERMISSION; // is always drawn during an intermission
 
 	int iLineWidth;
 	gHUD.GetHudStringSize("0", iLineWidth, m_iLineHeight);
@@ -62,26 +61,24 @@ bool CHudSayText::Init()
 	m_iBaseX = LINE_START;
 	m_iBaseY = gHUD.GetHeight() - 60 - m_iLineHeight;
 
-	return true;
+	return CHudBase::Init();
 }
 
 
-void CHudSayText::InitHUDData()
+void CHudSayText::Reset()
 {
 	memset(g_szLineBuffer, 0, sizeof g_szLineBuffer);
 	memset(g_pflNameColors, 0, sizeof g_pflNameColors);
 	memset(g_iNameLengths, 0, sizeof g_iNameLengths);
 }
 
-bool CHudSayText::VidInit()
+void CHudSayText::VidInit()
 {
 	int iLineWidth;
 	gHUD.GetHudStringSize("0", iLineWidth, m_iLineHeight);
 
 	m_iBaseX = LINE_START;
 	m_iBaseY = gHUD.GetHeight() - 60 - m_iLineHeight;
-
-	return true;
 }
 
 
@@ -102,27 +99,28 @@ int ScrollTextUp()
 	return 1;
 }
 
-bool CHudSayText::Draw(float flTime)
+void CHudSayText::Draw(const float time)
 {
 	int y = m_iBaseY;
 
 	if (0 == m_HUD_saytext->value)
-		return true;
+		return;
 
 	// make sure the scrolltime is within reasonable bounds,  to guard against the clock being reset
-	flScrollTime = std::min(flScrollTime, flTime + m_HUD_saytext_time->value);
+	flScrollTime = std::min(flScrollTime, time + m_HUD_saytext_time->value);
 
-	if (flScrollTime <= flTime)
+	if (flScrollTime <= time)
 	{
 		if ('\0' != *g_szLineBuffer[0])
 		{
-			flScrollTime = flTime + m_HUD_saytext_time->value;
+			flScrollTime = time + m_HUD_saytext_time->value;
 			// push the console up
 			ScrollTextUp();
 		}
 		else
 		{ // buffer is empty,  just disable drawing of this section
-			m_iFlags &= ~HUD_ACTIVE;
+			SetActive(false);
+			return;
 		}
 	}
 
@@ -174,8 +172,6 @@ bool CHudSayText::Draw(float flTime)
 
 		y -= m_iLineHeight;
 	}
-
-	return true;
 }
 
 bool CHudSayText::MsgFunc_SayText(const char* pszName, int iSize, void* pbuf)
@@ -298,7 +294,7 @@ void CHudSayText::SayTextPrint(const char* pszBuf, int clientIndex)
 		flScrollTime = gHUD.m_flTime + m_HUD_saytext_time->value;
 	}
 
-	m_iFlags |= HUD_ACTIVE;
+	SetActive(true);
 	PlaySound("misc/talk.wav", 1);
 }
 

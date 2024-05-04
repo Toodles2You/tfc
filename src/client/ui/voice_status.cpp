@@ -222,8 +222,7 @@ int CVoiceStatus::Init(
 
 	m_pHelper = pHelper;
 	m_pParentPanel = pParentPanel;
-	gHUD.AddHudElem(this);
-	m_iFlags = HUD_ACTIVE;
+
 	HOOK_MESSAGE(VoiceMask);
 	HOOK_MESSAGE(ReqState);
 
@@ -232,11 +231,11 @@ int CVoiceStatus::Init(
 	m_pchGameDir = (char*)malloc(strlen(pchGameDirT) + 1);
 	strcpy(m_pchGameDir, pchGameDirT);
 
-	return 1;
+	return CHudBase::Init() ? 1 : 0;
 }
 
 
-bool CVoiceStatus::VidInit()
+void CVoiceStatus::VidInit()
 {
 	FreeBitmaps();
 
@@ -292,7 +291,6 @@ bool CVoiceStatus::VidInit()
 	}
 
 	m_VoiceHeadModel = gEngfuncs.pfnSPR_Load("sprites/voiceicon.spr");
-	return true;
 }
 
 

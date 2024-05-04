@@ -38,11 +38,6 @@
 
 #define HUDELEM_ACTIVE 1
 
-typedef struct
-{
-	int x, y;
-} POSITION;
-
 #include "global_consts.h"
 
 typedef struct
@@ -51,10 +46,6 @@ typedef struct
 } RGBA;
 
 typedef struct cvar_s cvar_t;
-
-
-#define HUD_ACTIVE 1
-#define HUD_INTERMISSION 2
 
 #define MAX_PLAYER_NAME_LENGTH 32
 
@@ -66,17 +57,54 @@ typedef struct cvar_s cvar_t;
 class CHudBase
 {
 public:
-	POSITION m_pos;
-	int m_type;
-	int m_iFlags; // active, moving,
-	int m_iHideFlags;
+	friend class CHud;
 	virtual ~CHudBase() {}
-	virtual bool Init() { return false; }
-	virtual bool VidInit() { return false; }
-	virtual bool Draw(float flTime) { return false; }
-	virtual void Think() {}
+
+	enum
+	{
+		kActive = 1,
+	};
+
+protected:
+	constexpr static float kMinAlpha = 100.0F;
+	constexpr static float kMaxAlpha = 200.0F;
+	constexpr static float kFadeTime = 100.0F;
+
+	int m_iFlags;
+	float m_fFade;
+
+	int GetAlpha() { return kMinAlpha + (kMaxAlpha - kMinAlpha) * (m_fFade / kFadeTime); }
+
+public:
+	void Flash() { m_fFade = kFadeTime; }
+
+	virtual bool IsActive() { return (m_iFlags & kActive) != 0; }
+	virtual bool IsVisible() { return IsActive(); }
+
+	bool SetActive(const bool active)
+	{
+		const auto alreadyActive = IsActive();
+
+		if (active != alreadyActive)
+		{
+			if (active)
+			{
+				m_iFlags |= kActive;
+				Flash();
+			}
+			else
+			{
+				m_iFlags &= ~kActive;
+			}
+		}
+	}
+
+	virtual bool Init();
+	virtual void VidInit() {}
+	virtual void Draw(const float time) {}
+	virtual void Think();
+	virtual bool ShouldReset(const bool reinitialize) { return true; }
 	virtual void Reset() {}
-	virtual void InitHUDData() {} // called every time a server is connected to
 };
 
 struct HUDLIST
@@ -101,9 +129,10 @@ class WeaponsResource;
 class CHudAmmo : public CHudBase
 {
 public:
+	bool IsActive() override { return true; }
 	bool Init() override;
-	bool VidInit() override;
-	bool Draw(float flTime) override;
+	void VidInit() override;
+	void Draw(const float time) override;
 	void Think() override;
 	void Reset() override;
 	bool DrawWList(float flTime);
@@ -138,7 +167,6 @@ protected:
 	int DrawBar(int x, int y, int width, int height, float f, int color, int a);
 	void DrawAmmoBar(WEAPON* p, int x, int y, int width, int height, int color, int a);
 
-	float m_fFade;
 	RGBA m_rgba;
 	WEAPON* m_pWeapon;
 	int m_HUD_bucket0;
@@ -158,9 +186,8 @@ class CHudAmmoSecondary : public CHudBase
 {
 public:
 	bool Init() override;
-	bool VidInit() override;
-	void Reset() override;
-	bool Draw(float flTime) override;
+	void VidInit() override;
+	void Draw(const float time) override;
 
 	void Update_SecAmmoVal(int iIndex, int iCount);
 	void Update_SecAmmoIcon(const char* pszIcon);
@@ -175,14 +202,10 @@ private:
 
 	int m_HUD_ammoicon; // sprite indices
 	int m_iAmmoAmounts[MAX_SEC_AMMO_VALUES];
-	float m_fFade;
 };
 
 
 #include "health.h"
-
-
-#define FADE_TIME 100
 
 
 //
@@ -192,8 +215,7 @@ class CHudGeiger : public CHudBase
 {
 public:
 	bool Init() override;
-	bool VidInit() override;
-	bool Draw(float flTime) override;
+	void Draw(const float time) override;
 	bool MsgFunc_Geiger(const char* pszName, int iSize, void* pbuf);
 
 private:
@@ -208,8 +230,8 @@ class CHudTrain : public CHudBase
 {
 public:
 	bool Init() override;
-	bool VidInit() override;
-	bool Draw(float flTime) override;
+	void VidInit() override;
+	void Draw(const float time) override;
 	bool MsgFunc_Train(const char* pszName, int iSize, void* pbuf);
 
 private:
@@ -225,8 +247,7 @@ class CHudStatusBar : public CHudBase
 {
 public:
 	bool Init() override;
-	bool VidInit() override;
-	bool Draw(float flTime) override;
+	void Draw(const float time) override;
 	void Reset() override;
 
 	void UpdateStatusBar(cl_entity_t* entity);
@@ -274,9 +295,10 @@ class CHudDeathNotice : public CHudBase
 {
 public:
 	bool Init() override;
-	void InitHUDData() override;
-	bool VidInit() override;
-	bool Draw(float flTime) override;
+	bool ShouldReset(const bool reinitialize) override { return reinitialize; }
+	void Reset() override;
+	void VidInit() override;
+	void Draw(const float time) override;
 	bool MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbuf);
 
 private:
@@ -301,10 +323,10 @@ public:
 	} menu_e;
 
 	bool Init() override;
-	void InitHUDData() override;
-	bool VidInit() override;
+	void VidInit() override;
+	bool ShouldReset(const bool reinitialize) override { return reinitialize; }
 	void Reset() override;
-	bool Draw(float flTime) override;
+	void Draw(const float time) override;
 	bool MsgFunc_ShowMenu(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_VoteMenu(const char* pszName, int iSize, void* pbuf);
 
@@ -324,10 +346,12 @@ protected:
 class CHudSayText : public CHudBase
 {
 public:
+	bool IsActive() override;
 	bool Init() override;
-	void InitHUDData() override;
-	bool VidInit() override;
-	bool Draw(float flTime) override;
+	bool ShouldReset(const bool reinitialize) override { return reinitialize; }
+	void Reset() override;
+	void VidInit() override;
+	void Draw(const float time) override;
 	bool MsgFunc_SayText(const char* pszName, int iSize, void* pbuf);
 	void SayTextPrint(const char* pszBuf, int clientIndex = -1);
 	void EnsureTextFitsInOneLineAndWrapIfHaveTo(int line);
@@ -352,8 +376,8 @@ public:
 	friend class CHudHealth;
 	
 	bool Init() override;
-	bool VidInit() override;
-	bool Draw(float flTime) override;
+	void VidInit() override;
+	void Draw(const float time) override;
 	void Update_Battery(int iBat);
 	bool MsgFunc_Battery(const char* pszName, int iSize, void* pbuf);
 
@@ -364,7 +388,6 @@ private:
 	Rect* m_prc2;
 	int m_iBat;
 	int m_iBatMax;
-	float m_fFade;
 	int m_iHeight; // width of the battery innards
 	int m_iAnchorX; // our x position, set by the health hud
 	int m_iAnchorY; // our y position, set by the health hud
@@ -377,9 +400,10 @@ private:
 class CHudFlashlight : public CHudBase
 {
 public:
+	bool IsActive() override { return true; }
 	bool Init() override;
-	bool VidInit() override;
-	bool Draw(float flTime) override;
+	void VidInit() override;
+	void Draw(const float time) override;
 	void Reset() override;
 	void Update_Flashlight(const bool on);
 	bool IsFlashlightOn() { return m_fOn; }
@@ -395,7 +419,6 @@ private:
 	Rect* m_prcBeam;
 	float m_flBat;
 	int m_iBat;
-	float m_fFade;
 	int m_iWidth; // width of the battery innards
 #endif
 };
@@ -443,8 +466,8 @@ class CHudMessage : public CHudBase
 {
 public:
 	bool Init() override;
-	bool VidInit() override;
-	bool Draw(float flTime) override;
+	void VidInit() override;
+	void Draw(const float time) override;
 	bool MsgFunc_HudText(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_HudTextPro(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_GameTitle(const char* pszName, int iSize, void* pbuf);
@@ -458,6 +481,7 @@ public:
 	void MessageDrawScan(client_textmessage_t* pMessage, float time);
 	void MessageScanStart();
 	void MessageScanNextChar();
+	bool ShouldReset(const bool reinitialize) { return reinitialize; }
 	void Reset() override;
 
 private:
@@ -480,9 +504,9 @@ class CHudStatusIcons : public CHudBase
 {
 public:
 	bool Init() override;
-	bool VidInit() override;
+	void VidInit() override;
 	void Reset() override;
-	bool Draw(float flTime) override;
+	void Draw(const float time) override;
 	bool MsgFunc_StatusIcon(const char* pszName, int iSize, void* pbuf);
 
 	enum

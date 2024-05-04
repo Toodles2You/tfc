@@ -32,41 +32,27 @@ bool CHudAmmoSecondary::Init()
 	HOOK_MESSAGE(SecAmmoVal);
 	HOOK_MESSAGE(SecAmmoIcon);
 
-	gHUD.AddHudElem(this);
 	m_HUD_ammoicon = 0;
 
 	for (int i = 0; i < MAX_SEC_AMMO_VALUES; i++)
 		m_iAmmoAmounts[i] = -1; // -1 means don't draw this value
 
-	Reset();
-
-	return true;
+	return CHudBase::Init();
 }
 
-void CHudAmmoSecondary::Reset()
-{
-	m_fFade = 0;
-}
-
-bool CHudAmmoSecondary::VidInit()
+void CHudAmmoSecondary::VidInit()
 {
 	if (m_HUD_ammoicon == 0)
 	{
 		m_HUD_ammoicon = gHUD.GetSpriteIndex("grenade");
 	}
-	return true;
 }
 
-bool CHudAmmoSecondary::Draw(float flTime)
+void CHudAmmoSecondary::Draw(const float time)
 {
-	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_WEAPONS) != 0)
-		return true;
-
 	// draw secondary ammo icons above normal ammo readout
 	int a, x, y, AmmoWidth;
-	a = (int)std::max(MIN_ALPHA, m_fFade);
-	if (m_fFade > 0)
-		m_fFade -= (gHUD.m_flTimeDelta * 20); // slowly lower alpha to fade out icons
+	a = GetAlpha();
 
 	AmmoWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
 
@@ -107,8 +93,6 @@ bool CHudAmmoSecondary::Draw(float flTime)
 			gHUD.DrawHudFill(x, y, (AmmoWidth / 10), gHUD.m_iFontHeight, CHud::COLOR_PRIMARY, MIN_ALPHA);
 		}
 	}
-
-	return true;
 }
 
 void CHudAmmoSecondary::Update_SecAmmoIcon(const char* pszIcon)
@@ -123,8 +107,7 @@ void CHudAmmoSecondary::Update_SecAmmoVal(int iIndex, int iCount)
 
 	if (m_iAmmoAmounts[iIndex] != iCount)
 	{
-		// make the icons light up
-		m_fFade = 200.0F;
+		Flash();
 	}
 
 	m_iAmmoAmounts[iIndex] = iCount;
@@ -136,20 +119,7 @@ void CHudAmmoSecondary::Update_SecAmmoVal(int iIndex, int iCount)
 		count += std::max(0, m_iAmmoAmounts[i]);
 	}
 
-	if (count == 0)
-	{ // the ammo fields are all empty, so turn off this hud area
-		m_iFlags &= ~HUD_ACTIVE;
-	}
-	else
-	{
-		if ((m_iFlags & HUD_ACTIVE) == 0)
-		{
-			// make the icons light up
-			m_fFade = 200.0F;
-		}
-
-		m_iFlags |= HUD_ACTIVE;
-	}
+	SetActive(count != 0);
 }
 
 // Message handler for Secondary Ammo Value

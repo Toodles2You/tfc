@@ -54,23 +54,21 @@ DeathNoticeItem rgDeathNoticeList[MAX_DEATHNOTICES + 1];
 
 bool CHudDeathNotice::Init()
 {
-	gHUD.AddHudElem(this);
-
 	HOOK_MESSAGE(DeathMsg);
 
 	hud_deathnotice_time = CVAR_CREATE("hud_deathnotice_time", "6", 0);
 
-	return true;
+	return CHudBase::Init();
 }
 
 
-void CHudDeathNotice::InitHUDData()
+void CHudDeathNotice::Reset()
 {
 	memset(rgDeathNoticeList, 0, sizeof(rgDeathNoticeList));
 }
 
 
-bool CHudDeathNotice::VidInit()
+void CHudDeathNotice::VidInit()
 {
 	m_HUD_d_skull = gHUD.GetSpriteIndex("d_skull");
 	m_HUD_d_headshot = gHUD.GetSpriteIndex("d_headshot");
@@ -85,17 +83,15 @@ bool CHudDeathNotice::VidInit()
 	m_headshot_height = rect.bottom - rect.top;
 
 	m_headshot_height = ceilf(m_headshot_height / 2.0F);
-
-	return true;
 }
 
-bool CHudDeathNotice::Draw(float flTime)
+void CHudDeathNotice::Draw(const float time)
 {
 	int x, y, r, g, b;
 
 	if (hud_deathnotice_time->value <= 0.0F)
 	{
-		return true;
+		return;
 	}
 
 	y = DEATHNOTICE_TOP + 2;
@@ -108,7 +104,7 @@ bool CHudDeathNotice::Draw(float flTime)
 		if (item->iId == 0)
 			break; // we've gone through them all
 		
-		auto deltaTime = flTime - item->flDisplayTime;
+		auto deltaTime = time - item->flDisplayTime;
 		auto displayTime = hud_deathnotice_time->value;
 
 		if (item->bLocalPlayerInvolved)
@@ -246,14 +242,12 @@ bool CHudDeathNotice::Draw(float flTime)
 
 		y += weaponHeight + 6;
 	}
-
-	return true;
 }
 
 // This message handler may be better off elsewhere
 bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbuf)
 {
-	m_iFlags |= HUD_ACTIVE;
+	SetActive(true);
 
 	BEGIN_READ(pbuf, iSize);
 
