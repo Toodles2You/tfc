@@ -144,7 +144,7 @@ void CHalfLifeTeamplay::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobu
 }
 
 
-bool CHalfLifeTeamplay::FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* pAttacker)
+bool CHalfLifeTeamplay::FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* pAttacker, CBaseEntity* inflictor)
 {
 	if (pAttacker && PlayerRelationship(pPlayer, pAttacker) == GR_TEAMMATE)
 	{
@@ -156,7 +156,7 @@ bool CHalfLifeTeamplay::FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* 
 		}
 	}
 
-	return CHalfLifeMultiplay::FPlayerCanTakeDamage(pPlayer, pAttacker);
+	return CHalfLifeMultiplay::FPlayerCanTakeDamage(pPlayer, pAttacker, inflictor);
 }
 
 
