@@ -2120,6 +2120,10 @@ void CBasePlayer::SendExtraInfo(CBaseEntity* toWhom)
 	{
 		flags |= 2;
 	}
+	if (!IsNetClient())
+	{
+		flags |= 4;
+	}
 	WriteByte(flags);
 
 	MessageEnd();

@@ -2510,8 +2510,18 @@ bool TeamFortressViewport::MsgFunc_ExtraInfo(const char* pszName, int iSize, voi
 		info.teamnumber = role >> 5;
 		info.dead = (flags & 1) != 0;
 		info.lefthanded = (flags & 2) != 0;
+		info.bot = (flags & 4) != 0;
 
-		if (cl == gEngfuncs.GetLocalPlayer()->index)
+		auto localPlayer = gEngfuncs.GetLocalPlayer();
+
+		/* Not a LAN game. */
+		if (g_PlayerInfoList[localPlayer->index].m_nSteamID != 0)
+		{
+			/* Bot will be indicated by a zero Steam ID. */
+			info.bot |= g_PlayerInfoList[cl].m_nSteamID == 0;
+		}
+
+		if (cl == localPlayer->index)
 		{
 			g_iPlayerClass = info.playerclass;
 			g_iTeamNumber = info.teamnumber;

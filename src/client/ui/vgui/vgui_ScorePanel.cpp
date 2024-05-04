@@ -397,11 +397,12 @@ void ScorePanel::FillGrid()
 				sprintf(sz, "%d", g_PlayerExtraInfo[m_iSortedRows[row]].score);
 				break;
 			case COLUMN_LATENCY:
-				if (g_PlayerInfoList[m_iSortedRows[row]].m_nSteamID == 0)
+				sz[0] = '\0';
+				if (g_PlayerExtraInfo[m_iSortedRows[row]].bot)
 				{
 					strcpy(sz, CHudTextMessage::BufferedLocaliseTextString("#BOT"));
 				}
-				else
+				else if (g_PlayerInfoList[m_iSortedRows[row]].ping != 0)
 				{
 					sprintf(sz, "%d", g_PlayerInfoList[m_iSortedRows[row]].ping);
 				}
