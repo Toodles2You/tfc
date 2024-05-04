@@ -101,7 +101,7 @@ CClassMenuPanel::CClassMenuPanel(int iTrans, bool iRemoveMe, int x, int y, int w
 	m_pScrollPanel->validate();
 
 	// Create the Class buttons
-	for (int i = 0; i <= 10; i++)
+	for (int i = 0; i <= PC_RANDOM; i++)
 	{
 		char sz[256];
 		int iYPos = CLASSMENU_TOPLEFT_BUTTON_Y + ((CLASSMENU_BUTTON_SIZE_Y + CLASSMENU_BUTTON_SPACER_Y) * i);
@@ -112,7 +112,7 @@ CClassMenuPanel::CClassMenuPanel(int iTrans, bool iRemoveMe, int x, int y, int w
 		sprintf(sz, "%s", CHudTextMessage::BufferedLocaliseTextString(sLocalisedClasses[i]));
 		m_pButtons[i] = new ClassButton(i, sz, CLASSMENU_TOPLEFT_BUTTON_X, iYPos, CLASSMENU_BUTTON_SIZE_X, CLASSMENU_BUTTON_SIZE_Y, true);
 		// RandomPC uses '0'
-		if (i >= 1 && i <= 9)
+		if (i > PC_UNDEFINED && i < PC_RANDOM)
 		{
 			sprintf(sz, "%d", i);
 		}
@@ -243,6 +243,7 @@ CClassMenuPanel::CClassMenuPanel(int iTrans, bool iRemoveMe, int x, int y, int w
 	m_pCancelButton = new CommandButton(gHUD.m_TextMessage.BufferedLocaliseTextString("#Menu_Cancel"), CLASSMENU_TOPLEFT_BUTTON_X, 0, CLASSMENU_BUTTON_SIZE_X, CLASSMENU_BUTTON_SIZE_Y);
 	m_pCancelButton->setParent(this);
 	m_pCancelButton->addActionSignal(new CMenuHandler_TextWindow(HIDE_TEXTWINDOW));
+	m_pCancelButton->addInputSignal(new CHandler_MenuButtonOver(this, 11));
 
 	m_iCurrentInfo = 0;
 }
@@ -258,7 +259,7 @@ void CClassMenuPanel::Update()
 	int iYPos = CLASSMENU_TOPLEFT_BUTTON_Y;
 
 	// Cycle through the rest of the buttons
-	for (int i = 0; i <= 10; i++)
+	for (int i = 0; i <= PC_RANDOM; i++)
 	{
 		bool bCivilian = (gViewPort->GetValidClasses(g_iTeamNumber) == -1);
 
@@ -289,8 +290,10 @@ void CClassMenuPanel::Update()
 				iYPos += CLASSMENU_BUTTON_SIZE_Y + CLASSMENU_BUTTON_SPACER_Y;
 
 				// Start with the first option up
-				if (!m_iCurrentInfo)
+				if (m_iCurrentInfo == 0)
+				{
 					SetActiveInfo(i);
+				}
 			}
 		}
 
@@ -359,7 +362,7 @@ void CClassMenuPanel::Update()
 // Key inputs for the Class Menu
 bool CClassMenuPanel::SlotInput(int iSlot)
 {
-	if ((iSlot < 0) || (iSlot > 9))
+	if (iSlot < 0 || iSlot >= PC_RANDOM)
 		return false;
 	if (!m_pButtons[iSlot])
 		return false;
@@ -375,7 +378,7 @@ bool CClassMenuPanel::SlotInput(int iSlot)
 		}
 
 		// Select RandomPC
-		iSlot = 10;
+		iSlot = PC_RANDOM;
 	}
 
 	if (!(m_pButtons[iSlot]->IsNotValid()))
@@ -391,6 +394,11 @@ bool CClassMenuPanel::SlotInput(int iSlot)
 // Update the Class menu before opening it
 void CClassMenuPanel::Open()
 {
+	// Start with the current class up
+	if (g_iPlayerClass != PC_UNDEFINED)
+	{
+		SetActiveInfo(g_iPlayerClass);
+	}
 	Update();
 	CMenuPanel::Open();
 }
@@ -409,17 +417,25 @@ void CClassMenuPanel::Initialize()
 void CClassMenuPanel::SetActiveInfo(int iInput)
 {
 	// Remove all the Info panels and bring up the specified one
-	for (int i = 0; i <= 10; i++)
+
+	if (iInput == 11)
 	{
-		m_pButtons[i]->setArmed(false);
-		m_pClassInfoPanel[i]->setVisible(false);
+		m_pCancelButton->setArmed(true);
+	}
+	else
+	{
+		m_pCancelButton->setArmed(false);
+
+		for (int i = 0; i <= PC_RANDOM; i++)
+		{
+			m_pButtons[i]->setArmed(false);
+			m_pClassInfoPanel[i]->setVisible(false);
+		}
+
+		m_pButtons[iInput]->setArmed(true);
+		m_pClassInfoPanel[iInput]->setVisible(true);
 	}
 
-	if (iInput > 10 || iInput < 0)
-		iInput = 0;
-
-	m_pButtons[iInput]->setArmed(true);
-	m_pClassInfoPanel[iInput]->setVisible(true);
 	m_iCurrentInfo = iInput;
 
 	m_pScrollPanel->setScrollValue(0, 0);

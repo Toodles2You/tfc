@@ -789,6 +789,7 @@ enum
 enum
 {
 	PC_UNDEFINED = 0,
+	PC_RANDOM = 10,
 	PC_LASTCLASS = 12,
 };
 
