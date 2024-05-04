@@ -127,20 +127,17 @@ void CPipeBombLauncher::DetonatePipeBombs(const bool fizzle)
 
 		if (pipebomb != nullptr)
 		{
-			if (fizzle)
+			if (pipebomb->pev->pain_finished > gpGlobals->time)
 			{
-				pipebomb->Remove();
-			}
-			else
-			{
-				if (pipebomb->pev->pain_finished > gpGlobals->time)
+				if (fizzle)
 				{
-					break;
+					pipebomb->Remove();
 				}
-
-				pipebomb->SetThink(&CPipeBomb::Detonate);
-				pipebomb->pev->nextthink = gpGlobals->time;
+				break;
 			}
+
+			pipebomb->SetThink(&CPipeBomb::Detonate);
+			pipebomb->pev->nextthink = gpGlobals->time;
 		}
 	}
 }
