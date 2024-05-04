@@ -1433,7 +1433,11 @@ void TeamFortressViewport::InputPlayerSpecial()
 	if (!m_iInitialized)
 		return;
 
-	if (g_iPlayerClass == PC_ENGINEER || g_iPlayerClass == PC_SPY)
+	if (g_iPlayerClass == PC_SCOUT)
+	{
+		gEngfuncs.pfnServerCmd("flaginfo");
+	}
+	else if (g_iPlayerClass == PC_ENGINEER || g_iPlayerClass == PC_SPY)
 	{
 		ShowCommandMenu(gViewPort->m_StandardMenu);
 

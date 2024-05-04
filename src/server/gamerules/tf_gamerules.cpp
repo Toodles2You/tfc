@@ -116,11 +116,114 @@ CTeamFortress::CTeamFortress()
 
     m_teams.push_back(CTeam{TEAM_BLUE, "Team_Blue"});
     m_teams.push_back(CTeam{TEAM_RED, "Team_Red"});
+
+    memset(display_item_status, 0, sizeof(display_item_status));
+
+    team_str_home = iStringNull;
+    team_str_moved = iStringNull;
+    team_str_carried = iStringNull;
+
+    non_team_str_home = iStringNull;
+    non_team_str_moved = iStringNull;
+    non_team_str_carried = iStringNull;
+}
+
+
+/* Toodles FIXME: This is redundant but, I'm lazy. */
+void CTeamFortress::DisplayItemStatus(CBasePlayer* player, const int goalNo)
+{
+    auto goal = util::FindItem(goalNo);
+
+    if (goal == nullptr)
+    {
+        return;
+    }
+
+    const auto isGoalOwner = player->TeamNumber() == goal->tfv.GetOwningTeam();
+    const char* message = nullptr;
+    const char* carrier = nullptr;
+
+    if (goal->InGoalState(TFGS_ACTIVE))
+    {
+        /* Goal is being carried! */
+        if (isGoalOwner)
+        {
+            if (!FStringNull(team_str_carried))
+            {
+                message = STRING(team_str_carried);
+            }
+        }
+        else if (!FStringNull(non_team_str_carried))
+        {
+            message = STRING(non_team_str_carried);
+        }
+
+        /* Find the carrier. */
+        if (goal->pev->owner != nullptr)
+        {
+            auto goalCarrier = dynamic_cast<CBasePlayer*>(CBaseEntity::Instance(goal->pev->owner));
+
+            if (goalCarrier != nullptr)
+            {
+                carrier = STRING(goalCarrier->pev->netname);
+            }
+        }
+    }
+    else if (goal->pev->origin != goal->pev->oldorigin)
+    {
+        /* Goal is dropped! */
+        if (isGoalOwner)
+        {
+            if (!FStringNull(team_str_moved))
+            {
+                message = STRING(team_str_moved);
+            }
+        }
+        else if (!FStringNull(non_team_str_moved))
+        {
+            message = STRING(non_team_str_moved);
+        }
+    }
+    else
+    {
+        /* Goal is at home! */
+        if (isGoalOwner)
+        {
+            if (!FStringNull(team_str_home))
+            {
+                message = STRING(team_str_home);
+            }
+        }
+        else if (!FStringNull(non_team_str_home))
+        {
+            message = STRING(non_team_str_home);
+        }
+    }
+
+    if (message == nullptr)
+    {
+        return;
+    }
+
+    util::ClientPrint(player, HUD_PRINTTALK, message, carrier);
 }
 
 
 bool CTeamFortress::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 {
+    if (FStrEq(pcmd, "flaginfo"))
+    {
+        for (int i = 0; i < TEAM_SPECTATORS - 1; i++)
+        {
+            if (display_item_status[i] > 0)
+            {
+                DisplayItemStatus(pPlayer, display_item_status[i]);
+            }
+        }
+
+        return true;
+    }
+
     for (int i = PC_SCOUT; i <= PC_MEDIC; i++)
     {
         if (strcmp(pcmd, sTFClassSelection[i]) == 0)

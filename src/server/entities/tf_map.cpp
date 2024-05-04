@@ -513,6 +513,98 @@ void CTFVars::DoGroupWork(CBaseEntity* player)
     }
 }
 
+void CTFVars::DisplayItemStatus(CBaseEntity* player, const int index)
+{
+    int goalNo = 0;
+    switch (index)
+    {
+        case 0: goalNo = display_item_status1; break;
+        case 1: goalNo = display_item_status2; break;
+        case 2: goalNo = display_item_status3; break;
+        case 3: goalNo = display_item_status4; break;
+        default: return;
+    }
+
+    if (goalNo <= 0)
+    {
+        return;
+    }
+
+    auto goal = util::FindItem(goalNo);
+
+    if (goal == nullptr)
+    {
+        return;
+    }
+
+    const auto isGoalOwner = player->TeamNumber() == goal->tfv.GetOwningTeam();
+    const char* message = nullptr;
+    const char* carrier = nullptr;
+
+    if (goal->InGoalState(TFGS_ACTIVE))
+    {
+        /* Goal is being carried! */
+        if (isGoalOwner)
+        {
+            if (!FStringNull(team_str_carried))
+            {
+                message = STRING(team_str_carried);
+            }
+        }
+        else if (!FStringNull(non_team_str_carried))
+        {
+            message = STRING(non_team_str_carried);
+        }
+
+        /* Find the carrier. */
+        if (goal->pev->owner != nullptr)
+        {
+            auto goalCarrier = CBaseEntity::Instance(goal->pev->owner);
+            if (goalCarrier != nullptr)
+            {
+                carrier = STRING(goalCarrier->pev->netname);
+            }
+        }
+    }
+    else if (goal->pev->origin != goal->pev->oldorigin)
+    {
+        /* Goal is dropped! */
+        if (isGoalOwner)
+        {
+            if (!FStringNull(team_str_moved))
+            {
+                message = STRING(team_str_moved);
+            }
+        }
+        else if (!FStringNull(non_team_str_moved))
+        {
+            message = STRING(non_team_str_moved);
+        }
+    }
+    else
+    {
+        /* Goal is at home! */
+        if (isGoalOwner)
+        {
+            if (!FStringNull(team_str_home))
+            {
+                message = STRING(team_str_home);
+            }
+        }
+        else if (!FStringNull(non_team_str_home))
+        {
+            message = STRING(non_team_str_home);
+        }
+    }
+
+    if (message == nullptr)
+    {
+        return;
+    }
+
+    util::ClientPrint(player, HUD_PRINTTALK, message, carrier);
+}
+
 //==================================================
 // CTFSpawn
 //==================================================
@@ -709,8 +801,59 @@ bool CTFDetect::KeyValue(KeyValueData* pkvd)
         pTFGameRules->m_TFTeamInfo[3].m_afInvalidClasses = atoi(pkvd->szValue);
         return true;
     }
-
-    /* Toodles FIXME: Item status stuff */
+    else if (FStrEq(pkvd->szKeyName, "display_item_status1"))
+    {
+        pTFGameRules->display_item_status[0] = atoi(pkvd->szValue);
+        return true;
+    }
+    else if (FStrEq(pkvd->szKeyName, "display_item_status2"))
+    {
+        pTFGameRules->display_item_status[1] = atoi(pkvd->szValue);
+        return true;
+    }
+    else if (FStrEq(pkvd->szKeyName, "display_item_status3"))
+    {
+        pTFGameRules->display_item_status[2] = atoi(pkvd->szValue);
+        return true;
+    }
+    else if (FStrEq(pkvd->szKeyName, "display_item_status4"))
+    {
+        pTFGameRules->display_item_status[3] = atoi(pkvd->szValue);
+        return true;
+    }
+    else if (FStrEq(pkvd->szKeyName, "team_str_home"))
+    {
+        pTFGameRules->team_str_home = ALLOC_STRING(pkvd->szValue);
+        return true;
+    }
+    else if (FStrEq(pkvd->szKeyName, "team_str_moved")
+          || FStrEq(pkvd->szKeyName, "t_s_m"))
+    {
+        pTFGameRules->team_str_moved = ALLOC_STRING(pkvd->szValue);
+        return true;
+    }
+    else if (FStrEq(pkvd->szKeyName, "team_str_carried")
+          || FStrEq(pkvd->szKeyName, "t_s_c"))
+    {
+        pTFGameRules->team_str_carried = ALLOC_STRING(pkvd->szValue);
+        return true;
+    }
+    else if (FStrEq(pkvd->szKeyName, "non_team_str_home"))
+    {
+        pTFGameRules->non_team_str_home = ALLOC_STRING(pkvd->szValue);
+        return true;
+    }
+    else if (FStrEq(pkvd->szKeyName, "non_team_str_moved"))
+    {
+        pTFGameRules->non_team_str_moved = ALLOC_STRING(pkvd->szValue);
+        return true;
+    }
+    else if (FStrEq(pkvd->szKeyName, "non_team_str_carried")
+          || FStrEq(pkvd->szKeyName, "n_s_c"))
+    {
+        pTFGameRules->non_team_str_carried = ALLOC_STRING(pkvd->szValue);
+        return true;
+    }
 
 #if 0
     ALERT(at_aiconsole, "WARNING! Unhandled TF pair: \'%s\' = \'%s\'\n", pkvd->szKeyName, pkvd->szValue);

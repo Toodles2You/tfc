@@ -179,6 +179,7 @@ public:
     bool Activated(CBaseEntity* player, bool item = false);
     void DoGoalWork(CBaseEntity* player);
     void DoGroupWork(CBaseEntity* player);
+    void DisplayItemStatus(CBaseEntity* player, const int index);
 
 protected:
     CTFTeamCheck* m_pTeamCheck;

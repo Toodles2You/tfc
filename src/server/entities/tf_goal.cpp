@@ -1039,7 +1039,10 @@ dead_bonuses:
         }
     }
 
-    /* Toodles FIXME: Report item info */
+    tfv.DisplayItemStatus(player, 0);
+    tfv.DisplayItemStatus(player, 1);
+    tfv.DisplayItemStatus(player, 2);
+    tfv.DisplayItemStatus(player, 3);
 
     if (HasGoalResults(TFGR_FORCE_RESPAWN))
     {

@@ -73,6 +73,7 @@ public:
 protected:
 	void UpdatePlayerClass(CBasePlayer* player);
 	bool ChangePlayerClass(CBasePlayer* pPlayer, int classIndex);
+	void DisplayItemStatus(CBasePlayer* player, const int goalNo);
 
 protected:
 	virtual void Enter_RND_RUNNING() override;
@@ -85,4 +86,14 @@ protected:
 
 	int m_afToggleFlags;
 	CTFTeamInfo m_TFTeamInfo[TEAM_SPECTATORS - 1];
+
+	int display_item_status[TEAM_SPECTATORS - 1];
+
+    string_t team_str_home;
+    string_t team_str_moved;
+    string_t team_str_carried;
+
+    string_t non_team_str_home;
+    string_t non_team_str_moved;
+    string_t non_team_str_carried;
 };
