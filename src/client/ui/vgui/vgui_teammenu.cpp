@@ -110,7 +110,7 @@ CTeamMenuPanel::CTeamMenuPanel(int iTrans, bool iRemoveMe, int x, int y, int wid
 		int iYPos = TEAMMENU_TOPLEFT_BUTTON_Y + ((TEAMMENU_BUTTON_SIZE_Y + TEAMMENU_BUTTON_SPACER_Y) * i);
 
 		// Team button
-		m_pButtons[i] = new CommandButton("", TEAMMENU_TOPLEFT_BUTTON_X, iYPos, TEAMMENU_BUTTON_SIZE_X, TEAMMENU_BUTTON_SIZE_Y, true);
+		m_pButtons[i] = new CommandButton("", TEAMMENU_TOPLEFT_BUTTON_X, iYPos, TEAMMENU_BUTTON_SIZE_X, TEAMMENU_BUTTON_SIZE_Y, false);
 		m_pButtons[i]->setParent(this);
 		m_pButtons[i]->setContentAlignment(vgui::Label::a_west);
 		m_pButtons[i]->setVisible(false);
@@ -142,7 +142,7 @@ CTeamMenuPanel::CTeamMenuPanel(int iTrans, bool iRemoveMe, int x, int y, int wid
 	m_pCancelButton->addInputSignal(new CHandler_MenuButtonOver(this, 7));
 
 	// Create the Spectate button
-	m_pSpectateButton = new SpectateButton(CHudTextMessage::BufferedLocaliseTextString("#Menu_Spectate"), TEAMMENU_TOPLEFT_BUTTON_X, 0, TEAMMENU_BUTTON_SIZE_X, TEAMMENU_BUTTON_SIZE_Y, true);
+	m_pSpectateButton = new SpectateButton(CHudTextMessage::BufferedLocaliseTextString("#Menu_Spectate"), TEAMMENU_TOPLEFT_BUTTON_X, 0, TEAMMENU_BUTTON_SIZE_X, TEAMMENU_BUTTON_SIZE_Y, false);
 	m_pSpectateButton->setParent(this);
 	m_pSpectateButton->addActionSignal(new CMenuHandler_StringCommand("spectate", true));
 	m_pSpectateButton->setBoundKey('6');
@@ -185,10 +185,6 @@ void CTeamMenuPanel::Update()
 				m_pButtons[i]->setVisible(true);
 				m_pButtons[i]->setPos(TEAMMENU_TOPLEFT_BUTTON_X, iYPos);
 				iYPos += TEAMMENU_BUTTON_SIZE_Y + TEAMMENU_BUTTON_SPACER_Y;
-
-				// Start with the first option up
-				if (0 == m_iCurrentInfo)
-					SetActiveInfo(i);
 
 				char szPlayerList[(MAX_PLAYER_NAME_LENGTH + 3) * 31]; // name + ", "
 				strcpy(szPlayerList, "\n");
@@ -376,6 +372,7 @@ bool CTeamMenuPanel::SlotInput(int iSlot)
 // Update the Team menu before opening it
 void CTeamMenuPanel::Open()
 {
+	SetActiveInfo(0);
 	Update();
 	CMenuPanel::Open();
 }
@@ -410,7 +407,7 @@ void CTeamMenuPanel::SetActiveInfo(int iInput)
 	{
 		m_pCancelButton->setArmed(true);
 	}
-	else
+	else if (iInput != 0)
 	{
 		m_pButtons[iInput]->setArmed(true);
 		m_pTeamInfoPanel[iInput]->setVisible(true);
@@ -418,5 +415,6 @@ void CTeamMenuPanel::SetActiveInfo(int iInput)
 
 	m_iCurrentInfo = iInput;
 
+	m_pScrollPanel->setScrollValue(0, 0);
 	m_pScrollPanel->validate();
 }

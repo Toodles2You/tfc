@@ -43,6 +43,7 @@ void CStudioModelRenderer::Init()
 	m_pCvarHiModels = IEngineStudio.GetCvar("cl_himodels");
 	m_pCvarDeveloper = IEngineStudio.GetCvar("developer");
 	m_pCvarDrawEntities = IEngineStudio.GetCvar("r_drawentities");
+	m_pCvarUseTriAPI = gEngfuncs.pfnRegisterVariable("gl_use_triapi", "1", FCVAR_ARCHIVE);
 
 	m_pChromeSprite = IEngineStudio.GetChromeSprite();
 
@@ -82,6 +83,8 @@ CStudioModelRenderer::CStudioModelRenderer()
 	m_pSubModel = NULL;
 	m_pPlayerInfo = NULL;
 	m_pRenderModel = NULL;
+	m_pTextureHeader = NULL;
+	m_pCvarUseTriAPI = NULL;
 }
 
 /*
@@ -1138,10 +1141,17 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 		return result;
 	}
 
+	m_bUseTriAPI =
+		IEngineStudio.IsHardware() != 0
+			&& m_pCvarUseTriAPI->value != 0.0F
+			&& m_pCurrentEntity->curstate.rendermode == kRenderNormal;
+
 	m_pRenderModel = m_pCurrentEntity->model;
 	m_pStudioHeader = (studiohdr_t*)IEngineStudio.Mod_Extradata(m_pRenderModel);
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
+
+	StudioSetUpTextureHeader();
 
 	StudioSetUpTransform(false);
 
@@ -1191,7 +1201,7 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 		IEngineStudio.StudioEntityLight(&lighting);
 
 		// model and frame independant
-		IEngineStudio.StudioSetupLighting(&lighting);
+		StudioSetupLighting(&lighting);
 
 		// get remap colors
 		m_nTopColor = m_pCurrentEntity->curstate.colormap & 0xFF;
@@ -1416,9 +1426,16 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 	if (m_pRenderModel == NULL)
 		return false;
 
+	m_bUseTriAPI =
+		IEngineStudio.IsHardware() != 0
+			&& m_pCvarUseTriAPI->value != 0.0F
+			&& m_pCurrentEntity->curstate.rendermode == kRenderNormal;
+
 	m_pStudioHeader = (studiohdr_t*)IEngineStudio.Mod_Extradata(m_pRenderModel);
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
+
+	StudioSetUpTextureHeader();
 
 	if (0 != pplayer->gaitsequence)
 	{
@@ -1506,7 +1523,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		IEngineStudio.StudioEntityLight(&lighting);
 
 		// model and frame independant
-		IEngineStudio.StudioSetupLighting(&lighting);
+		StudioSetupLighting(&lighting);
 
 		m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 
@@ -1556,10 +1573,11 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 			m_pStudioHeader = (studiohdr_t*)IEngineStudio.Mod_Extradata(pweaponmodel);
 			IEngineStudio.StudioSetHeader(m_pStudioHeader);
 
+			StudioSetUpTextureHeader();
 
 			StudioMergeBones(pweaponmodel);
 
-			IEngineStudio.StudioSetupLighting(&lighting);
+			StudioSetupLighting(&lighting);
 
 			StudioRenderModel();
 
@@ -1639,6 +1657,9 @@ void CStudioModelRenderer::StudioRenderModel()
 
 		IEngineStudio.SetForceFaceFlags(STUDIO_NF_CHROME);
 
+		const auto useTriAPI = StudioUseTriAPI();
+		m_bUseTriAPI = false;
+
 		gEngfuncs.pTriAPI->SpriteTexture(m_pChromeSprite, 0);
 		m_pCurrentEntity->curstate.renderfx = kRenderFxGlowShell;
 
@@ -1657,6 +1678,8 @@ void CStudioModelRenderer::StudioRenderModel()
 		{
 			m_pCurrentEntity->curstate.renderamt = 5;
 		}
+
+		m_bUseTriAPI = useTriAPI;
 	}
 	else
 	{
@@ -1735,7 +1758,7 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware()
 	{
 		for (i = 0; i < m_pStudioHeader->numbodyparts; i++)
 		{
-			IEngineStudio.StudioSetupModel(i, (void**)&m_pBodyPart, (void**)&m_pSubModel);
+			StudioSetupModel(i);
 
 			if (m_fDoInterp)
 			{
@@ -1750,7 +1773,7 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware()
 				gEngfuncs.pTriAPI->CullFace(TRI_NONE);
 			}
 
-			IEngineStudio.StudioDrawPoints();
+			StudioDrawPoints();
 
 			if (m_fFlipModel)
 			{
@@ -1809,4 +1832,281 @@ bool CStudioModelRenderer::StudioShouldFlipModel()
 	{
 		return false;
 	}
+}
+
+/*
+====================
+StudioSetUpTextureHeader
+
+====================
+*/
+void CStudioModelRenderer::StudioSetUpTextureHeader()
+{
+	if (!StudioUseTriAPI())
+	{
+		return;
+	}
+
+	m_pTextureHeader = m_pStudioHeader;
+
+	if (m_pStudioHeader->numtextures == 0)
+	{
+		char texturename[64];
+		strcpy(texturename, m_pStudioHeader->name);
+		strcpy(&texturename[strlen(texturename) - 4], "T.mdl");
+
+		studiohdr_t* pTextureHeader = (studiohdr_t*)IEngineStudio.Mod_Extradata(IEngineStudio.Mod_ForName(texturename, false));
+
+		if (pTextureHeader != nullptr)
+		{
+			m_pTextureHeader = pTextureHeader;
+		}
+	}
+}
+
+/*
+====================
+StudioSetupChrome
+
+====================
+*/
+void CStudioModelRenderer::StudioSetupChrome(int bone)
+{
+	Vector up;
+	Vector right;
+	Vector origin;
+
+	VectorScale(m_vRenderOrigin, -1, origin);
+	origin.x += (*m_pbonetransform)[bone][0][3];
+	origin.y += (*m_pbonetransform)[bone][1][3];
+	origin.z += (*m_pbonetransform)[bone][2][3];
+	VectorNormalize(origin);
+	CrossProduct(origin, m_vRight, up);
+	VectorNormalize(up);
+	CrossProduct(origin, up, right);
+	VectorNormalize(right);
+
+	VectorIRotate(up, (*m_pbonetransform)[bone], m_vChromeUp[bone]);
+	VectorIRotate(right, (*m_pbonetransform)[bone], m_vChromeRight[bone]);
+}
+
+/*
+====================
+StudioSetupLighting
+
+====================
+*/
+void CStudioModelRenderer::StudioSetupLighting(alight_t* lighting)
+{
+	if (!StudioUseTriAPI())
+	{
+		IEngineStudio.StudioSetupLighting(lighting);
+		return;
+	}
+
+	m_lighting.ambientlight = lighting->ambientlight;
+	m_lighting.shadelight = lighting->shadelight;
+	m_lighting.color = lighting->color;
+
+	m_vLight[MAXSTUDIOBONES] = lighting->plightvec;
+
+	for (int i = 0; i < m_pStudioHeader->numbones; i++)
+	{
+		VectorIRotate(lighting->plightvec, (*m_pbonetransform)[i], m_vLight[i]);
+		StudioSetupChrome(i);
+	}
+}
+
+/*
+====================
+StudioSetupModel
+
+====================
+*/
+void CStudioModelRenderer::StudioSetupModel(int bodypart)
+{
+	if (!StudioUseTriAPI())
+	{
+		IEngineStudio.StudioSetupModel(bodypart, (void**)&m_pBodyPart, (void**)&m_pSubModel);
+		return;
+	}
+
+	if (bodypart > m_pStudioHeader->numbodyparts)
+	{
+		bodypart = 0;
+	}
+
+	m_pBodyPart = (mstudiobodyparts_t*)((byte*)m_pStudioHeader + m_pStudioHeader->bodypartindex) + bodypart;
+
+	int index = m_pCurrentEntity->curstate.body / m_pBodyPart->base;
+	index %= m_pBodyPart->nummodels;
+
+	m_pSubModel = (mstudiomodel_t*)((byte*)m_pStudioHeader + m_pBodyPart->modelindex) + index;
+}
+
+/*
+====================
+CalculateLighting
+
+====================
+*/
+void CStudioModelRenderer::CalculateLighting(float* dest, int bone, int flags, Vector normal)
+{
+	/* Toodles: This was the main reason I did all of this. :3 */
+	if ((flags & STUDIO_NF_FULLBRIGHT) != 0)
+	{
+		(*dest) = 1.0F;
+		return;
+	}
+
+	float illum = m_lighting.ambientlight;
+
+	if ((flags & STUDIO_NF_FLATSHADE) != 0)
+	{
+		illum += m_lighting.shadelight * 0.8F;
+	}
+	else
+	{
+		float lightcos;
+		if (bone == -1)
+		{
+			lightcos = DotProduct(normal, m_vLight[MAXSTUDIOBONES]);
+		}
+		else
+		{
+			/* -1 colinear, 1 opposite */
+			lightcos = DotProduct(normal, m_vLight[bone]);
+		}
+
+		/* Do modified hemispherical lighting */
+		lightcos = (std::min(lightcos, 1.0F) + (kStudioLambert - 1.0F)) / kStudioLambert;
+
+		illum += m_lighting.shadelight;
+
+		if (lightcos > 0.0F)
+		{
+			illum -= m_lighting.shadelight * lightcos;
+		}
+	}
+
+	(*dest) = std::clamp(illum, 0.0F, 255.0F) / 255.0F;
+}
+
+/*
+====================
+StudioDrawPoints
+
+====================
+*/
+void CStudioModelRenderer::StudioDrawPoints()
+{
+	if (!StudioUseTriAPI())
+	{
+		IEngineStudio.StudioDrawPoints();
+		return;
+	}
+
+	int force_flags = IEngineStudio.GetForceFaceFlags();
+	int i, j, k;
+
+	byte* pVertBone = ((byte*)m_pStudioHeader + m_pSubModel->vertinfoindex);
+	byte* pNormBone = ((byte*)m_pStudioHeader + m_pSubModel->norminfoindex);
+
+	mstudiotexture_t* pTexture = (mstudiotexture_t*)((byte*)m_pTextureHeader + m_pTextureHeader->textureindex);
+
+	int16_t* pSkinRef = (int16_t*)((byte*)m_pTextureHeader + m_pTextureHeader->skinindex);
+
+	if (m_pCurrentEntity->curstate.skin != 0 && m_pCurrentEntity->curstate.skin < m_pTextureHeader->numskinfamilies)
+	{
+		pSkinRef += (m_pCurrentEntity->curstate.skin * m_pTextureHeader->numskinref);
+	}
+
+	Vector* pStudioVerts = (Vector*)((byte*)m_pStudioHeader + m_pSubModel->vertindex);
+	Vector* pStudioNorms = (Vector*)((byte*)m_pStudioHeader + m_pSubModel->normindex);
+
+	for (i = 0; i < m_pSubModel->numverts; i++)
+	{
+		VectorTransform(pStudioVerts[i], (*m_pbonetransform)[pVertBone[i]], m_vVertexTransform[i]);
+	}
+
+	mstudiomesh_t* pMesh;
+	int flags;
+	float illum;
+	bool chrome, additive, masked;
+
+	for (j = 0, k = 0; j < m_pSubModel->nummesh; j++)
+	{
+		pMesh = (mstudiomesh_t*)((byte*)m_pStudioHeader + m_pSubModel->meshindex) + j;
+		flags = pTexture[pSkinRef[pMesh->skinref]].flags | force_flags;
+		chrome = (flags & STUDIO_NF_CHROME) != 0;
+
+		for (i = 0; i < pMesh->numnorms; i++, k++)
+		{
+			CalculateLighting(&illum, (int)pNormBone[k], flags, pStudioNorms[k]);
+
+			if (chrome)
+			{
+				m_vChromeValues[k].x = (DotProduct(pStudioNorms[k], m_vChromeRight[pNormBone[k]]) + 1.0F) * 32.0F;
+				m_vChromeValues[k].y = (DotProduct(pStudioNorms[k], m_vChromeUp[pNormBone[k]]) + 1.0F) * 32.0F;
+			}
+
+			m_vLightValues[k] = m_lighting.color * illum;
+		}
+	}
+
+	int16_t* pTriCmds;
+	float s, t;
+	int rendermode = m_pCurrentEntity->curstate.rendermode;
+	float renderamt = (rendermode == kRenderNormal) ? 1.0F : (m_pCurrentEntity->curstate.renderamt / 255.0F);
+
+	gEngfuncs.pTriAPI->CullFace(m_fFlipModel ? TRI_NONE : TRI_FRONT);
+
+	for (j = 0; j < m_pSubModel->nummesh; j++)
+	{
+		pMesh = (mstudiomesh_t*)((byte*)m_pStudioHeader + m_pSubModel->meshindex) + j;
+		pTriCmds = (int16_t*)((byte*)m_pStudioHeader + pMesh->triindex);
+
+		s = 1.0F / pTexture[pSkinRef[pMesh->skinref]].width;
+		t = 1.0F / pTexture[pSkinRef[pMesh->skinref]].height;
+
+		IEngineStudio.StudioSetupSkin(m_pTextureHeader, pSkinRef[pMesh->skinref]);
+
+		flags = pTexture[pSkinRef[pMesh->skinref]].flags | force_flags;
+		chrome = (flags & STUDIO_NF_CHROME) != 0;
+		additive = (flags & STUDIO_NF_ADDITIVE) != 0;
+		masked = (flags & STUDIO_NF_MASKED) != 0;
+
+		while ((i = *(pTriCmds++)) != 0)
+		{
+			if (i < 0)
+			{
+				gEngfuncs.pTriAPI->Begin(TRI_TRIANGLE_FAN);
+				i = -i;
+			}
+			else
+			{
+				gEngfuncs.pTriAPI->Begin(TRI_TRIANGLE_STRIP);
+			}
+
+			for (; i > 0; i--, pTriCmds += 4)
+			{
+				if (chrome)
+				{
+					gEngfuncs.pTriAPI->TexCoord2f(m_vChromeValues[pTriCmds[1]].x * s, m_vChromeValues[pTriCmds[1]].y * t);
+				}
+				else
+				{
+					gEngfuncs.pTriAPI->TexCoord2f(pTriCmds[2] * s, pTriCmds[3] * t);
+				}
+
+				gEngfuncs.pTriAPI->Color4f(m_vLightValues[pTriCmds[1]].x, m_vLightValues[pTriCmds[1]].y, m_vLightValues[pTriCmds[1]].z, renderamt);
+
+				gEngfuncs.pTriAPI->Vertex3fv(m_vVertexTransform[pTriCmds[0]]);
+			}
+
+			gEngfuncs.pTriAPI->End();
+		}
+	}
+
+	gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
 }

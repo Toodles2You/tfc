@@ -95,6 +95,7 @@ void CHLBot::Update()
         ClearPrimaryAttack();
         return;
     }
+    Upkeep();
     PrimaryAttack();
 }
 

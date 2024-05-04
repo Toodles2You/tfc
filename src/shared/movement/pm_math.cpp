@@ -387,6 +387,20 @@ void VectorAngles(const float* forward, float* angles)
 	angles[2] = 0;
 }
 
+void VectorRotate(const Vector& in1, const float in2[3][4], Vector& out)
+{
+	out[0] = DotProduct(in1, in2[0]);
+	out[1] = DotProduct(in1, in2[1]);
+	out[2] = DotProduct(in1, in2[2]);
+}
+
+void VectorIRotate(const Vector& in1, const float in2[3][4], Vector& out)
+{
+	out[0] = in1[0] * in2[0][0] + in1[1] * in2[1][0] + in1[2] * in2[2][0];
+	out[1] = in1[0] * in2[0][1] + in1[1] * in2[1][1] + in1[2] * in2[2][1];
+	out[2] = in1[0] * in2[0][2] + in1[1] * in2[1][2] + in1[2] * in2[2][2];
+}
+
 /*
 ================
 ConcatTransforms

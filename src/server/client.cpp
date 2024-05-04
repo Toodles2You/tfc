@@ -1736,7 +1736,7 @@ void PM_Move(struct playermove_s* ppmove, qboolean server)
 
 	auto player = dynamic_cast<CBasePlayer*>(util::PlayerByIndex(ppmove->player_index + 1));
 
-	if (player)
+	if (player != nullptr && player->GetGameMovement() != nullptr)
 	{
 		player->GetGameMovement()->Move();
 	}
