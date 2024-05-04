@@ -96,6 +96,20 @@ public:
 
 	virtual bool StudioShouldFlipModel();
 
+	bool StudioUseTriAPI() { return m_bUseTriAPI; }
+
+	virtual void StudioSetUpTextureHeader();
+
+	virtual void StudioSetupChrome(int bone);
+
+	virtual void StudioSetupLighting(alight_t* lighting);
+
+	virtual void StudioSetupModel(int bodypart);
+
+	virtual void CalculateLighting(float* dest, int bone, int flags, Vector normal);
+
+	virtual void StudioDrawPoints();
+
 public:
 	// Client clock
 	double m_clTime;
@@ -183,4 +197,25 @@ public:
 	// Concatenated bone and light transforms
 	float (*m_pbonetransform)[MAXSTUDIOBONES][3][4];
 	float (*m_plighttransform)[MAXSTUDIOBONES][3][4];
+
+protected:
+	static constexpr float kStudioLambert = 1.5F;
+
+	bool m_bUseTriAPI;
+	cvar_t* m_pCvarUseTriAPI;
+
+	studiohdr_t* m_pTextureHeader;
+
+	Vector m_vVertexTransform[MAXSTUDIOVERTS];
+
+	alight_t m_lighting;
+	Vector m_vLight[MAXSTUDIOBONES + 1];
+	Vector m_vLightValues[MAXSTUDIOVERTS];
+
+	Vector m_vChromeUp[MAXSTUDIOBONES];
+	Vector m_vChromeRight[MAXSTUDIOBONES];
+
+	/* Toodles: These were integers. */
+	struct ChromeVector { float x, y; };
+	ChromeVector m_vChromeValues[MAXSTUDIOVERTS];
 };

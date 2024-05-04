@@ -42,6 +42,9 @@ Features
 - Player voting system
     - Next level voting
     - Chat commands, `!rtv` and `!nominate`
+- Custom OpenGL model rendering
+    - Supports fullbright textures
+    - See `gl_use_triapi`
 
 Building this SDK
 ======================
