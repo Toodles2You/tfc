@@ -253,6 +253,7 @@ struct extra_player_info_t
 	short teamnumber;
 	char teamname[MAX_TEAM_NAME];
 	bool lefthanded;
+	bool bot;
 };
 
 struct team_info_t
