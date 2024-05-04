@@ -155,7 +155,10 @@ void CBasePlayer::PostThink()
 	WeaponPostFrame();
 
 #ifdef GAME_DLL
-	if ((FBitSet(pev->flags, FL_ONGROUND)) && (pev->health > 0) && m_flFallVelocity >= PLAYER_FALL_PUNCH_THRESHHOLD)
+	if (PCNumber() != PC_SCOUT
+	 && (pev->flags & FL_ONGROUND) != 0
+	 && IsAlive()
+	 && m_flFallVelocity >= PLAYER_FALL_PUNCH_THRESHHOLD)
 	{
 		if (pev->watertype == CONTENTS_WATER)
 		{

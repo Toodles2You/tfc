@@ -69,6 +69,7 @@ public:
 	int DeadPlayerAmmo(CBasePlayer* pPlayer) override { return GR_PLR_DROP_AMMO_ALL; }
 	void AddPlayerSpawnSpot(CBaseEntity *pEntity) override;
 	int GetMaxAmmo(CBasePlayer* pPlayer, int iAmmoType) override;
+	float FlPlayerFallDamage(CBasePlayer* player) override;
 
 protected:
 	void UpdatePlayerClass(CBasePlayer* player);

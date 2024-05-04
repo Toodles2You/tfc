@@ -555,7 +555,7 @@ void CHalfLifeMovement::CheckFalling()
      && pmove->flFallVelocity >= PLAYER_FALL_PUNCH_THRESHHOLD
      && pmove->waterlevel <= kWaterLevelNone)
     {
-        if (pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED)
+        if (pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED && player->PCNumber() != PC_SCOUT)
         {
             pmove->PM_PlaySound(CHAN_VOICE, "player/pl_fallpain3.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
 #ifdef CLIENT_DLL

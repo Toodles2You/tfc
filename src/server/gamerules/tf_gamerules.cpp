@@ -626,3 +626,20 @@ int CTeamFortress::GetMaxAmmo(CBasePlayer* pPlayer, int iAmmoType)
     return info.maxAmmo[iAmmoType];
 }
 
+
+float CTeamFortress::FlPlayerFallDamage(CBasePlayer* player)
+{
+    auto damage = player->m_flFallVelocity / 60.0F;
+
+    if (player->PCNumber() == PC_SCOUT)
+    {
+        damage /= 2.0F;
+    }
+    else if (player->PCNumber() == PC_HVYWEAP)
+    {
+        damage *= 1.5F;
+    }
+
+    return damage;
+}
+
