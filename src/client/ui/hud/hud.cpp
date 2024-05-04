@@ -795,3 +795,8 @@ bool CHud::IsSpectator()
 {
 	return g_iTeamNumber == TEAM_SPECTATORS || gEngfuncs.IsSpectateOnly() != 0;
 }
+
+bool CHud::IsViewZoomed()
+{
+	return m_iFOV != cl_fov->value;
+}

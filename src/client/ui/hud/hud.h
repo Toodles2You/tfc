@@ -725,7 +725,7 @@ public:
 	bool IsObserver();
 	bool IsSpectator();
 
-	bool IsViewZoomed() { return m_flMouseSensitivity != 0.0F; }
+	bool IsViewZoomed();
 };
 
 extern CHud gHUD;

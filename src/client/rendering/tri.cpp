@@ -15,17 +15,26 @@
 #include "const.h"
 #include "entity_state.h"
 #include "cl_entity.h"
+#include "com_model.h"
+#include "r_studioint.h"
 #include "triangleapi.h"
 #include "Exports.h"
 
 #include "particleman.h"
 #include "tri.h"
+
+extern engine_studio_api_t IEngineStudio;
 extern IParticleMan* g_pParticleMan;
 
 #include <algorithm>
 
 void CHud::RedrawZoomOverlay(float time)
 {
+	if (!IEngineStudio.IsHardware())
+	{
+		return;
+	}
+
 	auto sprite = const_cast<struct model_s*>(gEngfuncs.GetSpritePointer(m_hSniperScope));
 
 	float scopeLeft = (ScreenWidth - ScreenHeight) / 2.0F;
