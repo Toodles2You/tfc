@@ -421,7 +421,7 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		pev->dmg_inflictor = nullptr;
 	}
 
-	if (!g_pGameRules->FPlayerCanTakeDamage(this, attacker))
+	if (!g_pGameRules->FPlayerCanTakeDamage(this, attacker, inflictor))
 	{
 		return false;
 	}

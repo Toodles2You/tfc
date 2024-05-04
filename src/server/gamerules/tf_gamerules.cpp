@@ -442,9 +442,11 @@ void CTeamFortress::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer
 }
 
 
-bool CTeamFortress::FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* pAttacker)
+bool CTeamFortress::FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* pAttacker, CBaseEntity* inflictor)
 {
-    if (pAttacker && PlayerRelationship(pPlayer, pAttacker) >= GR_ALLY)
+    CBaseEntity* check = (inflictor != nullptr) ? inflictor : pAttacker;
+
+    if (check != nullptr && PlayerRelationship(pPlayer, check) >= GR_ALLY)
     {
         if (friendlyfire.value == 0 && pAttacker != pPlayer)
         {
@@ -452,13 +454,13 @@ bool CTeamFortress::FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* pAtt
         }
     }
 
-    return CHalfLifeMultiplay::FPlayerCanTakeDamage(pPlayer, pAttacker);
+    return CHalfLifeMultiplay::FPlayerCanTakeDamage(pPlayer, pAttacker, inflictor);
 }
 
 
 int CTeamFortress::PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget)
 {
-    if (pPlayer == nullptr || pTarget == nullptr || !pTarget->IsClient())
+    if (pPlayer == nullptr || pTarget == nullptr)
     {
         return GR_NOTTEAMMATE;
     }
@@ -466,6 +468,11 @@ int CTeamFortress::PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget
     if (pPlayer->TeamNumber() == pTarget->TeamNumber())
     {
         return GR_TEAMMATE;
+    }
+
+    if (!pTarget->IsClient())
+    {
+        return GR_NOTTEAMMATE;
     }
 
     if ((m_TFTeamInfo[pPlayer->TeamNumber() - 1].m_afAlliedTeams & (1 << (pTarget->TeamNumber() - 1))) != 0)

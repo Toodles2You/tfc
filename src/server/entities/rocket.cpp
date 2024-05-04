@@ -27,6 +27,7 @@ CRocket* CRocket::CreateRocket(
 	rocket->pev->dmg_save = damageMin;
 	rocket->pev->dmg_take = radius;
 	rocket->pev->owner = owner->edict();
+	rocket->pev->team = owner->TeamNumber();
 	rocket->Spawn();
 
 	return rocket;

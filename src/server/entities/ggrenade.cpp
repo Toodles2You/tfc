@@ -207,6 +207,7 @@ CGrenade* CGrenade::ShootContact(CBaseEntity* owner, Vector vecStart, Vector vec
 	pGrenade->pev->velocity = vecVelocity;
 	pGrenade->pev->angles = util::VecToAngles(pGrenade->pev->velocity);
 	pGrenade->pev->owner = owner->edict();
+	pGrenade->pev->team = owner->TeamNumber();
 
 	// Tumble in air
 	pGrenade->pev->avelocity.x = RANDOM_FLOAT(-100, -500);
@@ -400,6 +401,7 @@ CPrimeGrenade* CPrimeGrenade::PrimeGrenade(CBaseEntity* owner)
 	auto grenade = GetClassPtr((CPrimeGrenade*)nullptr);
 
 	grenade->pev->owner = owner->edict();
+	grenade->pev->team = owner->TeamNumber();
 	grenade->Spawn();
 
 	return grenade;
@@ -423,6 +425,7 @@ CCaltropCanister* CCaltropCanister::CaltropCanister(CBaseEntity* owner)
 	auto grenade = GetClassPtr((CCaltropCanister*)nullptr);
 
 	grenade->pev->owner = owner->edict();
+	grenade->pev->team = owner->TeamNumber();
 	grenade->Spawn();
 
 	return grenade;
@@ -543,6 +546,7 @@ CCaltrop* CCaltrop::Caltrop(CBaseEntity* owner, const Vector& origin, const floa
 	auto grenade = GetClassPtr((CCaltrop*)nullptr);
 
 	grenade->pev->owner = owner->edict();
+	grenade->pev->team = owner->TeamNumber();
 	grenade->pev->origin = origin;
 	grenade->pev->angles = Vector(0, yaw, 0);
 	grenade->Spawn();
@@ -612,7 +616,7 @@ void CConcussionGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 		entity->pev->velocity.y *= ajdusted;
 		entity->pev->velocity.z *= ajdusted * 1.5F;
 
-		if (entity == owner || g_pGameRules->PlayerRelationship(entity, owner) < GR_ALLY)
+		if (entity == owner || g_pGameRules->PlayerRelationship(entity, this) < GR_ALLY)
 		{
 			dynamic_cast<CBasePlayer*>(entity)->BecomeConcussed(owner);
 		}
@@ -627,6 +631,7 @@ CConcussionGrenade* CConcussionGrenade::ConcussionGrenade(CBaseEntity* owner)
 	auto grenade = GetClassPtr((CConcussionGrenade*)nullptr);
 
 	grenade->pev->owner = owner->edict();
+	grenade->pev->team = owner->TeamNumber();
 	grenade->Spawn();
 
 	return grenade;
@@ -671,6 +676,7 @@ CFlare* CFlare::Flare(CBaseEntity* owner)
 	auto grenade = GetClassPtr((CFlare*)nullptr);
 
 	grenade->pev->owner = owner->edict();
+	grenade->pev->team = owner->TeamNumber();
 	grenade->Spawn();
 
 	return grenade;
@@ -791,6 +797,7 @@ CNailGrenade* CNailGrenade::NailGrenade(CBaseEntity* owner)
 	auto grenade = GetClassPtr((CNailGrenade*)nullptr);
 
 	grenade->pev->owner = owner->edict();
+	grenade->pev->team = owner->TeamNumber();
 	grenade->Spawn();
 
 	grenade->pev->classname = MAKE_STRING("nailgrenade");
@@ -820,6 +827,7 @@ CMirv* CMirv::Mirv(CBaseEntity* owner)
 	auto grenade = GetClassPtr((CMirv*)nullptr);
 
 	grenade->pev->owner = owner->edict();
+	grenade->pev->team = owner->TeamNumber();
 	grenade->Spawn();
 
 	grenade->pev->classname = MAKE_STRING("mirvgrenade");
@@ -868,6 +876,7 @@ CBomblet* CBomblet::Bomblet(CBaseEntity* owner, const Vector& origin, const floa
 	auto grenade = GetClassPtr((CBomblet*)nullptr);
 
 	grenade->pev->owner = owner->edict();
+	grenade->pev->team = owner->TeamNumber();
 	grenade->pev->origin = origin;
 	grenade->pev->angles = Vector(0, yaw, 0);
 	grenade->Spawn();

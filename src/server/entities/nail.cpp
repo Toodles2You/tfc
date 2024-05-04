@@ -22,6 +22,7 @@ CNail* CNail::CreateNail(const Vector& origin, const Vector& dir, const float da
 	nail->pev->angles = dir;
 	nail->pev->dmg = damage;
 	nail->pev->owner = owner->edict();
+	nail->pev->team = owner->TeamNumber();
 	nail->Spawn();
 
 	if (damage > 9)
@@ -41,6 +42,7 @@ CNail* CNail::CreateNailGrenadeNail(const Vector& origin, const Vector& dir, con
 	nail->pev->angles = dir;
 	nail->pev->dmg = damage;
 	nail->pev->dmg_inflictor = owner->edict();
+	nail->pev->team = owner->TeamNumber();
 	nail->Spawn();
 
 	nail->pev->classname = MAKE_STRING("nailgrenade");

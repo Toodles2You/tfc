@@ -98,6 +98,7 @@ void CDetpack::Set()
 
 #ifdef GAME_DLL
 	pev->owner = player->pev->pContainingEntity;
+	pev->team = player->TeamNumber();
 
 	pev->solid = SOLID_TRIGGER;
 	pev->movetype = MOVETYPE_TOSS;
@@ -184,9 +185,7 @@ void CDetpack::Disarm(CBaseEntity* activator, CBaseEntity* caller, USE_TYPE useT
 		return;
 	}
 
-	auto owner = dynamic_cast<CBasePlayer*>(CBaseEntity::Instance(pev->owner));
-
-	if (g_pGameRules->PlayerRelationship(player, owner) >= GR_ALLY)
+	if (g_pGameRules->PlayerRelationship(player, this) >= GR_ALLY)
 	{
 		return;
 	}

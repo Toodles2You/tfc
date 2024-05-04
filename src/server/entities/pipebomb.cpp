@@ -39,6 +39,7 @@ CPipeBomb* CPipeBomb::CreatePipeBomb(
         pipebomb->pev->skin = 1;
     }
 	pipebomb->pev->owner = owner->edict();
+	pipebomb->pev->team = owner->TeamNumber();
 	pipebomb->Spawn();
 
 	return pipebomb;

@@ -56,7 +56,7 @@ public:
 	bool ClientCommand(CBasePlayer* pPlayer, const char* pcmd) override;
 	void ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer) override;
 	bool IsTeamplay() override { return true; }
-	bool FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* pAttacker) override;
+	bool FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* pAttacker, CBaseEntity* inflictor = nullptr) override;
 	int PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget) override;
 	float GetPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled, bool assist = false) override;
 	void InitHUD(CBasePlayer* pl) override;
