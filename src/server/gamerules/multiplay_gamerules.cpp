@@ -479,6 +479,10 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 
 			pPlayer->RemoveAllWeapons(); // destroy all of the players weapons and items
 		}
+
+		pClient->v.team = TEAM_UNASSIGNED;
+		pClient->v.playerclass = PC_UNDEFINED;
+		pClient->v.netname = MAKE_STRING("Disconnected");
 	}
 }
 
