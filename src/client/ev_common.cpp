@@ -134,7 +134,10 @@ void EV_EjectBrass(float* origin, float* velocity, float rotation, int model, in
 	VectorClear(endpos);
 	endpos[1] = rotation;
 	auto shell = gEngfuncs.pEfxAPI->R_TempModel(origin, velocity, endpos, 2.5, model, soundtype);
-	shell->flags |= FTENT_FADEOUT;
+	if (shell != nullptr)
+	{
+		shell->flags |= FTENT_FADEOUT;
+	}
 }
 
 /*
