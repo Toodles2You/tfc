@@ -1648,11 +1648,14 @@ One of the ENGINE_FORCE_UNMODIFIED files failed the consistency check for the sp
 int InconsistentFile(const edict_t* player, const char* filename, char* disconnect_message)
 {
 	// Server doesn't care?
-	if (CVAR_GET_FLOAT("mp_consistency") != 1)
+	if (mp_consistency->value != 1.0F)
+	{
 		return 0;
+	}
 
 	// Default behavior is to kick the player
-	sprintf(disconnect_message, "Server is enforcing file consistency for %s\n", filename);
+	snprintf(disconnect_message, 255, "Server is enforcing file consistency for \"%s\"\n", filename);
+	disconnect_message[255] = '\0';
 
 	// Kick now with specified disconnect message.
 	return 1;

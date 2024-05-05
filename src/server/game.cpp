@@ -64,6 +64,7 @@ static bool SV_InitServer()
 void GameDLLInit()
 {
 	g_psv_cheats = CVAR_GET_POINTER("sv_cheats");
+	mp_consistency = g_engfuncs.pfnCVarGetPointer("mp_consistency");
 
 	if (!SV_InitServer())
 	{
