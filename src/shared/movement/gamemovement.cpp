@@ -42,6 +42,19 @@ void CHalfLifeMovement::Move()
         return;
     }
 
+    if (pmove->iuser1 != OBS_NONE
+     && pmove->iuser1 != OBS_ROAMING)
+    {
+        return;
+    }
+
+    const auto saveMovetype = pmove->movetype;
+
+    if (pmove->iuser1 == OBS_ROAMING)
+    {
+        pmove->movetype = MOVETYPE_NOCLIP;
+    }
+
     CheckParameters();
     CategorizePosition();
 
@@ -75,6 +88,8 @@ void CHalfLifeMovement::Move()
     {
         pmove->friction = 1;
     }
+
+    pmove->movetype = saveMovetype;
 }
 
 

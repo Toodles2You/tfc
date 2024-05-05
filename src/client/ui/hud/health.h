@@ -43,7 +43,7 @@ typedef struct
 //
 //-----------------------------------------------------
 //
-class CHudHealth : public CHudBase
+class CHudHealth : public CHudStatus
 {
 public:
 	bool Init() override;

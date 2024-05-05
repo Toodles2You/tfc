@@ -98,8 +98,6 @@ void CHudHealth::VidInit()
 
 void CHudHealth::Update_Health(int iHealth)
 {
-	SetActive(true);
-
 	// Only update the fade if we've changed health
 	if (iHealth != m_iHealth)
 	{

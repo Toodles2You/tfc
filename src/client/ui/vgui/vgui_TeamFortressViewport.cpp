@@ -1232,6 +1232,11 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 	if (!m_pSpectatorPanel)
 		return;
 
+	if (gHUD.GetObserverMode() == OBS_FIXED)
+	{
+		return;
+	}
+
 	if (gHUD.IsObserver()
 	 && gHUD.GetObserverMode() != OBS_DEATHCAM
 	 && 0 != gHUD.m_pCvarDraw->value

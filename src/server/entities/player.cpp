@@ -838,6 +838,11 @@ void CBasePlayer::PreThink()
 	if (g_pGameRules->GetState() == GR_STATE_GAME_OVER)
 		return; // intermission or finale
 
+	if (pev->iuser1 == OBS_FIXED)
+	{
+		return;
+	}
+
 	// Observer Button Handling
 	if (IsObserver())
 	{

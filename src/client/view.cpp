@@ -545,7 +545,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 void V_CalcRefdef(ref_params_t* pparams)
 {
 	// intermission / finale rendering
-	if (0 != pparams->intermission)
+	if (0 != pparams->intermission || gHUD.GetObserverMode() == OBS_FIXED)
 	{
 		V_ResetPunchAngle();
 		V_CalcIntermissionRefdef(pparams);

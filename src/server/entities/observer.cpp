@@ -91,7 +91,7 @@ void CBasePlayer::Observer_HandleButtons()
 	if (m_flNextObserverInput > gpGlobals->time)
 		return;
 
-	if (pev->iuser1 == OBS_DEATHCAM)
+	if (pev->iuser1 == OBS_DEATHCAM || pev->iuser1 == OBS_FIXED)
 		return;
 
 	// Jump changes from modes: Chase to Roaming
@@ -128,7 +128,7 @@ void CBasePlayer::Observer_HandleButtons()
 
 void CBasePlayer::Observer_CheckTarget()
 {
-	if (pev->iuser1 == OBS_ROAMING || pev->iuser1 == OBS_DEATHCAM)
+	if (pev->iuser1 == OBS_ROAMING || pev->iuser1 == OBS_DEATHCAM || pev->iuser1 == OBS_FIXED)
 		return;
 
 	// try to find a traget if we have no current one

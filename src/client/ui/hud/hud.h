@@ -60,12 +60,12 @@ public:
 	friend class CHud;
 	virtual ~CHudBase() {}
 
+private:
 	enum
 	{
 		kActive = 1,
 	};
 
-protected:
 	constexpr static float kMinAlpha = 100.0F;
 	constexpr static float kMaxAlpha = 200.0F;
 	constexpr static float kFadeTime = 100.0F;
@@ -73,13 +73,12 @@ protected:
 	int m_iFlags;
 	float m_fFade;
 
+protected:
 	int GetAlpha() { return kMinAlpha + (kMaxAlpha - kMinAlpha) * (m_fFade / kFadeTime); }
-
-public:
 	void Flash() { m_fFade = kFadeTime; }
 
-	virtual bool IsActive() { return (m_iFlags & kActive) != 0; }
-	virtual bool IsVisible() { return IsActive(); }
+public:
+	virtual bool IsActive();
 
 	bool SetActive(const bool active)
 	{
@@ -107,6 +106,12 @@ public:
 	virtual void Reset() {}
 };
 
+class CHudStatus : public CHudBase
+{
+public:
+	bool IsActive() override;
+};
+
 struct HUDLIST
 {
 	CHudBase* p;
@@ -126,10 +131,9 @@ class WeaponsResource;
 //
 //-----------------------------------------------------
 //
-class CHudAmmo : public CHudBase
+class CHudAmmo : public CHudStatus
 {
 public:
-	bool IsActive() override { return true; }
 	bool Init() override;
 	void VidInit() override;
 	void Draw(const float time) override;
@@ -181,9 +185,10 @@ protected:
 //-----------------------------------------------------
 //
 
-class CHudAmmoSecondary : public CHudBase
+class CHudAmmoSecondary : public CHudStatus
 {
 public:
+	bool IsActive() override { return CHudBase::IsActive() && CHudStatus::IsActive(); }
 	bool Init() override;
 	void VidInit() override;
 	void Draw(const float time) override;
@@ -349,7 +354,6 @@ protected:
 class CHudSayText : public CHudBase
 {
 public:
-	bool IsActive() override;
 	bool Init() override;
 	bool ShouldReset(const bool reinitialize) override { return reinitialize; }
 	void Reset() override;
@@ -373,7 +377,7 @@ private:
 //
 //-----------------------------------------------------
 //
-class CHudBattery : public CHudBase
+class CHudBattery : public CHudStatus
 {
 public:
 	friend class CHudHealth;
@@ -400,10 +404,9 @@ private:
 //
 //-----------------------------------------------------
 //
-class CHudFlashlight : public CHudBase
+class CHudFlashlight : public CHudStatus
 {
 public:
-	bool IsActive() override { return true; }
 	bool Init() override;
 	void VidInit() override;
 	void Draw(const float time) override;
@@ -503,7 +506,7 @@ private:
 //
 #define MAX_SPRITE_NAME_LENGTH 24
 
-class CHudStatusIcons : public CHudBase
+class CHudStatusIcons : public CHudStatus
 {
 public:
 	bool Init() override;

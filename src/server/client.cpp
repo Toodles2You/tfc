@@ -166,10 +166,10 @@ void ClientPutInServer(edict_t* pEntity)
 	// Reset interpolation during first frame
 	pPlayer->pev->effects |= EF_NOINTERP;
 
-	pPlayer->pev->iuser1 = 0; // disable any spec modes
+	pPlayer->pev->iuser1 = OBS_FIXED;
 	pPlayer->pev->iuser2 = 0;
 	pPlayer->pev->iuser3 = 0;
-	pPlayer->m_iObserverLastMode = OBS_ROAMING;
+	pPlayer->m_iObserverLastMode = OBS_FIXED;
 
 	pPlayer->m_ResetHUD = CBasePlayer::ResetHUD::Initialize;
 

@@ -41,6 +41,11 @@ extern int g_iObserverMode;
 extern int g_iObserverTarget;
 extern int g_iObserverTarget2;
 
+bool CHudBase::IsActive()
+{
+	return (m_iFlags & kActive) != 0;
+}
+
 bool CHudBase::Init()
 {
 	gHUD.AddHudElem(this);
@@ -51,6 +56,13 @@ bool CHudBase::Init()
 void CHudBase::Think()
 {
 	m_fFade = std::max(m_fFade - static_cast<float>(gHUD.m_flTimeDelta) * 20.0F, 0.0F);
+}
+
+bool CHudStatus::IsActive()
+{
+	return gHUD.IsAlive()
+		&& !gHUD.IsObserver()
+		&& !gHUD.IsSpectator();
 }
 
 class CHLVoiceStatusHelper : public IVoiceStatusHelper

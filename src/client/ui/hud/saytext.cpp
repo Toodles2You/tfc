@@ -42,11 +42,6 @@ static float flScrollTime = 0; // the time at which the lines next scroll up
 
 DECLARE_MESSAGE(m_SayText, SayText);
 
-bool CHudSayText::IsActive()
-{
-	return CHudBase::IsActive() || gHUD.m_iIntermission;
-}
-
 bool CHudSayText::Init()
 {
 	HOOK_MESSAGE(SayText);

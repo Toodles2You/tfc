@@ -264,7 +264,9 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 		}
 		return true;
 	}
-	else if (pPlayer->IsObserver())
+	else if (pPlayer->IsObserver()
+	 && pPlayer->pev->iuser1 != OBS_DEATHCAM
+	 && pPlayer->pev->iuser1 != OBS_FIXED)
 	{
 		if (CMD_ARGC() > 1)
 		{
@@ -523,10 +525,10 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 
 	if (pPlayer->TeamNumber() == TEAM_UNASSIGNED)
 	{
-		pPlayer->pev->effects |= EF_NODRAW;
-		pPlayer->pev->solid = SOLID_NOT;
-		pPlayer->pev->takedamage = DAMAGE_NO;
-		pPlayer->pev->movetype = MOVETYPE_NONE;
+		pPlayer->pev->iuser1 = OBS_FIXED;
+		pPlayer->pev->iuser2 = 0;
+		pPlayer->pev->iuser3 = 0;
+		pPlayer->m_iObserverLastMode = OBS_FIXED;
 		return;
 	}
 
