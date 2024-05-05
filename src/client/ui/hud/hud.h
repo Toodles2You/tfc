@@ -585,6 +585,7 @@ public:
 	int m_iFOV;
 	gamemode_e m_gameMode;
 	int m_iRes;
+	HSPRITE m_hBackground;
 	cvar_t* m_pCvarStealMouse;
 	cvar_t* m_pCvarDraw;
 	cvar_t* m_pCvarWidescreen;
@@ -634,6 +635,8 @@ public:
 	int DrawHudString(const char* string, int x, int y);
 	void GetHudStringSize(const char* string, int& width, int& height);
 	int HudStringLen(const char* string);
+
+	void DrawHudBackground(int x, int y, int w, int h);
 
 	void DrawWorldSprite(HSPRITE pic, int frame, Rect *rect, Vector origin, hudcolor_e color, int a);
 
