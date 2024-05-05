@@ -237,7 +237,6 @@ HSPRITE ghsprBuckets; // Sprite for top row of weapons menu
 
 DECLARE_MESSAGE(m_Ammo, AmmoPickup); // flashes an ammo pickup record
 DECLARE_MESSAGE(m_Ammo, WeapPickup); // flashes a weapon pickup record
-DECLARE_MESSAGE(m_Ammo, HideWeapon); // hides the weapon, ammo, and crosshair displays temporarily
 DECLARE_MESSAGE(m_Ammo, ItemPickup);
 DECLARE_MESSAGE(m_Ammo, HitFeedback);
 
@@ -261,7 +260,6 @@ bool CHudAmmo::Init()
 	HOOK_MESSAGE(AmmoPickup);
 	HOOK_MESSAGE(WeapPickup);
 	HOOK_MESSAGE(ItemPickup);
-	HOOK_MESSAGE(HideWeapon);
 	HOOK_MESSAGE(HitFeedback);
 
 	HOOK_COMMAND("slot1", Slot1);
@@ -295,7 +293,6 @@ void CHudAmmo::Reset()
 	CHudBase::Reset();
 
 	gpActiveSel = NULL;
-	gHUD.m_iHideHUDDisplay = 0;
 
 	m_flSelectionTime = -1000.0F;
 	m_flHitFeedbackTime = -1000.0F;
@@ -409,9 +406,6 @@ HSPRITE* WeaponsResource::GetAmmoPicFromWeapon(int iAmmoId, Rect& rect)
 void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 {
 	if (iSlot > MAX_WEAPON_SLOTS)
-		return;
-
-	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
 		return;
 
 	if (!gHUD.HasAnyWeapons())
@@ -586,25 +580,6 @@ bool CHudAmmo::MsgFunc_ItemPickup(const char* pszName, int iSize, void* pbuf)
 	return true;
 }
 
-
-bool CHudAmmo::MsgFunc_HideWeapon(const char* pszName, int iSize, void* pbuf)
-{
-	BEGIN_READ(pbuf, iSize);
-
-	gHUD.m_iHideHUDDisplay = READ_BYTE();
-
-	if (0 != gEngfuncs.IsSpectateOnly())
-		return true;
-
-	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
-	{
-		gpActiveSel = NULL;
-	}
-
-	return true;
-}
-
-
 bool CHudAmmo::MsgFunc_HitFeedback(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
@@ -726,9 +701,6 @@ void CHudAmmo::UserCmd_Close()
 // Selects the next item in the weapon menu
 void CHudAmmo::UserCmd_NextWeapon()
 {
-	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
-		return;
-
 	bool open = false;
 
 	if (!gpActiveSel || gpActiveSel == (WEAPON*)1)
@@ -791,9 +763,6 @@ void CHudAmmo::UserCmd_NextWeapon()
 // Selects the previous item in the menu
 void CHudAmmo::UserCmd_PrevWeapon()
 {
-	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
-		return;
-
 	bool open = false;
 
 	if (!gpActiveSel || gpActiveSel == (WEAPON*)1)

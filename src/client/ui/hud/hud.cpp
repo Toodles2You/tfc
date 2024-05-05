@@ -387,7 +387,9 @@ void CHud::Init()
 	m_Health.Init();
 	m_SayText.Init();
 	m_Spectator.Init();
+#ifdef HALFLIFE_HUD_GEIGER
 	m_Geiger.Init();
+#endif
 #ifdef HALFLIFE_TRAINCONTROL
 	m_Train.Init();
 #endif
@@ -537,14 +539,14 @@ void CHud::VidInit()
 	// assumption: number_1, number_2, etc, are all listed and loaded sequentially
 	m_HUD_number_0 = GetSpriteIndex("number_0");
 
-	m_hSprDummy = SPR_Load("sprites/tile.spr");
-
 	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
 
 	m_Ammo.VidInit();
 	m_Health.VidInit();
 	m_Spectator.VidInit();
+#ifdef HALFLIFE_HUD_GEIGER
 	m_Geiger.VidInit();
+#endif
 #ifdef HALFLIFE_TRAINCONTROL
 	m_Train.VidInit();
 #endif

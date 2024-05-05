@@ -38,14 +38,11 @@ bool CHudTrain::Init()
 
 void CHudTrain::VidInit()
 {
-	m_hSprite = 0;
+	m_hSprite = LoadSprite("sprites/%d_train.spr");
 }
 
 void CHudTrain::Draw(const float time)
 {
-	if (0 == m_hSprite)
-		m_hSprite = LoadSprite("sprites/%d_train.spr");
-
 	if (0 != m_iPos)
 	{
 		int x, y;

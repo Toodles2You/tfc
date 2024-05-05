@@ -38,7 +38,6 @@ inline int gmsgServerName = 0;
 inline int gmsgAmmoPickup = 0;
 inline int gmsgWeapPickup = 0;
 inline int gmsgItemPickup = 0;
-inline int gmsgHideWeapon = 0;
 inline int gmsgSetCurWeap = 0;
 inline int gmsgSayText = 0;
 inline int gmsgTextMsg = 0;

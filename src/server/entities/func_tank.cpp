@@ -365,7 +365,6 @@ bool CFuncTank::StartControl(CBasePlayer* pController)
 	m_pController = pController;
 	m_pController->SetWeaponHolstered(true);
 
-	m_pController->m_iHideHUD |= HIDEHUD_WEAPONS;
 	m_vecControllerUsePos = m_pController->pev->origin;
 
 	pev->nextthink = pev->ltime + 0.1;
@@ -381,8 +380,6 @@ void CFuncTank::StopControl()
 	m_pController->SetWeaponHolstered(false);
 
 	ALERT(at_console, "stopped using TANK\n");
-
-	m_pController->m_iHideHUD &= ~HIDEHUD_WEAPONS;
 
 	pev->nextthink = 0;
 	m_pController = NULL;

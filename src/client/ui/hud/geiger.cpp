@@ -18,6 +18,8 @@
 // implementation of CHudAmmo class
 //
 
+#ifdef HALFLIFE_HUD_GEIGER
+
 #include "hud.h"
 #include "cl_util.h"
 #include <string.h>
@@ -167,3 +169,5 @@ void CHudGeiger::Draw(const float time)
 		}
 	}
 }
+
+#endif /* HALFLIFE_HUD_GEIGER */

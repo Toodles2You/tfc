@@ -127,7 +127,7 @@ bool CHud::Redraw(float flTime, bool intermission)
 	m_iIntermission = intermission;
 
 	// draw all registered HUD elements
-	if (0 != m_pCvarDraw->value && (m_iHideHUDDisplay & HIDEHUD_ALL) == 0)
+	if (0 != m_pCvarDraw->value)
 	{
 		HUDLIST* pList = m_pHudList;
 

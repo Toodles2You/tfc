@@ -87,7 +87,7 @@ void CHudHealth::Reset()
 
 void CHudHealth::VidInit()
 {
-	m_hSprite = 0;
+	m_hSprite = LoadSprite(PAIN_NAME);
 
 	m_HUD_dmg_bio = gHUD.GetSpriteIndex("dmg_bio") + 1;
 	m_HUD_cross = gHUD.GetSpriteIndex("cross");
@@ -182,9 +182,6 @@ void CHudHealth::Draw(const float time)
 
 	if (0 != gEngfuncs.IsSpectateOnly())
 		return;
-
-	if (0 == m_hSprite)
-		m_hSprite = LoadSprite(PAIN_NAME);
 
 	a = GetAlpha();
 

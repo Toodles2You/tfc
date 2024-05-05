@@ -527,11 +527,8 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 		pPlayer->pev->solid = SOLID_NOT;
 		pPlayer->pev->takedamage = DAMAGE_NO;
 		pPlayer->pev->movetype = MOVETYPE_NONE;
-		pPlayer->m_iHideHUD |= HIDEHUD_WEAPONS | HIDEHUD_FLASHLIGHT | HIDEHUD_HEALTH;
 		return;
 	}
-
-	pPlayer->m_iHideHUD &= ~(HIDEHUD_WEAPONS | HIDEHUD_FLASHLIGHT | HIDEHUD_HEALTH);
 
 	bool addDefault;
 	CBaseEntity* pWeaponEntity = NULL;

@@ -339,7 +339,6 @@ void RestoreGlobalState(SAVERESTOREDATA* pSaveData)
 void ResetGlobalState()
 {
 	gGlobalState.ClearStates();
-	gInitHUD = true; // Init the HUD on a new game / load game
 }
 
 // moved CWorld class definition to cbase.h

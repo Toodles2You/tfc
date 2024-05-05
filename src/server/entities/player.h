@@ -92,8 +92,15 @@ public:
 
 	int m_bitsHUDDamage; // Damage bits for the current fame. These get sent to
 						 // the hude via the DAMAGE message
-	bool m_fInitHUD;	 // True when deferred HUD restart msg needs to be sent
-	bool m_fGameHUDInitialized;
+
+#ifdef GAME_DLL
+	enum class ResetHUD
+	{
+		No = 0,
+		Initialize,
+		Reset,
+	} m_ResetHUD;
+#endif
 
 #ifdef HALFLIFE_TRAINCONTROL
 	int m_iTrain;	// Train control position
@@ -105,8 +112,6 @@ public:
 
 	float m_fDeadTime;		 // the time at which the player died  (used in PlayerDeathFrame())
 
-	int m_iHideHUD;		  // the players hud weapon info is to be hidden
-	int m_iClientHideHUD;
 	int m_iFOV;		  // field of view
 	// usable player weapons
 	CBasePlayerWeapon* m_rgpPlayerWeapons[WEAPON_TYPES];
@@ -330,5 +335,4 @@ inline void CBasePlayer::ClearWeaponBit(int id)
 	m_WeaponBits &= ~(1ULL << id);
 }
 
-inline bool gInitHUD = true;
 inline bool gEvilImpulse101 = false;

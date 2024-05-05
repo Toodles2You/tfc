@@ -141,7 +141,6 @@ public:
 	bool MsgFunc_AmmoPickup(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_WeapPickup(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_ItemPickup(const char* pszName, int iSize, void* pbuf);
-	bool MsgFunc_HideWeapon(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_HitFeedback(const char* pszName, int iSize, void* pbuf);
 
 	void SlotInput(int iSlot);
@@ -208,6 +207,8 @@ private:
 #include "health.h"
 
 
+#ifdef HALFLIFE_HUD_GEIGER
+
 //
 //-----------------------------------------------------
 //
@@ -221,6 +222,8 @@ public:
 private:
 	int m_iGeigerRange;
 };
+
+#endif
 
 //
 //-----------------------------------------------------
@@ -568,7 +571,6 @@ private:
 	float m_flOffsetX;
 	float m_flOffsetY;
 	byte m_bIsWidescreen;
-	HSPRITE m_hSprDummy;
 
 public:
 	float m_flTime;		  // the current client time
@@ -577,7 +579,6 @@ public:
 	Vector m_vecOrigin;
 	Vector m_vecAngles;
 	int m_iKeyBits;
-	int m_iHideHUDDisplay;
 	int m_iFOV;
 	gamemode_e m_gameMode;
 	int m_iRes;
@@ -689,7 +690,9 @@ public:
 	CHudAmmo m_Ammo;
 	CHudHealth m_Health;
 	CHudSpectator m_Spectator;
+#ifdef HALFLIFE_HUD_GEIGER
 	CHudGeiger m_Geiger;
+#endif
 	CHudBattery m_Battery;
 #ifdef HALFLIFE_TRAINCONTROL
 	CHudTrain m_Train;
