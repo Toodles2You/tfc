@@ -131,14 +131,16 @@ void ToggleScores()
 	}
 }
 
+bool CHudSpectator::IsActive()
+{
+	return gHUD.IsSpectator();
+}
+
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
 bool CHudSpectator::Init()
 {
-	gHUD.AddHudElem(this);
-
-	m_iFlags |= HUD_ACTIVE;
 	m_flNextObserverInput = 0.0f;
 	m_zoomDelta = 0.0f;
 	m_moveDelta = 0.0f;
@@ -168,7 +170,7 @@ bool CHudSpectator::Init()
 		return false;
 	}
 
-	return true;
+	return CHudBase::Init();
 }
 
 
@@ -537,7 +539,7 @@ bool CHudSpectator::GetDirectorCamera(Vector& position, Vector& angle)
 //-----------------------------------------------------------------------------
 // Purpose: Loads new icons
 //-----------------------------------------------------------------------------
-bool CHudSpectator::VidInit()
+void CHudSpectator::VidInit()
 {
 	m_hsprPlayer = SPR_Load("sprites/iplayer.spr");
 	m_hsprPlayerBlue = SPR_Load("sprites/iplayerblue.spr");
@@ -554,8 +556,6 @@ bool CHudSpectator::VidInit()
 	iJumpSpectator = false;
 	g_iObserverMode = OBS_NONE;
 	g_iObserverTarget = g_iObserverTarget2 = 0;
-
-	return true;
 }
 
 float CHudSpectator::GetFOV()
@@ -568,16 +568,12 @@ float CHudSpectator::GetFOV()
 // Input  : flTime -
 //			intermission -
 //-----------------------------------------------------------------------------
-bool CHudSpectator::Draw(float flTime)
+void CHudSpectator::Draw(const float time)
 {
 	int lx;
 
 	char string[256];
 	float* color;
-
-	// draw only in spectator mode
-	if (!gHUD.IsSpectator())
-		return false;
 
 	// if user pressed zoom, aplly changes
 	if ((m_zoomDelta != 0.0f) && (g_iObserverMode == OBS_MAP_FREE))
@@ -604,10 +600,10 @@ bool CHudSpectator::Draw(float flTime)
 
 	// Only draw the icon names only if map mode is in Main Mode
 	if (g_iObserverMode < OBS_MAP_FREE)
-		return true;
+		return;
 
 	if (0 == m_drawnames->value)
-		return true;
+		return;
 
 	// make sure we have player info
 	gViewPort->GetAllPlayersInfo();
@@ -640,8 +636,6 @@ bool CHudSpectator::Draw(float flTime)
 		gEngfuncs.pfnDrawSetTextColor(color[0], color[1], color[2]);
 		DrawConsoleString(m_vPlayerPos[i][0] - lx, m_vPlayerPos[i][1], string);
 	}
-
-	return true;
 }
 
 
@@ -1831,6 +1825,22 @@ int CHudSpectator::ToggleInset(bool allowOff)
 }
 void CHudSpectator::Reset()
 {
+	m_lastPrimaryObject = m_lastSecondaryObject = 0;
+	m_flNextObserverInput = 0.0f;
+	m_lastHudMessage = 0;
+	m_iSpectatorNumber = 0;
+	iJumpSpectator = false;
+	g_iObserverMode = OBS_NONE;
+	g_iObserverTarget = g_iObserverTarget2 = 0;
+
+	memset(&m_OverviewData, 0, sizeof(m_OverviewData));
+	memset(&m_OverviewEntities, 0, sizeof(m_OverviewEntities));
+
+	if (0 != gEngfuncs.IsSpectateOnly() || 0 != gEngfuncs.pDemoAPI->IsPlayingback())
+		m_autoDirector->value = 1.0f;
+	else
+		m_autoDirector->value = 0.0f;
+
 	// Reset HUD
 	if (0 != strcmp(m_OverviewData.map, gEngfuncs.pfnGetLevelName()))
 	{
@@ -1848,27 +1858,6 @@ void CHudSpectator::Reset()
 	m_ChaseEntity = 0;
 
 	SetSpectatorStartPosition();
-}
-
-void CHudSpectator::InitHUDData()
-{
-	m_lastPrimaryObject = m_lastSecondaryObject = 0;
-	m_flNextObserverInput = 0.0f;
-	m_lastHudMessage = 0;
-	m_iSpectatorNumber = 0;
-	iJumpSpectator = false;
-	g_iObserverMode = OBS_NONE;
-	g_iObserverTarget = g_iObserverTarget2 = 0;
-
-	memset(&m_OverviewData, 0, sizeof(m_OverviewData));
-	memset(&m_OverviewEntities, 0, sizeof(m_OverviewEntities));
-
-	if (0 != gEngfuncs.IsSpectateOnly() || 0 != gEngfuncs.pDemoAPI->IsPlayingback())
-		m_autoDirector->value = 1.0f;
-	else
-		m_autoDirector->value = 0.0f;
-
-	Reset();
 
 	SetModes(OBS_CHASE_FREE, INSET_OFF);
 

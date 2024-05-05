@@ -38,7 +38,7 @@ void CHud::Think()
 
 	while (pList)
 	{
-		if ((pList->p->m_iFlags & HUD_ACTIVE) != 0)
+		if (pList->p->IsActive())
 			pList->p->Think();
 		pList = pList->pNext;
 	}
@@ -133,15 +133,9 @@ bool CHud::Redraw(float flTime, bool intermission)
 
 		while (pList)
 		{
-			if (!intermission)
+			if (pList->p->IsActive())
 			{
-				if ((pList->p->m_iFlags & HUD_ACTIVE) != 0 && (m_iHideHUDDisplay & HIDEHUD_ALL) == 0)
-					pList->p->Draw(flTime);
-			}
-			else
-			{ // it's an intermission,  so only draw hud elements that are set to draw during intermissions
-				if ((pList->p->m_iFlags & HUD_INTERMISSION) != 0)
-					pList->p->Draw(flTime);
+				pList->p->Draw(flTime);
 			}
 
 			pList = pList->pNext;
@@ -500,6 +494,162 @@ void CHud::GetChatInputPosition(int& x, int& y)
 {
 	x = roundf (m_flOffsetX + m_SayText.m_iBaseX * m_flScaleX);
 	y = roundf (m_flOffsetY + (m_SayText.m_iBaseY + m_SayText.m_iLineHeight) * m_flScaleY);
+}
+
+void CHud::DrawHudBackground(int left, int top, int right, int bottom)
+{
+	if (!IEngineStudio.IsHardware())
+	{
+		return;
+	}
+
+	auto sprw = gEngfuncs.pfnSPR_Width (m_hBackground, 0);
+	auto sprh = gEngfuncs.pfnSPR_Height (m_hBackground, 0);
+
+	static Rect rc;
+	rc.left = 0;
+	rc.right = sprw;
+	rc.top = 0;
+	rc.bottom = sprh;
+	Rect* rect = &rc;
+
+	auto pSprite = const_cast<model_t *>(gEngfuncs.GetSpritePointer (m_hBackground));
+
+	auto x1 = roundf (m_flOffsetX + left * m_flScaleX);
+	auto y1 = roundf (m_flOffsetY + top * m_flScaleY);
+	auto x2 = roundf (m_flOffsetX + right * m_flScaleX);
+	auto y2 = roundf (m_flOffsetY + bottom * m_flScaleY);
+
+	auto x0 = roundf (m_flOffsetX + (left - 4) * m_flScaleX);
+	auto y0 = roundf (m_flOffsetY + (top - 4) * m_flScaleY);
+	auto x3 = roundf (m_flOffsetX + (right + 4) * m_flScaleX);
+	auto y3 = roundf (m_flOffsetY + (bottom + 4) * m_flScaleY);
+
+	gEngfuncs.pTriAPI->SpriteTexture (pSprite, 0);
+
+	gEngfuncs.pTriAPI->Color4fRendermode (0.0F, 0.0F, 0.0F, 1.0F / 3.0F, kRenderTransAlpha);
+	gEngfuncs.pTriAPI->RenderMode (kRenderTransAlpha);
+
+	gEngfuncs.pTriAPI->Begin (TRI_QUADS);
+
+	/* Left Top */
+	gEngfuncs.pTriAPI->TexCoord2f (0, 0);
+	gEngfuncs.pTriAPI->Vertex3f (x0, y0, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0);
+	gEngfuncs.pTriAPI->Vertex3f (x1, y0, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0.25);
+	gEngfuncs.pTriAPI->Vertex3f (x1, y1, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0, 0.25);
+	gEngfuncs.pTriAPI->Vertex3f (x0, y1, 0);
+
+	/* Left Center */
+	gEngfuncs.pTriAPI->TexCoord2f (0, 0.25);
+	gEngfuncs.pTriAPI->Vertex3f (x0, y1, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0.25);
+	gEngfuncs.pTriAPI->Vertex3f (x1, y1, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0.75);
+	gEngfuncs.pTriAPI->Vertex3f (x1, y2, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0, 0.75);
+	gEngfuncs.pTriAPI->Vertex3f (x0, y2, 0);
+
+	/* Left Bottom */
+	gEngfuncs.pTriAPI->TexCoord2f (0, 0.75);
+	gEngfuncs.pTriAPI->Vertex3f (x0, y2, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0.75);
+	gEngfuncs.pTriAPI->Vertex3f (x1, y2, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0.25, 1);
+	gEngfuncs.pTriAPI->Vertex3f (x1, y3, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0, 1);
+	gEngfuncs.pTriAPI->Vertex3f (x0, y3, 0);
+
+	/* Center Top */
+	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0);
+	gEngfuncs.pTriAPI->Vertex3f (x1, y0, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0);
+	gEngfuncs.pTriAPI->Vertex3f (x2, y0, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0.25);
+	gEngfuncs.pTriAPI->Vertex3f (x2, y1, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0.25);
+	gEngfuncs.pTriAPI->Vertex3f (x1, y1, 0);
+
+	/* Center Center */
+	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0.25);
+	gEngfuncs.pTriAPI->Vertex3f (x1, y1, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0.25);
+	gEngfuncs.pTriAPI->Vertex3f (x2, y1, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0.75);
+	gEngfuncs.pTriAPI->Vertex3f (x2, y2, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0.75);
+	gEngfuncs.pTriAPI->Vertex3f (x1, y2, 0);
+
+	/* Center Bottom */
+	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0.75);
+	gEngfuncs.pTriAPI->Vertex3f (x1, y2, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0.75);
+	gEngfuncs.pTriAPI->Vertex3f (x2, y2, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0.75, 1);
+	gEngfuncs.pTriAPI->Vertex3f (x2, y3, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0.25, 1);
+	gEngfuncs.pTriAPI->Vertex3f (x1, y3, 0);
+
+	/* Right Top */
+	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0);
+	gEngfuncs.pTriAPI->Vertex3f (x2, y0, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (1, 0);
+	gEngfuncs.pTriAPI->Vertex3f (x3, y0, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (1, 0.25);
+	gEngfuncs.pTriAPI->Vertex3f (x3, y1, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0.25);
+	gEngfuncs.pTriAPI->Vertex3f (x2, y1, 0);
+
+	/* Right Center */
+	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0.25);
+	gEngfuncs.pTriAPI->Vertex3f (x2, y1, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (1, 0.25);
+	gEngfuncs.pTriAPI->Vertex3f (x3, y1, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (1, 0.75);
+	gEngfuncs.pTriAPI->Vertex3f (x3, y2, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0.75);
+	gEngfuncs.pTriAPI->Vertex3f (x2, y2, 0);
+
+	/* Right Bottom */
+	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0.75);
+	gEngfuncs.pTriAPI->Vertex3f (x2, y2, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (1, 0.75);
+	gEngfuncs.pTriAPI->Vertex3f (x3, y2, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (1, 1);
+	gEngfuncs.pTriAPI->Vertex3f (x3, y3, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f (0.75, 1);
+	gEngfuncs.pTriAPI->Vertex3f (x2, y3, 0);
+
+	gEngfuncs.pTriAPI->End ();
 }
 
 void CHud::DrawWorldSprite(HSPRITE pic, int frame, Rect *rect, Vector origin, hudcolor_e color, int a)

@@ -34,18 +34,14 @@ bool CHudBattery::Init()
 	m_iBatMax = 0;
 	m_flType = 0.0F;
 	m_szString[0] = '\0';
-	m_fFade = 0;
-	m_iFlags = 0;
 
 	HOOK_MESSAGE(Battery);
 
-	gHUD.AddHudElem(this);
-
-	return true;
+	return CHudBase::Init();
 }
 
 
-bool CHudBattery::VidInit()
+void CHudBattery::VidInit()
 {
 	int HUD_suit_empty = gHUD.GetSpriteIndex("suit_empty");
 	int HUD_suit_full = gHUD.GetSpriteIndex("suit_full");
@@ -55,23 +51,21 @@ bool CHudBattery::VidInit()
 	m_prc1 = &gHUD.GetSpriteRect(HUD_suit_empty);
 	m_prc2 = &gHUD.GetSpriteRect(HUD_suit_full);
 	m_iHeight = m_prc2->bottom - m_prc1->top;
-	m_fFade = 0;
-	return true;
 }
 
 void CHudBattery::Update_Battery(int iBat, float flType)
 {
-	m_iFlags |= HUD_ACTIVE;
+	SetActive(true);
 
 	if (iBat != m_iBat || flType != m_flType)
 	{
-		m_fFade = FADE_TIME;
 		m_iBat = iBat;
+		Flash();
 	}
 	
 	if (flType != m_flType)
 	{
-		m_fFade = FADE_TIME;
+		Flash();
 		m_flType = flType;
 		m_szString[0] = '\0';
 
@@ -104,11 +98,8 @@ bool CHudBattery::MsgFunc_Battery(const char* pszName, int iSize, void* pbuf)
 }
 
 
-bool CHudBattery::Draw(float flTime)
+void CHudBattery::Draw(const float time)
 {
-	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) != 0)
-		return true;
-
 	const auto iBatMax = sTFClassInfo[g_iPlayerClass].maxArmor;
 	int x, y, a;
 	Rect rc;
@@ -117,25 +108,7 @@ bool CHudBattery::Draw(float flTime)
 
 	rc.top += m_iHeight * ((float)(iBatMax - (std::min(iBatMax, m_iBat))) * (1.0F / iBatMax)); // battery can go from 0 to 100 so * 0.01 goes from 0 to 1
 
-	// Has health changed? Flash the health #
-	if (0 != m_fFade)
-	{
-		if (m_fFade > FADE_TIME)
-			m_fFade = FADE_TIME;
-
-		m_fFade -= (gHUD.m_flTimeDelta * 20);
-		if (m_fFade <= 0)
-		{
-			a = 128;
-			m_fFade = 0;
-		}
-
-		// Fade the health number back to dim
-
-		a = MIN_ALPHA + (m_fFade / FADE_TIME) * 128;
-	}
-	else
-		a = MIN_ALPHA;
+	a = GetAlpha();
 
 	int r, g, b;
 
@@ -161,6 +134,4 @@ bool CHudBattery::Draw(float flTime)
 		ScaleColors(r, g, b, a);
 		gHUD.DrawHudString(x + 2, m_iAnchorY - (m_prc1->bottom - m_prc1->top) - 8, gHUD.GetWidth(), m_szString, r, g, b);
 	}
-
-	return true;
 }

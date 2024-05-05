@@ -227,7 +227,6 @@ HSPRITE ghsprBuckets; // Sprite for top row of weapons menu
 
 DECLARE_MESSAGE(m_Ammo, AmmoPickup); // flashes an ammo pickup record
 DECLARE_MESSAGE(m_Ammo, WeapPickup); // flashes a weapon pickup record
-DECLARE_MESSAGE(m_Ammo, HideWeapon); // hides the weapon, ammo, and crosshair displays temporarily
 DECLARE_MESSAGE(m_Ammo, ItemPickup);
 DECLARE_MESSAGE(m_Ammo, HitFeedback);
 
@@ -248,12 +247,9 @@ DECLARE_COMMAND(m_Ammo, LastWeapon);
 
 bool CHudAmmo::Init()
 {
-	gHUD.AddHudElem(this);
-
 	HOOK_MESSAGE(AmmoPickup);
 	HOOK_MESSAGE(WeapPickup);
 	HOOK_MESSAGE(ItemPickup);
-	HOOK_MESSAGE(HideWeapon);
 	HOOK_MESSAGE(HitFeedback);
 
 	HOOK_COMMAND("slot1", Slot1);
@@ -271,28 +267,22 @@ bool CHudAmmo::Init()
 	HOOK_COMMAND("invprev", PrevWeapon);
 	HOOK_COMMAND("lastinv", LastWeapon);
 
-	Reset();
-
 	CVAR_CREATE("hud_drawhistory_time", "5", 0);
 	hud_fastswitch = CVAR_CREATE("hud_fastswitch", "0", FCVAR_ARCHIVE); // controls whether or not weapons can be selected in one keypress
 	hud_selection_fadeout = CVAR_CREATE("hud_selection_fadeout", "0.5", FCVAR_ARCHIVE);
 	hud_selection_timeout = CVAR_CREATE("hud_selection_timeout", "1.5", FCVAR_ARCHIVE);
 
-	m_iFlags |= HUD_ACTIVE; //!!!
-
 	gWR.Init();
 	gHR.Init();
 
-	return true;
+	return CHudBase::Init();
 }
 
 void CHudAmmo::Reset()
 {
-	m_fFade = 0;
-	m_iFlags |= HUD_ACTIVE; //!!!
+	CHudBase::Reset();
 
 	gpActiveSel = NULL;
-	gHUD.m_iHideHUDDisplay = 0;
 
 	m_flSelectionTime = -1000.0F;
 	m_flHitFeedbackTime = -1000.0F;
@@ -301,7 +291,7 @@ void CHudAmmo::Reset()
 	gHR.Reset();
 }
 
-bool CHudAmmo::VidInit()
+void CHudAmmo::VidInit()
 {
 	// Load sprites for buckets (top row of weapon menu)
 	m_HUD_bucket0 = gHUD.GetSpriteIndex("bucket1");
@@ -326,8 +316,6 @@ bool CHudAmmo::VidInit()
 		giABWidth = 10;
 		giABHeight = 2;
 	}
-
-	return true;
 }
 
 //
@@ -336,6 +324,8 @@ bool CHudAmmo::VidInit()
 //
 void CHudAmmo::Think()
 {
+	CHudBase::Think();
+
 	if (gHUD.m_iWeaponBits != gWR.iOldWeaponBits)
 	{
 		gWR.iOldWeaponBits = gHUD.m_iWeaponBits;
@@ -398,9 +388,6 @@ HSPRITE* WeaponsResource::GetAmmoPicFromWeapon(int iAmmoId, Rect& rect)
 void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 {
 	if (iSlot > MAX_WEAPON_SLOTS)
-		return;
-
-	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
 		return;
 
 	if (!gHUD.HasAnyWeapons())
@@ -476,7 +463,7 @@ void CHudAmmo::Update_AmmoX(int iIndex, int iCount)
 		{
 			if (gWR.CountAmmo(iIndex) != iCount)
 			{
-				m_fFade = 200.0f;
+				Flash();
 			}
 		}
 	}
@@ -518,7 +505,7 @@ void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip)
 	if (pWeapon->iClip != iClip)
 	{
 		pWeapon->iClip = iClip;
-		m_fFade = 200.0f;
+		Flash();
 	}
 
 	if (m_pWeapon != pWeapon)
@@ -529,10 +516,8 @@ void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip)
 		}
 
 		m_pWeapon = pWeapon;
-		m_fFade = 200.0f;
+		Flash();
 	}
-
-	m_iFlags |= HUD_ACTIVE;
 }
 
 void CHudAmmo::Update_Detpack(const int setting)
@@ -574,25 +559,6 @@ bool CHudAmmo::MsgFunc_ItemPickup(const char* pszName, int iSize, void* pbuf)
 
 	return true;
 }
-
-
-bool CHudAmmo::MsgFunc_HideWeapon(const char* pszName, int iSize, void* pbuf)
-{
-	BEGIN_READ(pbuf, iSize);
-
-	gHUD.m_iHideHUDDisplay = READ_BYTE();
-
-	if (0 != gEngfuncs.IsSpectateOnly())
-		return true;
-
-	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
-	{
-		gpActiveSel = NULL;
-	}
-
-	return true;
-}
-
 
 bool CHudAmmo::MsgFunc_HitFeedback(const char* pszName, int iSize, void* pbuf)
 {
@@ -715,9 +681,6 @@ void CHudAmmo::UserCmd_Close()
 // Selects the next item in the weapon menu
 void CHudAmmo::UserCmd_NextWeapon()
 {
-	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
-		return;
-
 	bool open = false;
 
 	if (!gpActiveSel || gpActiveSel == (WEAPON*)1)
@@ -773,9 +736,6 @@ void CHudAmmo::UserCmd_NextWeapon()
 // Selects the previous item in the menu
 void CHudAmmo::UserCmd_PrevWeapon()
 {
-	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
-		return;
-
 	bool open = false;
 
 	if (!gpActiveSel || gpActiveSel == (WEAPON*)1)
@@ -884,30 +844,21 @@ void CHudAmmo::DrawCrosshair(WEAPON *pWeapon, int a, bool zoom, bool autoaim)
 // Drawing code
 //-------------------------------------------------------------------------
 
-bool CHudAmmo::Draw(float flTime)
+void CHudAmmo::Draw(const float time)
 {
 	int a, x, y;
 	int AmmoWidth;
 
-	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_WEAPONS) != 0)
-		return true;
-
 	// Draw Weapon Menu
-	DrawWList(flTime);
+	DrawWList(time);
 
 	// Draw ammo pickup history
-	gHR.DrawAmmoHistory(flTime);
-
-	if ((m_iFlags & HUD_ACTIVE) == 0)
-		return false;
+	gHR.DrawAmmoHistory(time);
 
 	if (!m_pWeapon)
-		return false;
+		return;
 
-	a = (int)std::max(MIN_ALPHA, m_fFade);
-
-	if (m_fFade > 0)
-		m_fFade -= (gHUD.m_flTimeDelta * 20);
+	a = GetAlpha();
 
 	WEAPON* pw = m_pWeapon; // shorthand
 
@@ -917,7 +868,7 @@ bool CHudAmmo::Draw(float flTime)
 			pw,
 			255,
 			gHUD.IsViewZoomed(),
-			flTime - m_flHitFeedbackTime < 0.2);
+			time - m_flHitFeedbackTime < 0.2);
 	}
 
 	// SPR_Draw Ammo
@@ -925,7 +876,7 @@ bool CHudAmmo::Draw(float flTime)
 	 && pw->iAmmoType == -1
 	 && pw->iAmmo2Type == -1)
 	{
-		return false;
+		return;
 	}
 
 
@@ -998,7 +949,6 @@ bool CHudAmmo::Draw(float flTime)
 			gHUD.DrawHudSprite(*hAmmo2, 0, &rcAmmo2, x, y - iOffset, CHud::COLOR_PRIMARY, a);
 		}
 	}
-	return true;
 }
 
 
@@ -1081,7 +1031,7 @@ void CHudAmmo::DrawAmmoBar(WEAPON* p, int x, int y, int width, int height, int c
 //
 // Draw Weapon Menu
 //
-bool CHudAmmo::DrawWList(float flTime)
+bool CHudAmmo::DrawWList(float time)
 {
 	int x, y, i;
 
@@ -1092,7 +1042,7 @@ bool CHudAmmo::DrawWList(float flTime)
 
 	if (hud_selection_timeout->value > 0.0F)
 	{
-		float selectionDelta = flTime - m_flSelectionTime;
+		float selectionDelta = time - m_flSelectionTime;
 
 		if (selectionDelta >= hud_selection_fadeout->value + hud_selection_timeout->value)
 		{

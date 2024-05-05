@@ -82,12 +82,10 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 #endif
 	DEFINE_FIELD(CBasePlayer, m_bitsHUDDamage, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayer, m_flFallVelocity, FIELD_FLOAT),
-	DEFINE_FIELD(CBasePlayer, m_fInitHUD, FIELD_BOOLEAN),
 
 #ifdef HALFLIFE_TANKCONTROL
 	DEFINE_FIELD(CBasePlayer, m_pTank, FIELD_EHANDLE),
 #endif
-	DEFINE_FIELD(CBasePlayer, m_iHideHUD, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayer, m_iFOV, FIELD_INTEGER),
 
 	DEFINE_FIELD(CBasePlayer, m_SndRoomtype, FIELD_INTEGER),
@@ -505,8 +503,6 @@ void CBasePlayer::RemoveAllWeapons()
 	}
 
 	memset(m_rgAmmo, 0, sizeof(m_rgAmmo));
-
-	UpdateClientData();
 }
 
 
@@ -675,7 +671,6 @@ void CBasePlayer::StartObserver()
 	m_iFOV = 0;
 
 	// Setup flags
-	m_iHideHUD = HIDEHUD_WEAPONS | HIDEHUD_FLASHLIGHT | HIDEHUD_HEALTH;
 	pev->effects = EF_NOINTERP | EF_NODRAW;
 	pev->view_ofs = g_vecZero;
 	pev->fixangle = 1;
@@ -686,8 +681,7 @@ void CBasePlayer::StartObserver()
 	pev->deadflag = DEAD_RESPAWNABLE;
 	pev->health = 1;
 
-	// Clear out the status bar
-	m_fInitHUD = true;
+	m_ResetHUD = ResetHUD::Reset;
 
 	// Find a player to watch
 	m_flNextObserverInput = 0;
@@ -875,11 +869,15 @@ void CBasePlayer::PreThink()
 
 	g_pGameRules->PlayerThink(this);
 
+	UpdateClientData();
+
 	if (g_pGameRules->GetState() == GR_STATE_GAME_OVER)
 		return; // intermission or finale
 
-	// JOHN: checks if new client data (for HUD and view control) needs to be sent to the client
-	UpdateClientData();
+	if (pev->iuser1 == OBS_FIXED)
+	{
+		return;
+	}
 
 	// Observer Button Handling
 	if (IsObserver())
@@ -1009,6 +1007,7 @@ bool CBasePlayer::Spawn()
 		{
 			//Done spawning; reset.
 			m_bIsSpawning = false;
+			util::FireTargets("game_playerspawn", this, this, USE_TOGGLE, 0);
 		}};
 
 	Precache();
@@ -1070,8 +1069,7 @@ bool CBasePlayer::Spawn()
 
 	pev->view_ofs = VEC_VIEW;
 
-	m_fInitHUD = true;
-	m_iClientHideHUD = -1; // force this to be recalculated
+	m_ResetHUD = ResetHUD::Reset;
 	m_ClientWeaponBits = 0;
 
 	// reset all ammo values to 0
@@ -1132,9 +1130,6 @@ void CBasePlayer::Precache()
 
 	// Make sure any necessary user messages have been registered
 	LinkUserMessages();
-
-	if (gInitHUD)
-		m_fInitHUD = true;
 }
 
 
@@ -1304,7 +1299,6 @@ Reset stuff so that the state is transmitted.
 */
 void CBasePlayer::ForceClientDllUpdate()
 {
-	m_iClientHideHUD = -1;
 	m_ClientWeaponBits = 0;
 	m_ClientSndRoomtype = -1;
 
@@ -1312,11 +1306,7 @@ void CBasePlayer::ForceClientDllUpdate()
 	m_iTrain |= TRAIN_NEW; // Force new train message.
 #endif
 
-	m_fInitHUD = true;	   // Force HUD gmsgResetHUD message
-
-	// Now force all the necessary messages
-	//  to be sent.
-	UpdateClientData();
+	m_ResetHUD = ResetHUD::Reset;
 }
 
 /*
@@ -1632,42 +1622,20 @@ reflecting all of the HUD state info.
 */
 void CBasePlayer::UpdateClientData()
 {
-	const bool fullHUDInitRequired = m_fInitHUD != false;
-
-	if (m_fInitHUD)
+	if (m_ResetHUD != CBasePlayer::ResetHUD::No)
 	{
-		m_fInitHUD = false;
-		gInitHUD = false;
-
-		MessageBegin(MSG_ONE, gmsgResetHUD, this);
-		MessageEnd();
-
-		if (!m_fGameHUDInitialized)
+		if (m_ResetHUD == CBasePlayer::ResetHUD::Initialize)
 		{
 			MessageBegin(MSG_ONE, gmsgInitHUD, this);
 			MessageEnd();
 
 			g_pGameRules->InitHUD(this);
-			m_fGameHUDInitialized = true;
-
-			m_iObserverLastMode = OBS_ROAMING;
-
-			if (util::IsMultiplayer())
-			{
-				util::FireTargets("game_playerjoin", this, this, USE_TOGGLE, 0);
-			}
 		}
 
-		util::FireTargets("game_playerspawn", this, this, USE_TOGGLE, 0);
-	}
-
-	if (m_iHideHUD != m_iClientHideHUD)
-	{
-		MessageBegin(MSG_ONE, gmsgHideWeapon, this);
-		WriteByte(m_iHideHUD);
+		MessageBegin(MSG_ONE, gmsgResetHUD, this);
 		MessageEnd();
 
-		m_iClientHideHUD = m_iHideHUD;
+		m_ResetHUD = CBasePlayer::ResetHUD::No;
 	}
 
 	if (m_WeaponBits != m_ClientWeaponBits)

@@ -28,20 +28,9 @@
 
 bool CHudStatusBar::Init()
 {
-	gHUD.AddHudElem(this);
-
-	Reset();
-
 	hud_expireid = CVAR_CREATE("hud_expireid", "0.2", FCVAR_ARCHIVE);
 
-	return true;
-}
-
-bool CHudStatusBar::VidInit()
-{
-	// Load sprites here
-
-	return true;
+	return CHudBase::Init();
 }
 
 void CHudStatusBar::Reset()
@@ -49,24 +38,23 @@ void CHudStatusBar::Reset()
 	m_targetIndex = 0;
 	m_targetExpireTime = -1000.0F;
 	m_szStatusBar[0] = '\0';
-	m_iFlags &= ~HUD_ACTIVE; // start out inactive
 }
 
-bool CHudStatusBar::Draw(float fTime)
+void CHudStatusBar::Draw(const float time)
 {
 	if (hud_expireid->value > 0.0F
-	 && fTime - m_targetExpireTime >= hud_expireid->value)
+	 && time - m_targetExpireTime >= hud_expireid->value)
 	{
-		Reset();
-		return true;
+		SetActive(false);
+		return;
 	}
 
 	auto info = &g_PlayerInfoList[m_targetIndex];
 
 	if (info->name[0] == '\0')
 	{
-		Reset();
-		return true;
+		SetActive(false);
+		return;
 	}
 
 	auto extra = &g_PlayerExtraInfo[m_targetIndex];
@@ -94,8 +82,6 @@ bool CHudStatusBar::Draw(float fTime)
 	int y = (gHUD.GetHeight() >> 1) + textHeight * 4;
 
 	gHUD.DrawHudString(m_szStatusBar, x, y);
-
-	return true;
 }
 
 void CHudStatusBar::UpdateStatusBar(cl_entity_t* entity)
@@ -104,12 +90,12 @@ void CHudStatusBar::UpdateStatusBar(cl_entity_t* entity)
 	{
 		if (hud_expireid->value <= 0.0F)
 		{
-			Reset();
+			SetActive(false);
 		}
 		return;
 	}
 
 	m_targetIndex = entity->index;
 	m_targetExpireTime = gEngfuncs.GetClientTime();
-	m_iFlags |= HUD_ACTIVE;
+	SetActive(true);
 }

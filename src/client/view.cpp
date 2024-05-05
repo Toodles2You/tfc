@@ -221,6 +221,12 @@ static void V_CalcIntermissionRefdef(ref_params_t* pparams)
 	view = gEngfuncs.GetViewModel();
 
 	VectorCopy(pparams->simorg, pparams->vieworg);
+
+	if (!gHUD.IsObserver() && !gHUD.IsSpectator())
+	{
+		VectorAdd(pparams->vieworg, pparams->viewheight, pparams->vieworg);
+	}
+
 	VectorCopy(pparams->cl_viewangles, pparams->viewangles);
 
 	view->model = NULL;
@@ -545,7 +551,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 void V_CalcRefdef(ref_params_t* pparams)
 {
 	// intermission / finale rendering
-	if (0 != pparams->intermission)
+	if (0 != pparams->intermission || gHUD.GetObserverMode() == OBS_FIXED)
 	{
 		V_ResetPunchAngle();
 		V_CalcIntermissionRefdef(pparams);

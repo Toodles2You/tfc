@@ -41,6 +41,30 @@ extern int g_iObserverMode;
 extern int g_iObserverTarget;
 extern int g_iObserverTarget2;
 
+bool CHudBase::IsActive()
+{
+	return (m_iFlags & kActive) != 0;
+}
+
+bool CHudBase::Init()
+{
+	gHUD.AddHudElem(this);
+	Reset();
+	return true;
+}
+
+void CHudBase::Think()
+{
+	m_fFade = std::max(m_fFade - static_cast<float>(gHUD.m_flTimeDelta) * 20.0F, 0.0F);
+}
+
+bool CHudStatus::IsActive()
+{
+	return gHUD.IsAlive()
+		&& !gHUD.IsObserver()
+		&& !gHUD.IsSpectator();
+}
+
 class CHLVoiceStatusHelper : public IVoiceStatusHelper
 {
 public:
@@ -377,7 +401,9 @@ void CHud::Init()
 	m_Health.Init();
 	m_SayText.Init();
 	m_Spectator.Init();
+#ifdef HALFLIFE_HUD_GEIGER
 	m_Geiger.Init();
+#endif
 #ifdef HALFLIFE_TRAINCONTROL
 	m_Train.Init();
 #endif
@@ -527,7 +553,7 @@ void CHud::VidInit()
 	// assumption: number_1, number_2, etc, are all listed and loaded sequentially
 	m_HUD_number_0 = GetSpriteIndex("number_0");
 
-	m_hSprDummy = SPR_Load("sprites/tile.spr");
+	m_hBackground = SPR_Load("sprites/background.spr");
 	m_hSniperScope = SPR_Load("sprites/sniper_scope.spr");
 
 	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
@@ -535,7 +561,9 @@ void CHud::VidInit()
 	m_Ammo.VidInit();
 	m_Health.VidInit();
 	m_Spectator.VidInit();
+#ifdef HALFLIFE_HUD_GEIGER
 	m_Geiger.VidInit();
+#endif
 #ifdef HALFLIFE_TRAINCONTROL
 	m_Train.VidInit();
 #endif

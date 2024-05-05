@@ -39,6 +39,19 @@ void CHalfLifeMovement::Move()
 {
     CGameMovement::Move();
 
+    if (pmove->iuser1 != OBS_NONE
+     && pmove->iuser1 != OBS_ROAMING)
+    {
+        return;
+    }
+
+    const auto saveMovetype = pmove->movetype;
+
+    if (pmove->iuser1 == OBS_ROAMING)
+    {
+        pmove->movetype = MOVETYPE_NOCLIP;
+    }
+
     CheckParameters();
     CategorizePosition();
     CheckDucking();
@@ -88,6 +101,8 @@ void CHalfLifeMovement::Move()
     {
         pmove->flags &= ~FL_ONGROUND;
     }
+
+    pmove->movetype = saveMovetype;
 }
 
 

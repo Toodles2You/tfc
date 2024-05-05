@@ -37,34 +37,23 @@ DECLARE_MESSAGE(m_Menu, VoteMenu);
 
 bool CHudMenu::Init()
 {
-	gHUD.AddHudElem(this);
-
 	HOOK_MESSAGE(ShowMenu);
 	HOOK_MESSAGE(VoteMenu);
 
-	InitHUDData();
-
-	return true;
-}
-
-void CHudMenu::InitHUDData()
-{
-	m_fMenuDisplayed = kNone;
-	m_bitsValidSlots = 0;
-	m_iFlags &= ~HUD_ACTIVE;
-	Reset();
+	return CHudBase::Init();
 }
 
 void CHudMenu::Reset()
 {
+	m_fMenuDisplayed = kNone;
+	m_bitsValidSlots = 0;
 	g_szPrelocalisedMenuString[0] = 0;
 	m_fWaitingForMore = false;
 }
 
-bool CHudMenu::VidInit()
+void CHudMenu::VidInit()
 {
-	InitHUDData();
-	return true;
+	Reset();
 }
 
 
@@ -129,7 +118,7 @@ static inline const char* ParseEscapeToken(const char* token)
 }
 
 
-bool CHudMenu::Draw(float flTime)
+void CHudMenu::Draw(const float time)
 {
 	// check for if menu is set to disappear
 	if (m_flShutoffTime > 0)
@@ -137,17 +126,19 @@ bool CHudMenu::Draw(float flTime)
 		if (m_flShutoffTime <= gHUD.m_flTime)
 		{ // times up, shutoff
 			m_fMenuDisplayed = kNone;
-			m_iFlags &= ~HUD_ACTIVE;
-			return true;
+			SetActive(false);
+			return;
 		}
 	}
 
 	// don't draw the menu if the scoreboard is being shown
-	if (gViewPort
+	if (gViewPort != nullptr
 	 && (gViewPort->IsScoreBoardVisible()
 	  || gViewPort->m_pCurrentMenu != nullptr
 	  || gViewPort->m_pCurrentCommandMenu != nullptr))
-		return true;
+	{
+		return;
+	}
 
 	// draw the menu, along the left-hand side of the screen
 
@@ -221,7 +212,7 @@ void CHudMenu::SelectMenuItem(int menu_item)
 
 		// remove the menu
 		m_fMenuDisplayed = kNone;
-		m_iFlags &= ~HUD_ACTIVE;
+		SetActive(false);
 	}
 }
 
@@ -273,12 +264,12 @@ bool CHudMenu::MsgFunc_ShowMenu(const char* pszName, int iSize, void* pbuf)
 		}
 
 		m_fMenuDisplayed = kMenu;
-		m_iFlags |= HUD_ACTIVE;
+		SetActive(true);
 	}
 	else
 	{
 		m_fMenuDisplayed = kNone; // no valid slots means that the menu should be turned off
-		m_iFlags &= ~HUD_ACTIVE;
+		SetActive(false);
 	}
 
 	m_fWaitingForMore = NeedMore;
@@ -296,7 +287,7 @@ bool CHudMenu::MsgFunc_VoteMenu(const char* pszName, int iSize, void* pbuf)
 	if (numOptions == 0)
 	{
 		m_fMenuDisplayed = kNone;
-		m_iFlags &= ~HUD_ACTIVE;
+		SetActive(false);
 		return true;
 	}
 
@@ -338,6 +329,6 @@ bool CHudMenu::MsgFunc_VoteMenu(const char* pszName, int iSize, void* pbuf)
 	g_szMenuString[MAX_MENU_STRING - 1] = '\0';
 
 	m_fMenuDisplayed = kVote;
-	m_iFlags |= HUD_ACTIVE;
+	SetActive(true);
 	return true;
 }

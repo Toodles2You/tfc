@@ -523,15 +523,12 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
 
 	if (pPlayer->TeamNumber() == TEAM_UNASSIGNED || pPlayer->PCNumber() == PC_UNDEFINED)
 	{
-		pPlayer->pev->effects |= EF_NODRAW;
-		pPlayer->pev->solid = SOLID_NOT;
-		pPlayer->pev->takedamage = DAMAGE_NO;
-		pPlayer->pev->movetype = MOVETYPE_NONE;
-		pPlayer->m_iHideHUD |= HIDEHUD_WEAPONS | HIDEHUD_FLASHLIGHT | HIDEHUD_HEALTH;
+		pPlayer->pev->iuser1 = OBS_FIXED;
+		pPlayer->pev->iuser2 = 0;
+		pPlayer->pev->iuser3 = 0;
+		pPlayer->m_iObserverLastMode = OBS_FIXED;
 		return;
 	}
-
-	pPlayer->m_iHideHUD &= ~(HIDEHUD_WEAPONS | HIDEHUD_FLASHLIGHT | HIDEHUD_HEALTH);
 
 	const int originalAutoWepSwitch = pPlayer->m_iAutoWepSwitch;
 	pPlayer->m_iAutoWepSwitch = 1;

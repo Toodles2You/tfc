@@ -54,11 +54,14 @@ int giDmgFlags[NUM_DMG_TYPES] =
 
 bool CHudHealth::Init()
 {
+	if (!CHudBase::Init())
+	{
+		return false;
+	}
+
 	HOOK_MESSAGE(Health);
 	HOOK_MESSAGE(Damage);
 	m_iHealth = 100;
-	m_fFade = 0;
-	m_iFlags = 0;
 	m_bitsDamage = 0;
 	m_fAttackFront = m_fAttackRear = m_fAttackRight = m_fAttackLeft = 0;
 	giDmgHeight = 0;
@@ -66,8 +69,6 @@ bool CHudHealth::Init()
 
 	memset(m_dmg, 0, sizeof(DAMAGE_IMAGE) * NUM_DMG_TYPES);
 
-
-	gHUD.AddHudElem(this);
 	return true;
 }
 
@@ -85,9 +86,9 @@ void CHudHealth::Reset()
 	}
 }
 
-bool CHudHealth::VidInit()
+void CHudHealth::VidInit()
 {
-	m_hSprite = 0;
+	m_hSprite = LoadSprite(PAIN_NAME);
 
 	m_HUD_dmg_bio = gHUD.GetSpriteIndex("dmg_bio") + 1;
 
@@ -103,18 +104,15 @@ bool CHudHealth::VidInit()
 
 	giDmgHeight = gHUD.GetSpriteRect(m_HUD_dmg_bio).right - gHUD.GetSpriteRect(m_HUD_dmg_bio).left;
 	giDmgWidth = gHUD.GetSpriteRect(m_HUD_dmg_bio).bottom - gHUD.GetSpriteRect(m_HUD_dmg_bio).top;
-	return true;
 }
 
 void CHudHealth::Update_Health(int iHealth)
 {
-	m_iFlags |= HUD_ACTIVE;
-
 	// Only update the fade if we've changed health
 	if (iHealth != m_iHealth)
 	{
-		m_fFade = FADE_TIME;
 		m_iHealth = iHealth;
+		Flash();
 	}
 }
 
@@ -185,39 +183,21 @@ void CHudHealth::GetPainColor(int& r, int& g, int& b)
 #endif
 }
 
-bool CHudHealth::Draw(float flTime)
+void CHudHealth::Draw(const float time)
 {
 	const auto iHealthMax = sTFClassInfo[g_iPlayerClass].maxHealth;
 	int a, x, y;
 	int HealthWidth;
 	Rect rc;
 
-	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) != 0 || 0 != gEngfuncs.IsSpectateOnly())
-		return true;
-
-	if (0 == m_hSprite)
-		m_hSprite = LoadSprite(PAIN_NAME);
+	if (0 != gEngfuncs.IsSpectateOnly())
+		return;
 
 	rc = *m_prc2;
 
 	rc.top += m_iHeight * ((float)(iHealthMax - (std::min(iHealthMax, m_iHealth))) * (1.0F / iHealthMax));
 
-	// Has health changed? Flash the health #
-	if (0 != m_fFade)
-	{
-		m_fFade -= (gHUD.m_flTimeDelta * 20);
-		if (m_fFade <= 0)
-		{
-			a = MIN_ALPHA;
-			m_fFade = 0;
-		}
-
-		// Fade the health number back to dim
-
-		a = MIN_ALPHA + (m_fFade / FADE_TIME) * 128;
-	}
-	else
-		a = MIN_ALPHA;
+	a = GetAlpha();
 
 	int iOffset = (m_prc1->bottom - m_prc1->top) / 6;
 
@@ -257,8 +237,8 @@ bool CHudHealth::Draw(float flTime)
 	gHUD.m_Battery.m_iAnchorX = x + HealthWidth / 2;
 	gHUD.m_Battery.m_iAnchorY = gHUD.GetHeight();
 
-	DrawDamage(flTime);
-	return DrawPain(flTime);
+	DrawDamage(time);
+	DrawPain(time);
 }
 
 void CHudHealth::CalcDamageDirection(Vector vecFrom)
@@ -320,7 +300,7 @@ void CHudHealth::CalcDamageDirection(Vector vecFrom)
 	}
 }
 
-bool CHudHealth::DrawPain(float flTime)
+bool CHudHealth::DrawPain(float time)
 {
 	if (!(0 != m_fAttackFront || 0 != m_fAttackRear || 0 != m_fAttackLeft || 0 != m_fAttackRight))
 		return true;
@@ -382,7 +362,7 @@ bool CHudHealth::DrawPain(float flTime)
 	return true;
 }
 
-bool CHudHealth::DrawDamage(float flTime)
+bool CHudHealth::DrawDamage(float time)
 {
 	int r, g, b, a;
 	DAMAGE_IMAGE* pdmg;
@@ -390,7 +370,7 @@ bool CHudHealth::DrawDamage(float flTime)
 	if (0 == m_bitsDamage)
 		return true;
 
-	a = (int)(fabs(sin(flTime * 2)) * 256.0);
+	a = (int)(fabs(sin(time * 2)) * 256.0);
 
 	// Draw all the items
 	int i;
@@ -411,9 +391,9 @@ bool CHudHealth::DrawDamage(float flTime)
 
 		if ((m_bitsDamage & giDmgFlags[i]) != 0)
 		{
-			pdmg->fExpire = std::min(flTime + DMG_IMAGE_LIFE, pdmg->fExpire);
+			pdmg->fExpire = std::min(time + DMG_IMAGE_LIFE, pdmg->fExpire);
 
-			if (pdmg->fExpire <= flTime // when the time has expired
+			if (pdmg->fExpire <= time // when the time has expired
 				&& a < 40)				// and the flash is at the low point of the cycle
 			{
 				pdmg->fExpire = 0;
@@ -438,7 +418,7 @@ bool CHudHealth::DrawDamage(float flTime)
 }
 
 
-void CHudHealth::UpdateTiles(float flTime, long bitsDamage)
+void CHudHealth::UpdateTiles(float time, long bitsDamage)
 {
 	DAMAGE_IMAGE* pdmg;
 
@@ -452,9 +432,9 @@ void CHudHealth::UpdateTiles(float flTime, long bitsDamage)
 		// Is this one already on?
 		if ((m_bitsDamage & giDmgFlags[i]) != 0)
 		{
-			pdmg->fExpire = flTime + DMG_IMAGE_LIFE; // extend the duration
+			pdmg->fExpire = time + DMG_IMAGE_LIFE; // extend the duration
 			if (0 == pdmg->fBaseline)
-				pdmg->fBaseline = flTime;
+				pdmg->fBaseline = time;
 		}
 
 		// Are we just turning it on?
@@ -463,7 +443,7 @@ void CHudHealth::UpdateTiles(float flTime, long bitsDamage)
 			// put this one at the bottom
 			pdmg->x = giDmgWidth / 8;
 			pdmg->y = gHUD.GetHeight() - giDmgHeight * 2;
-			pdmg->fExpire = flTime + DMG_IMAGE_LIFE;
+			pdmg->fExpire = time + DMG_IMAGE_LIFE;
 
 			// move everyone else up
 			for (int j = 0; j < NUM_DMG_TYPES; j++)
