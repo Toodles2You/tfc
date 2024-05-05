@@ -221,6 +221,12 @@ static void V_CalcIntermissionRefdef(ref_params_t* pparams)
 	view = gEngfuncs.GetViewModel();
 
 	VectorCopy(pparams->simorg, pparams->vieworg);
+
+	if (!gHUD.IsObserver() && !gHUD.IsSpectator())
+	{
+		VectorAdd(pparams->vieworg, pparams->viewheight, pparams->vieworg);
+	}
+
 	VectorCopy(pparams->cl_viewangles, pparams->viewangles);
 
 	view->model = NULL;
