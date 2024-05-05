@@ -111,20 +111,23 @@ bool CHudStatusIcons::DrawTimer(float flTime)
 	int timerHeight = SPR_Height(m_hTimer, timerFrame);
 	float timerAlpha = std::min((flTime - m_flTimerStart) / 0.8F, 1.0F);
 
-#if 0
-	constexpr float kTickInterval = 3.9F / 3.0F;
-	float tickAlpha =
-		1 - std::fmod(flTime - m_flTimerStart, kTickInterval) / kTickInterval;
-#endif
+	const auto timerX = (gHUD.GetWidth() - timerWidth) / 2;
+	const auto timerY = y - timerHeight;
+
+	gHUD.DrawHudBackground(
+		timerX,
+		timerY,
+		timerX + timerWidth,
+		timerY + timerHeight);
 
 	gHUD.DrawHudSprite(
 		m_hTimer,
 		timerFrame,
 		nullptr,
-		(gHUD.GetWidth() - timerWidth) >> 1,
-		y - timerHeight,
+		timerX,
+		timerY,
 		color,
-		192 * timerAlpha);
+		CHudBase::kMaxAlpha * timerAlpha);
 
 	int grenadeWidth = m_rcGrenade.right - m_rcGrenade.left;
 	int grenadeHeight = m_rcGrenade.bottom - m_rcGrenade.top;
@@ -136,7 +139,7 @@ bool CHudStatusIcons::DrawTimer(float flTime)
 		(gHUD.GetWidth() - grenadeWidth) >> 1,
 		y - ((timerHeight + grenadeHeight) >> 1),
 		color,
-		192 * timerAlpha);
+		CHudBase::kMaxAlpha * timerAlpha);
 
 	return true;
 }
