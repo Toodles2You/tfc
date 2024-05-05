@@ -51,48 +51,75 @@ void CHudAmmoSecondary::VidInit()
 
 void CHudAmmoSecondary::Draw(const float time)
 {
-	// draw secondary ammo icons above normal ammo readout
-	int a, x, y, AmmoWidth;
-	a = GetAlpha();
+	const auto color = CHud::COLOR_PRIMARY;
+	const auto alpha = GetAlpha();
 
-	AmmoWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
+	/* Draw the ammo in the lower right corner of the HUD, above the weapon ammo. */
+	const auto x = gHUD.GetWidth() - 10;
+	const auto y = gHUD.GetHeight() - 73;
 
-	y = gHUD.GetHeight() - (gHUD.m_iFontHeight * 4); // this is one font height higher than the weapon ammo values
-	x = gHUD.GetWidth() - AmmoWidth;
+	auto w = 32;
 
-	if (0 != m_HUD_ammoicon)
+	/* Widen the background for each ammo value. */
+	for (auto i = 0; i < MAX_SEC_AMMO_VALUES; i++)
 	{
-		// Draw the ammo icon
-		x -= (gHUD.GetSpriteRect(m_HUD_ammoicon).right - gHUD.GetSpriteRect(m_HUD_ammoicon).left);
-		y -= (gHUD.GetSpriteRect(m_HUD_ammoicon).top - gHUD.GetSpriteRect(m_HUD_ammoicon).bottom);
-
-		gHUD.DrawHudSpriteIndex(m_HUD_ammoicon, x, y, CHud::COLOR_PRIMARY, a);
-	}
-	else
-	{ // move the cursor by the '0' char instead, since we don't have an icon to work with
-		x -= AmmoWidth;
-		y -= (gHUD.GetSpriteRect(gHUD.m_HUD_number_0).top - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).bottom);
-	}
-
-	// draw the ammo counts, in reverse order, from right to left
-	for (int i = MAX_SEC_AMMO_VALUES - 1; i >= 0; i--)
-	{
-		if (m_iAmmoAmounts[i] < 0)
-			continue; // negative ammo amounts imply that they shouldn't be drawn
-
-		// half a char gap between the ammo number and the previous pic
-		x -= (AmmoWidth / 2);
-
-		// draw the number, right-aligned
-		x -= (gHUD.GetNumWidth(m_iAmmoAmounts[i], DHN_DRAWZERO) * AmmoWidth);
-		gHUD.DrawHudNumber(x, y, DHN_DRAWZERO, m_iAmmoAmounts[i], CHud::COLOR_PRIMARY, a);
-
-		if (i != 0)
+		if (m_iAmmoAmounts[i] >= 0)
 		{
-			// draw the divider bar
-			x -= (AmmoWidth / 2);
-			gHUD.DrawHudFill(x, y, (AmmoWidth / 10), gHUD.m_iFontHeight, CHud::COLOR_PRIMARY, MIN_ALPHA);
+			w += 30;
 		}
+	}
+
+	gHUD.DrawHudBackground(
+		x - w,
+		y - 16,
+		x,
+		y + 16);
+
+	if (m_HUD_ammoicon != 0)
+	{
+		/* Draw the icon sprite on the right side. */
+		gHUD.DrawHudSpriteIndex(
+			m_HUD_ammoicon,
+			x - 16,
+			y,
+			color,
+			alpha,
+			CHud::a_center);
+	}
+
+	auto drawn = false;
+
+	for (auto i = MAX_SEC_AMMO_VALUES - 1; i >= 0; i--)
+	{
+		/* Negative implies that they shouldn't be drawn. */
+		if (m_iAmmoAmounts[i] < 0)
+		{
+			continue;
+		}
+
+		if (drawn)
+		{
+			/* Vertical divider bar. */
+			gHUD.DrawHudFill(
+				x - 32 - (i + 1) * 30 + 4, /* Toodles FIXME: This sucks. */
+				y - 12,
+				2,
+				24,
+				color,
+				CHudBase::kMinAlpha);
+		}
+
+		drawn = true;
+
+		/* Draw the current value to the left of the previous. */
+		gHUD.DrawHudNumberReverse(
+			x - 32 - i * 30,
+			y,
+			m_iAmmoAmounts[i],
+			DHN_DRAWZERO,
+			color,
+			alpha,
+			CHud::a_west);
 	}
 }
 

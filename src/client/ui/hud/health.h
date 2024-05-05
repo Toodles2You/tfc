@@ -45,6 +45,9 @@ typedef struct
 //
 class CHudHealth : public CHudStatus
 {
+protected:
+	virtual int GetAlpha() { return (m_iHealth > 25) ? CHudStatus::GetAlpha() : CHudBase::kMaxAlpha; }
+
 public:
 	bool Init() override;
 	void VidInit() override;
@@ -56,17 +59,13 @@ public:
 	int m_iHealth;
 	int m_HUD_dmg_bio;
 	float m_fAttackFront, m_fAttackRear, m_fAttackLeft, m_fAttackRight;
-	void GetPainColor(int& r, int& g, int& b);
 	float m_fFade;
 
 private:
 	HSPRITE m_hSprite;
 	HSPRITE m_hDamage;
-	HSPRITE m_hSprite1;
-	HSPRITE m_hSprite2;
-	Rect* m_prc1;
-	Rect* m_prc2;
-	int m_iHeight;
+	HSPRITE m_hCross;
+	Rect m_rcCross;
 
 	DAMAGE_IMAGE m_dmg[NUM_DMG_TYPES];
 	int m_bitsDamage;

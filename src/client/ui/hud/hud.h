@@ -67,8 +67,8 @@ protected:
 	};
 
 	/* Toodles TODO: Make these console variables. */
-	constexpr static float kMinAlpha = 100.0F;
-	constexpr static float kMaxAlpha = 200.0F;
+	constexpr static float kMinAlpha = 150.0F;
+	constexpr static float kMaxAlpha = 225.0F;
 	constexpr static float kFadeTime = 100.0F;
 
 private:
@@ -391,17 +391,11 @@ public:
 	bool MsgFunc_Battery(const char* pszName, int iSize, void* pbuf);
 
 private:
-	HSPRITE m_hSprite1;
-	HSPRITE m_hSprite2;
-	Rect* m_prc1;
-	Rect* m_prc2;
+	HSPRITE m_hSuit;
+	Rect m_rcSuit;
 	int m_iBat;
-	int m_iBatMax;
 	float m_flType;
 	char m_szString[32];
-	int m_iHeight; // width of the battery innards
-	int m_iAnchorX; // our x position, set by the health hud
-	int m_iAnchorY; // our y position, set by the health hud
 };
 
 

@@ -92,15 +92,10 @@ void CHudHealth::VidInit()
 
 	m_HUD_dmg_bio = gHUD.GetSpriteIndex("dmg_bio") + 1;
 
-	/* Toodles FIXME: Need separate sprites. */
-	int HUD_cross_empty = gHUD.GetSpriteIndex("cross");
-	int HUD_cross_full = gHUD.GetSpriteIndex("cross");
+	int crossIndex = gHUD.GetSpriteIndex("cross");
 
-	m_hSprite1 = gHUD.GetSprite(HUD_cross_empty);
-	m_hSprite2 = gHUD.GetSprite(HUD_cross_full);
-	m_prc1 = &gHUD.GetSpriteRect(HUD_cross_empty);
-	m_prc2 = &gHUD.GetSpriteRect(HUD_cross_full);
-	m_iHeight = m_prc2->bottom - m_prc1->top;
+	m_hCross = gHUD.GetSprite(crossIndex);
+	m_rcCross = gHUD.GetSpriteRect(crossIndex);
 
 	giDmgHeight = gHUD.GetSpriteRect(m_HUD_dmg_bio).right - gHUD.GetSpriteRect(m_HUD_dmg_bio).left;
 	giDmgWidth = gHUD.GetSpriteRect(m_HUD_dmg_bio).bottom - gHUD.GetSpriteRect(m_HUD_dmg_bio).top;
@@ -156,86 +151,38 @@ bool CHudHealth::MsgFunc_Damage(const char* pszName, int iSize, void* pbuf)
 	return true;
 }
 
-
-// Returns back a color from the
-// Green <-> Yellow <-> Red ramp
-void CHudHealth::GetPainColor(int& r, int& g, int& b)
-{
-	int iHealth = m_iHealth;
-
-	if (iHealth > 25)
-		iHealth -= 25;
-	else if (iHealth < 0)
-		iHealth = 0;
-#if 0
-	g = iHealth * 255 / 100;
-	r = 255 - g;
-	b = 0;
-#else
-	if (m_iHealth > 25)
-	{
-		gHUD.GetColor(r, g, b, CHud::COLOR_PRIMARY);
-	}
-	else
-	{
-		gHUD.GetColor(r, g, b, CHud::COLOR_WARNING);
-	}
-#endif
-}
-
 void CHudHealth::Draw(const float time)
 {
-	const auto iHealthMax = sTFClassInfo[g_iPlayerClass].maxHealth;
-	int a, x, y;
-	int HealthWidth;
-	Rect rc;
+	const auto color = (m_iHealth > 25) ? CHud::COLOR_PRIMARY : CHud::COLOR_WARNING;
+	const auto alpha = GetAlpha();
 
-	if (0 != gEngfuncs.IsSpectateOnly())
-		return;
+	const auto x = 10;
+	const auto y = gHUD.GetHeight() - 26;
 
-	rc = *m_prc2;
+	gHUD.DrawHudBackground(
+		x,
+		y - 16,
+		x + 92,
+		y + 16);
 
-	rc.top += m_iHeight * ((float)(iHealthMax - (std::min(iHealthMax, m_iHealth))) * (1.0F / iHealthMax));
+	gHUD.DrawHudSprite(
+		m_hCross,
+		0,
+		&m_rcCross,
+		x + 16,
+		y,
+		color,
+		alpha,
+		CHud::a_center);
 
-	a = GetAlpha();
-
-	int iOffset = (m_prc1->bottom - m_prc1->top) / 6;
-
-	// If health is getting low, make it bright red
-	if (m_iHealth <= iHealthMax / 4)
-		a = 255;
-	
-	auto color = (m_iHealth <= iHealthMax / 4) ? CHud::COLOR_WARNING : CHud::COLOR_PRIMARY;
-
-	HealthWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
-	int CrossWidth = m_prc1->right - m_prc1->left;
-
-	y = gHUD.GetHeight() - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
-	x = CrossWidth / 2;
-
-	gHUD.DrawHudSprite(m_hSprite1, 0, m_prc1, x, y - iOffset, color, a / 3);
-
-	if (rc.bottom > rc.top)
-	{
-		gHUD.DrawHudSprite(m_hSprite2, 0, &rc, x, y - iOffset + (rc.top - m_prc2->top), color, a - a / 3);
-	}
-
-	x = CrossWidth + HealthWidth / 2;
-
-	//Reserve space for 3 digits by default, but allow it to expand
-	x += gHUD.GetHudNumberWidth(m_iHealth, 3, DHN_DRAWZERO);
-
-	gHUD.DrawHudNumberReverse(x, y, m_iHealth, DHN_DRAWZERO, color, a);
-
-	x += HealthWidth / 2;
-
-	int iHeight = gHUD.m_iFontHeight;
-	int iWidth = HealthWidth / 10;
-
-	gHUD.DrawHudFill(x, y, iWidth, iHeight, CHud::COLOR_PRIMARY, MIN_ALPHA);
-
-	gHUD.m_Battery.m_iAnchorX = x + HealthWidth / 2;
-	gHUD.m_Battery.m_iAnchorY = gHUD.GetHeight();
+	gHUD.DrawHudNumber(
+		x + 32,
+		y,
+		DHN_DRAWZERO | DHN_3DIGITS,
+		m_iHealth,
+		color,
+		alpha,
+		CHud::a_west);
 
 	DrawDamage(time);
 	DrawPain(time);

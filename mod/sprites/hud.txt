@@ -1,4 +1,4 @@
-77
+74
 
 selection		640 640hud3	0	180	170	45
 
@@ -38,14 +38,10 @@ number_7		640 640hud7	168	0	20	24
 number_8		640 640hud7	192	0	20	24
 number_9		640 640hud7	216	0	20	24
 
-cross			640 640hud7	80	24	32	32
+cross			640 640hud7	112	24	32	32
 
-suit_full		640 640hud7	0	24	40	40
-suit_empty		640 640hud7	40	24	40	40
+suit			640 640hud7	32	24	32	32
 
-flash_full		640 640hud7	160	24	32	32
-flash_empty		640 640hud7	112	24	32	32
-flash_beam		640 640hud7 144	24	16	32
 stopwatch		640	640hud7	144	72	24	24
 
 d_spanner		640	tfc_dmsg	0	48	48	16

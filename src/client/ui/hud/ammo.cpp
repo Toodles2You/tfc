@@ -846,108 +846,96 @@ void CHudAmmo::DrawCrosshair(WEAPON *pWeapon, int a, bool zoom, bool autoaim)
 
 void CHudAmmo::Draw(const float time)
 {
-	int a, x, y;
-	int AmmoWidth;
-
 	// Draw Weapon Menu
 	DrawWList(time);
 
 	// Draw ammo pickup history
 	gHR.DrawAmmoHistory(time);
 
-	if (!m_pWeapon)
+	if (m_pWeapon == nullptr)
+	{
 		return;
-
-	a = GetAlpha();
-
-	WEAPON* pw = m_pWeapon; // shorthand
+	}
 
 	if (gHUD.m_pCvarCrosshair->value != 0)
 	{
 		DrawCrosshair(
-			pw,
+			m_pWeapon,
 			255,
 			gHUD.IsViewZoomed(),
 			time - m_flHitFeedbackTime < 0.2);
 	}
 
-	// SPR_Draw Ammo
-	if (pw->iClip < 0
-	 && pw->iAmmoType == -1
-	 && pw->iAmmo2Type == -1)
+	const auto color = CHud::COLOR_PRIMARY;
+	const auto alpha = GetAlpha();
+
+	/* Draw the weapon ammo in the lower right corner of the HUD. */
+	const auto x = gHUD.GetWidth() - 10;
+	const auto y = gHUD.GetHeight() - 26;
+
+	const auto usesAmmo = m_pWeapon->iAmmoType > -1;
+	const auto usesClip = m_pWeapon->iClip > -1;
+
+	/* Fill the background if this weapon uses ammo and/or a clip. */
+	if (usesAmmo || usesClip)
 	{
-		return;
+		/* Widen the background if it uses both ammo & a clip. */
+		const auto w = (usesClip == usesAmmo) ? 142 : 92;
+
+		gHUD.DrawHudBackground(
+			x - w,
+			y - 16,
+			x,
+			y + 16);
 	}
 
-
-	int iFlags = DHN_DRAWZERO; // draw 0 values
-
-	AmmoWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
-
-	// Does this weapon have a clip?
-	y = gHUD.GetHeight() - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
-
-	// Does weapon have any ammo at all?
-	if (pw->iClip >= 0 || m_pWeapon->iAmmoType != -1)
+	if (usesAmmo)
 	{
-		Rect rcAmmo;
-		HSPRITE* hAmmo = gWR.GetAmmoPicFromWeapon(m_pWeapon->iAmmoType, rcAmmo);
+		/* Draw the ammo sprite on the right side. */
+		Rect ammoRect;
+		const auto ammoSprite = *gWR.GetAmmoPicFromWeapon(m_pWeapon->iAmmoType, ammoRect);
 
-		int iIconWidth = rcAmmo.right - rcAmmo.left;
+		gHUD.DrawHudSprite(
+			ammoSprite,
+			0,
+			&ammoRect,
+			x - 16,
+			y,
+			color,
+			alpha,
+			CHud::a_center);
 
-		if (pw->iClip >= 0 && m_pWeapon->iAmmoType != -1)
-		{
-			// room for the number and the '|' and the current ammo
-
-			x = gHUD.GetWidth() - (8 * AmmoWidth) - iIconWidth;
-			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, pw->iClip, CHud::COLOR_PRIMARY, a);
-
-			int iBarWidth = AmmoWidth / 10;
-
-			x += AmmoWidth / 2;
-
-			// draw the | bar
-			gHUD.DrawHudFill(x, y, iBarWidth, gHUD.m_iFontHeight, CHud::COLOR_PRIMARY, MIN_ALPHA);
-
-			x += iBarWidth + AmmoWidth / 2;
-
-			// GL Seems to need this
-			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, gWR.CountAmmo(pw->iAmmoType), CHud::COLOR_PRIMARY, a);
-		}
-		else
-		{
-			auto ammoCount =
-				(pw->iClip >= 0) ? pw->iClip : gWR.CountAmmo(pw->iAmmoType);
-
-			// SPR_Draw a bullets only line
-			x = gHUD.GetWidth() - 4 * AmmoWidth - iIconWidth;
-			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, ammoCount, CHud::COLOR_PRIMARY, a);
-		}
-
-		// Draw the ammo Icon
-		int iOffset = (rcAmmo.bottom - rcAmmo.top) / 8;
-		gHUD.DrawHudSprite(*hAmmo, 0, &rcAmmo, x, y - iOffset, CHud::COLOR_PRIMARY, a);
+		/* Draw the weapon ammo to the left of the ammo sprite. */
+		gHUD.DrawHudNumberReverse(
+			x - 32,
+			y,
+			gWR.CountAmmo(m_pWeapon->iAmmoType),
+			DHN_DRAWZERO | DHN_3DIGITS,
+			color,
+			alpha,
+			CHud::a_west);
 	}
 
-	// Does weapon have seconday ammo?
-	if (pw->iAmmo2Type != -1)
+	if (usesClip)
 	{
-		Rect rcAmmo2;
-		HSPRITE* hAmmo2 = gWR.GetAmmoPicFromWeapon(m_pWeapon->iAmmo2Type, rcAmmo2);
+		/* Vertical divider bar. */
+		gHUD.DrawHudFill(
+			x - 98,
+			y - 12,
+			2,
+			24,
+			color,
+			CHudBase::kMinAlpha);
 
-		int iIconWidth = rcAmmo2.right - rcAmmo2.left;
-
-		// Do we have secondary ammo?
-		if (gWR.CountAmmo(pw->iAmmo2Type) > 0)
-		{
-			y -= gHUD.m_iFontHeight + gHUD.m_iFontHeight / 4;
-			x = gHUD.GetWidth() - 4 * AmmoWidth - iIconWidth;
-			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, gWR.CountAmmo(pw->iAmmo2Type), CHud::COLOR_PRIMARY, a);
-
-			// Draw the ammo Icon
-			int iOffset = (rcAmmo2.bottom - rcAmmo2.top) / 8;
-			gHUD.DrawHudSprite(*hAmmo2, 0, &rcAmmo2, x, y - iOffset, CHud::COLOR_PRIMARY, a);
-		}
+		/* Draw the weapon clip to the left of the weapon ammo. */
+		gHUD.DrawHudNumberReverse(
+			x - 102,
+			y,
+			m_pWeapon->iClip,
+			DHN_DRAWZERO | DHN_2DIGITS,
+			color,
+			alpha,
+			CHud::a_west);
 	}
 }
 
