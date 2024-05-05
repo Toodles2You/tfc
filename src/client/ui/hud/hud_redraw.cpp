@@ -210,40 +210,25 @@ void CHud::DrawHudSprite(HSPRITE pic, int frame, Rect *rect, int x, int y, int r
 
 		ScaleColors(r, g, b, a);
 		gEngfuncs.pfnSPR_Set(pic, r, g, b);
-		
-		// Toodles FIXME: Hack for the crosshair.
-		if (alignment == a_center)
-		{
-			gEngfuncs.pfnSPR_DrawHoles(frame, x, y, rect);
-		}
-		else
-		{
-			gEngfuncs.pfnSPR_DrawAdditive(frame, x, y, rect);
-		}
+		gEngfuncs.pfnSPR_DrawAdditive(frame, x, y, rect);
 		return;
 	}
 	
-	auto pSprite = const_cast<model_t *>(gEngfuncs.GetSpritePointer (pic));
+	const auto pSprite = const_cast<model_t *>(gEngfuncs.GetSpritePointer (pic));
 
-	auto x1 = roundf (m_flOffsetX + xf * m_flScaleX);
-	auto y1 = roundf (m_flOffsetY + yf * m_flScaleY);
-	auto x2 = roundf (m_flOffsetX + (xf + width) * m_flScaleX);
-	auto y2 = roundf (m_flOffsetY + (yf + height) * m_flScaleY);
+	const auto x1 = roundf (m_flOffsetX + xf * m_flScaleX);
+	const auto y1 = roundf (m_flOffsetY + yf * m_flScaleY);
+	const auto x2 = roundf (m_flOffsetX + (xf + width) * m_flScaleX);
+	const auto y2 = roundf (m_flOffsetY + (yf + height) * m_flScaleY);
 
-	auto left = rect->left / (float)sprw;
-	auto right = rect->right / (float)sprw;
-	auto top = rect->top / (float)sprh;
-	auto bottom = rect->bottom / (float)sprh;
+	const auto left = rect->left / (float)sprw;
+	const auto right = rect->right / (float)sprw;
+	const auto top = rect->top / (float)sprh;
+	const auto bottom = rect->bottom / (float)sprh;
 	
 	gEngfuncs.pTriAPI->SpriteTexture (pSprite, frame);
 
-	auto rendermode = kRenderTransAdd;
-
-	// Toodles FIXME: Hack for the crosshair.
-	if (alignment == a_center)
-	{
-		rendermode = kRenderTransAlpha;
-	}
+	const auto rendermode = kRenderTransAdd;
 
 	gEngfuncs.pTriAPI->Color4fRendermode (r / 255.0F, g / 255.0F, b / 255.0F, a / 255.0F, rendermode);
 	gEngfuncs.pTriAPI->RenderMode (rendermode);
@@ -503,31 +488,27 @@ void CHud::DrawHudBackground(int left, int top, int right, int bottom)
 		return;
 	}
 
-	auto sprw = gEngfuncs.pfnSPR_Width (m_hBackground, 0);
-	auto sprh = gEngfuncs.pfnSPR_Height (m_hBackground, 0);
+	const auto pSprite = const_cast<model_t *>(gEngfuncs.GetSpritePointer (m_hBackground));
 
-	static Rect rc;
-	rc.left = 0;
-	rc.right = sprw;
-	rc.top = 0;
-	rc.bottom = sprh;
-	Rect* rect = &rc;
+	/* Shrink the bounds slightly to compensate for the border. */
+	left += 1;
+	top += 1;
+	right -= 1;
+	bottom -= 1;
 
-	auto pSprite = const_cast<model_t *>(gEngfuncs.GetSpritePointer (m_hBackground));
+	const auto x1 = roundf (m_flOffsetX + left * m_flScaleX);
+	const auto y1 = roundf (m_flOffsetY + top * m_flScaleY);
+	const auto x2 = roundf (m_flOffsetX + right * m_flScaleX);
+	const auto y2 = roundf (m_flOffsetY + bottom * m_flScaleY);
 
-	auto x1 = roundf (m_flOffsetX + left * m_flScaleX);
-	auto y1 = roundf (m_flOffsetY + top * m_flScaleY);
-	auto x2 = roundf (m_flOffsetX + right * m_flScaleX);
-	auto y2 = roundf (m_flOffsetY + bottom * m_flScaleY);
-
-	auto x0 = roundf (m_flOffsetX + (left - 4) * m_flScaleX);
-	auto y0 = roundf (m_flOffsetY + (top - 4) * m_flScaleY);
-	auto x3 = roundf (m_flOffsetX + (right + 4) * m_flScaleX);
-	auto y3 = roundf (m_flOffsetY + (bottom + 4) * m_flScaleY);
+	const auto x0 = roundf (m_flOffsetX + (left - 4) * m_flScaleX);
+	const auto y0 = roundf (m_flOffsetY + (top - 4) * m_flScaleY);
+	const auto x3 = roundf (m_flOffsetX + (right + 4) * m_flScaleX);
+	const auto y3 = roundf (m_flOffsetY + (bottom + 4) * m_flScaleY);
 
 	gEngfuncs.pTriAPI->SpriteTexture (pSprite, 0);
 
-	gEngfuncs.pTriAPI->Color4fRendermode (0.0F, 0.0F, 0.0F, 1.0F / 3.0F, kRenderTransAlpha);
+	gEngfuncs.pTriAPI->Color4fRendermode (0.0F, 0.0F, 0.0F, 1.0F / 2.0F, kRenderTransAlpha);
 	gEngfuncs.pTriAPI->RenderMode (kRenderTransAlpha);
 
 	gEngfuncs.pTriAPI->Begin (TRI_QUADS);
