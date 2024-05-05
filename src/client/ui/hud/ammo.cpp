@@ -1019,23 +1019,23 @@ void CHudAmmo::DrawAmmoBar(WEAPON* p, int x, int y, int width, int height, int c
 //
 // Draw Weapon Menu
 //
-bool CHudAmmo::DrawWList(float time)
+void CHudAmmo::DrawWList(const float time)
 {
-	int x, y, i;
+	if (gpActiveSel == nullptr)
+	{
+		return;
+	}
 
-	if (!gpActiveSel)
-		return false;
-
-	float fadeDelta = 1.0F;
+	auto fadeDelta = 1.0F;
 
 	if (hud_selection_timeout->value > 0.0F)
 	{
-		float selectionDelta = time - m_flSelectionTime;
+		auto selectionDelta = time - m_flSelectionTime;
 
 		if (selectionDelta >= hud_selection_fadeout->value + hud_selection_timeout->value)
 		{
 			UserCmd_Close();
-			return false;
+			return;
 		}
 
 		fadeDelta =
@@ -1044,138 +1044,125 @@ bool CHudAmmo::DrawWList(float time)
 		fadeDelta = 1.0F - (fadeDelta / hud_selection_timeout->value);
 	}
 
-	int iActiveSlot;
+	const auto activeSlot = (gpActiveSel != (WEAPON*)1) ? gpActiveSel->iSlot : -1;
+	const auto activePos = (gpActiveSel != (WEAPON*)1) ? gpActiveSel->iSlotPos : -1;
 
-	if (gpActiveSel == (WEAPON*)1)
-		iActiveSlot = -1; // current slot has no weapons
-	else
-		iActiveSlot = gpActiveSel->iSlot;
+	/* Draw the weapon list in the top left corner of the HUD. */
+	auto x = 10;
 
-	x = 10; //!!!
-	y = 10; //!!!
+	/* Widen the background for each weapon slot. */
+	const auto w = (activeSlot > -1) ? 282 : 132;
 
+	/* Fill the background behind the top bar. */
+	gHUD.DrawHudBackground(x, 10, x + w, 30);
 
-	// Ensure that there are available choices in the active slot
-	if (iActiveSlot > 0)
+	for (auto slot = 0; slot < MAX_WEAPON_SLOTS; slot++)
 	{
-		if (!gWR.GetFirstPos(iActiveSlot))
-		{
-			gpActiveSel = (WEAPON*)1;
-			iActiveSlot = -1;
-		}
-	}
+		const auto isActiveSlot = slot == activeSlot;
 
-	// Draw top line
-	for (i = 0; i < MAX_WEAPON_SLOTS; i++)
-	{
-		int iWidth;
+		auto alpha = isActiveSlot ? CHudBase::kMaxAlpha : CHudBase::kMinAlpha;
 
-		// make active slot wide enough to accomodate gun pictures
-		if (i == iActiveSlot)
-		{
-			WEAPON* p = gWR.GetFirstPos(iActiveSlot);
-			if (p)
-				iWidth = p->rcActive.right - p->rcActive.left;
-			else
-				iWidth = giBucketWidth;
-		}
-		else
-		{
-			iWidth = giBucketWidth;
-		}
+		auto y = 10;
 
+		/* Draw the top bar. */
 		gHUD.DrawHudSpriteIndex(
-			m_HUD_bucket0 + i,
+			m_HUD_bucket0 + slot,
 			x,
 			y,
 			CHud::COLOR_PRIMARY,
-			(iActiveSlot == i ? 255 : 192) * fadeDelta
-		);
+			alpha * fadeDelta);
 
-		x += iWidth + 5;
-	}
+		y += 28;
 
-	x = 10;
-
-	// Draw all of the buckets
-	for (i = 0; i < MAX_WEAPON_SLOTS; i++)
-	{
-		y = giBucketHeight + 10;
-
-		// If this is the active slot, draw the bigger pictures,
-		// otherwise just draw boxes
-		if (i == iActiveSlot)
+		if (!isActiveSlot)
 		{
-			WEAPON* p = gWR.GetFirstPos(i);
-			int iWidth = giBucketWidth;
-			if (p)
-				iWidth = p->rcActive.right - p->rcActive.left;
-
-			for (int iPos = 0; iPos < MAX_WEAPON_POSITIONS; iPos++)
+			/* Draw a background behind the small squares. */
+			auto weaponCount = 0;
+			for (auto pos = 0; pos < MAX_WEAPON_POSITIONS; pos++)
 			{
-				p = gWR.GetWeaponSlot(i, iPos);
-
-				if (p == nullptr)
+				if (gWR.GetWeaponSlot(slot, pos) != nullptr)
 				{
-					continue;
+					weaponCount++;
 				}
-
-				// Draw Weapon if Red if no ammo
-				auto ammo = gWR.HasAmmo(p);
-				auto color = ammo ? CHud::COLOR_PRIMARY : CHud::COLOR_WARNING;
-
-				if (gpActiveSel == p)
-				{
-					gHUD.DrawHudSprite(p->hActive, 0, &p->rcActive, x, y, color, 255 * fadeDelta);
-					gHUD.DrawHudSpriteIndex(m_HUD_selection, x, y, color, 255 * fadeDelta);
-				}
-				else
-				{
-					gHUD.DrawHudSprite(p->hInactive, 0, &p->rcInactive, x, y, color, (ammo ? 192 : 128) * fadeDelta);
-				}
-
-				// Draw Ammo Bar
-				if (ammo)
-				{
-					DrawAmmoBar(p, x + giABWidth / 2, y, giABWidth, giABHeight, color, 192 * fadeDelta);
-				}
-
-				y += p->rcActive.bottom - p->rcActive.top + 5;
 			}
 
-			x += iWidth + 5;
-		}
-		else
-		{
-			// Draw Row of weapons.
-
-			for (int iPos = 0; iPos < MAX_WEAPON_POSITIONS; iPos++)
+			if (weaponCount == 0)
 			{
-				WEAPON* p = gWR.GetWeaponSlot(i, iPos);
+				x += 28;
+				continue;
+			}
 
-				if (p == nullptr)
-				{
-					continue;
-				}
+			gHUD.DrawHudBackground(
+				x,
+				y,
+				x + 20,
+				y + 20 + 25 * (weaponCount - 1));
+		}
 
-				bool ammo = gWR.HasAmmo(p);
+		/* Draw all of the icons just below. */
+		for (auto pos = 0; pos < MAX_WEAPON_POSITIONS; pos++)
+		{
+			const auto weapon = gWR.GetWeaponSlot(slot, pos);
 
+			if (weapon == nullptr)
+			{
+				continue;
+			}
+
+			const auto hasAmmo = gWR.HasAmmo(weapon);
+			const auto color = hasAmmo ? CHud::COLOR_PRIMARY : CHud::COLOR_WARNING;
+
+			if (!isActiveSlot)
+			{
+				/* This is not the active slot, so draw small squares. */
 				gHUD.DrawHudFill(
 					x,
 					y,
-					giBucketWidth, giBucketHeight,
-					ammo ? CHud::COLOR_PRIMARY : CHud::COLOR_WARNING,
-					(ammo ? 128 : 96) * fadeDelta
-				);
+					20,
+					20,
+					color,
+					alpha * fadeDelta);
 
-				y += giBucketHeight + 5;
+				y += 25;
+				continue;
 			}
 
-			x += giBucketWidth + 5;
-		}
-	}
+			const auto isActivePos = pos == activePos;
 
-	return true;
+			alpha = isActivePos ? CHudBase::kMaxAlpha : CHudBase::kMinAlpha;
+
+			/* This is the active slot, so draw the weapon icons. */
+			gHUD.DrawHudBackground(
+				x,
+				y,
+				x + 170,
+				y + 45);
+
+			/* Draw the active or inactive weapon icon. */
+			gHUD.DrawHudSprite(
+				isActivePos ? weapon->hActive : weapon->hInactive,
+				0,
+				isActivePos ? &weapon->rcActive : &weapon->rcInactive,
+				x,
+				y,
+				color,
+				alpha * fadeDelta);
+
+			/* Draw the weapon ammo bar on the top left of the weapon icon. */
+			DrawAmmoBar(
+				weapon,
+				x + 5,
+				y + 2,
+				20,
+				4,
+				hasAmmo ? CHud::COLOR_SECONDARY : color,
+				alpha * fadeDelta);
+
+			y += 53;
+		}
+
+		x += isActiveSlot ? 178 : 28;
+	}
 }
 
 

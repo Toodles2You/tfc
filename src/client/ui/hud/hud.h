@@ -141,7 +141,7 @@ public:
 	void Draw(const float time) override;
 	void Think() override;
 	void Reset() override;
-	bool DrawWList(float flTime);
+	void DrawWList(const float time);
 	void Update_AmmoX(int iIndex, int iCount);
 	void Update_CurWeapon(int iState, int iId, int iClip);
 	void Update_Detpack(const int setting);
