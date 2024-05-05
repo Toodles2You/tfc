@@ -87,22 +87,23 @@ void CHudDeathNotice::VidInit()
 
 void CHudDeathNotice::Draw(const float time)
 {
-	int x, y, r, g, b;
+	int r, g, b;
 
 	if (hud_deathnotice_time->value <= 0.0F)
 	{
 		return;
 	}
 
-	y = DEATHNOTICE_TOP + 2;
+	auto y = 10;
 
-	DeathNoticeItem* item;
 	for (int i = 0; i < MAX_DEATHNOTICES; i++)
 	{
-		item = rgDeathNoticeList + i;
+		auto item = rgDeathNoticeList + i;
 
 		if (item->iId == 0)
+		{
 			break; // we've gone through them all
+		}
 		
 		auto deltaTime = time - item->flDisplayTime;
 		auto displayTime = hud_deathnotice_time->value;
@@ -128,7 +129,7 @@ void CHudDeathNotice::Draw(const float time)
 		int weaponWidth = rect.right - rect.left;
 		int weaponHeight = rect.bottom - rect.top;
 
-		int centerY = y + (weaponHeight >> 1);
+		auto centerY = y + (weaponHeight >> 1);
 
 		gHUD.GetColor(r, g, b, CHud::COLOR_PRIMARY);
 		
@@ -157,18 +158,16 @@ void CHudDeathNotice::Draw(const float time)
 				+ gHUD.HudStringLen(" finished off ");
 		}
 
-		x = gHUD.GetWidth() - 6 - w;
+		auto x = gHUD.GetWidth() - 10;
 
-		if (item->bLocalPlayerInvolved)
-		{
-			gHUD.DrawHudFill(
-				x - 2,
-				y - 2,
-				w + 4,
-				weaponHeight + 4,
-				CHud::COLOR_WARNING,
-				(MIN_ALPHA + MIN_ALPHA * (1.0F - (deltaTime / displayTime))) / 2);
-		}
+		gHUD.DrawHudBackground(
+			x - w,
+			y,
+			x,
+			y + weaponHeight,
+			item->bLocalPlayerInvolved);
+
+		x -= w;
 
 		if (!item->bSuicide)
 		{
@@ -240,7 +239,7 @@ void CHudDeathNotice::Draw(const float time)
 		}
 		x = gHUD.DrawHudString(item->szVictim, x, centerY - m_string_height);
 
-		y += weaponHeight + 6;
+		y += weaponHeight + 10;
 	}
 }
 

@@ -629,7 +629,7 @@ public:
 	void GetHudStringSize(const char* string, int& width, int& height);
 	int HudStringLen(const char* string);
 
-	void DrawHudBackground(int left, int top, int right, int bottom);
+	void DrawHudBackground(int left, int top, int right, int bottom, const bool highlight = false);
 
 	void RedrawZoomOverlay(float time);
 

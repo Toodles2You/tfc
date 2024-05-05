@@ -481,7 +481,7 @@ void CHud::GetChatInputPosition(int& x, int& y)
 	y = roundf (m_flOffsetY + (m_SayText.m_iBaseY + m_SayText.m_iLineHeight) * m_flScaleY);
 }
 
-void CHud::DrawHudBackground(int left, int top, int right, int bottom)
+void CHud::DrawHudBackground(int left, int top, int right, int bottom, const bool highlight)
 {
 	if (!IEngineStudio.IsHardware())
 	{
@@ -508,7 +508,9 @@ void CHud::DrawHudBackground(int left, int top, int right, int bottom)
 
 	gEngfuncs.pTriAPI->SpriteTexture (pSprite, 0);
 
-	gEngfuncs.pTriAPI->Color4fRendermode (0.0F, 0.0F, 0.0F, 1.0F / 2.0F, kRenderTransAlpha);
+	const auto value = highlight ? 0.4F : 0.0F;
+
+	gEngfuncs.pTriAPI->Color4fRendermode (value, 0.0F, 0.0F, 1.0F / 2.0F, kRenderTransAlpha);
 	gEngfuncs.pTriAPI->RenderMode (kRenderTransAlpha);
 
 	gEngfuncs.pTriAPI->Begin (TRI_QUADS);
