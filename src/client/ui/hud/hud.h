@@ -60,21 +60,23 @@ public:
 	friend class CHud;
 	virtual ~CHudBase() {}
 
-private:
+protected:
 	enum
 	{
 		kActive = 1,
 	};
 
+	/* Toodles TODO: Make these console variables. */
 	constexpr static float kMinAlpha = 100.0F;
 	constexpr static float kMaxAlpha = 200.0F;
 	constexpr static float kFadeTime = 100.0F;
 
+private:
 	int m_iFlags;
 	float m_fFade;
 
 protected:
-	int GetAlpha() { return kMinAlpha + (kMaxAlpha - kMinAlpha) * (m_fFade / kFadeTime); }
+	virtual int GetAlpha() { return kMinAlpha + (kMaxAlpha - kMinAlpha) * (m_fFade / kFadeTime); }
 	void Flash() { m_fFade = kFadeTime; }
 
 public:
@@ -633,7 +635,7 @@ public:
 	void GetHudStringSize(const char* string, int& width, int& height);
 	int HudStringLen(const char* string);
 
-	void DrawHudBackground(int x, int y, int w, int h);
+	void DrawHudBackground(int left, int top, int right, int bottom);
 
 	void RedrawZoomOverlay(float time);
 
