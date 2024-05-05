@@ -35,5 +35,6 @@ extern cvar_t mp_chattime;
 
 // Engine Cvars
 inline cvar_t* g_psv_cheats;
+inline cvar_t* mp_consistency;
 
 inline bool g_bDeveloperMode;

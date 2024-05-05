@@ -79,38 +79,42 @@ called when a player disconnects from a server
 */
 void ClientDisconnect(edict_t* pEntity)
 {
-	auto entity = CBaseEntity::Instance(pEntity);
+	auto player = static_cast<CBasePlayer*>(CBaseEntity::Instance(pEntity));
 
-	// since the edict doesn't get deleted, fix it so it doesn't interfere.
-	entity->pev->takedamage = DAMAGE_NO; // don't attract autoaim
-	entity->pev->solid = SOLID_NOT;	   // nonsolid
-	entity->SetOrigin(entity->pev->origin);
-
-	auto pPlayer = reinterpret_cast<CBasePlayer*>(GET_PRIVATE(pEntity));
-
-	if (pPlayer)
+	if (player != nullptr)
 	{
-		pPlayer->InstallGameMovement(nullptr);
+		/* Since the edict doesn't get deleted, fix it so it doesn't interfere. */
+		player->pev->solid = SOLID_NOT;
+		player->pev->movetype = MOVETYPE_NONE;
+		player->pev->takedamage = DAMAGE_NO;
+		player->SetOrigin(g_vecZero);
+
+		player->InstallGameMovement(nullptr);
 
 #ifdef HALFLIFE_TANKCONTROL
-		if (pPlayer->m_pTank != NULL)
+		if (player->m_pTank != NULL)
 		{
-			pPlayer->m_pTank->Use(pPlayer, pPlayer, USE_OFF, 0);
-			pPlayer->m_pTank = NULL;
+			player->m_pTank->Use(player, player, USE_OFF, 0);
+			player->m_pTank = NULL;
 		}
 #endif
 
-		pPlayer->SetUseObject(nullptr);
+		player->SetUseObject(nullptr);
 	}
 
 	g_pGameRules->ClientDisconnected(pEntity);
 
-#ifdef HALFLIFE_BOTS
-	if (g_pBotMan)
+	if (player != nullptr)
 	{
-		g_pBotMan->ClientDisconnect(pPlayer);
-	}
+#ifdef HALFLIFE_BOTS
+		if (g_pBotMan != nullptr)
+		{
+			g_pBotMan->ClientDisconnect(player);
+		}
 #endif
+
+		g_engfuncs.pfnFreeEntPrivateData(pEntity);
+	}
 }
 
 
@@ -1707,11 +1711,14 @@ One of the ENGINE_FORCE_UNMODIFIED files failed the consistency check for the sp
 int InconsistentFile(const edict_t* player, const char* filename, char* disconnect_message)
 {
 	// Server doesn't care?
-	if (CVAR_GET_FLOAT("mp_consistency") != 1)
+	if (mp_consistency->value != 1.0F)
+	{
 		return 0;
+	}
 
 	// Default behavior is to kick the player
-	sprintf(disconnect_message, "Server is enforcing file consistency for %s\n", filename);
+	snprintf(disconnect_message, 255, "Server is enforcing file consistency for \"%s\"\n", filename);
+	disconnect_message[255] = '\0';
 
 	// Kick now with specified disconnect message.
 	return 1;
