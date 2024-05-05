@@ -1,0 +1,306 @@
+//----------------------------------------------------------------------------
+// BotProfile.db
+// Author: Michael S. Booth, Turtle Rock Studios (www.turtlerockstudios.com)
+//
+// This database defines bot "personalities". 
+// Feel free to edit it and define your own bots.
+//
+
+//----------------------------------------------------------------------------
+
+Skin barney
+    Model = barney
+End
+
+Skin bbbbarney
+    Model = bbbbarney
+End
+
+Skin gina
+    Model = gina
+End
+
+Skin gman
+    Model = gman
+End
+
+Skin gordon
+    Model = gordon
+End
+
+Skin helmet
+    Model = helmet
+End
+
+Skin hgrunt
+    Model = hgrunt
+End
+
+Skin ivan
+    Model = ivan
+End
+
+Skin recon
+    Model = recon
+End
+
+Skin robo
+    Model = robo
+End
+
+Skin scientist
+    Model = scientist
+End
+
+Skin skeleton
+    Model = skeleton
+End
+
+Skin tmcm
+    Model = tmcm
+End
+
+Skin zombie
+    Model = zombie
+End
+
+
+//----------------------------------------------------------------------------
+
+//
+// All profiles begin with this data and overwrite their own
+//
+Default
+	Skill = 50
+	Aggression = 50
+	ReactionTime = 0.3
+	AttackDelay = 0
+	Teamwork = 75
+	WeaponPreference = none
+	Cost = 0
+	Difficulty = NORMAL
+	VoicePitch = 100
+	Skin = 0
+End
+
+//----------------------------------------------------------------------------
+
+//
+// These templates inherit from Default and override with their values
+// The name of the template defines a type that is used by individual bot profiles
+//
+
+// weapon preference templates
+Template Rifle
+	WeaponPreference = m4a1
+	WeaponPreference = ak47
+	WeaponPreference = famas
+	WeaponPreference = galil
+	WeaponPreference = mp5
+End
+
+Template RifleT
+	WeaponPreference = ak47
+	WeaponPreference = m4a1
+	WeaponPreference = galil
+	WeaponPreference = famas
+	WeaponPreference = mp5
+End
+
+Template Punch
+	WeaponPreference = aug
+	WeaponPreference = sg552
+	WeaponPreference = famas
+	WeaponPreference = galil
+	WeaponPreference = mp5
+End
+
+Template PunchT
+	WeaponPreference = aug
+	WeaponPreference = sg552
+	WeaponPreference = famas
+	WeaponPreference = galil
+	WeaponPreference = mp5
+End
+
+Template Sniper
+	WeaponPreference = awp
+	WeaponPreference = sg550
+	WeaponPreference = g3sg1
+	WeaponPreference = scout
+	WeaponPreference = famas
+	WeaponPreference = galil
+	WeaponPreference = mp5
+End
+
+Template Power
+	WeaponPreference = m249
+	WeaponPreference = xm1014
+	WeaponPreference = m3
+	WeaponPreference = famas
+	WeaponPreference = galil
+	WeaponPreference = mp5
+End
+
+Template Shotgun
+	WeaponPreference = xm1014
+	WeaponPreference = m3
+	WeaponPreference = famas
+	WeaponPreference = galil
+	WeaponPreference = mp5
+End
+
+Template Shield
+	WeaponPreference = shield
+	WeaponPreference = m4a1			// in case shield is disallowed
+	WeaponPreference = ak47
+	WeaponPreference = famas
+	WeaponPreference = galil
+	WeaponPreference = mp5
+End
+
+Template Spray
+	WeaponPreference = p90
+	WeaponPreference = tmp
+	WeaponPreference = mac10
+	WeaponPreference = mp5
+End
+
+
+// skill templates
+Template Elite
+	Skill = 100
+	Aggression = 100
+	ReactionTime = 0.2
+	Cost = 4
+	Difficulty = EXPERT
+	VoicePitch = 85
+End
+
+Template Expert
+	Skill = 90
+	Aggression = 90
+	ReactionTime = 0.2
+	Cost = 4
+	Difficulty = EXPERT
+	VoicePitch = 88
+End
+
+Template VeryHard
+	Skill = 80
+	Aggression = 80
+	ReactionTime = 0.25
+	Cost = 3
+	Difficulty = HARD
+	VoicePitch = 92
+End
+
+Template Hard
+	Skill = 75
+	Aggression = 75
+	ReactionTime = 0.25
+	Cost = 3
+	Difficulty = HARD
+	VoicePitch = 94
+End
+
+Template Tough
+	Skill = 60
+	Aggression = 60
+	ReactionTime = 0.3
+	AttackDelay = 0.35
+	Cost = 2
+	Difficulty = NORMAL+HARD
+	VoicePitch = 96
+End
+
+Template Normal
+	Skill = 50
+	Aggression = 50
+	ReactionTime = 0.4
+	AttackDelay = 0.7
+	Cost = 2
+	Difficulty = NORMAL
+End
+
+Template Fair
+	Skill = 25
+	Aggression = 30
+	ReactionTime = 0.4
+	AttackDelay = 1.0
+	Cost = 1
+	Difficulty = EASY+NORMAL
+	VoicePitch = 105
+End
+
+Template Easy
+	Skill = 0
+	Aggression = 20
+	ReactionTime = 0.5
+	AttackDelay = 1.5
+	Cost = 1
+	Difficulty = EASY
+	VoicePitch = 110
+End
+
+//----------------------------------------------------------------------------
+//
+// These are the individual bot profiles, which inherit first from 
+// Default and then the specified Template(s), in order
+//
+
+Normal "Barney Caljoun"
+    Skin = barney
+End
+
+Normal "Freeze!"
+    Skin = bbbbarney
+End
+
+Normal "Gina Cross"
+    Skin = gina
+End
+
+Normal "G-Man"
+    Skin = gman
+End
+
+Normal "Gordon Freeman"
+    Skin = gordon
+End
+
+Normal "Xen Survey Team"
+    Skin = helmet
+End
+
+Normal "Adrian Shephard"
+    Skin = hgrunt
+End
+
+Normal "Ivan The Space Biker"
+    Skin = ivan
+End
+
+Normal "HECU Recon"
+    Skin = recon
+End
+
+Normal "HECU Automaton"
+    Skin = robo
+End
+
+Normal "Walter Bennett"
+    Skin = scientist
+End
+
+Normal "*The Skeleton Appears*"
+    Skin = skeleton
+End
+
+Normal "Too Much Coffee Man"
+    Skin = tmcm
+End
+
+Normal "Headcrab Zombie"
+    Skin = zombie
+End
