@@ -162,17 +162,21 @@ bool CHalfLifeMovement::BeginUnducking()
     }
 
     Vector vecOrigin = pmove->origin;
+    bool tryAgain = false;
 
     if (pmove->onground != -1)
     {
         vecOrigin.z += pmove->player_mins[1].z - pmove->player_mins[0].z;
     }
-#if 0
-    else
+    else if (IsSubmerged())
     {
-        vecOrigin.z -= VEC_VIEW.z - VEC_DUCK_VIEW.z;
+        tryAgain = true;
+secondAttempt:
+        if (!tryAgain)
+        {
+            vecOrigin.z += pmove->player_mins[1].z - pmove->player_mins[0].z;
+        }
     }
-#endif
 
     pmtrace_t trace = pmove->PM_PlayerTraceEx(
         vecOrigin,
@@ -182,6 +186,11 @@ bool CHalfLifeMovement::BeginUnducking()
 
     if (trace.startsolid != 0)
     {
+        if (tryAgain)
+        {
+            tryAgain = false;
+            goto secondAttempt;
+        }
         return false;
     }
     
@@ -196,6 +205,11 @@ bool CHalfLifeMovement::BeginUnducking()
     if (trace.startsolid != 0)
     {
         pmove->usehull = 1;
+        if (tryAgain)
+        {
+            tryAgain = false;
+            goto secondAttempt;
+        }
         return false;
     }
 
