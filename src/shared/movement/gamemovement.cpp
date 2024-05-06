@@ -19,6 +19,11 @@
 #include "pm_debug.h"
 #include "gamemovement.h"
 
+#ifdef CLIENT_DLL
+#include "hud.h"
+#include "player_info.h"
+#endif
+
 #include <algorithm>
 
 
@@ -52,6 +57,7 @@ void CHalfLifeMovement::Move()
         pmove->movetype = MOVETYPE_NOCLIP;
     }
 
+    BuildCollisionMask();
     CheckParameters();
     CategorizePosition();
     CheckDucking();
@@ -103,6 +109,39 @@ void CHalfLifeMovement::Move()
     }
 
     pmove->movetype = saveMovetype;
+}
+
+
+void CHalfLifeMovement::BuildCollisionMask()
+{
+    for (auto i = 1; i <= MAX_PLAYERS; i++)
+    {
+#ifdef GAME_DLL
+        auto otherTeam = TEAM_UNASSIGNED;
+        auto otherPlayer = util::PlayerByIndex(i);
+        if (otherPlayer != nullptr)
+        {
+            otherTeam = otherPlayer->TeamNumber();
+        }
+#else
+        auto otherTeam = g_PlayerExtraInfo[i].teamnumber;
+#endif
+        /* Prevent collision against teammates. */
+        m_shouldCollide[i - 1] = (player->TeamNumber() != otherTeam);
+    }
+}
+
+
+bool CHalfLifeMovement::ShouldCollide(physent_t* other)
+{
+    if (other->player != 0
+     && other->info >= 1
+     && other->info <= MAX_PLAYERS)
+    {
+        return m_shouldCollide[other->info - 1];
+    }
+
+    return true;
 }
 
 

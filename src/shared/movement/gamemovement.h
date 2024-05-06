@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "bitvec.h"
+
 class CBasePlayer;
 
 
@@ -39,6 +41,7 @@ public:
     CHalfLifeMovement(playermove_t* _pmove, CBasePlayer* _player);
 
     virtual void Move() override;
+    virtual bool ShouldCollide(physent_t* other) override;
 
 protected:
     void BuildWishMove(const Vector& move);
@@ -83,6 +86,8 @@ protected:
     virtual bool Climb(physent_t* ladder);
     bool CheckLadder();
 
+    void BuildCollisionMask();
+
 public:
     static void ClipVelocity(const Vector& in, const Vector& normal, Vector& out, const float overbounce);
 
@@ -94,6 +99,7 @@ protected:
     float m_wishSpeed;
     Vector m_freeWishDir;
     float m_freeWishSpeed;
+    CBitVec<MAX_PLAYERS> m_shouldCollide;
 };
 
 
