@@ -82,6 +82,11 @@ void CRocket::RocketTouch(CBaseEntity* pOther)
 			}
 		}
 
+		if (pOther->pev->takedamage != DAMAGE_NO && pOther->IsBSPModel())
+		{
+			pOther->TakeDamage(this, owner, pev->dmg, DMG_BLAST);
+		}
+
 		ExplodeTouch(pOther);
 	}
 
