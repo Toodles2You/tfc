@@ -391,7 +391,16 @@ void DispatchTouch(edict_t* pentTouched, edict_t* pentOther)
 	CBaseEntity* pOther = (CBaseEntity*)GET_PRIVATE(pentOther);
 
 	if (pEntity && pOther && ((pEntity->pev->flags | pOther->pev->flags) & FL_KILLME) == 0)
-		pEntity->Touch(pOther);
+	{
+		/*
+			Toodles: Trigger entities (such as items) don't call "ShouldCollide" since 
+			they technically don't "collide" with entities, so it must be checked here.
+		*/
+		if (pEntity->pev->solid != SOLID_TRIGGER || pEntity->ShouldCollide(pOther))
+		{
+			pEntity->Touch(pOther);
+		}
+	}
 }
 
 
@@ -478,6 +487,19 @@ void OnFreeEntPrivateData(edict_s* pEdict)
 
 int ShouldCollide(edict_t* pentTouched, edict_t* pentOther)
 {
+	auto touched = static_cast<CBaseEntity*>(GET_PRIVATE(pentTouched));
+	auto other = static_cast<CBaseEntity*>(GET_PRIVATE(pentOther));
+
+	if (touched != nullptr && other != nullptr && ((touched->pev->flags | other->pev->flags) & FL_KILLME) == 0)
+	{
+		/*
+			Toodles: Important to note that this will not affect player physics.
+			Define CHalfLifePlayerMovement::ShouldCollide in order to prevent 
+			players from colliding with objects.
+		*/
+		return touched->ShouldCollide(other) && other->ShouldCollide(touched);
+	}
+
 	return 1;
 }
 

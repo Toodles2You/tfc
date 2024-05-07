@@ -226,6 +226,10 @@ public:
 		if (m_pfnBlocked)
 			(this->*m_pfnBlocked)(pOther);
 	}
+	virtual bool ShouldCollide(CBaseEntity* other)
+	{
+		return true;
+	}
 
 	void* operator new(size_t stAllocateBlock)
 	{
