@@ -84,6 +84,8 @@ bool CPipeBomb::Spawn()
         pev->pain_finished = gpGlobals->time + 0.5F;
     }
 
+	pev->air_finished = gpGlobals->time;
+
 	tent::RocketTrail(this, false);
 
 	return true;

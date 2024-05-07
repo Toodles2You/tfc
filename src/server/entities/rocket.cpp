@@ -58,6 +58,8 @@ bool CRocket::Spawn()
 	pev->nextthink = gpGlobals->time + 1.0F / 30.0F;
 	pev->pain_finished = gpGlobals->time + 5.0F;
 
+	pev->air_finished = gpGlobals->time;
+
 	tent::RocketTrail(this);
 
 	return true;

@@ -223,6 +223,22 @@ CGrenade* CGrenade::ShootContact(CBaseEntity* owner, Vector vecStart, Vector vec
 }
 
 
+bool CGrenade::ShouldCollide(CBaseEntity* other)
+{
+	if (!other->IsPlayer())
+	{
+		return CBaseAnimating::ShouldCollide(other);
+	}
+
+	/* Don't collide with teammates for the first moments of flight. */
+	return gpGlobals->time - pev->air_finished >= 0.5F
+		|| g_pGameRules->FPlayerCanTakeDamage(
+			dynamic_cast<CBasePlayer*>(other),
+			CBaseEntity::Instance(pev->owner),
+			this);
+}
+
+
 #ifdef HALFLIFE_GRENADES
 
 bool CPrimeGrenade::Spawn()
@@ -387,6 +403,8 @@ void CPrimeGrenade::Throw(throw_e mode)
 		ResetSequenceInfo();
 	}
 
+	pev->air_finished = gpGlobals->time;
+
 	MessageBegin(MSG_ONE, gmsgStatusIcon, owner);
 	WriteByte(0);
 	WriteString(GetIconName());
@@ -538,6 +556,20 @@ void CCaltrop::CaltropTouch(CBaseEntity* other)
 	}
 
 	Remove();
+}
+
+
+bool CCaltrop::ShouldCollide(CBaseEntity* other)
+{
+	if (!other->IsPlayer())
+	{
+		return CPrimeGrenade::ShouldCollide(other);
+	}
+
+	return g_pGameRules->FPlayerCanTakeDamage(
+		dynamic_cast<CBasePlayer*>(other),
+		CBaseEntity::Instance(pev->owner),
+		this);
 }
 
 
@@ -868,6 +900,20 @@ bool CBomblet::Spawn()
 	pev->dmg_take = 360;
 
 	return true;
+}
+
+
+bool CBomblet::ShouldCollide(CBaseEntity* other)
+{
+	if (!other->IsPlayer())
+	{
+		return CPrimeGrenade::ShouldCollide(other);
+	}
+
+	return g_pGameRules->FPlayerCanTakeDamage(
+		dynamic_cast<CBasePlayer*>(other),
+		CBaseEntity::Instance(pev->owner),
+		this);
 }
 
 

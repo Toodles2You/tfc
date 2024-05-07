@@ -447,6 +447,8 @@ public:
 	void EXPORT TumbleThink();
 
 	virtual void BounceSound();
+
+	bool ShouldCollide(CBaseEntity* other) override;
 };
 
 #ifdef HALFLIFE_GRENADES
@@ -500,6 +502,8 @@ public:
 	bool Spawn() override;
 	void EXPORT CaltropThink();
 	void EXPORT CaltropTouch(CBaseEntity* other);
+
+	bool ShouldCollide(CBaseEntity* other) override;
 
 	const char* GetModelName() override { return "models/caltrop.mdl"; }
 	const char* GetIconName() override { return "d_caltrop"; }
@@ -567,11 +571,12 @@ private:
 	static constexpr int kNumBomblets = 4;
 };
 
-/* Toodles: This had a bunch of stupid randomness that I got rid of. */
 class CBomblet : public CPrimeGrenade
 {
 public:
 	bool Spawn() override;
+
+	bool ShouldCollide(CBaseEntity* other) override;
 
 	const char* GetModelName() override { return "models/bomblet.mdl"; }
 	const char* GetIconName() override { return "d_mirvgrenade"; }
