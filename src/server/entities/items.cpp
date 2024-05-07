@@ -168,6 +168,7 @@ public:
 			pev->armortype = 0.3F;
 			pev->model = MAKE_STRING("models/g_armor.mdl");
 			pev->noise = MAKE_STRING("items/armoron_1.wav");
+			pev->netname = MAKE_STRING("item_armor");
 		}
 		else if (FStrEq("item_armor2", classname))
 		{
@@ -175,6 +176,7 @@ public:
 			pev->armortype = 0.6F;
 			pev->model = MAKE_STRING("models/y_armor.mdl");
 			pev->noise = MAKE_STRING("items/armoron_1.wav");
+			pev->netname = MAKE_STRING("item_armor");
 		}
 		else if (FStrEq("item_armor3", classname))
 		{
@@ -182,6 +184,7 @@ public:
 			pev->armortype = 0.8F;
 			pev->model = MAKE_STRING("models/r_armor.mdl");
 			pev->noise = MAKE_STRING("items/armoron_1.wav");
+			pev->netname = MAKE_STRING("item_armor");
 		}
 		else if (FStrEq("item_shells", classname))
 		{

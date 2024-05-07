@@ -103,7 +103,7 @@ public:
 extern WeaponsResource gWR;
 
 
-#define MAX_HISTORY 12
+#define MAX_HISTORY 8
 enum
 {
 	HISTSLOT_EMPTY,
@@ -119,33 +119,34 @@ private:
 	{
 		int type;
 		float DisplayTime; // the time at which this item should be removed from the history
-		int iCount;
+		byte iCount;
 		int iId;
 	};
 
-	HIST_ITEM rgAmmoHistory[MAX_HISTORY];
+	HIST_ITEM rgAmmoHistory[MAX_HISTORY + 1];
 
 public:
 	void Init()
 	{
+		hud_drawhistory_time = gEngfuncs.pfnRegisterVariable("hud_drawhistory_time", "5", 0);
 		Reset();
 	}
 
 	void Reset()
 	{
-		memset(rgAmmoHistory, 0, sizeof rgAmmoHistory);
-		iHistoryGap = 45;
-		iCurrentHistorySlot = 0;
+		memset(rgAmmoHistory, 0, sizeof (rgAmmoHistory));
 	}
 
-	int iHistoryGap;
-	int iCurrentHistorySlot;
-
+private:
+	HIST_ITEM* GetFreeItem();
+public:
 	void AddToHistory(int iType, int iId, int iCount = 0);
-	void AddToHistory(int iType, const char* szName, int iCount = 0);
+	void AddToHistory(const char* szName, int iCount = 0);
 
-	void CheckClearHistory();
-	bool DrawAmmoHistory(float flTime);
+	void DrawAmmoHistory(const float time);
+
+private:
+	cvar_t *hud_drawhistory_time;
 };
 
 extern HistoryResource gHR;

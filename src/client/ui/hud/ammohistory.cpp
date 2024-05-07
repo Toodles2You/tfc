@@ -23,162 +23,172 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <algorithm>
 
 #include "ammohistory.h"
 
 HistoryResource gHR;
 
-#define AMMO_PICKUP_GAP (gHR.iHistoryGap + 5)
-#define AMMO_PICKUP_PICK_HEIGHT (32 + (gHR.iHistoryGap * 2))
-#define AMMO_PICKUP_HEIGHT_MAX (gHUD.GetHeight() - 100)
-
-#define MAX_ITEM_NAME 32
-int HISTORY_DRAW_TIME = 5;
-
-// keep a list of items
-struct ITEM_INFO
+HistoryResource::HIST_ITEM* HistoryResource::GetFreeItem()
 {
-	char szName[MAX_ITEM_NAME];
-	HSPRITE spr;
-	Rect rect;
-};
+	int i;
+	HIST_ITEM* item;
 
-void HistoryResource::AddToHistory(int iType, int iId, int iCount)
-{
-	if (iType == HISTSLOT_AMMO && 0 == iCount)
-		return; // no amount, so don't add
-
-	if ((((AMMO_PICKUP_GAP * iCurrentHistorySlot) + AMMO_PICKUP_PICK_HEIGHT) > AMMO_PICKUP_HEIGHT_MAX) || (iCurrentHistorySlot >= MAX_HISTORY))
-	{ // the pic would have to be drawn too high
-		// so start from the bottom
-		iCurrentHistorySlot = 0;
-	}
-
-	HIST_ITEM* freeslot = &rgAmmoHistory[iCurrentHistorySlot++]; // default to just writing to the first slot
-	HISTORY_DRAW_TIME = CVAR_GET_FLOAT("hud_drawhistory_time");
-
-	freeslot->type = iType;
-	freeslot->iId = iId;
-	freeslot->iCount = iCount;
-	freeslot->DisplayTime = gHUD.m_flTime + HISTORY_DRAW_TIME;
-}
-
-void HistoryResource::AddToHistory(int iType, const char* szName, int iCount)
-{
-	if (iType != HISTSLOT_ITEM)
-		return;
-
-	if ((((AMMO_PICKUP_GAP * iCurrentHistorySlot) + AMMO_PICKUP_PICK_HEIGHT) > AMMO_PICKUP_HEIGHT_MAX) || (iCurrentHistorySlot >= MAX_HISTORY))
-	{ // the pic would have to be drawn too high
-		// so start from the bottom
-		iCurrentHistorySlot = 0;
-	}
-
-	HIST_ITEM* freeslot = &rgAmmoHistory[iCurrentHistorySlot++]; // default to just writing to the first slot
-
-	// I am really unhappy with all the code in this file
-
-	int i = gHUD.GetSpriteIndex(szName);
-	if (i == -1)
-		return; // unknown sprite name, don't add it to history
-
-	freeslot->iId = i;
-	freeslot->type = iType;
-	freeslot->iCount = iCount;
-
-	HISTORY_DRAW_TIME = CVAR_GET_FLOAT("hud_drawhistory_time");
-	freeslot->DisplayTime = gHUD.m_flTime + HISTORY_DRAW_TIME;
-}
-
-
-void HistoryResource::CheckClearHistory()
-{
-	for (int i = 0; i < MAX_HISTORY; i++)
+	for (i = 0; i < MAX_HISTORY; i++)
 	{
-		if (HISTSLOT_EMPTY != rgAmmoHistory[i].type)
-			return;
-	}
+		item = rgAmmoHistory + i;
 
-	iCurrentHistorySlot = 0;
-}
-
-//
-// Draw Ammo pickup history
-//
-bool HistoryResource::DrawAmmoHistory(float flTime)
-{
-	float scale;
-
-	for (int i = 0; i < MAX_HISTORY; i++)
-	{
-		if (HISTSLOT_EMPTY != rgAmmoHistory[i].type)
+		if (item->type == HISTSLOT_EMPTY)
 		{
-			rgAmmoHistory[i].DisplayTime = std::min(rgAmmoHistory[i].DisplayTime, gHUD.m_flTime + HISTORY_DRAW_TIME);
-
-			scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
-			scale = std::min(scale, 255.0F);
-
-			if (rgAmmoHistory[i].DisplayTime <= flTime)
-			{ // pic drawing time has expired
-				memset(&rgAmmoHistory[i], 0, sizeof(HIST_ITEM));
-				CheckClearHistory();
-			}
-			else if (rgAmmoHistory[i].type == HISTSLOT_AMMO)
-			{
-				Rect rcPic;
-				HSPRITE* spr = gWR.GetAmmoPicFromWeapon(rgAmmoHistory[i].iId, rcPic);
-
-
-				// Draw the pic
-				int ypos = gHUD.GetHeight() - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * i));
-				int xpos = gHUD.GetWidth() - 24;
-				if (spr && 0 != *spr) // weapon isn't loaded yet so just don't draw the pic
-				{					  // the dll has to make sure it has sent info the weapons you need
-					gHUD.DrawHudSprite(*spr, 0, &rcPic, xpos, ypos, CHud::COLOR_PRIMARY, scale);
-				}
-
-				int r, g, b;
-				gHUD.GetColor(r, g, b, CHud::COLOR_PRIMARY);
-				ScaleColors(r, g, b, scale);
-
-				// Draw the number
-				gHUD.DrawHudNumberString(xpos - 10, ypos, xpos - 100, rgAmmoHistory[i].iCount, r, g, b);
-			}
-			else if (rgAmmoHistory[i].type == HISTSLOT_WEAP)
-			{
-				WEAPON* weap = gWR.GetWeapon(rgAmmoHistory[i].iId);
-
-				if (!weap)
-					return true; // we don't know about the weapon yet, so don't draw anything
-
-				int ypos = gHUD.GetHeight() - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * i));
-				int xpos = gHUD.GetWidth() - (weap->rcInactive.right - weap->rcInactive.left);
-
-				gHUD.DrawHudSprite(
-					weap->hInactive,
-					0,
-					&weap->rcInactive,
-					xpos,
-					ypos,
-					!gWR.HasAmmo(weap) ? CHud::COLOR_WARNING : CHud::COLOR_PRIMARY,
-					scale
-				);
-			}
-			else if (rgAmmoHistory[i].type == HISTSLOT_ITEM)
-			{
-				if (0 == rgAmmoHistory[i].iId)
-					continue; // sprite not loaded
-
-				Rect rect = gHUD.GetSpriteRect(rgAmmoHistory[i].iId);
-
-				int ypos = gHUD.GetHeight() - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * i));
-				int xpos = gHUD.GetWidth() - (rect.right - rect.left) - 10;
-
-				gHUD.DrawHudSpriteIndex(rgAmmoHistory[i].iId, xpos, ypos, CHud::COLOR_PRIMARY, scale);
-			}
+			break;
 		}
 	}
 
+	if (i == MAX_HISTORY)
+	{
+		memmove(
+			rgAmmoHistory,
+			rgAmmoHistory + 1,
+			sizeof(HIST_ITEM) * MAX_HISTORY);
 
-	return true;
+		i = MAX_HISTORY - 1;
+	}
+
+	return item;
+}
+
+void HistoryResource::AddToHistory(int iType, int iId, int iCount)
+{
+	auto item = GetFreeItem();
+
+	item->type = iType;
+	item->iId = iId;
+	item->iCount = iCount;
+	item->DisplayTime = gHUD.m_flTime;
+}
+
+void HistoryResource::AddToHistory(const char* szName, int iCount)
+{
+	const auto itemIndex = gHUD.GetSpriteIndex(szName);
+
+	/* Unknown sprite */
+	if (itemIndex == -1)
+	{
+		return;
+	}
+
+	auto item = GetFreeItem();
+
+	item->iId = itemIndex;
+	item->type = HISTSLOT_ITEM;
+	item->iCount = iCount;
+	item->DisplayTime = gHUD.m_flTime;
+}
+
+void HistoryResource::DrawAmmoHistory(float time)
+{
+	const auto color = CHud::COLOR_PRIMARY;
+
+	/* Draw the history in the lower right corner of the HUD, above the secondary ammo. */
+	const auto x = gHUD.GetWidth() - 10;
+
+	auto y = gHUD.GetHeight() - 99;
+
+	for (auto i = 0; i < MAX_HISTORY; i++)
+	{
+		auto item = rgAmmoHistory + i;
+
+		if (item->type == HISTSLOT_EMPTY)
+		{
+			break;
+		}
+
+		const auto deltaTime = time - item->DisplayTime;
+		const auto displayTime = hud_drawhistory_time->value;
+
+		if (deltaTime >= displayTime)
+		{
+			/* Display time has expired; Remove the current item from the list. */
+			memmove(rgAmmoHistory + i, rgAmmoHistory + i + 1, sizeof(HIST_ITEM) * (MAX_HISTORY - i));
+			i--;
+			continue;
+		}
+
+		const auto alpha = CHudBase::kMaxAlpha * (1.0F - deltaTime / displayTime);
+
+		switch (item->type)
+		{
+			case HISTSLOT_AMMO:
+			{
+				Rect ammoRect;
+				const auto ammoSprite = *gWR.GetAmmoPicFromWeapon(item->iId, ammoRect);
+
+				if (ammoSprite != 0)
+				{
+					gHUD.DrawHudSprite(
+						ammoSprite,
+						0,
+						&ammoRect,
+						x,
+						y,
+						color,
+						alpha,
+						CHud::a_southeast);
+
+					/* Draw the count to the left of the icon. */
+					int r, g, b;
+					gHUD.GetColor(r, g, b, color);
+					ScaleColors(r, g, b, alpha);
+
+					char str[4];
+					sprintf(str, "%d", item->iCount);
+
+					gHUD.DrawHudStringReverse(x - 32, y - 16, x - 128, str, r, g, b);
+				}
+
+				y -= 32;
+				break;
+			}
+
+			case HISTSLOT_WEAP:
+			{
+				auto weapon = gWR.GetWeapon(item->iId);
+
+				if (weapon != nullptr)
+				{
+					const auto hasAmmo = gWR.HasAmmo(weapon);
+
+					gHUD.DrawHudSprite(
+						weapon->hInactive,
+						0,
+						&weapon->rcInactive,
+						x,
+						y,
+						hasAmmo ? color : CHud::COLOR_WARNING,
+						alpha,
+						CHud::a_southeast);
+				}
+
+				y -= 70;
+				break;
+			}
+
+			case HISTSLOT_ITEM:
+			{
+				if (item->iId != 0)
+				{
+					gHUD.DrawHudSpriteIndex(
+						item->iId,
+						x,
+						y,
+						color,
+						alpha,
+						CHud::a_southeast);
+				}
+
+				y -= 32;
+				break;
+			}
+		}
+	}
 }

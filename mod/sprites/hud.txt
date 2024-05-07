@@ -76,8 +76,8 @@ d_gasgrenade			640	tfc_dmsg	60	96	24	24
 d_empgrenade			640	tfc_dmsg	60	120	24	24
 d_concussiongrenade		640	tfc_dmsg	60	144	24	24
 
-item_battery	640 640hud2	176	0	44	44
-item_healthkit	640 640hud2	176	48	44	44
+item_armor		640 320hud2	48	52	20	20
+item_healthkit	640	320hud2	68	52	20	20
 
 shell			640 640hud7		72	72	24	24
 nail			640 640hud7		0	72	24	24

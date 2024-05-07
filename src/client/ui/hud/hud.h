@@ -58,6 +58,7 @@ class CHudBase
 {
 public:
 	friend class CHud;
+	friend class HistoryResource;
 	virtual ~CHudBase() {}
 
 protected:

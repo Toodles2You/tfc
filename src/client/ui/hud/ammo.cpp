@@ -172,8 +172,6 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 		sprintf(sz, "sprites/%s.spr", p->szSprite);
 		pWeapon->hInactive = SPR_Load(sz);
 		pWeapon->rcInactive = p->rc;
-
-		gHR.iHistoryGap = std::max(gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top);
 	}
 	else
 		pWeapon->hInactive = 0;
@@ -267,7 +265,6 @@ bool CHudAmmo::Init()
 	HOOK_COMMAND("invprev", PrevWeapon);
 	HOOK_COMMAND("lastinv", LastWeapon);
 
-	CVAR_CREATE("hud_drawhistory_time", "5", 0);
 	hud_fastswitch = CVAR_CREATE("hud_fastswitch", "0", FCVAR_ARCHIVE); // controls whether or not weapons can be selected in one keypress
 	hud_selection_fadeout = CVAR_CREATE("hud_selection_fadeout", "0.5", FCVAR_ARCHIVE);
 	hud_selection_timeout = CVAR_CREATE("hud_selection_timeout", "1.5", FCVAR_ARCHIVE);
@@ -300,8 +297,6 @@ void CHudAmmo::VidInit()
 	ghsprBuckets = gHUD.GetSprite(m_HUD_bucket0);
 	giBucketWidth = gHUD.GetSpriteRect(m_HUD_bucket0).right - gHUD.GetSpriteRect(m_HUD_bucket0).left;
 	giBucketHeight = gHUD.GetSpriteRect(m_HUD_bucket0).bottom - gHUD.GetSpriteRect(m_HUD_bucket0).top;
-
-	gHR.iHistoryGap = std::max(gHR.iHistoryGap, gHUD.GetSpriteRect(m_HUD_bucket0).bottom - gHUD.GetSpriteRect(m_HUD_bucket0).top);
 
 	// If we've already loaded weapons, let's get new sprites
 	gWR.LoadAllWeaponSprites();
@@ -555,7 +550,7 @@ bool CHudAmmo::MsgFunc_ItemPickup(const char* pszName, int iSize, void* pbuf)
 	const char* szName = READ_STRING();
 
 	// Add the weapon to the history
-	gHR.AddToHistory(HISTSLOT_ITEM, szName);
+	gHR.AddToHistory(szName);
 
 	return true;
 }
