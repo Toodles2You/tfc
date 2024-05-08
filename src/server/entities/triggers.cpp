@@ -1655,6 +1655,11 @@ void CTriggerPush::Touch(CBaseEntity* pOther)
 {
 	entvars_t* pevToucher = pOther->pev;
 
+	if (!pOther->IsPlayer())
+	{
+		return;
+	}
+
 	switch (pevToucher->movetype)
 	{
 	case MOVETYPE_NONE:
