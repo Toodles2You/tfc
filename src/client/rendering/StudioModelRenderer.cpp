@@ -2059,6 +2059,9 @@ void CStudioModelRenderer::StudioDrawPoints()
 	int rendermode = m_pCurrentEntity->curstate.rendermode;
 	float renderamt = (rendermode == kRenderNormal) ? 1.0F : (m_pCurrentEntity->curstate.renderamt / 255.0F);
 
+	/* Avoid unneeded state switches. */
+	auto previousRenderMode = -1;
+
 	gEngfuncs.pTriAPI->CullFace(m_fFlipModel ? TRI_NONE : TRI_FRONT);
 
 	for (j = 0; j < m_pSubModel->nummesh; j++)
@@ -2075,6 +2078,24 @@ void CStudioModelRenderer::StudioDrawPoints()
 		chrome = (flags & STUDIO_NF_CHROME) != 0;
 		additive = (flags & STUDIO_NF_ADDITIVE) != 0;
 		masked = (flags & STUDIO_NF_MASKED) != 0;
+
+		auto newRenderMode = kRenderNormal;
+
+		if (masked)
+		{
+			newRenderMode = kRenderTransAlpha;
+		}
+		else if (additive)
+		{
+			newRenderMode = kRenderTransAdd;
+		}
+
+		if (newRenderMode != previousRenderMode)
+		{
+			IEngineStudio.SetupRenderer(newRenderMode);
+			IEngineStudio.GL_SetRenderMode(newRenderMode);
+			previousRenderMode = newRenderMode;
+		}
 
 		while ((i = *(pTriCmds++)) != 0)
 		{
