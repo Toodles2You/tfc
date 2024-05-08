@@ -62,7 +62,6 @@ void GameDLLInit()
 {
 	g_psv_cheats = CVAR_GET_POINTER("sv_cheats");
 	mp_consistency = g_engfuncs.pfnCVarGetPointer("mp_consistency");
-	g_bDeveloperMode = g_engfuncs.pfnCVarGetFloat("developer") != 0.0F;
 
 	if (!SV_InitServer())
 	{

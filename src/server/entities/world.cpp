@@ -28,6 +28,7 @@
 #include "player.h"
 #include "weapons.h"
 #include "gamerules.h"
+#include "game.h"
 #ifdef HALFLIFE_NODEGRAPH
 #include "nodes.h"
 #endif
@@ -384,6 +385,8 @@ void CWorld::Precache()
 		Remove();
 		return;
 	}
+
+	g_bDeveloperMode = g_engfuncs.pfnCVarGetFloat("developer") != 0.0F;
 
 	// Set up game rules
 	delete g_pGameRules;
