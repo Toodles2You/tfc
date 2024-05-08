@@ -1047,6 +1047,7 @@ dead_bonuses:
     if (HasGoalResults(TFGR_FORCE_RESPAWN))
     {
         dynamic_cast<CBasePlayer*>(player)->RemoveAllWeapons();
+        dynamic_cast<CBasePlayer*>(player)->RemoveAllObjects();
         player->Spawn();
     }
 }

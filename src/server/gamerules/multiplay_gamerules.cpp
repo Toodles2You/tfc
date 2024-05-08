@@ -480,7 +480,9 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 				g_engfuncs.pfnGetPlayerAuthId(pPlayer->edict()));
 
             pPlayer->RemoveGoalItems();
+			pPlayer->DropBackpack();
 			pPlayer->RemoveAllWeapons(); // destroy all of the players weapons and items
+			pPlayer->RemoveAllObjects();
 		}
 
 		pClient->v.team = TEAM_UNASSIGNED;

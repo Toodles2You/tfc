@@ -176,6 +176,8 @@ public:
 
 	void RemoveAllWeapons();
 
+	void RemoveAllObjects();
+
 	void SetWeaponBit(int id);
 	void ClearWeaponBit(int id);
 
@@ -244,6 +246,7 @@ public:
 
 	bool GiveAmmo(int iAmount, int iType) override;
 #ifdef GAME_DLL
+	void DropBackpack();
 	void DiscardAmmo();
 #endif
 

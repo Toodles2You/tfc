@@ -26,7 +26,7 @@ public:
 
 	virtual bool MyTouch(CBasePlayer* pPlayer) { return false; }
 
-	static CItem* DropBackpack(CBaseEntity* owner, int shells, int nails, int rockets, int cells);
+	static CItem* DropBackpack(CBaseEntity* owner, int shells, int nails, int rockets, int cells, bool drop);
 
 protected:
 	bool CanHaveItem(CBaseEntity* other);

@@ -384,7 +384,7 @@ public:
 		{
 			return CTFWeapon::ObjectCaps();
 		}
-		return CTFWeapon::ObjectCaps() | FCAP_CONTINUOUS_USE;
+		return CTFWeapon::ObjectCaps() | FCAP_DONT_SAVE | FCAP_CONTINUOUS_USE;
 	}
 
 	int GetID() const override { return WEAPON_DETPACK; }
@@ -434,6 +434,8 @@ class CGrenade : public CBaseAnimating
 {
 public:
 	bool Spawn() override;
+
+	int ObjectCaps() override { return CBaseAnimating::ObjectCaps() | FCAP_DONT_SAVE; }
 
 	static CGrenade* ShootContact(CBaseEntity* owner, Vector vecStart, Vector vecVelocity);
 
@@ -589,6 +591,8 @@ class CRocket : public CGrenade
 public:
 	bool Spawn() override;
 
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() | FCAP_DONT_SAVE; }
+
 	static CRocket* CreateRocket(
 		const Vector& origin,
 		const Vector& dir,
@@ -604,6 +608,8 @@ class CNail : public CBaseEntity
 {
 public:
 	bool Spawn() override;
+
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() | FCAP_DONT_SAVE; }
 
 	static CNail* CreateNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
 	static CNail* CreateNailGrenadeNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);

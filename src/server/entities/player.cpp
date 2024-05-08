@@ -506,6 +506,58 @@ void CBasePlayer::RemoveAllWeapons()
 }
 
 
+void CBasePlayer::RemoveAllObjects()
+{
+	auto e = util::GetEntityList();
+
+	if (e == nullptr)
+	{
+		return;
+	}
+
+	/* Ignore the world. */
+	e++;
+
+	/*
+		Toodles TODO: This doesn't remove client-side nails, obviously.
+		That's not a huge deal but, it'd be a nice feature to have.
+	*/
+	auto count = 0;
+
+	for (auto i = 1; i < gpGlobals->maxEntities; i++, e++)
+	{
+		if (e->free != 0
+		 || (e->v.flags & FL_KILLME) != 0
+		 || e->v.owner != pev->pContainingEntity)
+		{
+			continue;
+		}
+
+		auto entity = CBaseEntity::Instance(e);
+		if (entity == nullptr)
+		{
+			continue;
+		}
+
+		if ((entity->ObjectCaps() & FCAP_DONT_SAVE) == 0)
+		{
+			continue;
+		}
+
+		entity->Remove();
+		count++;
+	}
+
+#ifndef NDEBUG
+	g_engfuncs.pfnAlertMessage(
+		at_aiconsole,
+		"Removed %i entities owned by '%s'\n",
+		count,
+		STRING(pev->netname));
+#endif
+}
+
+
 void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType)
 {
 	CBaseEntity* accomplice = m_hLastAttacker[1];
@@ -543,20 +595,7 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 	pev->health = std::min(pev->health, 0.0F);
 	pev->deadflag = DEAD_DYING;
 
-	if (g_pGameRules->DeadPlayerAmmo(this) != GR_PLR_DROP_AMMO_NO)
-	{
-		CItem::DropBackpack(
-			this,
-			m_rgAmmo[AMMO_SHELLS],
-			m_rgAmmo[AMMO_NAILS],
-			m_rgAmmo[AMMO_ROCKETS],
-			m_rgAmmo[AMMO_CELLS]);
-
-		m_rgAmmo[AMMO_SHELLS] = 0;
-		m_rgAmmo[AMMO_NAILS] = 0;
-		m_rgAmmo[AMMO_ROCKETS] = 0;
-		m_rgAmmo[AMMO_CELLS] = 0;
-	}
+	DropBackpack();
 
 	m_iFOV = 0;
 
@@ -1039,6 +1078,7 @@ bool CBasePlayer::Spawn()
 	pev->iuser2 = pev->iuser3 = 0;
 	m_hLastAttacker[0] = m_hLastAttacker[1] = nullptr;
 	m_hGrenade = nullptr;
+	m_iGrenadeExplodeTime = 0;
 	m_TFItems = 0;
 
 	m_iFOV = 0;
@@ -1549,6 +1589,26 @@ bool CBasePlayer::GiveAmmo(int iCount, int iType)
 }
 
 
+void CBasePlayer::DropBackpack()
+{
+	if (g_pGameRules->DeadPlayerAmmo(this) != GR_PLR_DROP_AMMO_NO)
+	{
+		CItem::DropBackpack(
+			this,
+			m_rgAmmo[AMMO_SHELLS],
+			m_rgAmmo[AMMO_NAILS],
+			m_rgAmmo[AMMO_ROCKETS],
+			m_rgAmmo[AMMO_CELLS],
+			true);
+
+		m_rgAmmo[AMMO_SHELLS] = 0;
+		m_rgAmmo[AMMO_NAILS] = 0;
+		m_rgAmmo[AMMO_ROCKETS] = 0;
+		m_rgAmmo[AMMO_CELLS] = 0;
+	}
+}
+
+
 /* Toodles TODO: Engineers convert cells into other ammo types. */
 void CBasePlayer::DiscardAmmo()
 {
@@ -1606,7 +1666,8 @@ void CBasePlayer::DiscardAmmo()
 		discardAmmo[AMMO_SHELLS],
 		discardAmmo[AMMO_NAILS],
 		discardAmmo[AMMO_ROCKETS],
-		discardAmmo[AMMO_CELLS]);
+		discardAmmo[AMMO_CELLS],
+		false);
 }
 
 

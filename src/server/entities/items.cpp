@@ -337,7 +337,7 @@ LINK_ENTITY_TO_CLASS(item_rockets, CItemBackpack);
 LINK_ENTITY_TO_CLASS(item_cells, CItemBackpack);
 
 
-CItem* CItem::DropBackpack(CBaseEntity* owner, int shells, int nails, int rockets, int cells)
+CItem* CItem::DropBackpack(CBaseEntity* owner, int shells, int nails, int rockets, int cells, bool drop)
 {
 	CItemBackpack *item = GetClassPtr((CItemBackpack*)nullptr);
 
@@ -357,7 +357,7 @@ CItem* CItem::DropBackpack(CBaseEntity* owner, int shells, int nails, int rocket
 
 	item->pev->air_finished = gpGlobals->time + 0.75F;
 
-	if (!owner->IsAlive())
+	if (drop)
 	{
 		item->pev->velocity = Vector(0.0F, 0.0F, 200.0F);
 	}

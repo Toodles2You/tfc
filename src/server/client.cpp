@@ -87,7 +87,6 @@ void ClientDisconnect(edict_t* pEntity)
 		player->pev->solid = SOLID_NOT;
 		player->pev->movetype = MOVETYPE_NONE;
 		player->pev->takedamage = DAMAGE_NO;
-		player->SetOrigin(g_vecZero);
 
 		player->InstallGameMovement(nullptr);
 
@@ -112,6 +111,8 @@ void ClientDisconnect(edict_t* pEntity)
 			g_pBotMan->ClientDisconnect(player);
 		}
 #endif
+
+		player->SetOrigin(g_vecZero);
 
 		g_engfuncs.pfnFreeEntPrivateData(pEntity);
 	}

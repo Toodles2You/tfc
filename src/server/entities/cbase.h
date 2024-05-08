@@ -23,8 +23,8 @@ enum
 
 #ifdef HALFLIFE_SAVERESTORE
 	FCAP_MUST_SPAWN = 0x00000004,		  // Spawn after restore
-	FCAP_DONT_SAVE = 0x80000000,		  // Don't save this
 #endif
+	FCAP_DONT_SAVE = 0x80000000,		  // Don't save this & remove upon forced player respawn
 
 	FCAP_IMPULSE_USE = 0x00000008,		  // can be used by the player
 	FCAP_CONTINUOUS_USE = 0x00000010,	  // can be used by the player
