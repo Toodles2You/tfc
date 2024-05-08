@@ -285,6 +285,13 @@ void CBasePlayer::ConcussionJump(Vector& velocity)
 	velocity.x *= 2.36F;
 	velocity.y *= 2.36F;
 	velocity.z *= 3.53F;
+
+	if (HUD_FirstTimePredicting())
+	{
+		gHUD.m_StatusIcons.DisableIcon("d_concussiongrenade");
+	}
+	
+	LeaveState(CBasePlayer::State::Grenade);
 }
 
 

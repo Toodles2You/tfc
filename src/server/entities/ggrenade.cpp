@@ -411,6 +411,8 @@ void CPrimeGrenade::Throw(throw_e mode)
 	MessageEnd();
 	
 	owner->LeaveState(CBasePlayer::State::Grenade);
+	owner->m_iGrenadeExplodeTime = 0;
+	owner->m_hGrenade = nullptr;
 }
 
 
@@ -474,6 +476,8 @@ void CCaltropCanister::Throw(throw_e mode)
 	MessageEnd();
 	
 	owner->LeaveState(CBasePlayer::State::Grenade);
+	owner->m_iGrenadeExplodeTime = 0;
+	owner->m_hGrenade = nullptr;
 
 	Remove();
 }

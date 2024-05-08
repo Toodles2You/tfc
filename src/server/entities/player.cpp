@@ -1038,6 +1038,7 @@ bool CBasePlayer::Spawn()
 	pev->iuser1 = OBS_NONE;
 	pev->iuser2 = pev->iuser3 = 0;
 	m_hLastAttacker[0] = m_hLastAttacker[1] = nullptr;
+	m_hGrenade = nullptr;
 	m_TFItems = 0;
 
 	m_iFOV = 0;
@@ -1911,10 +1912,10 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 		switch (PCNumber())
 		{
 			case PC_SCOUT:
-				CCaltropCanister::CaltropCanister(this);
+				m_hGrenade = CCaltropCanister::CaltropCanister(this);
 				break;
 			default:
-				CPrimeGrenade::PrimeGrenade(this);
+				m_hGrenade = CPrimeGrenade::PrimeGrenade(this);
 				break;
 		}
 	}
@@ -1923,23 +1924,23 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 		switch (PCNumber())
 		{
 		case PC_SCOUT:
-			CConcussionGrenade::ConcussionGrenade(this);
+			m_hGrenade = CConcussionGrenade::ConcussionGrenade(this);
 			m_iGrenadeExplodeTime = 3800;
 			break;
 		case PC_SNIPER:
 			return;
 		case PC_SOLDIER:
-			CNailGrenade::NailGrenade(this);
+			m_hGrenade = CNailGrenade::NailGrenade(this);
 			break;
 		case PC_DEMOMAN:
-			CMirv::Mirv(this);
+			m_hGrenade = CMirv::Mirv(this);
 			break;
 		case PC_MEDIC:
-			CConcussionGrenade::ConcussionGrenade(this);
+			m_hGrenade = CConcussionGrenade::ConcussionGrenade(this);
 			m_iGrenadeExplodeTime = 3800;
 			break;
 		case PC_HVYWEAP:
-			CMirv::Mirv(this);
+			m_hGrenade = CMirv::Mirv(this);
 			break;
 		case PC_PYRO:
 			return;
@@ -1974,6 +1975,7 @@ void CBasePlayer::ThrowGrenade()
 	LeaveState(State::GrenadePrime);
 	EnterState(State::GrenadeThrowing);
 	m_iGrenadeExplodeTime = 0;
+	m_hGrenade = nullptr;
 }
 
 #endif
@@ -1989,6 +1991,20 @@ void CBasePlayer::ConcussionJump(Vector& velocity)
 	{
 		BecomeConcussed(this);
 	}
+
+	CBaseEntity* grenade = m_hGrenade;
+	if (grenade != nullptr)
+	{
+		grenade->Remove();
+	}
+	m_hGrenade = nullptr;
+
+	MessageBegin(MSG_ONE, gmsgStatusIcon, this);
+	WriteByte(0);
+	WriteString("d_concussiongrenade");
+	MessageEnd();
+
+	LeaveState(CBasePlayer::State::Grenade);
 }
 
 

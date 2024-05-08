@@ -352,6 +352,7 @@ protected:
 	int m_iConcussionTime;
 public:
 	int m_iGrenadeExplodeTime;
+	EHANDLE m_hGrenade;
 	void ConcussionJump(Vector& velocity);
 
 public:
