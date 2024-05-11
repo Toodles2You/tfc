@@ -94,7 +94,7 @@ void CMP5::SecondaryAttack()
 	m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
 #ifndef CLIENT_DLL
-	util::MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+	util::MakeVectors(m_pPlayer->v.v_angle + m_pPlayer->v.punchangle);
 
 	int rightOffset = 4;
 
@@ -104,8 +104,8 @@ void CMP5::SecondaryAttack()
 	}
 
 	CGrenade::ShootContact(m_pPlayer,
-		m_pPlayer->pev->origin
-			+ m_pPlayer->pev->view_ofs
+		m_pPlayer->v.origin
+			+ m_pPlayer->v.view_ofs
 			+ gpGlobals->v_right * rightOffset
 			+ gpGlobals->v_forward * 16,
 		gpGlobals->v_forward * 800);
@@ -119,7 +119,7 @@ void CMP5::SecondaryAttack()
 
 void CMP5::WeaponPostFrame()
 {
-	if ((m_pPlayer->pev->button & IN_ATTACK2) != 0 && m_pPlayer->m_rgAmmo[iAmmo2()] != 0)
+	if ((m_pPlayer->v.button & IN_ATTACK2) != 0 && m_pPlayer->m_rgAmmo[iAmmo2()] != 0)
 	{
 		if (m_iNextPrimaryAttack <= 0 || m_fInReload)
 		{
@@ -139,7 +139,7 @@ void CMP5::WeaponPostFrame()
 			m_fInReload = false;
 		}
 		else if ((m_iClip == 0
-		 || ((m_pPlayer->pev->button & IN_RELOAD) != 0 && m_iClip < iMaxClip()))
+		 || ((m_pPlayer->v.button & IN_RELOAD) != 0 && m_iClip < iMaxClip()))
 		 && m_pPlayer->m_rgAmmo[iAmmo1()] != 0)
 		{
 			SendWeaponAnim(kAnimReload);
@@ -149,7 +149,7 @@ void CMP5::WeaponPostFrame()
 			return;
 		}
 
-		if ((m_pPlayer->pev->button & IN_ATTACK) != 0 && m_iClip != 0)
+		if ((m_pPlayer->v.button & IN_ATTACK) != 0 && m_iClip != 0)
 		{
 			PrimaryAttack();
 		}

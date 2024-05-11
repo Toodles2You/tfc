@@ -38,9 +38,9 @@ CHalfLifeTeamplay::CHalfLifeTeamplay()
 
 	if (teamoverride.value != 0
 	 && CWorld::World
-	 && !FStringNull(CWorld::World->pev->team))
+	 && !FStringNull(CWorld::World->v.team))
 	{
-		const char* worldTeams = STRING(CWorld::World->pev->team);
+		const char* worldTeams = STRING(CWorld::World->v.team);
 		if (strlen(worldTeams) != 0)
 		{
 			strcpy(teams, worldTeams);

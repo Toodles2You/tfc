@@ -33,10 +33,7 @@ bool UTIL_IsNameTaken( const char *name, bool ignoreHumans )
 		if (player == NULL)
 			continue;
 
-		if (FNullEnt( player->pev ))
-			continue;
-
-		if (FStrEq( STRING( player->pev->netname ), "" ))
+		if (FStrEq( STRING( player->v.netname ), "" ))
 			continue;
 
 		if (player->IsPlayer() && ((CBasePlayer *)player)->IsBot())
@@ -53,7 +50,7 @@ bool UTIL_IsNameTaken( const char *name, bool ignoreHumans )
 		{
 			if (!ignoreHumans)
 			{
-				if (FStrEq( name, STRING( player->pev->netname ) ))
+				if (FStrEq( name, STRING( player->v.netname ) ))
 					return true;
 			}
 		}
@@ -75,10 +72,7 @@ int UTIL_ClientsInGame( void )
 		if ( pPlayer == NULL )
 			continue;
 
-		if ( FNullEnt( pPlayer->pev ) )
-			continue;
-
-		if ( FStrEq( STRING( pPlayer->pev->netname ), "" ) )
+		if ( FStrEq( STRING( pPlayer->v.netname ), "" ) )
 			continue;
 
 		iCount++;
@@ -102,10 +96,7 @@ int UTIL_ActivePlayersInGame( void )
 		if ( entity == NULL )
 			continue;
 
-		if ( FNullEnt( entity->pev ) )
-			continue;
-
-		if ( FStrEq( STRING( entity->pev->netname ), "" ) )
+		if ( FStrEq( STRING( entity->v.netname ), "" ) )
 			continue;
 
 		CBasePlayer *player = static_cast<CBasePlayer *>( entity );
@@ -134,10 +125,7 @@ int UTIL_HumansInGame( bool ignoreSpectators )
 		if ( entity == NULL )
 			continue;
 
-		if ( FNullEnt( entity->pev ) )
-			continue;
-
-		if ( FStrEq( STRING( entity->pev->netname ), "" ) )
+		if ( FStrEq( STRING( entity->v.netname ), "" ) )
 			continue;
 
 		CBasePlayer *player = static_cast<CBasePlayer *>( entity );
@@ -177,10 +165,7 @@ int UTIL_HumansOnTeam( int teamID, bool isAlive )
 		if ( entity == NULL )
 			continue;
 
-		if ( FNullEnt( entity->pev ) )
-			continue;
-
-		if ( FStrEq( STRING( entity->pev->netname ), "" ) )
+		if ( FStrEq( STRING( entity->v.netname ), "" ) )
 			continue;
 
 		CBasePlayer *player = static_cast<CBasePlayer *>( entity );
@@ -213,10 +198,7 @@ int UTIL_BotsInGame( void )
 		if ( pPlayer == NULL )
 			continue;
 
-		if ( FNullEnt( pPlayer->pev ) )
-			continue;
-
-		if ( FStrEq( STRING( pPlayer->pev->netname ), "" ) )
+		if ( FStrEq( STRING( pPlayer->v.netname ), "" ) )
 			continue;
 
 		if ( !pPlayer->IsBot() )
@@ -244,10 +226,7 @@ bool UTIL_KickBotFromTeam( int kickTeam )
 		if (player == NULL)
 			continue;
 
-		if (FNullEnt( player->pev ))
-			continue;
-
-		const char *name = STRING( player->pev->netname );
+		const char *name = STRING( player->v.netname );
 		if (FStrEq( name, "" ))
 			continue;
 
@@ -257,7 +236,7 @@ bool UTIL_KickBotFromTeam( int kickTeam )
 		if (!player->IsAlive() && (kickTeam == -1 || player->TeamNumber() == kickTeam))
 		{
 			// its a bot on the right team - kick it
-			SERVER_COMMAND( util::VarArgs( "kick \"%s\"\n", STRING( player->pev->netname ) ) );
+			SERVER_COMMAND( util::VarArgs( "kick \"%s\"\n", STRING( player->v.netname ) ) );
 
 			return true;
 		}
@@ -271,10 +250,7 @@ bool UTIL_KickBotFromTeam( int kickTeam )
 		if (player == NULL)
 			continue;
 
-		if (FNullEnt( player->pev ))
-			continue;
-
-		const char *name = STRING( player->pev->netname );
+		const char *name = STRING( player->v.netname );
 		if (FStrEq( name, "" ))
 			continue;
 
@@ -284,7 +260,7 @@ bool UTIL_KickBotFromTeam( int kickTeam )
 		if ((kickTeam == -1 || player->TeamNumber() == kickTeam))
 		{
 			// its a bot on the right team - kick it
-			SERVER_COMMAND( util::VarArgs( "kick \"%s\"\n", STRING( player->pev->netname ) ) );
+			SERVER_COMMAND( util::VarArgs( "kick \"%s\"\n", STRING( player->v.netname ) ) );
 
 			return true;
 		}
@@ -312,14 +288,11 @@ bool UTIL_IsTeamAllBots( int team )
 		if (player->TeamNumber() != team)
 			continue;
 
-		if (FNullEnt( player->pev ))
-			continue;
-
-		if (FStrEq( STRING( player->pev->netname ), "" ))
+		if (FStrEq( STRING( player->v.netname ), "" ))
 			continue;
 
 		// if not a bot, fail the test
-		if (!FBitSet( player->pev->flags, FL_FAKECLIENT ))
+		if (!FBitSet( player->v.flags, FL_FAKECLIENT ))
 			return false;
 
 		// is a bot on given team
@@ -353,7 +326,7 @@ CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, float *distance, CBasePla
 		if (!player->IsAlive())
 			continue;
 
-		float distSq = (player->pev->origin - *pos).LengthSquared();
+		float distSq = (player->v.origin - *pos).LengthSquared();
 		if (distSq < closeDistSq)
 		{
 			closeDistSq = distSq;
@@ -393,7 +366,7 @@ CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, int team, float *distance
 		if (player->TeamNumber() != team)
 			continue;
 
-		float distSq = (player->pev->origin - *pos).LengthSquared();
+		float distSq = (player->v.origin - *pos).LengthSquared();
 		if (distSq < closeDistSq)
 		{
 			closeDistSq = distSq;
@@ -428,7 +401,7 @@ CBasePlayer *UTIL_GetClosestEnemyPlayer( CBasePlayer *self, float *distance )
 		if (g_pGameRules->PlayerRelationship(self, player) > GR_NOTTEAMMATE)
 			continue;
 
-		float distSq = (player->pev->origin - self->pev->origin).LengthSquared();
+		float distSq = (player->v.origin - self->v.origin).LengthSquared();
 		if (distSq < closeDistSq)
 		{
 			closeDistSq = distSq;
@@ -482,10 +455,7 @@ bool UTIL_IsVisibleToTeam( const Vector &spot, int team, float maxRange )
 		if (player == NULL)
 			continue;
 
-		if (FNullEnt( player->pev ))
-			continue;
-
-		if (FStrEq( STRING( player->pev->netname ), "" ))
+		if (FStrEq( STRING( player->v.netname ), "" ))
 			continue;
 
 		if (!player->IsAlive())
@@ -511,26 +481,18 @@ bool UTIL_IsVisibleToTeam( const Vector &spot, int team, float maxRange )
 //--------------------------------------------------------------------------------------------------------------
 
 
-//------------------------------------------------------------------------------------------------------------
-// Some types of entities have no origin set, so we use this instead.
-Vector UTIL_ComputeOrigin( entvars_t * pevVars )
+Vector UTIL_ComputeOrigin( Entity * pentEdict )
 {
-	if ( ( pevVars->origin.x == 0.0 ) && ( pevVars->origin.y == 0.0 ) && ( pevVars->origin.z == 0.0 ) )
-		return ( pevVars->absmax + pevVars->absmin ) * 0.5;
+	if ( ( pentEdict->origin.x == 0.0 ) && ( pentEdict->origin.y == 0.0 ) && ( pentEdict->origin.z == 0.0 ) )
+		return ( pentEdict->absmax + pentEdict->absmin ) * 0.5;
 	else
-		return pevVars->origin;
+		return pentEdict->origin;
 }
 
 
 Vector UTIL_ComputeOrigin( CBaseEntity * pEntity )
 {
-	return UTIL_ComputeOrigin( pEntity->pev );
-}
-
-
-Vector UTIL_ComputeOrigin( edict_t * pentEdict )
-{
-	return UTIL_ComputeOrigin( VARS( pentEdict ) );
+	return UTIL_ComputeOrigin( &pEntity->v );
 }
 
 

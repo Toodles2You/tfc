@@ -30,6 +30,8 @@
 class CLight : public CPointEntity
 {
 public:
+	CLight(Entity* containingEntity) : CPointEntity(containingEntity) {}
+
 	DECLARE_SAVERESTORE()
 
 	bool KeyValue(KeyValueData* pkvd) override;
@@ -61,7 +63,7 @@ bool CLight::KeyValue(KeyValueData* pkvd)
 	}
 	else if (FStrEq(pkvd->szKeyName, "pitch"))
 	{
-		pev->angles.x = atof(pkvd->szValue);
+		v.angles.x = atof(pkvd->szValue);
 		return true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "pattern"))
@@ -76,15 +78,14 @@ bool CLight::KeyValue(KeyValueData* pkvd)
 
 bool CLight::Spawn()
 {
-	if (FStringNull(pev->targetname))
+	if (FStringNull(v.targetname))
 	{
 		return false;
 	}
 
 	if (m_iStyle >= 32)
 	{
-		//		CHANGE_METHOD(ENT(pev), em_use, light_use);
-		if (FBitSet(pev->spawnflags, SF_LIGHT_START_OFF))
+		if (FBitSet(v.spawnflags, SF_LIGHT_START_OFF))
 			LIGHT_STYLE(m_iStyle, "a");
 		else if (!FStringNull(m_iszPattern))
 			LIGHT_STYLE(m_iStyle, (char*)STRING(m_iszPattern));
@@ -100,21 +101,21 @@ void CLight::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType
 {
 	if (m_iStyle >= 32)
 	{
-		if (!ShouldToggle(useType, !FBitSet(pev->spawnflags, SF_LIGHT_START_OFF)))
+		if (!ShouldToggle(useType, !FBitSet(v.spawnflags, SF_LIGHT_START_OFF)))
 			return;
 
-		if (FBitSet(pev->spawnflags, SF_LIGHT_START_OFF))
+		if (FBitSet(v.spawnflags, SF_LIGHT_START_OFF))
 		{
 			if (!FStringNull(m_iszPattern))
 				LIGHT_STYLE(m_iStyle, (char*)STRING(m_iszPattern));
 			else
 				LIGHT_STYLE(m_iStyle, "m");
-			ClearBits(pev->spawnflags, SF_LIGHT_START_OFF);
+			ClearBits(v.spawnflags, SF_LIGHT_START_OFF);
 		}
 		else
 		{
 			LIGHT_STYLE(m_iStyle, "a");
-			SetBits(pev->spawnflags, SF_LIGHT_START_OFF);
+			SetBits(v.spawnflags, SF_LIGHT_START_OFF);
 		}
 	}
 }
@@ -128,6 +129,8 @@ LINK_ENTITY_TO_CLASS(light_spot, CLight);
 class CEnvLight : public CLight
 {
 public:
+	CEnvLight(Entity* containingEntity) : CLight(containingEntity) {}
+
 	bool KeyValue(KeyValueData* pkvd) override;
 	bool Spawn() override;
 };
@@ -174,7 +177,7 @@ bool CEnvLight::KeyValue(KeyValueData* pkvd)
 bool CEnvLight::Spawn()
 {
 	char szVector[64];
-	util::MakeAimVectors(pev->angles);
+	util::MakeAimVectors(v.angles);
 
 	sprintf(szVector, "%f", gpGlobals->v_forward.x);
 	CVAR_SET_STRING("sv_skyvec_x", szVector);

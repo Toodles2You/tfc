@@ -31,16 +31,16 @@
 // Precaches the weapon and queues the weapon info for sending to clients
 void util::PrecacheWeapon(const char* szClassname)
 {
-	edict_t* pent;
+	Entity* pent;
 
-	pent = CREATE_NAMED_ENTITY(MAKE_STRING(szClassname));
-	if (FNullEnt(pent))
+	pent = g_engfuncs.pfnCreateNamedEntity(MAKE_STRING(szClassname));
+	if (pent == nullptr)
 	{
 		ALERT(at_console, "NULL Ent in UTIL_PrecacheOtherWeapon\n");
 		return;
 	}
 
-	CBaseEntity* pEntity = CBaseEntity::Instance(VARS(pent));
+	CBaseEntity* pEntity = pent->Get<CBaseEntity>();
 
 	if (pEntity)
 	{
@@ -146,8 +146,8 @@ bool CBasePlayerWeapon::Spawn()
 
 	SetModel(info.pszWorld);
 
-	pev->movetype = MOVETYPE_TOSS;
-	pev->solid = SOLID_TRIGGER;
+	v.movetype = MOVETYPE_TOSS;
+	v.solid = SOLID_TRIGGER;
 
 	g_engfuncs.pfnDropToFloor(edict());
 
@@ -185,8 +185,8 @@ void CBasePlayerWeapon::Precache()
 
 void CBasePlayerWeapon::SetObjectCollisionBox()
 {
-	pev->absmin = pev->origin + Vector(-24, -24, 0);
-	pev->absmax = pev->origin + Vector(24, 24, 16);
+	v.absmin = v.origin + Vector(-24, -24, 0);
+	v.absmax = v.origin + Vector(24, 24, 16);
 }
 
 
@@ -195,15 +195,15 @@ void CBasePlayerWeapon::SetObjectCollisionBox()
 //=========================================================
 void CBasePlayerWeapon::Materialize()
 {
-	if ((pev->effects & EF_NODRAW) != 0)
+	if ((v.effects & EF_NODRAW) != 0)
 	{
 		EmitSound("items/itembk2.wav", CHAN_WEAPON);
-		pev->effects &= ~EF_NODRAW;
+		v.effects &= ~EF_NODRAW;
 	}
 
-	pev->solid = SOLID_TRIGGER;
+	v.solid = SOLID_TRIGGER;
 
-	SetOrigin(pev->origin);
+	SetOrigin(v.origin);
 	SetTouch(&CBasePlayerWeapon::DefaultTouch);
 	SetThink(nullptr);
 }
@@ -223,7 +223,7 @@ void CBasePlayerWeapon::AttemptToMaterialize()
 		return;
 	}
 
-	pev->nextthink = time;
+	v.nextthink = time;
 }
 
 
@@ -254,20 +254,20 @@ CBaseEntity* CBasePlayerWeapon::Respawn()
 	// will decide when to make the weapon visible and touchable.
 	CBaseEntity* pNewWeapon =
 		CBaseEntity::Create(
-			(char*)STRING(pev->classname),
+			(char*)STRING(v.classname),
 			g_pGameRules->VecWeaponRespawnSpot(this),
-			pev->angles,
-			pev->owner);
+			v.angles,
+			*v.owner);
 
 	if (pNewWeapon != nullptr)
 	{
-		pNewWeapon->pev->effects |= EF_NODRAW;
+		pNewWeapon->v.effects |= EF_NODRAW;
 		pNewWeapon->SetTouch(nullptr);
 		pNewWeapon->SetThink(&CBasePlayerWeapon::AttemptToMaterialize);
 
 		g_engfuncs.pfnDropToFloor(edict());
 
-		pNewWeapon->pev->nextthink = g_pGameRules->FlWeaponRespawnTime(this);
+		pNewWeapon->v.nextthink = g_pGameRules->FlWeaponRespawnTime(this);
 	}
 
 	return pNewWeapon;
@@ -316,11 +316,11 @@ bool CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer)
 
 	m_pPlayer = pPlayer;
 
-	pev->owner = pev->aiment = pPlayer->edict();
+	v.owner = v.aiment = pPlayer->edict();
 
-	pev->movetype = MOVETYPE_FOLLOW;
-	pev->solid = SOLID_NOT;
-	pev->effects = EF_NODRAW;
+	v.movetype = MOVETYPE_FOLLOW;
+	v.solid = SOLID_NOT;
+	v.effects = EF_NODRAW;
 
 	SetTouch(nullptr);
 	SetThink(nullptr);
@@ -349,7 +349,7 @@ void CBasePlayerWeapon::RemoveFromPlayer(bool forceSendAnimations)
 	m_pPlayer->RemovePlayerWeapon(this);
 	m_ForceSendAnimations = false;
 
-	pev->owner = pev->aiment = nullptr;
+	v.owner = v.aiment = nullptr;
 	m_pPlayer = nullptr;
 }
 
@@ -358,14 +358,14 @@ void CBasePlayerWeapon::SendWeaponAnim(int iAnim)
 {
 	const bool skiplocal = !m_ForceSendAnimations;
 
-	m_pPlayer->pev->weaponanim = iAnim;
+	m_pPlayer->v.weaponanim = iAnim;
 
 	if (skiplocal && ENGINE_CANSKIP(m_pPlayer->edict()))
 		return;
 
 	MessageBegin(MSG_ONE, SVC_WEAPONANIM, m_pPlayer);
 	WriteByte(iAnim);
-	WriteByte(pev->body);
+	WriteByte(v.body);
 	MessageEnd();
 }
 
@@ -374,8 +374,8 @@ void CBasePlayerWeapon::Deploy()
 {
 	const auto info = GetInfo();
 
-	m_pPlayer->pev->viewmodel = g_engfuncs.pfnModelIndex(info.pszView);
-	m_pPlayer->pev->weaponmodel = g_engfuncs.pfnModelIndex(info.pszPlayer);
+	m_pPlayer->v.viewmodel = g_engfuncs.pfnModelIndex(info.pszView);
+	m_pPlayer->v.weaponmodel = g_engfuncs.pfnModelIndex(info.pszPlayer);
 	strcpy(m_pPlayer->m_szAnimExtention, info.pszAnimExt);
 
 	SendWeaponAnim(info.iAnims[kWeaponAnimDeploy]);

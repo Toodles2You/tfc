@@ -66,6 +66,8 @@ typedef struct
 class CBasePlayerWeapon : public CBaseAnimating
 {
 public:
+	CBasePlayerWeapon(Entity* containingEntity) : CBaseAnimating(containingEntity) {}
+
 	DECLARE_SAVERESTORE()
 
 	void SetObjectCollisionBox() override;
@@ -138,6 +140,8 @@ inline short g_sModelIndexBloodSpray;
 class CCrowbar : public CBasePlayerWeapon
 {
 public:
+	CCrowbar(Entity* containingEntity) : CBasePlayerWeapon(containingEntity) {}
+
 	enum
 	{
 		kAnimIdle = 0,
@@ -177,6 +181,8 @@ private:
 class CMP5 : public CBasePlayerWeapon
 {
 public:
+	CMP5(Entity* containingEntity) : CBasePlayerWeapon(containingEntity) {}
+
 	enum
 	{
 		kAnimLongidle = 0,
@@ -215,6 +221,8 @@ private:
 class CGrenade : public CBaseAnimating
 {
 public:
+	CGrenade(Entity* containingEntity) : CBaseAnimating(containingEntity) {}
+
 	bool Spawn() override;
 
 	static CGrenade* ShootContact(CBaseEntity* owner, Vector vecStart, Vector vecVelocity);
@@ -236,6 +244,8 @@ public:
 class CPrimeGrenade : public CGrenade
 {
 public:
+	CPrimeGrenade(Entity* containingEntity) : CGrenade(containingEntity) {}
+
 	bool Spawn() override;
 	void EXPORT PrimedThink();
 

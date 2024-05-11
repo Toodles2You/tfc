@@ -36,15 +36,15 @@ bool CItem::Spawn()
 {
 	Precache();
 
-	pev->movetype = MOVETYPE_TOSS;
-	pev->solid = SOLID_TRIGGER;
-	SetOrigin(pev->origin);
+	v.movetype = MOVETYPE_TOSS;
+	v.solid = SOLID_TRIGGER;
+	SetOrigin(v.origin);
 	SetSize(Vector(-16, -16, 0), Vector(16, 16, 16));
 	SetTouch(&CItem::ItemTouch);
 
-	if (g_engfuncs.pfnDropToFloor(pev->pContainingEntity) == 0)
+	if (g_engfuncs.pfnDropToFloor(&v) == 0)
 	{
-		ALERT(at_error, "Item %s fell out of level at %f,%f,%f", STRING(pev->classname), pev->origin.x, pev->origin.y, pev->origin.z);
+		ALERT(at_error, "Item %s fell out of level at %f,%f,%f", STRING(v.classname), v.origin.x, v.origin.y, v.origin.z);
 		return false;
 	}
 
@@ -100,21 +100,21 @@ void CItem::ItemTouch(CBaseEntity* pOther)
 CBaseEntity* CItem::Respawn()
 {
 	SetTouch(NULL);
-	pev->effects |= EF_NODRAW;
+	v.effects |= EF_NODRAW;
 
 	SetOrigin(g_pGameRules->VecItemRespawnSpot(this)); // blip to whereever you should respawn.
 
 	SetThink(&CItem::Materialize);
-	pev->nextthink = g_pGameRules->FlItemRespawnTime(this);
+	v.nextthink = g_pGameRules->FlItemRespawnTime(this);
 	return this;
 }
 
 void CItem::Materialize()
 {
-	if ((pev->effects & EF_NODRAW) != 0)
+	if ((v.effects & EF_NODRAW) != 0)
 	{
 		EmitSound("items/itembk2.wav", CHAN_WEAPON);
-		pev->effects &= ~EF_NODRAW;
+		v.effects &= ~EF_NODRAW;
 	}
 
 	SetTouch(&CItem::ItemTouch);
@@ -124,50 +124,52 @@ void CItem::Materialize()
 class CItemBackpack : public CItem
 {
 public:
+	CItemBackpack(Entity* containingEntity) : CItem(containingEntity) {}
+
 	void Precache() override
 	{
-		const auto classname = STRING(pev->classname);
+		const auto classname = STRING(v.classname);
 
 		if (FStrEq("item_healthkit", classname))
 		{
-			pev->health = 15.0F;
-			pev->model = MAKE_STRING("models/w_medkit.mdl");
-			pev->noise = MAKE_STRING("items/smallmedkit1.wav");
-			pev->netname = pev->classname;
+			v.health = 15.0F;
+			v.model = MAKE_STRING("models/w_medkit.mdl");
+			v.noise = MAKE_STRING("items/smallmedkit1.wav");
+			v.netname = v.classname;
 		}
 		else if (FStrEq("item_battery", classname))
 		{
-			pev->armorvalue = 15.0F;
-			pev->model = MAKE_STRING("models/w_battery.mdl");
-			pev->noise = MAKE_STRING("items/gunpickup2.wav");
-			pev->netname = pev->classname;
+			v.armorvalue = 15.0F;
+			v.model = MAKE_STRING("models/w_battery.mdl");
+			v.noise = MAKE_STRING("items/gunpickup2.wav");
+			v.netname = v.classname;
 		}
 
-		g_engfuncs.pfnPrecacheModel(STRING(pev->model));
-		g_engfuncs.pfnPrecacheSound(STRING(pev->noise));
+		g_engfuncs.pfnPrecacheModel(STRING(v.model));
+		g_engfuncs.pfnPrecacheSound(STRING(v.noise));
 
-		SetModel(STRING(pev->model));
+		SetModel(STRING(v.model));
 	}
 
 protected:
 	bool GiveHealth(CBasePlayer* player)
 	{
-		return pev->health != 0.0F && player->GiveHealth(pev->health, DMG_GENERIC);
+		return v.health != 0.0F && player->GiveHealth(v.health, DMG_GENERIC);
 	}
 
 	bool GiveArmor(CBasePlayer* player)
 	{
-		if (pev->armorvalue == 0.0F)
+		if (v.armorvalue == 0.0F)
 		{
 			return false;
 		}
 
-		if (player->pev->armorvalue >= 100)
+		if (player->v.armorvalue >= 100)
 		{
 			return false;
 		}
 
-		player->pev->armorvalue = std::clamp(player->pev->armorvalue, 0.0F, 100.0F);
+		player->v.armorvalue = std::clamp(player->v.armorvalue, 0.0F, 100.0F);
 		return true;
 	}
 
@@ -180,12 +182,12 @@ public:
 			return false;
 		}
 
-		EmitSound(STRING(pev->noise), CHAN_ITEM);
+		EmitSound(STRING(v.noise), CHAN_ITEM);
 
-		if (!FStringNull(pev->netname))
+		if (!FStringNull(v.netname))
 		{
 			MessageBegin(MSG_ONE, gmsgItemPickup, player);
-			WriteString(STRING(pev->netname));
+			WriteString(STRING(v.netname));
 			MessageEnd();
 		}
 

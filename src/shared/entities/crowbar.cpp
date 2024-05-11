@@ -64,7 +64,7 @@ void CCrowbar::PrimaryAttack()
 	m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
 	Vector forward;
-	AngleVectors(m_pPlayer->pev->v_angle, &forward, nullptr, nullptr);
+	AngleVectors(m_pPlayer->v.v_angle, &forward, nullptr, nullptr);
 
 	Vector gun = m_pPlayer->GetGunPosition();
 	Vector end = gun + forward * 64;
@@ -79,7 +79,7 @@ void CCrowbar::PrimaryAttack()
 #ifdef GAME_DLL
 		auto other = g_engfuncs.pfnPEntityOfEntIndex(trace.entity);
 
-		if (other->v.solid != SOLID_BSP && other->v.movetype != MOVETYPE_PUSHSTEP)
+		if (other->solid != SOLID_BSP && other->movetype != MOVETYPE_PUSHSTEP)
 		{
 			hit = kCrowbarHitPlayer;
 		}
@@ -107,7 +107,7 @@ void CCrowbar::PrimaryAttack()
 	}
 
 #ifdef GAME_DLL
-	auto other = CBaseEntity::Instance(g_engfuncs.pfnPEntityOfEntIndex(trace.entity));
+	auto other = g_engfuncs.pfnPEntityOfEntIndex(trace.entity)->Get<CBaseEntity>();
 
 	other->TraceAttack(
 		m_pPlayer,
@@ -125,7 +125,7 @@ void CCrowbar::PrimaryAttack()
 
 void CCrowbar::WeaponPostFrame()
 {
-	if ((m_pPlayer->pev->button & IN_ATTACK) != 0 && m_iNextPrimaryAttack <= 0)
+	if ((m_pPlayer->v.button & IN_ATTACK) != 0 && m_iNextPrimaryAttack <= 0)
 	{
 		PrimaryAttack();
 	}

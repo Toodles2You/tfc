@@ -70,7 +70,7 @@ void RadiusDamage(
 
 	while ((entity = util::FindEntityInSphere(entity, origin, radius)) != nullptr)
 	{
-		if (entity->pev->takedamage == DAMAGE_NO)
+		if (entity->v.takedamage == DAMAGE_NO)
 		{
 			continue;
 		}
@@ -99,9 +99,9 @@ bool CBaseEntity::FInViewCone(CBaseEntity* pEntity)
 	Vector2D vec2LOS;
 	float flDot;
 
-	util::MakeVectors(pev->angles);
+	util::MakeVectors(v.angles);
 
-	vec2LOS = (pEntity->pev->origin - pev->origin).Make2D();
+	vec2LOS = (pEntity->v.origin - v.origin).Make2D();
 	vec2LOS = vec2LOS.Normalize();
 
 	flDot = DotProduct(vec2LOS, gpGlobals->v_forward.Make2D());
@@ -126,9 +126,9 @@ bool CBaseEntity::FInViewCone(const Vector& vecOrigin)
 	Vector2D vec2LOS;
 	float flDot;
 
-	util::MakeVectors(pev->angles);
+	util::MakeVectors(v.angles);
 
-	vec2LOS = (vecOrigin - pev->origin).Make2D();
+	vec2LOS = (vecOrigin - v.origin).Make2D();
 	vec2LOS = vec2LOS.Normalize();
 
 	flDot = DotProduct(vec2LOS, gpGlobals->v_forward.Make2D());
@@ -153,14 +153,14 @@ bool CBaseEntity::FVisible(CBaseEntity* pEntity)
 	Vector vecLookerOrigin;
 	Vector vecTargetOrigin;
 
-	if (FBitSet(pEntity->pev->flags, FL_NOTARGET))
+	if (FBitSet(pEntity->v.flags, FL_NOTARGET))
 		return false;
 
 	// don't look through water
-	if ((pev->waterlevel >= kWaterLevelEyes) != (pEntity->pev->waterlevel >= kWaterLevelEyes))
+	if ((v.waterlevel >= kWaterLevelEyes) != (pEntity->v.waterlevel >= kWaterLevelEyes))
 		return false;
 
-	vecLookerOrigin = pev->origin + pev->view_ofs; //look through the caller's 'eyes'
+	vecLookerOrigin = v.origin + v.view_ofs; //look through the caller's 'eyes'
 	vecTargetOrigin = pEntity->EyePosition();
 
 	util::TraceLine(vecLookerOrigin, vecTargetOrigin, util::ignore_monsters, util::ignore_glass, this, &tr);
@@ -205,7 +205,7 @@ TraceAttack
 */
 void CBaseEntity::TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, int hitgroup, int bitsDamageType)
 {
-	if (pev->takedamage != DAMAGE_NO)
+	if (v.takedamage != DAMAGE_NO)
 	{
 		AddMultiDamage(flDamage, bitsDamageType);
 	}
@@ -217,8 +217,8 @@ void CBasePlayer::FireBullets(
 	const unsigned int count,
 	const float distance)
 {
-	const auto gun = pev->origin + pev->view_ofs;
-	const auto aim = pev->v_angle + pev->punchangle;
+	const auto gun = v.origin + v.view_ofs;
+	const auto aim = v.v_angle + v.punchangle;
 
 	auto traceHits = 0;
 	auto traceFlags = 0;
@@ -254,9 +254,9 @@ void CBasePlayer::FireBullets(
 			continue;
 		}
 
-		auto hit = CBaseEntity::Instance(tr.pHit);
+		auto hit = tr.pHit->Get<CBaseEntity>();
 		
-		if (hit == nullptr || hit->pev->takedamage == DAMAGE_NO)
+		if (hit == nullptr || hit->v.takedamage == DAMAGE_NO)
 		{
 			continue;
 		}
@@ -347,17 +347,17 @@ void CBaseEntity::Look(int iDistance)
 	Vector delta = Vector(iDistance, iDistance, iDistance);
 
 	// Find only monsters/clients in box, NOT limited to PVS
-	int count = util::EntitiesInBox(pList, 100, pev->origin - delta, pev->origin + delta, FL_CLIENT | FL_MONSTER);
+	int count = util::EntitiesInBox(pList, 100, v.origin - delta, v.origin + delta, FL_CLIENT | FL_MONSTER);
 	for (int i = 0; i < count; i++)
 	{
 		pSightEnt = pList[i];
 		// !!!temporarily only considering other monsters and clients, don't see prisoners
 		if (pSightEnt != this &&
-			pSightEnt->pev->health > 0)
+			pSightEnt->v.health > 0)
 		{
 			// the looker will want to consider this entity
 			// don't check anything else about an entity that can't be seen, or an entity that you don't care about.
-			if (IRelationship(pSightEnt) != R_NO && FInViewCone(pSightEnt) && !FBitSet(pSightEnt->pev->flags, FL_NOTARGET) && FVisible(pSightEnt))
+			if (IRelationship(pSightEnt) != R_NO && FInViewCone(pSightEnt) && !FBitSet(pSightEnt->v.flags, FL_NOTARGET) && FVisible(pSightEnt))
 			{
 				pSightEnt->m_pLink = m_pLink;
 				m_pLink = pSightEnt;
@@ -395,7 +395,7 @@ CBaseEntity* CBaseEntity::BestVisibleEnemy()
 				// currently think is the best visible enemy. No need to do
 				// a distance check, just get mad at this one for now.
 				iBestRelationship = IRelationship(pNextEnt);
-				iNearest = (pNextEnt->pev->origin - pev->origin).Length();
+				iNearest = (pNextEnt->v.origin - v.origin).Length();
 				pReturn = pNextEnt;
 			}
 			else if (IRelationship(pNextEnt) == iBestRelationship)
@@ -403,7 +403,7 @@ CBaseEntity* CBaseEntity::BestVisibleEnemy()
 				// this entity is disliked just as much as the entity that
 				// we currently think is the best visible enemy, so we only
 				// get mad at it if it is closer.
-				iDist = (pNextEnt->pev->origin - pev->origin).Length();
+				iDist = (pNextEnt->v.origin - v.origin).Length();
 
 				if (iDist <= iNearest)
 				{

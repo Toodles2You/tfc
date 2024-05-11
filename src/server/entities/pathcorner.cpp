@@ -25,6 +25,8 @@
 class CPathCorner : public CPointEntity
 {
 public:
+	CPathCorner(Entity* containingEntity) : CPointEntity(containingEntity) {}
+
 	DECLARE_SAVERESTORE()
 
 	bool Spawn() override;
@@ -61,7 +63,7 @@ bool CPathCorner::KeyValue(KeyValueData* pkvd)
 
 bool CPathCorner::Spawn()
 {
-	if (FStringNull(pev->targetname))
+	if (FStringNull(v.targetname))
 	{
 		ALERT(at_console, "path_corner without a targetname\n");
 		return false;
@@ -103,25 +105,25 @@ void CPathTrack::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE use
 	// Use toggles between two paths
 	if (m_paltpath)
 	{
-		on = !FBitSet(pev->spawnflags, SF_PATH_ALTERNATE);
+		on = !FBitSet(v.spawnflags, SF_PATH_ALTERNATE);
 		if (ShouldToggle(useType, on))
 		{
 			if (on)
-				SetBits(pev->spawnflags, SF_PATH_ALTERNATE);
+				SetBits(v.spawnflags, SF_PATH_ALTERNATE);
 			else
-				ClearBits(pev->spawnflags, SF_PATH_ALTERNATE);
+				ClearBits(v.spawnflags, SF_PATH_ALTERNATE);
 		}
 	}
 	else // Use toggles between enabled/disabled
 	{
-		on = !FBitSet(pev->spawnflags, SF_PATH_DISABLED);
+		on = !FBitSet(v.spawnflags, SF_PATH_DISABLED);
 
 		if (ShouldToggle(useType, on))
 		{
 			if (on)
-				SetBits(pev->spawnflags, SF_PATH_DISABLED);
+				SetBits(v.spawnflags, SF_PATH_DISABLED);
 			else
-				ClearBits(pev->spawnflags, SF_PATH_DISABLED);
+				ClearBits(v.spawnflags, SF_PATH_DISABLED);
 		}
 	}
 }
@@ -129,14 +131,14 @@ void CPathTrack::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE use
 
 void CPathTrack::Link()
 {
-	edict_t* pentTarget;
+	Entity* pentTarget;
 
-	if (!FStringNull(pev->target))
+	if (!FStringNull(v.target))
 	{
-		pentTarget = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(pev->target));
-		if (!FNullEnt(pentTarget))
+		pentTarget = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(v.target));
+		if (pentTarget != nullptr)
 		{
-			m_pnext = CPathTrack::Instance(pentTarget);
+			m_pnext = pentTarget->Get<CPathTrack>();
 
 			if (m_pnext) // If no next pointer, this is the end of a path
 			{
@@ -144,16 +146,16 @@ void CPathTrack::Link()
 			}
 		}
 		else
-			ALERT(at_console, "Dead end link %s\n", STRING(pev->target));
+			ALERT(at_console, "Dead end link %s\n", STRING(v.target));
 	}
 
 	// Find "alternate" path
 	if (!FStringNull(m_altName))
 	{
 		pentTarget = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(m_altName));
-		if (!FNullEnt(pentTarget))
+		if (pentTarget != nullptr)
 		{
-			m_paltpath = CPathTrack::Instance(pentTarget);
+			m_paltpath = pentTarget->Get<CPathTrack>();
 
 			if (m_paltpath) // If no next pointer, this is the end of a path
 			{
@@ -166,7 +168,7 @@ void CPathTrack::Link()
 
 bool CPathTrack::Spawn()
 {
-	pev->solid = SOLID_TRIGGER;
+	v.solid = SOLID_TRIGGER;
 	SetSize(Vector(-8, -8, -8), Vector(8, 8, 8));
 
 	m_pnext = NULL;
@@ -174,7 +176,7 @@ bool CPathTrack::Spawn()
 // DEBUGGING CODE
 #if PATH_SPARKLE_DEBUG
 	SetThink(Sparkle);
-	pev->nextthink = gpGlobals->time + 0.5;
+	v.nextthink = gpGlobals->time + 0.5;
 #endif
 
 	return true;
@@ -183,7 +185,7 @@ bool CPathTrack::Spawn()
 
 void CPathTrack::Activate()
 {
-	if (!FStringNull(pev->targetname)) // Link to next, and back-link
+	if (!FStringNull(v.targetname)) // Link to next, and back-link
 		Link();
 }
 
@@ -192,7 +194,7 @@ CPathTrack* CPathTrack::ValidPath(CPathTrack* ppath, bool testFlag)
 	if (!ppath)
 		return NULL;
 
-	if (testFlag && FBitSet(ppath->pev->spawnflags, SF_PATH_DISABLED))
+	if (testFlag && FBitSet(ppath->v.spawnflags, SF_PATH_DISABLED))
 		return NULL;
 
 	return ppath;
@@ -203,15 +205,15 @@ void CPathTrack::Project(CPathTrack* pstart, CPathTrack* pend, Vector* origin, f
 {
 	if (pstart && pend)
 	{
-		Vector dir = (pend->pev->origin - pstart->pev->origin);
+		Vector dir = (pend->v.origin - pstart->v.origin);
 		dir = dir.Normalize();
-		*origin = pend->pev->origin + dir * dist;
+		*origin = pend->v.origin + dir * dist;
 	}
 }
 
 CPathTrack* CPathTrack::GetNext()
 {
-	if (m_paltpath && FBitSet(pev->spawnflags, SF_PATH_ALTERNATE) && !FBitSet(pev->spawnflags, SF_PATH_ALTREVERSE))
+	if (m_paltpath && FBitSet(v.spawnflags, SF_PATH_ALTERNATE) && !FBitSet(v.spawnflags, SF_PATH_ALTREVERSE))
 		return m_paltpath;
 
 	return m_pnext;
@@ -221,7 +223,7 @@ CPathTrack* CPathTrack::GetNext()
 
 CPathTrack* CPathTrack::GetPrevious()
 {
-	if (m_paltpath && FBitSet(pev->spawnflags, SF_PATH_ALTERNATE) && FBitSet(pev->spawnflags, SF_PATH_ALTREVERSE))
+	if (m_paltpath && FBitSet(v.spawnflags, SF_PATH_ALTERNATE) && FBitSet(v.spawnflags, SF_PATH_ALTREVERSE))
 		return m_paltpath;
 
 	return m_pprevious;
@@ -232,7 +234,7 @@ CPathTrack* CPathTrack::GetPrevious()
 void CPathTrack::SetPrevious(CPathTrack* pprev)
 {
 	// Only set previous if this isn't my alternate path
-	if (pprev && !FStrEq(STRING(pprev->pev->targetname), STRING(m_altName)))
+	if (pprev && !FStrEq(STRING(pprev->v.targetname), STRING(m_altName)))
 		m_pprevious = pprev;
 }
 
@@ -251,7 +253,7 @@ CPathTrack* CPathTrack::LookAhead(Vector* origin, float dist, bool move)
 		dist = -dist;
 		while (dist > 0)
 		{
-			Vector dir = pcurrent->pev->origin - currentPos;
+			Vector dir = pcurrent->v.origin - currentPos;
 			float length = dir.Length();
 			if (0 == length)
 			{
@@ -271,7 +273,7 @@ CPathTrack* CPathTrack::LookAhead(Vector* origin, float dist, bool move)
 			else
 			{
 				dist -= length;
-				currentPos = pcurrent->pev->origin;
+				currentPos = pcurrent->v.origin;
 				*origin = currentPos;
 				if (!ValidPath(pcurrent->GetPrevious(), move)) // If there is no previous node, or it's disabled, return now.
 					return NULL;
@@ -292,7 +294,7 @@ CPathTrack* CPathTrack::LookAhead(Vector* origin, float dist, bool move)
 					Project(pcurrent->GetPrevious(), pcurrent, origin, dist);
 				return NULL;
 			}
-			Vector dir = pcurrent->GetNext()->pev->origin - currentPos;
+			Vector dir = pcurrent->GetNext()->v.origin - currentPos;
 			float length = dir.Length();
 			if (0 == length && !ValidPath(pcurrent->GetNext()->GetNext(), move))
 			{
@@ -308,7 +310,7 @@ CPathTrack* CPathTrack::LookAhead(Vector* origin, float dist, bool move)
 			else
 			{
 				dist -= length;
-				currentPos = pcurrent->GetNext()->pev->origin;
+				currentPos = pcurrent->GetNext()->v.origin;
 				pcurrent = pcurrent->GetNext();
 				*origin = currentPos;
 			}
@@ -329,7 +331,7 @@ CPathTrack* CPathTrack::Nearest(Vector origin)
 	CPathTrack *ppath, *pnearest;
 
 
-	delta = origin - pev->origin;
+	delta = origin - v.origin;
 	delta.z = 0;
 	minDist = delta.Length();
 	pnearest = this;
@@ -342,10 +344,10 @@ CPathTrack* CPathTrack::Nearest(Vector origin)
 		deadCount++;
 		if (deadCount > 9999)
 		{
-			ALERT(at_error, "Bad sequence of path_tracks from %s", STRING(pev->targetname));
+			ALERT(at_error, "Bad sequence of path_tracks from %s", STRING(v.targetname));
 			return NULL;
 		}
-		delta = origin - ppath->pev->origin;
+		delta = origin - ppath->v.origin;
 		delta.z = 0;
 		dist = delta.Length();
 		if (dist < minDist)
@@ -359,23 +361,15 @@ CPathTrack* CPathTrack::Nearest(Vector origin)
 }
 
 
-CPathTrack* CPathTrack::Instance(edict_t* pent)
-{
-	if (FClassnameIs(pent, "path_track"))
-		return (CPathTrack*)GET_PRIVATE(pent);
-	return NULL;
-}
-
-
 // DEBUGGING CODE
 #if PATH_SPARKLE_DEBUG
 void CPathTrack::Sparkle()
 {
 
-	pev->nextthink = gpGlobals->time + 0.2;
-	if (FBitSet(pev->spawnflags, SF_PATH_DISABLED))
-		util::ParticleEffect(pev->origin, Vector(0, 0, 100), 210, 10);
+	v.nextthink = gpGlobals->time + 0.2;
+	if (FBitSet(v.spawnflags, SF_PATH_DISABLED))
+		util::ParticleEffect(v.origin, Vector(0, 0, 100), 210, 10);
 	else
-		util::ParticleEffect(pev->origin, Vector(0, 0, 100), 84, 10);
+		util::ParticleEffect(v.origin, Vector(0, 0, 100), 84, 10);
 }
 #endif

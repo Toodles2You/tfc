@@ -44,21 +44,15 @@ extern struct local_state_s g_finalstate;
 static bool firstTimePredicting = false;
 
 // Pool of client side entities
-static edict_t theEdicts[256];
+static Entity theEdicts[256];
 static int numEntities = 0;
 
-static CBasePlayer players[MAX_PLAYERS + 1];
+static CBasePlayer *players[MAX_PLAYERS + 1];
 
 // The entity we'll use to represent the local client
-static CBasePlayer* player = players;
+static CBasePlayer* player;
 
-static CCrowbar crowbar;
-static CMP5 mp5;
-static CBasePlayerWeapon* weapons[] =
-{
-	&crowbar,
-	&mp5,
-};
+static CBasePlayerWeapon* weapons[WEAPON_TYPES];
 
 static Vector previousorigin;
 
@@ -96,22 +90,12 @@ we set up the m_pPlayer field.
 */
 static void HUD_PrepEntity(CBaseEntity* entity, CBasePlayer* owner)
 {
-	auto edict = theEdicts + numEntities;
-	numEntities++;
-
-	memset(edict, 0, sizeof(edict_t));
-
-	edict->free = false;
-	edict->pvPrivateData = entity;
-	entity->pev = &edict->v;
-	entity->pev->pContainingEntity = edict;
-
 	entity->Precache();
 	entity->Spawn();
 
 	if (owner)
 	{
-		const auto weapon = dynamic_cast<CBasePlayerWeapon*>(entity);
+		auto weapon = static_cast<CBasePlayerWeapon*>(entity);
 
 		WeaponInfo info;
 		memset(&info, 0, sizeof(info));
@@ -127,7 +111,7 @@ static void HUD_PrepEntity(CBaseEntity* entity, CBasePlayer* owner)
 	}
 	else
 	{
-		entity->pev->flags |= FL_CLIENT;
+		entity->v.flags |= FL_CLIENT;
 	}
 }
 
@@ -141,7 +125,7 @@ If weapons code "kills" an entity, just set its effects to EF_NODRAW
 */
 void CBaseEntity::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType)
 {
-	pev->effects |= EF_NODRAW;
+	v.effects |= EF_NODRAW;
 }
 
 
@@ -158,7 +142,7 @@ HUD_PlaybackEvent
 Directly queue up an event on the client
 =====================
 */
-static void HUD_PlaybackEvent(int flags, const edict_t* pInvoker, unsigned short eventindex, float delay,
+static void HUD_PlaybackEvent(int flags, const Entity* pInvoker, unsigned short eventindex, float delay,
 	const float* origin, const float* angles, float fparam1, float fparam2, int iparam1, int iparam2, int bparam1, int bparam2)
 {
 	Vector org;
@@ -169,20 +153,20 @@ static void HUD_PlaybackEvent(int flags, const edict_t* pInvoker, unsigned short
 
 	// Weapon prediction events are assumed to occur at the player's origin
 	org = g_finalstate.playerstate.origin;
-	ang = player->pev->v_angle + player->pev->punchangle * 2;
+	ang = player->v.v_angle + player->v.punchangle * 2;
 	gEngfuncs.pfnPlaybackEvent(flags, pInvoker, eventindex, delay, org, ang, fparam1, fparam2, iparam1, iparam2, bparam1, bparam2);
 }
 
 
-static edict_t* HUD_GetEntityByIndex(int index)
+static Entity* HUD_GetEntityByIndex(int index)
 {
 	return theEdicts + index;
 }
 
 
-static void* HUD_GetModelPtr(edict_t* edict)
+static void* HUD_GetModelPtr(Entity* edict)
 {
-	model_t* model = gEngfuncs.hudGetModelByIndex(edict->v.modelindex);
+	model_t* model = gEngfuncs.hudGetModelByIndex(edict->modelindex);
 
 	if (model == nullptr || model->type != mod_studio)
 	{
@@ -213,6 +197,38 @@ static void HUD_InitClientWeapons()
 	gpGlobals = &globals;
 
 	// Fill in current time
+	gpGlobals->time = 0.0F;
+
+	// Allocate slots for the players
+	for (auto i = 0; i <= MAX_PLAYERS; i++)
+	{
+		players[i] = theEdicts[numEntities].GetNew<CBasePlayer>();
+		memset(theEdicts[numEntities].ToEntvars(), 0, sizeof(entvars_t));
+		numEntities++;
+	}
+
+	player = players[0];
+
+	// Allocate slots for each weapon that we are going to be predicting
+	weapons[WEAPON_CROWBAR] = theEdicts[numEntities].GetNew<CCrowbar>();
+	memset(theEdicts[numEntities].ToEntvars(), 0, sizeof(entvars_t));
+	numEntities++;
+
+	weapons[WEAPON_MP5] = theEdicts[numEntities].GetNew<CMP5>();
+	memset(theEdicts[numEntities].ToEntvars(), 0, sizeof(entvars_t));
+	numEntities++;
+}
+
+
+static void HUD_SpawnClientWeapons()
+{
+	static bool spawned = false;
+	if (spawned)
+		return;
+
+	spawned = true;
+
+	// Fill in current time
 	gpGlobals->time = gEngfuncs.GetClientTime();
 
 	// Handled locally
@@ -235,11 +251,11 @@ static void HUD_InitClientWeapons()
 	// Allocate slots for the players
 	for (auto i = 0; i <= MAX_PLAYERS; i++)
 	{
-		HUD_PrepEntity(players + i, nullptr);
+		HUD_PrepEntity(players[i], nullptr);
 	}
 
 	// Allocate slots for each weapon that we are going to be predicting
-	for (auto i = 0; i < ARRAYSIZE(weapons); i++)
+	for (auto i = 0; i < WEAPON_TYPES; i++)
 	{
 		HUD_PrepEntity(weapons[i], player);
 	}
@@ -282,7 +298,7 @@ playerstate structure
 */
 void HUD_ProcessPlayerState(struct entity_state_s* dst, const struct entity_state_s* src)
 {
-	HUD_InitClientWeapons();
+	HUD_SpawnClientWeapons();
 
 	// Copy in network data
 	dst->origin = src->origin;
@@ -349,7 +365,7 @@ void HUD_ProcessPlayerState(struct entity_state_s* dst, const struct entity_stat
 
 	if (dst->number >= 1 && dst->number <= MAX_PLAYERS)
 	{
-		players[dst->number].SetEntityState(*dst);
+		players[dst->number]->SetEntityState(*dst);
 	}
 }
 
@@ -385,28 +401,28 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 	// If so, run the appropriate player killed or spawn function
 	if (HUD_FirstTimePredicting())
 	{
-		if (to->client.health <= 0 && player->pev->health > 0)
+		if (to->client.health <= 0 && player->v.health > 0)
 		{
 			player->Killed(nullptr, nullptr, DMG_GENERIC);
 		}
-		else if (to->client.health > 0 && player->pev->health <= 0)
+		else if (to->client.health > 0 && player->v.health <= 0)
 		{
 			player->Spawn();
 		}
-		player->pev->health = to->client.health;
+		player->v.health = to->client.health;
 	}
 
 	player->SetPrefsFromUserinfo(nullptr);
 
-	gEngfuncs.GetViewAngles(player->pev->v_angle);
-	player->pev->button = cmd->buttons;
+	gEngfuncs.GetViewAngles(player->v.v_angle);
+	player->v.button = cmd->buttons;
 	player->m_afButtonLast = from->playerstate.oldbuttons;
 	player->m_WeaponBits = gHUD.m_iWeaponBits;
 
 	player->SetEntityState(from->playerstate);
 	player->SetClientData(from->client);
 
-	for (i = 0; i < ARRAYSIZE(weapons); i++)
+	for (i = 0; i < WEAPON_TYPES; i++)
 	{
 		auto weapon = weapons[i];
 		weapon->SetWeaponData(from->weapondata[weapon->GetID()]);
@@ -417,7 +433,7 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 
 	player->PostThink();
 
-	for (i = 0; i < ARRAYSIZE(weapons); i++)
+	for (i = 0; i < WEAPON_TYPES; i++)
 	{
 		auto weapon = weapons[i];
 		weapon->DecrementTimers(cmd->msec);
@@ -441,6 +457,7 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 
 void HUD_PlayerMoveInit(struct playermove_s* ppmove)
 {
+	HUD_InitClientWeapons();
 	PM_Init(ppmove);
 	player->InstallGameMovement(new CHalfLifeMovement{ppmove, player});
 }
@@ -489,7 +506,7 @@ void WeaponsResource::Init()
 	memset(rgWeapons, 0, sizeof(rgWeapons));
 	Reset();
 
-	for (auto i = 0; i < ARRAYSIZE(weapons); i++)
+	for (auto i = 0; i < WEAPON_TYPES; i++)
 	{
 		WeaponInfo info;
 		memset(&info, 0, sizeof(info));

@@ -93,7 +93,7 @@ void IPoll::ClientVote(unsigned int playerIndex, unsigned int option)
 	m_Tally[option - 1]++;
 
 	util::LogPrintf("\"%s<%i><%s><>\" voted for option %i\n",
-		STRING(player->pev->netname),
+		STRING(player->v.netname),
 		g_engfuncs.pfnGetPlayerUserId(player->edict()),
 		g_engfuncs.pfnGetPlayerAuthId(player->edict()),
 		option - 1);

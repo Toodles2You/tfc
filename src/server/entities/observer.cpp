@@ -27,6 +27,9 @@
 // Find the next client in the game for this player to spectate
 void CBasePlayer::Observer_FindNextPlayer(bool bReverse)
 {
+	if (IsBot())
+		return;
+
 	// MOD AUTHORS: Modify the logic of this function if you want to restrict the observer to watching
 	//				only a subset of the players. e.g. Make it check the target's team.
 
@@ -74,24 +77,27 @@ void CBasePlayer::Observer_FindNextPlayer(bool bReverse)
 	if (m_hObserverTarget)
 	{
 		// Move to the target
-		SetOrigin(m_hObserverTarget->pev->origin);
+		SetOrigin(m_hObserverTarget->v.origin);
 
-		// ALERT( at_console, "Now Tracking %s\n", STRING( m_hObserverTarget->pev->netname ) );
+		// ALERT( at_console, "Now Tracking %s\n", STRING( m_hObserverTarget->v.netname ) );
 
 		// Store the target in pev so the physics DLL can get to it
-		if (pev->iuser1 != OBS_ROAMING)
-			pev->iuser2 = ENTINDEX(m_hObserverTarget->edict());
+		if (v.iuser1 != OBS_ROAMING)
+			v.iuser2 = ENTINDEX(m_hObserverTarget->edict());
 	}
 }
 
 // Handle buttons in observer mode
 void CBasePlayer::Observer_HandleButtons()
 {
+	if (IsBot())
+		return;
+
 	// Slow down mouse clicks
 	if (m_flNextObserverInput > gpGlobals->time)
 		return;
 
-	if (pev->iuser1 == OBS_DEATHCAM || pev->iuser1 == OBS_FIXED)
+	if (v.iuser1 == OBS_DEATHCAM || v.iuser1 == OBS_FIXED)
 		return;
 
 	// Jump changes from modes: Chase to Roaming
@@ -99,18 +105,18 @@ void CBasePlayer::Observer_HandleButtons()
 	{
 		if (IsSpectator())
 		{
-			Observer_SetMode((pev->iuser1 + 1) % OBS_DEATHCAM);
+			Observer_SetMode((v.iuser1 + 1) % OBS_DEATHCAM);
 		}
 		else
 		{
-			Observer_SetMode((pev->iuser1 + 1) % OBS_ROAMING);
+			Observer_SetMode((v.iuser1 + 1) % OBS_ROAMING);
 		}
 
 		m_flNextObserverInput = gpGlobals->time + 0.2;
 	}
 
 	// Attack moves to the next player
-	if ((m_afButtonPressed & IN_ATTACK) != 0) //&& pev->iuser1 != OBS_ROAMING )
+	if ((m_afButtonPressed & IN_ATTACK) != 0) //&& v.iuser1 != OBS_ROAMING )
 	{
 		Observer_FindNextPlayer(false);
 
@@ -118,7 +124,7 @@ void CBasePlayer::Observer_HandleButtons()
 	}
 
 	// Attack2 moves to the prev player
-	if ((m_afButtonPressed & IN_ATTACK2) != 0) // && pev->iuser1 != OBS_ROAMING )
+	if ((m_afButtonPressed & IN_ATTACK2) != 0) // && v.iuser1 != OBS_ROAMING )
 	{
 		Observer_FindNextPlayer(true);
 
@@ -128,7 +134,10 @@ void CBasePlayer::Observer_HandleButtons()
 
 void CBasePlayer::Observer_CheckTarget()
 {
-	if (pev->iuser1 == OBS_ROAMING || pev->iuser1 == OBS_DEATHCAM || pev->iuser1 == OBS_FIXED)
+	if (IsBot())
+		return;
+
+	if (v.iuser1 == OBS_ROAMING || v.iuser1 == OBS_DEATHCAM || v.iuser1 == OBS_FIXED)
 		return;
 
 	// try to find a traget if we have no current one
@@ -140,7 +149,7 @@ void CBasePlayer::Observer_CheckTarget()
 		{
 			// no target found at all
 
-			int lastMode = pev->iuser1;
+			int lastMode = v.iuser1;
 
 			Observer_SetMode(OBS_ROAMING);
 
@@ -182,8 +191,11 @@ void CBasePlayer::Observer_CheckTarget()
 // Attempt to change the observer mode
 void CBasePlayer::Observer_SetMode(int iMode)
 {
+	if (IsBot())
+		return;
+
 	// Just abort if we're changing to the mode we're already in
-	if (iMode == pev->iuser1)
+	if (iMode == v.iuser1)
 		return;
 
 	// is valid mode ?
@@ -209,7 +221,7 @@ void CBasePlayer::Observer_SetMode(int iMode)
 	}
 
 	// set spectator mode
-	pev->iuser1 = iMode;
+	v.iuser1 = iMode;
 
 	// if we are not roaming, we need a valid target to track
 	if ((iMode != OBS_ROAMING) && (m_hObserverTarget == NULL))
@@ -223,21 +235,21 @@ void CBasePlayer::Observer_SetMode(int iMode)
 			{
 				util::ClientPrint(this, HUD_PRINTCENTER, "#Spec_NoTarget");
 			}
-			pev->iuser1 = OBS_ROAMING;
+			v.iuser1 = OBS_ROAMING;
 		}
 	}
 
 	// set target if not roaming
-	if (pev->iuser1 == OBS_ROAMING)
+	if (v.iuser1 == OBS_ROAMING)
 	{
-		pev->iuser2 = 0;
+		v.iuser2 = 0;
 	}
 	else
 	{
-		pev->iuser2 = ENTINDEX(m_hObserverTarget->edict());
+		v.iuser2 = ENTINDEX(m_hObserverTarget->edict());
 	}
 
-	pev->iuser3 = 0; // clear second target from death cam
+	v.iuser3 = 0; // clear second target from death cam
 
 	/*! Toodles FIXME: */
 #if 0
@@ -245,7 +257,7 @@ void CBasePlayer::Observer_SetMode(int iMode)
 	if (IsSpectator())
 	{
 		char modemsg[16];
-		sprintf(modemsg, "#Spec_Mode%i", pev->iuser1);
+		sprintf(modemsg, "#Spec_Mode%i", v.iuser1);
 		util::ClientPrint(this, HUD_PRINTCENTER, modemsg);
 	}
 #endif

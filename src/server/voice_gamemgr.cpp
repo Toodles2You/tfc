@@ -49,7 +49,7 @@ static CBasePlayer* FindPlayerByName(const char* pTestName)
 		CBaseEntity* pEnt = util::PlayerByIndex(i);
 		if (pEnt)
 		{
-			const char* pNetName = STRING(pEnt->pev->netname);
+			const char* pNetName = STRING(pEnt->v.netname);
 			if (stricmp(pNetName, pTestName) == 0)
 			{
 				return (CBasePlayer*)pEnt;
@@ -132,7 +132,7 @@ void CVoiceGameMgr::Update(double frametime)
 }
 
 
-void CVoiceGameMgr::ClientConnected(edict_t* pEdict)
+void CVoiceGameMgr::ClientConnected(Entity* pEdict)
 {
 	int index = ENTINDEX(pEdict) - 1;
 

@@ -28,6 +28,8 @@
 class CEnvExplosion : public CBaseEntity
 {
 public:
+	CEnvExplosion(Entity* containingEntity) : CBaseEntity(containingEntity) {}
+
 	DECLARE_SAVERESTORE()
 
 	bool Spawn() override;
@@ -60,10 +62,10 @@ bool CEnvExplosion::KeyValue(KeyValueData* pkvd)
 
 bool CEnvExplosion::Spawn()
 {
-	pev->solid = SOLID_NOT;
-	pev->effects = EF_NODRAW;
+	v.solid = SOLID_NOT;
+	v.effects = EF_NODRAW;
 
-	pev->movetype = MOVETYPE_NONE;
+	v.movetype = MOVETYPE_NONE;
 
 	float flSpriteScale;
 	flSpriteScale = (m_iMagnitude - 50) * 0.6;
@@ -82,40 +84,40 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 {
 	TraceResult tr;
 
-	pev->model = iStringNull; //invisible
-	pev->solid = SOLID_NOT;	  // intangible
+	v.model = iStringNull; //invisible
+	v.solid = SOLID_NOT;	  // intangible
 
 	Vector vecSpot; // trace starts here!
 
-	vecSpot = pev->origin + Vector(0, 0, 8);
+	vecSpot = v.origin + Vector(0, 0, 8);
 
 	util::TraceLine(vecSpot, vecSpot + Vector(0, 0, -40), util::ignore_monsters, this, &tr);
 
 	// Pull out of the wall a bit
 	if (tr.flFraction != 1.0)
 	{
-		pev->origin = tr.vecEndPos + (tr.vecPlaneNormal * (m_iMagnitude - 24) * 0.6);
+		v.origin = tr.vecEndPos + (tr.vecPlaneNormal * (m_iMagnitude - 24) * 0.6);
 	}
 	else
 	{
-		pev->origin = pev->origin;
+		v.origin = v.origin;
 	}
 
 	// draw fireball
 	tent::Explosion(
-		pev->origin,
+		v.origin,
 		g_vecZero,
-		(pev->spawnflags & SF_ENVEXPLOSION_NOFIREBALL) == 0 ? m_spriteScale : 0,
-		(pev->spawnflags & SF_ENVEXPLOSION_NOSMOKE) == 0,
-		(pev->spawnflags & SF_ENVEXPLOSION_NOSPARKS) == 0);
+		(v.spawnflags & SF_ENVEXPLOSION_NOFIREBALL) == 0 ? m_spriteScale : 0,
+		(v.spawnflags & SF_ENVEXPLOSION_NOSMOKE) == 0,
+		(v.spawnflags & SF_ENVEXPLOSION_NOSPARKS) == 0);
 
 	// do damage
-	if ((pev->spawnflags & SF_ENVEXPLOSION_NODAMAGE) == 0)
+	if ((v.spawnflags & SF_ENVEXPLOSION_NODAMAGE) == 0)
 	{
-		RadiusDamage(pev->origin, this, this, m_iMagnitude, m_iMagnitude * 2.5, DMG_BLAST);
+		RadiusDamage(v.origin, this, this, m_iMagnitude, m_iMagnitude * 2.5, DMG_BLAST);
 	}
 
-	if ((pev->spawnflags & SF_ENVEXPLOSION_REPEATABLE) == 0)
+	if ((v.spawnflags & SF_ENVEXPLOSION_REPEATABLE) == 0)
 	{
 		Remove();
 	}
@@ -123,18 +125,18 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 
 
 // HACKHACK -- create one of these and fake a keyvalue to get the right explosion setup
-void ExplosionCreate(const Vector& center, const Vector& angles, edict_t* pOwner, int magnitude, bool doDamage)
+void ExplosionCreate(const Vector& center, const Vector& angles, Entity* pOwner, int magnitude, bool doDamage)
 {
 	KeyValueData kvd;
 	char buf[128];
 
-	CBaseEntity* pExplosion = CBaseEntity::Create("env_explosion", center, angles, pOwner);
+	CBaseEntity* pExplosion = CBaseEntity::Create("env_explosion", center, angles, *pOwner);
 	sprintf(buf, "%3d", magnitude);
 	kvd.szKeyName = "iMagnitude";
 	kvd.szValue = buf;
 	pExplosion->KeyValue(&kvd);
 	if (!doDamage)
-		pExplosion->pev->spawnflags |= SF_ENVEXPLOSION_NODAMAGE;
+		pExplosion->v.spawnflags |= SF_ENVEXPLOSION_NODAMAGE;
 
 	pExplosion->Spawn();
 	pExplosion->Use(NULL, NULL, USE_TOGGLE, 0);

@@ -13,7 +13,8 @@
 class CHLBot : public CBot
 {
 public:
-	CHLBot();
+	CHLBot(Entity* containingEntity);
+
 	bool Initialize(const BotProfile* profile) override;
 	void SpawnBot() override;
 	void Upkeep() override;

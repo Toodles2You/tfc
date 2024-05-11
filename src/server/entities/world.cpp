@@ -46,6 +46,8 @@ extern void W_Precache();
 class CDecal : public CBaseEntity
 {
 public:
+	CDecal(Entity* containingEntity) : CBaseEntity(containingEntity) {}
+
 	bool Spawn() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 	void EXPORT StaticDecal();
@@ -57,16 +59,16 @@ LINK_ENTITY_TO_CLASS(infodecal, CDecal);
 // UNDONE:  These won't get sent to joining players in multi-player
 bool CDecal::Spawn()
 {
-	if (pev->skin < 0 || (g_pGameRules->IsDeathmatch() && FBitSet(pev->spawnflags, SF_DECAL_NOTINDEATHMATCH)))
+	if (v.skin < 0 || (g_pGameRules->IsDeathmatch() && FBitSet(v.spawnflags, SF_DECAL_NOTINDEATHMATCH)))
 	{
 		return false;
 	}
 
-	if (FStringNull(pev->targetname))
+	if (FStringNull(v.targetname))
 	{
 		SetThink(&CDecal::StaticDecal);
 		// if there's no targetname, the decal will spray itself on as soon as the world is done spawning.
-		pev->nextthink = gpGlobals->time;
+		v.nextthink = gpGlobals->time;
 	}
 	else
 	{
@@ -85,18 +87,18 @@ void CDecal::TriggerDecal(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 	TraceResult trace;
 	int entityIndex;
 
-	util::TraceLine(pev->origin - Vector(5, 5, 5), pev->origin + Vector(5, 5, 5), util::ignore_monsters, this, &trace);
+	util::TraceLine(v.origin - Vector(5, 5, 5), v.origin + Vector(5, 5, 5), util::ignore_monsters, this, &trace);
 
 	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
 	WriteByte(TE_BSPDECAL);
-	WriteCoord(pev->origin.x);
-	WriteCoord(pev->origin.y);
-	WriteCoord(pev->origin.z);
-	WriteShort((int)pev->skin);
+	WriteCoord(v.origin.x);
+	WriteCoord(v.origin.y);
+	WriteCoord(v.origin.z);
+	WriteShort((int)v.skin);
 	entityIndex = (short)ENTINDEX(trace.pHit);
 	WriteShort(entityIndex);
 	if (0 != entityIndex)
-		WriteShort((int)VARS(trace.pHit)->modelindex);
+		WriteShort((int)trace.pHit->modelindex);
 	MessageEnd();
 
 	Remove();
@@ -108,15 +110,15 @@ void CDecal::StaticDecal()
 	TraceResult trace;
 	int entityIndex, modelIndex;
 
-	util::TraceLine(pev->origin - Vector(5, 5, 5), pev->origin + Vector(5, 5, 5), util::ignore_monsters, this, &trace);
+	util::TraceLine(v.origin - Vector(5, 5, 5), v.origin + Vector(5, 5, 5), util::ignore_monsters, this, &trace);
 
 	entityIndex = (short)ENTINDEX(trace.pHit);
 	if (0 != entityIndex)
-		modelIndex = (int)VARS(trace.pHit)->modelindex;
+		modelIndex = (int)trace.pHit->modelindex;
 	else
 		modelIndex = 0;
 
-	g_engfuncs.pfnStaticDecal(pev->origin, (int)pev->skin, entityIndex, modelIndex);
+	g_engfuncs.pfnStaticDecal(v.origin, (int)v.skin, entityIndex, modelIndex);
 
 	Remove();
 }
@@ -126,9 +128,9 @@ bool CDecal::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "texture"))
 	{
-		pev->skin = DECAL_INDEX(pkvd->szValue);
+		v.skin = DECAL_INDEX(pkvd->szValue);
 
-		if (pev->skin < 0)
+		if (v.skin < 0)
 		{
 			ALERT(at_console, "Can't find decal %s\n", pkvd->szValue);
 		}
@@ -354,7 +356,7 @@ LINK_ENTITY_TO_CLASS(worldspawn, CWorld);
 #define SF_WORLD_TITLE 0x0002	  // Display game title at startup
 #define SF_WORLD_FORCETEAM 0x0004 // Force teams
 
-CWorld::CWorld()
+CWorld::CWorld(Entity* containingEntity) : CBaseEntity(containingEntity)
 {
 	if (World)
 	{
@@ -452,13 +454,13 @@ void CWorld::Precache()
 		}
 
 		SetThink(&CWorld::PostSpawn);
-		pev->nextthink = gpGlobals->time + 0.5f;
+		v.nextthink = gpGlobals->time + 0.5f;
 	}
 #endif
 
-	CVAR_SET_FLOAT("sv_zmax", (pev->speed > 0) ? pev->speed : 4096);
+	CVAR_SET_FLOAT("sv_zmax", (v.speed > 0) ? v.speed : 4096);
 
-	CVAR_SET_FLOAT("mp_defaultteam", ((pev->spawnflags & SF_WORLD_FORCETEAM) != 0) ? 1 : 0);
+	CVAR_SET_FLOAT("mp_defaultteam", ((v.spawnflags & SF_WORLD_FORCETEAM) != 0) ? 1 : 0);
 }
 
 
@@ -478,25 +480,25 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 	else if (FStrEq(pkvd->szKeyName, "WaveHeight"))
 	{
 		// Sent over net now.
-		pev->scale = atof(pkvd->szValue) * (1.0 / 8.0);
-		CVAR_SET_FLOAT("sv_wateramp", pev->scale);
+		v.scale = atof(pkvd->szValue) * (1.0 / 8.0);
+		CVAR_SET_FLOAT("sv_wateramp", v.scale);
 		return true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "MaxRange"))
 	{
-		pev->speed = atof(pkvd->szValue);
+		v.speed = atof(pkvd->szValue);
 		return true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "chaptertitle"))
 	{
-		pev->netname = ALLOC_STRING(pkvd->szValue);
+		v.netname = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "startdark"))
 	{
 		if (0 != atoi(pkvd->szValue))
 		{	
-			pev->spawnflags |= SF_WORLD_DARK;
+			v.spawnflags |= SF_WORLD_DARK;
 		}
 		return true;
 	}
@@ -515,20 +517,20 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 	{
 		if (0 != atoi(pkvd->szValue))
 		{
-			pev->spawnflags |= SF_WORLD_TITLE;
+			v.spawnflags |= SF_WORLD_TITLE;
 		}
 		return true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "mapteams"))
 	{
-		pev->team = ALLOC_STRING(pkvd->szValue);
+		v.team = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "defaultteam"))
 	{
 		if (0 != atoi(pkvd->szValue))
 		{
-			pev->spawnflags |= SF_WORLD_FORCETEAM;
+			v.spawnflags |= SF_WORLD_FORCETEAM;
 		}
 		return true;
 	}

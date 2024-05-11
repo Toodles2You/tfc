@@ -47,7 +47,7 @@ bool studio::ExtractBbox(void* pmodel, int sequence, float* mins, float* maxs)
 }
 
 
-int studio::LookupActivity(void* pmodel, entvars_t* pev, int activity)
+int studio::LookupActivity(void* pmodel, int activity)
 {
 	studiohdr_t* pstudiohdr;
 
@@ -75,7 +75,7 @@ int studio::LookupActivity(void* pmodel, entvars_t* pev, int activity)
 }
 
 
-int studio::LookupActivityHeaviest(void* pmodel, entvars_t* pev, int activity)
+int studio::LookupActivityHeaviest(void* pmodel, int activity)
 {
 	studiohdr_t* pstudiohdr;
 
@@ -190,7 +190,7 @@ void studio::SequencePrecache(void* pmodel, const char* pSequenceName)
 #endif /* GAME_DLL */
 
 
-void studio::GetSequenceInfo(void* pmodel, entvars_t* pev, float* pflFrameRate, float* pflGroundSpeed)
+void studio::GetSequenceInfo(void* pmodel, int sequence, float* pflFrameRate, float* pflGroundSpeed)
 {
 	studiohdr_t* pstudiohdr;
 
@@ -200,14 +200,14 @@ void studio::GetSequenceInfo(void* pmodel, entvars_t* pev, float* pflFrameRate, 
 
 	mstudioseqdesc_t* pseqdesc;
 
-	if (pev->sequence < 0 || pev->sequence >= pstudiohdr->numseq)
+	if (sequence < 0 || sequence >= pstudiohdr->numseq)
 	{
 		*pflFrameRate = 0.0;
 		*pflGroundSpeed = 0.0;
 		return;
 	}
 
-	pseqdesc = (mstudioseqdesc_t*)((byte*)pstudiohdr + pstudiohdr->seqindex) + (int)pev->sequence;
+	pseqdesc = (mstudioseqdesc_t*)((byte*)pstudiohdr + pstudiohdr->seqindex) + sequence;
 
 	if (pseqdesc->numframes > 1)
 	{
@@ -223,27 +223,27 @@ void studio::GetSequenceInfo(void* pmodel, entvars_t* pev, float* pflFrameRate, 
 }
 
 
-int studio::GetSequenceFlags(void* pmodel, entvars_t* pev)
+int studio::GetSequenceFlags(void* pmodel, int sequence)
 {
 	studiohdr_t* pstudiohdr;
 
 	pstudiohdr = (studiohdr_t*)pmodel;
-	if (!pstudiohdr || pev->sequence < 0 || pev->sequence >= pstudiohdr->numseq)
+	if (!pstudiohdr || sequence < 0 || sequence >= pstudiohdr->numseq)
 		return 0;
 
 	mstudioseqdesc_t* pseqdesc;
-	pseqdesc = (mstudioseqdesc_t*)((byte*)pstudiohdr + pstudiohdr->seqindex) + (int)pev->sequence;
+	pseqdesc = (mstudioseqdesc_t*)((byte*)pstudiohdr + pstudiohdr->seqindex) + sequence;
 
 	return pseqdesc->flags;
 }
 
 
-int studio::GetAnimationEvent(void* pmodel, entvars_t* pev, MonsterEvent_t* pMonsterEvent, float flStart, float flEnd, int index)
+int studio::GetAnimationEvent(void* pmodel, int sequence, MonsterEvent_t* pMonsterEvent, float flStart, float flEnd, int index)
 {
 	studiohdr_t* pstudiohdr;
 
 	pstudiohdr = (studiohdr_t*)pmodel;
-	if (!pstudiohdr || pev->sequence < 0 || pev->sequence >= pstudiohdr->numseq || !pMonsterEvent)
+	if (!pstudiohdr || sequence < 0 || sequence >= pstudiohdr->numseq || !pMonsterEvent)
 		return 0;
 
 	int events = 0;
@@ -251,7 +251,7 @@ int studio::GetAnimationEvent(void* pmodel, entvars_t* pev, MonsterEvent_t* pMon
 	mstudioseqdesc_t* pseqdesc;
 	mstudioevent_t* pevent;
 
-	pseqdesc = (mstudioseqdesc_t*)((byte*)pstudiohdr + pstudiohdr->seqindex) + (int)pev->sequence;
+	pseqdesc = (mstudioseqdesc_t*)((byte*)pstudiohdr + pstudiohdr->seqindex) + sequence;
 	pevent = (mstudioevent_t*)((byte*)pstudiohdr + pseqdesc->eventindex);
 
 	if (pseqdesc->numevents == 0 || index > pseqdesc->numevents)
@@ -285,7 +285,7 @@ int studio::GetAnimationEvent(void* pmodel, entvars_t* pev, MonsterEvent_t* pMon
 	return 0;
 }
 
-float studio::SetController(void* pmodel, entvars_t* pev, int iController, float flValue)
+float studio::SetController(void* pmodel, byte* controller, int iController, float flValue)
 {
 	studiohdr_t* pstudiohdr;
 	int i;
@@ -336,23 +336,23 @@ float studio::SetController(void* pmodel, entvars_t* pev, int iController, float
 		setting = 0;
 	if (setting > 255)
 		setting = 255;
-	pev->controller[iController] = setting;
+	controller[iController] = setting;
 
 	return setting * (1.0 / 255.0) * (pbonecontroller->end - pbonecontroller->start) + pbonecontroller->start;
 }
 
 
-float studio::SetBlending(void* pmodel, entvars_t* pev, int iBlender, float flValue)
+float studio::SetBlending(void* pmodel, int sequence, byte* blending, int iBlender, float flValue)
 {
 	studiohdr_t* pstudiohdr;
 
 	pstudiohdr = (studiohdr_t*)pmodel;
-	if (!pstudiohdr || pev->sequence < 0 || pev->sequence >= pstudiohdr->numseq)
+	if (!pstudiohdr || sequence < 0 || sequence >= pstudiohdr->numseq)
 		return flValue;
 
 	mstudioseqdesc_t* pseqdesc;
 
-	pseqdesc = (mstudioseqdesc_t*)((byte*)pstudiohdr + pstudiohdr->seqindex) + (int)pev->sequence;
+	pseqdesc = (mstudioseqdesc_t*)((byte*)pstudiohdr + pstudiohdr->seqindex) + sequence;
 
 	if (pseqdesc->blendtype[iBlender] == 0)
 		return flValue;
@@ -380,7 +380,7 @@ float studio::SetBlending(void* pmodel, entvars_t* pev, int iBlender, float flVa
 	if (setting > 255)
 		setting = 255;
 
-	pev->blending[iBlender] = setting;
+	blending[iBlender] = setting;
 
 	return setting * (1.0 / 255.0) * (pseqdesc->blendend[iBlender] - pseqdesc->blendstart[iBlender]) + pseqdesc->blendstart[iBlender];
 }
@@ -455,7 +455,7 @@ int studio::FindTransition(void* pmodel, int iEndingAnim, int iGoalAnim, int* pi
 	return iGoalAnim;
 }
 
-void studio::SetBodygroup(void* pmodel, entvars_t* pev, int iGroup, int iValue)
+void studio::SetBodygroup(void* pmodel, int& body, int iGroup, int iValue)
 {
 	studiohdr_t* pstudiohdr;
 
@@ -471,13 +471,13 @@ void studio::SetBodygroup(void* pmodel, entvars_t* pev, int iGroup, int iValue)
 	if (iValue >= pbodypart->nummodels)
 		return;
 
-	int iCurrent = (pev->body / pbodypart->base) % pbodypart->nummodels;
+	int iCurrent = (body / pbodypart->base) % pbodypart->nummodels;
 
-	pev->body = (pev->body - (iCurrent * pbodypart->base) + (iValue * pbodypart->base));
+	body = (body - (iCurrent * pbodypart->base) + (iValue * pbodypart->base));
 }
 
 
-int studio::GetBodygroup(void* pmodel, entvars_t* pev, int iGroup)
+int studio::GetBodygroup(void* pmodel, int body, int iGroup)
 {
 	studiohdr_t* pstudiohdr;
 
@@ -493,7 +493,7 @@ int studio::GetBodygroup(void* pmodel, entvars_t* pev, int iGroup)
 	if (pbodypart->nummodels <= 1)
 		return 0;
 
-	int iCurrent = (pev->body / pbodypart->base) % pbodypart->nummodels;
+	int iCurrent = (body / pbodypart->base) % pbodypart->nummodels;
 
 	return iCurrent;
 }

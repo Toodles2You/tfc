@@ -29,9 +29,9 @@ called when a spectator connects to a server
 */
 void CBaseSpectator::SpectatorConnect()
 {
-	pev->flags = FL_SPECTATOR;
-	pev->solid = SOLID_NOT;
-	pev->movetype = MOVETYPE_NOCLIP;
+	v.flags = FL_SPECTATOR;
+	v.solid = SOLID_NOT;
+	v.movetype = MOVETYPE_NOCLIP;
 
 	m_pGoalEnt = NULL;
 }
@@ -56,12 +56,12 @@ Called by SpectatorThink if the spectator entered an impulse
 */
 void CBaseSpectator::SpectatorImpulseCommand()
 {
-	static edict_t* pGoal = NULL;
-	edict_t* pPreviousGoal;
-	edict_t* pCurrentGoal;
+	static Entity* pGoal = NULL;
+	Entity* pPreviousGoal;
+	Entity* pCurrentGoal;
 	bool bFound;
 
-	switch (pev->impulse)
+	switch (v.impulse)
 	{
 	case 1:
 		// teleport the spectator to the next spawn point
@@ -83,7 +83,7 @@ void CBaseSpectator::SpectatorImpulseCommand()
 				break;
 			}
 			// Found a non-world entity, set success, otherwise, look for the next one.
-			if (!FNullEnt(pCurrentGoal))
+			if (pCurrentGoal != nullptr)
 			{
 				bFound = true;
 				break;
@@ -94,16 +94,16 @@ void CBaseSpectator::SpectatorImpulseCommand()
 			break;
 
 		pGoal = pCurrentGoal;
-		SetOrigin(pGoal->v.origin);
-		pev->angles = pGoal->v.angles;
-		pev->fixangle = 0;
+		SetOrigin(pGoal->origin);
+		v.angles = pGoal->angles;
+		v.fixangle = 0;
 		break;
 	default:
 		ALERT(at_console, "Unknown spectator impulse\n");
 		break;
 	}
 
-	pev->impulse = 0;
+	v.impulse = 0;
 }
 
 /*
@@ -115,15 +115,15 @@ Called every frame after physics are run
 */
 void CBaseSpectator::SpectatorThink()
 {
-	if ((pev->flags & FL_SPECTATOR) == 0)
+	if ((v.flags & FL_SPECTATOR) == 0)
 	{
-		pev->flags = FL_SPECTATOR;
+		v.flags = FL_SPECTATOR;
 	}
 
-	pev->solid = SOLID_NOT;
-	pev->movetype = MOVETYPE_NOCLIP;
+	v.solid = SOLID_NOT;
+	v.movetype = MOVETYPE_NOCLIP;
 
-	if (0 != pev->impulse)
+	if (0 != v.impulse)
 		SpectatorImpulseCommand();
 }
 
@@ -137,9 +137,9 @@ Spawn
 */
 bool CBaseSpectator::Spawn()
 {
-	pev->flags = FL_SPECTATOR;
-	pev->solid = SOLID_NOT;
-	pev->movetype = MOVETYPE_NOCLIP;
+	v.flags = FL_SPECTATOR;
+	v.solid = SOLID_NOT;
+	v.movetype = MOVETYPE_NOCLIP;
 
 	m_pGoalEnt = NULL;
 

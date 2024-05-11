@@ -1652,22 +1652,22 @@ void BuildLadders( void )
 
 	TraceResult result;
 	CBaseEntity *entity = util::FindEntityByClassname( NULL, "func_ladder" );
-	while( entity && !FNullEnt( entity->edict() ) )
+	while( entity != nullptr )
 	{
 		CNavLadder *ladder = new CNavLadder;
 
 		// compute top & bottom of ladder
-		ladder->m_top.x = (entity->pev->absmin.x + entity->pev->absmax.x) / 2.0f;
-		ladder->m_top.y = (entity->pev->absmin.y + entity->pev->absmax.y) / 2.0f;
-		ladder->m_top.z = entity->pev->absmax.z;
+		ladder->m_top.x = (entity->v.absmin.x + entity->v.absmax.x) / 2.0f;
+		ladder->m_top.y = (entity->v.absmin.y + entity->v.absmax.y) / 2.0f;
+		ladder->m_top.z = entity->v.absmax.z;
 
 		ladder->m_bottom.x = ladder->m_top.x;
 		ladder->m_bottom.y = ladder->m_top.y;
-		ladder->m_bottom.z = entity->pev->absmin.z;
+		ladder->m_bottom.z = entity->v.absmin.z;
 
 		// determine facing - assumes "normal" runged ladder
-		float xSize = entity->pev->absmax.x - entity->pev->absmin.x;
-		float ySize = entity->pev->absmax.y - entity->pev->absmin.y;
+		float xSize = entity->v.absmax.x - entity->v.absmin.x;
+		float ySize = entity->v.absmax.y - entity->v.absmin.y;
 		if (xSize > ySize)
 		{
 			// ladder is facing north or south - determine which way
@@ -3612,13 +3612,13 @@ bool IsCrossingLineOfFire( const Vector &start, const Vector &finish, CBaseEntit
 			continue;
 
 		// compute player's unit aiming vector 
-		util::MakeVectors( player->pev->v_angle + player->pev->punchangle );
+		util::MakeVectors( player->v.v_angle + player->v.punchangle );
 
 		const float longRange = 5000.0f;
-		Vector playerTarget = player->pev->origin + longRange * gpGlobals->v_forward;
+		Vector playerTarget = player->v.origin + longRange * gpGlobals->v_forward;
 
 		Vector result;
-		if (IsIntersecting2D( start, finish, player->pev->origin, playerTarget, &result ))
+		if (IsIntersecting2D( start, finish, player->v.origin, playerTarget, &result ))
 		{
 			// simple check to see if intersection lies in the Z range of the path
 			float loZ, hiZ;
@@ -3730,7 +3730,7 @@ int CNavArea::GetPlayerCount( int teamID, CBasePlayer *ignore ) const
 			continue;
 
 		if (teamID == 0 || player->TeamNumber() == teamID)
-			if (Contains( &player->pev->origin ))
+			if (Contains( &player->v.origin ))
 				++count;
 	}
 	
@@ -4039,8 +4039,8 @@ void EditNavAreas( NavEditCmdType cmd )
 		{
 			CNavLadder *ladder = *iter;
 
-			float dx = player->pev->origin.x - ladder->m_bottom.x;
-			float dy = player->pev->origin.y - ladder->m_bottom.y;
+			float dx = player->v.origin.x - ladder->m_bottom.x;
+			float dy = player->v.origin.y - ladder->m_bottom.y;
 			if (dx*dx + dy*dy > maxRange*maxRange)
 				continue;
 
@@ -4101,9 +4101,9 @@ void EditNavAreas( NavEditCmdType cmd )
 	}
 
 	Vector dir;
-	util::MakeVectorsPrivate( player->pev->v_angle, dir, NULL, NULL );
+	util::MakeVectorsPrivate( player->v.v_angle, dir, NULL, NULL );
 
-	Vector from = player->pev->origin + player->pev->view_ofs;	// eye position
+	Vector from = player->v.origin + player->v.view_ofs;	// eye position
 	Vector to = from + maxRange * dir;
 
 	TraceResult result;
@@ -4266,7 +4266,7 @@ void EditNavAreas( NavEditCmdType cmd )
 				// draw split line
 				const Extent *extent = area->GetExtent();
 
-				float yaw = player->pev->v_angle.y;
+				float yaw = player->v.v_angle.y;
 				while( yaw > 360.0f )
 					yaw -= 360.0f;
 
@@ -4445,7 +4445,7 @@ void EditNavAreas( NavEditCmdType cmd )
 						if (markedArea)
 						{
 							CBasePlayer *pLocalPlayer = static_cast<CBasePlayer *>(util::GetLocalPlayer());
-							if ( pLocalPlayer && pLocalPlayer->IsSpectator() && pLocalPlayer->pev->iuser1 == OBS_ROAMING )
+							if ( pLocalPlayer && pLocalPlayer->IsSpectator() && pLocalPlayer->v.iuser1 == OBS_ROAMING )
 							{
 								Vector origin = *markedArea->GetCenter() + Vector( 0, 0, 0.75f * HumanHeight );
 								pLocalPlayer->SetOrigin( origin );
@@ -4649,7 +4649,7 @@ bool GetGroundHeight( const Vector *pos, float *height, Vector *normal )
 	float offset;
 	Vector from;
 	TraceResult result;
-	edict_t *ignore = NULL;
+	Entity *ignore = NULL;
 	float ground = 0.0f;
 
 	const float maxOffset = 100.0f;
@@ -4668,15 +4668,15 @@ bool GetGroundHeight( const Vector *pos, float *height, Vector *normal )
 	{
 		from = *pos + Vector( 0, 0, offset );
 
-		util::TraceLine( from, to, util::ignore_monsters, util::dont_ignore_glass, CBaseEntity::Instance(ignore), &result );
+		util::TraceLine( from, to, util::ignore_monsters, util::dont_ignore_glass, ignore->Get<CBaseEntity>(), &result );
 
 		// if the trace came down thru a door, ignore the door and try again
 		// also ignore breakable floors
 		if (result.pHit)
 		{
-			if (FClassnameIs( VARS( result.pHit ), "func_door" ) ||
-				FClassnameIs( VARS( result.pHit ), "func_door_rotating" ) ||
-				(FClassnameIs( VARS( result.pHit ), "func_breakable" ) && VARS( result.pHit )->takedamage == DAMAGE_YES))
+			if (FClassnameIs( result.pHit, "func_door" ) ||
+				FClassnameIs( result.pHit, "func_door_rotating" ) ||
+				(FClassnameIs( result.pHit, "func_breakable" ) && result.pHit->takedamage == DAMAGE_YES))
 			{
 				ignore = result.pHit;
 				// keep incrementing to avoid infinite loop if more than one entity is along the traceline...

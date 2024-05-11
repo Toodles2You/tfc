@@ -52,7 +52,7 @@ bool CHalfLifeRules::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWeapon
 }
 
 
-bool CHalfLifeRules::ClientConnected(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128])
+bool CHalfLifeRules::ClientConnected(Entity* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128])
 {
 	return true;
 }
@@ -63,7 +63,7 @@ void CHalfLifeRules::ClientPutInServer(CBasePlayer* pPlayer)
 }
 
 
-void CHalfLifeRules::ClientDisconnected(edict_t* pClient)
+void CHalfLifeRules::ClientDisconnected(Entity* pClient)
 {
 }
 
@@ -144,7 +144,7 @@ float CHalfLifeRules::FlWeaponTryRespawn(CBasePlayerWeapon* pWeapon)
 
 Vector CHalfLifeRules::VecWeaponRespawnSpot(CBasePlayerWeapon* pWeapon)
 {
-	return pWeapon->pev->origin;
+	return pWeapon->v.origin;
 }
 
 
@@ -168,7 +168,7 @@ float CHalfLifeRules::FlItemRespawnTime(CItem* pItem)
 
 Vector CHalfLifeRules::VecItemRespawnSpot(CItem* pItem)
 {
-	return pItem->pev->origin;
+	return pItem->v.origin;
 }
 
 
@@ -192,7 +192,7 @@ float CHalfLifeRules::FlAmmoRespawnTime(CBasePlayerAmmo* pAmmo)
 
 Vector CHalfLifeRules::VecAmmoRespawnSpot(CBasePlayerAmmo* pAmmo)
 {
-	return pAmmo->pev->origin;
+	return pAmmo->v.origin;
 }
 
 

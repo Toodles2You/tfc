@@ -175,42 +175,42 @@ bool CHalfLifeMultiplay::PrivilegedCommand(CBasePlayer* pPlayer, const char* pcm
 {
 	if (strcmp(pcmd, "nc") == 0)
 	{
-		if (pPlayer->pev->movetype != MOVETYPE_NOCLIP)
+		if (pPlayer->v.movetype != MOVETYPE_NOCLIP)
 		{
-			pPlayer->pev->movetype = MOVETYPE_NOCLIP;
+			pPlayer->v.movetype = MOVETYPE_NOCLIP;
 			g_engfuncs.pfnClientPrintf(pPlayer->edict(), print_console, "noclip ON\n");
 		}
 		else
 		{
-			pPlayer->pev->movetype = MOVETYPE_WALK;
+			pPlayer->v.movetype = MOVETYPE_WALK;
 			g_engfuncs.pfnClientPrintf(pPlayer->edict(), print_console, "noclip OFF\n");
 		}
 		return true;
 	}
 	else if (strcmp(pcmd, "gaben") == 0)
 	{
-		if ((pPlayer->pev->flags & FL_GODMODE) == 0)
+		if ((pPlayer->v.flags & FL_GODMODE) == 0)
 		{
-			pPlayer->pev->flags |= FL_GODMODE;
+			pPlayer->v.flags |= FL_GODMODE;
 			g_engfuncs.pfnClientPrintf(pPlayer->edict(), print_console, "godmode ON\n");
 		}
 		else
 		{
-			pPlayer->pev->flags &= ~FL_GODMODE;
+			pPlayer->v.flags &= ~FL_GODMODE;
 			g_engfuncs.pfnClientPrintf(pPlayer->edict(), print_console, "godmode OFF\n");
 		}
 		return true;
 	}
 	else if (strcmp(pcmd, "nt") == 0)
 	{
-		if ((pPlayer->pev->flags & FL_NOTARGET) == 0)
+		if ((pPlayer->v.flags & FL_NOTARGET) == 0)
 		{
-			pPlayer->pev->flags |= FL_NOTARGET;
+			pPlayer->v.flags |= FL_NOTARGET;
 			g_engfuncs.pfnClientPrintf(pPlayer->edict(), print_console, "notarget ON\n");
 		}
 		else
 		{
-			pPlayer->pev->flags &= ~FL_NOTARGET;
+			pPlayer->v.flags &= ~FL_NOTARGET;
 			g_engfuncs.pfnClientPrintf(pPlayer->edict(), print_console, "notarget OFF\n");
 		}
 		return true;
@@ -265,8 +265,8 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 		return true;
 	}
 	else if (pPlayer->IsObserver()
-	 && pPlayer->pev->iuser1 != OBS_DEATHCAM
-	 && pPlayer->pev->iuser1 != OBS_FIXED)
+	 && pPlayer->v.iuser1 != OBS_DEATHCAM
+	 && pPlayer->v.iuser1 != OBS_FIXED)
 	{
 		if (CMD_ARGC() > 1)
 		{
@@ -359,7 +359,7 @@ bool CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWe
 }
 
 
-bool CHalfLifeMultiplay::ClientConnected(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128])
+bool CHalfLifeMultiplay::ClientConnected(Entity* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128])
 {
 	g_VoiceGameMgr.ClientConnected(pEntity);
 	g_VoteManager.ClientConnected(ENTINDEX(pEntity));
@@ -370,8 +370,8 @@ bool CHalfLifeMultiplay::ClientConnected(edict_t* pEntity, const char* pszName, 
 void CHalfLifeMultiplay::ClientPutInServer(CBasePlayer* pPlayer)
 {
 	pPlayer->m_team = nullptr;
-	pPlayer->pev->team = TEAM_UNASSIGNED;
-	pPlayer->pev->playerclass = PC_UNDEFINED;
+	pPlayer->v.team = TEAM_UNASSIGNED;
+	pPlayer->v.playerclass = PC_UNDEFINED;
 	pPlayer->m_fDeadTime = gpGlobals->time - 60.0F;
 }
 
@@ -380,9 +380,9 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 {
 	const char *name = "unconnected";
 	
-	if (!FStringNull(pl->pev->netname) && STRING(pl->pev->netname)[0] != '\0')
+	if (!FStringNull(pl->v.netname) && STRING(pl->v.netname)[0] != '\0')
 	{
-		name = STRING(pl->pev->netname);
+		name = STRING(pl->v.netname);
 	}
 
 	// notify other clients of player joining the game
@@ -429,11 +429,12 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 		{
 			MessageBegin(MSG_ONE, gmsgScoreInfo, pl);
 			WriteByte(i); // client number
-			WriteShort(plr->pev->frags);
+			WriteShort(plr->v.frags);
 			WriteShort(plr->m_iDeaths);
 			MessageEnd();
 
 			plr->SendExtraInfo(pl);
+			pl->SendExtraInfo(plr);
 		}
 	}
 
@@ -447,7 +448,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 }
 
 
-void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
+void CHalfLifeMultiplay::ClientDisconnected(Entity* pClient)
 {
 	if (pClient)
 	{
@@ -455,14 +456,14 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 
 		const char *name = "unconnected";
 		
-		if (!FStringNull(pClient->v.netname) && STRING(pClient->v.netname)[0] != '\0')
+		if (!FStringNull(pClient->netname) && STRING(pClient->netname)[0] != '\0')
 		{
-			name = STRING(pClient->v.netname);
+			name = STRING(pClient->netname);
 		}
 		
 		util::ClientPrintAll(HUD_PRINTTALK, "#Game_disconnected", name);
 
-		CBasePlayer* pPlayer = (CBasePlayer*)CBaseEntity::Instance(pClient);
+		CBasePlayer* pPlayer = pClient->Get<CBasePlayer>();
 
 		if (pPlayer)
 		{
@@ -475,16 +476,16 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 			util::FireTargets("game_playerleave", pPlayer, pPlayer, USE_TOGGLE, 0);
 
 			util::LogPrintf("\"%s<%i><%s><>\" disconnected\n",
-				STRING(pPlayer->pev->netname),
+				STRING(pPlayer->v.netname),
 				g_engfuncs.pfnGetPlayerUserId(pPlayer->edict()),
 				g_engfuncs.pfnGetPlayerAuthId(pPlayer->edict()));
 
 			pPlayer->RemoveAllWeapons(); // destroy all of the players weapons and items
 		}
 
-		pClient->v.team = TEAM_UNASSIGNED;
-		pClient->v.playerclass = PC_UNDEFINED;
-		pClient->v.netname = MAKE_STRING("Disconnected");
+		pClient->team = TEAM_UNASSIGNED;
+		pClient->playerclass = PC_UNDEFINED;
+		pClient->netname = MAKE_STRING("Disconnected");
 	}
 }
 
@@ -513,7 +514,7 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer* pPlayer)
 	{
 		// clear attack/use commands from player
 		pPlayer->m_afButtonPressed = 0;
-		pPlayer->pev->button = 0;
+		pPlayer->v.button = 0;
 		pPlayer->m_afButtonReleased = 0;
 	}
 }
@@ -521,17 +522,18 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer* pPlayer)
 
 void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 {
-	pPlayer->SendExtraInfo();
-
 	if (pPlayer->TeamNumber() == TEAM_UNASSIGNED)
 	{
-		pPlayer->StartObserver();
-		pPlayer->pev->iuser1 = OBS_FIXED;
-		pPlayer->pev->iuser2 = 0;
-		pPlayer->pev->iuser3 = 0;
+		pPlayer->m_hObserverTarget = nullptr;
 		pPlayer->m_iObserverLastMode = OBS_FIXED;
+		pPlayer->StartObserver();
+		pPlayer->v.iuser1 = OBS_FIXED;
+		pPlayer->v.iuser2 = 0;
+		pPlayer->v.iuser3 = 0;
 		return;
 	}
+
+	pPlayer->SendExtraInfo();
 
 	bool addDefault;
 	CBaseEntity* pWeaponEntity = NULL;
@@ -631,7 +633,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer,
 	// killed scores
 	MessageBegin(MSG_ALL, gmsgScoreInfo);
 	WriteByte(pVictim->entindex());
-	WriteShort(pVictim->pev->frags);
+	WriteShort(pVictim->v.frags);
 	WriteShort(pVictim->m_iDeaths);
 	MessageEnd();
 
@@ -640,7 +642,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer,
 	{
 		MessageBegin(MSG_ALL, gmsgScoreInfo);
 		WriteByte(killer->entindex());
-		WriteShort(killer->pev->frags);
+		WriteShort(killer->v.frags);
 		WriteShort(((CBasePlayer *)killer)->m_iDeaths);
 		MessageEnd();
 
@@ -674,13 +676,13 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 			}
 			else
 			{
-				killerWeapon = STRING(inflictor->pev->classname);
+				killerWeapon = STRING(inflictor->v.classname);
 			}
 		}
 	}
 	else
 	{
-		killerWeapon = STRING(inflictor->pev->classname);
+		killerWeapon = STRING(inflictor->v.classname);
 	}
 
 	// strip the monster_* or weapon_* from the inflictor's classname
@@ -723,7 +725,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 	if (pVictim == killer)
 	{
 		util::LogPrintf("\"%s<%i><%s><>\" committed suicide with \"%s\"\n",
-			STRING(pVictim->pev->netname),
+			STRING(pVictim->v.netname),
 			g_engfuncs.pfnGetPlayerUserId(pVictim->edict()),
 			g_engfuncs.pfnGetPlayerAuthId(pVictim->edict()),
 			killerWeapon);
@@ -731,10 +733,10 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 	else if (killer->IsClient())
 	{
 		util::LogPrintf("\"%s<%i><%s><>\" killed \"%s<%i><%s><>\" with \"%s\"\n",
-			STRING(killer->pev->netname),
+			STRING(killer->v.netname),
 			g_engfuncs.pfnGetPlayerUserId(killer->edict()),
 			g_engfuncs.pfnGetPlayerAuthId(killer->edict()),
-			STRING(killer->pev->netname),
+			STRING(killer->v.netname),
 			g_engfuncs.pfnGetPlayerUserId(pVictim->edict()),
 			g_engfuncs.pfnGetPlayerAuthId(pVictim->edict()),
 			killerWeapon);
@@ -742,7 +744,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 	else
 	{
 		util::LogPrintf("\"%s<%i><%s><>\" died\n",
-			STRING(pVictim->pev->netname),
+			STRING(pVictim->v.netname),
 			g_engfuncs.pfnGetPlayerUserId(pVictim->edict()),
 			g_engfuncs.pfnGetPlayerAuthId(pVictim->edict()),
 			killerWeapon);
@@ -763,22 +765,22 @@ void CHalfLifeMultiplay::AddPointsToPlayer(CBasePlayer* player, float score, boo
 	// Positive score always adds
 	if (score <= 0 && !allowNegative)
 	{
-		if (player->pev->frags <= 0) // Can't go more negative
+		if (player->v.frags <= 0) // Can't go more negative
 		{
 			return;
 		}
 
-		if (-score > player->pev->frags) // Will this go negative?
+		if (-score > player->v.frags) // Will this go negative?
 		{
-			score = -player->pev->frags; // Sum will be 0
+			score = -player->v.frags; // Sum will be 0
 		}
 	}
 
-	player->pev->frags += score;
+	player->v.frags += score;
 
 	MessageBegin(MSG_ALL, gmsgScoreInfo);
 	WriteByte(player->entindex());
-	WriteShort(player->pev->frags);
+	WriteShort(player->v.frags);
 	WriteShort(player->m_iDeaths);
 	MessageEnd();
 }
@@ -838,13 +840,13 @@ float CHalfLifeMultiplay::FlWeaponTryRespawn(CBasePlayerWeapon* pWeapon)
 
 Vector CHalfLifeMultiplay::VecWeaponRespawnSpot(CBasePlayerWeapon* pWeapon)
 {
-	return pWeapon->pev->origin;
+	return pWeapon->v.origin;
 }
 
 
 int CHalfLifeMultiplay::WeaponShouldRespawn(CBasePlayerWeapon* pWeapon)
 {
-	if ((pWeapon->pev->spawnflags & SF_NORESPAWN) != 0)
+	if ((pWeapon->v.spawnflags & SF_NORESPAWN) != 0)
 	{
 		return GR_WEAPON_RESPAWN_NO;
 	}
@@ -874,7 +876,7 @@ bool CHalfLifeMultiplay::CanHavePlayerWeapon(CBasePlayer* pPlayer, CBasePlayerWe
 
 int CHalfLifeMultiplay::ItemShouldRespawn(CItem* pItem)
 {
-	if ((pItem->pev->spawnflags & SF_NORESPAWN) != 0)
+	if ((pItem->v.spawnflags & SF_NORESPAWN) != 0)
 	{
 		return GR_ITEM_RESPAWN_NO;
 	}
@@ -891,13 +893,13 @@ float CHalfLifeMultiplay::FlItemRespawnTime(CItem* pItem)
 
 Vector CHalfLifeMultiplay::VecItemRespawnSpot(CItem* pItem)
 {
-	return pItem->pev->origin;
+	return pItem->v.origin;
 }
 
 
 bool CHalfLifeMultiplay::IsAllowedToSpawn(CBaseEntity* pEntity)
 {
-	if (!FAllowMonsters() && (pEntity->pev->flags & FL_MONSTER) != 0)
+	if (!FAllowMonsters() && (pEntity->v.flags & FL_MONSTER) != 0)
 	{
 		return false;
 	}
@@ -907,7 +909,7 @@ bool CHalfLifeMultiplay::IsAllowedToSpawn(CBaseEntity* pEntity)
 
 int CHalfLifeMultiplay::AmmoShouldRespawn(CBasePlayerAmmo* pAmmo)
 {
-	if ((pAmmo->pev->spawnflags & SF_NORESPAWN) != 0)
+	if ((pAmmo->v.spawnflags & SF_NORESPAWN) != 0)
 	{
 		return GR_AMMO_RESPAWN_NO;
 	}
@@ -924,7 +926,7 @@ float CHalfLifeMultiplay::FlAmmoRespawnTime(CBasePlayerAmmo* pAmmo)
 
 Vector CHalfLifeMultiplay::VecAmmoRespawnSpot(CBasePlayerAmmo* pAmmo)
 {
-	return pAmmo->pev->origin;
+	return pAmmo->v.origin;
 }
 
 
@@ -1003,7 +1005,7 @@ CSpawnPoint *CHalfLifeMultiplay::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
 
 void CHalfLifeMultiplay::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 {
-	if (FStrEq(STRING(pEntity->pev->classname), "info_player_start"))
+	if (FStrEq(STRING(pEntity->v.classname), "info_player_start"))
 	{
 		CGameRules::AddPlayerSpawnSpot(pEntity);
 		return;
@@ -1015,7 +1017,7 @@ void CHalfLifeMultiplay::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 	ALERT(
 		at_aiconsole,
 		"%s %lu at (%g, %g, %g)\n",
-		STRING(pEntity->pev->classname),
+		STRING(pEntity->v.classname),
 		m_numSpawnPoints,
 		spawn->m_origin.x,
 		spawn->m_origin.y,
@@ -1193,11 +1195,11 @@ bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, b
 			bGib ? DMG_ALWAYSGIB : DMG_GENERIC);
 	}
 
-	pPlayer->pev->team = teamIndex;
+	pPlayer->v.team = teamIndex;
 
 	if (teamIndex != TEAM_SPECTATORS)
 	{
-		m_teams[pPlayer->pev->team - 1].AddPlayer(pPlayer);
+		m_teams[pPlayer->v.team - 1].AddPlayer(pPlayer);
 
 		if (!bKill && g_pGameRules->FPlayerCanRespawn(pPlayer))
 		{
@@ -1227,11 +1229,11 @@ bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, b
 	util::ClientPrintAll(
 		HUD_PRINTTALK,
 		msg,
-		STRING(pPlayer->pev->netname),
+		STRING(pPlayer->v.netname),
 		localizeName.c_str());
 	
 	util::LogPrintf("\"%s<%i><%s><>\" joined team %s\n",
-		STRING(pPlayer->pev->netname),
+		STRING(pPlayer->v.netname),
 		g_engfuncs.pfnGetPlayerUserId(pPlayer->edict()),
 		g_engfuncs.pfnGetPlayerAuthId(pPlayer->edict()),
 		GetIndexedTeamName(teamIndex));
@@ -1318,7 +1320,7 @@ void CHalfLifeMultiplay::Think_RND_RUNNING()
 				continue;
 			}
 
-			if ((int)player->pev->frags >= (int)fraglimit.value)
+			if ((int)player->v.frags >= (int)fraglimit.value)
 			{
 				EnterState(GR_STATE_GAME_OVER);
 				return;

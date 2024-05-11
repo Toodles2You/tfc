@@ -36,7 +36,7 @@ inline void MessageBegin(int dest, int type, const Vector& origin, CBaseEntity* 
 		dest,
 		type,
 		origin,
-		entity ? entity->pev->pContainingEntity : nullptr);
+		entity ? &entity->v : nullptr);
 }
 
 inline void MessageBegin(int dest, int type, CBaseEntity* entity)
@@ -45,18 +45,18 @@ inline void MessageBegin(int dest, int type, CBaseEntity* entity)
 		dest,
 		type,
 		nullptr,
-		entity ? entity->pev->pContainingEntity : nullptr);
+		entity ? &entity->v : nullptr);
 }
 
 CBaseEntity* util::FindEntityForward(CBaseEntity* pMe)
 {
 	TraceResult tr;
 
-	util::MakeVectors(pMe->pev->v_angle);
-	util::TraceLine(pMe->pev->origin + pMe->pev->view_ofs, pMe->pev->origin + pMe->pev->view_ofs + gpGlobals->v_forward * 8192, dont_ignore_monsters, pMe, &tr);
-	if (tr.flFraction != 1.0 && !FNullEnt(tr.pHit))
+	util::MakeVectors(pMe->v.v_angle);
+	util::TraceLine(pMe->v.origin + pMe->v.view_ofs, pMe->v.origin + pMe->v.view_ofs + gpGlobals->v_forward * 8192, dont_ignore_monsters, pMe, &tr);
+	if (tr.flFraction != 1.0 && tr.pHit != nullptr)
 	{
-		CBaseEntity* pHit = CBaseEntity::Instance(tr.pHit);
+		CBaseEntity* pHit = tr.pHit->Get<CBaseEntity>();
 		return pHit;
 	}
 	return NULL;
@@ -195,7 +195,7 @@ util::GroupTrace::~GroupTrace()
 	ENGINE_SETGROUPMASK(g_groupmask, g_groupop);
 }
 
-edict_t* util::GetEntityList()
+Entity* util::GetEntityList()
 {
 	return g_engfuncs.pfnPEntityOfEntOffset(0);
 }
@@ -248,7 +248,7 @@ Vector util::VecToAngles(const Vector& vec)
 
 int util::EntitiesInBox(CBaseEntity** pList, int listMax, const Vector& mins, const Vector& maxs, int flagMask, bool checkSolid)
 {
-	edict_t* pEdict = util::GetEntityList();
+	Entity* pEdict = util::GetEntityList();
 	CBaseEntity* pEntity;
 	int count;
 
@@ -262,24 +262,24 @@ int util::EntitiesInBox(CBaseEntity** pList, int listMax, const Vector& mins, co
 
 	for (int i = 1; i < gpGlobals->maxEntities; i++, pEdict++)
 	{
-		if (0 != pEdict->free) // Not in use
+		if (pEdict->IsFree()) // Not in use
 			continue;
 
-		if (0 != flagMask && (pEdict->v.flags & flagMask) == 0) // Does it meet the criteria?
+		if (0 != flagMask && (pEdict->flags & flagMask) == 0) // Does it meet the criteria?
 			continue;
 
-		if (0 != checkSolid && (pEdict->v.solid == SOLID_NOT || pEdict->v.mins.x == pEdict->v.maxs.x))
+		if (0 != checkSolid && (pEdict->solid == SOLID_NOT || pEdict->mins.x == pEdict->maxs.x))
 			continue;
 
-		if (mins.x > pEdict->v.absmax.x ||
-			mins.y > pEdict->v.absmax.y ||
-			mins.z > pEdict->v.absmax.z ||
-			maxs.x < pEdict->v.absmin.x ||
-			maxs.y < pEdict->v.absmin.y ||
-			maxs.z < pEdict->v.absmin.z)
+		if (mins.x > pEdict->absmax.x ||
+			mins.y > pEdict->absmax.y ||
+			mins.z > pEdict->absmax.z ||
+			maxs.x < pEdict->absmin.x ||
+			maxs.y < pEdict->absmin.y ||
+			maxs.z < pEdict->absmin.z)
 			continue;
 
-		pEntity = CBaseEntity::Instance(pEdict);
+		pEntity = pEdict->Get<CBaseEntity>();
 		if (!pEntity)
 			continue;
 
@@ -296,7 +296,7 @@ int util::EntitiesInBox(CBaseEntity** pList, int listMax, const Vector& mins, co
 
 int util::MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& center, float radius)
 {
-	edict_t* pEdict = util::GetEntityList();
+	Entity* pEdict = util::GetEntityList();
 	CBaseEntity* pEntity;
 	int count;
 	float distance, delta;
@@ -312,15 +312,15 @@ int util::MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& cente
 
 	for (int i = 1; i < gpGlobals->maxEntities; i++, pEdict++)
 	{
-		if (0 != pEdict->free) // Not in use
+		if (pEdict->IsFree()) // Not in use
 			continue;
 
-		if ((pEdict->v.flags & (FL_CLIENT | FL_MONSTER)) == 0) // Not a client/monster ?
+		if ((pEdict->flags & (FL_CLIENT | FL_MONSTER)) == 0) // Not a client/monster ?
 			continue;
 
 		// Use origin for X & Y since they are centered for all monsters
 		// Now X
-		delta = center.x - pEdict->v.origin.x; //(pEdict->v.absmin.x + pEdict->v.absmax.x)*0.5;
+		delta = center.x - pEdict->origin.x;
 		delta *= delta;
 
 		if (delta > radiusSquared)
@@ -328,7 +328,7 @@ int util::MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& cente
 		distance = delta;
 
 		// Now Y
-		delta = center.y - pEdict->v.origin.y; //(pEdict->v.absmin.y + pEdict->v.absmax.y)*0.5;
+		delta = center.y - pEdict->origin.y;
 		delta *= delta;
 
 		distance += delta;
@@ -336,14 +336,14 @@ int util::MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& cente
 			continue;
 
 		// Now Z
-		delta = center.z - (pEdict->v.absmin.z + pEdict->v.absmax.z) * 0.5;
+		delta = center.z - (pEdict->absmin.z + pEdict->absmax.z) * 0.5;
 		delta *= delta;
 
 		distance += delta;
 		if (distance > radiusSquared)
 			continue;
 
-		pEntity = CBaseEntity::Instance(pEdict);
+		pEntity = pEdict->Get<CBaseEntity>();
 		if (!pEntity)
 			continue;
 
@@ -361,7 +361,7 @@ int util::MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& cente
 
 CBaseEntity* util::FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius)
 {
-	edict_t* pentEntity;
+	Entity* pentEntity;
 
 	if (pStartEntity)
 		pentEntity = pStartEntity->edict();
@@ -370,25 +370,25 @@ CBaseEntity* util::FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& v
 
 	pentEntity = FIND_ENTITY_IN_SPHERE(pentEntity, vecCenter, flRadius);
 
-	if (!FNullEnt(pentEntity))
-		return CBaseEntity::Instance(pentEntity);
+	if (pentEntity != nullptr && OFFSET(pentEntity) != 0)
+		return pentEntity->Get<CBaseEntity>();
 	return NULL;
 }
 
 
 CBaseEntity* util::FindEntityByString(CBaseEntity* pStartEntity, const char* szKeyword, const char* szValue)
 {
-	edict_t* pentEntity;
+	Entity* pentEntity;
 
 	if (pStartEntity)
 		pentEntity = pStartEntity->edict();
 	else
 		pentEntity = NULL;
 
-	pentEntity = FIND_ENTITY_BY_STRING(pentEntity, szKeyword, szValue);
+	pentEntity = g_engfuncs.pfnFindEntityByString(pentEntity, szKeyword, szValue);
 
-	if (!FNullEnt(pentEntity))
-		return CBaseEntity::Instance(pentEntity);
+	if (pentEntity != nullptr && OFFSET(pentEntity) != 0)
+		return pentEntity->Get<CBaseEntity>();
 	return NULL;
 }
 
@@ -415,7 +415,7 @@ CBaseEntity* util::FindEntityGeneric(const char* szWhatever, Vector& vecSrc, flo
 	float flMaxDist2 = flRadius * flRadius;
 	while ((pSearch = util::FindEntityByClassname(pSearch, szWhatever)) != NULL)
 	{
-		float flDist2 = (pSearch->pev->origin - vecSrc).Length();
+		float flDist2 = (pSearch->v.origin - vecSrc).Length();
 		flDist2 = flDist2 * flDist2;
 		if (flMaxDist2 > flDist2)
 		{
@@ -432,18 +432,19 @@ CBaseEntity* util::FindEntityGeneric(const char* szWhatever, Vector& vecSrc, flo
 // Index is 1 based
 CBaseEntity* util::PlayerByIndex(int playerIndex)
 {
-	CBaseEntity* pPlayer = NULL;
+	CBaseEntity* player = nullptr;
 
 	if (playerIndex > 0 && playerIndex <= gpGlobals->maxClients)
 	{
-		edict_t* pPlayerEdict = INDEXENT(playerIndex);
-		if (pPlayerEdict && 0 == pPlayerEdict->free)
+		auto entity = g_engfuncs.pfnPEntityOfEntIndex(playerIndex);
+
+		if (entity != nullptr && !entity->IsFree())
 		{
-			pPlayer = CBaseEntity::Instance(pPlayerEdict);
+			player = entity->Get<CBaseEntity>();
 		}
 	}
 
-	return pPlayer;
+	return player;
 }
 
 
@@ -515,7 +516,7 @@ void util::ScreenShake(const Vector& center, float amplitude, float frequency, f
 	{
 		CBaseEntity* pPlayer = util::PlayerByIndex(i);
 
-		if (!pPlayer || (pPlayer->pev->flags & FL_ONGROUND) == 0) // Don't shake if not onground
+		if (!pPlayer || (pPlayer->v.flags & FL_ONGROUND) == 0) // Don't shake if not onground
 			continue;
 
 		localAmplitude = 0;
@@ -524,7 +525,7 @@ void util::ScreenShake(const Vector& center, float amplitude, float frequency, f
 			localAmplitude = amplitude;
 		else
 		{
-			Vector delta = center - pPlayer->pev->origin;
+			Vector delta = center - pPlayer->v.origin;
 			float distance = delta.Length();
 
 			// Had to get rid of this falloff - it didn't work well
@@ -812,7 +813,7 @@ bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CB
 		gpGlobals->trace_flags |= FTRACE_SIMPLEBOX;
 	}
 
-	edict_t* ignoreEnt = ignore ? ignore->pev->pContainingEntity : nullptr;
+	Entity* ignoreEnt = ignore ? &ignore->v : nullptr;
 
 	if (hull == point_hull)
 	{	
@@ -845,12 +846,12 @@ bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CB
 }
 
 
-void util::TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t* pentIgnore, TraceResult* ptr)
+void util::TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, Entity* pentIgnore, TraceResult* ptr)
 {
 	TRACE_HULL(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), hullNumber, pentIgnore, ptr);
 }
 
-void util::TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, edict_t* pentModel, TraceResult* ptr)
+void util::TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, Entity* pentModel, TraceResult* ptr)
 {
 	g_engfuncs.pfnTraceModel(vecStart, vecEnd, hullNumber, pentModel, ptr);
 }
@@ -963,7 +964,7 @@ char* util::VarArgs(const char* format, ...)
 	return string;
 }
 
-Vector util::GetAimVector(edict_t* pent, float flSpeed)
+Vector util::GetAimVector(Entity* pent, float flSpeed)
 {
 	Vector tmp;
 	GET_AIM_VECTOR(pent, flSpeed, tmp);
@@ -974,11 +975,11 @@ bool util::IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator)
 {
 	if (!FStringNull(sMaster))
 	{
-		edict_t* pentTarget = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(sMaster));
+		Entity* pentTarget = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(sMaster));
 
-		if (!FNullEnt(pentTarget))
+		if (pentTarget != nullptr)
 		{
-			CBaseEntity* pMaster = CBaseEntity::Instance(pentTarget);
+			CBaseEntity* pMaster = pentTarget->Get<CBaseEntity>();
 			if (pMaster && (pMaster->ObjectCaps() & FCAP_MASTER) != 0)
 				return pMaster->IsTriggered(pActivator);
 		}
@@ -1096,16 +1097,16 @@ Vector util::ClampVectorToBox(const Vector& input, const Vector& clampSize)
 
 void util::PrecacheOther(const char* szClassname)
 {
-	edict_t* pent;
+	Entity* pent;
 
-	pent = CREATE_NAMED_ENTITY(MAKE_STRING(szClassname));
-	if (FNullEnt(pent))
+	pent = g_engfuncs.pfnCreateNamedEntity(MAKE_STRING(szClassname));
+	if (pent == nullptr)
 	{
 		ALERT(at_console, "NULL Ent in util::PrecacheOther\n");
 		return;
 	}
 
-	CBaseEntity* pEntity = CBaseEntity::Instance(VARS(pent));
+	CBaseEntity* pEntity = pent->Get<CBaseEntity>();
 	if (pEntity)
 		pEntity->Precache();
 	g_engfuncs.pfnRemoveEntity(pent);

@@ -141,12 +141,12 @@ bool CGraph::AllocNodes()
 // pNode is the node the monster will be standing on when it
 // will need to stop and trigger the ent.
 //=========================================================
-entvars_t* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
+Entity* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
 {
-	edict_t* pentSearch;
-	edict_t* pentTrigger;
-	entvars_t* pevTrigger;
-	entvars_t* pevLinkEnt;
+	Entity* pentSearch;
+	Entity* pentTrigger;
+	Entity* pevTrigger;
+	Entity* pevLinkEnt;
 	TraceResult tr;
 
 	pevLinkEnt = pLink->m_pLinkEnt;
@@ -166,7 +166,7 @@ entvars_t* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
 		{
 			pentTrigger = FIND_ENTITY_BY_TARGET(pentSearch, STRING(pevLinkEnt->targetname)); // find the button or trigger
 
-			if (FNullEnt(pentTrigger))
+			if (pentTrigger == nullptr)
 			{ // no trigger found
 
 				// right now this is a problem among auto-open doors, or any door that opens through the use
@@ -182,7 +182,7 @@ entvars_t* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
 			{ // only buttons are handled right now.
 
 				// trace from the node to the trigger, make sure it's one we can see from the node.
-				util::TraceLine(pNode->m_vecOrigin, CBaseEntity::Instance(pevTrigger)->Center(), util::ignore_monsters, nullptr, &tr);
+				util::TraceLine(pNode->m_vecOrigin, pevTrigger->Get<CBaseEntity>()->Center(), util::ignore_monsters, nullptr, &tr);
 
 				if (VARS(tr.pHit) == pevTrigger)
 				{ // good to go!
@@ -204,9 +204,9 @@ entvars_t* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
 // Given the monster's capability, determine whether
 // or not the monster can go this way.
 //=========================================================
-bool CGraph::HandleLinkEnt(int iNode, entvars_t* pevLinkEnt, int afCapMask, NODEQUERY queryType)
+bool CGraph::HandleLinkEnt(int iNode, Entity* pevLinkEnt, int afCapMask, NODEQUERY queryType)
 {
-	edict_t* pentWorld;
+	Entity* pentWorld;
 	CBaseEntity* pDoor;
 	TraceResult tr;
 
@@ -216,7 +216,7 @@ bool CGraph::HandleLinkEnt(int iNode, entvars_t* pevLinkEnt, int afCapMask, NODE
 		return false;
 	}
 
-	if (FNullEnt(pevLinkEnt))
+	if (pevLinkEnt == nullptr)
 	{
 		ALERT(at_aiconsole, "dead path ent!\n");
 		return true;
@@ -227,7 +227,7 @@ bool CGraph::HandleLinkEnt(int iNode, entvars_t* pevLinkEnt, int afCapMask, NODE
 	if (FClassnameIs(pevLinkEnt, "func_door") || FClassnameIs(pevLinkEnt, "func_door_rotating"))
 	{ // ent is a door.
 
-		pDoor = (CBaseEntity::Instance(pevLinkEnt));
+		pDoor = pevLinkEnt->Get<CBaseEntity>();
 
 		if ((pevLinkEnt->spawnflags & SF_DOOR_USE_ONLY) != 0)
 		{ // door is use only.
@@ -432,14 +432,14 @@ int	CGraph:: FindNearestLink ( const Vector &vecTestPoint, int *piNearestLink, b
 
 int CGraph::HullIndex(const CBaseEntity* pEntity)
 {
-	if (pEntity->pev->movetype == MOVETYPE_FLY)
+	if (pEntity->v.movetype == MOVETYPE_FLY)
 		return NODE_FLY_HULL;
 
-	if (pEntity->pev->mins == Vector(-12, -12, 0))
+	if (pEntity->v.mins == Vector(-12, -12, 0))
 		return NODE_SMALL_HULL;
-	else if (pEntity->pev->mins == VEC_HUMAN_HULL_MIN)
+	else if (pEntity->v.mins == VEC_HUMAN_HULL_MIN)
 		return NODE_HUMAN_HULL;
-	else if (pEntity->pev->mins == Vector(-32, -32, 0))
+	else if (pEntity->v.mins == Vector(-32, -32, 0))
 		return NODE_LARGE_HULL;
 
 	//	ALERT ( at_aiconsole, "Unknown Hull Mins!\n" );
@@ -449,9 +449,9 @@ int CGraph::HullIndex(const CBaseEntity* pEntity)
 
 int CGraph::NodeType(const CBaseEntity* pEntity)
 {
-	if (pEntity->pev->movetype == MOVETYPE_FLY)
+	if (pEntity->v.movetype == MOVETYPE_FLY)
 	{
-		if (pEntity->pev->waterlevel > kWaterLevelNone)
+		if (pEntity->v.waterlevel > kWaterLevelNone)
 		{
 			return bits_NODE_WATER;
 		}
@@ -1174,7 +1174,7 @@ void CGraph::ShowNodeConnections(int iNode)
 int CGraph::LinkVisibleNodes(CLink* pLinkPool, FSFile& file, int* piBadNode)
 {
 	int i, j, z;
-	edict_t* pTraceEnt;
+	Entity* pTraceEnt;
 	int cTotalLinks, cLinksThisNode, cMaxInitialLinks;
 	TraceResult tr;
 
@@ -1307,7 +1307,7 @@ int CGraph::LinkVisibleNodes(CLink* pLinkPool, FSFile& file, int* piBadNode)
 			{
 				file.Printf("%4d", j);
 
-				if (!FNullEnt(pLinkPool[cTotalLinks].m_pLinkEnt))
+				if (pLinkPool[cTotalLinks].m_pLinkEnt != nullptr)
 				{ // record info about the ent in the way, if any.
 					file.Printf("  Entity on connection: %s, name: %s  Model: %s", STRING(VARS(pTraceEnt)->classname), STRING(VARS(pTraceEnt)->targetname), STRING(VARS(tr.pHit)->model));
 				}
@@ -1468,7 +1468,9 @@ class CTestHull : public CBaseEntity
 {
 
 public:
-	bool Spawn(entvars_t* pevMasterNode);
+	CTestHull(Entity* containingEntity) : CBaseEntity(containingEntity) {}
+
+	bool Spawn() override;
 	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	void EXPORT CallBuildNodeGraph();
 	void BuildNodeGraph();
@@ -1484,16 +1486,16 @@ LINK_ENTITY_TO_CLASS(testhull, CTestHull);
 //=========================================================
 // CTestHull::Spawn
 //=========================================================
-bool CTestHull::Spawn(entvars_t* pevMasterNode)
+bool CTestHull::Spawn()
 {
 	SetModel("models/player.mdl");
 	SetSize(VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX);
 
-	pev->solid = SOLID_SLIDEBOX;
-	pev->movetype = MOVETYPE_STEP;
-	pev->effects = 0;
-	pev->health = 50;
-	pev->yaw_speed = 8;
+	v.solid = SOLID_SLIDEBOX;
+	v.movetype = MOVETYPE_STEP;
+	v.effects = 0;
+	v.health = 50;
+	v.yaw_speed = 8;
 
 	if (0 != WorldGraph.m_fGraphPresent)
 	{ // graph loaded from disk, so we don't need the test hull
@@ -1501,10 +1503,10 @@ bool CTestHull::Spawn(entvars_t* pevMasterNode)
 	}
 
 	SetThink(&CTestHull::DropDelay);
-	pev->nextthink = gpGlobals->time + 1;
+	v.nextthink = gpGlobals->time + 1;
 
 	// Make this invisible
-	pev->effects |= EF_NODRAW;
+	v.effects |= EF_NODRAW;
 
 	return true;
 }
@@ -1521,7 +1523,7 @@ void CTestHull::DropDelay()
 
 	SetThink(&CTestHull::CallBuildNodeGraph);
 
-	pev->nextthink = gpGlobals->time + 1;
+	v.nextthink = gpGlobals->time + 1;
 }
 
 //=========================================================
@@ -1549,8 +1551,8 @@ bool CNodeEnt::KeyValue(KeyValueData* pkvd)
 //=========================================================
 bool CNodeEnt::Spawn()
 {
-	pev->movetype = MOVETYPE_NONE;
-	pev->solid = SOLID_NOT; // always solid_not
+	v.movetype = MOVETYPE_NONE;
+	v.solid = SOLID_NOT; // always solid_not
 
 	if (!g_pGameRules->FAllowMonsters())
 	{
@@ -1564,8 +1566,8 @@ bool CNodeEnt::Spawn()
 
 	if (WorldGraph.m_cNodes == 0)
 	{ // this is the first node to spawn, spawn the test hull entity that builds and walks the node tree
-		CTestHull* pHull = GetClassPtr((CTestHull*)NULL);
-		pHull->Spawn(pev);
+		CTestHull* pHull = Entity::Create<CTestHull>();
+		pHull->Spawn();
 	}
 
 	if (WorldGraph.m_cNodes >= MAX_NODES)
@@ -1575,12 +1577,12 @@ bool CNodeEnt::Spawn()
 	}
 
 	WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_vecOriginPeek =
-		WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_vecOrigin = pev->origin;
-	WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_flHintYaw = pev->angles.y;
+		WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_vecOrigin = v.origin;
+	WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_flHintYaw = v.angles.y;
 	WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_sHintType = m_sHintType;
 	WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_sHintActivity = m_sHintActivity;
 
-	if (FClassnameIs(pev, "info_node_air"))
+	if (FClassnameIs(&v, "info_node_air"))
 		WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_afNodeInfo = bits_NODE_AIR;
 	else
 		WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_afNodeInfo = 0;
@@ -1598,18 +1600,18 @@ bool CNodeEnt::Spawn()
 //=========================================================
 void CTestHull::ShowBadNode()
 {
-	pev->movetype = MOVETYPE_FLY;
-	pev->angles.y = pev->angles.y + 4;
+	v.movetype = MOVETYPE_FLY;
+	v.angles.y = v.angles.y + 4;
 
-	util::MakeVectors(pev->angles);
+	util::MakeVectors(v.angles);
 
-	util::ParticleEffect(pev->origin, g_vecZero, 255, 25);
-	util::ParticleEffect(pev->origin + gpGlobals->v_forward * 64, g_vecZero, 255, 25);
-	util::ParticleEffect(pev->origin - gpGlobals->v_forward * 64, g_vecZero, 255, 25);
-	util::ParticleEffect(pev->origin + gpGlobals->v_right * 64, g_vecZero, 255, 25);
-	util::ParticleEffect(pev->origin - gpGlobals->v_right * 64, g_vecZero, 255, 25);
+	util::ParticleEffect(v.origin, g_vecZero, 255, 25);
+	util::ParticleEffect(v.origin + gpGlobals->v_forward * 64, g_vecZero, 255, 25);
+	util::ParticleEffect(v.origin - gpGlobals->v_forward * 64, g_vecZero, 255, 25);
+	util::ParticleEffect(v.origin + gpGlobals->v_right * 64, g_vecZero, 255, 25);
+	util::ParticleEffect(v.origin - gpGlobals->v_right * 64, g_vecZero, 255, 25);
 
-	pev->nextthink = gpGlobals->time + 0.1;
+	v.nextthink = gpGlobals->time + 0.1;
 }
 
 void CTestHull::CallBuildNodeGraph()
@@ -1668,7 +1670,7 @@ void CTestHull::BuildNodeGraph()
 	int step;
 
 	SetThink(&CTestHull::Remove);
-	pev->nextthink = gpGlobals->time + 0.1;
+	v.nextthink = gpGlobals->time + 0.1;
 
 	// 	malloc a swollen temporary connection pool that we trim down after we know exactly how many connections there are.
 	pTempPool = (CLink*)calloc(sizeof(CLink), (WorldGraph.m_cNodes * MAX_NODE_INITIAL_LINKS));
@@ -1757,7 +1759,7 @@ void CTestHull::BuildNodeGraph()
 			if (trEnt.flFraction < tr.flFraction)
 			{
 				// If it was a world brush entity, copy the node location
-				if (trEnt.pHit && (trEnt.pHit->v.flags & FL_WORLDBRUSH) != 0)
+				if (trEnt.pHit && (trEnt.pHit->flags & FL_WORLDBRUSH) != 0)
 					tr.vecEndPos = trEnt.vecEndPos;
 			}
 
@@ -1773,8 +1775,8 @@ void CTestHull::BuildNodeGraph()
 		ALERT(at_aiconsole, "**ConnectVisibleNodes FAILED!\n");
 
 		SetThink(&CTestHull::ShowBadNode); // send the hull off to show the offending node.
-		//pev->solid = SOLID_NOT;
-		pev->origin = WorldGraph.m_pNodes[iBadNode].m_vecOrigin;
+		//v.solid = SOLID_NOT;
+		v.origin = WorldGraph.m_pNodes[iBadNode].m_vecOrigin;
 
 		if (pTempPool)
 		{
@@ -1830,7 +1832,7 @@ void CTestHull::BuildNodeGraph()
 
 				SetOrigin(pSrcNode->m_vecOrigin); // place the hull on the node
 
-				if (!FBitSet(pev->flags, FL_ONGROUND))
+				if (!FBitSet(v.flags, FL_ONGROUND))
 				{
 					ALERT(at_aiconsole, "OFFGROUND!\n");
 				}
@@ -1850,26 +1852,26 @@ void CTestHull::BuildNodeGraph()
 				pDestNode = &WorldGraph.m_pNodes[pTempPool[pSrcNode->m_iFirstLink + j].m_iDestNode];
 
 				vecSpot = pDestNode->m_vecOrigin;
-				//vecSpot.z = pev->origin.z;
+				//vecSpot.z = v.origin.z;
 
 				if (hull < NODE_FLY_HULL)
 				{
-					int SaveFlags = pev->flags;
+					int SaveFlags = v.flags;
 					int MoveMode = WALKMOVE_WORLDONLY;
 					if ((pSrcNode->m_afNodeInfo & bits_NODE_WATER) != 0)
 					{
-						pev->flags |= FL_SWIM;
+						v.flags |= FL_SWIM;
 						MoveMode = WALKMOVE_NORMAL;
 					}
 
-					flYaw = util::VecToYaw(pDestNode->m_vecOrigin - pev->origin);
+					flYaw = util::VecToYaw(pDestNode->m_vecOrigin - v.origin);
 
-					flDist = (vecSpot - pev->origin).Length2D();
+					flDist = (vecSpot - v.origin).Length2D();
 
 					bool fWalkFailed = false;
 
 					// in this loop we take tiny steps from the current node to the nodes that it links to, one at a time.
-					// pev->angles.y = flYaw;
+					// v.angles.y = flYaw;
 					for (step = 0; step < flDist && !fWalkFailed; step += HULL_STEP_SIZE)
 					{
 						float stepSize = HULL_STEP_SIZE;
@@ -1877,7 +1879,7 @@ void CTestHull::BuildNodeGraph()
 						if ((step + stepSize) >= (flDist - 1))
 							stepSize = (flDist - step) - 1;
 
-						if (!WALK_MOVE(ENT(pev), flYaw, stepSize, MoveMode))
+						if (!WALK_MOVE(&v, flYaw, stepSize, MoveMode))
 						{ // can't take the next step
 
 							fWalkFailed = true;
@@ -1885,7 +1887,7 @@ void CTestHull::BuildNodeGraph()
 						}
 					}
 
-					if (!fWalkFailed && (pev->origin - vecSpot).Length() > 64)
+					if (!fWalkFailed && (v.origin - vecSpot).Length() > 64)
 					{
 						// ALERT( at_console, "bogus walk\n");
 						// we thought we
@@ -1916,13 +1918,13 @@ void CTestHull::BuildNodeGraph()
 							break;
 						}
 					}
-					pev->flags = SaveFlags;
+					v.flags = SaveFlags;
 				}
 				else
 				{
 					TraceResult tr;
 
-					util::TraceHull(pSrcNode->m_vecOrigin + Vector(0, 0, 32), pDestNode->m_vecOriginPeek + Vector(0, 0, 32), util::ignore_monsters, util::large_hull, ENT(pev), &tr);
+					util::TraceHull(pSrcNode->m_vecOrigin + Vector(0, 0, 32), pDestNode->m_vecOriginPeek + Vector(0, 0, 32), util::ignore_monsters, util::large_hull, &v, &tr);
 					if (0 != tr.fStartSolid || tr.flFraction < 1.0)
 					{
 						pTempPool[pSrcNode->m_iFirstLink + j].m_afLinkInfo &= ~bits_LINK_FLY_HULL;
@@ -2546,7 +2548,7 @@ bool CGraph::FSaveGraph(const char* szMapName)
 bool CGraph::FSetGraphPointers()
 {
 	int i;
-	edict_t* pentLinkEnt;
+	Entity* pentLinkEnt;
 
 	for (i = 0; i < m_cLinks; i++)
 	{ // go through all of the links
@@ -2561,9 +2563,9 @@ bool CGraph::FSetGraphPointers()
 			// m_szLinkEntModelname is not necessarily NULL terminated (so we can store it in a more alignment-friendly 4 bytes)
 			memcpy(name, m_pLinkPool[i].m_szLinkEntModelname, 4);
 			name[4] = 0;
-			pentLinkEnt = FIND_ENTITY_BY_STRING(NULL, "model", name);
+			pentLinkEnt = FIND_ENTITY_BY_MODEL(NULL, name);
 
-			if (FNullEnt(pentLinkEnt))
+			if (pentLinkEnt == nullptr)
 			{
 				// the ent isn't around anymore? Either there is a major problem, or it was removed from the world
 				// ( like a func_breakable that's been destroyed or something ). Make sure that LinkEnt is null.
@@ -3466,6 +3468,8 @@ EnoughSaid:
 class CNodeViewer : public CBaseEntity
 {
 public:
+	CNodeViewer(Entity* containingEntity) : CBaseEntity(containingEntity) {}
+
 	bool Spawn() override;
 
 	int m_iBaseNode;
@@ -3494,13 +3498,13 @@ bool CNodeViewer::Spawn()
 		return false;
 	}
 
-	if (FClassnameIs(pev, "node_viewer_fly"))
+	if (FClassnameIs(&v, "node_viewer_fly"))
 	{
 		m_iHull = NODE_FLY_HULL;
 		m_afNodeType = bits_NODE_AIR;
 		m_vecColor = Vector(160, 100, 255);
 	}
-	else if (FClassnameIs(pev, "node_viewer_large"))
+	else if (FClassnameIs(&v, "node_viewer_large"))
 	{
 		m_iHull = NODE_LARGE_HULL;
 		m_afNodeType = bits_NODE_LAND | bits_NODE_WATER;
@@ -3514,7 +3518,7 @@ bool CNodeViewer::Spawn()
 	}
 
 
-	m_iBaseNode = WorldGraph.FindNearestNode(pev->origin, m_afNodeType);
+	m_iBaseNode = WorldGraph.FindNearestNode(v.origin, m_afNodeType);
 
 	if (m_iBaseNode < 0)
 	{
@@ -3556,7 +3560,7 @@ bool CNodeViewer::Spawn()
 
 	m_iDraw = 0;
 	SetThink(&CNodeViewer::DrawThink);
-	pev->nextthink = gpGlobals->time;
+	v.nextthink = gpGlobals->time;
 
 	return true;
 }
@@ -3599,7 +3603,7 @@ void CNodeViewer::AddNode(int iFrom, int iTo)
 
 void CNodeViewer::DrawThink()
 {
-	pev->nextthink = gpGlobals->time;
+	v.nextthink = gpGlobals->time;
 
 	for (int i = 0; i < 10; i++)
 	{

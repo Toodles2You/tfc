@@ -72,8 +72,8 @@ void CBasePlayer::UpdateHudData()
 	}
 
 	gHUD.Update_SetFOV(m_iFOV);
-	gHUD.m_Health.Update_Health(pev->health);
-	gHUD.m_Battery.Update_Battery(pev->armorvalue);
+	gHUD.m_Health.Update_Health(v.health);
+	gHUD.m_Battery.Update_Battery(v.armorvalue);
 
 	if (IsAlive() && m_pActiveWeapon != nullptr)
 	{
@@ -176,12 +176,12 @@ void CBasePlayer::ThrowGrenade()
 
 void CBaseEntity::GetEntityState(entity_state_t& state)
 {
-	state.animtime = (int)(1000.0 * pev->animtime) / 1000.0;
+	state.animtime = (int)(1000.0 * v.animtime) / 1000.0;
 
-	state.frame = pev->frame;
+	state.frame = v.frame;
 
-	state.sequence = pev->sequence;
-	state.framerate = pev->framerate;
+	state.sequence = v.sequence;
+	state.framerate = v.framerate;
 }
 
 
@@ -189,6 +189,6 @@ void CBasePlayer::GetEntityState(entity_state_t& state)
 {
 	CBaseEntity::GetEntityState(state);
 
-	state.gaitsequence = pev->gaitsequence;
+	state.gaitsequence = v.gaitsequence;
 }
 

@@ -72,9 +72,12 @@ void CHLBotManager::AddBot(const char *profileName)
 	}
 	char szRejectReason[128];
 	auto bot = CreateBot<CHLBot>(profile);
-	if (bot && ClientConnect(bot->edict(), STRING(bot->pev->netname), "127.0.0.1", szRejectReason))
+	if (bot != nullptr)
 	{
-		ClientPutInServer(bot->edict());
+		if (ClientConnect(&bot->v, STRING(bot->v.netname), "127.0.0.1", szRejectReason))
+		{
+			ClientPutInServer(&bot->v);
+		}
 	}
 }
 
@@ -146,8 +149,8 @@ void CHLBotManager::ServerDeactivate()
 		{
 			continue;
 		}
-		player->pev->takedamage = DAMAGE_NO;
-		player->pev->solid = SOLID_NOT;
+		player->v.takedamage = DAMAGE_NO;
+		player->v.solid = SOLID_NOT;
 	}
 	delete TheBotProfiles;
 	TheBotProfiles = nullptr;

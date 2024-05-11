@@ -30,7 +30,7 @@ class BotProfile;
 //--------------------------------------------------------------------------------------------------------
 template <class T> T * CreateBot( const BotProfile *profile )
 {
-	edict_t * pentBot;
+	Entity * pentBot;
 
 	if ( UTIL_ClientsInGame() >= gpGlobals->maxClients )
 	{
@@ -42,9 +42,9 @@ template <class T> T * CreateBot( const BotProfile *profile )
 
 	UTIL_ConstructBotNetName(netname, 64, profile);
 
-	pentBot = CREATE_FAKE_CLIENT( netname );
+	pentBot = g_engfuncs.pfnCreateFakeClient( netname );
 
-	if ( FNullEnt( pentBot ) )
+	if ( pentBot == nullptr )
 	{
 		CONSOLE_ECHO( "Unable to create bot: pfnCreateFakeClient() returned null.\n" );
 		return NULL;
@@ -53,8 +53,11 @@ template <class T> T * CreateBot( const BotProfile *profile )
 	{
 		T * pBot = NULL;
 
-		FREE_PRIVATE( pentBot );
-		pBot = GetClassPtr( (T *)VARS( pentBot ) );
+		g_engfuncs.pfnFreeEntPrivateData(pentBot);
+
+		pentBot->flags |= FL_FAKECLIENT;
+
+		pBot = pentBot->GetNew<T>();
 
 		// initialize the bot
 		pBot->Initialize( profile );
@@ -71,7 +74,8 @@ template <class T> T * CreateBot( const BotProfile *profile )
 class CBot : public CBasePlayer 
 {
 public:
-	CBot( void );											///< constructor initializes all values to zero
+	CBot( Entity* containingEntity );											///< constructor initializes all values to zero
+
 	virtual bool Initialize( const BotProfile *profile );	///< (EXTEND) prepare bot for action
 
 	unsigned int GetID( void ) const	{ return m_id; }	///< return bot's unique ID
@@ -258,10 +262,10 @@ inline void CBot::SetModel( const char *modelName )
 inline float CBot::GetMoveSpeed( void )
 {
 	if (m_isRunning || m_isCrouching)
-		return pev->maxspeed;
+		return v.maxspeed;
 
 	// should be 0.52, but when bots strafe, they break the run/walk threshold
-	return 0.4f * pev->maxspeed;
+	return 0.4f * v.maxspeed;
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -312,7 +316,9 @@ inline void CBot::PushPostureContext( void )
 {
 	if (m_postureStackIndex == MAX_POSTURE_STACK)
 	{
+#if 0
 		if (pev)
+#endif
 			PrintIfWatched( "PushPostureContext() overflow error!\n" );
 		return;
 	}
@@ -327,7 +333,9 @@ inline void CBot::PopPostureContext( void )
 {
 	if (m_postureStackIndex == 0)
 	{
+#if 0
 		if (pev)
+#endif
 			PrintIfWatched( "PopPostureContext() underflow error!\n" );
 		m_isRunning = true;
 		m_isCrouching = false;
@@ -342,10 +350,10 @@ inline void CBot::PopPostureContext( void )
 //-----------------------------------------------------------------------------------------------------------
 inline bool CBot::IsPlayerFacingMe( CBasePlayer *other ) const
 {
-	Vector toOther = other->pev->origin - pev->origin;
+	Vector toOther = other->v.origin - v.origin;
 
 	// compute the unit vector along our other player's
-	util::MakeVectors( other->pev->v_angle + other->pev->punchangle );
+	util::MakeVectors( other->v.v_angle + other->v.punchangle );
 	Vector otherDir = gpGlobals->v_forward;
 
 	if (otherDir.x * toOther.x + otherDir.y * toOther.y < 0.0f)
@@ -357,11 +365,11 @@ inline bool CBot::IsPlayerFacingMe( CBasePlayer *other ) const
 //-----------------------------------------------------------------------------------------------------------
 inline bool CBot::IsPlayerLookingAtMe( CBasePlayer *other ) const
 {
-	Vector toOther = other->pev->origin - pev->origin;
+	Vector toOther = other->v.origin - v.origin;
 	toOther.NormalizeInPlace();
 
 	// compute the unit vector along our other player's
-	util::MakeVectors( other->pev->v_angle + other->pev->punchangle );
+	util::MakeVectors( other->v.v_angle + other->v.punchangle );
 	Vector otherDir = gpGlobals->v_forward;
 
 	// other player must be pointing nearly right at us to be "looking at" us

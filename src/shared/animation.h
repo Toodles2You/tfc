@@ -21,22 +21,22 @@
 
 namespace studio
 {
-int LookupActivity(void* pmodel, entvars_t* pev, int activity);
-int LookupActivityHeaviest(void* pmodel, entvars_t* pev, int activity);
+int LookupActivity(void* pmodel, int activity);
+int LookupActivityHeaviest(void* pmodel, int activity);
 int LookupSequence(void* pmodel, const char* label);
-void GetSequenceInfo(void* pmodel, entvars_t* pev, float* pflFrameRate, float* pflGroundSpeed);
-int GetSequenceFlags(void* pmodel, entvars_t* pev);
-float SetController(void* pmodel, entvars_t* pev, int iController, float flValue);
-float SetBlending(void* pmodel, entvars_t* pev, int iBlender, float flValue);
+void GetSequenceInfo(void* pmodel, int sequence, float* pflFrameRate, float* pflGroundSpeed);
+int GetSequenceFlags(void* pmodel, int sequence);
+float SetController(void* pmodel, byte* controller, int iController, float flValue);
+float SetBlending(void* pmodel, int sequence, byte* blending, int iBlender, float flValue);
 void GetEyePosition(void* pmodel, Vector& vecEyePosition);
 #ifdef GAME_DLL
 void SequencePrecache(void* pmodel, const char* pSequenceName);
 #endif
 int FindTransition(void* pmodel, int iEndingAnim, int iGoalAnim, int* piDir);
-void SetBodygroup(void* pmodel, entvars_t* pev, int iGroup, int iValue);
-int GetBodygroup(void* pmodel, entvars_t* pev, int iGroup);
+void SetBodygroup(void* pmodel, int& body, int iGroup, int iValue);
+int GetBodygroup(void* pmodel, int body, int iGroup);
 
-int GetAnimationEvent(void* pmodel, entvars_t* pev, MonsterEvent_t* pMonsterEvent, float flStart, float flEnd, int index);
+int GetAnimationEvent(void* pmodel, int sequence, MonsterEvent_t* pMonsterEvent, float flStart, float flEnd, int index);
 bool ExtractBbox(void* pmodel, int sequence, float* mins, float* maxs);
 } /* namespace util */
 

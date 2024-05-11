@@ -21,7 +21,7 @@
 #include "hl_bot.h"
 
 
-CHLBot::CHLBot()
+CHLBot::CHLBot(Entity* containingEntity) : CBot(containingEntity)
 {
     m_pEnemy = nullptr;
 }
@@ -62,8 +62,8 @@ void CHLBot::Upkeep()
     }
     auto start = GetGunPosition();
     auto end = m_pEnemy->BodyTarget();
-    pev->v_angle = util::VecToAngles(end - start);
-    pev->v_angle.x = -pev->v_angle.x;
+    v.v_angle = util::VecToAngles(end - start);
+    v.v_angle.x = -v.v_angle.x;
 }
 
 

@@ -30,8 +30,8 @@ void CBasePlayerWeapon::Deploy()
 {
 	const auto info = GetInfo();
 
-	gEngfuncs.CL_LoadModel(info.pszView, &m_pPlayer->pev->viewmodel);
-	gEngfuncs.CL_LoadModel(info.pszPlayer, &m_pPlayer->pev->weaponmodel);
+	gEngfuncs.CL_LoadModel(info.pszView, &m_pPlayer->v.viewmodel);
+	gEngfuncs.CL_LoadModel(info.pszPlayer, &m_pPlayer->v.weaponmodel);
 	strcpy(m_pPlayer->m_szAnimExtention, info.pszAnimExt);
 
 	SendWeaponAnim(info.iAnims[kWeaponAnimDeploy]);
@@ -69,7 +69,7 @@ void CBasePlayerWeapon::RemoveFromPlayer(bool forceSendAnimations)
 
 void CBasePlayerWeapon::SendWeaponAnim(int iAnim)
 {
-	m_pPlayer->pev->weaponanim = iAnim;
-	HUD_SendWeaponAnim(iAnim, pev->body, false);
+	m_pPlayer->v.weaponanim = iAnim;
+	HUD_SendWeaponAnim(iAnim, v.body, false);
 }
 

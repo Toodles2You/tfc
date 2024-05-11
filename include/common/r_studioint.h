@@ -134,5 +134,5 @@ typedef struct sv_blending_interface_s
 		const byte* pcontroller,
 		const byte* pblending,
 		int iBone,
-		const edict_t* pEdict);
+		const Entity* pEdict);
 } sv_blending_interface_t;

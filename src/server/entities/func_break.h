@@ -38,6 +38,8 @@ typedef enum
 class CBreakable : public CBaseEntity
 {
 public:
+	CBreakable(Entity* containingEntity) : CBaseEntity(containingEntity) {}
+
 	DECLARE_SAVERESTORE()
 
 	// basic functions
@@ -57,8 +59,8 @@ public:
 	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION); }
 
 	inline bool Explodable() { return ExplosionMagnitude() > 0; }
-	inline int ExplosionMagnitude() { return pev->impulse; }
-	inline void ExplosionSetMagnitude(int magnitude) { pev->impulse = magnitude; }
+	inline int ExplosionMagnitude() { return v.impulse; }
+	inline void ExplosionSetMagnitude(int magnitude) { v.impulse = magnitude; }
 
 	static void MaterialSoundPrecache(Materials precacheMaterial);
 	static const char** MaterialSoundList(Materials precacheMaterial, int& soundCount);

@@ -91,9 +91,8 @@ extern int UTIL_HumansOnTeam( int teamID, bool isAlive = false );
 
 extern int		UTIL_BotsInGame( void );
 extern bool		UTIL_IsTeamAllBots( int team );
-extern Vector	UTIL_ComputeOrigin( entvars_t * pevVars );
 extern Vector	UTIL_ComputeOrigin( CBaseEntity * pEntity );
-extern Vector	UTIL_ComputeOrigin( edict_t * pentEdict );
+extern Vector	UTIL_ComputeOrigin( Entity * pentEdict );
 extern void		UTIL_DrawBeamFromEnt( int iIndex, Vector vecEnd, int iLifetime, byte bRed, byte bGreen, byte bBlue );
 extern void		UTIL_DrawBeamPoints( Vector vecStart, Vector vecEnd, int iLifetime, byte bRed, byte bGreen, byte bBlue );
 extern CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, float *distance = NULL, CBasePlayer *ignore = NULL );
@@ -228,14 +227,11 @@ inline bool IsEntityValid( CBaseEntity *entity )
 	if (entity == NULL)
 		return false;
 
-	if (FNullEnt( entity->pev ))
-		return false;
-
-	if (FStrEq( STRING( entity->pev->netname ), "" ))
+	if (FStrEq( STRING( entity->v.netname ), "" ))
 		return false;
 
 #ifdef HALFLIFE_SAVERESTORE
-	if (entity->pev->flags & FL_DORMANT)
+	if (entity->v.flags & FL_DORMANT)
 		return false;
 #endif
 

@@ -62,7 +62,7 @@ ClientConnect
 called when a player connects to a server
 ============
 */
-qboolean ClientConnect(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128])
+qboolean ClientConnect(Entity* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128])
 {
 	return static_cast<qboolean>(g_pGameRules->ClientConnected(pEntity, pszName, pszAddress, szRejectReason));
 }
@@ -75,16 +75,16 @@ ClientDisconnect
 called when a player disconnects from a server
 ============
 */
-void ClientDisconnect(edict_t* pEntity)
+void ClientDisconnect(Entity* pEntity)
 {
-	auto player = static_cast<CBasePlayer*>(CBaseEntity::Instance(pEntity));
+	auto player = pEntity->Get<CBasePlayer>();
 
 	if (player != nullptr)
 	{
 		/* Since the edict doesn't get deleted, fix it so it doesn't interfere. */
-		player->pev->solid = SOLID_NOT;
-		player->pev->movetype = MOVETYPE_NONE;
-		player->pev->takedamage = DAMAGE_NO;
+		player->v.solid = SOLID_NOT;
+		player->v.movetype = MOVETYPE_NONE;
+		player->v.takedamage = DAMAGE_NO;
 		player->SetOrigin(g_vecZero);
 
 		player->InstallGameMovement(nullptr);
@@ -123,10 +123,9 @@ ClientKill
 Player entered the suicide command
 ============
 */
-void ClientKill(edict_t* pEntity)
+void ClientKill(Entity* pEntity)
 {
-	entvars_t* pev = &pEntity->v;
-	CBasePlayer* pl = (CBasePlayer*)CBasePlayer::Instance(pev);
+	auto pl = pEntity->Get<CBasePlayer>();
 
 	if (!pl->IsPlayer() || !pl->IsAlive())
 	{
@@ -151,13 +150,20 @@ ClientPutInServer
 called each time a player is spawned
 ============
 */
-void ClientPutInServer(edict_t* pEntity)
+void ClientPutInServer(Entity* pEntity)
 {
 	CBasePlayer* pPlayer;
 
-	entvars_t* pev = &pEntity->v;
+	if ((pEntity->flags & FL_FAKECLIENT) == 0)
+	{
+		g_engfuncs.pfnFreeEntPrivateData(pEntity);
+		pPlayer = pEntity->GetNew<CBasePlayer>();
+	}
+	else
+	{
+		pPlayer = pEntity->Get<CBasePlayer>();
+	}
 
-	pPlayer = GetClassPtr((CBasePlayer*)pev);
 	pPlayer->InstallGameMovement(new CHalfLifeMovement{pmove, pPlayer});
 	pPlayer->SetCustomDecalFrames(-1);
 	pPlayer->m_flNextChatTime = gpGlobals->time + CHAT_INTERVAL;
@@ -168,13 +174,14 @@ void ClientPutInServer(edict_t* pEntity)
 	pPlayer->Spawn();
 
 	// Reset interpolation during first frame
-	pPlayer->pev->effects |= EF_NOINTERP;
+	pPlayer->v.effects |= EF_NOINTERP;
 
-	pPlayer->StartObserver();
-	pPlayer->pev->iuser1 = OBS_FIXED;
-	pPlayer->pev->iuser2 = 0;
-	pPlayer->pev->iuser3 = 0;
+	pPlayer->m_hObserverTarget = nullptr;
 	pPlayer->m_iObserverLastMode = OBS_FIXED;
+	pPlayer->StartObserver();
+	pPlayer->v.iuser1 = OBS_FIXED;
+	pPlayer->v.iuser2 = 0;
+	pPlayer->v.iuser3 = 0;
 
 	pPlayer->m_ResetHUD = CBasePlayer::ResetHUD::Initialize;
 
@@ -308,7 +315,7 @@ bool Q_UnicodeValidate(const char* pUTF8)
 // or as
 // blah blah blah
 //
-void Host_Say(edict_t* pEntity, bool teamonly)
+void Host_Say(Entity* pEntity, bool teamonly)
 {
 	CBasePlayer* client;
 	char* p;
@@ -321,8 +328,7 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 	if (CMD_ARGC() == 0)
 		return;
 
-	entvars_t* pev = &pEntity->v;
-	CBasePlayer* player = GetClassPtr((CBasePlayer*)pev);
+	auto player = pEntity->Get<CBasePlayer>();
 
 	//Not yet.
 	if (player->m_flNextChatTime > gpGlobals->time)
@@ -396,12 +402,9 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 	// This may return the world in single player if the client types something between levels or during spawn
 	// so check it, or it will infinite loop
 
-	client = NULL;
-	while (((client = (CBasePlayer*)util::FindEntityByClassname(client, "player")) != NULL) && (!FNullEnt(client->edict())))
+	client = nullptr;
+	while ((client = (CBasePlayer*)util::FindEntityByClassname(client, "player")) != nullptr)
 	{
-		if (!client->pev)
-			continue;
-
 		if (client->edict() == pEntity)
 			continue;
 
@@ -412,7 +415,7 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 		if (g_VoiceGameMgr.PlayerHasBlockedPlayer(client, player))
 			continue;
 
-		if (teamonly && g_pGameRules->PlayerRelationship(client, CBaseEntity::Instance(pEntity)) != GR_TEAMMATE)
+		if (teamonly && g_pGameRules->PlayerRelationship(client, pEntity->Get<CBaseEntity>()) != GR_TEAMMATE)
 			continue;
 
 		MessageBegin(MSG_ONE, gmsgSayText, client);
@@ -423,7 +426,7 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 	}
 
 	// print to the sending client
-	MessageBegin(MSG_ONE, gmsgSayText, CBaseEntity::Instance(pEntity));
+	MessageBegin(MSG_ONE, gmsgSayText, pEntity->Get<CBaseEntity>());
 	WriteByte(player->entindex());
 	WriteByte(teamonly);
 	WriteString(p);
@@ -436,7 +439,7 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 		temp = "say";
 
 	util::LogPrintf("\"%s<%i><%s><>\" %s \"%s\"\n",
-		STRING(pEntity->v.netname),
+		STRING(pEntity->netname),
 		g_engfuncs.pfnGetPlayerUserId(pEntity),
 		g_engfuncs.pfnGetPlayerAuthId(pEntity),
 		temp,
@@ -451,18 +454,18 @@ called each time a player uses a "cmd" command
 ============
 */
 // Use CMD_ARGV,  CMD_ARGV, and CMD_ARGC to get pointers the character string command.
-void ClientCommand(edict_t* pEntity)
+void ClientCommand(Entity* pEntity)
 {
 	const char* pcmd = CMD_ARGV(0);
 	const char* pstr;
 
+	auto player = pEntity->Get<CBasePlayer>();
+
 	// Is the client spawned yet?
-	if (!pEntity->pvPrivateData)
+	if (player == nullptr)
+	{
 		return;
-
-	entvars_t* pev = &pEntity->v;
-
-	auto player = GetClassPtr<CBasePlayer>(reinterpret_cast<CBasePlayer*>(&pEntity->v));
+	}
 
 	if (FStrEq(pcmd, "say"))
 	{
@@ -539,14 +542,16 @@ userinfo - gives dll a chance to modify it before
 it gets sent into the rest of the engine.
 ========================
 */
-void ClientUserInfoChanged(edict_t* pEntity, char* infobuffer)
+void ClientUserInfoChanged(Entity* pEntity, char* infobuffer)
 {
 	// Is the client spawned yet?
-	if (!pEntity->pvPrivateData)
+	if (pEntity->Get<CBasePlayer>() == nullptr)
+	{
 		return;
+	}
 
 	// msg everyone if someone changes their name,  and it isn't the first time (changing no name to current name)
-	if (!FStringNull(pEntity->v.netname) && STRING(pEntity->v.netname)[0] != 0 && !FStrEq(STRING(pEntity->v.netname), g_engfuncs.pfnInfoKeyValue(infobuffer, "name")))
+	if (!FStringNull(pEntity->netname) && STRING(pEntity->netname)[0] != 0 && !FStrEq(STRING(pEntity->netname), g_engfuncs.pfnInfoKeyValue(infobuffer, "name")))
 	{
 		char sName[256];
 		char* pName = g_engfuncs.pfnInfoKeyValue(infobuffer, "name");
@@ -566,17 +571,17 @@ void ClientUserInfoChanged(edict_t* pEntity, char* infobuffer)
 
 		if (util::IsMultiplayer())
 		{	
-			util::ClientPrintAll(HUD_PRINTTALK, "#Game_name_change", STRING(pEntity->v.netname), g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
+			util::ClientPrintAll(HUD_PRINTTALK, "#Game_name_change", STRING(pEntity->netname), g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
 
 			util::LogPrintf("\"%s<%i><%s><>\" changed name to \"%s\"\n",
-				STRING(pEntity->v.netname),
+				STRING(pEntity->netname),
 				g_engfuncs.pfnGetPlayerUserId(pEntity),
 				g_engfuncs.pfnGetPlayerAuthId(pEntity),
 				g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
 		}
 	}
 
-	g_pGameRules->ClientUserInfoChanged(GetClassPtr((CBasePlayer*)&pEntity->v), infobuffer);
+	g_pGameRules->ClientUserInfoChanged(pEntity->Get<CBasePlayer>(), infobuffer);
 }
 
 static int g_serveractive = 0;
@@ -600,7 +605,7 @@ void ServerDeactivate()
 #endif
 }
 
-void ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
+void ServerActivate(Entity* pEdictList, int edictCount, int clientMax)
 {
 	int i;
 	CBaseEntity* pClass;
@@ -611,17 +616,20 @@ void ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
 	// Clients have not been initialized yet
 	for (i = 0; i < edictCount; i++)
 	{
-		if (0 != pEdictList[i].free)
+		if (pEdictList[i].IsFree())
 			continue;
 
 		// Clients aren't necessarily initialized until ClientPutInServer()
-		if ((i > 0 && i <= clientMax) || !pEdictList[i].pvPrivateData)
+		if (i > 0 && i <= clientMax)
+		{
+			g_engfuncs.pfnFreeEntPrivateData(pEdictList + i);
 			continue;
+		}
 
-		pClass = CBaseEntity::Instance(&pEdictList[i]);
+		pClass = pEdictList[i].Get<CBaseEntity>();
 		// Activate this entity if it's got a class & isn't dormant
 #ifdef HALFLIFE_SAVERESTORE
-		if (pClass != nullptr && (pClass->pev->flags & FL_DORMANT) == 0)
+		if (pClass != nullptr && (pClass->v.flags & FL_DORMANT) == 0)
 #else
 		if (pClass != nullptr)
 #endif
@@ -630,7 +638,7 @@ void ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
 		}
 		else
 		{
-			ALERT(at_console, "Can't instance %s\n", STRING(pEdictList[i].v.classname));
+			ALERT(at_console, "Can't instance %s\n", STRING(pEdictList[i].classname));
 		}
 	}
 
@@ -653,10 +661,9 @@ PlayerPreThink
 Called every frame before physics are run
 ================
 */
-void PlayerPreThink(edict_t* pEntity)
+void PlayerPreThink(Entity* pEntity)
 {
-	entvars_t* pev = &pEntity->v;
-	CBasePlayer* pPlayer = (CBasePlayer*)GET_PRIVATE(pEntity);
+	CBasePlayer* pPlayer = pEntity->Get<CBasePlayer>();
 
 	if (pPlayer)
 	{
@@ -671,10 +678,9 @@ PlayerPostThink
 Called every frame after physics are run
 ================
 */
-void PlayerPostThink(edict_t* pEntity)
+void PlayerPostThink(Entity* pEntity)
 {
-	entvars_t* pev = &pEntity->v;
-	CBasePlayer* pPlayer = (CBasePlayer*)GET_PRIVATE(pEntity);
+	CBasePlayer* pPlayer = pEntity->Get<CBasePlayer>();
 	const int msec = static_cast<int>(std::roundf(gpGlobals->frametime * 1000));
 
 	if (pPlayer)
@@ -973,10 +979,9 @@ PlayerCustomization
 A new player customization has been registered on the server
 ================
 */
-void PlayerCustomization(edict_t* pEntity, customization_t* pCust)
+void PlayerCustomization(Entity* pEntity, customization_t* pCust)
 {
-	entvars_t* pev = &pEntity->v;
-	CBasePlayer* pPlayer = (CBasePlayer*)GET_PRIVATE(pEntity);
+	CBasePlayer* pPlayer = pEntity->Get<CBasePlayer>();
 
 	if (!pPlayer)
 	{
@@ -1013,10 +1018,9 @@ SpectatorConnect
 A spectator has joined the game
 ================
 */
-void SpectatorConnect(edict_t* pEntity)
+void SpectatorConnect(Entity* pEntity)
 {
-	entvars_t* pev = &pEntity->v;
-	CBaseSpectator* pPlayer = (CBaseSpectator*)GET_PRIVATE(pEntity);
+	CBaseSpectator* pPlayer = pEntity->Get<CBaseSpectator>();
 
 	if (pPlayer)
 		pPlayer->SpectatorConnect();
@@ -1029,10 +1033,9 @@ SpectatorConnect
 A spectator has left the game
 ================
 */
-void SpectatorDisconnect(edict_t* pEntity)
+void SpectatorDisconnect(Entity* pEntity)
 {
-	entvars_t* pev = &pEntity->v;
-	CBaseSpectator* pPlayer = (CBaseSpectator*)GET_PRIVATE(pEntity);
+	CBaseSpectator* pPlayer = pEntity->Get<CBaseSpectator>();
 
 	if (pPlayer)
 		pPlayer->SpectatorDisconnect();
@@ -1045,10 +1048,9 @@ SpectatorConnect
 A spectator has sent a usercmd
 ================
 */
-void SpectatorThink(edict_t* pEntity)
+void SpectatorThink(Entity* pEntity)
 {
-	entvars_t* pev = &pEntity->v;
-	CBaseSpectator* pPlayer = (CBaseSpectator*)GET_PRIVATE(pEntity);
+	CBaseSpectator* pPlayer = pEntity->Get<CBaseSpectator>();
 
 	if (pPlayer)
 		pPlayer->SpectatorThink();
@@ -1072,10 +1074,10 @@ From the eye position, we set up the PAS and PVS to use for filtering network me
 NOTE:  Do not cache the values of pas and pvs, as they depend on reusable memory in the engine, they are only good for this one frame
 ================
 */
-void SetupVisibility(edict_t* pViewEntity, edict_t* pClient, unsigned char** pvs, unsigned char** pas)
+void SetupVisibility(Entity* pViewEntity, Entity* pClient, unsigned char** pvs, unsigned char** pas)
 {
 	Vector org;
-	edict_t* pView = pClient;
+	Entity* pView = pClient;
 
 	// Find the client's PVS
 	if (pViewEntity)
@@ -1083,15 +1085,15 @@ void SetupVisibility(edict_t* pViewEntity, edict_t* pClient, unsigned char** pvs
 		pView = pViewEntity;
 	}
 
-	if ((pClient->v.flags & FL_PROXY) != 0)
+	if ((pClient->flags & FL_PROXY) != 0)
 	{
 		*pvs = NULL; // the spectator proxy sees
 		*pas = NULL; // and hears everything
 		return;
 	}
 
-	org = pView->v.origin + pView->v.view_ofs;
-	if ((pView->v.flags & FL_DUCKING) != 0)
+	org = pView->origin + pView->view_ofs;
+	if ((pView->flags & FL_DUCKING) != 0)
 	{
 		org = org + (VEC_HULL_MIN - VEC_DUCK_HULL_MIN);
 	}
@@ -1115,7 +1117,7 @@ player is 1 if the ent/e is a player and 0 otherwise
 pSet is either the PAS or PVS that we previous set up.  We can use it to ask the engine to filter the entity against the PAS or PVS.
 we could also use the pas/ pvs that we set in SetupVisibility, if we wanted to.  Caching the value is valid in that case, but still only for the current frame
 */
-int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* host, int hostflags, int player, unsigned char* pSet)
+int AddToFullPack(struct entity_state_s* state, int e, Entity* ent, Entity* host, int hostflags, int player, unsigned char* pSet)
 {
 	// Entities with an index greater than this will corrupt the client's heap because 
 	// the index is sent with only 11 bits of precision (2^11 == 2048).
@@ -1126,26 +1128,29 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 		return 0;
 	}
 
-	int i;
+	auto entity = ent->Get<CBaseEntity>();
 
-	auto entity = reinterpret_cast<CBaseEntity*>(GET_PRIVATE(ent));
+	if (entity == nullptr)
+	{
+		return 0;
+	}
 
 	if (ent != host)
 	{
 		// don't send if flagged for NODRAW and it's not the host getting the message
-		if ((ent->v.effects & EF_NODRAW) != 0)
+		if ((ent->effects & EF_NODRAW) != 0)
 		{
 			return 0;
 		}
 
 		// Ignore ents without valid / visible models
-		if (0 == ent->v.modelindex || !STRING(ent->v.model))
+		if (0 == ent->modelindex || !STRING(ent->model))
 		{
 			return 0;
 		}
 
 		// Don't send spectators to other players
-		if ((ent->v.flags & FL_SPECTATOR) != 0)
+		if ((ent->flags & FL_SPECTATOR) != 0)
 		{
 			return 0;
 		}
@@ -1154,7 +1159,7 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 		// If pSet is NULL, then the test will always succeed and the entity will be added to the update
 		if ((entity->ObjectCaps() & FCAP_NET_ALWAYS_SEND) == 0)
 		{
-			if (!ENGINE_CHECK_VISIBILITY((const struct edict_s*)ent, pSet))
+			if (!ENGINE_CHECK_VISIBILITY(ent, pSet))
 			{
 				return 0;
 			}
@@ -1163,27 +1168,27 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 
 
 	// Don't send entity to local client if the client says it's predicting the entity itself.
-	if ((ent->v.flags & FL_SKIPLOCALHOST) != 0)
+	if ((ent->flags & FL_SKIPLOCALHOST) != 0)
 	{
-		if ((hostflags & 1) != 0 && (ent->v.owner == host))
+		if ((hostflags & 1) != 0 && (ent->owner == host))
 			return 0;
 	}
 
-	if (0 != host->v.groupinfo)
+	if (0 != host->groupinfo)
 	{
-		util::SetGroupTrace(host->v.groupinfo, util::GROUP_OP_AND);
+		util::SetGroupTrace(host->groupinfo, util::GROUP_OP_AND);
 
 		// Should always be set, of course
-		if (0 != ent->v.groupinfo)
+		if (0 != ent->groupinfo)
 		{
 			if (util::g_groupop == util::GROUP_OP_AND)
 			{
-				if ((ent->v.groupinfo & host->v.groupinfo) == 0)
+				if ((ent->groupinfo & host->groupinfo) == 0)
 					return 0;
 			}
 			else if (util::g_groupop == util::GROUP_OP_NAND)
 			{
-				if ((ent->v.groupinfo & host->v.groupinfo) != 0)
+				if ((ent->groupinfo & host->groupinfo) != 0)
 					return 0;
 			}
 		}
@@ -1209,20 +1214,20 @@ CreateBaseline
 Creates baselines used for network encoding, especially for player data since players are not spawned until connect time.
 ===================
 */
-void CreateBaseline(int player, int eindex, struct entity_state_s* baseline, struct edict_s* entity, int playermodelindex, Vector* player_mins, Vector* player_maxs)
+void CreateBaseline(int player, int eindex, struct entity_state_s* baseline, Entity* entity, int playermodelindex, Vector* player_mins, Vector* player_maxs)
 {
-	baseline->origin = entity->v.origin;
-	baseline->angles = entity->v.angles;
-	baseline->frame = entity->v.frame;
-	baseline->skin = (short)entity->v.skin;
+	baseline->origin = entity->origin;
+	baseline->angles = entity->angles;
+	baseline->frame = entity->frame;
+	baseline->skin = (short)entity->skin;
 
 	// render information
-	baseline->rendermode = (byte)entity->v.rendermode;
-	baseline->renderamt = (byte)entity->v.renderamt;
-	baseline->rendercolor.r = (byte)entity->v.rendercolor.x;
-	baseline->rendercolor.g = (byte)entity->v.rendercolor.y;
-	baseline->rendercolor.b = (byte)entity->v.rendercolor.z;
-	baseline->renderfx = (byte)entity->v.renderfx;
+	baseline->rendermode = (byte)entity->rendermode;
+	baseline->renderamt = (byte)entity->renderamt;
+	baseline->rendercolor.r = (byte)entity->rendercolor.x;
+	baseline->rendercolor.g = (byte)entity->rendercolor.y;
+	baseline->rendercolor.b = (byte)entity->rendercolor.z;
+	baseline->renderfx = (byte)entity->renderfx;
 
 	if (0 != player)
 	{
@@ -1234,24 +1239,24 @@ void CreateBaseline(int player, int eindex, struct entity_state_s* baseline, str
 		baseline->friction = 1.0;
 		baseline->movetype = MOVETYPE_WALK;
 
-		baseline->scale = entity->v.scale;
+		baseline->scale = entity->scale;
 		baseline->solid = SOLID_SLIDEBOX;
 		baseline->framerate = 1.0;
 		baseline->gravity = 1.0;
 	}
 	else
 	{
-		baseline->mins = entity->v.mins;
-		baseline->maxs = entity->v.maxs;
+		baseline->mins = entity->mins;
+		baseline->maxs = entity->maxs;
 
 		baseline->colormap = 0;
-		baseline->modelindex = entity->v.modelindex;
-		baseline->movetype = entity->v.movetype;
+		baseline->modelindex = entity->modelindex;
+		baseline->movetype = entity->movetype;
 
-		baseline->scale = entity->v.scale;
-		baseline->solid = entity->v.solid;
-		baseline->framerate = entity->v.framerate;
-		baseline->gravity = entity->v.gravity;
+		baseline->scale = entity->scale;
+		baseline->solid = entity->solid;
+		baseline->framerate = entity->framerate;
+		baseline->gravity = entity->gravity;
 	}
 }
 
@@ -1507,11 +1512,11 @@ void RegisterEncoders()
 	DELTA_ADDENCODER("Player_Encode", Player_Encode);
 }
 
-int GetWeaponData(struct edict_s* player, struct weapon_data_s* info)
+int GetWeaponData(Entity* player, struct weapon_data_s* info)
 {
 	memset(info, 0, WEAPON_TYPES * sizeof(weapon_data_t));
 
-	CBasePlayer* pl = dynamic_cast<CBasePlayer*>(CBasePlayer::Instance(player));
+	CBasePlayer* pl = player->Get<CBasePlayer>();
 
 	if (!pl)
 	{
@@ -1533,17 +1538,21 @@ Data sent to current client only
 engine sets cd to 0 before calling.
 =================
 */
-void UpdateClientData(const edict_t* ent, int sendweapons, struct clientdata_s* cd)
+void UpdateClientData(const Entity* ent, int sendweapons, struct clientdata_s* cd)
 {
-	if (ent == nullptr || ent->pvPrivateData == nullptr)
+	if (ent == nullptr)
 	{
 		return;
 	}
 
-	auto player =
-		dynamic_cast<CBasePlayer*>(CBasePlayer::Instance((edict_t*)ent));
+	auto player = const_cast<Entity*>(ent)->Get<CBasePlayer>();
 
-	cd->pushmsec = ent->v.pushmsec;
+	if (player == nullptr)
+	{
+		return;
+	}
+
+	cd->pushmsec = ent->pushmsec;
 	strcpy(cd->physinfo, g_engfuncs.pfnGetPhysicsInfoString(ent));
 
 	player->GetClientData(*cd, sendweapons != 0);
@@ -1557,21 +1566,25 @@ We're about to run this usercmd for the specified player.  We can set up groupin
 This is the time to examine the usercmd for anything extra.  This call happens even if think does not.
 =================
 */
-void CmdStart(const edict_t* ent, const struct usercmd_s* cmd, unsigned int random_seed)
+void CmdStart(const Entity* ent, const struct usercmd_s* cmd, unsigned int random_seed)
 {
-	if (ent == nullptr || ent->pvPrivateData == nullptr)
+	if (ent == nullptr)
 	{
 		return;
 	}
 
-	auto player =
-		dynamic_cast<CBasePlayer*>(CBasePlayer::Instance((edict_t*)ent));
+	auto player = const_cast<Entity*>(ent)->Get<CBasePlayer>();
+
+	if (player == nullptr)
+	{
+		return;
+	}
 
 	player->CmdStart(*cmd, random_seed);
 
-	if (player->pev->groupinfo != 0)
+	if (player->v.groupinfo != 0)
 	{
-		util::SetGroupTrace(player->pev->groupinfo, util::GROUP_OP_AND);
+		util::SetGroupTrace(player->v.groupinfo, util::GROUP_OP_AND);
 	}
 }
 
@@ -1582,14 +1595,14 @@ CmdEnd
 Each cmdstart is exactly matched with a cmd end, clean up any group trace flags, etc. here
 =================
 */
-void CmdEnd(const edict_t* player)
+void CmdEnd(const Entity* player)
 {
-	entvars_t* pev = (entvars_t*)&player->v;
-	CBasePlayer* pl = dynamic_cast<CBasePlayer*>(CBasePlayer::Instance(pev));
-
-	if (!pl)
+	if (player == nullptr)
+	{
 		return;
-	if (pl->pev->groupinfo != 0)
+	}
+
+	if (player->groupinfo != 0)
 	{
 		util::UnsetGroupTrace();
 	}
@@ -1649,7 +1662,7 @@ One of the ENGINE_FORCE_UNMODIFIED files failed the consistency check for the sp
  Return 0 to allow the client to continue, 1 to force immediate disconnection ( with an optional disconnect message of up to 256 characters )
 ================================
 */
-int InconsistentFile(const edict_t* player, const char* filename, char* disconnect_message)
+int InconsistentFile(const Entity* player, const char* filename, char* disconnect_message)
 {
 	// Server doesn't care?
 	if (mp_consistency->value != 1.0F)

@@ -16,10 +16,10 @@
 
 bool CBasePlayerAmmo::Spawn()
 {
-	pev->movetype = MOVETYPE_TOSS;
-	pev->solid = SOLID_TRIGGER;
+	v.movetype = MOVETYPE_TOSS;
+	v.solid = SOLID_TRIGGER;
 	SetSize(Vector(-16, -16, 0), Vector(16, 16, 16));
-	SetOrigin(pev->origin);
+	SetOrigin(v.origin);
 
 	SetTouch(&CBasePlayerAmmo::DefaultTouch);
 
@@ -28,23 +28,23 @@ bool CBasePlayerAmmo::Spawn()
 
 CBaseEntity* CBasePlayerAmmo::Respawn()
 {
-	pev->effects |= EF_NODRAW;
+	v.effects |= EF_NODRAW;
 	SetTouch(nullptr);
 
 	SetOrigin(g_pGameRules->VecAmmoRespawnSpot(this)); // move to wherever I'm supposed to repawn.
 
 	SetThink(&CBasePlayerAmmo::Materialize);
-	pev->nextthink = g_pGameRules->FlAmmoRespawnTime(this);
+	v.nextthink = g_pGameRules->FlAmmoRespawnTime(this);
 
 	return this;
 }
 
 void CBasePlayerAmmo::Materialize()
 {
-	if ((pev->effects & EF_NODRAW) != 0)
+	if ((v.effects & EF_NODRAW) != 0)
 	{
 		EmitSound("items/itembk2.wav", CHAN_WEAPON);
-		pev->effects &= ~EF_NODRAW;
+		v.effects &= ~EF_NODRAW;
 	}
 
 	SetTouch(&CBasePlayerAmmo::DefaultTouch);
@@ -123,8 +123,8 @@ bool CWeaponBox::Spawn()
 {
 	Precache();
 
-	pev->movetype = MOVETYPE_TOSS;
-	pev->solid = SOLID_TRIGGER;
+	v.movetype = MOVETYPE_TOSS;
+	v.solid = SOLID_TRIGGER;
 
 	SetSize(g_vecZero, g_vecZero);
 
@@ -160,7 +160,7 @@ void CWeaponBox::RemoveWeapons()
 //=========================================================
 void CWeaponBox::Touch(CBaseEntity* pOther)
 {
-	if ((pev->flags & FL_ONGROUND) == 0)
+	if ((v.flags & FL_ONGROUND) == 0)
 	{
 		return;
 	}
@@ -200,7 +200,7 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 
 		if (pWeapon != nullptr)
 		{
-			//ALERT ( at_console, "trying to give %s\n", STRING( pWeapon[ i ]->pev->classname ) );
+			//ALERT ( at_console, "trying to give %s\n", STRING( pWeapon[ i ]->v.classname ) );
 
 			if (dynamic_cast<CBasePlayerWeapon*>(pWeapon)->AddToPlayer(pPlayer))
 			{
@@ -229,15 +229,15 @@ bool CWeaponBox::PackWeapon(CBasePlayerWeapon* pWeapon)
 
 	m_hPlayerWeapons[pWeapon->GetID()] = pWeapon;
 
-	pWeapon->pev->spawnflags |= SF_NORESPAWN;
-	pWeapon->pev->movetype = MOVETYPE_NONE;
-	pWeapon->pev->solid = SOLID_NOT;
-	pWeapon->pev->effects = EF_NODRAW;
-	pWeapon->pev->owner = edict();
+	pWeapon->v.spawnflags |= SF_NORESPAWN;
+	pWeapon->v.movetype = MOVETYPE_NONE;
+	pWeapon->v.solid = SOLID_NOT;
+	pWeapon->v.effects = EF_NODRAW;
+	pWeapon->v.owner = edict();
 	pWeapon->SetThink(nullptr);
 	pWeapon->SetTouch(nullptr);
 
-	//ALERT ( at_console, "packed %s\n", STRING(pWeapon->pev->classname) );
+	//ALERT ( at_console, "packed %s\n", STRING(pWeapon->v.classname) );
 
 	return true;
 }
@@ -295,6 +295,6 @@ bool CWeaponBox::IsEmpty()
 //=========================================================
 void CWeaponBox::SetObjectCollisionBox()
 {
-	pev->absmin = pev->origin + Vector(-16, -16, 0);
-	pev->absmax = pev->origin + Vector(16, 16, 16);
+	v.absmin = v.origin + Vector(-16, -16, 0);
+	v.absmax = v.origin + Vector(16, 16, 16);
 }

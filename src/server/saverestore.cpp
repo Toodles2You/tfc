@@ -28,7 +28,7 @@ static int gSizes[FIELD_TYPECOUNT] =
 		sizeof(int),	   // FIELD_ENTITY
 		sizeof(int),	   // FIELD_CLASSPTR
 		sizeof(EHANDLE),   // FIELD_EHANDLE
-		sizeof(int),	   // FIELD_entvars_t
+		sizeof(int),	   // FIELD_EVARS
 		sizeof(int),	   // FIELD_EDICT
 		sizeof(float) * 3, // FIELD_VECTOR
 		sizeof(float) * 3, // FIELD_POSITION_VECTOR
@@ -62,24 +62,16 @@ int CSaveRestoreBuffer::EntityIndex(CBaseEntity* pEntity)
 {
 	if (pEntity == NULL)
 		return -1;
-	return EntityIndex(pEntity->pev);
+	return EntityIndex(&pEntity->v);
 }
 
-
-int CSaveRestoreBuffer::EntityIndex(entvars_t* pevLookup)
-{
-	if (pevLookup == NULL)
-		return -1;
-	return EntityIndex(ENT(pevLookup));
-}
-
-int CSaveRestoreBuffer::EntityIndex(EOFFSET eoLookup)
+int CSaveRestoreBuffer::EntityIndex(EntityOffset eoLookup)
 {
 	return EntityIndex(ENT(eoLookup));
 }
 
 
-int CSaveRestoreBuffer::EntityIndex(edict_t* pentLookup)
+int CSaveRestoreBuffer::EntityIndex(Entity* pentLookup)
 {
 	if (pentLookup == NULL)
 		return -1;
@@ -97,7 +89,7 @@ int CSaveRestoreBuffer::EntityIndex(edict_t* pentLookup)
 }
 
 
-edict_t* CSaveRestoreBuffer::EntityFromIndex(int entityIndex)
+Entity* CSaveRestoreBuffer::EntityFromIndex(int entityIndex)
 {
 	if (entityIndex < 0)
 		return NULL;
@@ -354,9 +346,9 @@ void CSave::WriteFunction(const char* pname, void** data, int count)
 
 
 
-bool CSave::WriteEntVars(const char* pname, entvars_t* pev)
+bool CSave::WriteEntVars(const char* pname, Entity* entity)
 {
-	return WriteFields(pname, pev, CBaseEntity::m_EntvarsDescription, ARRAYSIZE(CBaseEntity::m_EntvarsDescription));
+	return WriteFields(pname, entity, CBaseEntity::m_EntvarsDescription, ARRAYSIZE(CBaseEntity::m_EntvarsDescription));
 }
 
 
@@ -417,16 +409,16 @@ bool CSave::WriteFields(const char* pname, void* pBaseData, TYPEDESCRIPTION* pFi
 				switch (pTest->fieldType)
 				{
 				case FIELD_EVARS:
-					entityArray[j] = EntityIndex(((entvars_t**)pOutputData)[j]);
+					entityArray[j] = EntityIndex(((Entity**)pOutputData)[j]);
 					break;
 				case FIELD_CLASSPTR:
 					entityArray[j] = EntityIndex(((CBaseEntity**)pOutputData)[j]);
 					break;
 				case FIELD_EDICT:
-					entityArray[j] = EntityIndex(((edict_t**)pOutputData)[j]);
+					entityArray[j] = EntityIndex(((Entity**)pOutputData)[j]);
 					break;
 				case FIELD_ENTITY:
-					entityArray[j] = EntityIndex(((EOFFSET*)pOutputData)[j]);
+					entityArray[j] = EntityIndex(((EntityOffset*)pOutputData)[j]);
 					break;
 				case FIELD_EHANDLE:
 					entityArray[j] = EntityIndex((CBaseEntity*)(((EHANDLE*)pOutputData)[j]));
@@ -553,7 +545,7 @@ int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCoun
 	TYPEDESCRIPTION* pTest;
 	float timeData;
 	Vector position;
-	edict_t* pent;
+	Entity* pent;
 	char* pString;
 
 	position = Vector(0, 0, 0);
@@ -620,22 +612,22 @@ int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCoun
 						entityIndex = *(int*)pInputData;
 						pent = EntityFromIndex(entityIndex);
 						if (pent)
-							*((entvars_t**)pOutputData) = VARS(pent);
+							*((Entity**)pOutputData) = pent;
 						else
-							*((entvars_t**)pOutputData) = NULL;
+							*((Entity**)pOutputData) = NULL;
 						break;
 					case FIELD_CLASSPTR:
 						entityIndex = *(int*)pInputData;
 						pent = EntityFromIndex(entityIndex);
 						if (pent)
-							*((CBaseEntity**)pOutputData) = CBaseEntity::Instance(pent);
+							*((CBaseEntity**)pOutputData) = pent->Get<CBaseEntity>();
 						else
 							*((CBaseEntity**)pOutputData) = NULL;
 						break;
 					case FIELD_EDICT:
 						entityIndex = *(int*)pInputData;
 						pent = EntityFromIndex(entityIndex);
-						*((edict_t**)pOutputData) = pent;
+						*((Entity**)pOutputData) = pent;
 						break;
 					case FIELD_EHANDLE:
 						// Input and Output sizes are different!
@@ -643,7 +635,7 @@ int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCoun
 						entityIndex = *(int*)pInputData;
 						pent = EntityFromIndex(entityIndex);
 						if (pent)
-							*((EHANDLE*)pOutputData) = CBaseEntity::Instance(pent);
+							*((EHANDLE*)pOutputData) = pent->Get<CBaseEntity>();
 						else
 							*((EHANDLE*)pOutputData) = NULL;
 						break;
@@ -651,9 +643,9 @@ int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCoun
 						entityIndex = *(int*)pInputData;
 						pent = EntityFromIndex(entityIndex);
 						if (pent)
-							*((EOFFSET*)pOutputData) = OFFSET(pent);
+							*((EntityOffset*)pOutputData) = OFFSET(pent);
 						else
-							*((EOFFSET*)pOutputData) = 0;
+							*((EntityOffset*)pOutputData) = 0;
 						break;
 					case FIELD_VECTOR:
 						((float*)pOutputData)[0] = ((float*)pInputData)[0];
@@ -721,9 +713,9 @@ int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCoun
 }
 
 
-bool CRestore::ReadEntVars(const char* pname, entvars_t* pev)
+bool CRestore::ReadEntVars(const char* pname, Entity* entity)
 {
-	return ReadFields(pname, pev, CBaseEntity::m_EntvarsDescription, ARRAYSIZE(CBaseEntity::m_EntvarsDescription));
+	return ReadFields(pname, entity, CBaseEntity::m_EntvarsDescription, ARRAYSIZE(CBaseEntity::m_EntvarsDescription));
 }
 
 

@@ -83,7 +83,7 @@ public:
 	int m_iSrcNode;	 // the node that 'owns' this link ( keeps us from having to make reverse lookups )
 	int m_iDestNode; // the node on the other end of the link.
 
-	entvars_t* m_pLinkEnt; // the entity that blocks this connection (doors, etc)
+	Entity* m_pLinkEnt; // the entity that blocks this connection (doors, etc)
 
 	// m_szLinkEntModelname is not necessarily NULL terminated (so we can store it in a more alignment-friendly 4 bytes)
 	char m_szLinkEntModelname[4]; // the unique name of the brush model that blocks the connection (this is kept for save/restore)
@@ -178,8 +178,8 @@ public:
 	};
 	// A static query means we're asking about the possiblity of handling this entity at ANY time
 	// A dynamic query means we're asking about it RIGHT NOW.  So we should query the current state
-	bool HandleLinkEnt(int iNode, entvars_t* pevLinkEnt, int afCapMask, NODEQUERY queryType);
-	entvars_t* LinkEntForLink(CLink* pLink, CNode* pNode);
+	bool HandleLinkEnt(int iNode, Entity* pevLinkEnt, int afCapMask, NODEQUERY queryType);
+	Entity* LinkEntForLink(CLink* pLink, CNode* pNode);
 	void ShowNodeConnections(int iNode);
 	void InitGraph();
 	bool IsAvailable();
@@ -269,6 +269,8 @@ public:
 //=========================================================
 class CNodeEnt : public CBaseEntity
 {
+	CNodeEnt(Entity* containingEntity) : CBaseEntity(containingEntity) {}
+
 	bool Spawn() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
