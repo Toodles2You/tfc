@@ -130,7 +130,7 @@ void CHLBotManager::ServerActivate()
 	TheBotProfiles = new BotProfileManager();
 	TheBotProfiles->Init(cv_bot_profile_db.string);
 
-	m_NextQuotaCheckTime = gpGlobals->time;
+	m_NextQuotaCheckTime = gpGlobals->time + 3.0f;
 }
 
 

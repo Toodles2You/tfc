@@ -73,7 +73,7 @@ CTeam::CTeam(short index, std::string name)
 
 void CTeam::AddPlayer(CBasePlayer *player)
 {
-	if (player->m_team)
+	if (player->m_team != nullptr)
 	{
 		player->m_team->RemovePlayer(player);
 	}
@@ -93,6 +93,7 @@ void CTeam::RemovePlayer(CBasePlayer *player)
 	{
 		if (*p == player)
 		{
+			player->m_team = nullptr;
 			m_players.erase(p);
 			break;
 		}
@@ -367,15 +368,6 @@ bool CHalfLifeMultiplay::ClientConnected(Entity* pEntity, const char* pszName, c
 }
 
 
-void CHalfLifeMultiplay::ClientPutInServer(CBasePlayer* pPlayer)
-{
-	pPlayer->m_team = nullptr;
-	pPlayer->v.team = TEAM_UNASSIGNED;
-	pPlayer->v.playerclass = PC_UNDEFINED;
-	pPlayer->m_fDeadTime = gpGlobals->time - 60.0F;
-}
-
-
 void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 {
 	const char *name = "unconnected";
@@ -467,25 +459,13 @@ void CHalfLifeMultiplay::ClientDisconnected(Entity* pClient)
 
 		if (pPlayer)
 		{
-			if (pPlayer->m_team)
-			{
-				pPlayer->m_team->RemovePlayer(pPlayer);
-				pPlayer->m_team = nullptr;
-			}
-
 			util::FireTargets("game_playerleave", pPlayer, pPlayer, USE_TOGGLE, 0);
 
 			util::LogPrintf("\"%s<%i><%s><>\" disconnected\n",
 				STRING(pPlayer->v.netname),
 				g_engfuncs.pfnGetPlayerUserId(pPlayer->edict()),
 				g_engfuncs.pfnGetPlayerAuthId(pPlayer->edict()));
-
-			pPlayer->RemoveAllWeapons(); // destroy all of the players weapons and items
 		}
-
-		pClient->team = TEAM_UNASSIGNED;
-		pClient->playerclass = PC_UNDEFINED;
-		pClient->netname = MAKE_STRING("Disconnected");
 	}
 }
 
@@ -524,12 +504,6 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 {
 	if (pPlayer->TeamNumber() == TEAM_UNASSIGNED)
 	{
-		pPlayer->m_hObserverTarget = nullptr;
-		pPlayer->m_iObserverLastMode = OBS_FIXED;
-		pPlayer->StartObserver();
-		pPlayer->v.iuser1 = OBS_FIXED;
-		pPlayer->v.iuser2 = 0;
-		pPlayer->v.iuser3 = 0;
 		return;
 	}
 

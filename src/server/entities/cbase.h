@@ -108,6 +108,12 @@ private:
 	int m_serialnumber;
 
 public:
+	EHANDLE()
+	{
+		m_pent = nullptr;
+		m_serialnumber = 0;
+	}
+
 	Entity* Get();
 	Entity* Set(Entity* pent);
 
@@ -135,7 +141,8 @@ public:
 
 	// Constructor.  Set engine to use C/C++ callback functions
 	// pointers to engine data
-	CBaseEntity(Entity* containingEntity) : v {*containingEntity} {}
+	CBaseEntity(Entity* containingEntity);
+	virtual ~CBaseEntity();
 
 	// path corners
 	CBaseEntity* m_pGoalEnt; // path corner we are heading towards
@@ -145,8 +152,6 @@ public:
 	*	@brief Entity flags sent to the client in ::AddToFullPack
 	*/
 	byte m_EFlags = 0;
-
-	virtual ~CBaseEntity() {}
 
 	// initialization functions
 	virtual bool Spawn() { return false; }

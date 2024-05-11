@@ -58,11 +58,6 @@ bool CHalfLifeRules::ClientConnected(Entity* pEntity, const char* pszName, const
 }
 
 
-void CHalfLifeRules::ClientPutInServer(CBasePlayer* pPlayer)
-{
-}
-
-
 void CHalfLifeRules::ClientDisconnected(Entity* pClient)
 {
 }

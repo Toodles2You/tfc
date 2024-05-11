@@ -50,8 +50,8 @@ class CTeam;
 class CBasePlayer : public CBaseAnimating
 {
 public:
-	CBasePlayer(Entity* containingEntity) : CBaseAnimating(containingEntity) {}
-	virtual ~CBasePlayer() { InstallGameMovement(nullptr); }
+	CBasePlayer(Entity* containingEntity);
+	~CBasePlayer();
 
 	enum class State
 	{

@@ -132,7 +132,6 @@ public:
 
 	// Client connection/disconnection
 	virtual bool ClientConnected(Entity* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128]) = 0; // a client just connected to the server (player hasn't spawned yet)
-	virtual void ClientPutInServer(CBasePlayer* pPlayer) = 0;
 	virtual void InitHUD(CBasePlayer* pl);																				   // the client dll is ready for updating
 	virtual void ClientDisconnected(Entity* pClient) = 0;																	   // a client just disconnected from the server
 	virtual void UpdateGameMode(CBasePlayer* pPlayer);																	   // the client needs to be informed of the current game mode
@@ -247,7 +246,6 @@ public:
 
 	// Client connection/disconnection
 	bool ClientConnected(Entity* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128]) override;
-	void ClientPutInServer(CBasePlayer* pPlayer) override;
 	void ClientDisconnected(Entity* pClient) override;
 
 	// Client damage rules
@@ -339,7 +337,6 @@ public:
 	//  svRejectReason
 	// Only the client's name and remote address are provided to the dll for verification.
 	bool ClientConnected(Entity* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128]) override;
-	void ClientPutInServer(CBasePlayer* pPlayer) override;
 	void InitHUD(CBasePlayer* pl) override; // the client dll is ready for updating
 	void ClientDisconnected(Entity* pClient) override;
 	gamemode_e GetGameMode() override { return IsCoOp() ? kGamemodeCooperative : kGamemodeDeathmatch; }

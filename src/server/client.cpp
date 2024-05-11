@@ -79,27 +79,6 @@ void ClientDisconnect(Entity* pEntity)
 {
 	auto player = pEntity->Get<CBasePlayer>();
 
-	if (player != nullptr)
-	{
-		/* Since the edict doesn't get deleted, fix it so it doesn't interfere. */
-		player->v.solid = SOLID_NOT;
-		player->v.movetype = MOVETYPE_NONE;
-		player->v.takedamage = DAMAGE_NO;
-		player->SetOrigin(g_vecZero);
-
-		player->InstallGameMovement(nullptr);
-
-#ifdef HALFLIFE_TANKCONTROL
-		if (player->m_pTank != NULL)
-		{
-			player->m_pTank->Use(player, player, USE_OFF, 0);
-			player->m_pTank = NULL;
-		}
-#endif
-
-		player->SetUseObject(nullptr);
-	}
-
 	g_pGameRules->ClientDisconnected(pEntity);
 
 	if (player != nullptr)
@@ -165,25 +144,9 @@ void ClientPutInServer(Entity* pEntity)
 	}
 
 	pPlayer->InstallGameMovement(new CHalfLifeMovement{pmove, pPlayer});
-	pPlayer->SetCustomDecalFrames(-1);
-	pPlayer->m_flNextChatTime = gpGlobals->time + CHAT_INTERVAL;
-
-	g_pGameRules->ClientPutInServer(pPlayer);
 
 	// Allocate a CBasePlayer for pev, and call spawn
 	pPlayer->Spawn();
-
-	// Reset interpolation during first frame
-	pPlayer->v.effects |= EF_NOINTERP;
-
-	pPlayer->m_hObserverTarget = nullptr;
-	pPlayer->m_iObserverLastMode = OBS_FIXED;
-	pPlayer->StartObserver();
-	pPlayer->v.iuser1 = OBS_FIXED;
-	pPlayer->v.iuser2 = 0;
-	pPlayer->v.iuser3 = 0;
-
-	pPlayer->m_ResetHUD = CBasePlayer::ResetHUD::Initialize;
 
 	if (util::IsMultiplayer())
 	{
@@ -622,7 +585,6 @@ void ServerActivate(Entity* pEdictList, int edictCount, int clientMax)
 		// Clients aren't necessarily initialized until ClientPutInServer()
 		if (i > 0 && i <= clientMax)
 		{
-			g_engfuncs.pfnFreeEntPrivateData(pEdictList + i);
 			continue;
 		}
 

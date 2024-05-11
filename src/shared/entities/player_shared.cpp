@@ -19,6 +19,74 @@
 #include <string>
 
 
+CBaseEntity::CBaseEntity(Entity* containingEntity) : v {*containingEntity}
+{
+	containingEntity->effects |= EF_NOINTERP;
+}
+
+
+CBaseEntity::~CBaseEntity()
+{
+	/* Since the edict doesn't get deleted, fix it so it doesn't interfere. */
+	v.model = 0;
+	v.modelindex = 0;
+	v.effects = EF_NOINTERP | EF_NODRAW;
+	v.solid = SOLID_NOT;
+	v.movetype = MOVETYPE_NONE;
+	v.takedamage = DAMAGE_NO;
+	v.origin = g_vecZero;
+}
+
+
+CBasePlayer::CBasePlayer(Entity* containingEntity) : CBaseAnimating(containingEntity)
+{
+	containingEntity->team = TEAM_UNASSIGNED;
+	containingEntity->playerclass = PC_UNDEFINED;
+	containingEntity->iuser1 = OBS_FIXED;
+
+	m_fDeadTime = gpGlobals->time - 60.0F;
+	SetCustomDecalFrames(-1);
+	m_flNextChatTime = gpGlobals->time + CHAT_INTERVAL;
+
+#ifdef GAME_DLL
+	m_ResetHUD = ResetHUD::Initialize;
+	m_team = nullptr;
+	m_gameMovement = nullptr;
+#endif
+}
+
+
+CBasePlayer::~CBasePlayer()
+{
+	CBaseEntity::~CBaseEntity();
+
+	v.team = TEAM_UNASSIGNED;
+	v.playerclass = PC_UNDEFINED;
+	v.netname = MAKE_STRING("unconnected");
+
+	InstallGameMovement(nullptr);
+
+#ifdef GAME_DLL
+#ifdef HALFLIFE_TANKCONTROL
+		if (m_pTank != nullptr)
+		{
+			m_pTank->Use(this, this, USE_OFF, 0);
+			m_pTank = nullptr;
+		}
+#endif
+
+	SetUseObject(nullptr);
+
+	if (m_team != nullptr)
+	{
+		m_team->RemovePlayer(this);
+	}
+#endif
+
+	RemoveAllWeapons();
+}
+
+
 void
 CBasePlayer::PlaybackEvent(
 	unsigned short event,

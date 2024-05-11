@@ -476,6 +476,15 @@ void OnFreeEntPrivateData(Entity* pEdict)
 {
 	if (pEdict != nullptr)
 	{
+		/* Since the edict doesn't get deleted, fix it so it doesn't interfere. */
+		pEdict->model = iStringNull;
+		pEdict->modelindex = 0;
+		pEdict->effects = EF_NOINTERP | EF_NODRAW;
+		pEdict->solid = SOLID_NOT;
+		pEdict->movetype = MOVETYPE_NONE;
+		pEdict->takedamage = DAMAGE_NO;
+		pEdict->origin = g_vecZero;
+
 		// Zero this out so the engine doesn't try to free it again.
 		pEdict->Free<CBaseEntity>();
 	}
