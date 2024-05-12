@@ -41,8 +41,8 @@ void NormalizeAngles(float* angles);
 float Distance(const float* v1, const float* v2);
 void VectorAngles(const float* forward, float* angles);
 
-extern float vJumpOrigin[3];
-extern float vJumpAngles[3];
+extern Vector vJumpOrigin;
+extern Vector vJumpAngles;
 
 extern Vector v_origin;
 extern Vector v_angles;
@@ -179,8 +179,8 @@ static void V_GetChaseOrigin(float* angles, float* origin, float distance, float
 
 static void V_GetDeathCam(int victim, int killer, float* cl_angles, float* origin, float* angle)
 {
-	float newAngle[3];
-	float newOrigin[3];
+	Vector newAngle;
+	Vector newOrigin;
 
 	float distance = 168.0f;
 
@@ -231,8 +231,8 @@ static void V_GetDeathCam(int victim, int killer, float* cl_angles, float* origi
 
 static void V_GetSingleTargetCam(cl_entity_t* ent1, float* angle, float* origin)
 {
-	float newAngle[3];
-	float newOrigin[3];
+	Vector newAngle;
+	Vector newOrigin;
 
 	int flags = gHUD.m_Spectator.m_iObserverFlags;
 
@@ -325,9 +325,9 @@ static float MaxAngleBetweenAngles(float* a1, float* a2)
 
 void V_GetDoubleTargetsCam(cl_entity_t* ent1, cl_entity_t* ent2, float* angle, float* origin)
 {
-	float newAngle[3];
-	float newOrigin[3];
-	float tempVec[3];
+	Vector newAngle;
+	Vector newOrigin;
+	Vector tempVec;
 
 	int flags = gHUD.m_Spectator.m_iObserverFlags;
 
@@ -430,7 +430,7 @@ void V_GetDirectedChasePosition(cl_entity_t* ent1, cl_entity_t* ent2, float* ang
 		// second target disappeard somehow (dead)
 
 		// keep last good viewangle
-		float newOrigin[3];
+		Vector newOrigin;
 
 		int flags = gHUD.m_Spectator.m_iObserverFlags;
 

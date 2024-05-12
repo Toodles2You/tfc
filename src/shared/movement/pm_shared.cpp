@@ -40,8 +40,8 @@
 #ifdef CLIENT_DLL
 // Spectator Mode
 bool iJumpSpectator;
-float vJumpOrigin[3];
-float vJumpAngles[3];
+Vector vJumpOrigin;
+Vector vJumpAngles;
 #endif
 
 #pragma warning(disable : 4305)
@@ -315,7 +315,7 @@ static void PM_CreateStuckTable()
 	float x, y, z;
 	int idx;
 	int i;
-	float zi[3];
+	Vector zi;
 
 	memset(rgv3tStuckTable, 0, 54 * sizeof(Vector));
 

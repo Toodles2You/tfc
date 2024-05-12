@@ -241,7 +241,7 @@ float util::AngleDiff(float destAngle, float srcAngle)
 Vector util::VecToAngles(const Vector& vec)
 {
 	float rgflVecOut[3];
-	VEC_TO_ANGLES(vec, rgflVecOut);
+	g_engfuncs.pfnVecToAngles(vec, rgflVecOut);
 	return Vector(rgflVecOut);
 }
 

@@ -748,13 +748,13 @@ bool CHud::ImpulseCommands(int impulse)
 	return false;
 }
 
-static float g_ColorBlue[3] = {0.6, 0.8, 1.0};
-static float g_ColorRed[3] = {1.0, 0.25, 0.25};
-static float g_ColorGreen[3] = {0.6, 1.0, 0.6};
-static float g_ColorYellow[3] = {1.0, 0.7, 0.0};
-static float g_ColorGrey[3] = {0.8, 0.8, 0.8};
+static constexpr Vector g_ColorBlue = {0.6, 0.8, 1.0};
+static constexpr Vector g_ColorRed = {1.0, 0.25, 0.25};
+static constexpr Vector g_ColorGreen = {0.6, 1.0, 0.6};
+static constexpr Vector g_ColorYellow = {1.0, 0.7, 0.0};
+static constexpr Vector g_ColorGrey = {0.8, 0.8, 0.8};
 
-float* CHud::GetTeamColor(int teamNumber) const
+const Vector& CHud::GetTeamColor(int teamNumber) const
 {
 	if (m_gameMode < kGamemodeTeamplay)
 	{
@@ -786,7 +786,7 @@ float* CHud::GetTeamColor(int teamNumber) const
 	return g_ColorGrey;
 }
 
-float* CHud::GetClientColor(int clientIndex) const
+const Vector& CHud::GetClientColor(int clientIndex) const
 {
 	return GetTeamColor(g_PlayerExtraInfo[clientIndex].teamnumber);
 }

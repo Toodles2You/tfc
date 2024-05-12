@@ -51,9 +51,6 @@ static void EmitAmbientSound(
 	int fFlags,
 	int pitch)
 {
-	float rgfl[3];
-	vecOrigin.CopyToArray(rgfl);
-
 	if (samp != nullptr && samp[0] == '!')
 	{
 		char name[32];
@@ -61,7 +58,7 @@ static void EmitAmbientSound(
 		{
 			g_engfuncs.pfnEmitAmbientSound(
 				&entity->v,
-				rgfl,
+				const_cast<Vector&>(vecOrigin),
 				name,
 				vol,
 				attenuation,
@@ -73,7 +70,7 @@ static void EmitAmbientSound(
 	{
 		g_engfuncs.pfnEmitAmbientSound(
 			&entity->v,
-			rgfl,
+			const_cast<Vector&>(vecOrigin),
 			samp,
 			vol,
 			attenuation,

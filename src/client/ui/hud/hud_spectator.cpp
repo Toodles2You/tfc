@@ -30,8 +30,8 @@
 #pragma warning(disable : 4244)
 
 extern bool iJumpSpectator;
-extern float vJumpOrigin[3];
-extern float vJumpAngles[3];
+extern Vector vJumpOrigin;
+extern Vector vJumpAngles;
 
 
 extern void V_GetInEyePos(int entity, float* origin, float* angles);

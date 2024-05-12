@@ -751,8 +751,8 @@ public:
 
 	bool ImpulseCommands(int impulse);
 
-	float* GetTeamColor(int teamNumber) const;
-	float* GetClientColor(int clientIndex) const;
+	const Vector& GetTeamColor(int teamNumber) const;
+	const Vector& GetClientColor(int clientIndex) const;
 
 	bool IsAlive();
 	int GetObserverMode();
