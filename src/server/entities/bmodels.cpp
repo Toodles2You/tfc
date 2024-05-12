@@ -68,7 +68,7 @@ bool CFuncWall::Spawn()
 	v.angles = g_vecZero;
 	v.movetype = MOVETYPE_PUSH; // so it doesn't get pushed by anything
 	v.solid = SOLID_BSP;
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 
 	// If it can't move/go away, it's really part of the world
 	v.flags |= FL_WORLDBRUSH;
@@ -236,7 +236,7 @@ LINK_ENTITY_TO_CLASS(func_illusionary, CFuncIllusionary);
 
 bool CFuncIllusionary::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "skin")) //skin is used for content type
+	if (streq(pkvd->szKeyName, "skin")) //skin is used for content type
 	{
 		v.skin = atof(pkvd->szValue);
 		return true;
@@ -250,7 +250,7 @@ bool CFuncIllusionary::Spawn()
 	v.angles = g_vecZero;
 	v.movetype = MOVETYPE_NONE;
 	v.solid = SOLID_NOT; // always solid_not
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 
 	// I'd rather eat the network bandwidth of this than figure out how to save/restore
 	// these entities after they have been moved to the client, or respawn them ala Quake
@@ -339,12 +339,12 @@ LINK_ENTITY_TO_CLASS(func_rotating, CFuncRotating);
 
 bool CFuncRotating::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "fanfriction"))
+	if (streq(pkvd->szKeyName, "fanfriction"))
 	{
 		m_flFanFriction = atof(pkvd->szValue) / 100;
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "Volume"))
+	else if (streq(pkvd->szKeyName, "Volume"))
 	{
 		m_flVolume = atof(pkvd->szValue) / 10.0;
 
@@ -354,7 +354,7 @@ bool CFuncRotating::KeyValue(KeyValueData* pkvd)
 			m_flVolume = 0.0;
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "spawnorigin"))
+	else if (streq(pkvd->szKeyName, "spawnorigin"))
 	{
 		Vector tmp;
 		util::StringToVector((float*)tmp, pkvd->szValue);
@@ -362,7 +362,7 @@ bool CFuncRotating::KeyValue(KeyValueData* pkvd)
 			v.origin = tmp;
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "sounds"))
+	else if (streq(pkvd->szKeyName, "sounds"))
 	{
 		m_sounds = atoi(pkvd->szValue);
 		return true;
@@ -430,7 +430,7 @@ bool CFuncRotating::Spawn()
 	}
 
 	SetOrigin(v.origin);
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 
 	SetUse(&CFuncRotating::RotatingUse);
 	// did level designer forget to assign speed?
@@ -801,12 +801,12 @@ END_SAVERESTORE(CPendulum, CBaseEntity)
 
 bool CPendulum::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "distance"))
+	if (streq(pkvd->szKeyName, "distance"))
 	{
 		m_distance = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "damp"))
+	else if (streq(pkvd->szKeyName, "damp"))
 	{
 		m_damp = atof(pkvd->szValue) * 0.001;
 		return true;
@@ -827,7 +827,7 @@ bool CPendulum::Spawn()
 		v.solid = SOLID_BSP;
 	v.movetype = MOVETYPE_PUSH;
 	SetOrigin(v.origin);
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 
 	if (m_distance == 0)
 		return;

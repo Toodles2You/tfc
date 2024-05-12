@@ -62,17 +62,17 @@ LINK_ENTITY_TO_CLASS(env_global, CEnvGlobal);
 
 bool CEnvGlobal::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "globalstate")) // State name
+	if (streq(pkvd->szKeyName, "globalstate")) // State name
 	{
 		m_globalstate = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "triggermode"))
+	else if (streq(pkvd->szKeyName, "triggermode"))
 	{
 		m_triggermode = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "initialstate"))
+	else if (streq(pkvd->szKeyName, "initialstate"))
 	{
 		m_initialstate = atoi(pkvd->szValue);
 		return true;
@@ -150,14 +150,14 @@ LINK_ENTITY_TO_CLASS(multisource, CMultiSource);
 
 bool CMultiSource::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "style") ||
-		FStrEq(pkvd->szKeyName, "height") ||
-		FStrEq(pkvd->szKeyName, "killtarget") ||
-		FStrEq(pkvd->szKeyName, "value1") ||
-		FStrEq(pkvd->szKeyName, "value2") ||
-		FStrEq(pkvd->szKeyName, "value3"))
+	if (streq(pkvd->szKeyName, "style") ||
+		streq(pkvd->szKeyName, "height") ||
+		streq(pkvd->szKeyName, "killtarget") ||
+		streq(pkvd->szKeyName, "value1") ||
+		streq(pkvd->szKeyName, "value2") ||
+		streq(pkvd->szKeyName, "value3"))
 		return true;
-	else if (FStrEq(pkvd->szKeyName, "globalstate"))
+	else if (streq(pkvd->szKeyName, "globalstate"))
 	{
 		m_globalstate = ALLOC_STRING(pkvd->szValue);
 		return true;
@@ -387,32 +387,32 @@ void CBaseButton::Precache()
 
 bool CBaseButton::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "changetarget"))
+	if (streq(pkvd->szKeyName, "changetarget"))
 	{
 		m_strChangeTarget = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "locked_sound"))
+	else if (streq(pkvd->szKeyName, "locked_sound"))
 	{
 		m_bLockedSound = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "locked_sentence"))
+	else if (streq(pkvd->szKeyName, "locked_sentence"))
 	{
 		m_bLockedSentence = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "unlocked_sound"))
+	else if (streq(pkvd->szKeyName, "unlocked_sound"))
 	{
 		m_bUnlockedSound = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "unlocked_sentence"))
+	else if (streq(pkvd->szKeyName, "unlocked_sentence"))
 	{
 		m_bUnlockedSentence = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "sounds"))
+	else if (streq(pkvd->szKeyName, "sounds"))
 	{
 		m_sounds = atoi(pkvd->szValue);
 		return true;
@@ -479,7 +479,7 @@ bool CBaseButton::Spawn()
 
 	v.movetype = MOVETYPE_PUSH;
 	v.solid = SOLID_BSP;
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 
 	if (v.speed == 0)
 		v.speed = 40;
@@ -892,7 +892,7 @@ bool CRotButton::Spawn()
 	else
 		v.solid = SOLID_BSP;
 
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 
 	if (v.speed == 0)
 		v.speed = 40;
@@ -1009,7 +1009,7 @@ bool CMomentaryRotButton::Spawn()
 
 	v.movetype = MOVETYPE_PUSH;
 	SetOrigin(v.origin);
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 
 	const char* pszSound = ButtonSound(m_sounds);
 	PRECACHE_SOUND(pszSound);
@@ -1021,12 +1021,12 @@ bool CMomentaryRotButton::Spawn()
 
 bool CMomentaryRotButton::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "returnspeed"))
+	if (streq(pkvd->szKeyName, "returnspeed"))
 	{
 		m_returnSpeed = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "sounds"))
+	else if (streq(pkvd->szKeyName, "sounds"))
 	{
 		m_sounds = atoi(pkvd->szValue);
 		return true;
@@ -1246,17 +1246,17 @@ void CEnvSpark::Precache()
 
 bool CEnvSpark::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "MaxDelay"))
+	if (streq(pkvd->szKeyName, "MaxDelay"))
 	{
 		m_flDelay = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "style") ||
-			 FStrEq(pkvd->szKeyName, "height") ||
-			 FStrEq(pkvd->szKeyName, "killtarget") ||
-			 FStrEq(pkvd->szKeyName, "value1") ||
-			 FStrEq(pkvd->szKeyName, "value2") ||
-			 FStrEq(pkvd->szKeyName, "value3"))
+	else if (streq(pkvd->szKeyName, "style") ||
+			 streq(pkvd->szKeyName, "height") ||
+			 streq(pkvd->szKeyName, "killtarget") ||
+			 streq(pkvd->szKeyName, "value1") ||
+			 streq(pkvd->szKeyName, "value2") ||
+			 streq(pkvd->szKeyName, "value3"))
 		return true;
 
 	return CBaseEntity::KeyValue(pkvd);
@@ -1301,7 +1301,7 @@ bool CButtonTarget::Spawn()
 {
 	v.movetype = MOVETYPE_PUSH;
 	v.solid = SOLID_BSP;
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 	v.takedamage = DAMAGE_YES;
 
 	if (FBitSet(v.spawnflags, SF_BTARGET_ON))

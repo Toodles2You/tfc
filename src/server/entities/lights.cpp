@@ -56,17 +56,17 @@ END_SAVERESTORE(CLight, CPointEntity)
 //
 bool CLight::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "style"))
+	if (streq(pkvd->szKeyName, "style"))
 	{
 		m_iStyle = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "pitch"))
+	else if (streq(pkvd->szKeyName, "pitch"))
 	{
 		v.angles.x = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "pattern"))
+	else if (streq(pkvd->szKeyName, "pattern"))
 	{
 		m_iszPattern = ALLOC_STRING(pkvd->szValue);
 		return true;
@@ -139,7 +139,7 @@ LINK_ENTITY_TO_CLASS(light_environment, CEnvLight);
 
 bool CEnvLight::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "_light"))
+	if (streq(pkvd->szKeyName, "_light"))
 	{
 		int r = 0, g = 0, b = 0, v = 0;
 		char szColor[64];

@@ -126,7 +126,7 @@ void CDecal::StaticDecal()
 
 bool CDecal::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "texture"))
+	if (streq(pkvd->szKeyName, "texture"))
 	{
 		v.skin = DECAL_INDEX(pkvd->szValue);
 
@@ -165,7 +165,7 @@ globalentity_t* CGlobalState::Find(string_t globalname)
 	pTest = m_pList;
 	while (pTest)
 	{
-		if (FStrEq(pEntityName, pTest->name))
+		if (streq(pEntityName, pTest->name))
 			break;
 
 		pTest = pTest->pNext;
@@ -466,35 +466,35 @@ void CWorld::Precache()
 
 bool CWorld::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "skyname"))
+	if (streq(pkvd->szKeyName, "skyname"))
 	{
 		// Sent over net now.
 		CVAR_SET_STRING("sv_skyname", pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "sounds"))
+	else if (streq(pkvd->szKeyName, "sounds"))
 	{
 		gpGlobals->cdAudioTrack = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "WaveHeight"))
+	else if (streq(pkvd->szKeyName, "WaveHeight"))
 	{
 		// Sent over net now.
 		v.scale = atof(pkvd->szValue) * (1.0 / 8.0);
 		CVAR_SET_FLOAT("sv_wateramp", v.scale);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "MaxRange"))
+	else if (streq(pkvd->szKeyName, "MaxRange"))
 	{
 		v.speed = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "chaptertitle"))
+	else if (streq(pkvd->szKeyName, "chaptertitle"))
 	{
 		v.netname = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "startdark"))
+	else if (streq(pkvd->szKeyName, "startdark"))
 	{
 		if (0 != atoi(pkvd->szValue))
 		{	
@@ -503,7 +503,7 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 		return true;
 	}
 #ifdef HALFLIFE_SAVERESTORE
-	else if (FStrEq(pkvd->szKeyName, "newunit"))
+	else if (streq(pkvd->szKeyName, "newunit"))
 	{
 		// Single player only.  Clear save directory if set
 		if (0 != atoi(pkvd->szValue))
@@ -513,7 +513,7 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 		return true;
 	}
 #endif
-	else if (FStrEq(pkvd->szKeyName, "gametitle"))
+	else if (streq(pkvd->szKeyName, "gametitle"))
 	{
 		if (0 != atoi(pkvd->szValue))
 		{
@@ -521,12 +521,12 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 		}
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "mapteams"))
+	else if (streq(pkvd->szKeyName, "mapteams"))
 	{
 		v.team = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "defaultteam"))
+	else if (streq(pkvd->szKeyName, "defaultteam"))
 	{
 		if (0 != atoi(pkvd->szValue))
 		{

@@ -1538,13 +1538,13 @@ void CTestHull::DropDelay()
 //=========================================================
 bool CNodeEnt::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "hinttype"))
+	if (streq(pkvd->szKeyName, "hinttype"))
 	{
 		m_sHintType = (short)atoi(pkvd->szValue);
 		return true;
 	}
 
-	if (FStrEq(pkvd->szKeyName, "activity"))
+	if (streq(pkvd->szKeyName, "activity"))
 	{
 		m_sHintActivity = (short)atoi(pkvd->szValue);
 		return true;
@@ -1588,7 +1588,7 @@ bool CNodeEnt::Spawn()
 	WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_sHintType = m_sHintType;
 	WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_sHintActivity = m_sHintActivity;
 
-	if (streq(STRING(v.classname), "info_node_air"))
+	if (streq(v.classname, "info_node_air"))
 		WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_afNodeInfo = bits_NODE_AIR;
 	else
 		WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_afNodeInfo = 0;
@@ -3504,13 +3504,13 @@ bool CNodeViewer::Spawn()
 		return false;
 	}
 
-	if (streq(STRING(v.classname), "node_viewer_fly"))
+	if (streq(v.classname, "node_viewer_fly"))
 	{
 		m_iHull = NODE_FLY_HULL;
 		m_afNodeType = bits_NODE_AIR;
 		m_vecColor = Vector(160, 100, 255);
 	}
-	else if (streq(STRING(v.classname), "node_viewer_large"))
+	else if (streq(v.classname, "node_viewer_large"))
 	{
 		m_iHull = NODE_LARGE_HULL;
 		m_afNodeType = bits_NODE_LAND | bits_NODE_WATER;

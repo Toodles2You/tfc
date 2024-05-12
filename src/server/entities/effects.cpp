@@ -68,7 +68,7 @@ END_SAVERESTORE(CBubbling, CBaseEntity)
 bool CBubbling::Spawn()
 {
 	Precache();
-	SetModel(STRING(v.model)); // Set size
+	SetModel(v.model); // Set size
 
 	v.solid = SOLID_NOT; // Remove model & collisions
 	v.renderamt = 0;		// The engine won't draw this model if this is set to 0 and blending is on
@@ -119,17 +119,17 @@ void CBubbling::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 
 bool CBubbling::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "density"))
+	if (streq(pkvd->szKeyName, "density"))
 	{
 		m_density = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "frequency"))
+	else if (streq(pkvd->szKeyName, "frequency"))
 	{
 		m_frequency = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "current"))
+	else if (streq(pkvd->szKeyName, "current"))
 	{
 		v.speed = atoi(pkvd->szValue);
 		return true;
@@ -499,57 +499,57 @@ void CLightning::Activate()
 
 bool CLightning::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "LightningStart"))
+	if (streq(pkvd->szKeyName, "LightningStart"))
 	{
 		m_iszStartEntity = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "LightningEnd"))
+	else if (streq(pkvd->szKeyName, "LightningEnd"))
 	{
 		m_iszEndEntity = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "life"))
+	else if (streq(pkvd->szKeyName, "life"))
 	{
 		m_life = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "BoltWidth"))
+	else if (streq(pkvd->szKeyName, "BoltWidth"))
 	{
 		m_boltWidth = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "NoiseAmplitude"))
+	else if (streq(pkvd->szKeyName, "NoiseAmplitude"))
 	{
 		m_noiseAmplitude = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "TextureScroll"))
+	else if (streq(pkvd->szKeyName, "TextureScroll"))
 	{
 		m_speed = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "StrikeTime"))
+	else if (streq(pkvd->szKeyName, "StrikeTime"))
 	{
 		m_restrike = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "texture"))
+	else if (streq(pkvd->szKeyName, "texture"))
 	{
 		m_iszSpriteName = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "framestart"))
+	else if (streq(pkvd->szKeyName, "framestart"))
 	{
 		m_frameStart = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "Radius"))
+	else if (streq(pkvd->szKeyName, "Radius"))
 	{
 		m_radius = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "damage"))
+	else if (streq(pkvd->szKeyName, "damage"))
 	{
 		v.dmg = atof(pkvd->szValue);
 		return true;
@@ -968,42 +968,42 @@ void CLaser::Precache()
 
 bool CLaser::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "LaserTarget"))
+	if (streq(pkvd->szKeyName, "LaserTarget"))
 	{
 		v.message = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "width"))
+	else if (streq(pkvd->szKeyName, "width"))
 	{
 		SetWidth((int)atof(pkvd->szValue));
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "NoiseAmplitude"))
+	else if (streq(pkvd->szKeyName, "NoiseAmplitude"))
 	{
 		SetNoise(atoi(pkvd->szValue));
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "TextureScroll"))
+	else if (streq(pkvd->szKeyName, "TextureScroll"))
 	{
 		SetScrollRate(atoi(pkvd->szValue));
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "texture"))
+	else if (streq(pkvd->szKeyName, "texture"))
 	{
 		v.model = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "EndSprite"))
+	else if (streq(pkvd->szKeyName, "EndSprite"))
 	{
 		m_iszSpriteName = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "framestart"))
+	else if (streq(pkvd->szKeyName, "framestart"))
 	{
 		v.frame = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "damage"))
+	else if (streq(pkvd->szKeyName, "damage"))
 	{
 		v.dmg = atof(pkvd->szValue);
 		return true;
@@ -1115,7 +1115,7 @@ bool CGlow::Spawn()
 	v.frame = 0;
 
 	PRECACHE_MODEL((char*)STRING(v.model));
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 
 	m_maxFrame = (float)MODEL_FRAMES(v.modelindex) - 1;
 	if (m_maxFrame > 1.0 && v.framerate != 0)
@@ -1160,7 +1160,7 @@ bool CSprite::Spawn()
 	v.frame = 0;
 
 	Precache();
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 
 	m_maxFrame = (float)MODEL_FRAMES(v.modelindex) - 1;
 	if (!FStringNull(v.targetname) && (v.spawnflags & SF_SPRITE_STARTON) == 0)
@@ -1371,22 +1371,22 @@ bool CShake::Spawn()
 
 bool CShake::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "amplitude"))
+	if (streq(pkvd->szKeyName, "amplitude"))
 	{
 		SetAmplitude(atof(pkvd->szValue));
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "frequency"))
+	else if (streq(pkvd->szKeyName, "frequency"))
 	{
 		SetFrequency(atof(pkvd->szValue));
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "duration"))
+	else if (streq(pkvd->szKeyName, "duration"))
 	{
 		SetDuration(atof(pkvd->szValue));
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "radius"))
+	else if (streq(pkvd->szKeyName, "radius"))
 	{
 		SetRadius(atof(pkvd->szValue));
 		return true;
@@ -1440,12 +1440,12 @@ bool CFade::Spawn()
 
 bool CFade::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "duration"))
+	if (streq(pkvd->szKeyName, "duration"))
 	{
 		SetDuration(atof(pkvd->szValue));
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "holdtime"))
+	else if (streq(pkvd->szKeyName, "holdtime"))
 	{
 		SetHoldTime(atof(pkvd->szValue));
 		return true;
@@ -1540,17 +1540,17 @@ void CMessage::Precache()
 
 bool CMessage::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "messagesound"))
+	if (streq(pkvd->szKeyName, "messagesound"))
 	{
 		v.noise = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "messagevolume"))
+	else if (streq(pkvd->szKeyName, "messagevolume"))
 	{
 		v.scale = atof(pkvd->szValue) * 0.1;
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "messageattenuation"))
+	else if (streq(pkvd->szKeyName, "messageattenuation"))
 	{
 		v.impulse = atoi(pkvd->szValue);
 		return true;

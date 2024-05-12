@@ -226,7 +226,7 @@ void CBotManager::OnEvent( GameEventType event, CBaseEntity *entity, CBaseEntity
 		if (player == NULL)
 			continue;
 
-		if (FStrEq( STRING( player->v.netname ), "" ))
+		if (STRING(player->v.netname)[0] == '\0')
 			continue;
 
 		if (!player->IsBot())

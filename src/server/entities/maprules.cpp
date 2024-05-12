@@ -66,7 +66,7 @@ bool CRuleEntity::Spawn()
 
 bool CRuleEntity::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "master"))
+	if (streq(pkvd->szKeyName, "master"))
 	{
 		SetMaster(ALLOC_STRING(pkvd->szValue));
 		return true;
@@ -123,7 +123,7 @@ private:
 
 bool CRuleBrushEntity::Spawn()
 {
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 	return CRuleEntity::Spawn();
 }
 
@@ -165,7 +165,7 @@ bool CGameScore::Spawn()
 
 bool CGameScore::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "points"))
+	if (streq(pkvd->szKeyName, "points"))
 	{
 		SetPoints(atoi(pkvd->szValue));
 		return true;
@@ -258,27 +258,27 @@ END_SAVERESTORE(CGameText, CRulePointEntity)
 
 bool CGameText::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "channel"))
+	if (streq(pkvd->szKeyName, "channel"))
 	{
 		m_textParms.channel = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "x"))
+	else if (streq(pkvd->szKeyName, "x"))
 	{
 		m_textParms.x = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "y"))
+	else if (streq(pkvd->szKeyName, "y"))
 	{
 		m_textParms.y = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "effect"))
+	else if (streq(pkvd->szKeyName, "effect"))
 	{
 		m_textParms.effect = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "color"))
+	else if (streq(pkvd->szKeyName, "color"))
 	{
 		int color[4];
 		util::StringToIntArray(color, 4, pkvd->szValue);
@@ -288,7 +288,7 @@ bool CGameText::KeyValue(KeyValueData* pkvd)
 		m_textParms.a1 = color[3];
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "color2"))
+	else if (streq(pkvd->szKeyName, "color2"))
 	{
 		int color[4];
 		util::StringToIntArray(color, 4, pkvd->szValue);
@@ -298,22 +298,22 @@ bool CGameText::KeyValue(KeyValueData* pkvd)
 		m_textParms.a2 = color[3];
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "fadein"))
+	else if (streq(pkvd->szKeyName, "fadein"))
 	{
 		m_textParms.fadeinTime = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "fadeout"))
+	else if (streq(pkvd->szKeyName, "fadeout"))
 	{
 		m_textParms.fadeoutTime = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "holdtime"))
+	else if (streq(pkvd->szKeyName, "holdtime"))
 	{
 		m_textParms.holdTime = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "fxtime"))
+	else if (streq(pkvd->szKeyName, "fxtime"))
 	{
 		m_textParms.fxTime = atof(pkvd->szValue);
 		return true;
@@ -379,12 +379,12 @@ LINK_ENTITY_TO_CLASS(game_team_master, CGameTeamMaster);
 
 bool CGameTeamMaster::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "teamindex"))
+	if (streq(pkvd->szKeyName, "teamindex"))
 	{
 		m_teamIndex = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "triggerstate"))
+	else if (streq(pkvd->szKeyName, "triggerstate"))
 	{
 		int type = atoi(pkvd->szValue);
 		switch (type)
@@ -538,22 +538,22 @@ END_SAVERESTORE(CGamePlayerZone, CRuleBrushEntity)
 
 bool CGamePlayerZone::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "intarget"))
+	if (streq(pkvd->szKeyName, "intarget"))
 	{
 		m_iszInTarget = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "outtarget"))
+	else if (streq(pkvd->szKeyName, "outtarget"))
 	{
 		m_iszOutTarget = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "incount"))
+	else if (streq(pkvd->szKeyName, "incount"))
 	{
 		m_iszInCount = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "outcount"))
+	else if (streq(pkvd->szKeyName, "outcount"))
 	{
 		m_iszOutCount = ALLOC_STRING(pkvd->szValue);
 		return true;
@@ -910,7 +910,7 @@ const char* CGamePlayerTeam::TargetTeamName(const char* pszTargetName)
 
 	while ((pTeamEntity = util::FindEntityByTargetname(pTeamEntity, pszTargetName)) != NULL)
 	{
-		if (streq(STRING(pTeamEntity->v.classname), "game_team_master"))
+		if (streq(pTeamEntity->v.classname, "game_team_master"))
 			return pTeamEntity->TeamID();
 	}
 

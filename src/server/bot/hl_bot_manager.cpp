@@ -84,7 +84,7 @@ void CHLBotManager::AddBot(const char *profileName)
 
 bool CHLBotManager::ClientCommand(CBasePlayer *pPlayer, const char *pcmd)
 {
-	if (FStrEq(pcmd, "bot"))
+	if (streq(pcmd, "bot"))
 	{
 		AddBot(g_engfuncs.pfnCmd_Argc() > 1 ? g_engfuncs.pfnCmd_Argv(1) : nullptr);
 		return true;

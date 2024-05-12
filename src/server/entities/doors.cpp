@@ -194,47 +194,47 @@ void PlayLockSounds(CBaseEntity* entity, locksound_t* pls, bool flocked, bool fb
 bool CBaseDoor::KeyValue(KeyValueData* pkvd)
 {
 
-	if (FStrEq(pkvd->szKeyName, "skin")) //skin is used for content type
+	if (streq(pkvd->szKeyName, "skin")) //skin is used for content type
 	{
 		v.skin = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "movesnd"))
+	else if (streq(pkvd->szKeyName, "movesnd"))
 	{
 		m_bMoveSnd = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "stopsnd"))
+	else if (streq(pkvd->szKeyName, "stopsnd"))
 	{
 		m_bStopSnd = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "healthvalue"))
+	else if (streq(pkvd->szKeyName, "healthvalue"))
 	{
 		m_bHealthValue = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "locked_sound"))
+	else if (streq(pkvd->szKeyName, "locked_sound"))
 	{
 		m_bLockedSound = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "locked_sentence"))
+	else if (streq(pkvd->szKeyName, "locked_sentence"))
 	{
 		m_bLockedSentence = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "unlocked_sound"))
+	else if (streq(pkvd->szKeyName, "unlocked_sound"))
 	{
 		m_bUnlockedSound = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "unlocked_sentence"))
+	else if (streq(pkvd->szKeyName, "unlocked_sentence"))
 	{
 		m_bUnlockedSentence = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "WaveHeight"))
+	else if (streq(pkvd->szKeyName, "WaveHeight"))
 	{
 		v.scale = atof(pkvd->szValue) * (1.0 / 8.0);
 		return true;
@@ -271,7 +271,7 @@ bool CBaseDoor::Spawn()
 
 	v.movetype = MOVETYPE_PUSH;
 	SetOrigin(v.origin);
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 
 	if (v.speed == 0)
 		v.speed = 100;
@@ -813,7 +813,7 @@ bool CRotDoor::Spawn()
 
 	v.movetype = MOVETYPE_PUSH;
 	SetOrigin(v.origin);
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 
 	if (v.speed == 0)
 		v.speed = 100;
@@ -889,7 +889,7 @@ bool CMomentaryDoor::Spawn()
 	v.movetype = MOVETYPE_PUSH;
 
 	SetOrigin(v.origin);
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 
 	if (v.speed == 0)
 		v.speed = 100;
@@ -963,17 +963,17 @@ void CMomentaryDoor::Precache()
 bool CMomentaryDoor::KeyValue(KeyValueData* pkvd)
 {
 
-	if (FStrEq(pkvd->szKeyName, "movesnd"))
+	if (streq(pkvd->szKeyName, "movesnd"))
 	{
 		m_bMoveSnd = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "stopsnd"))
+	else if (streq(pkvd->szKeyName, "stopsnd"))
 	{
 		//		m_bStopSnd = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "healthvalue"))
+	else if (streq(pkvd->szKeyName, "healthvalue"))
 	{
 		//		m_bHealthValue = atof(pkvd->szValue);
 		return true;

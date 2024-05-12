@@ -174,7 +174,7 @@ int DispatchSpawn(Entity* pent)
 				if (pGlobal->state == GLOBAL_DEAD)
 					return -1;
 #ifdef HALFLIFE_SAVERESTORE
-				else if (!FStrEq(STRING(gpGlobals->mapname), pGlobal->levelName))
+				else if (!streq(gpGlobals->mapname, pGlobal->levelName))
 					pEntity->MakeDormant(); // Hasn't been moved to this level yet, wait but stay alive
 											// In this level & not dead, continue on as normal
 #endif
@@ -515,7 +515,7 @@ CBaseEntity* FindGlobalEntity(string_t classname, string_t globalname)
 	CBaseEntity* pReturn = util::FindEntityByString(nullptr, "globalname", STRING(globalname));
 	if (pReturn)
 	{
-		if (!streq(STRING(pReturn->v.classname), STRING(classname)))
+		if (!streq(pReturn->v.classname, STRING(classname)))
 		{
 			ALERT(at_console, "Global entity found %s, wrong class %s\n", STRING(globalname), STRING(pReturn->v.classname));
 			pReturn = NULL;
@@ -559,7 +559,7 @@ int DispatchRestore(Entity* pent, SAVERESTOREDATA* pSaveData, int globalEntity)
 			// pSaveData->szCurrentMapName is the level this entity is coming from
 			// pGlobla->levelName is the last level the global entity was active in.
 			// If they aren't the same, then this global update is out of date.
-			if (!FStrEq(pSaveData->szCurrentMapName, pGlobal->levelName))
+			if (!streq(pSaveData->szCurrentMapName, pGlobal->levelName))
 				return 0;
 
 			// Compute the new global offset
@@ -624,7 +624,7 @@ int DispatchRestore(Entity* pent, SAVERESTOREDATA* pSaveData, int globalEntity)
 				// Already dead? delete
 				if (pGlobal->state == GLOBAL_DEAD)
 					return -1;
-				else if (!FStrEq(STRING(gpGlobals->mapname), pGlobal->levelName))
+				else if (!streq(gpGlobals->mapname, pGlobal->levelName))
 				{
 					pEntity->MakeDormant(); // Hasn't been moved to this level yet, wait but stay alive
 				}
@@ -880,7 +880,7 @@ bool CBaseEntity::Restore(CRestore& restore)
 
 
 		PRECACHE_MODEL((char*)STRING(v.model));
-		SetModel(STRING(v.model));
+		SetModel(v.model);
 		SetSize(mins, maxs); // Reset them
 	}
 

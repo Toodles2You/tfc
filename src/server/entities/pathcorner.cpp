@@ -51,7 +51,7 @@ END_SAVERESTORE(CPathCorner, CPointEntity)
 //
 bool CPathCorner::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "wait"))
+	if (streq(pkvd->szKeyName, "wait"))
 	{
 		m_flWait = atof(pkvd->szValue);
 		return true;
@@ -89,7 +89,7 @@ LINK_ENTITY_TO_CLASS(path_track, CPathTrack);
 //
 bool CPathTrack::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "altpath"))
+	if (streq(pkvd->szKeyName, "altpath"))
 	{
 		m_altName = ALLOC_STRING(pkvd->szValue);
 		return true;
@@ -234,7 +234,7 @@ CPathTrack* CPathTrack::GetPrevious()
 void CPathTrack::SetPrevious(CPathTrack* pprev)
 {
 	// Only set previous if this isn't my alternate path
-	if (pprev && !FStrEq(STRING(pprev->v.targetname), STRING(m_altName)))
+	if (pprev && !streq(pprev->v.targetname, m_altName))
 		m_pprevious = pprev;
 }
 

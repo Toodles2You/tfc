@@ -1084,7 +1084,7 @@ bool CBasePlayer::Restore(CRestore& restore)
 	m_ClientSndRoomtype = -1;
 
 	// Reset room type on level change.
-	if (!FStrEq(restore.GetData().szCurrentMapName, STRING(gpGlobals->mapname)))
+	if (!streq(restore.GetData().szCurrentMapName, STRING(gpGlobals->mapname)))
 	{
 		m_SndRoomtype = 0;
 	}
@@ -1634,7 +1634,7 @@ void CBasePlayer::DropPlayerWeapon(char* pszWeaponName)
 	{
 		for (auto it : m_lpPlayerWeapons)
 		{
-			if (streq(STRING(it->v.classname), pszWeaponName))
+			if (streq(it->v.classname, pszWeaponName))
 			{
 				pWeapon = it;
 				break;

@@ -51,7 +51,7 @@ LINK_ENTITY_TO_CLASS(env_explosion, CEnvExplosion);
 
 bool CEnvExplosion::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "iMagnitude"))
+	if (streq(pkvd->szKeyName, "iMagnitude"))
 	{
 		m_iMagnitude = atoi(pkvd->szValue);
 		return true;

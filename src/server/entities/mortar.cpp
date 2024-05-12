@@ -66,27 +66,27 @@ END_SAVERESTORE(CFuncMortarField, CBaseToggle)
 
 bool CFuncMortarField::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "m_iszXController"))
+	if (streq(pkvd->szKeyName, "m_iszXController"))
 	{
 		m_iszXController = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "m_iszYController"))
+	else if (streq(pkvd->szKeyName, "m_iszYController"))
 	{
 		m_iszYController = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "m_flSpread"))
+	else if (streq(pkvd->szKeyName, "m_flSpread"))
 	{
 		m_flSpread = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "m_fControl"))
+	else if (streq(pkvd->szKeyName, "m_fControl"))
 	{
 		m_fControl = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "m_iCount"))
+	else if (streq(pkvd->szKeyName, "m_iCount"))
 	{
 		m_iCount = atoi(pkvd->szValue);
 		return true;
@@ -100,7 +100,7 @@ bool CFuncMortarField::KeyValue(KeyValueData* pkvd)
 bool CFuncMortarField::Spawn()
 {
 	v.solid = SOLID_NOT;
-	SetModel(STRING(v.model)); // set size and link into world
+	SetModel(v.model); // set size and link into world
 	v.movetype = MOVETYPE_NONE;
 	SetBits(v.effects, EF_NODRAW);
 	SetUse(&CFuncMortarField::FieldUse);

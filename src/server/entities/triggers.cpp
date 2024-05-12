@@ -71,7 +71,7 @@ END_SAVERESTORE(CFrictionModifier, CBaseEntity)
 bool CFrictionModifier::Spawn()
 {
 	v.solid = SOLID_TRIGGER;
-	SetModel(STRING(v.model)); // set size and link into world
+	SetModel(v.model); // set size and link into world
 	v.movetype = MOVETYPE_NONE;
 	SetTouch(&CFrictionModifier::ChangeFriction);
 	return true;
@@ -90,7 +90,7 @@ void CFrictionModifier::ChangeFriction(CBaseEntity* pOther)
 // Sets toucher's friction to m_frictionFraction (1.0 = normal friction)
 bool CFrictionModifier::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "modifier"))
+	if (streq(pkvd->szKeyName, "modifier"))
 	{
 		m_frictionFraction = atof(pkvd->szValue) / 100.0;
 		return true;
@@ -134,12 +134,12 @@ END_SAVERESTORE(CAutoTrigger, CBaseDelay)
 
 bool CAutoTrigger::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "globalstate"))
+	if (streq(pkvd->szKeyName, "globalstate"))
 	{
 		m_globalstate = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "triggerstate"))
+	else if (streq(pkvd->szKeyName, "triggerstate"))
 	{
 		int type = atoi(pkvd->szValue);
 		switch (type)
@@ -214,7 +214,7 @@ END_SAVERESTORE(CTriggerRelay, CBaseDelay)
 
 bool CTriggerRelay::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "triggerstate"))
+	if (streq(pkvd->szKeyName, "triggerstate"))
 	{
 		int type = atoi(pkvd->szValue);
 		switch (type)
@@ -313,7 +313,7 @@ END_SAVERESTORE(CMultiManager, CBaseToggle)
 
 bool CMultiManager::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "wait"))
+	if (streq(pkvd->szKeyName, "wait"))
 	{
 		m_flWait = atof(pkvd->szValue);
 		return true;
@@ -373,7 +373,7 @@ bool CMultiManager::Spawn()
 bool CMultiManager::HasTarget(string_t targetname)
 {
 	for (int i = 0; i < m_cTargets; i++)
-		if (FStrEq(STRING(targetname), STRING(m_iTargetName[i])))
+		if (streq(targetname, m_iTargetName[i]))
 			return true;
 
 	return false;
@@ -551,7 +551,7 @@ void CBaseTrigger::InitTrigger()
 		v.movedir = util::SetMovedir(v.angles);
 	v.solid = SOLID_TRIGGER;
 	v.movetype = MOVETYPE_NONE;
-	SetModel(STRING(v.model)); // set size and link into world
+	SetModel(v.model); // set size and link into world
 	SetBits(v.effects, EF_NODRAW);
 }
 
@@ -562,17 +562,17 @@ void CBaseTrigger::InitTrigger()
 
 bool CBaseTrigger::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "damage"))
+	if (streq(pkvd->szKeyName, "damage"))
 	{
 		v.dmg = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "count"))
+	else if (streq(pkvd->szKeyName, "count"))
 	{
 		m_cTriggersLeft = (int)atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "damagetype"))
+	else if (streq(pkvd->szKeyName, "damagetype"))
 	{
 		m_bitsDamageInflict = atoi(pkvd->szValue);
 		return true;
@@ -759,7 +759,7 @@ LINK_ENTITY_TO_CLASS(target_cdaudio, CTargetCDAudio);
 
 bool CTargetCDAudio::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "radius"))
+	if (streq(pkvd->szKeyName, "radius"))
 	{
 		v.scale = atof(pkvd->szValue);
 		return true;
@@ -1094,7 +1094,7 @@ void CBaseTrigger::ActivateMultiTrigger(CBaseEntity* pActivator)
 	if (!util::IsMasterTriggered(m_sMaster, pActivator))
 		return;
 
-	if (streq(STRING(v.classname), "trigger_secret"))
+	if (streq(v.classname, "trigger_secret"))
 	{
 		if (v.enemy == NULL || (v.enemy->flags & FL_CLIENT) == 0)
 			return;
@@ -1199,7 +1199,7 @@ bool CTriggerVolume::Spawn()
 {
 	v.solid = SOLID_NOT;
 	v.movetype = MOVETYPE_NONE;
-	SetModel(STRING(v.model)); // set size and link into world
+	SetModel(v.model); // set size and link into world
 	v.model = iStringNull;
 	v.modelindex = 0;
 	return true;
@@ -1292,26 +1292,26 @@ END_SAVERESTORE(CChangeLevel, CBaseTrigger)
 
 bool CChangeLevel::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "map"))
+	if (streq(pkvd->szKeyName, "map"))
 	{
 		if (strlen(pkvd->szValue) >= kMapNameMost)
 			ALERT(at_error, "Map name '%s' too long (32 chars)\n", pkvd->szValue);
 		strcpy(m_szMapName, pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "landmark"))
+	else if (streq(pkvd->szKeyName, "landmark"))
 	{
 		if (strlen(pkvd->szValue) >= kMapNameMost)
 			ALERT(at_error, "Landmark name '%s' too long (32 chars)\n", pkvd->szValue);
 		strcpy(m_szLandmarkName, pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "changetarget"))
+	else if (streq(pkvd->szKeyName, "changetarget"))
 	{
 		m_changeTarget = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "changedelay"))
+	else if (streq(pkvd->szKeyName, "changedelay"))
 	{
 		m_changeTargetDelay = atof(pkvd->szValue);
 		return true;
@@ -1323,13 +1323,13 @@ bool CChangeLevel::KeyValue(KeyValueData* pkvd)
 
 bool CChangeLevel::Spawn()
 {
-	if (FStrEq(m_szMapName, ""))
+	if (streq(m_szMapName, ""))
 	{
 		ALERT(at_console, "a trigger_changelevel doesn't have a map");
 		return false;
 	}
 
-	if (FStrEq(m_szLandmarkName, ""))
+	if (streq(m_szLandmarkName, ""))
 	{
 		ALERT(at_console, "trigger_changelevel to %s doesn't have a landmark", m_szMapName);
 		return false;
@@ -1362,7 +1362,7 @@ Entity* CChangeLevel::FindLandmark(const char* pLandmarkName)
 	while (pentLandmark != nullptr)
 	{
 		// Found the landmark
-		if (streq(STRING(pentLandmark->v.classname), "info_landmark"))
+		if (streq(pentLandmark->v.classname, "info_landmark"))
 			return &pentLandmark->v;
 		else
 			pentLandmark = util::FindEntityByTargetname(pentLandmark, pLandmarkName);
@@ -1842,22 +1842,22 @@ END_SAVERESTORE(CRevertSaved, CPointEntity)
 
 bool CRevertSaved::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "duration"))
+	if (streq(pkvd->szKeyName, "duration"))
 	{
 		SetDuration(atof(pkvd->szValue));
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "holdtime"))
+	else if (streq(pkvd->szKeyName, "holdtime"))
 	{
 		SetHoldTime(atof(pkvd->szValue));
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "messagetime"))
+	else if (streq(pkvd->szKeyName, "messagetime"))
 	{
 		SetMessageTime(atof(pkvd->szValue));
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "loadtime"))
+	else if (streq(pkvd->szKeyName, "loadtime"))
 	{
 		SetLoadTime(atof(pkvd->szValue));
 		return true;
@@ -1962,7 +1962,7 @@ void CTriggerEndSection::EndSectionTouch(CBaseEntity* pOther)
 
 bool CTriggerEndSection::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "section"))
+	if (streq(pkvd->szKeyName, "section"))
 	{
 		//		m_iszSectionName = ALLOC_STRING( pkvd->szValue );
 		// Store this in message so we don't have to write save/restore for this ent
@@ -2033,7 +2033,7 @@ END_SAVERESTORE(CTriggerChangeTarget, CBaseDelay)
 
 bool CTriggerChangeTarget::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "m_iszNewTarget"))
+	if (streq(pkvd->szKeyName, "m_iszNewTarget"))
 	{
 		m_iszNewTarget = ALLOC_STRING(pkvd->szValue);
 		return true;

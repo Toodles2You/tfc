@@ -48,7 +48,7 @@ const char* CBreakable::pSpawnObjects[] =
 
 bool CBreakable::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "explosion"))
+	if (streq(pkvd->szKeyName, "explosion"))
 	{
 		if (!stricmp(pkvd->szValue, "directed"))
 			m_Explosion = expDirected;
@@ -68,7 +68,7 @@ bool CBreakable::KeyValue(KeyValueData* pkvd)
 
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "material"))
+	else if (streq(pkvd->szKeyName, "material"))
 	{
 		int i = atoi(pkvd->szValue);
 
@@ -81,33 +81,33 @@ bool CBreakable::KeyValue(KeyValueData* pkvd)
 
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "deadmodel"))
+	else if (streq(pkvd->szKeyName, "deadmodel"))
 	{
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "shards"))
+	else if (streq(pkvd->szKeyName, "shards"))
 	{
 		//			m_iShards = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "gibmodel"))
+	else if (streq(pkvd->szKeyName, "gibmodel"))
 	{
 		m_iszGibModel = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "spawnobject"))
+	else if (streq(pkvd->szKeyName, "spawnobject"))
 	{
 		int object = atoi(pkvd->szValue);
 		if (object > 0 && object < ARRAYSIZE(pSpawnObjects))
 			m_iszSpawnObject = MAKE_STRING(pSpawnObjects[object]);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "explodemagnitude"))
+	else if (streq(pkvd->szKeyName, "explodemagnitude"))
 	{
 		ExplosionSetMagnitude(atoi(pkvd->szValue));
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "lip"))
+	else if (streq(pkvd->szKeyName, "lip"))
 		return true;
 
 	return CBaseEntity::KeyValue(pkvd);
@@ -151,7 +151,7 @@ bool CBreakable::Spawn()
 		v.playerclass = 1;
 	}
 
-	SetModel(STRING(v.model)); //set size and link into world.
+	SetModel(v.model); //set size and link into world.
 
 	SetTouch(&CBreakable::BreakTouch);
 	if (FBitSet(v.spawnflags, SF_BREAK_TRIGGER_ONLY)) // Only break on trigger
@@ -770,7 +770,7 @@ bool CPushable::Spawn()
 
 	v.movetype = MOVETYPE_PUSHSTEP;
 	v.solid = SOLID_BBOX;
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 
 	if (v.friction > 399)
 		v.friction = 399;
@@ -802,7 +802,7 @@ void CPushable::Precache()
 
 bool CPushable::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "size"))
+	if (streq(pkvd->szKeyName, "size"))
 	{
 		int bbox = atoi(pkvd->szValue);
 
@@ -828,7 +828,7 @@ bool CPushable::KeyValue(KeyValueData* pkvd)
 
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "buoyancy"))
+	else if (streq(pkvd->szKeyName, "buoyancy"))
 	{
 		v.skin = atof(pkvd->szValue);
 		return true;

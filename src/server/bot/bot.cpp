@@ -459,7 +459,7 @@ int CBot::GetEnemiesRemaining( void ) const
 		if (player == NULL)
 			continue;
 
-		if (FStrEq( STRING( player->v.netname ), "" ))
+		if (STRING(player->v.netname)[0] == '\0')
 			continue;
 
 		if (!IsEnemy( player ))
@@ -489,7 +489,7 @@ int CBot::GetFriendsRemaining( void ) const
 		if (player == NULL)
 			continue;
 
-		if (FStrEq( STRING( player->v.netname ), "" ))
+		if (STRING(player->v.netname)[0] == '\0')
 			continue;
 
 		if (IsEnemy( player ))

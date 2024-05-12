@@ -200,6 +200,7 @@ public:
 	void SetOrigin(const Vector& org);
 	void SetSize(const Vector& mins, const Vector& maxs);
 	void SetModel(const char* name);
+	void SetModel(string_t name) { SetModel(STRING(name)); }
 
 	virtual void DeathNotice(CBaseEntity* child) {} // monster maker children use this to tell the monster maker that they have died.
 
@@ -218,7 +219,7 @@ public:
 	virtual bool OnControls(CBaseEntity* other) { return false; }
 	virtual bool IsAlive() { return (v.deadflag == DEAD_NO) && v.health > 0; }
 	virtual bool IsBSPModel() { return v.solid == SOLID_BSP || v.movetype == MOVETYPE_PUSHSTEP; }
-	virtual bool HasTarget(string_t targetname) { return FStrEq(STRING(targetname), STRING(v.target)); }
+	virtual bool HasTarget(string_t targetname) { return streq(targetname, v.target); }
 	virtual bool IsClient() { return false; }
 	virtual bool IsPlayer() { return false; }
 	virtual bool IsBot() { return false; }

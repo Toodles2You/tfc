@@ -130,14 +130,14 @@ public:
 	{
 		const auto classname = STRING(v.classname);
 
-		if (FStrEq("item_healthkit", classname))
+		if (streq("item_healthkit", classname))
 		{
 			v.health = 15.0F;
 			v.model = MAKE_STRING("models/w_medkit.mdl");
 			v.noise = MAKE_STRING("items/smallmedkit1.wav");
 			v.netname = v.classname;
 		}
-		else if (FStrEq("item_battery", classname))
+		else if (streq("item_battery", classname))
 		{
 			v.armorvalue = 15.0F;
 			v.model = MAKE_STRING("models/w_battery.mdl");
@@ -148,7 +148,7 @@ public:
 		g_engfuncs.pfnPrecacheModel(STRING(v.model));
 		g_engfuncs.pfnPrecacheSound(STRING(v.noise));
 
-		SetModel(STRING(v.model));
+		SetModel(v.model);
 	}
 
 protected:

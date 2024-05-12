@@ -978,7 +978,7 @@ CSpawnPoint *CHalfLifeMultiplay::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
 
 void CHalfLifeMultiplay::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 {
-	if (streq(STRING(pEntity->v.classname), "info_player_start"))
+	if (streq(pEntity->v.classname, "info_player_start"))
 	{
 		CGameRules::AddPlayerSpawnSpot(pEntity);
 		return;

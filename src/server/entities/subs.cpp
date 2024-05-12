@@ -54,7 +54,7 @@ LINK_ENTITY_TO_CLASS(info_player_start, CBaseDMStart);
 
 bool CBaseDMStart::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "master"))
+	if (streq(pkvd->szKeyName, "master"))
 	{
 		v.netname = ALLOC_STRING(pkvd->szValue);
 		return true;
@@ -161,12 +161,12 @@ void CBaseEntity::Remove()
 
 bool CBaseEntity::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "delay"))
+	if (streq(pkvd->szKeyName, "delay"))
 	{
 		m_flDelay = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "killtarget"))
+	else if (streq(pkvd->szKeyName, "killtarget"))
 	{
 		m_iszKillTarget = ALLOC_STRING(pkvd->szValue);
 		return true;
@@ -348,22 +348,22 @@ bool CBaseToggle::EntvarsKeyvalue(KeyValueData* pkvd)
 
 bool CBaseToggle::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "lip"))
+	if (streq(pkvd->szKeyName, "lip"))
 	{
 		m_flLip = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "wait"))
+	else if (streq(pkvd->szKeyName, "wait"))
 	{
 		m_flWait = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "master"))
+	else if (streq(pkvd->szKeyName, "master"))
 	{
 		m_sMaster = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "distance"))
+	else if (streq(pkvd->szKeyName, "distance"))
 	{
 		m_flMoveDistance = atof(pkvd->szValue);
 		return true;

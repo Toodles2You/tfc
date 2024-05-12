@@ -191,7 +191,7 @@ bool CFuncTank::Spawn()
 
 	v.movetype = MOVETYPE_PUSH; // so it doesn't get pushed by anything
 	v.solid = SOLID_BSP;
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 
 	m_yawCenter = v.angles.y;
 	m_pitchCenter = v.angles.x;
@@ -226,107 +226,107 @@ void CFuncTank::Precache()
 
 bool CFuncTank::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "yawrate"))
+	if (streq(pkvd->szKeyName, "yawrate"))
 	{
 		m_yawRate = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "yawrange"))
+	else if (streq(pkvd->szKeyName, "yawrange"))
 	{
 		m_yawRange = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "yawtolerance"))
+	else if (streq(pkvd->szKeyName, "yawtolerance"))
 	{
 		m_yawTolerance = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "pitchrange"))
+	else if (streq(pkvd->szKeyName, "pitchrange"))
 	{
 		m_pitchRange = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "pitchrate"))
+	else if (streq(pkvd->szKeyName, "pitchrate"))
 	{
 		m_pitchRate = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "pitchtolerance"))
+	else if (streq(pkvd->szKeyName, "pitchtolerance"))
 	{
 		m_pitchTolerance = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "firerate"))
+	else if (streq(pkvd->szKeyName, "firerate"))
 	{
 		m_fireRate = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "barrel"))
+	else if (streq(pkvd->szKeyName, "barrel"))
 	{
 		m_barrelPos.x = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "barrely"))
+	else if (streq(pkvd->szKeyName, "barrely"))
 	{
 		m_barrelPos.y = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "barrelz"))
+	else if (streq(pkvd->szKeyName, "barrelz"))
 	{
 		m_barrelPos.z = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "spritescale"))
+	else if (streq(pkvd->szKeyName, "spritescale"))
 	{
 		m_spriteScale = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "spritesmoke"))
+	else if (streq(pkvd->szKeyName, "spritesmoke"))
 	{
 		m_iszSpriteSmoke = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "spriteflash"))
+	else if (streq(pkvd->szKeyName, "spriteflash"))
 	{
 		m_iszSpriteFlash = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "rotatesound"))
+	else if (streq(pkvd->szKeyName, "rotatesound"))
 	{
 		v.noise = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "persistence"))
+	else if (streq(pkvd->szKeyName, "persistence"))
 	{
 		m_persist = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "bullet"))
+	else if (streq(pkvd->szKeyName, "bullet"))
 	{
 		m_bulletType = (TANKBULLET)atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "bullet_damage"))
+	else if (streq(pkvd->szKeyName, "bullet_damage"))
 	{
 		m_iBulletDamage = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "firespread"))
+	else if (streq(pkvd->szKeyName, "firespread"))
 	{
 		m_spread = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "minRange"))
+	else if (streq(pkvd->szKeyName, "minRange"))
 	{
 		m_minRange = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "maxRange"))
+	else if (streq(pkvd->szKeyName, "maxRange"))
 	{
 		m_maxRange = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "master"))
+	else if (streq(pkvd->szKeyName, "master"))
 	{
 		m_iszMaster = ALLOC_STRING(pkvd->szValue);
 		return true;
@@ -799,7 +799,7 @@ void CFuncTankLaser::Activate()
 
 bool CFuncTankLaser::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "laserentity"))
+	if (streq(pkvd->szKeyName, "laserentity"))
 	{
 		v.message = ALLOC_STRING(pkvd->szValue);
 		return true;
@@ -927,7 +927,7 @@ LINK_ENTITY_TO_CLASS(func_tankmortar, CFuncTankMortar);
 
 bool CFuncTankMortar::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "iMagnitude"))
+	if (streq(pkvd->szKeyName, "iMagnitude"))
 	{
 		v.impulse = atoi(pkvd->szValue);
 		return true;
@@ -1027,7 +1027,7 @@ bool CFuncTankControls::Spawn()
 	v.solid = SOLID_TRIGGER;
 	v.movetype = MOVETYPE_NONE;
 	v.effects |= EF_NODRAW;
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 
 	SetSize(v.mins, v.maxs);
 	SetOrigin(v.origin);

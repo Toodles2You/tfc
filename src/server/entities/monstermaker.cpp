@@ -77,17 +77,17 @@ END_SAVERESTORE(CMonsterMaker, CBaseToggle)
 bool CMonsterMaker::KeyValue(KeyValueData* pkvd)
 {
 
-	if (FStrEq(pkvd->szKeyName, "monstercount"))
+	if (streq(pkvd->szKeyName, "monstercount"))
 	{
 		m_cNumMonsters = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "m_imaxlivechildren"))
+	else if (streq(pkvd->szKeyName, "m_imaxlivechildren"))
 	{
 		m_iMaxLiveChildren = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "monstertype"))
+	else if (streq(pkvd->szKeyName, "monstertype"))
 	{
 		m_iszMonsterClassname = ALLOC_STRING(pkvd->szValue);
 		return true;

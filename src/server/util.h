@@ -185,12 +185,7 @@ typedef enum
 
 inline bool streq(const char* s1, const char* s2) { return strcmp(s1, s2) == 0; }
 inline bool streq(string_t s1, const char* s2) { return strcmp(STRING(s1), s2) == 0; }
-
-// Misc useful
-inline bool FStrEq(const char* sz1, const char* sz2)
-{
-	return (strcmp(sz1, sz2) == 0);
-}
+inline bool streq(string_t s1, string_t s2) { return strcmp(STRING(s1), STRING(s2)) == 0; }
 
 #define SND_SPAWNING (1 << 8)
 #define SND_STOP (1 << 5)

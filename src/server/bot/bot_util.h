@@ -227,7 +227,7 @@ inline bool IsEntityValid( CBaseEntity *entity )
 	if (entity == NULL)
 		return false;
 
-	if (FStrEq( STRING( entity->v.netname ), "" ))
+	if (STRING(entity->v.netname)[0] == '\0')
 		return false;
 
 #ifdef HALFLIFE_SAVERESTORE

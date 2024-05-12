@@ -62,37 +62,37 @@ END_SAVERESTORE(CBasePlatTrain, CBaseToggle)
 
 bool CBasePlatTrain::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "lip"))
+	if (streq(pkvd->szKeyName, "lip"))
 	{
 		m_flLip = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "wait"))
+	else if (streq(pkvd->szKeyName, "wait"))
 	{
 		m_flWait = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "height"))
+	else if (streq(pkvd->szKeyName, "height"))
 	{
 		m_flHeight = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "rotation"))
+	else if (streq(pkvd->szKeyName, "rotation"))
 	{
 		m_vecFinalAngle.x = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "movesnd"))
+	else if (streq(pkvd->szKeyName, "movesnd"))
 	{
 		m_bMoveSnd = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "stopsnd"))
+	else if (streq(pkvd->szKeyName, "stopsnd"))
 	{
 		m_bStopSnd = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "volume"))
+	else if (streq(pkvd->szKeyName, "volume"))
 	{
 		m_volume = atof(pkvd->szValue);
 		return true;
@@ -283,7 +283,7 @@ void CFuncPlat::Setup()
 
 	SetOrigin(v.origin); // set size and link into world
 	SetSize(v.mins, v.maxs);
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 
 	// vecPosition1 is the top position, vecPosition2 is the bottom
 	m_vecPosition1 = v.origin;
@@ -671,7 +671,7 @@ END_SAVERESTORE(CFuncTrain, CBasePlatTrain)
 
 bool CFuncTrain::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "sounds"))
+	if (streq(pkvd->szKeyName, "sounds"))
 	{
 		m_sounds = atoi(pkvd->szValue);
 		return true;
@@ -860,7 +860,7 @@ bool CFuncTrain::Spawn()
 	else
 		v.solid = SOLID_BSP;
 
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 	SetSize(v.mins, v.maxs);
 	SetOrigin(v.origin);
 
@@ -957,33 +957,33 @@ LINK_ENTITY_TO_CLASS(func_tracktrain, CFuncTrackTrain);
 
 bool CFuncTrackTrain::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "wheels"))
+	if (streq(pkvd->szKeyName, "wheels"))
 	{
 		m_length = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "height"))
+	else if (streq(pkvd->szKeyName, "height"))
 	{
 		m_height = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "startspeed"))
+	else if (streq(pkvd->szKeyName, "startspeed"))
 	{
 		m_startSpeed = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "sounds"))
+	else if (streq(pkvd->szKeyName, "sounds"))
 	{
 		m_sounds = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "volume"))
+	else if (streq(pkvd->szKeyName, "volume"))
 	{
 		m_flVolume = (float)(atoi(pkvd->szValue));
 		m_flVolume *= 0.1;
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "bank"))
+	else if (streq(pkvd->szKeyName, "bank"))
 	{
 		m_flBank = atof(pkvd->szValue);
 		return true;
@@ -1477,7 +1477,7 @@ bool CFuncTrackTrain::Spawn()
 		v.solid = SOLID_BSP;
 	v.movetype = MOVETYPE_PUSH;
 
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 
 	SetSize(v.mins, v.maxs);
 	SetOrigin(v.origin);
@@ -1578,7 +1578,7 @@ bool CFuncTrainControls::Spawn()
 {
 	v.solid = SOLID_NOT;
 	v.movetype = MOVETYPE_NONE;
-	SetModel(STRING(v.model));
+	SetModel(v.model);
 
 	SetSize(v.mins, v.maxs);
 	SetOrigin(v.origin);
@@ -1724,17 +1724,17 @@ void CFuncTrackChange::Touch(CBaseEntity* pOther)
 
 bool CFuncTrackChange::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "train"))
+	if (streq(pkvd->szKeyName, "train"))
 	{
 		m_trainName = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "toptrack"))
+	else if (streq(pkvd->szKeyName, "toptrack"))
 	{
 		m_trackTopName = ALLOC_STRING(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "bottomtrack"))
+	else if (streq(pkvd->szKeyName, "bottomtrack"))
 	{
 		m_trackBottomName = ALLOC_STRING(pkvd->szValue);
 		return true;

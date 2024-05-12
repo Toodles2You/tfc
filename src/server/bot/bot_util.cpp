@@ -33,7 +33,7 @@ bool UTIL_IsNameTaken( const char *name, bool ignoreHumans )
 		if (player == NULL)
 			continue;
 
-		if (FStrEq( STRING( player->v.netname ), "" ))
+		if (STRING(player->v.netname)[0] == '\0')
 			continue;
 
 		if (player->IsPlayer() && ((CBasePlayer *)player)->IsBot())
@@ -41,7 +41,7 @@ bool UTIL_IsNameTaken( const char *name, bool ignoreHumans )
 			// bots can have prefixes so we need to check the name
 			// against the profile name instead.
 			CBot *bot = (CBot *)player;
-			if (FStrEq(name, bot->GetProfile()->GetName()))
+			if (streq(name, bot->GetProfile()->GetName()))
 			{
 				return true;
 			}
@@ -50,7 +50,7 @@ bool UTIL_IsNameTaken( const char *name, bool ignoreHumans )
 		{
 			if (!ignoreHumans)
 			{
-				if (FStrEq( name, STRING( player->v.netname ) ))
+				if (streq( name, STRING( player->v.netname ) ))
 					return true;
 			}
 		}
@@ -72,7 +72,7 @@ int UTIL_ClientsInGame( void )
 		if ( pPlayer == NULL )
 			continue;
 
-		if ( FStrEq( STRING( pPlayer->v.netname ), "" ) )
+		if (STRING(pPlayer->v.netname)[0] == '\0')
 			continue;
 
 		iCount++;
@@ -96,7 +96,7 @@ int UTIL_ActivePlayersInGame( void )
 		if ( entity == NULL )
 			continue;
 
-		if ( FStrEq( STRING( entity->v.netname ), "" ) )
+		if (STRING(entity->v.netname)[0] == '\0')
 			continue;
 
 		CBasePlayer *player = static_cast<CBasePlayer *>( entity );
@@ -125,7 +125,7 @@ int UTIL_HumansInGame( bool ignoreSpectators )
 		if ( entity == NULL )
 			continue;
 
-		if ( FStrEq( STRING( entity->v.netname ), "" ) )
+		if (STRING(entity->v.netname)[0] == '\0')
 			continue;
 
 		CBasePlayer *player = static_cast<CBasePlayer *>( entity );
@@ -165,7 +165,7 @@ int UTIL_HumansOnTeam( int teamID, bool isAlive )
 		if ( entity == NULL )
 			continue;
 
-		if ( FStrEq( STRING( entity->v.netname ), "" ) )
+		if (STRING(entity->v.netname)[0] == '\0')
 			continue;
 
 		CBasePlayer *player = static_cast<CBasePlayer *>( entity );
@@ -198,7 +198,7 @@ int UTIL_BotsInGame( void )
 		if ( pPlayer == NULL )
 			continue;
 
-		if ( FStrEq( STRING( pPlayer->v.netname ), "" ) )
+		if (STRING(pPlayer->v.netname)[0] == '\0')
 			continue;
 
 		if ( !pPlayer->IsBot() )
@@ -227,7 +227,7 @@ bool UTIL_KickBotFromTeam( int kickTeam )
 			continue;
 
 		const char *name = STRING( player->v.netname );
-		if (FStrEq( name, "" ))
+		if (streq( name, "" ))
 			continue;
 
 		if (!player->IsBot())
@@ -251,7 +251,7 @@ bool UTIL_KickBotFromTeam( int kickTeam )
 			continue;
 
 		const char *name = STRING( player->v.netname );
-		if (FStrEq( name, "" ))
+		if (streq( name, "" ))
 			continue;
 
 		if (!player->IsBot())
@@ -288,7 +288,7 @@ bool UTIL_IsTeamAllBots( int team )
 		if (player->TeamNumber() != team)
 			continue;
 
-		if (FStrEq( STRING( player->v.netname ), "" ))
+		if (STRING(player->v.netname)[0] == '\0')
 			continue;
 
 		// if not a bot, fail the test
@@ -455,7 +455,7 @@ bool UTIL_IsVisibleToTeam( const Vector &spot, int team, float maxRange )
 		if (player == NULL)
 			continue;
 
-		if (FStrEq( STRING( player->v.netname ), "" ))
+		if (STRING(player->v.netname)[0] == '\0')
 			continue;
 
 		if (!player->IsAlive())

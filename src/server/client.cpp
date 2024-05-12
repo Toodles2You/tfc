@@ -432,19 +432,19 @@ void ClientCommand(Entity* pEntity)
 		return;
 	}
 
-	if (FStrEq(pcmd, "say"))
+	if (streq(pcmd, "say"))
 	{
 		Host_Say(pEntity, false);
 	}
-	else if (FStrEq(pcmd, "say_team"))
+	else if (streq(pcmd, "say_team"))
 	{
 		Host_Say(pEntity, true);
 	}
-	else if (FStrEq(pcmd, "fullupdate"))
+	else if (streq(pcmd, "fullupdate"))
 	{
 		player->ForceClientDllUpdate();
 	}
-	else if (FStrEq(pcmd, "give"))
+	else if (streq(pcmd, "give"))
 	{
 		if (g_pGameRules->IsPlayerPrivileged(player))
 		{
@@ -452,12 +452,12 @@ void ClientCommand(Entity* pEntity)
 			player->GiveNamedItem(STRING(iszItem));
 		}
 	}
-	else if (FStrEq(pcmd, "drop"))
+	else if (streq(pcmd, "drop"))
 	{
 		// player is dropping an item.
 		player->DropPlayerWeapon((char*)CMD_ARGV(1));
 	}
-	else if (FStrEq(pcmd, "fov"))
+	else if (streq(pcmd, "fov"))
 	{
 		if (g_pGameRules->IsPlayerPrivileged(player))
 		{
@@ -471,7 +471,7 @@ void ClientCommand(Entity* pEntity)
 			}
 		}
 	}
-	else if (FStrEq(pcmd, "closemenus"))
+	else if (streq(pcmd, "closemenus"))
 	{
 	}
 	else if (g_pGameRules->ClientCommand(player, pcmd))
@@ -516,7 +516,7 @@ void ClientUserInfoChanged(Entity* pEntity, char* infobuffer)
 	}
 
 	// msg everyone if someone changes their name,  and it isn't the first time (changing no name to current name)
-	if (!FStringNull(pEntity->netname) && STRING(pEntity->netname)[0] != 0 && !FStrEq(STRING(pEntity->netname), g_engfuncs.pfnInfoKeyValue(infobuffer, "name")))
+	if (!FStringNull(pEntity->netname) && STRING(pEntity->netname)[0] != 0 && !streq(pEntity->netname, g_engfuncs.pfnInfoKeyValue(infobuffer, "name")))
 	{
 		char sName[256];
 		char* pName = g_engfuncs.pfnInfoKeyValue(infobuffer, "name");
