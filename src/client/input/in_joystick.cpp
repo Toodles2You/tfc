@@ -287,7 +287,7 @@ void Joy_Move(float frametime, usercmd_t* cmd)
 	int i;
 	Vector viewangles;
 
-	gEngfuncs.GetViewAngles((float*)viewangles);
+	gEngfuncs.GetViewAngles(viewangles);
 
 	// complete initialization if first time in
 	// this is needed as cvars are not available at initialization time
@@ -389,7 +389,7 @@ void Joy_Move(float frametime, usercmd_t* cmd)
 
 	viewangles.x = std::clamp(viewangles.x, -cl_pitchup->value, cl_pitchdown->value);
 
-	gEngfuncs.SetViewAngles((float*)viewangles);
+	gEngfuncs.SetViewAngles(viewangles);
 }
 
 

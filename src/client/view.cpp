@@ -171,8 +171,8 @@ void V_CalcGunAngle(ref_params_t* pparams)
 	viewent->angles[PITCH] += v_idlescale * sin(pparams->time * v_ipitch_cycle.value) * v_ipitch_level.value;
 	viewent->angles[YAW] -= v_idlescale * sin(pparams->time * v_iyaw_cycle.value) * v_iyaw_level.value;
 
-	VectorCopy(viewent->angles, viewent->curstate.angles);
-	VectorCopy(viewent->angles, viewent->latched.prevangles);
+	viewent->curstate.angles = viewent->angles;
+	viewent->latched.prevangles = viewent->angles;
 }
 
 
@@ -220,14 +220,14 @@ static void V_CalcIntermissionRefdef(ref_params_t* pparams)
 	// view is the weapon model (only visible from inside body )
 	view = gEngfuncs.GetViewModel();
 
-	VectorCopy(pparams->simorg, pparams->vieworg);
+	pparams->vieworg = pparams->simorg;
 
 	if (!gHUD.IsObserver() && !gHUD.IsSpectator())
 	{
 		VectorAdd(pparams->vieworg, pparams->viewheight, pparams->vieworg);
 	}
 
-	VectorCopy(pparams->cl_viewangles, pparams->viewangles);
+	pparams->viewangles = pparams->cl_viewangles;
 
 	view->model = NULL;
 
@@ -240,8 +240,8 @@ static void V_CalcIntermissionRefdef(ref_params_t* pparams)
 	if (0 != gEngfuncs.IsSpectateOnly())
 	{
 		// in HLTV we must go to 'intermission' position by ourself
-		VectorCopy(gHUD.m_Spectator.m_cameraOrigin, pparams->vieworg);
-		VectorCopy(gHUD.m_Spectator.m_cameraAngles, pparams->viewangles);
+		pparams->vieworg = gHUD.m_Spectator.m_cameraOrigin;
+		pparams->viewangles = gHUD.m_Spectator.m_cameraAngles;
 	}
 
 	v_idlescale = old;
@@ -337,7 +337,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	view = gEngfuncs.GetViewModel();
 
 	// refresh position
-	VectorCopy(pparams->simorg, pparams->vieworg);
+	pparams->vieworg = pparams->simorg;
 
 	if (cl_bob->value != 0.0F)
 	{
@@ -355,7 +355,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 
 	VectorAdd(pparams->vieworg, pparams->viewheight, pparams->vieworg);
 
-	VectorCopy(pparams->cl_viewangles, pparams->viewangles);
+	pparams->viewangles = pparams->cl_viewangles;
 
 	gEngfuncs.V_CalcShake();
 	gEngfuncs.V_ApplyShake(pparams->vieworg, pparams->viewangles, 1.0);
@@ -387,7 +387,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 			waterEntity = 0; // Don't need this in software
 		}
 
-		VectorCopy(pparams->vieworg, point);
+		point = pparams->vieworg;
 
 		// Eyes are above water, make sure we're above the waves
 		if (pparams->waterlevel == kWaterLevelWaist)
@@ -425,7 +425,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	V_AddIdle(pparams);
 
 	// offsets
-	VectorCopy(pparams->cl_viewangles, angles);
+	angles = pparams->cl_viewangles;
 
 	AngleVectors(angles, pparams->forward, pparams->right, pparams->up);
 
@@ -436,9 +436,9 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 
 		ofs[0] = ofs[1] = ofs[2] = 0.0;
 
-		CL_CameraOffset((float*)&ofs);
+		CL_CameraOffset(ofs);
 
-		VectorCopy(ofs, camAngles);
+		camAngles = ofs;
 		camAngles[ROLL] = 0;
 
 		AngleVectors(camAngles, camForward, camRight, camUp);
@@ -450,13 +450,13 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	}
 
 	// Give gun our viewangles
-	VectorCopy(pparams->cl_viewangles, view->angles);
+	view->angles = pparams->cl_viewangles;
 
 	// set up gun position
 	V_CalcGunAngle(pparams);
 
 	// Use predicted origin as view origin.
-	VectorCopy(pparams->simorg, view->origin);
+	view->origin = pparams->simorg;
 	view->origin[2] += (waterOffset);
 	VectorAdd(view->origin, pparams->viewheight, view->origin);
 
@@ -482,7 +482,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 			view->angles[ROLL] -= bob * 1;
 			view->angles[PITCH] -= bob * 0.3;
 
-			VectorCopy(view->angles, view->curstate.angles);
+			view->curstate.angles = view->angles;
 		}
 	}
 	else
@@ -506,7 +506,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	v_lastAngles = pparams->viewangles;
 	if (0 != CL_IsThirdPerson())
 	{
-		VectorCopy(camAngles, pparams->viewangles);
+		pparams->viewangles = camAngles;
 	}
 
 	//Apply this at all times
@@ -536,8 +536,8 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 		viewentity = gEngfuncs.GetEntityByIndex(pparams->viewentity);
 		if (viewentity)
 		{
-			VectorCopy(viewentity->origin, pparams->vieworg);
-			VectorCopy(viewentity->angles, pparams->viewangles);
+			pparams->vieworg = viewentity->origin;
+			pparams->viewangles = viewentity->angles;
 
 			// Store off overridden viewangles
 			v_angles = pparams->viewangles;

@@ -39,7 +39,7 @@ static void GetCrosshairTarget(pmtrace_t* tr, float distance)
 	Vector view_ofs;
 
 	// Get our exact viewangles from engine
-	gEngfuncs.GetViewAngles((float*)angles);
+	gEngfuncs.GetViewAngles(angles);
 	angles = angles + g_PunchAngle;
 
 	// Determine our last predicted origin
@@ -47,7 +47,7 @@ static void GetCrosshairTarget(pmtrace_t* tr, float distance)
 
 	AngleVectors(angles, forward, right, up);
 
-	VectorCopy(origin, vecSrc);
+	vecSrc = origin;
 
 	VectorMA(vecSrc, distance, forward, vecEnd);
 

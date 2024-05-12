@@ -309,7 +309,7 @@ static void Mouse_MoveInternal(float frametime, usercmd_t* cmd)
 	Point pos;
 	Vector viewangles;
 
-	gEngfuncs.GetViewAngles((float*)viewangles);
+	gEngfuncs.GetViewAngles(viewangles);
 
 	//jjb - this disbles normal mouse control if the user is trying to
 	//      move the camera, or if the mouse cursor is visible or if we're in intermission
@@ -388,7 +388,7 @@ static void Mouse_MoveInternal(float frametime, usercmd_t* cmd)
 		}
 	}
 
-	gEngfuncs.SetViewAngles((float*)viewangles);
+	gEngfuncs.SetViewAngles(viewangles);
 
 #ifdef WIN32
 	if ((!Mouse_UseRawInput() && SDL_FALSE != mouseRelative) || g_iVisibleMouse)

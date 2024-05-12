@@ -23,7 +23,7 @@
 #include "scriptevent.h"
 
 
-bool studio::ExtractBbox(void* pmodel, int sequence, float* mins, float* maxs)
+bool studio::ExtractBbox(void* pmodel, int sequence, Vector& mins, Vector& maxs)
 {
 	studiohdr_t* pstudiohdr;
 

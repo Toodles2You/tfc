@@ -256,7 +256,7 @@ int PM_GetRandomStuckOffsets(int nIndex, Vector& offset)
 	int idx;
 	idx = rgStuckLast[nIndex]++;
 
-	VectorCopy(rgv3tStuckTable[idx % 54], offset);
+	offset = rgv3tStuckTable[idx % 54];
 
 	return (idx % 54);
 }
@@ -299,7 +299,7 @@ bool PM_TryToUnstuck(Vector base, int (*pfnIgnore)(physent_t *pe))
 
 				if (pmove->PM_TestPlayerPositionEx(test, nullptr, pfnIgnore) == -1)
 				{
-					VectorCopy(test, pmove->origin);
+					pmove->origin = test;
 					return false;
 				}
 			}

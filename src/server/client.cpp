@@ -1063,8 +1063,8 @@ void SetupVisibility(Entity* pViewEntity, Entity* pClient, unsigned char** pvs, 
 		org = org + (VEC_HULL_MIN - VEC_DUCK_HULL_MIN);
 	}
 
-	*pvs = ENGINE_SET_PVS((float*)&org);
-	*pas = ENGINE_SET_PAS((float*)&org);
+	*pvs = g_engfuncs.pfnSetFatPVS(org);
+	*pas = g_engfuncs.pfnSetFatPAS(org);
 }
 
 #include "entity_state.h"

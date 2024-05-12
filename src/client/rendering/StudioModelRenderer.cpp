@@ -433,7 +433,7 @@ void CStudioModelRenderer::StudioSetUpTransform(bool trivial_accept)
 	//for (i = 0; i < 3; i++)
 	//	modelpos[i] = m_pCurrentEntity->origin[i];
 
-	VectorCopy(m_pCurrentEntity->origin, modelpos);
+	modelpos = m_pCurrentEntity->origin;
 
 	// TODO: should really be stored with the entity instead of being reconstructed
 	// TODO: should use a look-up table
@@ -509,7 +509,7 @@ void CStudioModelRenderer::StudioSetUpTransform(bool trivial_accept)
 	}
 	else if (m_pCurrentEntity->curstate.movetype != MOVETYPE_NONE)
 	{
-		VectorCopy(m_pCurrentEntity->angles, angles);
+		angles = m_pCurrentEntity->angles;
 	}
 
 	//Con_DPrintf("%.0f %0.f %0.f\n", modelpos[0], modelpos[1], modelpos[2] );
@@ -522,10 +522,10 @@ void CStudioModelRenderer::StudioSetUpTransform(bool trivial_accept)
 	{
 		static float viewmatrix[3][4];
 
-		VectorCopy(m_vRight, viewmatrix[0]);
-		VectorCopy(m_vUp, viewmatrix[1]);
+		m_vRight.CopyToArray(viewmatrix[0]);
+		m_vUp.CopyToArray(viewmatrix[1]);
 		VectorInverse(viewmatrix[1]);
-		VectorCopy(m_vNormal, viewmatrix[2]);
+		m_vNormal.CopyToArray(viewmatrix[2]);
 
 		(*m_protationmatrix)[0][3] = modelpos[0] - m_vRenderOrigin[0];
 		(*m_protationmatrix)[1][3] = modelpos[1] - m_vRenderOrigin[1];
@@ -1128,8 +1128,8 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 		deadplayer.gaitsequence = 0;
 
 		deadplayer.movetype = MOVETYPE_NONE;
-		VectorCopy(m_pCurrentEntity->curstate.angles, deadplayer.angles);
-		VectorCopy(m_pCurrentEntity->curstate.origin, deadplayer.origin);
+		deadplayer.angles = m_pCurrentEntity->curstate.angles;
+		deadplayer.origin = m_pCurrentEntity->curstate.origin;
 
 		save_interp = m_fDoInterp;
 		m_fDoInterp = false;
@@ -1443,7 +1443,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 		m_fFlipModel = StudioShouldFlipModel();
 
-		VectorCopy(m_pCurrentEntity->angles, orig_angles);
+		orig_angles = m_pCurrentEntity->angles;
 
 		StudioProcessGait(pplayer);
 
@@ -1451,7 +1451,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		m_pPlayerInfo = NULL;
 
 		StudioSetUpTransform(false);
-		VectorCopy(orig_angles, m_pCurrentEntity->angles);
+		m_pCurrentEntity->angles = orig_angles;
 	}
 	else
 	{

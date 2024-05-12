@@ -334,7 +334,7 @@ void CAM_Think()
 	if (cam_contain->value)
 	{
 		// check new ideal
-		VectorCopy(origin, pnt);
+		pnt = origin;
 		AngleVectors(camAngles, camForward, camRight, camUp);
 		for (i = 0; i < 3; i++)
 			pnt[i] += -dist * camForward[i];
@@ -360,9 +360,9 @@ void CAM_Think()
 	}
 
 	// Move towards ideal
-	VectorCopy(cam_ofs, camAngles);
+	camAngles = cam_ofs;
 
-	gEngfuncs.GetViewAngles((float*)viewangles);
+	gEngfuncs.GetViewAngles(viewangles);
 
 	if (0 != cam_snapto->value)
 	{
@@ -390,7 +390,7 @@ void CAM_Think()
 		dist = camAngles[ROLL];
 		camAngles[ROLL] = 0;
 
-		VectorCopy(origin, pnt);
+		pnt = origin;
 		AngleVectors(camAngles, camForward, camRight, camUp);
 		for (i = 0; i < 3; i++)
 			pnt[i] += -dist * camForward[i];
@@ -436,7 +436,7 @@ void CAM_ToThirdPerson()
 	}
 #endif
 
-	gEngfuncs.GetViewAngles((float*)viewangles);
+	gEngfuncs.GetViewAngles(viewangles);
 
 	if (!cam_thirdperson)
 	{
@@ -503,7 +503,7 @@ void CAM_ClearStates()
 {
 	Vector viewangles;
 
-	gEngfuncs.GetViewAngles((float*)viewangles);
+	gEngfuncs.GetViewAngles(viewangles);
 
 	cam_pitchup.state = 0;
 	cam_pitchdown.state = 0;
@@ -618,5 +618,5 @@ int CL_IsThirdPerson()
 
 void CL_CameraOffset(float* ofs)
 {
-	VectorCopy(cam_ofs, ofs);
+	cam_ofs.CopyToArray(ofs);
 }

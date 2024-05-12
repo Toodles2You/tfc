@@ -57,18 +57,6 @@ extern int nanmask;
 		(c)[1] = (a)[1] + (b)[1]; \
 		(c)[2] = (a)[2] + (b)[2]; \
 	}
-#define VectorCopy(a, b) \
-	{                    \
-		(b)[0] = (a)[0]; \
-		(b)[1] = (a)[1]; \
-		(b)[2] = (a)[2]; \
-	}
-inline void VectorClear(float* a)
-{
-	a[0] = 0.0;
-	a[1] = 0.0;
-	a[2] = 0.0;
-}
 
 void VectorMA(const float* veca, float scale, const float* vecb, float* vecc);
 

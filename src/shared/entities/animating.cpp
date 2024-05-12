@@ -239,7 +239,7 @@ int CBaseAnimating::GetBodygroup(int iGroup)
 }
 
 
-bool CBaseAnimating::ExtractBbox(int sequence, float* mins, float* maxs)
+bool CBaseAnimating::ExtractBbox(int sequence, Vector& mins, Vector& maxs)
 {
 	return studio::ExtractBbox(g_engfuncs.pfnGetModelPtr(&v), sequence, mins, maxs);
 }

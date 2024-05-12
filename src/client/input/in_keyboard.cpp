@@ -531,7 +531,7 @@ CL_AdjustAngles
 Moves the local angle positions
 ================
 */
-void CL_AdjustAngles(float frametime, float* viewangles)
+void CL_AdjustAngles(float frametime, Vector& viewangles)
 {
 	float speed;
 	float up, down;
@@ -574,13 +574,13 @@ void CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 
 	if (0 != active)
 	{
-		gEngfuncs.GetViewAngles((float*)viewangles);
+		gEngfuncs.GetViewAngles(viewangles);
 
 		CL_AdjustAngles(frametime, viewangles);
 
 		memset(cmd, 0, sizeof(*cmd));
 
-		gEngfuncs.SetViewAngles((float*)viewangles);
+		gEngfuncs.SetViewAngles(viewangles);
 
 		Vector move =
 		{
@@ -635,10 +635,8 @@ void CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 	}
 #endif
 
-	gEngfuncs.GetViewAngles((float*)viewangles);
 	// Set current view angles.
-
-	VectorCopy(viewangles, cmd->viewangles);
+	gEngfuncs.GetViewAngles(cmd->viewangles);
 }
 
 /*

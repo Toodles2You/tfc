@@ -37,7 +37,7 @@ void SetBodygroup(void* pmodel, int& body, int iGroup, int iValue);
 int GetBodygroup(void* pmodel, int body, int iGroup);
 
 int GetAnimationEvent(void* pmodel, int sequence, MonsterEvent_t* pMonsterEvent, float flStart, float flEnd, int index);
-bool ExtractBbox(void* pmodel, int sequence, float* mins, float* maxs);
+bool ExtractBbox(void* pmodel, int sequence, Vector& mins, Vector& maxs);
 } /* namespace util */
 
 // From /engine/studio.h

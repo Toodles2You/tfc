@@ -36,7 +36,7 @@
 static float SCROLL_SPEED = 5;
 
 static char g_szLineBuffer[MAX_LINES + 1][MAX_CHARS_PER_LINE];
-static float* g_pflNameColors[MAX_LINES + 1];
+static Vector* g_pflNameColors[MAX_LINES + 1];
 static int g_iNameLengths[MAX_LINES + 1];
 static float flScrollTime = 0; // the time at which the lines next scroll up
 
@@ -149,7 +149,7 @@ void CHudSayText::Draw(const float time)
 			//Cut off the actual text so we can print player name
 			line[playerNameEndIndex] = '\0';
 
-			gEngfuncs.pfnDrawSetTextColor(g_pflNameColors[i][0], g_pflNameColors[i][1], g_pflNameColors[i][2]);
+			gEngfuncs.pfnDrawSetTextColor(g_pflNameColors[i]->x, g_pflNameColors[i]->y, g_pflNameColors[i]->z);
 			x = gHUD.DrawHudString(line + 1, x, y); // don't draw the control code at the start
 
 			//Reset last character
@@ -268,7 +268,7 @@ void CHudSayText::SayTextPrint(const char* pszBuf, int clientIndex)
 			if (nameInString)
 			{
 				g_iNameLengths[i] = strlen(pName) + (nameInString - pszBuf);
-				g_pflNameColors[i] = gHUD.GetClientColor(clientIndex);
+				g_pflNameColors[i] = &const_cast<Vector&>(gHUD.GetClientColor(clientIndex));
 			}
 		}
 	}

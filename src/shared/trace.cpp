@@ -48,8 +48,8 @@ Trace::Trace(const Vector& start, const Vector& end, int ignore, int traceFlags)
 	TraceResult trace;
 
     g_engfuncs.pfnTraceLine(
-        (float*)&start,
-        (float*)&end,
+        const_cast<Vector&>(start),
+        const_cast<Vector&>(end),
         flags,
         g_engfuncs.pfnPEntityOfEntIndex(ignore),
         &trace);
@@ -91,8 +91,8 @@ Trace::Trace(const Vector& start, const Vector& end, int ignore, int traceFlags)
     pmtrace_t trace;
 
     gEngfuncs.pEventAPI->EV_PlayerTrace(
-        (float*)&start,
-        (float*)&end,
+        const_cast<Vector&>(start),
+        const_cast<Vector&>(end),
         flags,
         -1,
         &trace);

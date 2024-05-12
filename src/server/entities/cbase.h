@@ -420,7 +420,7 @@ public:
 	void GetAttachment(int iAttachment, Vector& origin, Vector& angles);
 	void SetBodygroup(int iGroup, int iValue);
 	int GetBodygroup(int iGroup);
-	bool ExtractBbox(int sequence, float* mins, float* maxs);
+	bool ExtractBbox(int sequence, Vector& mins, Vector& maxs);
 	void SetSequenceBox();
 	virtual void HandleSequenceFinished() {}
 

@@ -34,9 +34,9 @@ extern Vector vJumpOrigin;
 extern Vector vJumpAngles;
 
 
-extern void V_GetInEyePos(int entity, float* origin, float* angles);
+extern void V_GetInEyePos(int entity, Vector& origin, Vector& angles);
 extern void V_ResetChaseCam();
-extern void V_GetChasePos(int target, float* cl_angles, float* origin, float* angles);
+extern void V_GetChasePos(int target, float* cl_angles, Vector& origin, Vector& angles);
 
 extern Vector v_origin;	   // last view origin
 extern Vector v_angles;	   // last view angle
@@ -351,12 +351,12 @@ void CHudSpectator::SetSpectatorStartPosition()
 	else
 	{
 		// jump to 0,0,0 if no better position was found
-		VectorCopy(vec3_origin, m_cameraOrigin);
-		VectorCopy(vec3_origin, m_cameraAngles);
+		m_cameraOrigin = g_vecZero;
+		m_cameraAngles = g_vecZero;
 	}
 
-	VectorCopy(m_cameraOrigin, vJumpOrigin);
-	VectorCopy(m_cameraAngles, vJumpAngles);
+	vJumpOrigin = m_cameraOrigin;
+	vJumpAngles = m_cameraAngles;
 
 	iJumpSpectator = true; // jump anyway
 }
@@ -365,8 +365,8 @@ void CHudSpectator::SetSpectatorStartPosition()
 void CHudSpectator::SetCameraView(Vector pos, Vector angle, float fov)
 {
 	m_FOV = fov;
-	VectorCopy(pos, vJumpOrigin);
-	VectorCopy(angle, vJumpAngles);
+	vJumpOrigin = pos;
+	vJumpAngles = angle;
 	gEngfuncs.SetViewAngles(vJumpAngles);
 	iJumpSpectator = true; // jump anyway
 }
@@ -387,8 +387,8 @@ void CHudSpectator::AddWaypoint(float time, Vector pos, Vector angle, float fov,
 		return;
 	}
 
-	VectorCopy(angle, m_CamPath[m_NumWayPoints].angle);
-	VectorCopy(pos, m_CamPath[m_NumWayPoints].position);
+	m_CamPath[m_NumWayPoints].angle = angle;
+	m_CamPath[m_NumWayPoints].position = pos;
 	m_CamPath[m_NumWayPoints].flags = flags;
 	m_CamPath[m_NumWayPoints].fov = fov;
 	m_CamPath[m_NumWayPoints].time = time;
@@ -573,7 +573,7 @@ void CHudSpectator::Draw(const float time)
 	int lx;
 
 	char string[256];
-	float* color;
+	Vector color;
 
 	// if user pressed zoom, aplly changes
 	if ((m_zoomDelta != 0.0f) && (g_iObserverMode == OBS_MAP_FREE))
@@ -901,14 +901,14 @@ void CHudSpectator::FindNextPlayer(bool bReverse)
 	{
 		gEngfuncs.Con_DPrintf("No observer targets.\n");
 		// take save camera position
-		VectorCopy(m_cameraOrigin, vJumpOrigin);
-		VectorCopy(m_cameraAngles, vJumpAngles);
+		vJumpOrigin = m_cameraOrigin;
+		vJumpAngles = m_cameraAngles;
 	}
 	else
 	{
 		// use new entity position for roaming
-		VectorCopy(pEnt->origin, vJumpOrigin);
-		VectorCopy(pEnt->angles, vJumpAngles);
+		vJumpOrigin = pEnt->origin;
+		vJumpAngles = pEnt->angles;
 	}
 
 	iJumpSpectator = true;
@@ -958,14 +958,14 @@ void CHudSpectator::FindPlayer(const char* name)
 	{
 		gEngfuncs.Con_DPrintf("No observer targets.\n");
 		// take save camera position
-		VectorCopy(m_cameraOrigin, vJumpOrigin);
-		VectorCopy(m_cameraAngles, vJumpAngles);
+		vJumpOrigin = m_cameraOrigin;
+		vJumpAngles = m_cameraAngles;
 	}
 	else
 	{
 		// use new entity position for roaming
-		VectorCopy(pEnt->origin, vJumpOrigin);
-		VectorCopy(pEnt->angles, vJumpAngles);
+		vJumpOrigin = pEnt->origin;
+		vJumpAngles = pEnt->angles;
 	}
 
 	iJumpSpectator = true;
@@ -1500,7 +1500,7 @@ void CHudSpectator::DrawOverviewEntities()
 
 		AngleVectors(ent->angles, right, up, NULL);
 
-		VectorCopy(ent->origin, origin);
+		origin = ent->origin;
 
 		gEngfuncs.pTriAPI->Begin(TRI_QUADS);
 
@@ -1606,11 +1606,11 @@ void CHudSpectator::DrawOverviewEntities()
 	}
 	else if (g_iObserverMode == OBS_ROAMING)
 	{
-		VectorCopy(v_sim_org, origin);
-		VectorCopy(v_cl_angles, angles);
+		origin = v_sim_org;
+		angles = v_cl_angles;
 	}
 	else
-		V_GetChasePos(g_iObserverTarget, NULL, origin, angles);
+		V_GetChasePos(g_iObserverTarget, nullptr, origin, angles);
 
 
 	// draw camera sprite

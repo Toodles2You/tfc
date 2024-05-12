@@ -127,33 +127,26 @@ fired during this frame, handle the event by it's tag ( e.g., muzzleflash, sound
 */
 void HUD_StudioEvent(const struct mstudioevent_s* event, const struct cl_entity_s* entity)
 {
-	bool iMuzzleFlash = true;
-
-
 	switch (event->event)
 	{
 	case 5001:
-		if (iMuzzleFlash)
-			gEngfuncs.pEfxAPI->R_MuzzleFlash((float*)&entity->attachment[0], atoi(event->options));
+		gEngfuncs.pEfxAPI->R_MuzzleFlash(const_cast<cl_entity_t*>(entity)->attachment[0], atoi(event->options));
 		break;
 	case 5011:
-		if (iMuzzleFlash)
-			gEngfuncs.pEfxAPI->R_MuzzleFlash((float*)&entity->attachment[1], atoi(event->options));
+		gEngfuncs.pEfxAPI->R_MuzzleFlash(const_cast<cl_entity_t*>(entity)->attachment[1], atoi(event->options));
 		break;
 	case 5021:
-		if (iMuzzleFlash)
-			gEngfuncs.pEfxAPI->R_MuzzleFlash((float*)&entity->attachment[2], atoi(event->options));
+		gEngfuncs.pEfxAPI->R_MuzzleFlash(const_cast<cl_entity_t*>(entity)->attachment[2], atoi(event->options));
 		break;
 	case 5031:
-		if (iMuzzleFlash)
-			gEngfuncs.pEfxAPI->R_MuzzleFlash((float*)&entity->attachment[3], atoi(event->options));
+		gEngfuncs.pEfxAPI->R_MuzzleFlash(const_cast<cl_entity_t*>(entity)->attachment[3], atoi(event->options));
 		break;
 	case 5002:
-		gEngfuncs.pEfxAPI->R_SparkEffect((float*)&entity->attachment[0], atoi(event->options), -100, 100);
+		gEngfuncs.pEfxAPI->R_SparkEffect(const_cast<cl_entity_t*>(entity)->attachment[0], atoi(event->options), -100, 100);
 		break;
 	// Client side sound
 	case 5004:
-		gEngfuncs.pfnPlaySoundByNameAtLocation((char*)event->options, 1.0, (float*)&entity->attachment[0]);
+		gEngfuncs.pfnPlaySoundByNameAtLocation((char*)event->options, 1.0, const_cast<cl_entity_t*>(entity)->attachment[0]);
 		break;
 	default:
 		break;
@@ -184,7 +177,7 @@ void HUD_TempEntUpdate(
 
 	Vector vAngles;
 
-	gEngfuncs.GetViewAngles((float*)vAngles);
+	gEngfuncs.GetViewAngles(vAngles);
 
 	if (g_pParticleMan)
 		g_pParticleMan->SetVariables(cl_gravity, vAngles);
@@ -273,7 +266,7 @@ void HUD_TempEntUpdate(
 
 			hull = (pTemp->entity.curstate.renderfx == kRenderFxDeadPlayer) ? kHullPlayer : kHullPoint;
 
-			VectorCopy(pTemp->entity.origin, pTemp->entity.prevstate.origin);
+			pTemp->entity.prevstate.origin = pTemp->entity.origin;
 
 			if ((pTemp->flags & FTENT_SPARKSHOWER) != 0)
 			{
@@ -377,7 +370,7 @@ void HUD_TempEntUpdate(
 				pTemp->entity.angles[1] += pTemp->entity.baseline.angles[1] * frametime;
 				pTemp->entity.angles[2] += pTemp->entity.baseline.angles[2] * frametime;
 
-				VectorCopy(pTemp->entity.angles, pTemp->entity.latched.prevangles);
+				pTemp->entity.latched.prevangles = pTemp->entity.angles;
 			}
 
 			if ((pTemp->flags & (FTENT_COLLIDEALL | FTENT_COLLIDEWORLD)) != 0)
@@ -402,7 +395,7 @@ void HUD_TempEntUpdate(
 						if (0 == pmtrace.ent || (pe->info != pTemp->clientIndex))
 						{
 							traceFraction = pmtrace.fraction;
-							VectorCopy(pmtrace.plane.normal, traceNormal);
+							traceNormal = pmtrace.plane.normal;
 
 							if (pTemp->hitcallback)
 							{
@@ -422,7 +415,7 @@ void HUD_TempEntUpdate(
 					if (pmtrace.fraction != 1)
 					{
 						traceFraction = pmtrace.fraction;
-						VectorCopy(pmtrace.plane.normal, traceNormal);
+						traceNormal = pmtrace.plane.normal;
 
 						if ((pTemp->flags & FTENT_SPARKSHOWER) != 0)
 						{
@@ -504,7 +497,7 @@ void HUD_TempEntUpdate(
 			if ((pTemp->flags & FTENT_FLICKER) != 0 && gTempEntFrame == pTemp->entity.curstate.effects)
 			{
 				dlight_t* dl = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
-				VectorCopy(pTemp->entity.origin, dl->origin);
+				dl->origin = pTemp->entity.origin;
 				dl->radius = 60;
 				dl->color.r = 255;
 				dl->color.g = 120;

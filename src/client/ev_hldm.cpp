@@ -757,7 +757,7 @@ void EV_TrainPitchAdjust(event_args_t* args)
 
 	idx = args->entindex;
 
-	VectorCopy(args->origin, origin);
+	origin = args->origin;
 
 	us_params = (unsigned short)args->iparam1;
 	stop = 0 != args->bparam1;

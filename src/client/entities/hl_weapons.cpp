@@ -329,7 +329,7 @@ void HUD_ProcessPlayerState(struct entity_state_s* dst, const struct entity_stat
 	memcpy(&dst->controller[0], &src->controller[0], 4 * sizeof(byte));
 	memcpy(&dst->blending[0], &src->blending[0], 2 * sizeof(byte));
 
-	VectorCopy(src->basevelocity, dst->basevelocity);
+	dst->basevelocity = src->basevelocity;
 
 	dst->friction = src->friction;
 	dst->gravity = src->gravity;
