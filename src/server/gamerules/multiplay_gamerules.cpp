@@ -426,7 +426,6 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 			MessageEnd();
 
 			plr->SendExtraInfo(pl);
-			pl->SendExtraInfo(plr);
 		}
 	}
 
@@ -502,12 +501,12 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer* pPlayer)
 
 void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 {
+	pPlayer->SendExtraInfo();
+
 	if (pPlayer->TeamNumber() == TEAM_UNASSIGNED)
 	{
 		return;
 	}
-
-	pPlayer->SendExtraInfo();
 
 	bool addDefault;
 	CBaseEntity* pWeaponEntity = NULL;
@@ -518,7 +517,7 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 
 	addDefault = true;
 
-	while (pWeaponEntity = util::FindEntityByClassname(pWeaponEntity, "game_player_equip"))
+	while ((pWeaponEntity = util::FindEntityByClassname(pWeaponEntity, "game_player_equip")) != nullptr)
 	{
 		pWeaponEntity->Touch(pPlayer);
 		addDefault = false;

@@ -998,7 +998,10 @@ bool CBasePlayer::Spawn()
 
 	v.view_ofs = VEC_VIEW;
 
-	m_ResetHUD = ResetHUD::Reset;
+	if (m_ResetHUD == ResetHUD::No)
+	{
+		m_ResetHUD = ResetHUD::Reset;
+	}
 	m_ClientWeaponBits = 0;
 
 	// reset all ammo values to 0

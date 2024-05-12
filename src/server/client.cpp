@@ -133,6 +133,7 @@ void ClientPutInServer(Entity* pEntity)
 {
 	CBasePlayer* pPlayer;
 
+	/* Allocate a player class */
 	if ((pEntity->flags & FL_FAKECLIENT) == 0)
 	{
 		g_engfuncs.pfnFreeEntPrivateData(pEntity);
@@ -145,8 +146,7 @@ void ClientPutInServer(Entity* pEntity)
 
 	pPlayer->InstallGameMovement(new CHalfLifeMovement{pmove, pPlayer});
 
-	// Allocate a CBasePlayer for pev, and call spawn
-	pPlayer->Spawn();
+	g_pGameRules->PlayerSpawn(pPlayer);
 
 	if (util::IsMultiplayer())
 	{
@@ -585,6 +585,7 @@ void ServerActivate(Entity* pEdictList, int edictCount, int clientMax)
 		// Clients aren't necessarily initialized until ClientPutInServer()
 		if (i > 0 && i <= clientMax)
 		{
+			g_engfuncs.pfnFreeEntPrivateData(pEdictList + i);
 			continue;
 		}
 
