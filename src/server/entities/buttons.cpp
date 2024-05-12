@@ -689,7 +689,7 @@ CBaseButton::BUTTON_CODE CBaseButton::ButtonResponseToTouch()
 void CBaseButton::ButtonTouch(CBaseEntity* pOther)
 {
 	// Ignore touches by anything but players
-	if (!FClassnameIs(&pOther->v, "player"))
+	if (!pOther->IsPlayer())
 		return;
 
 	m_hActivator = pOther;
@@ -822,7 +822,7 @@ void CBaseButton::ButtonBackHome()
 			if (pentTarget == nullptr)
 				break;
 
-			if (!FClassnameIs(&pentTarget->v, "multisource"))
+			if (!pentTarget->Is(Type::MultiSource))
 				continue;
 
 			pentTarget->Use(m_hActivator, this, USE_TOGGLE, 0);
@@ -840,7 +840,7 @@ void CBaseButton::ButtonBackHome()
 
 	// reset think for a sparking button
 	//func_rot_button's X Axis spawnflag overlaps with this one so don't use it here.
-	if (!FClassnameIs(&v, "func_rot_button") && FBitSet(v.spawnflags, SF_BUTTON_SPARK_IF_OFF))
+	if (!Is(Type::RotatingButton) && FBitSet(v.spawnflags, SF_BUTTON_SPARK_IF_OFF))
 	{
 		SetThink(&CBaseButton::ButtonSpark);
 		v.nextthink = v.ltime + 0.5; // no hurry.
@@ -856,6 +856,11 @@ class CRotButton : public CBaseButton
 {
 public:
 	CRotButton(Entity* containingEntity) : CBaseButton(containingEntity) {}
+
+	bool Is(const Type type) override
+	{
+		return type == Type::RotatingButton || CBaseButton::Is(type);
+	}
 
 	bool Spawn() override;
 };
@@ -931,6 +936,8 @@ class CMomentaryRotButton : public CBaseToggle
 {
 public:
 	CMomentaryRotButton(Entity* containingEntity) : CBaseToggle(containingEntity) {}
+
+	bool Is(const Type type) override { return type == Type::MomentaryButton; }
 
 	DECLARE_SAVERESTORE()
 
@@ -1059,7 +1066,7 @@ void CMomentaryRotButton::UpdateAllButtons(float value, bool start)
 		if (pentTarget == nullptr)
 			break;
 
-		if (FClassnameIs(&pentTarget->v, "momentary_rot_button"))
+		if (pentTarget->Is(Type::MomentaryButton))
 		{
 			CMomentaryRotButton* pEntity = static_cast<CMomentaryRotButton*>(pentTarget);
 			if (pEntity)

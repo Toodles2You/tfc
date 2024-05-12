@@ -137,12 +137,34 @@ typedef struct
 class CBaseEntity
 {
 public:
+	enum class Type
+	{
+		World,
+		Point,
+		Door,
+		RotatingDoor,
+		Breakable,
+		Pushable,
+		Button,
+		RotatingButton,
+		MomentaryButton,
+		MultiSource,
+		Laser,
+		TriggerVolume,
+		ChooChooTrain,
+		Track,
+		Tank,
+	};
+
+public:
 	Entity& v; // Don't need to save/restore this pointer, the engine resets it
 
 	// Constructor.  Set engine to use C/C++ callback functions
 	// pointers to engine data
 	CBaseEntity(Entity* containingEntity);
 	virtual ~CBaseEntity();
+
+	virtual bool Is(const Type type) { return false; }
 
 	// path corners
 	CBaseEntity* m_pGoalEnt; // path corner we are heading towards
@@ -391,6 +413,8 @@ class CPointEntity : public CBaseEntity
 public:
 	CPointEntity(Entity* containingEntity) : CBaseEntity(containingEntity) {}
 
+	bool Is(const Type type) override { return type == Type::Point; }
+
 	bool Spawn() override;
 	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 
@@ -427,6 +451,11 @@ class CMultiSource : public CPointEntity
 {
 public:
 	CMultiSource(Entity* containingEntity) : CPointEntity(containingEntity) {}
+
+	bool Is(const Type type) override
+	{
+		return type == Type::MultiSource || CPointEntity::Is(type);
+	}
 
 	DECLARE_SAVERESTORE()
 
@@ -535,6 +564,8 @@ class CBaseButton : public CBaseToggle
 public:
 	CBaseButton(Entity* containingEntity) : CBaseToggle(containingEntity) {}
 
+	bool Is(const Type type) override { return type == Type::Button; }
+
 	DECLARE_SAVERESTORE()
 
 	bool Spawn() override;
@@ -592,6 +623,8 @@ class CWorld : public CBaseEntity
 public:
 	CWorld(Entity* containingEntity);
 	~CWorld();
+
+	bool Is(const Type type) override { return type == Type::World; }
 
 	bool Spawn() override;
 	void Precache() override;

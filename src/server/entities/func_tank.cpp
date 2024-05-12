@@ -48,6 +48,8 @@ class CFuncTank : public CBaseEntity
 public:
 	CFuncTank(Entity* containingEntity) : CBaseEntity(containingEntity) {}
 
+	bool Is(const Type type) override { return type == Type::Tank; }
+
 	DECLARE_SAVERESTORE()
 
 	bool Spawn() override;
@@ -818,7 +820,7 @@ CLaser* CFuncTankLaser::GetLaser()
 	while (pentLaser != nullptr)
 	{
 		// Found the landmark
-		if (FClassnameIs(&pentLaser->v, "env_laser"))
+		if (pentLaser->Is(Type::Laser))
 		{
 			m_pLaser = static_cast<CLaser*>(pentLaser);
 			break;
@@ -1009,7 +1011,7 @@ void CFuncTankControls::Think()
 	do
 	{
 		pTarget = util::FindEntityByTargetname(pTarget, STRING(v.target));
-	} while (pTarget != nullptr && 0 != strncmp(STRING(pTarget->v.classname), "func_tank", 9));
+	} while (pTarget != nullptr && !pTarget->Is(Type::Tank));
 
 	if (pTarget == nullptr)
 	{

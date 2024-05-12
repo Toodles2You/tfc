@@ -362,7 +362,7 @@ bool CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWe
 
 bool CHalfLifeMultiplay::ClientConnected(Entity* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128])
 {
-	g_VoiceGameMgr.ClientConnected(pEntity);
+	g_VoiceGameMgr.ClientConnected(ENTINDEX(pEntity));
 	g_VoteManager.ClientConnected(ENTINDEX(pEntity));
 	return true;
 }
@@ -978,7 +978,7 @@ CSpawnPoint *CHalfLifeMultiplay::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
 
 void CHalfLifeMultiplay::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 {
-	if (FStrEq(STRING(pEntity->v.classname), "info_player_start"))
+	if (streq(STRING(pEntity->v.classname), "info_player_start"))
 	{
 		CGameRules::AddPlayerSpawnSpot(pEntity);
 		return;

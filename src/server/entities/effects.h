@@ -207,6 +207,8 @@ class CLaser : public CBeam
 public:
 	CLaser(Entity* containingEntity) : CBeam(containingEntity) {}
 
+	bool Is(const Type type) override { return type == Type::Laser; }
+
 	DECLARE_SAVERESTORE()
 
 	bool Spawn() override;

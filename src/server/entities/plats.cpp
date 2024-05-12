@@ -387,7 +387,7 @@ void CPlatTrigger::Touch(CBaseEntity* pOther)
 	}
 
 	// Ignore touches by non-players
-	if (!FClassnameIs(&pOther->v, "player"))
+	if (!pOther->IsPlayer())
 		return;
 
 	// Ignore touches by corpses
@@ -1369,7 +1369,7 @@ void CFuncTrackTrain::Find()
 
 	m_ppath = static_cast<CPathTrack*>(target);
 
-	if (!FClassnameIs(&m_ppath->v, "path_track"))
+	if (!m_ppath->Is(Type::Track))
 	{
 		ALERT(at_error, "func_track_train must be on a path of path_track\n");
 		m_ppath = NULL;
@@ -1410,7 +1410,7 @@ void CFuncTrackTrain::NearestPath()
 	while ((pTrack = util::FindEntityInSphere(pTrack, v.origin, 1024)) != NULL)
 	{
 		// filter out non-tracks
-		if ((pTrack->v.flags & (FL_CLIENT | FL_MONSTER)) == 0 && FClassnameIs(&pTrack->v, "path_track"))
+		if (pTrack->Is(Type::Track))
 		{
 			dist = (v.origin - pTrack->v.origin).Length();
 			if (dist < closest)
@@ -1560,7 +1560,7 @@ void CFuncTrainControls::Find()
 	do
 	{
 		pTarget = util::FindEntityByTargetname(pTarget, STRING(v.target));
-	} while (pTarget != nullptr && !FClassnameIs(&pTarget->v, "func_tracktrain"));
+	} while (pTarget != nullptr && !pTarget->Is(Type::ChooChooTrain));
 
 	if (pTarget == nullptr)
 	{
@@ -2061,7 +2061,7 @@ void CFuncTrackAuto::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE
 	else
 		pTarget = NULL;
 
-	if (FClassnameIs(&pActivator->v, "func_tracktrain"))
+	if (pActivator->Is(Type::ChooChooTrain))
 	{
 		m_code = EvaluateTrain(pTarget);
 		// Safe to fire?

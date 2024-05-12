@@ -200,8 +200,6 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 
 		if (pWeapon != nullptr)
 		{
-			//ALERT ( at_console, "trying to give %s\n", STRING( pWeapon[ i ]->v.classname ) );
-
 			if (dynamic_cast<CBasePlayerWeapon*>(pWeapon)->AddToPlayer(pPlayer))
 			{
 				m_hPlayerWeapons[i] = nullptr;
@@ -236,8 +234,6 @@ bool CWeaponBox::PackWeapon(CBasePlayerWeapon* pWeapon)
 	pWeapon->v.owner = edict();
 	pWeapon->SetThink(nullptr);
 	pWeapon->SetTouch(nullptr);
-
-	//ALERT ( at_console, "packed %s\n", STRING(pWeapon->v.classname) );
 
 	return true;
 }

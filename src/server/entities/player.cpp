@@ -1634,7 +1634,7 @@ void CBasePlayer::DropPlayerWeapon(char* pszWeaponName)
 	{
 		for (auto it : m_lpPlayerWeapons)
 		{
-			if (FClassnameIs(&it->v, pszWeaponName))
+			if (streq(STRING(it->v.classname), pszWeaponName))
 			{
 				pWeapon = it;
 				break;

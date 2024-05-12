@@ -4674,9 +4674,9 @@ bool GetGroundHeight( const Vector *pos, float *height, Vector *normal )
 		// also ignore breakable floors
 		if (result.pHit)
 		{
-			if (FClassnameIs( result.pHit, "func_door" ) ||
-				FClassnameIs( result.pHit, "func_door_rotating" ) ||
-				(FClassnameIs( result.pHit, "func_breakable" ) && result.pHit->takedamage == DAMAGE_YES))
+			auto hit = result.pHit->Get<CBaseEntity>();
+			if (hit->Is(CBaseEntity::Type::Door)
+			 || (hit->Is(CBaseEntity::Type::Breakable) && hit->v.takedamage != DAMAGE_NO))
 			{
 				ignore = result.pHit;
 				// keep incrementing to avoid infinite loop if more than one entity is along the traceline...

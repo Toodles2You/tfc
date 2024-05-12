@@ -122,7 +122,7 @@ CSpawnPoint *CGameRules::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
 
 void CGameRules::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 {
-	if (!FStrEq(STRING(pEntity->v.classname), "info_player_start"))
+	if (!streq(STRING(pEntity->v.classname), "info_player_start"))
 	{
 		return;
 	}

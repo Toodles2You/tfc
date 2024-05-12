@@ -155,7 +155,9 @@ Entity* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
 
 	pentSearch = NULL; // start search at the top of the ent list.
 
-	if (FClassnameIs(pevLinkEnt, "func_door") || FClassnameIs(pevLinkEnt, "func_door_rotating"))
+	auto link = pevLinkEnt->Get<CBaseEntity>();
+
+	if (link->Is(CBaseEntity::Type::Door))
 	{
 		if ((pevLinkEnt->spawnflags & SF_DOOR_USE_ONLY) != 0)
 		{ // door is use only, so the door is all the monster has to worry about
@@ -178,7 +180,7 @@ Entity* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
 			pentSearch = pentTrigger;
 			pevTrigger = pentTrigger;
 
-			if (FClassnameIs(&pevTrigger->v, "func_button") || FClassnameIs(&pevTrigger->v, "func_rot_button"))
+			if (pevTrigger->Is(CBaseEntity::Type::Button))
 			{ // only buttons are handled right now.
 
 				// trace from the node to the trigger, make sure it's one we can see from the node.
@@ -223,8 +225,10 @@ bool CGraph::HandleLinkEnt(int iNode, Entity* pevLinkEnt, int afCapMask, NODEQUE
 	}
 	pentWorld = NULL;
 
+	auto link = pevLinkEnt->Get<CBaseEntity>();
+
 	// func_door
-	if (FClassnameIs(pevLinkEnt, "func_door") || FClassnameIs(pevLinkEnt, "func_door_rotating"))
+	if (link->Is(CBaseEntity::Type::Door))
 	{ // ent is a door.
 
 		pDoor = pevLinkEnt->Get<CBaseEntity>();
@@ -265,7 +269,7 @@ bool CGraph::HandleLinkEnt(int iNode, Entity* pevLinkEnt, int afCapMask, NODEQUE
 		}
 	}
 	// func_breakable
-	else if (FClassnameIs(pevLinkEnt, "func_breakable") && queryType == NODEGRAPH_STATIC)
+	else if (link->Is(CBaseEntity::Type::Breakable) && queryType == NODEGRAPH_STATIC)
 	{
 		return true;
 	}
@@ -1270,6 +1274,8 @@ int CGraph::LinkVisibleNodes(CLink* pLinkPool, FSFile& file, int* piBadNode)
 
 				pTraceEnt = tr.pHit; // store the ent that the trace hit, for comparison
 
+				auto hit = pTraceEnt->Get<CBaseEntity>();
+
 				util::TraceLine(m_pNodes[j].m_vecOrigin,
 					m_pNodes[i].m_vecOrigin,
 					util::ignore_monsters,
@@ -1281,7 +1287,7 @@ int CGraph::LinkVisibleNodes(CLink* pLinkPool, FSFile& file, int* piBadNode)
 				// track of it in the pathfinding code, as well as through save and restore of the node graph. ANY data that is manipulated
 				// as part of the process of adding a LINKENT to a connection here must also be done in CGraph::SetGraphPointers, where reloaded
 				// graphs are prepared for use.
-				if (tr.pHit == pTraceEnt && !FClassnameIs(tr.pHit, "worldspawn"))
+				if (tr.pHit == pTraceEnt && !hit->Is(CBaseEntity::Type::World))
 				{
 					// get a pointer
 					pLinkPool[cTotalLinks].m_pLinkEnt = VARS(tr.pHit);
@@ -1582,7 +1588,7 @@ bool CNodeEnt::Spawn()
 	WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_sHintType = m_sHintType;
 	WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_sHintActivity = m_sHintActivity;
 
-	if (FClassnameIs(&v, "info_node_air"))
+	if (streq(STRING(v.classname), "info_node_air"))
 		WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_afNodeInfo = bits_NODE_AIR;
 	else
 		WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_afNodeInfo = 0;
@@ -3498,13 +3504,13 @@ bool CNodeViewer::Spawn()
 		return false;
 	}
 
-	if (FClassnameIs(&v, "node_viewer_fly"))
+	if (streq(STRING(v.classname), "node_viewer_fly"))
 	{
 		m_iHull = NODE_FLY_HULL;
 		m_afNodeType = bits_NODE_AIR;
 		m_vecColor = Vector(160, 100, 255);
 	}
-	else if (FClassnameIs(&v, "node_viewer_large"))
+	else if (streq(STRING(v.classname), "node_viewer_large"))
 	{
 		m_iHull = NODE_LARGE_HULL;
 		m_afNodeType = bits_NODE_LAND | bits_NODE_WATER;

@@ -910,7 +910,7 @@ const char* CGamePlayerTeam::TargetTeamName(const char* pszTargetName)
 
 	while ((pTeamEntity = util::FindEntityByTargetname(pTeamEntity, pszTargetName)) != NULL)
 	{
-		if (FClassnameIs(&pTeamEntity->v, "game_team_master"))
+		if (streq(STRING(pTeamEntity->v.classname), "game_team_master"))
 			return pTeamEntity->TeamID();
 	}
 

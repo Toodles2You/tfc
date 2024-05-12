@@ -183,14 +183,13 @@ typedef enum
 	TS_GOING_DOWN
 } TOGGLE_STATE;
 
+inline bool streq(const char* s1, const char* s2) { return strcmp(s1, s2) == 0; }
+inline bool streq(string_t s1, const char* s2) { return strcmp(STRING(s1), s2) == 0; }
+
 // Misc useful
 inline bool FStrEq(const char* sz1, const char* sz2)
 {
 	return (strcmp(sz1, sz2) == 0);
-}
-inline bool FClassnameIs(Entity* pent, const char* szClassname)
-{
-	return FStrEq(STRING(pent->classname), szClassname);
 }
 
 #define SND_SPAWNING (1 << 8)
@@ -276,6 +275,32 @@ float VecToYaw(const Vector& vec);
 Vector VecToAngles(const Vector& vec);
 float AngleMod(float a);
 float AngleDiff(float destAngle, float srcAngle);
+
+class EntityIterator
+{
+public:
+	EntityIterator(const char* key, const char* value, CBaseEntity* start = nullptr);
+
+	void operator++();
+
+	operator bool();
+
+	operator CBaseEntity*()
+	{
+		return _current->Get<CBaseEntity>();
+	}
+
+	CBaseEntity* operator->()
+	{
+		return _current->Get<CBaseEntity>();
+	}
+
+private:
+	const char* _key;
+	const char* _value;
+	Entity* _start;
+	Entity* _current;
+};
 
 CBaseEntity* FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius);
 CBaseEntity* FindEntityByString(CBaseEntity* pStartEntity, const char* szKeyword, const char* szValue);

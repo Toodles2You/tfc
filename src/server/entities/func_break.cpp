@@ -718,6 +718,8 @@ class CPushable : public CBreakable
 public:
 	CPushable(Entity* containingEntity) : CBreakable(containingEntity) {}
 
+	bool Is(const Type type) override { return type == Type::Pushable; }
+
 	DECLARE_SAVERESTORE()
 
 	bool Spawn() override;
@@ -853,7 +855,7 @@ void CPushable::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 
 void CPushable::Touch(CBaseEntity* pOther)
 {
-	if (FClassnameIs(&pOther->v, "worldspawn"))
+	if (pOther->Is(Type::World))
 		return;
 
 	Move(pOther, true);

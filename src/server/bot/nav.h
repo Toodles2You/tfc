@@ -312,12 +312,14 @@ inline bool VectorsAreEqual( const Vector *a, const Vector *b, float tolerance =
 #define WALK_THRU_BREAKABLES	0x02
 inline bool IsEntityWalkable( Entity *entity, unsigned int flags )
 {
+	auto walkable = entity->Get<CBaseEntity>();
+
 	// if we hit a door, assume its walkable because it will open when we touch it
-	if (FClassnameIs( entity, "func_door" ) || FClassnameIs( entity, "func_door_rotating" ))
+	if (walkable->Is(CBaseEntity::Type::Door))
 		return (flags & WALK_THRU_DOORS) ? true : false;
 
 	// if we hit a breakable object, assume its walkable because we will shoot it when we touch it
-	if (FClassnameIs( entity, "func_breakable" ) && entity->takedamage == DAMAGE_YES)
+	if (walkable->Is(CBaseEntity::Type::Breakable) && walkable->v.takedamage != DAMAGE_NO)
 		return (flags & WALK_THRU_BREAKABLES) ? true : false;
 
 	return false;

@@ -39,6 +39,8 @@ class CPathTrack : public CPointEntity
 public:
 	CPathTrack(Entity* containingEntity) : CPointEntity(containingEntity) {}
 
+	bool Is(const Type type) override { return type == Type::Track; }
+
 	DECLARE_SAVERESTORE()
 
 	bool Spawn() override;
@@ -74,6 +76,8 @@ class CFuncTrackTrain : public CBaseEntity
 {
 public:
 	CFuncTrackTrain(Entity* containingEntity) : CBaseEntity(containingEntity) {}
+
+	bool Is(const Type type) override { return type == Type::ChooChooTrain; }
 
 	DECLARE_SAVERESTORE()
 

@@ -132,9 +132,9 @@ void CVoiceGameMgr::Update(double frametime)
 }
 
 
-void CVoiceGameMgr::ClientConnected(Entity* pEdict)
+void CVoiceGameMgr::ClientConnected(int index)
 {
-	int index = ENTINDEX(pEdict) - 1;
+	index--;
 
 	// Clear out everything we use for deltas on this guy.
 	g_bWantModEnable[index] = true;

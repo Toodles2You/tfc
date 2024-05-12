@@ -608,7 +608,7 @@ bool IsPointEntity(CBaseEntity* pEnt)
 {
 	if (0 == pEnt->v.modelindex)
 		return true;
-	if (FClassnameIs(&pEnt->v, "info_target") || FClassnameIs(&pEnt->v, "info_landmark") || FClassnameIs(&pEnt->v, "path_corner"))
+	if (pEnt->Is(CBaseEntity::Type::Point))
 		return true;
 
 	return false;

@@ -33,6 +33,8 @@ class CBaseDoor : public CBaseToggle
 public:
 	CBaseDoor(Entity* containingEntity) : CBaseToggle(containingEntity) {}
 
+	bool Is(const Type type) override { return type == Type::Door; }
+
 	DECLARE_SAVERESTORE()
 
 	bool Spawn() override;
@@ -498,7 +500,7 @@ void CBaseDoor::Precache()
 void CBaseDoor::DoorTouch(CBaseEntity* pOther)
 {
 	// Ignore touches by anything but players
-	if (!FClassnameIs(&pOther->v, "player"))
+	if (!pOther->IsPlayer())
 		return;
 
 	// If door has master, and it's not ready to trigger,
@@ -582,7 +584,7 @@ void CBaseDoor::DoorGoUp()
 	m_toggle_state = TS_GOING_UP;
 
 	SetMoveDone(&CBaseDoor::DoorHitTop);
-	if (FClassnameIs(&v, "func_door_rotating")) // !!! BUGBUG Triggered doors don't work with this yet
+	if (Is(Type::RotatingDoor)) // !!! BUGBUG Triggered doors don't work with this yet
 	{
 		float sign = 1.0;
 
@@ -665,7 +667,7 @@ void CBaseDoor::DoorGoDown()
 	m_toggle_state = TS_GOING_DOWN;
 
 	SetMoveDone(&CBaseDoor::DoorHitBottom);
-	if (FClassnameIs(&v, "func_door_rotating")) //rotating door
+	if (Is(Type::RotatingDoor)) //rotating door
 		AngularMove(m_vecAngle1, v.speed);
 	else
 		LinearMove(m_vecPosition1, v.speed);
@@ -736,7 +738,7 @@ void CBaseDoor::Blocked(CBaseEntity* pOther)
 				if (pentTarget == nullptr)
 					break;
 
-				if (FClassnameIs(&pentTarget->v, "func_door") || FClassnameIs(&pentTarget->v, "func_door_rotating"))
+				if (pentTarget->Is(Type::Door))
 				{
 
 					pDoor = static_cast<CBaseDoor*>(pentTarget);
@@ -746,7 +748,7 @@ void CBaseDoor::Blocked(CBaseEntity* pOther)
 						if (pDoor->v.velocity == v.velocity && pDoor->v.avelocity == v.velocity)
 						{
 							// this is the most hacked, evil, bastardized thing I've ever seen. kjb
-							if (FClassnameIs(&pentTarget->v, "func_door"))
+							if (Is(Type::RotatingDoor))
 							{ // set origin to realign normal doors
 								pDoor->v.origin = v.origin;
 								pDoor->v.velocity = g_vecZero; // stop!
@@ -777,6 +779,11 @@ class CRotDoor : public CBaseDoor
 {
 public:
 	CRotDoor(Entity* containingEntity) : CBaseDoor(containingEntity) {}
+
+	bool Is(const Type type) override
+	{
+		return type == Type::RotatingDoor || CBaseDoor::Is(type);
+	}
 
 	bool Spawn() override;
 	void SetToggleState(int state) override;

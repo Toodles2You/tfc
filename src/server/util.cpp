@@ -359,6 +359,25 @@ int util::MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& cente
 }
 
 
+util::EntityIterator::EntityIterator(const char* key, const char* value, CBaseEntity* start)
+{
+	_key = key;
+	_value = value;
+	_start = (start != nullptr) ? &start->v : &CWorld::World->v;
+	_current = g_engfuncs.pfnFindEntityByString(_start, _key, _value);
+}
+
+void util::EntityIterator::operator++()
+{
+	_current = g_engfuncs.pfnFindEntityByString(_current, _key, _value);
+}
+
+util::EntityIterator::operator bool()
+{
+	return _current != &CWorld::World->v && _current != _start;
+}
+
+
 CBaseEntity* util::FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius)
 {
 	Entity* pentEntity;

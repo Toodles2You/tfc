@@ -361,25 +361,27 @@ void Host_Say(Entity* pEntity, bool teamonly)
 	}
 
 	// loop through all players
-	// Start with the first player.
-	// This may return the world in single player if the client types something between levels or during spawn
-	// so check it, or it will infinite loop
 
-	client = nullptr;
-	while ((client = (CBasePlayer*)util::FindEntityByClassname(client, "player")) != nullptr)
+	for (auto i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		if (client->edict() == pEntity)
-			continue;
+		client = static_cast<CBasePlayer*>(util::PlayerByIndex(i));
 
-		if (!(client->IsNetClient())) // Not a client ? (should never be true)
+		if (client == nullptr || client == player || client->IsBot())
+		{
 			continue;
+		}
 
-		// can the receiver hear the sender? or has he muted him?
+		/* Can the receiver hear the sender, or have they muted them? */
 		if (g_VoiceGameMgr.PlayerHasBlockedPlayer(client, player))
+		{
 			continue;
+		}
 
-		if (teamonly && g_pGameRules->PlayerRelationship(client, pEntity->Get<CBaseEntity>()) != GR_TEAMMATE)
+		if (teamonly
+		 && g_pGameRules->PlayerRelationship(client, player) != GR_TEAMMATE)
+		{
 			continue;
+		}
 
 		MessageBegin(MSG_ONE, gmsgSayText, client);
 		WriteByte(player->entindex());

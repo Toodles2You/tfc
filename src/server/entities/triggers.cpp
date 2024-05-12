@@ -1058,6 +1058,8 @@ public:
 };
 
 LINK_ENTITY_TO_CLASS(trigger_once, CTriggerOnce);
+LINK_ENTITY_TO_CLASS(trigger_secret, CTriggerOnce);
+
 bool CTriggerOnce::Spawn()
 {
 	m_flWait = -1;
@@ -1072,7 +1074,7 @@ void CBaseTrigger::MultiTouch(CBaseEntity* pOther)
 	// Only touch clients, monsters, or pushables (depending on flags)
 	if (((pOther->v.flags & FL_CLIENT) != 0 && (v.spawnflags & SF_TRIGGER_NOCLIENTS) == 0) ||
 		((pOther->v.flags & FL_MONSTER) != 0 && (v.spawnflags & SF_TRIGGER_ALLOWMONSTERS) != 0) ||
-		(v.spawnflags & SF_TRIGGER_PUSHABLES) != 0 && FClassnameIs(&pOther->v, "func_pushable"))
+		((v.spawnflags & SF_TRIGGER_PUSHABLES) != 0 && pOther->Is(Type::Pushable)))
 	{
 		ActivateMultiTrigger(pOther);
 	}
@@ -1092,9 +1094,9 @@ void CBaseTrigger::ActivateMultiTrigger(CBaseEntity* pActivator)
 	if (!util::IsMasterTriggered(m_sMaster, pActivator))
 		return;
 
-	if (FClassnameIs(&v, "trigger_secret"))
+	if (streq(STRING(v.classname), "trigger_secret"))
 	{
-		if (v.enemy == NULL || !FClassnameIs(v.enemy, "player"))
+		if (v.enemy == NULL || (v.enemy->flags & FL_CLIENT) == 0)
 			return;
 		gpGlobals->found_secrets++;
 	}
@@ -1181,6 +1183,11 @@ class CTriggerVolume : public CPointEntity // Derive from point entity so this d
 {
 public:
 	CTriggerVolume(Entity* containingEntity) : CPointEntity(containingEntity) {}
+
+	bool Is(const Type type) override
+	{
+		return type == Type::TriggerVolume || CPointEntity::Is(type);
+	}
 
 	bool Spawn() override;
 };
@@ -1355,7 +1362,7 @@ Entity* CChangeLevel::FindLandmark(const char* pLandmarkName)
 	while (pentLandmark != nullptr)
 	{
 		// Found the landmark
-		if (FClassnameIs(&pentLandmark->v, "info_landmark"))
+		if (streq(STRING(pentLandmark->v.classname), "info_landmark"))
 			return &pentLandmark->v;
 		else
 			pentLandmark = util::FindEntityByTargetname(pentLandmark, pLandmarkName);
@@ -1436,7 +1443,7 @@ void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 //
 void CChangeLevel::TouchChangeLevel(CBaseEntity* pOther)
 {
-	if (!FClassnameIs(&pOther->v, "player"))
+	if (!pOther->IsPlayer())
 		return;
 
 	ChangeLevelNow(pOther);
@@ -1465,7 +1472,7 @@ bool CChangeLevel::InTransitionVolume(CBaseEntity* pEntity, char* pVolumeName)
 	{
 		CBaseEntity* pVolume = pentVolume;
 
-		if (pVolume && FClassnameIs(&pVolume->v, "trigger_transition"))
+		if (pVolume && pVolume->Is(Type::TriggerVolume))
 		{
 			if (pVolume->Intersects(pEntity)) // It touches one, it's in the volume
 				return true;
@@ -1567,7 +1574,6 @@ int CChangeLevel::ChangeList(LEVELLIST* pLevelList, int maxList)
 				CBaseEntity* pEntity = pent->Get<CBaseEntity>();
 				if (pEntity)
 				{
-					//					ALERT( at_console, "Trying %s\n", STRING(pEntity->v.classname) );
 					int caps = pEntity->ObjectCaps();
 					if ((caps & FCAP_DONT_SAVE) == 0)
 					{
@@ -1586,11 +1592,7 @@ int CChangeLevel::ChangeList(LEVELLIST* pLevelList, int maxList)
 							if (entityCount > MAX_ENTITY)
 								ALERT(at_error, "Too many entities across a transition!");
 						}
-						//						else
-						//							ALERT( at_console, "Failed %s\n", STRING(pEntity->v.classname) );
 					}
-					//					else
-					//						ALERT( at_console, "DON'T SAVE %s\n", STRING(pEntity->v.classname) );
 				}
 				pent = pent->v.chain;
 			}
@@ -1605,8 +1607,6 @@ int CChangeLevel::ChangeList(LEVELLIST* pLevelList, int maxList)
 					// Flag it with the level number
 					saveHelper.EntityFlagsSet(index, entityFlags[j] | (1 << i));
 				}
-				//				else
-				//					ALERT( at_console, "Screened out %s\n", STRING(pEntList[j]->v.classname) );
 			}
 		}
 	}

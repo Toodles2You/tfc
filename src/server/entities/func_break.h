@@ -40,6 +40,8 @@ class CBreakable : public CBaseEntity
 public:
 	CBreakable(Entity* containingEntity) : CBaseEntity(containingEntity) {}
 
+	bool Is(const Type type) override { return type == Type::Breakable; }
+
 	DECLARE_SAVERESTORE()
 
 	// basic functions
