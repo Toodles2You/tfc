@@ -496,21 +496,21 @@ void CRenderFxManager::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TY
 {
 	if (!FStringNull(v.target))
 	{
-		Entity* pentTarget = NULL;
+		CBaseEntity* pentTarget = nullptr;
 		while (true)
 		{
-			pentTarget = FIND_ENTITY_BY_TARGETNAME(pentTarget, STRING(v.target));
+			pentTarget = util::FindEntityByTargetname(pentTarget, STRING(v.target));
 			if (pentTarget == nullptr)
 				break;
 
 			if (!FBitSet(v.spawnflags, SF_RENDER_MASKFX))
-				pentTarget->renderfx = v.renderfx;
+				pentTarget->v.renderfx = v.renderfx;
 			if (!FBitSet(v.spawnflags, SF_RENDER_MASKAMT))
-				pentTarget->renderamt = v.renderamt;
+				pentTarget->v.renderamt = v.renderamt;
 			if (!FBitSet(v.spawnflags, SF_RENDER_MASKMODE))
-				pentTarget->rendermode = v.rendermode;
+				pentTarget->v.rendermode = v.rendermode;
 			if (!FBitSet(v.spawnflags, SF_RENDER_MASKCOLOR))
-				pentTarget->rendercolor = v.rendercolor;
+				pentTarget->v.rendercolor = v.rendercolor;
 		}
 	}
 }
@@ -1349,16 +1349,16 @@ bool CChangeLevel::Spawn()
 
 Entity* CChangeLevel::FindLandmark(const char* pLandmarkName)
 {
-	Entity* pentLandmark;
+	CBaseEntity* pentLandmark;
 
-	pentLandmark = FIND_ENTITY_BY_TARGETNAME(NULL, pLandmarkName);
+	pentLandmark = util::FindEntityByTargetname(nullptr, pLandmarkName);
 	while (pentLandmark != nullptr)
 	{
 		// Found the landmark
-		if (FClassnameIs(pentLandmark, "info_landmark"))
-			return pentLandmark;
+		if (FClassnameIs(&pentLandmark->v, "info_landmark"))
+			return &pentLandmark->v;
 		else
-			pentLandmark = FIND_ENTITY_BY_TARGETNAME(pentLandmark, pLandmarkName);
+			pentLandmark = util::FindEntityByTargetname(pentLandmark, pLandmarkName);
 	}
 	ALERT(at_error, "Can't find landmark %s\n", pLandmarkName);
 	return NULL;
@@ -1445,7 +1445,7 @@ void CChangeLevel::TouchChangeLevel(CBaseEntity* pOther)
 
 bool CChangeLevel::InTransitionVolume(CBaseEntity* pEntity, char* pVolumeName)
 {
-	Entity* pentVolume;
+	CBaseEntity* pentVolume;
 
 
 	if ((pEntity->ObjectCaps() & FCAP_FORCE_TRANSITION) != 0)
@@ -1460,10 +1460,10 @@ bool CChangeLevel::InTransitionVolume(CBaseEntity* pEntity, char* pVolumeName)
 
 	bool inVolume = true; // Unless we find a trigger_transition, everything is in the volume
 
-	pentVolume = FIND_ENTITY_BY_TARGETNAME(NULL, pVolumeName);
+	pentVolume = util::FindEntityByTargetname(nullptr, pVolumeName);
 	while (pentVolume != nullptr)
 	{
-		CBaseEntity* pVolume = pentVolume->Get<CBaseEntity>();
+		CBaseEntity* pVolume = pentVolume;
 
 		if (pVolume && FClassnameIs(&pVolume->v, "trigger_transition"))
 		{
@@ -1472,7 +1472,7 @@ bool CChangeLevel::InTransitionVolume(CBaseEntity* pEntity, char* pVolumeName)
 			else
 				inVolume = false; // Found a trigger_transition, but I don't intersect it -- if I don't find another, don't go!
 		}
-		pentVolume = FIND_ENTITY_BY_TARGETNAME(pentVolume, pVolumeName);
+		pentVolume = util::FindEntityByTargetname(pentVolume, pVolumeName);
 	}
 
 	return inVolume;
@@ -1516,36 +1516,34 @@ int util::BuildChangeList(LEVELLIST* pLevelList, int maxList)
 // be moved across.
 int CChangeLevel::ChangeList(LEVELLIST* pLevelList, int maxList)
 {
-	Entity *pentChangelevel, *pentLandmark;
+	CBaseEntity *pentChangelevel;
+	Entity *pentLandmark;
 	int i, count;
 
 	count = 0;
 
 	// Find all of the possible level changes on this BSP
-	pentChangelevel = FIND_ENTITY_BY_CLASSNAME(NULL, "trigger_changelevel");
+	pentChangelevel = util::FindEntityByClassname(nullptr, "trigger_changelevel");
 	if (pentChangelevel == nullptr)
 		return 0;
 	while (pentChangelevel != nullptr)
 	{
-		CChangeLevel* pTrigger;
+		CChangeLevel* pTrigger = static_cast<CChangeLevel>(pentChangelevel);
 
-		pTrigger = pentChangelevel->Get<CChangeLevel>();
-		if (pTrigger)
+		// Find the corresponding landmark
+		pentLandmark = FindLandmark(pTrigger->m_szLandmarkName);
+		if (pentLandmark)
 		{
-			// Find the corresponding landmark
-			pentLandmark = FindLandmark(pTrigger->m_szLandmarkName);
-			if (pentLandmark)
+			// Build a list of unique transitions
+			if (AddTransitionToList(pLevelList, count, pTrigger->m_szMapName, pTrigger->m_szLandmarkName, pentLandmark))
 			{
-				// Build a list of unique transitions
-				if (AddTransitionToList(pLevelList, count, pTrigger->m_szMapName, pTrigger->m_szLandmarkName, pentLandmark))
-				{
-					count++;
-					if (count >= maxList) // FULL!!
-						break;
-				}
+				count++;
+				if (count >= maxList) // FULL!!
+					break;
 			}
 		}
-		pentChangelevel = FIND_ENTITY_BY_CLASSNAME(pentChangelevel, "trigger_changelevel");
+
+		pentChangelevel = util::FindEntityByClassname(pentChangelevel, "trigger_changelevel");
 	}
 
 	//Token table is null at this point, so don't use CSaveRestoreBuffer::IsValidSaveRestoreData here.
@@ -1693,7 +1691,7 @@ void CTriggerPush::Touch(CBaseEntity* pOther)
 
 void CBaseTrigger::TeleportTouch(CBaseEntity* pOther)
 {
-	Entity* pentTarget = NULL;
+	CBaseEntity* pentTarget = NULL;
 
 	// Only teleport monsters or clients
 	if (!FBitSet(pOther->v.flags, FL_CLIENT | FL_MONSTER))
@@ -1718,11 +1716,11 @@ void CBaseTrigger::TeleportTouch(CBaseEntity* pOther)
 		}
 	}
 
-	pentTarget = FIND_ENTITY_BY_TARGETNAME(pentTarget, STRING(v.target));
+	pentTarget = util::FindEntityByTargetname(pentTarget, STRING(v.target));
 	if (pentTarget == nullptr)
 		return;
 
-	Vector tmp = pentTarget->origin;
+	Vector tmp = pentTarget->v.origin;
 
 	if (pOther->IsPlayer())
 	{
@@ -1735,11 +1733,11 @@ void CBaseTrigger::TeleportTouch(CBaseEntity* pOther)
 
 	pOther->SetOrigin(tmp);
 
-	pOther->v.angles = pentTarget->angles;
+	pOther->v.angles = pentTarget->v.angles;
 
 	if (pOther->IsPlayer())
 	{
-		pOther->v.v_angle = pentTarget->angles;
+		pOther->v.v_angle = pentTarget->v.angles;
 	}
 
 	pOther->v.fixangle = 1;

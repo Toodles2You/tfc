@@ -701,7 +701,7 @@ void CBaseDoor::DoorHitBottom()
 
 void CBaseDoor::Blocked(CBaseEntity* pOther)
 {
-	Entity* pentTarget = NULL;
+	CBaseEntity* pentTarget = NULL;
 	CBaseDoor* pDoor = NULL;
 
 
@@ -729,24 +729,24 @@ void CBaseDoor::Blocked(CBaseEntity* pOther)
 	{
 		for (;;)
 		{
-			pentTarget = FIND_ENTITY_BY_TARGETNAME(pentTarget, STRING(v.targetname));
+			pentTarget = util::FindEntityByTargetname(pentTarget, STRING(v.targetname));
 
-			if (pentTarget != &v)
+			if (pentTarget != this)
 			{
 				if (pentTarget == nullptr)
 					break;
 
-				if (FClassnameIs(pentTarget, "func_door") || FClassnameIs(pentTarget, "func_door_rotating"))
+				if (FClassnameIs(&pentTarget->v, "func_door") || FClassnameIs(&pentTarget->v, "func_door_rotating"))
 				{
 
-					pDoor = pentTarget->Get<CBaseDoor>();
+					pDoor = static_cast<CBaseDoor*>(pentTarget);
 
 					if (pDoor->m_flWait >= 0)
 					{
 						if (pDoor->v.velocity == v.velocity && pDoor->v.avelocity == v.velocity)
 						{
 							// this is the most hacked, evil, bastardized thing I've ever seen. kjb
-							if (FClassnameIs(pentTarget, "func_door"))
+							if (FClassnameIs(&pentTarget->v, "func_door"))
 							{ // set origin to realign normal doors
 								pDoor->v.origin = v.origin;
 								pDoor->v.velocity = g_vecZero; // stop!

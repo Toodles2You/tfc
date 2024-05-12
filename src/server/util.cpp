@@ -378,18 +378,21 @@ CBaseEntity* util::FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& v
 
 CBaseEntity* util::FindEntityByString(CBaseEntity* pStartEntity, const char* szKeyword, const char* szValue)
 {
-	Entity* pentEntity;
+	Entity* entity = nullptr;
 
-	if (pStartEntity)
-		pentEntity = pStartEntity->edict();
-	else
-		pentEntity = NULL;
+	if (pStartEntity != nullptr)
+	{
+		entity = &pStartEntity->v;
+	}
 
-	pentEntity = g_engfuncs.pfnFindEntityByString(pentEntity, szKeyword, szValue);
+	entity = g_engfuncs.pfnFindEntityByString(entity, szKeyword, szValue);
 
-	if (pentEntity != nullptr && OFFSET(pentEntity) != 0)
-		return pentEntity->Get<CBaseEntity>();
-	return NULL;
+	if (entity != nullptr && g_engfuncs.pfnEntOffsetOfPEntity(entity) != 0)
+	{
+		return entity->Get<CBaseEntity>();
+	}
+
+	return nullptr;
 }
 
 CBaseEntity* util::FindEntityByClassname(CBaseEntity* pStartEntity, const char* szName)
@@ -975,16 +978,14 @@ bool util::IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator)
 {
 	if (!FStringNull(sMaster))
 	{
-		Entity* pentTarget = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(sMaster));
+		CBaseEntity* pMaster = util::FindEntityByTargetname(nullptr, STRING(sMaster));
 
-		if (pentTarget != nullptr)
+		if (pMaster != nullptr && (pMaster->ObjectCaps() & FCAP_MASTER) != 0)
 		{
-			CBaseEntity* pMaster = pentTarget->Get<CBaseEntity>();
-			if (pMaster && (pMaster->ObjectCaps() & FCAP_MASTER) != 0)
-				return pMaster->IsTriggered(pActivator);
+			return pMaster->IsTriggered(pActivator);
 		}
 
-		ALERT(at_console, "Master was null or not a master!\n");
+		ALERT(at_aiconsole, "Master was null or not a master!\n");
 	}
 
 	// if this isn't a master entity, just say yes.

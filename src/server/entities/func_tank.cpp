@@ -812,19 +812,19 @@ CLaser* CFuncTankLaser::GetLaser()
 	if (m_pLaser)
 		return m_pLaser;
 
-	Entity* pentLaser;
+	CBaseEntity* pentLaser;
 
-	pentLaser = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(v.message));
+	pentLaser = util::FindEntityByTargetname(nullptr, STRING(v.message));
 	while (pentLaser != nullptr)
 	{
 		// Found the landmark
-		if (FClassnameIs(pentLaser, "env_laser"))
+		if (FClassnameIs(&pentLaser->v, "env_laser"))
 		{
-			m_pLaser = pentLaser->Get<CLaser>();
+			m_pLaser = static_cast<CLaser*>(pentLaser);
 			break;
 		}
 		else
-			pentLaser = FIND_ENTITY_BY_TARGETNAME(pentLaser, STRING(v.message));
+			pentLaser = util::FindEntityByTargetname(pentLaser, STRING(v.message));
 	}
 
 	return m_pLaser;
@@ -1004,11 +1004,11 @@ void CFuncTankControls::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_T
 
 void CFuncTankControls::Think()
 {
-	Entity* pTarget = NULL;
+	CBaseEntity* pTarget = NULL;
 
 	do
 	{
-		pTarget = FIND_ENTITY_BY_TARGETNAME(pTarget, STRING(v.target));
+		pTarget = util::FindEntityByTargetname(pTarget, STRING(v.target));
 	} while (pTarget != nullptr && 0 != strncmp(STRING(pTarget->v.classname), "func_tank", 9));
 
 	if (pTarget == nullptr)
@@ -1017,7 +1017,7 @@ void CFuncTankControls::Think()
 		return;
 	}
 
-	m_pTank = pTarget->Get<CFuncTank>();
+	m_pTank = static_cast<CFuncTank*>(pTarget);
 }
 
 bool CFuncTankControls::Spawn()

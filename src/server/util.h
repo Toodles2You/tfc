@@ -45,57 +45,6 @@ inline EntityOffset OFFSET(const Entity* pent)
 	return (*g_engfuncs.pfnEntOffsetOfPEntity)(pent);
 }
 
-inline Entity* FIND_ENTITY_BY_CLASSNAME(Entity* entStart, const char* pszName)
-{
-	auto entity = FIND_ENTITY_BY_STRING(entStart, "classname", pszName);
-	if (OFFSET(entity) == 0)
-	{
-		return nullptr;
-	}
-	return entity;
-}
-
-inline Entity* FIND_ENTITY_BY_TARGETNAME(Entity* entStart, const char* pszName)
-{
-	auto entity = FIND_ENTITY_BY_STRING(entStart, "targetname", pszName);
-	if (OFFSET(entity) == 0)
-	{
-		return nullptr;
-	}
-	return entity;
-}
-
-// for doing a reverse lookup. Say you have a door, and want to find its button.
-inline Entity* FIND_ENTITY_BY_TARGET(Entity* entStart, const char* pszName)
-{
-	auto entity = FIND_ENTITY_BY_STRING(entStart, "target", pszName);
-	if (OFFSET(entity) == 0)
-	{
-		return nullptr;
-	}
-	return entity;
-}
-
-inline Entity* FIND_ENTITY_BY_GLOBALNAME(Entity* entStart, const char* pszName)
-{
-	auto entity = FIND_ENTITY_BY_STRING(entStart, "globalname", pszName);
-	if (OFFSET(entity) == 0)
-	{
-		return nullptr;
-	}
-	return entity;
-}
-
-inline Entity* FIND_ENTITY_BY_MODEL(Entity* entStart, const char* pszName)
-{
-	auto entity = FIND_ENTITY_BY_STRING(entStart, "model", pszName);
-	if (OFFSET(entity) == 0)
-	{
-		return nullptr;
-	}
-	return entity;
-}
-
 // Keeps clutter down a bit, when using a float as a bit-vector
 #define SetBits(flBitVector, bits) ((flBitVector) = (int)(flBitVector) | (bits))
 #define ClearBits(flBitVector, bits) ((flBitVector) = (int)(flBitVector) & ~(bits))

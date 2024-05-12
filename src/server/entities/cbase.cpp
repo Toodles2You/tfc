@@ -512,8 +512,7 @@ int ShouldCollide(Entity* pentTouched, Entity* pentOther)
 // different classes with the same global name
 CBaseEntity* FindGlobalEntity(string_t classname, string_t globalname)
 {
-	Entity* pent = FIND_ENTITY_BY_GLOBALNAME(NULL, STRING(globalname));
-	CBaseEntity* pReturn = pent->Get<CBaseEntity>();
+	CBaseEntity* pReturn = util::FindEntityByString(nullptr, "globalname", STRING(globalname));
 	if (pReturn)
 	{
 		if (!FClassnameIs(&pReturn->v, STRING(classname)))
@@ -836,11 +835,8 @@ CBaseEntity* CBaseEntity::GetNextTarget()
 {
 	if (FStringNull(v.target))
 		return nullptr;
-	Entity* pTarget = FIND_ENTITY_BY_TARGETNAME(nullptr, STRING(v.target));
-	if (pTarget == nullptr)
-		return nullptr;
 
-	return pTarget->Get<CBaseEntity>();
+	return util::FindEntityByTargetname(nullptr, STRING(v.target));
 }
 
 // Global Savedata for Delay

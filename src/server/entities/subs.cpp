@@ -95,14 +95,14 @@ bool CInfoIntermission::Spawn()
 
 void CInfoIntermission::Think()
 {
-	Entity* pTarget;
+	CBaseEntity* pTarget;
 
 	// find my target
-	pTarget = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(v.target));
+	pTarget = util::FindEntityByTargetname(nullptr, STRING(v.target));
 
 	if (pTarget != nullptr)
 	{
-		v.v_angle = util::VecToAngles((pTarget->origin - v.origin).Normalize());
+		v.v_angle = util::VecToAngles((pTarget->v.origin - v.origin).Normalize());
 		v.v_angle.x = -v.v_angle.x;
 	}
 }
@@ -178,7 +178,7 @@ bool CBaseEntity::KeyValue(KeyValueData* pkvd)
 
 void util::FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
-	Entity* pentTarget = NULL;
+	CBaseEntity* pTarget = nullptr;
 	if (!targetName)
 		return;
 
@@ -186,12 +186,11 @@ void util::FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEnt
 
 	for (;;)
 	{
-		pentTarget = FIND_ENTITY_BY_TARGETNAME(pentTarget, targetName);
-		if (pentTarget == nullptr)
+		pTarget = util::FindEntityByTargetname(pTarget, targetName);
+		if (pTarget == nullptr)
 			break;
 
-		CBaseEntity* pTarget = pentTarget->Get<CBaseEntity>();
-		if (pTarget && (pTarget->v.flags & FL_KILLME) == 0) // Don't use dying ents
+		if ((pTarget->v.flags & FL_KILLME) == 0) // Don't use dying ents
 		{
 			ALERT(at_aiconsole, "Found: %s, firing (%s)\n", STRING(pTarget->v.classname), targetName);
 			pTarget->Use(pActivator, pCaller, useType, value);
@@ -251,16 +250,16 @@ void CBaseEntity::UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float va
 
 	if (!FStringNull(m_iszKillTarget))
 	{
-		Entity* pentKillTarget = NULL;
+		CBaseEntity* pentKillTarget = nullptr;
 
 		ALERT(at_aiconsole, "KillTarget: %s\n", STRING(m_iszKillTarget));
-		pentKillTarget = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(m_iszKillTarget));
+		pentKillTarget = util::FindEntityByTargetname(nullptr, STRING(m_iszKillTarget));
 		while (pentKillTarget != nullptr)
 		{
-			pentKillTarget->Get<CBaseEntity>()->Remove();
+			pentKillTarget->Remove();
 
-			ALERT(at_aiconsole, "killing %s\n", STRING(pentKillTarget->classname));
-			pentKillTarget = FIND_ENTITY_BY_TARGETNAME(pentKillTarget, STRING(m_iszKillTarget));
+			ALERT(at_aiconsole, "killing %s\n", STRING(pentKillTarget->v.classname));
+			pentKillTarget = util::FindEntityByClassname(pentKillTarget, STRING(m_iszKillTarget));
 		}
 	}
 

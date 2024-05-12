@@ -143,9 +143,9 @@ bool CGraph::AllocNodes()
 //=========================================================
 Entity* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
 {
-	Entity* pentSearch;
-	Entity* pentTrigger;
-	Entity* pevTrigger;
+	CBaseEntity* pentSearch;
+	CBaseEntity* pentTrigger;
+	CBaseEntity* pevTrigger;
 	Entity* pevLinkEnt;
 	TraceResult tr;
 
@@ -164,7 +164,7 @@ Entity* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
 
 		while (true)
 		{
-			pentTrigger = FIND_ENTITY_BY_TARGET(pentSearch, STRING(pevLinkEnt->targetname)); // find the button or trigger
+			pentTrigger = util::FindEntityByString(pentSearch, "target", STRING(pevLinkEnt->targetname)); // find the button or trigger
 
 			if (pentTrigger == nullptr)
 			{ // no trigger found
@@ -176,17 +176,17 @@ Entity* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
 			}
 
 			pentSearch = pentTrigger;
-			pevTrigger = VARS(pentTrigger);
+			pevTrigger = pentTrigger;
 
-			if (FClassnameIs(pevTrigger, "func_button") || FClassnameIs(pevTrigger, "func_rot_button"))
+			if (FClassnameIs(&pevTrigger->v, "func_button") || FClassnameIs(&pevTrigger->v, "func_rot_button"))
 			{ // only buttons are handled right now.
 
 				// trace from the node to the trigger, make sure it's one we can see from the node.
-				util::TraceLine(pNode->m_vecOrigin, pevTrigger->Get<CBaseEntity>()->Center(), util::ignore_monsters, nullptr, &tr);
+				util::TraceLine(pNode->m_vecOrigin, pevTrigger->Center(), util::ignore_monsters, nullptr, &tr);
 
-				if (VARS(tr.pHit) == pevTrigger)
+				if (tr.pHit == &pevTrigger->v)
 				{ // good to go!
-					return VARS(tr.pHit);
+					return tr.pHit;
 				}
 			}
 		}
@@ -2548,7 +2548,7 @@ bool CGraph::FSaveGraph(const char* szMapName)
 bool CGraph::FSetGraphPointers()
 {
 	int i;
-	Entity* pentLinkEnt;
+	CBaseEntity* pentLinkEnt;
 
 	for (i = 0; i < m_cLinks; i++)
 	{ // go through all of the links
@@ -2563,7 +2563,7 @@ bool CGraph::FSetGraphPointers()
 			// m_szLinkEntModelname is not necessarily NULL terminated (so we can store it in a more alignment-friendly 4 bytes)
 			memcpy(name, m_pLinkPool[i].m_szLinkEntModelname, 4);
 			name[4] = 0;
-			pentLinkEnt = FIND_ENTITY_BY_MODEL(NULL, name);
+			pentLinkEnt = util::FindEntityByString(nullptr, "model", name);
 
 			if (pentLinkEnt == nullptr)
 			{
@@ -2574,7 +2574,7 @@ bool CGraph::FSetGraphPointers()
 			}
 			else
 			{
-				m_pLinkPool[i].m_pLinkEnt = VARS(pentLinkEnt);
+				m_pLinkPool[i].m_pLinkEnt = &pentLinkEnt->v;
 
 				if (!FBitSet(m_pLinkPool[i].m_pLinkEnt->flags, FL_GRAPHED))
 				{

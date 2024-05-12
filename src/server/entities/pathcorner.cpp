@@ -131,14 +131,14 @@ void CPathTrack::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE use
 
 void CPathTrack::Link()
 {
-	Entity* pentTarget;
+	CBaseEntity* pentTarget;
 
 	if (!FStringNull(v.target))
 	{
-		pentTarget = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(v.target));
+		pentTarget = util::FindEntityByTargetname(nullptr, STRING(v.target));
 		if (pentTarget != nullptr)
 		{
-			m_pnext = pentTarget->Get<CPathTrack>();
+			m_pnext = static_cast<CPathTrack*>(pentTarget);
 
 			if (m_pnext) // If no next pointer, this is the end of a path
 			{
@@ -152,10 +152,10 @@ void CPathTrack::Link()
 	// Find "alternate" path
 	if (!FStringNull(m_altName))
 	{
-		pentTarget = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(m_altName));
+		pentTarget = util::FindEntityByTargetname(nullptr, STRING(m_altName));
 		if (pentTarget != nullptr)
 		{
-			m_paltpath = pentTarget->Get<CPathTrack>();
+			m_paltpath = static_cast<CPathTrack*>(pentTarget);
 
 			if (m_paltpath) // If no next pointer, this is the end of a path
 			{

@@ -858,10 +858,10 @@ void CLightning::BeamUpdateVars()
 	int beamType;
 	bool pointStart, pointEnd;
 
-	Entity* pStart = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(m_iszStartEntity));
-	Entity* pEnd = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(m_iszEndEntity));
-	pointStart = IsPointEntity(pStart->Get<CBaseEntity>());
-	pointEnd = IsPointEntity(pEnd->Get<CBaseEntity>());
+	CBaseEntity* pStart = util::FindEntityByTargetname(nullptr, STRING(m_iszStartEntity));
+	CBaseEntity* pEnd = util::FindEntityByTargetname(nullptr, STRING(m_iszEndEntity));
+	pointStart = IsPointEntity(pStart);
+	pointEnd = IsPointEntity(pEnd);
 
 	v.skin = 0;
 	v.sequence = 0;
@@ -875,7 +875,7 @@ void CLightning::BeamUpdateVars()
 	{
 		if (!pointStart) // One point entity must be in pStart
 		{
-			Entity* pTemp;
+			CBaseEntity* pTemp;
 			// Swap start & end
 			pTemp = pStart;
 			pStart = pEnd;
@@ -893,16 +893,16 @@ void CLightning::BeamUpdateVars()
 	SetType(beamType);
 	if (beamType == BEAM_POINTS || beamType == BEAM_ENTPOINT || beamType == BEAM_HOSE)
 	{
-		SetStartPos(pStart->origin);
+		SetStartPos(pStart->v.origin);
 		if (beamType == BEAM_POINTS || beamType == BEAM_HOSE)
-			SetEndPos(pEnd->origin);
+			SetEndPos(pEnd->v.origin);
 		else
-			SetEndEntity(ENTINDEX(pEnd));
+			SetEndEntity(pEnd->entindex());
 	}
 	else
 	{
-		SetStartEntity(ENTINDEX(pStart));
-		SetEndEntity(ENTINDEX(pEnd));
+		SetStartEntity(pStart->entindex());
+		SetEndEntity(pEnd->entindex());
 	}
 
 	RelinkBeam();

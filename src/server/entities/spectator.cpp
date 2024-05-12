@@ -56,9 +56,9 @@ Called by SpectatorThink if the spectator entered an impulse
 */
 void CBaseSpectator::SpectatorImpulseCommand()
 {
-	static Entity* pGoal = NULL;
-	Entity* pPreviousGoal;
-	Entity* pCurrentGoal;
+	static CBaseEntity* pGoal = NULL;
+	CBaseEntity* pPreviousGoal;
+	CBaseEntity* pCurrentGoal;
 	bool bFound;
 
 	switch (v.impulse)
@@ -75,7 +75,7 @@ void CBaseSpectator::SpectatorImpulseCommand()
 		bFound = false;
 		while (true)
 		{
-			pCurrentGoal = FIND_ENTITY_BY_CLASSNAME(pCurrentGoal, "info_player_deathmatch");
+			pCurrentGoal = util::FindEntityByClassname(pCurrentGoal, "info_player_deathmatch");
 			// Looped around, failure
 			if (pCurrentGoal == pPreviousGoal)
 			{
@@ -94,8 +94,8 @@ void CBaseSpectator::SpectatorImpulseCommand()
 			break;
 
 		pGoal = pCurrentGoal;
-		SetOrigin(pGoal->origin);
-		v.angles = pGoal->angles;
+		SetOrigin(pGoal->v.origin);
+		v.angles = pGoal->v.angles;
 		v.fixangle = 0;
 		break;
 	default:

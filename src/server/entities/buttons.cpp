@@ -240,7 +240,7 @@ bool CMultiSource::IsTriggered(CBaseEntity*)
 
 void CMultiSource::Register()
 {
-	Entity* pentTarget = NULL;
+	CBaseEntity* pentTarget = nullptr;
 
 	m_iTotal = 0;
 	memset(m_rgEntities, 0, MS_MAX_TARGETS * sizeof(EHANDLE));
@@ -249,25 +249,19 @@ void CMultiSource::Register()
 
 	// search for all entities which target this multisource (v.targetname)
 
-	pentTarget = FIND_ENTITY_BY_TARGET(NULL, STRING(v.targetname));
-
-	while (pentTarget != nullptr && (m_iTotal < MS_MAX_TARGETS))
+	while ((pentTarget = util::FindEntityByString(pentTarget, "targetname", STRING(v.targetname))) != nullptr && m_iTotal < MS_MAX_TARGETS)
 	{
-		CBaseEntity* pTarget = pentTarget->Get<CBaseEntity>();
-		if (pTarget)
-			m_rgEntities[m_iTotal++] = pTarget;
-
-		pentTarget = FIND_ENTITY_BY_TARGET(pentTarget, STRING(v.targetname));
+		m_rgEntities[m_iTotal++] = pentTarget;
 	}
 
-	pentTarget = FIND_ENTITY_BY_CLASSNAME(NULL, "multi_manager");
-	while (pentTarget != nullptr && (m_iTotal < MS_MAX_TARGETS))
-	{
-		CBaseEntity* pTarget = pentTarget->Get<CBaseEntity>();
-		if (pTarget && pTarget->HasTarget(v.targetname))
-			m_rgEntities[m_iTotal++] = pTarget;
+	pentTarget = nullptr;
 
-		pentTarget = FIND_ENTITY_BY_CLASSNAME(pentTarget, "multi_manager");
+	while ((pentTarget = util::FindEntityByClassname(pentTarget, "multi_manager")) != nullptr && m_iTotal < MS_MAX_TARGETS)
+	{
+		if (pentTarget->HasTarget(v.targetname))
+		{
+			m_rgEntities[m_iTotal++] = pentTarget;
+		}
 	}
 
 	v.spawnflags &= ~SF_MULTI_INIT;
@@ -820,20 +814,18 @@ void CBaseButton::ButtonBackHome()
 
 	if (!FStringNull(v.target))
 	{
-		Entity* pentTarget = NULL;
+		CBaseEntity* pentTarget = nullptr;
 		for (;;)
 		{
-			pentTarget = FIND_ENTITY_BY_TARGETNAME(pentTarget, STRING(v.target));
+			pentTarget = util::FindEntityByTargetname(pentTarget, STRING(v.target));
 
 			if (pentTarget == nullptr)
 				break;
 
-			if (!FClassnameIs(pentTarget, "multisource"))
+			if (!FClassnameIs(&pentTarget->v, "multisource"))
 				continue;
-			CBaseEntity* pTarget = pentTarget->Get<CBaseEntity>();
 
-			if (pTarget)
-				pTarget->Use(m_hActivator, this, USE_TOGGLE, 0);
+			pentTarget->Use(m_hActivator, this, USE_TOGGLE, 0);
 		}
 	}
 
@@ -1059,17 +1051,17 @@ void CMomentaryRotButton::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE
 void CMomentaryRotButton::UpdateAllButtons(float value, bool start)
 {
 	// Update all rot buttons attached to the same target
-	Entity* pentTarget = NULL;
+	CBaseEntity* pentTarget = nullptr;
 	for (;;)
 	{
 
-		pentTarget = FIND_ENTITY_BY_TARGET(pentTarget, STRING(v.target));
+		pentTarget = util::FindEntityByString(pentTarget, "target", STRING(v.target));
 		if (pentTarget == nullptr)
 			break;
 
-		if (FClassnameIs(pentTarget, "momentary_rot_button"))
+		if (FClassnameIs(&pentTarget->v, "momentary_rot_button"))
 		{
-			CMomentaryRotButton* pEntity = pentTarget->Get<CMomentaryRotButton>();
+			CMomentaryRotButton* pEntity = static_cast<CMomentaryRotButton*>(pentTarget);
 			if (pEntity)
 			{
 				if (start)
@@ -1123,17 +1115,14 @@ void CMomentaryRotButton::UpdateTarget(float value)
 {
 	if (!FStringNull(v.target))
 	{
-		Entity* pentTarget = NULL;
+		CBaseEntity* pentTarget = nullptr;
 		for (;;)
 		{
-			pentTarget = FIND_ENTITY_BY_TARGETNAME(pentTarget, STRING(v.target));
+			pentTarget = util::FindEntityByTargetname(pentTarget, STRING(v.target));
 			if (pentTarget == nullptr)
 				break;
-			CBaseEntity* pEntity = pentTarget->Get<CBaseEntity>();
-			if (pEntity)
-			{
-				pEntity->Use(this, this, USE_SET, value);
-			}
+
+			pentTarget->Use(this, this, USE_SET, value);
 		}
 	}
 }
