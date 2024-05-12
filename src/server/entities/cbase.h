@@ -231,30 +231,60 @@ public:
 	virtual CBaseEntity* GetNextTarget();
 
 	// fundamental callbacks
-	void (CBaseEntity::*m_pfnThink)();
-	void (CBaseEntity::*m_pfnTouch)(CBaseEntity* pOther);
-	void (CBaseEntity::*m_pfnUse)(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
-	void (CBaseEntity::*m_pfnBlocked)(CBaseEntity* pOther);
+
+	using ThinkCallback = void (CBaseEntity::*)();
+	using TouchCallback = void (CBaseEntity::*)(CBaseEntity*);
+	using UseCallback = void (CBaseEntity::*)(CBaseEntity*, CBaseEntity*, USE_TYPE, float);
+
+	ThinkCallback m_pfnThink;
+	TouchCallback m_pfnTouch;
+	UseCallback m_pfnUse;
+
+	template <class T>
+	void SetThink(void (T::*callback)())
+	{
+		m_pfnThink = static_cast<ThinkCallback>(callback);
+	}
+
+	template <class T>
+	void SetTouch(void (T::*callback)(CBaseEntity*))
+	{
+		m_pfnTouch = static_cast<TouchCallback>(callback);
+	}
+
+	template <class T>
+	void SetUse(void (T::*callback)(CBaseEntity*, CBaseEntity*, USE_TYPE, float))
+	{
+		m_pfnUse = static_cast<UseCallback>(callback);
+	}
+
+	void ClearThink() { m_pfnThink = nullptr; }
+	void ClearTouch() { m_pfnTouch = nullptr; }
+	void ClearUse() { m_pfnUse = nullptr; }
 
 	virtual void Think()
 	{
-		if (m_pfnThink)
+		if (m_pfnThink != nullptr)
+		{
 			(this->*m_pfnThink)();
+		}
 	}
-	virtual void Touch(CBaseEntity* pOther)
+	virtual void Touch(CBaseEntity* other)
 	{
-		if (m_pfnTouch)
-			(this->*m_pfnTouch)(pOther);
+		if (m_pfnTouch != nullptr)
+		{
+			(this->*m_pfnTouch)(other);
+		}
 	}
-	virtual void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+	virtual void Use(CBaseEntity* activator, CBaseEntity* caller, USE_TYPE useType, float value)
 	{
-		if (m_pfnUse)
-			(this->*m_pfnUse)(pActivator, pCaller, useType, value);
+		if (m_pfnUse != nullptr)
+		{
+			(this->*m_pfnUse)(activator, caller, useType, value);
+		}
 	}
-	virtual void Blocked(CBaseEntity* pOther)
+	virtual void Blocked(CBaseEntity* other)
 	{
-		if (m_pfnBlocked)
-			(this->*m_pfnBlocked)(pOther);
 	}
 	virtual bool ShouldCollide(CBaseEntity* other)
 	{
@@ -365,11 +395,6 @@ protected:
 	MULTIDAMAGE m_multiDamage = {0.0F, DMG_GENERIC};
 #endif
 };
-
-#define SetThink(a) m_pfnThink = static_cast<void (CBaseEntity::*)()>(a)
-#define SetTouch(a) m_pfnTouch = static_cast<void (CBaseEntity::*)(CBaseEntity*)>(a)
-#define SetUse(a) m_pfnUse = static_cast<void (CBaseEntity::*)(CBaseEntity * pActivator, CBaseEntity * pCaller, USE_TYPE useType, float value)>(a)
-#define SetBlocked(a) m_pfnBlocked = static_cast<void (CBaseEntity::*)(CBaseEntity*)>(a)
 
 class CBaseAnimating : public CBaseEntity
 {

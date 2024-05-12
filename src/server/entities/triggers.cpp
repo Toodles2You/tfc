@@ -395,7 +395,7 @@ void CMultiManager::ManagerThink()
 
 	if (m_index >= m_cTargets) // have we fired all targets?
 	{
-		SetThink(NULL);
+		ClearThink();
 		if (IsClone())
 		{
 			Remove();
@@ -439,7 +439,7 @@ void CMultiManager::ManagerUse(CBaseEntity* pActivator, CBaseEntity* pCaller, US
 	m_index = 0;
 	m_startTime = gpGlobals->time;
 
-	SetUse(NULL); // disable use until all targets have fired
+	ClearUse(); // disable use until all targets have fired
 
 	SetThink(&CMultiManager::ManagerThink);
 	v.nextthink = gpGlobals->time;
@@ -635,7 +635,7 @@ void CTriggerMonsterJump::Think()
 {
 	v.solid = SOLID_NOT;
 	SetOrigin(v.origin); // Unlink from trigger list
-	SetThink(NULL);
+	ClearThink();
 }
 
 void CTriggerMonsterJump::Touch(CBaseEntity* pOther)
@@ -736,7 +736,7 @@ void CTriggerCDAudio::PlayTrack()
 {
 	PlayCDTrack((int)v.health);
 
-	SetTouch(NULL);
+	ClearTouch();
 	Remove();
 }
 
@@ -824,7 +824,7 @@ bool CTriggerHurt::Spawn()
 	}
 	else
 	{
-		SetUse(NULL);
+		ClearUse();
 	}
 
 #ifdef HALFLIFE_HUD_GEIGER
@@ -1123,7 +1123,7 @@ void CBaseTrigger::ActivateMultiTrigger(CBaseEntity* pActivator)
 	{
 		// we can't just remove (self) here, because this is a touch function
 		// called while C code is looping through area links...
-		SetTouch(NULL);
+		ClearTouch();
 		Remove();
 	}
 }
@@ -1132,7 +1132,7 @@ void CBaseTrigger::ActivateMultiTrigger(CBaseEntity* pActivator)
 // the wait time has passed, so set back up for another activation
 void CBaseTrigger::MultiWaitOver()
 {
-	SetThink(NULL);
+	ClearThink();
 }
 
 
@@ -1800,7 +1800,7 @@ void CTriggerSave::SaveTouch(CBaseEntity* pOther)
 	if (!pOther->IsPlayer())
 		return;
 
-	SetTouch(NULL);
+	ClearTouch();
 	Remove();
 	SERVER_COMMAND("autosave\n");
 }
@@ -1919,7 +1919,7 @@ void CTriggerEndSection::EndSectionUse(CBaseEntity* pActivator, CBaseEntity* pCa
 	if (pActivator && !pActivator->IsNetClient())
 		return;
 
-	SetUse(NULL);
+	ClearUse();
 
 	if (!FStringNull(v.message))
 	{
@@ -1951,7 +1951,7 @@ void CTriggerEndSection::EndSectionTouch(CBaseEntity* pOther)
 	if (!pOther->IsNetClient())
 		return;
 
-	SetTouch(NULL);
+	ClearTouch();
 
 	if (!FStringNull(v.message))
 	{

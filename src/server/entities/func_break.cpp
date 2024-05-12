@@ -155,7 +155,7 @@ bool CBreakable::Spawn()
 
 	SetTouch(&CBreakable::BreakTouch);
 	if (FBitSet(v.spawnflags, SF_BREAK_TRIGGER_ONLY)) // Only break on trigger
-		SetTouch(NULL);
+		ClearTouch();
 
 	// Flag unbreakable glass as "worldbrush" so it will block ALL tracelines
 	if (!IsBreakable() && v.rendermode != kRenderNormal)
@@ -425,7 +425,7 @@ void CBreakable::BreakTouch(CBaseEntity* pOther)
 
 		if (flDamage >= v.health)
 		{
-			SetTouch(NULL);
+			ClearTouch();
 			TakeDamage(pOther, pOther, flDamage, DMG_CRUSH);
 
 			// do a little damage to player if we broke glass or computer
@@ -440,7 +440,7 @@ void CBreakable::BreakTouch(CBaseEntity* pOther)
 		DamageSound();
 
 		SetThink(&CBreakable::Die);
-		SetTouch(NULL);
+		ClearTouch();
 
 		if (m_flDelay == 0)
 		{ // !!!BUGBUG - why doesn't zero delay work?

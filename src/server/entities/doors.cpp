@@ -292,7 +292,7 @@ bool CBaseDoor::Spawn()
 	// if the door is flagged for USE button activation only, use NULL touch function
 	if (FBitSet(v.spawnflags, SF_DOOR_USE_ONLY))
 	{
-		SetTouch(NULL);
+		ClearTouch();
 	}
 	else // touchable button
 		SetTouch(&CBaseDoor::DoorTouch);
@@ -522,7 +522,7 @@ void CBaseDoor::DoorTouch(CBaseEntity* pOther)
 	m_hActivator = pOther; // remember who activated the door
 
 	if (DoorActivate())
-		SetTouch(NULL); // Temporarily disable the touch function, until movement is finished.
+		ClearTouch(); // Temporarily disable the touch function, until movement is finished.
 }
 
 
@@ -689,7 +689,7 @@ void CBaseDoor::DoorHitBottom()
 	// Re-instate touch method, cycle is complete
 	if (FBitSet(v.spawnflags, SF_DOOR_USE_ONLY))
 	{ // use only door
-		SetTouch(NULL);
+		ClearTouch();
 	}
 	else // touchable door
 		SetTouch(&CBaseDoor::DoorTouch);
@@ -833,7 +833,7 @@ bool CRotDoor::Spawn()
 
 	if (FBitSet(v.spawnflags, SF_DOOR_USE_ONLY))
 	{
-		SetTouch(NULL);
+		ClearTouch();
 	}
 	else // touchable button
 		SetTouch(&CRotDoor::DoorTouch);
@@ -906,7 +906,7 @@ bool CMomentaryDoor::Spawn()
 		m_vecPosition2 = m_vecPosition1;
 		m_vecPosition1 = v.origin;
 	}
-	SetTouch(NULL);
+	ClearTouch();
 
 	Precache();
 
@@ -1028,5 +1028,5 @@ void CMomentaryDoor::StopMoveSound()
 {
 	StopSound(STRING(v.noiseMoving), CHAN_STATIC);
 	EmitSound(STRING(v.noiseArrived), CHAN_STATIC);
-	SetThink(nullptr);
+	ClearThink();
 }

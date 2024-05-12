@@ -874,7 +874,7 @@ void CPendulum::PendulumUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_T
 		else
 		{
 			v.speed = 0; // Dead stop
-			SetThink(NULL);
+			ClearThink();
 			v.avelocity = g_vecZero;
 		}
 	}
@@ -892,7 +892,7 @@ void CPendulum::Stop()
 {
 	v.angles = m_start;
 	v.speed = 0;
-	SetThink(NULL);
+	ClearThink();
 	v.avelocity = g_vecZero;
 }
 
@@ -933,7 +933,7 @@ void CPendulum::Swing()
 		{
 			v.angles = m_center;
 			v.speed = 0;
-			SetThink(NULL);
+			ClearThink();
 			v.avelocity = g_vecZero;
 		}
 		else if (v.speed > m_dampSpeed)

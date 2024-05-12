@@ -29,7 +29,7 @@ bool CBasePlayerAmmo::Spawn()
 CBaseEntity* CBasePlayerAmmo::Respawn()
 {
 	v.effects |= EF_NODRAW;
-	SetTouch(nullptr);
+	ClearTouch();
 
 	SetOrigin(g_pGameRules->VecAmmoRespawnSpot(this)); // move to wherever I'm supposed to repawn.
 
@@ -67,14 +67,14 @@ void CBasePlayerAmmo::DefaultTouch(CBaseEntity* pOther)
 		}
 		else
 		{
-			SetTouch(nullptr);
+			ClearTouch();
 			Remove();
 		}
 	}
 	else if (gEvilImpulse101)
 	{
 		// evil impulse 101 hack, kill always
-		SetTouch(nullptr);
+		ClearTouch();
 		Remove();
 	}
 }
@@ -208,7 +208,7 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 	}
 
 	pOther->EmitSound("items/gunpickup2.wav", CHAN_ITEM);
-	SetTouch(nullptr);
+	ClearTouch();
 	Remove();
 }
 
@@ -232,8 +232,8 @@ bool CWeaponBox::PackWeapon(CBasePlayerWeapon* pWeapon)
 	pWeapon->v.solid = SOLID_NOT;
 	pWeapon->v.effects = EF_NODRAW;
 	pWeapon->v.owner = edict();
-	pWeapon->SetThink(nullptr);
-	pWeapon->SetTouch(nullptr);
+	pWeapon->ClearThink();
+	pWeapon->ClearTouch();
 
 	return true;
 }

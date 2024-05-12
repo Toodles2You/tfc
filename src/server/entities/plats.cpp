@@ -425,7 +425,7 @@ void CFuncPlat::PlatUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	}
 	else
 	{
-		SetUse(NULL);
+		ClearUse();
 
 		if (m_toggle_state == TS_AT_TOP)
 			GoDown();
@@ -1046,7 +1046,7 @@ void CFuncTrackTrain::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 			v.velocity = g_vecZero;
 			v.avelocity = g_vecZero;
 			StopSound();
-			SetThink(NULL);
+			ClearThink();
 		}
 	}
 	else
@@ -1424,7 +1424,7 @@ void CFuncTrackTrain::NearestPath()
 	if (!pNearest)
 	{
 		ALERT(at_console, "Can't find a nearby track !!!\n");
-		SetThink(NULL);
+		ClearThink();
 		return;
 	}
 
@@ -1777,7 +1777,7 @@ void CFuncTrackChange::Find()
 				m_trackBottom = m_trackBottom->Nearest(center);
 				m_trackTop = m_trackTop->Nearest(center);
 				UpdateAutoTargets(m_toggle_state);
-				SetThink(NULL);
+				ClearThink();
 				return;
 			}
 			else
@@ -1976,7 +1976,7 @@ void CFuncTrackChange::HitBottom()
 		//		UpdateTrain();
 		m_train->SetTrack(m_trackBottom);
 	}
-	SetThink(NULL);
+	ClearThink();
 	v.nextthink = -1;
 
 	UpdateAutoTargets(m_toggle_state);
@@ -1998,7 +1998,7 @@ void CFuncTrackChange::HitTop()
 	}
 
 	// Don't let the plat go back down
-	SetThink(NULL);
+	ClearThink();
 	v.nextthink = -1;
 	UpdateAutoTargets(m_toggle_state);
 	EnableUse();

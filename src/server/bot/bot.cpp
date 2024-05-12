@@ -65,7 +65,7 @@ bool CBot::Spawn( void )
 	v.flags |= ( FL_CLIENT | FL_FAKECLIENT );
 
 	// Bots use their own thinking mechanism
-	SetThink( NULL );
+	ClearThink();
 	v.nextthink = -1;
 
 	m_flNextBotThink		= gpGlobals->time + g_flBotCommandInterval;

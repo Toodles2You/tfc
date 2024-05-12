@@ -849,7 +849,6 @@ TYPEDESCRIPTION CBaseEntity::m_SaveData[] =
 	DEFINE_FIELD(CBaseEntity, m_pfnThink, FIELD_FUNCTION),
 	DEFINE_FIELD(CBaseEntity, m_pfnTouch, FIELD_FUNCTION),
 	DEFINE_FIELD(CBaseEntity, m_pfnUse, FIELD_FUNCTION),
-	DEFINE_FIELD(CBaseEntity, m_pfnBlocked, FIELD_FUNCTION),
 
 	DEFINE_FIELD(CBaseDelay, m_flDelay, FIELD_FLOAT),
 	DEFINE_FIELD(CBaseDelay, m_iszKillTarget, FIELD_STRING),

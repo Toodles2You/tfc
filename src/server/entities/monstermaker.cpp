@@ -122,7 +122,7 @@ bool CMonsterMaker::Spawn()
 		else
 		{ // wait to be activated.
 			m_fActive = false;
-			SetThink(nullptr);
+			ClearThink();
 		}
 	}
 	else
@@ -225,8 +225,8 @@ void CMonsterMaker::MakeMonster()
 	if (m_cNumMonsters == 0)
 	{
 		// Disable this forever.  Don't kill it because it still gets death notices
-		SetThink(NULL);
-		SetUse(NULL);
+		ClearThink();
+		ClearUse();
 	}
 }
 
@@ -250,7 +250,7 @@ void CMonsterMaker::ToggleUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE
 	if (m_fActive)
 	{
 		m_fActive = false;
-		SetThink(NULL);
+		ClearThink();
 	}
 	else
 	{

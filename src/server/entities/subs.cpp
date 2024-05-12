@@ -153,10 +153,9 @@ void CBaseEntity::Remove()
 	v.modelindex = 0;
 	v.solid = SOLID_NOT;
 	v.movetype = MOVETYPE_NONE;
-	SetThink(nullptr);
-	SetTouch(nullptr);
-	SetUse(nullptr);
-	SetBlocked(nullptr);
+	ClearThink();
+	ClearTouch();
+	ClearUse();
 }
 
 bool CBaseEntity::KeyValue(KeyValueData* pkvd)

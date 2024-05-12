@@ -78,7 +78,7 @@ void CItem::ItemTouch(CBaseEntity* pOther)
 	if (MyTouch(pPlayer))
 	{
 		UseTargets(pOther, USE_TOGGLE, 0);
-		SetTouch(NULL);
+		ClearTouch();
 
 		// player grabbed the item.
 		g_pGameRules->PlayerGotItem(pPlayer, this);
@@ -99,7 +99,7 @@ void CItem::ItemTouch(CBaseEntity* pOther)
 
 CBaseEntity* CItem::Respawn()
 {
-	SetTouch(NULL);
+	ClearTouch();
 	v.effects |= EF_NODRAW;
 
 	SetOrigin(g_pGameRules->VecItemRespawnSpot(this)); // blip to whereever you should respawn.

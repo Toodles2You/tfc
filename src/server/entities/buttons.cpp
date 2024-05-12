@@ -245,7 +245,7 @@ void CMultiSource::Register()
 	m_iTotal = 0;
 	memset(m_rgEntities, 0, MS_MAX_TARGETS * sizeof(EHANDLE));
 
-	SetThink(nullptr);
+	ClearThink();
 
 	// search for all entities which target this multisource (v.targetname)
 
@@ -431,7 +431,7 @@ bool CBaseButton::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	if (code == BUTTON_NOTHING)
 		return false;
 	// Temporarily disable the touch function, until movement is finished.
-	SetTouch(NULL);
+	ClearTouch();
 
 	m_hActivator = attacker;
 	if (m_hActivator == NULL)
@@ -515,7 +515,7 @@ bool CBaseButton::Spawn()
 	}
 	else
 	{
-		SetTouch(NULL);
+		ClearTouch();
 		SetUse(&CBaseButton::ButtonUse);
 	}
 
@@ -707,7 +707,7 @@ void CBaseButton::ButtonTouch(CBaseEntity* pOther)
 	}
 
 	// Temporarily disable the touch function, until movement is finished.
-	SetTouch(NULL);
+	ClearTouch();
 
 	if (code == BUTTON_RETURN)
 	{
@@ -764,7 +764,7 @@ void CBaseButton::TriggerAndWait()
 		if (!FBitSet(v.spawnflags, SF_BUTTON_TOUCH_ONLY)) // this button only works if USED, not touched!
 		{
 			// ALL buttons are now use only
-			SetTouch(NULL);
+			ClearTouch();
 		}
 		else
 			SetTouch(&CBaseButton::ButtonTouch);
@@ -833,7 +833,7 @@ void CBaseButton::ButtonBackHome()
 	if (!FBitSet(v.spawnflags, SF_BUTTON_TOUCH_ONLY)) // this button only works if USED, not touched!
 	{
 		// All buttons are now use only
-		SetTouch(NULL);
+		ClearTouch();
 	}
 	else
 		SetTouch(&CBaseButton::ButtonTouch);
@@ -915,7 +915,7 @@ bool CRotButton::Spawn()
 	// if the button is flagged for USE button activation only, take away it's touch function and add a use function
 	if (!FBitSet(v.spawnflags, SF_BUTTON_TOUCH_ONLY))
 	{
-		SetTouch(NULL);
+		ClearTouch();
 		SetUse(&CRotButton::ButtonUse);
 	}
 	else // touchable button
@@ -1145,7 +1145,7 @@ void CMomentaryRotButton::Off()
 		m_direction = -1;
 	}
 	else
-		SetThink(NULL);
+		ClearThink();
 }
 
 void CMomentaryRotButton::Return()
@@ -1165,7 +1165,7 @@ void CMomentaryRotButton::UpdateSelfReturn(float value)
 		v.avelocity = g_vecZero;
 		v.angles = m_start;
 		v.nextthink = -1;
-		SetThink(NULL);
+		ClearThink();
 	}
 	else
 	{
@@ -1207,8 +1207,8 @@ LINK_ENTITY_TO_CLASS(env_spark, CEnvSpark);
 
 bool CEnvSpark::Spawn()
 {
-	SetThink(NULL);
-	SetUse(NULL);
+	ClearThink();
+	ClearUse();
 
 	if (FBitSet(v.spawnflags, 32)) // Use for on/off
 	{
@@ -1278,7 +1278,7 @@ void EXPORT CEnvSpark::SparkStart(CBaseEntity* pActivator, CBaseEntity* pCaller,
 void EXPORT CEnvSpark::SparkStop(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	SetUse(&CEnvSpark::SparkStart);
-	SetThink(NULL);
+	ClearThink();
 }
 
 #define SF_BTARGET_USE 0x0001

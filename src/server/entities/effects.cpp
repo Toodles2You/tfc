@@ -111,7 +111,7 @@ void CBubbling::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 	}
 	else
 	{
-		SetThink(NULL);
+		ClearThink();
 		v.nextthink = 0;
 	}
 }
@@ -446,7 +446,7 @@ bool CLightning::Spawn()
 
 	if (ServerSide())
 	{
-		SetThink(NULL);
+		ClearThink();
 		if (v.dmg > 0)
 		{
 			SetThink(&CLightning::DamageThink);
@@ -591,7 +591,7 @@ void CLightning::StrikeUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TY
 	if (m_active)
 	{
 		m_active = false;
-		SetThink(NULL);
+		ClearThink();
 	}
 	else
 	{
@@ -600,7 +600,7 @@ void CLightning::StrikeUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TY
 	}
 
 	if (!FBitSet(v.spawnflags, SF_BEAM_TOGGLE))
-		SetUse(NULL);
+		ClearUse();
 }
 
 
@@ -1740,7 +1740,7 @@ void CItemSoda::CanThink()
 
 	v.solid = SOLID_TRIGGER;
 	SetSize(Vector(-8, -8, 0), Vector(8, 8, 8));
-	SetThink(NULL);
+	ClearThink();
 	SetTouch(&CItemSoda::CanTouch);
 }
 
@@ -1764,6 +1764,6 @@ void CItemSoda::CanTouch(CBaseEntity* pOther)
 	v.solid = SOLID_NOT;
 	v.movetype = MOVETYPE_NONE;
 	v.effects = EF_NODRAW;
-	SetTouch(NULL);
+	ClearTouch();
 	Remove();
 }

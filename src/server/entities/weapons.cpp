@@ -205,7 +205,7 @@ void CBasePlayerWeapon::Materialize()
 
 	SetOrigin(v.origin);
 	SetTouch(&CBasePlayerWeapon::DefaultTouch);
-	SetThink(nullptr);
+	ClearThink();
 }
 
 
@@ -262,7 +262,7 @@ CBaseEntity* CBasePlayerWeapon::Respawn()
 	if (pNewWeapon != nullptr)
 	{
 		pNewWeapon->v.effects |= EF_NODRAW;
-		pNewWeapon->SetTouch(nullptr);
+		pNewWeapon->ClearTouch();
 		pNewWeapon->SetThink(&CBasePlayerWeapon::AttemptToMaterialize);
 
 		g_engfuncs.pfnDropToFloor(edict());
@@ -322,8 +322,8 @@ bool CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer)
 	v.solid = SOLID_NOT;
 	v.effects = EF_NODRAW;
 
-	SetTouch(nullptr);
-	SetThink(nullptr);
+	ClearTouch();
+	ClearThink();
 
 	pPlayer->AddPlayerWeapon(this);
 

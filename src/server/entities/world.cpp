@@ -73,7 +73,7 @@ bool CDecal::Spawn()
 	else
 	{
 		// if there IS a targetname, the decal sprays itself on when it is triggered.
-		SetThink(nullptr);
+		ClearThink();
 		SetUse(&CDecal::TriggerDecal);
 	}
 
@@ -557,6 +557,6 @@ void CWorld::PostSpawn()
 			}
 		}
 	}
-	SetThink(nullptr);
+	ClearThink();
 }
 #endif
