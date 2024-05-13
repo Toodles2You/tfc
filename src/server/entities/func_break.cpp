@@ -92,7 +92,7 @@ bool CBreakable::KeyValue(KeyValueData* pkvd)
 	}
 	else if (streq(pkvd->szKeyName, "gibmodel"))
 	{
-		m_iszGibModel = g_engfuncs.pfnAllocString(pkvd->szValue);
+		m_iszGibModel = engine::AllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "spawnobject"))
@@ -256,7 +256,7 @@ void CBreakable::MaterialSoundPrecache(Materials precacheMaterial)
 
 	for (i = 0; i < soundCount; i++)
 	{
-		g_engfuncs.pfnPrecacheSound((char*)pSoundList[i]);
+		engine::PrecacheSound((char*)pSoundList[i]);
 	}
 }
 
@@ -271,60 +271,60 @@ void CBreakable::Precache()
 	case matWood:
 		pGibName = "models/woodgibs.mdl";
 
-		g_engfuncs.pfnPrecacheSound("debris/bustcrate1.wav");
-		g_engfuncs.pfnPrecacheSound("debris/bustcrate2.wav");
+		engine::PrecacheSound("debris/bustcrate1.wav");
+		engine::PrecacheSound("debris/bustcrate2.wav");
 		break;
 	case matFlesh:
 		pGibName = "models/fleshgibs.mdl";
 
-		g_engfuncs.pfnPrecacheSound("debris/bustflesh1.wav");
-		g_engfuncs.pfnPrecacheSound("debris/bustflesh2.wav");
+		engine::PrecacheSound("debris/bustflesh1.wav");
+		engine::PrecacheSound("debris/bustflesh2.wav");
 		break;
 	case matComputer:
-		g_engfuncs.pfnPrecacheSound("buttons/spark5.wav");
-		g_engfuncs.pfnPrecacheSound("buttons/spark6.wav");
+		engine::PrecacheSound("buttons/spark5.wav");
+		engine::PrecacheSound("buttons/spark6.wav");
 		pGibName = "models/computergibs.mdl";
 
-		g_engfuncs.pfnPrecacheSound("debris/bustmetal1.wav");
-		g_engfuncs.pfnPrecacheSound("debris/bustmetal2.wav");
+		engine::PrecacheSound("debris/bustmetal1.wav");
+		engine::PrecacheSound("debris/bustmetal2.wav");
 		break;
 
 	case matUnbreakableGlass:
 	case matGlass:
 		pGibName = "models/glassgibs.mdl";
 
-		g_engfuncs.pfnPrecacheSound("debris/bustglass1.wav");
-		g_engfuncs.pfnPrecacheSound("debris/bustglass2.wav");
+		engine::PrecacheSound("debris/bustglass1.wav");
+		engine::PrecacheSound("debris/bustglass2.wav");
 		break;
 	case matMetal:
 		pGibName = "models/metalplategibs.mdl";
 
-		g_engfuncs.pfnPrecacheSound("debris/bustmetal1.wav");
-		g_engfuncs.pfnPrecacheSound("debris/bustmetal2.wav");
+		engine::PrecacheSound("debris/bustmetal1.wav");
+		engine::PrecacheSound("debris/bustmetal2.wav");
 		break;
 	case matCinderBlock:
 		pGibName = "models/cindergibs.mdl";
 
-		g_engfuncs.pfnPrecacheSound("debris/bustconcrete1.wav");
-		g_engfuncs.pfnPrecacheSound("debris/bustconcrete2.wav");
+		engine::PrecacheSound("debris/bustconcrete1.wav");
+		engine::PrecacheSound("debris/bustconcrete2.wav");
 		break;
 	case matRocks:
 		pGibName = "models/rockgibs.mdl";
 
-		g_engfuncs.pfnPrecacheSound("debris/bustconcrete1.wav");
-		g_engfuncs.pfnPrecacheSound("debris/bustconcrete2.wav");
+		engine::PrecacheSound("debris/bustconcrete1.wav");
+		engine::PrecacheSound("debris/bustconcrete2.wav");
 		break;
 	case matCeilingTile:
 		pGibName = "models/ceilinggibs.mdl";
 
-		g_engfuncs.pfnPrecacheSound("debris/bustceiling.wav");
+		engine::PrecacheSound("debris/bustceiling.wav");
 		break;
 	}
 	MaterialSoundPrecache(m_Material);
 	if (!FStringNull(m_iszGibModel))
 		pGibName = STRING(m_iszGibModel);
 
-	m_idShard = g_engfuncs.pfnPrecacheModel((char*)pGibName);
+	m_idShard = engine::PrecacheModel((char*)pGibName);
 
 	// Precache the spawn item's data
 	if (!FStringNull(m_iszSpawnObject))
@@ -343,17 +343,17 @@ void CBreakable::DamageSound()
 	int i;
 	int material = m_Material;
 
-	//	if (g_engfuncs.pfnRandomLong(0,1))
+	//	if (engine::RandomLong(0,1))
 	//		return;
 
-	if (g_engfuncs.pfnRandomLong(0, 2))
+	if (engine::RandomLong(0, 2))
 		pitch = PITCH_NORM;
 	else
-		pitch = 95 + g_engfuncs.pfnRandomLong(0, 34);
+		pitch = 95 + engine::RandomLong(0, 34);
 
-	fvol = g_engfuncs.pfnRandomFloat(0.75, 1.0);
+	fvol = engine::RandomFloat(0.75, 1.0);
 
-	if (material == matComputer && g_engfuncs.pfnRandomLong(0, 1))
+	if (material == matComputer && engine::RandomLong(0, 1))
 		material = matMetal;
 
 	switch (material)
@@ -406,7 +406,7 @@ void CBreakable::DamageSound()
 	}
 
 	if (0 != i)
-		EmitSound(rgpsz[g_engfuncs.pfnRandomLong(0, i - 1)], CHAN_VOICE, fvol, ATTN_NORM, pitch);
+		EmitSound(rgpsz[engine::RandomLong(0, i - 1)], CHAN_VOICE, fvol, ATTN_NORM, pitch);
 }
 
 void CBreakable::BreakTouch(CBaseEntity* pOther)
@@ -542,7 +542,7 @@ void CBreakable::Die()
 	int pitch;
 	float fvol;
 
-	pitch = 95 + g_engfuncs.pfnRandomLong(0, 29);
+	pitch = 95 + engine::RandomLong(0, 29);
 
 	if (pitch > 97 && pitch < 103)
 		pitch = 100;
@@ -550,7 +550,7 @@ void CBreakable::Die()
 	// The more negative v.health, the louder
 	// the sound should be.
 
-	fvol = g_engfuncs.pfnRandomFloat(0.85, 1.0) + (fabs(v.health) / 100.0);
+	fvol = engine::RandomFloat(0.85, 1.0) + (fabs(v.health) / 100.0);
 
 	if (fvol > 1.0)
 		fvol = 1.0;
@@ -561,7 +561,7 @@ void CBreakable::Die()
 	{
 	default:
 	case matGlass:
-		switch (g_engfuncs.pfnRandomLong(0, 1))
+		switch (engine::RandomLong(0, 1))
 		{
 		case 0: sample ="debris/bustglass1.wav"; break;
 		case 1: sample ="debris/bustglass2.wav"; break;
@@ -570,7 +570,7 @@ void CBreakable::Die()
 		break;
 
 	case matWood:
-		switch (g_engfuncs.pfnRandomLong(0, 1))
+		switch (engine::RandomLong(0, 1))
 		{
 		case 0: sample ="debris/bustcrate1.wav"; break;
 		case 1: sample ="debris/bustcrate2.wav"; break;
@@ -580,7 +580,7 @@ void CBreakable::Die()
 
 	case matComputer:
 	case matMetal:
-		switch (g_engfuncs.pfnRandomLong(0, 1))
+		switch (engine::RandomLong(0, 1))
 		{
 		case 0: sample ="debris/bustmetal1.wav"; break;
 		case 1: sample ="debris/bustmetal2.wav"; break;
@@ -589,7 +589,7 @@ void CBreakable::Die()
 		break;
 
 	case matFlesh:
-		switch (g_engfuncs.pfnRandomLong(0, 1))
+		switch (engine::RandomLong(0, 1))
 		{
 		case 0: sample ="debris/bustflesh1.wav"; break;
 		case 1: sample ="debris/bustflesh2.wav"; break;
@@ -599,7 +599,7 @@ void CBreakable::Die()
 
 	case matRocks:
 	case matCinderBlock:
-		switch (g_engfuncs.pfnRandomLong(0, 1))
+		switch (engine::RandomLong(0, 1))
 		{
 		case 0: sample ="debris/bustconcrete1.wav"; break;
 		case 1: sample ="debris/bustconcrete2.wav"; break;
@@ -793,7 +793,7 @@ bool CPushable::Spawn()
 void CPushable::Precache()
 {
 	for (int i = 0; i < 3; i++)
-		g_engfuncs.pfnPrecacheSound(m_soundNames[i]);
+		engine::PrecacheSound(m_soundNames[i]);
 
 	if ((v.spawnflags & SF_PUSH_BREAKABLE) != 0)
 		CBreakable::Precache();
@@ -921,7 +921,7 @@ void CPushable::Move(CBaseEntity* pOther, bool push)
 			m_soundTime = gpGlobals->time;
 			if (length > 0 && FBitSet(v.flags, FL_ONGROUND))
 			{
-				m_lastSound = g_engfuncs.pfnRandomLong(0, 2);
+				m_lastSound = engine::RandomLong(0, 2);
 				EmitSound(m_soundNames[m_lastSound], CHAN_WEAPON, 0.5F);
 			}
 			else

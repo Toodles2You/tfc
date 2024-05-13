@@ -1210,13 +1210,13 @@ CNavArea *FindMinimumCostArea( CNavArea *startArea, CostFunctor &costFunc )
 	if (cheapAreaSetCount)
 	{
 		// pick one of the areas at random
-		return cheapAreaSet[ g_engfuncs.pfnRandomLong( 0, cheapAreaSetCount-1 ) ].area;
+		return cheapAreaSet[ engine::RandomLong( 0, cheapAreaSetCount-1 ) ].area;
 	}
 	else
 	{
 		// degenerate case - no decent sized areas - pick a random area
 		int numAreas = TheNavAreaList.size();
-		int which = g_engfuncs.pfnRandomLong( 0, numAreas-1 );
+		int which = engine::RandomLong( 0, numAreas-1 );
 
 		NavAreaList::iterator iter;
 		for( iter = TheNavAreaList.begin(); iter != TheNavAreaList.end(); ++iter )

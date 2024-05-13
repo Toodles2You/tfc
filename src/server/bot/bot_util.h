@@ -68,10 +68,10 @@ extern cvar_t cv_zombie_max_spawn_time;
 #define ABS( num )        (SIGN(num) * (num))
 
 
-#define CREATE_FAKE_CLIENT		( *g_engfuncs.pfnCreateFakeClient )
-#define GET_USERINFO			( *g_engfuncs.pfnGetInfoKeyBuffer )
-#define SET_KEY_VALUE			( *g_engfuncs.pfnSetKeyValue )
-#define SET_CLIENT_KEY_VALUE	( *g_engfuncs.pfnSetClientKeyValue )
+#define CREATE_FAKE_CLIENT		( *engine::CreateFakeClient )
+#define GET_USERINFO			( *engine::GetInfoKeyBuffer )
+#define SET_KEY_VALUE			( *engine::SetKeyValue )
+#define SET_CLIENT_KEY_VALUE	( *engine::SetClientKeyValue )
 
 class BotProfile;
 

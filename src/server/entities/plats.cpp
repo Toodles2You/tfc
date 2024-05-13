@@ -113,55 +113,55 @@ void CBasePlatTrain::Precache()
 		v.noiseMoving = MAKE_STRING("common/null.wav");
 		break;
 	case 1:
-		g_engfuncs.pfnPrecacheSound("plats/bigmove1.wav");
+		engine::PrecacheSound("plats/bigmove1.wav");
 		v.noiseMoving = MAKE_STRING("plats/bigmove1.wav");
 		break;
 	case 2:
-		g_engfuncs.pfnPrecacheSound("plats/bigmove2.wav");
+		engine::PrecacheSound("plats/bigmove2.wav");
 		v.noiseMoving = MAKE_STRING("plats/bigmove2.wav");
 		break;
 	case 3:
-		g_engfuncs.pfnPrecacheSound("plats/elevmove1.wav");
+		engine::PrecacheSound("plats/elevmove1.wav");
 		v.noiseMoving = MAKE_STRING("plats/elevmove1.wav");
 		break;
 	case 4:
-		g_engfuncs.pfnPrecacheSound("plats/elevmove2.wav");
+		engine::PrecacheSound("plats/elevmove2.wav");
 		v.noiseMoving = MAKE_STRING("plats/elevmove2.wav");
 		break;
 	case 5:
-		g_engfuncs.pfnPrecacheSound("plats/elevmove3.wav");
+		engine::PrecacheSound("plats/elevmove3.wav");
 		v.noiseMoving = MAKE_STRING("plats/elevmove3.wav");
 		break;
 	case 6:
-		g_engfuncs.pfnPrecacheSound("plats/freightmove1.wav");
+		engine::PrecacheSound("plats/freightmove1.wav");
 		v.noiseMoving = MAKE_STRING("plats/freightmove1.wav");
 		break;
 	case 7:
-		g_engfuncs.pfnPrecacheSound("plats/freightmove2.wav");
+		engine::PrecacheSound("plats/freightmove2.wav");
 		v.noiseMoving = MAKE_STRING("plats/freightmove2.wav");
 		break;
 	case 8:
-		g_engfuncs.pfnPrecacheSound("plats/heavymove1.wav");
+		engine::PrecacheSound("plats/heavymove1.wav");
 		v.noiseMoving = MAKE_STRING("plats/heavymove1.wav");
 		break;
 	case 9:
-		g_engfuncs.pfnPrecacheSound("plats/rackmove1.wav");
+		engine::PrecacheSound("plats/rackmove1.wav");
 		v.noiseMoving = MAKE_STRING("plats/rackmove1.wav");
 		break;
 	case 10:
-		g_engfuncs.pfnPrecacheSound("plats/railmove1.wav");
+		engine::PrecacheSound("plats/railmove1.wav");
 		v.noiseMoving = MAKE_STRING("plats/railmove1.wav");
 		break;
 	case 11:
-		g_engfuncs.pfnPrecacheSound("plats/squeekmove1.wav");
+		engine::PrecacheSound("plats/squeekmove1.wav");
 		v.noiseMoving = MAKE_STRING("plats/squeekmove1.wav");
 		break;
 	case 12:
-		g_engfuncs.pfnPrecacheSound("plats/talkmove1.wav");
+		engine::PrecacheSound("plats/talkmove1.wav");
 		v.noiseMoving = MAKE_STRING("plats/talkmove1.wav");
 		break;
 	case 13:
-		g_engfuncs.pfnPrecacheSound("plats/talkmove2.wav");
+		engine::PrecacheSound("plats/talkmove2.wav");
 		v.noiseMoving = MAKE_STRING("plats/talkmove2.wav");
 		break;
 	default:
@@ -176,35 +176,35 @@ void CBasePlatTrain::Precache()
 		v.noiseArrived = MAKE_STRING("common/null.wav");
 		break;
 	case 1:
-		g_engfuncs.pfnPrecacheSound("plats/bigstop1.wav");
+		engine::PrecacheSound("plats/bigstop1.wav");
 		v.noiseArrived = MAKE_STRING("plats/bigstop1.wav");
 		break;
 	case 2:
-		g_engfuncs.pfnPrecacheSound("plats/bigstop2.wav");
+		engine::PrecacheSound("plats/bigstop2.wav");
 		v.noiseArrived = MAKE_STRING("plats/bigstop2.wav");
 		break;
 	case 3:
-		g_engfuncs.pfnPrecacheSound("plats/freightstop1.wav");
+		engine::PrecacheSound("plats/freightstop1.wav");
 		v.noiseArrived = MAKE_STRING("plats/freightstop1.wav");
 		break;
 	case 4:
-		g_engfuncs.pfnPrecacheSound("plats/heavystop2.wav");
+		engine::PrecacheSound("plats/heavystop2.wav");
 		v.noiseArrived = MAKE_STRING("plats/heavystop2.wav");
 		break;
 	case 5:
-		g_engfuncs.pfnPrecacheSound("plats/rackstop1.wav");
+		engine::PrecacheSound("plats/rackstop1.wav");
 		v.noiseArrived = MAKE_STRING("plats/rackstop1.wav");
 		break;
 	case 6:
-		g_engfuncs.pfnPrecacheSound("plats/railstop1.wav");
+		engine::PrecacheSound("plats/railstop1.wav");
 		v.noiseArrived = MAKE_STRING("plats/railstop1.wav");
 		break;
 	case 7:
-		g_engfuncs.pfnPrecacheSound("plats/squeekstop1.wav");
+		engine::PrecacheSound("plats/squeekstop1.wav");
 		v.noiseArrived = MAKE_STRING("plats/squeekstop1.wav");
 		break;
 	case 8:
-		g_engfuncs.pfnPrecacheSound("plats/talkstop1.wav");
+		engine::PrecacheSound("plats/talkstop1.wav");
 		v.noiseArrived = MAKE_STRING("plats/talkstop1.wav");
 		break;
 
@@ -303,8 +303,8 @@ void CFuncPlat::Setup()
 void CFuncPlat::Precache()
 {
 	CBasePlatTrain::Precache();
-	//g_engfuncs.pfnPrecacheSound("plats/platmove1.wav");
-	//g_engfuncs.pfnPrecacheSound("plats/platstop1.wav");
+	//engine::PrecacheSound("plats/platmove1.wav");
+	//engine::PrecacheSound("plats/platstop1.wav");
 	if (!IsTogglePlat())
 		PlatSpawnInsideTrigger(this); // the "start moving" trigger
 }
@@ -500,7 +500,7 @@ void CFuncPlat::HitTop()
 
 void CFuncPlat::Blocked(CBaseEntity* pOther)
 {
-	g_engfuncs.pfnAlertMessage(at_aiconsole, "%s Blocked by %s\n", STRING(v.classname), STRING(pOther->v.classname));
+	engine::AlertMessage(at_aiconsole, "%s Blocked by %s\n", STRING(v.classname), STRING(pOther->v.classname));
 	// Hurt the blocker a little
 	pOther->TakeDamage(this, this, 1, DMG_CRUSH);
 
@@ -738,7 +738,7 @@ void CFuncTrain::Wait()
 		return;
 	}
 
-	// g_engfuncs.pfnAlertMessage ( at_console, "%f\n", m_flWait );
+	// engine::AlertMessage ( at_console, "%f\n", m_flWait );
 
 	if (m_flWait != 0)
 	{ // -1 wait will wait forever!
@@ -786,7 +786,7 @@ void CFuncTrain::Next()
 	if (m_pevCurrentTarget && m_pevCurrentTarget->speed != 0)
 	{ // don't copy speed from target if it is 0 (uninitialized)
 		v.speed = m_pevCurrentTarget->speed;
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Train %s speed to %4.2f\n", STRING(v.targetname), v.speed);
+		engine::AlertMessage(at_aiconsole, "Train %s speed to %4.2f\n", STRING(v.targetname), v.speed);
 	}
 	m_pevCurrentTarget = &pTarg->v; // keep track of this since path corners change our target for us.
 
@@ -848,7 +848,7 @@ bool CFuncTrain::Spawn()
 		v.speed = 100;
 
 	if (FStringNull(v.target))
-		g_engfuncs.pfnAlertMessage(at_console, "FuncTrain with no target");
+		engine::AlertMessage(at_console, "FuncTrain with no target");
 
 	if (v.dmg == 0)
 		v.dmg = 2;
@@ -887,15 +887,15 @@ void CFuncTrain::Precache()
 		break;
 
 	case 1:
-		g_engfuncs.pfnPrecacheSound ("plats/train2.wav");
-		g_engfuncs.pfnPrecacheSound ("plats/train1.wav");
+		engine::PrecacheSound ("plats/train2.wav");
+		engine::PrecacheSound ("plats/train1.wav");
 		v.noise = MAKE_STRING("plats/train2.wav");
 		v.noise1 = MAKE_STRING("plats/train1.wav");
 		break;
 
 	case 2:
-		g_engfuncs.pfnPrecacheSound ("plats/platmove1.wav");
-		g_engfuncs.pfnPrecacheSound ("plats/platstop1.wav");
+		engine::PrecacheSound ("plats/platmove1.wav");
+		engine::PrecacheSound ("plats/platstop1.wav");
 		v.noise = MAKE_STRING("plats/platstop1.wav");
 		v.noise1 = MAKE_STRING("plats/platmove1.wav");
 		break;
@@ -1019,7 +1019,7 @@ void CFuncTrackTrain::Blocked(CBaseEntity* pOther)
 	else
 		pOther->v.velocity = (pOther->v.origin - v.origin).Normalize() * v.dmg;
 
-	g_engfuncs.pfnAlertMessage(at_aiconsole, "TRAIN(%s): Blocked by %s (dmg:%.2f)\n", STRING(v.targetname), STRING(pOther->v.classname), v.dmg);
+	engine::AlertMessage(at_aiconsole, "TRAIN(%s): Blocked by %s (dmg:%.2f)\n", STRING(v.targetname), STRING(pOther->v.classname), v.dmg);
 	if (v.dmg <= 0)
 		return;
 	// we can't hurt this thing, so we're not concerned with it
@@ -1065,7 +1065,7 @@ void CFuncTrackTrain::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 		}
 		v.speed = m_speed * delta;
 		Next();
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "TRAIN(%s), speed to %.2f\n", STRING(v.targetname), v.speed);
+		engine::AlertMessage(at_aiconsole, "TRAIN(%s), speed to %.2f\n", STRING(v.targetname), v.speed);
 	}
 }
 
@@ -1102,7 +1102,7 @@ void CFuncTrackTrain::StopSound()
 
 		us_encode = us_sound;
 
-		g_engfuncs.pfnPlaybackEvent(FEV_RELIABLE | FEV_UPDATE, edict(), m_usAdjustPitch, 0.0,
+		engine::PlaybackEvent(FEV_RELIABLE | FEV_UPDATE, edict(), m_usAdjustPitch, 0.0,
 			g_vecZero, g_vecZero, 0.0, 0.0, us_encode, 0, 1, 0);
 
 		EmitSound("plats/ttrain_brake1.wav", CHAN_ITEM, m_flVolume);
@@ -1145,7 +1145,7 @@ void CFuncTrackTrain::UpdateSound()
 
 		us_encode = us_sound | us_pitch | us_volume;
 
-		g_engfuncs.pfnPlaybackEvent(FEV_RELIABLE | FEV_UPDATE, edict(), m_usAdjustPitch, 0.0,
+		engine::PlaybackEvent(FEV_RELIABLE | FEV_UPDATE, edict(), m_usAdjustPitch, 0.0,
 			g_vecZero, g_vecZero, 0.0, 0.0, us_encode, 0, 0, 0);
 	}
 }
@@ -1157,14 +1157,14 @@ void CFuncTrackTrain::Next()
 
 	if (0 == v.speed)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "TRAIN(%s): Speed is 0\n", STRING(v.targetname));
+		engine::AlertMessage(at_aiconsole, "TRAIN(%s): Speed is 0\n", STRING(v.targetname));
 		StopSound();
 		return;
 	}
 
 	if (!m_ppath)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "TRAIN(%s): Lost path\n", STRING(v.targetname));
+		engine::AlertMessage(at_aiconsole, "TRAIN(%s): Lost path\n", STRING(v.targetname));
 		StopSound();
 		return;
 	}
@@ -1247,7 +1247,7 @@ void CFuncTrackTrain::Next()
 				if (pFire->v.speed != 0)
 				{ // don't copy speed from target if it is 0 (uninitialized)
 					v.speed = pFire->v.speed;
-					g_engfuncs.pfnAlertMessage(at_aiconsole, "TrackTrain %s speed to %4.2f\n", STRING(v.targetname), v.speed);
+					engine::AlertMessage(at_aiconsole, "TrackTrain %s speed to %4.2f\n", STRING(v.targetname), v.speed);
 				}
 			}
 		}
@@ -1291,7 +1291,7 @@ void CFuncTrackTrain::DeadEnd()
 
 	pTrack = m_ppath;
 
-	g_engfuncs.pfnAlertMessage(at_aiconsole, "TRAIN(%s): Dead end ", STRING(v.targetname));
+	engine::AlertMessage(at_aiconsole, "TRAIN(%s): Dead end ", STRING(v.targetname));
 	// Find the dead end path node
 	// HACKHACK -- This is bugly, but the train can actually stop moving at a different node depending on it's speed
 	// so we have to traverse the list to it's end.
@@ -1321,12 +1321,12 @@ void CFuncTrackTrain::DeadEnd()
 	v.avelocity = g_vecZero;
 	if (pTrack)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "at %s\n", STRING(pTrack->v.targetname));
+		engine::AlertMessage(at_aiconsole, "at %s\n", STRING(pTrack->v.targetname));
 		if (!FStringNull(pTrack->v.netname))
 			util::FireTargets(STRING(pTrack->v.netname), this, this, USE_TOGGLE, 0);
 	}
 	else
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "\n");
+		engine::AlertMessage(at_aiconsole, "\n");
 }
 
 
@@ -1371,7 +1371,7 @@ void CFuncTrackTrain::Find()
 
 	if (!m_ppath->Is(Type::Track))
 	{
-		g_engfuncs.pfnAlertMessage(at_error, "func_track_train must be on a path of path_track\n");
+		engine::AlertMessage(at_error, "func_track_train must be on a path of path_track\n");
 		m_ppath = nullptr;
 		return;
 	}
@@ -1423,12 +1423,12 @@ void CFuncTrackTrain::NearestPath()
 
 	if (!pNearest)
 	{
-		g_engfuncs.pfnAlertMessage(at_console, "Can't find a nearby track !!!\n");
+		engine::AlertMessage(at_console, "Can't find a nearby track !!!\n");
 		ClearThink();
 		return;
 	}
 
-	g_engfuncs.pfnAlertMessage(at_aiconsole, "TRAIN: %s, Nearest track is %s\n", STRING(v.targetname), STRING(pNearest->v.targetname));
+	engine::AlertMessage(at_aiconsole, "TRAIN: %s, Nearest track is %s\n", STRING(v.targetname), STRING(pNearest->v.targetname));
 	// If I'm closer to the next path_track on this path, then it's my real path
 	pTrack = ((CPathTrack*)pNearest)->GetNext();
 	if (pTrack)
@@ -1469,7 +1469,7 @@ bool CFuncTrackTrain::Spawn()
 	m_dir = 1;
 
 	if (FStringNull(v.target))
-		g_engfuncs.pfnAlertMessage(at_console, "FuncTrain with no target");
+		engine::AlertMessage(at_console, "FuncTrain with no target");
 
 	if ((v.spawnflags & SF_TRACKTRAIN_PASSABLE) != 0)
 		v.solid = SOLID_NOT;
@@ -1509,35 +1509,35 @@ void CFuncTrackTrain::Precache()
 		v.noise = 0;
 		break;
 	case 1:
-		g_engfuncs.pfnPrecacheSound("plats/ttrain1.wav");
+		engine::PrecacheSound("plats/ttrain1.wav");
 		v.noise = MAKE_STRING("plats/ttrain1.wav");
 		break;
 	case 2:
-		g_engfuncs.pfnPrecacheSound("plats/ttrain2.wav");
+		engine::PrecacheSound("plats/ttrain2.wav");
 		v.noise = MAKE_STRING("plats/ttrain2.wav");
 		break;
 	case 3:
-		g_engfuncs.pfnPrecacheSound("plats/ttrain3.wav");
+		engine::PrecacheSound("plats/ttrain3.wav");
 		v.noise = MAKE_STRING("plats/ttrain3.wav");
 		break;
 	case 4:
-		g_engfuncs.pfnPrecacheSound("plats/ttrain4.wav");
+		engine::PrecacheSound("plats/ttrain4.wav");
 		v.noise = MAKE_STRING("plats/ttrain4.wav");
 		break;
 	case 5:
-		g_engfuncs.pfnPrecacheSound("plats/ttrain6.wav");
+		engine::PrecacheSound("plats/ttrain6.wav");
 		v.noise = MAKE_STRING("plats/ttrain6.wav");
 		break;
 	case 6:
-		g_engfuncs.pfnPrecacheSound("plats/ttrain7.wav");
+		engine::PrecacheSound("plats/ttrain7.wav");
 		v.noise = MAKE_STRING("plats/ttrain7.wav");
 		break;
 	}
 
-	g_engfuncs.pfnPrecacheSound("plats/ttrain_brake1.wav");
-	g_engfuncs.pfnPrecacheSound("plats/ttrain_start1.wav");
+	engine::PrecacheSound("plats/ttrain_brake1.wav");
+	engine::PrecacheSound("plats/ttrain_start1.wav");
 
-	m_usAdjustPitch = g_engfuncs.pfnPrecacheEvent(1, "events/train.sc");
+	m_usAdjustPitch = engine::PrecacheEvent(1, "events/train.sc");
 }
 
 // This class defines the volume of space that the player must stand in to control the train
@@ -1564,7 +1564,7 @@ void CFuncTrainControls::Find()
 
 	if (pTarget == nullptr)
 	{
-		g_engfuncs.pfnAlertMessage(at_console, "No train %s\n", STRING(v.target));
+		engine::AlertMessage(at_console, "No train %s\n", STRING(v.target));
 		return;
 	}
 
@@ -1710,7 +1710,7 @@ bool CFuncTrackChange::Spawn()
 void CFuncTrackChange::Precache()
 {
 	// Can't trigger sound
-	g_engfuncs.pfnPrecacheSound("buttons/button11.wav");
+	engine::PrecacheSound("buttons/button11.wav");
 
 	CFuncPlatRot::Precache();
 }
@@ -1726,17 +1726,17 @@ bool CFuncTrackChange::KeyValue(KeyValueData* pkvd)
 {
 	if (streq(pkvd->szKeyName, "train"))
 	{
-		m_trainName = g_engfuncs.pfnAllocString(pkvd->szValue);
+		m_trainName = engine::AllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "toptrack"))
 	{
-		m_trackTopName = g_engfuncs.pfnAllocString(pkvd->szValue);
+		m_trackTopName = engine::AllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "bottomtrack"))
 	{
-		m_trackBottomName = g_engfuncs.pfnAllocString(pkvd->szValue);
+		m_trackBottomName = engine::AllocString(pkvd->szValue);
 		return true;
 	}
 
@@ -1769,7 +1769,7 @@ void CFuncTrackChange::Find()
 				target = util::FindEntityByTargetname(nullptr, STRING(m_trainName));
 				if (target == nullptr)
 				{
-					g_engfuncs.pfnAlertMessage(at_error, "Can't find train for track change! %s\n", STRING(m_trainName));
+					engine::AlertMessage(at_error, "Can't find train for track change! %s\n", STRING(m_trainName));
 					return;
 				}
 				m_train = static_cast<CFuncTrackTrain*>(target);
@@ -1782,15 +1782,15 @@ void CFuncTrackChange::Find()
 			}
 			else
 			{
-				g_engfuncs.pfnAlertMessage(at_error, "Can't find train for track change! %s\n", STRING(m_trainName));
+				engine::AlertMessage(at_error, "Can't find train for track change! %s\n", STRING(m_trainName));
 				target = util::FindEntityByTargetname(nullptr, STRING(m_trainName));
 			}
 		}
 		else
-			g_engfuncs.pfnAlertMessage(at_error, "Can't find bottom track for track change! %s\n", STRING(m_trackBottomName));
+			engine::AlertMessage(at_error, "Can't find bottom track for track change! %s\n", STRING(m_trackBottomName));
 	}
 	else
-		g_engfuncs.pfnAlertMessage(at_error, "Can't find top track for track change! %s\n", STRING(m_trackTopName));
+		engine::AlertMessage(at_error, "Can't find top track for track change! %s\n", STRING(m_trackTopName));
 }
 
 

@@ -23,18 +23,18 @@ void CMP5::Precache()
 	CBasePlayerWeapon::Precache();
 
 #ifdef GAME_DLL
-	g_engfuncs.pfnPrecacheModel("models/w_9mmARclip.mdl");
+	engine::PrecacheModel("models/w_9mmARclip.mdl");
 
-	g_engfuncs.pfnPrecacheSound("weapons/hks1.wav");
-	g_engfuncs.pfnPrecacheSound("weapons/hks2.wav");
-	g_engfuncs.pfnPrecacheSound("weapons/hks3.wav");
+	engine::PrecacheSound("weapons/hks1.wav");
+	engine::PrecacheSound("weapons/hks2.wav");
+	engine::PrecacheSound("weapons/hks3.wav");
 
-	g_engfuncs.pfnPrecacheSound("weapons/glauncher.wav");
-	g_engfuncs.pfnPrecacheSound("weapons/glauncher2.wav");
+	engine::PrecacheSound("weapons/glauncher.wav");
+	engine::PrecacheSound("weapons/glauncher2.wav");
 #endif
 
-	m_usPrimaryAttack = g_engfuncs.pfnPrecacheEvent(1, "events/mp5.sc");
-	m_usSecondaryAttack = g_engfuncs.pfnPrecacheEvent(1, "events/mp52.sc");
+	m_usPrimaryAttack = engine::PrecacheEvent(1, "events/mp5.sc");
+	m_usSecondaryAttack = engine::PrecacheEvent(1, "events/mp52.sc");
 }
 
 

@@ -27,7 +27,7 @@ class CBaseEntity;
 
 inline globalvars_t* gpGlobals = nullptr;
 
-// Use this instead of g_engfuncs.pfnAllocString on constant strings
+// Use this instead of engine::AllocString on constant strings
 #define STRING(offset) ((const char*)(gpGlobals->pStringBase + (unsigned int)(offset)))
 #define MAKE_STRING(str) ((uint64)(str) - (uint64)(STRING(0)))
 
@@ -39,10 +39,10 @@ inline EntityOffset OFFSET(const Entity* pent)
 #ifndef NDEBUG
 	if (pent == nullptr)
 	{
-		g_engfuncs.pfnAlertMessage(at_error, "Bad ent in OFFSET()\n");
+		engine::AlertMessage(at_error, "Bad ent in OFFSET()\n");
 	}
 #endif
-	return (*g_engfuncs.pfnEntOffsetOfPEntity)(pent);
+	return engine::EntOffsetOfPEntity(pent);
 }
 
 // Keeps clutter down a bit, when using a float as a bit-vector
@@ -68,15 +68,15 @@ inline EntityOffset OFFSET(const Entity* pent)
 #define LINK_ENTITY_TO_CLASS(mapClassName, DLLClassName)
 #endif
 
-inline int ENTINDEX(Entity* pEdict) { return (*g_engfuncs.pfnIndexOfEdict)(pEdict); }
-inline Entity* INDEXENT(int iEdictNum) { return (*g_engfuncs.pfnPEntityOfEntIndex)(iEdictNum); }
+inline int ENTINDEX(Entity* pEdict) { return engine::IndexOfEdict(pEdict); }
+inline Entity* INDEXENT(int iEdictNum) { return engine::PEntityOfEntIndex(iEdictNum); }
 
 inline void MessageBegin(int dest, int type, const Vector& origin, CBaseEntity* entity);
 inline void MessageBegin(int dest, int type, CBaseEntity* entity);
 
 inline void MessageBegin(int dest, int type, const Vector& origin)
 {
-	g_engfuncs.pfnMessageBegin(
+	engine::MessageBegin(
 		dest,
 		type,
 		origin,
@@ -85,52 +85,52 @@ inline void MessageBegin(int dest, int type, const Vector& origin)
 
 inline void MessageBegin(int dest, int type)
 {
-	g_engfuncs.pfnMessageBegin(dest, type, nullptr, nullptr);
+	engine::MessageBegin(dest, type, nullptr, nullptr);
 }
 
 inline void MessageEnd()
 {
-	g_engfuncs.pfnMessageEnd();
+	engine::MessageEnd();
 }
 
 inline void WriteByte(int value)
 {
-	g_engfuncs.pfnWriteByte(value);
+	engine::WriteByte(value);
 }
 
 inline void WriteChar(int value)
 {
-	g_engfuncs.pfnWriteChar(value);
+	engine::WriteChar(value);
 }
 
 inline void WriteShort(int value)
 {
-	g_engfuncs.pfnWriteShort(value);
+	engine::WriteShort(value);
 }
 
 inline void WriteLong(int value)
 {
-	g_engfuncs.pfnWriteLong(value);
+	engine::WriteLong(value);
 }
 
 inline void WriteAngle(float value)
 {
-	g_engfuncs.pfnWriteAngle(value);
+	engine::WriteAngle(value);
 }
 
 inline void WriteCoord(float value)
 {
-	g_engfuncs.pfnWriteCoord(value);
+	engine::WriteCoord(value);
 }
 
 inline void WriteString(const char* value)
 {
-	g_engfuncs.pfnWriteString(value);
+	engine::WriteString(value);
 }
 
 inline void WriteEntity(int value)
 {
-	g_engfuncs.pfnWriteEntity(value);
+	engine::WriteEntity(value);
 }
 
 inline void WriteFloat(float value)
@@ -223,9 +223,6 @@ int SENTENCEG_PlaySequentialSz(CBaseEntity* entity, const char* szrootname, floa
 int SENTENCEG_GetIndex(const char* szrootname);
 int SENTENCEG_Lookup(const char* sample, char* sentencenum);
 
-#define PLAYBACK_EVENT(flags, who, index) g_engfuncs.pfnPlaybackEvent(flags, who, index, 0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
-#define PLAYBACK_EVENT_DELAY(flags, who, index, delay) g_engfuncs.pfnPlaybackEvent(flags, who, index, delay, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
-
 /**
 *	@brief Helper type to run a function when the helper is destroyed.
 *	Useful for running cleanup on scope exit and function return.
@@ -310,7 +307,7 @@ CBaseEntity* PlayerByIndex(int playerIndex);
 
 inline Entity* EntitiesInPVS(Entity* pent)
 {
-	return g_engfuncs.pfnEntitiesInPVS(pent);
+	return engine::EntitiesInPVS(pent);
 }
 
 void MakeVectors(const Vector& vecAngles);
@@ -321,7 +318,7 @@ int EntitiesInBox(CBaseEntity** pList, int listMax, const Vector& mins, const Ve
 
 inline void MakeVectorsPrivate(const Vector& vecAngles, float* p_vForward, float* p_vRight, float* p_vUp)
 {
-	g_engfuncs.pfnAngleVectors(vecAngles, p_vForward, p_vRight, p_vUp);
+	engine::AngleVectors(vecAngles, p_vForward, p_vRight, p_vUp);
 }
 
 void MakeAimVectors(const Vector& vecAngles); // like MakeVectors, but assumes pitch isn't inverted

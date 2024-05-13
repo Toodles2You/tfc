@@ -35,9 +35,9 @@ CVoteManager::~CVoteManager()
 
 void CVoteManager::RegisterCvars()
 {
-	g_engfuncs.pfnCVarRegister(&sv_vote_nextlevel);
-	g_engfuncs.pfnCVarRegister(&sv_vote_changelevel);
-	g_engfuncs.pfnCVarRegister(&sv_vote_nominate);
+	engine::CVarRegister(&sv_vote_nextlevel);
+	engine::CVarRegister(&sv_vote_changelevel);
+	engine::CVarRegister(&sv_vote_nominate);
 }
 
 
@@ -130,8 +130,8 @@ void CVoteManager::RequestLevelChange(const unsigned int playerIndex)
 
 	util::LogPrintf("\"%s<%i><%s><>\" rocked the vote\n",
 		STRING(player->v.netname),
-		g_engfuncs.pfnGetPlayerUserId(player->edict()),
-		g_engfuncs.pfnGetPlayerAuthId(player->edict()));
+		engine::GetPlayerUserId(player->edict()),
+		engine::GetPlayerAuthId(player->edict()));
 
 	if (rocked >= players)
 	{
@@ -166,7 +166,7 @@ void CVoteManager::NominateLevel(
 	}
 
 	/*! Toodles TODO: Option to limit to levels in the map cycle */
-	if (g_engfuncs.pfnIsMapValid(levelName.c_str()) == 0)
+	if (engine::IsMapValid(levelName.c_str()) == 0)
 	{
 		return;
 	}
@@ -193,8 +193,8 @@ void CVoteManager::NominateLevel(
 
 		util::LogPrintf("\"%s<%i><%s><>\" changed their nomination to '%s'\n",
 			STRING(player->v.netname),
-			g_engfuncs.pfnGetPlayerUserId(player->edict()),
-			g_engfuncs.pfnGetPlayerAuthId(player->edict()),
+			engine::GetPlayerUserId(player->edict()),
+			engine::GetPlayerAuthId(player->edict()),
 			levelName.c_str());
 
 		util::ClientPrintAll(HUD_PRINTTALK, "#Vote_level_nominate", name, levelName.c_str());
@@ -209,8 +209,8 @@ void CVoteManager::NominateLevel(
 
 		util::LogPrintf("\"%s<%i><%s><>\" nominated '%s'\n",
 			STRING(player->v.netname),
-			g_engfuncs.pfnGetPlayerUserId(player->edict()),
-			g_engfuncs.pfnGetPlayerAuthId(player->edict()),
+			engine::GetPlayerUserId(player->edict()),
+			engine::GetPlayerAuthId(player->edict()),
 			levelName.c_str());
 
 		util::ClientPrintAll(HUD_PRINTTALK, "#Vote_level_nominate", name, levelName.c_str());
@@ -227,9 +227,9 @@ bool CVoteManager::ClientCommand(const unsigned int playerIndex, const char* cmd
 
 	if (strcmp(cmd, "menuselect") == 0)
 	{
-		if (g_engfuncs.pfnCmd_Argc() > 1)
+		if (engine::Cmd_Argc() > 1)
 		{
-			int option = atoi(g_engfuncs.pfnCmd_Argv(1));
+			int option = atoi(engine::Cmd_Argv(1));
 			m_Poll->ClientVote(playerIndex, option);
 		}
 		return true;

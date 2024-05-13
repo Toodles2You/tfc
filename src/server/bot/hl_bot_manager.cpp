@@ -86,7 +86,7 @@ bool CHLBotManager::ClientCommand(CBasePlayer *pPlayer, const char *pcmd)
 {
 	if (streq(pcmd, "bot"))
 	{
-		AddBot(g_engfuncs.pfnCmd_Argc() > 1 ? g_engfuncs.pfnCmd_Argv(1) : nullptr);
+		AddBot(engine::Cmd_Argc() > 1 ? engine::Cmd_Argv(1) : nullptr);
 		return true;
 	}
 	return false;
@@ -192,24 +192,24 @@ void Bot_ServerCommand()
 
 void Bot_RegisterCvars()
 {
-	g_engfuncs.pfnCVarRegister(&cv_bot_traceview);
-	g_engfuncs.pfnCVarRegister(&cv_bot_stop);
-	g_engfuncs.pfnCVarRegister(&cv_bot_show_nav);
-	g_engfuncs.pfnCVarRegister(&cv_bot_show_danger);
-	g_engfuncs.pfnCVarRegister(&cv_bot_nav_edit);
-	g_engfuncs.pfnCVarRegister(&cv_bot_nav_zdraw);
-	g_engfuncs.pfnCVarRegister(&cv_bot_walk);
-	g_engfuncs.pfnCVarRegister(&cv_bot_difficulty);
-	g_engfuncs.pfnCVarRegister(&cv_bot_debug);
-	g_engfuncs.pfnCVarRegister(&cv_bot_quicksave);
-	g_engfuncs.pfnCVarRegister(&cv_bot_quota);
-	g_engfuncs.pfnCVarRegister(&cv_bot_quota_match);
-	g_engfuncs.pfnCVarRegister(&cv_bot_prefix);
-	g_engfuncs.pfnCVarRegister(&cv_bot_join_team);
-	g_engfuncs.pfnCVarRegister(&cv_bot_join_after_player);
-	g_engfuncs.pfnCVarRegister(&cv_bot_auto_vacate);
-	g_engfuncs.pfnCVarRegister(&cv_bot_zombie);
-	g_engfuncs.pfnCVarRegister(&cv_bot_defer_to_human);
-	g_engfuncs.pfnCVarRegister(&cv_bot_chatter);
-	g_engfuncs.pfnCVarRegister(&cv_bot_profile_db);
+	engine::CVarRegister(&cv_bot_traceview);
+	engine::CVarRegister(&cv_bot_stop);
+	engine::CVarRegister(&cv_bot_show_nav);
+	engine::CVarRegister(&cv_bot_show_danger);
+	engine::CVarRegister(&cv_bot_nav_edit);
+	engine::CVarRegister(&cv_bot_nav_zdraw);
+	engine::CVarRegister(&cv_bot_walk);
+	engine::CVarRegister(&cv_bot_difficulty);
+	engine::CVarRegister(&cv_bot_debug);
+	engine::CVarRegister(&cv_bot_quicksave);
+	engine::CVarRegister(&cv_bot_quota);
+	engine::CVarRegister(&cv_bot_quota_match);
+	engine::CVarRegister(&cv_bot_prefix);
+	engine::CVarRegister(&cv_bot_join_team);
+	engine::CVarRegister(&cv_bot_join_after_player);
+	engine::CVarRegister(&cv_bot_auto_vacate);
+	engine::CVarRegister(&cv_bot_zombie);
+	engine::CVarRegister(&cv_bot_defer_to_human);
+	engine::CVarRegister(&cv_bot_chatter);
+	engine::CVarRegister(&cv_bot_profile_db);
 }

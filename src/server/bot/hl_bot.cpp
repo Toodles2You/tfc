@@ -37,13 +37,13 @@ bool CHLBot::Initialize(const BotProfile* profile)
     auto clientIndex = entindex();
     if (model)
     {
-        g_engfuncs.pfnSetClientKeyValue(clientIndex, g_engfuncs.pfnGetInfoKeyBuffer(edict()), "model", model);
+        engine::SetClientKeyValue(clientIndex, engine::GetInfoKeyBuffer(edict()), "model", model);
     }
-    auto color = g_engfuncs.pfnRandomLong(0, 255);
+    auto color = engine::RandomLong(0, 255);
     auto topColor = util::dtos1(color);
     auto bottomColor = util::dtos2((color + 32) % 256);
-    g_engfuncs.pfnSetClientKeyValue(clientIndex, g_engfuncs.pfnGetInfoKeyBuffer(edict()), "topcolor", topColor);
-    g_engfuncs.pfnSetClientKeyValue(clientIndex, g_engfuncs.pfnGetInfoKeyBuffer(edict()), "bottomcolor", bottomColor);
+    engine::SetClientKeyValue(clientIndex, engine::GetInfoKeyBuffer(edict()), "topcolor", topColor);
+    engine::SetClientKeyValue(clientIndex, engine::GetInfoKeyBuffer(edict()), "bottomcolor", bottomColor);
     return true;
 }
 

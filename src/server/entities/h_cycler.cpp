@@ -74,12 +74,12 @@ bool CCycler::GenericCyclerSpawn(const char* szModel, Vector vecMin, Vector vecM
 {
 	if (!szModel || '\0' == *szModel)
 	{
-		g_engfuncs.pfnAlertMessage(at_error, "cycler at %.0f %.0f %0.f missing modelname", v.origin.x, v.origin.y, v.origin.z);
+		engine::AlertMessage(at_error, "cycler at %.0f %.0f %0.f missing modelname", v.origin.x, v.origin.y, v.origin.z);
 		return false;
 	}
 
 	v.classname = MAKE_STRING("cycler");
-	g_engfuncs.pfnPrecacheModel(szModel);
+	engine::PrecacheModel(szModel);
 	SetModel(szModel);
 
 	if (!CCycler::Spawn())
@@ -188,7 +188,7 @@ bool CCycler::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float fl
 		v.framerate = 1.0;
 		StudioFrameAdvance(0.1);
 		v.framerate = 0;
-		g_engfuncs.pfnAlertMessage(at_console, "sequence: %d, frame %.0f\n", v.sequence, v.frame);
+		engine::AlertMessage(at_console, "sequence: %d, frame %.0f\n", v.sequence, v.frame);
 	}
 
 	return false;
@@ -237,10 +237,10 @@ bool CCyclerSprite::Spawn()
 	m_animate = true;
 	m_lastTime = gpGlobals->time;
 
-	g_engfuncs.pfnPrecacheModel((char*)STRING(v.model));
+	engine::PrecacheModel((char*)STRING(v.model));
 	SetModel(v.model);
 
-	m_maxFrame = (float)g_engfuncs.pfnModelFrames(v.modelindex) - 1;
+	m_maxFrame = (float)engine::ModelFrames(v.modelindex) - 1;
 
 	return true;
 }
@@ -259,7 +259,7 @@ void CCyclerSprite::Think()
 void CCyclerSprite::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	m_animate = !m_animate;
-	g_engfuncs.pfnAlertMessage(at_console, "Sprite: %s\n", STRING(v.model));
+	engine::AlertMessage(at_console, "Sprite: %s\n", STRING(v.model));
 }
 
 

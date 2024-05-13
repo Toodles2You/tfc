@@ -66,7 +66,7 @@ int studio::LookupActivity(void* pmodel, int activity)
 		if (pseqdesc[i].activity == activity)
 		{
 			weighttotal += pseqdesc[i].actweight;
-			if (0 == weighttotal || g_engfuncs.pfnRandomLong(0, weighttotal - 1) < pseqdesc[i].actweight)
+			if (0 == weighttotal || engine::RandomLong(0, weighttotal - 1) < pseqdesc[i].actweight)
 				seq = i;
 		}
 	}
@@ -112,7 +112,7 @@ void studio::GetEyePosition(void* pmodel, Vector& vecEyePosition)
 
 	if (!pstudiohdr)
 	{
-		g_engfuncs.pfnAlertMessage(at_console, "GetEyePosition() Can't get pstudiohdr ptr!\n");
+		engine::AlertMessage(at_console, "GetEyePosition() Can't get pstudiohdr ptr!\n");
 		return;
 	}
 
@@ -178,10 +178,10 @@ void studio::SequencePrecache(void* pmodel, const char* pSequenceName)
 			{
 				if (0 == strlen(pevent[i].options))
 				{
-					g_engfuncs.pfnAlertMessage(at_error, "Bad sound event %d in sequence %s :: %s (sound is \"%s\")\n", pevent[i].event, pstudiohdr->name, pSequenceName, pevent[i].options);
+					engine::AlertMessage(at_error, "Bad sound event %d in sequence %s :: %s (sound is \"%s\")\n", pevent[i].event, pstudiohdr->name, pSequenceName, pevent[i].options);
 				}
 
-				g_engfuncs.pfnPrecacheSound((char*)(gpGlobals->pStringBase + g_engfuncs.pfnAllocString(pevent[i].options)));
+				engine::PrecacheSound((char*)(gpGlobals->pStringBase + engine::AllocString(pevent[i].options)));
 			}
 		}
 	}
@@ -407,7 +407,7 @@ int studio::FindTransition(void* pmodel, int iEndingAnim, int iGoalAnim, int* pi
 
 	int iEndNode;
 
-	// g_engfuncs.pfnAlertMessage( at_console, "from %d to %d: ", pEndNode->iEndNode, pGoalNode->iStartNode );
+	// engine::AlertMessage( at_console, "from %d to %d: ", pEndNode->iEndNode, pGoalNode->iStartNode );
 
 	if (*piDir > 0)
 	{
@@ -451,7 +451,7 @@ int studio::FindTransition(void* pmodel, int iEndingAnim, int iGoalAnim, int* pi
 		}
 	}
 
-	g_engfuncs.pfnAlertMessage(at_console, "error in transition graph");
+	engine::AlertMessage(at_console, "error in transition graph");
 	return iGoalAnim;
 }
 

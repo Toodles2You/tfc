@@ -27,43 +27,43 @@ void LinkUserMessages()
 		return;
 	}
 
-	gmsgHealth = g_engfuncs.pfnRegUserMsg("Health", 2);
-	gmsgDamage = g_engfuncs.pfnRegUserMsg("Damage", 12);
-	gmsgBattery = g_engfuncs.pfnRegUserMsg("Battery", 2);
+	gmsgHealth = engine::RegUserMsg("Health", 2);
+	gmsgDamage = engine::RegUserMsg("Damage", 12);
+	gmsgBattery = engine::RegUserMsg("Battery", 2);
 #ifdef HALFLIFE_TRAINCONTROL
-	gmsgTrain = g_engfuncs.pfnRegUserMsg("Train", 1);
+	gmsgTrain = engine::RegUserMsg("Train", 1);
 #endif
-	//gmsgHudText = g_engfuncs.pfnRegUserMsg( "HudTextPro", -1 );
-	gmsgHudText = g_engfuncs.pfnRegUserMsg("HudText", -1); // we don't use the message but 3rd party addons may!
-	gmsgSayText = g_engfuncs.pfnRegUserMsg("SayText", -1);
-	gmsgTextMsg = g_engfuncs.pfnRegUserMsg("TextMsg", -1);
-	gmsgResetHUD = g_engfuncs.pfnRegUserMsg("ResetHUD", 0); // called every respawn
-	gmsgInitHUD = g_engfuncs.pfnRegUserMsg("InitHUD", 0);	// called every time a new player joins the server
-	gmsgShowGameTitle = g_engfuncs.pfnRegUserMsg("GameTitle", 1);
-	gmsgDeathMsg = g_engfuncs.pfnRegUserMsg("DeathMsg", -1);
-	gmsgScoreInfo = g_engfuncs.pfnRegUserMsg("ScoreInfo", 5);
-	gmsgExtraInfo = g_engfuncs.pfnRegUserMsg("ExtraInfo", 3);
-	gmsgTeamScore = g_engfuncs.pfnRegUserMsg("TeamScore", 3); // sets the score of a team on the scoreboard
-	gmsgGameMode = g_engfuncs.pfnRegUserMsg("GameMode", 1);
-	gmsgMOTD = g_engfuncs.pfnRegUserMsg("MOTD", -1);
-	gmsgVGUIMenu = g_engfuncs.pfnRegUserMsg("VGUIMenu", 1);
-	gmsgServerName = g_engfuncs.pfnRegUserMsg("ServerName", -1);
-	gmsgAmmoPickup = g_engfuncs.pfnRegUserMsg("AmmoPickup", 2);
-	gmsgWeapPickup = g_engfuncs.pfnRegUserMsg("WeapPickup", 1);
-	gmsgItemPickup = g_engfuncs.pfnRegUserMsg("ItemPickup", -1);
-	gmsgShowMenu = g_engfuncs.pfnRegUserMsg("ShowMenu", -1);
-	gmsgVoteMenu = g_engfuncs.pfnRegUserMsg("VoteMenu", -1);
-	gmsgShake = g_engfuncs.pfnRegUserMsg("ScreenShake", sizeof(ScreenShake));
-	gmsgFade = g_engfuncs.pfnRegUserMsg("ScreenFade", sizeof(ScreenFade));
-	gmsgTeamNames = g_engfuncs.pfnRegUserMsg("TeamNames", -1);
-	gmsgAllowSpec = g_engfuncs.pfnRegUserMsg("AllowSpec", 1);
+	//gmsgHudText = engine::RegUserMsg( "HudTextPro", -1 );
+	gmsgHudText = engine::RegUserMsg("HudText", -1); // we don't use the message but 3rd party addons may!
+	gmsgSayText = engine::RegUserMsg("SayText", -1);
+	gmsgTextMsg = engine::RegUserMsg("TextMsg", -1);
+	gmsgResetHUD = engine::RegUserMsg("ResetHUD", 0); // called every respawn
+	gmsgInitHUD = engine::RegUserMsg("InitHUD", 0);	// called every time a new player joins the server
+	gmsgShowGameTitle = engine::RegUserMsg("GameTitle", 1);
+	gmsgDeathMsg = engine::RegUserMsg("DeathMsg", -1);
+	gmsgScoreInfo = engine::RegUserMsg("ScoreInfo", 5);
+	gmsgExtraInfo = engine::RegUserMsg("ExtraInfo", 3);
+	gmsgTeamScore = engine::RegUserMsg("TeamScore", 3); // sets the score of a team on the scoreboard
+	gmsgGameMode = engine::RegUserMsg("GameMode", 1);
+	gmsgMOTD = engine::RegUserMsg("MOTD", -1);
+	gmsgVGUIMenu = engine::RegUserMsg("VGUIMenu", 1);
+	gmsgServerName = engine::RegUserMsg("ServerName", -1);
+	gmsgAmmoPickup = engine::RegUserMsg("AmmoPickup", 2);
+	gmsgWeapPickup = engine::RegUserMsg("WeapPickup", 1);
+	gmsgItemPickup = engine::RegUserMsg("ItemPickup", -1);
+	gmsgShowMenu = engine::RegUserMsg("ShowMenu", -1);
+	gmsgVoteMenu = engine::RegUserMsg("VoteMenu", -1);
+	gmsgShake = engine::RegUserMsg("ScreenShake", sizeof(ScreenShake));
+	gmsgFade = engine::RegUserMsg("ScreenFade", sizeof(ScreenFade));
+	gmsgTeamNames = engine::RegUserMsg("TeamNames", -1);
+	gmsgAllowSpec = engine::RegUserMsg("AllowSpec", 1);
 
-	gmsgWeapons = g_engfuncs.pfnRegUserMsg("Weapons", 8);
-	gmsgAmmo = g_engfuncs.pfnRegUserMsg("Ammo", AMMO_TYPES);
+	gmsgWeapons = engine::RegUserMsg("Weapons", 8);
+	gmsgAmmo = engine::RegUserMsg("Ammo", AMMO_TYPES);
 
-	gmsgHitFeedback = g_engfuncs.pfnRegUserMsg("HitFeedback", 4);
-	gmsgBlood = g_engfuncs.pfnRegUserMsg("Blood", -1);
-	gmsgPredictedSound = g_engfuncs.pfnRegUserMsg("PredSound", -1);
+	gmsgHitFeedback = engine::RegUserMsg("HitFeedback", 4);
+	gmsgBlood = engine::RegUserMsg("Blood", -1);
+	gmsgPredictedSound = engine::RegUserMsg("PredSound", -1);
 
-	gmsgStatusIcon = g_engfuncs.pfnRegUserMsg("StatusIcon", -1);
+	gmsgStatusIcon = engine::RegUserMsg("StatusIcon", -1);
 }

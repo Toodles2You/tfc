@@ -232,21 +232,21 @@ static void HUD_SpawnClientWeapons()
 	gpGlobals->time = gEngfuncs.GetClientTime();
 
 	// Handled locally
-	g_engfuncs.pfnAlertMessage = HUD_AlertMessage;
-	g_engfuncs.pfnPlaybackEvent = HUD_PlaybackEvent;
-	g_engfuncs.pfnPEntityOfEntIndex = HUD_GetEntityByIndex;
-	g_engfuncs.pfnGetModelPtr = HUD_GetModelPtr;
-	g_engfuncs.pfnGetBonePosition = nullptr; /*! Toodles FIXME: */
-	g_engfuncs.pfnGetAttachment = nullptr; /*! Toodles FIXME: */
-	g_engfuncs.pfnPEntityOfEntIndexAllEntities = HUD_GetEntityByIndex;
+	engine::AlertMessage = HUD_AlertMessage;
+	engine::PlaybackEvent = HUD_PlaybackEvent;
+	engine::PEntityOfEntIndex = HUD_GetEntityByIndex;
+	engine::GetModelPtr = HUD_GetModelPtr;
+	engine::GetBonePosition = nullptr; /*! Toodles FIXME: */
+	engine::GetAttachment = nullptr; /*! Toodles FIXME: */
+	engine::PEntityOfEntIndexAllEntities = HUD_GetEntityByIndex;
 
 	// Pass through to engine
-	g_engfuncs.pfnPrecacheEvent = gEngfuncs.pfnPrecacheEvent;
-	g_engfuncs.pfnRandomFloat = gEngfuncs.pfnRandomFloat;
-	g_engfuncs.pfnRandomLong = gEngfuncs.pfnRandomLong;
-	g_engfuncs.pfnCVarGetPointer = gEngfuncs.pfnGetCvarPointer;
-	g_engfuncs.pfnCVarGetString = gEngfuncs.pfnGetCvarString;
-	g_engfuncs.pfnCVarGetFloat = gEngfuncs.pfnGetCvarFloat;
+	engine::PrecacheEvent = gEngfuncs.pfnPrecacheEvent;
+	engine::RandomFloat = gEngfuncs.pfnRandomFloat;
+	engine::RandomLong = gEngfuncs.pfnRandomLong;
+	engine::CVarGetPointer = gEngfuncs.pfnGetCvarPointer;
+	engine::CVarGetString = gEngfuncs.pfnGetCvarString;
+	engine::CVarGetFloat = gEngfuncs.pfnGetCvarFloat;
 
 	// Allocate slots for the players
 	for (auto i = 0; i <= MAX_PLAYERS; i++)

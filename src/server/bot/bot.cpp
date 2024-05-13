@@ -369,7 +369,7 @@ void CBot::ExecuteCommand( void )
 		SetBits( m_buttonFlags, IN_DUCK );
 
 	// Run the command
-	(*g_engfuncs.pfnRunPlayerMove)( edict(), v.v_angle, m_forwardSpeed, m_strafeSpeed, m_verticalSpeed, 
+	engine::RunPlayerMove( edict(), v.v_angle, m_forwardSpeed, m_strafeSpeed, m_verticalSpeed, 
 																	m_buttonFlags, 0, adjustedMSec );
 }
 
@@ -551,13 +551,13 @@ void CBot::Print( char *format, ... ) const
 
 	// prefix the message with the bot's name
 	sprintf( buffer, "%s: ", STRING(v.netname) );
-	(*g_engfuncs.pfnServerPrint)( buffer );
+	engine::ServerPrint( buffer );
 
 	va_start( varg, format );
 	vsprintf( buffer, format, varg );
 	va_end( varg );
 
-	(*g_engfuncs.pfnServerPrint)( buffer );
+	engine::ServerPrint( buffer );
 }
 
 
@@ -585,13 +585,13 @@ void CBot::PrintIfWatched( char *format, ... ) const
 #endif
 			name = STRING(v.netname);
 		sprintf( buffer, "%s: ", (name) ? name : "(NULL netname)" );
-		(*g_engfuncs.pfnServerPrint)( buffer );
+		engine::ServerPrint( buffer );
 
 		va_start( varg, format );
 		vsprintf( buffer, format, varg );
 		va_end( varg );
 
-		(*g_engfuncs.pfnServerPrint)( buffer );
+		engine::ServerPrint( buffer );
 	}
 }
 

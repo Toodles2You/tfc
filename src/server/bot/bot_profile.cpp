@@ -27,8 +27,6 @@ BotProfileManager *TheBotProfiles = nullptr;
 	#include "../cstrike/dlls/weapontype.cpp"	/// @TODO: remove this CStrike peculiarity from a game_shared file!!!
 	void Career_Printf(const char *fmt, ...);
 	#define CONSOLE_ECHO Career_Printf
-	#define g_engfuncs.pfnLoadFileForMe(name, len) (engine->COM_LoadFile( (name), 5, (len) ))
-	#define g_engfuncs.pfnFreeFile (engine->COM_FreeFile)
 	#define UTIL_IsGame( x ) 0
 #else
 	#include "extdll.h"
@@ -140,7 +138,7 @@ BotProfileManager::BotProfileManager( void )
 void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 {
 	int dataLength;
-	char *dataPointer = (char *)g_engfuncs.pfnLoadFileForMe( const_cast<char *>( filename ), &dataLength );
+	char *dataPointer = (char *)engine::LoadFileForMe( const_cast<char *>( filename ), &dataLength );
 	const char *dataFile = dataPointer;
 
 	if (dataFile == nullptr)
@@ -190,7 +188,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (!dataFile)
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected skin name\n", filename );
-				g_engfuncs.pfnFreeFile( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 			token = SharedGetToken();
@@ -201,14 +199,14 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (!dataFile)
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected 'Model'\n", filename );
-				g_engfuncs.pfnFreeFile( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 			token = SharedGetToken();
 			if (stricmp( "Model", token ))
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected 'Model'\n", filename );
-				g_engfuncs.pfnFreeFile( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 
@@ -217,14 +215,14 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (!dataFile)
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected '='\n", filename );
-				g_engfuncs.pfnFreeFile( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 			token = SharedGetToken();
 			if (strcmp( "=", token ))
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected '='\n", filename );
-				g_engfuncs.pfnFreeFile( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 
@@ -233,7 +231,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (!dataFile)
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected attribute value\n", filename );
-				g_engfuncs.pfnFreeFile( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 			token = SharedGetToken();
@@ -257,14 +255,14 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (!dataFile)
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected 'End'\n", filename );
-				g_engfuncs.pfnFreeFile( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 			token = SharedGetToken();
 			if (strcmp( "End", token ))
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected 'End'\n", filename );
-				g_engfuncs.pfnFreeFile( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 
@@ -311,7 +309,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 				if (inherit == nullptr)
 				{
 					CONSOLE_ECHO( "Error parsing '%s' - invalid template reference '%s'\n", filename, token );
-					g_engfuncs.pfnFreeFile( dataPointer );
+					engine::FreeFile( dataPointer );
 					return;
 				}
 
@@ -333,7 +331,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (!dataFile)
 			{
 				CONSOLE_ECHO( "Error parsing '%s' - expected name\n", filename );
-				g_engfuncs.pfnFreeFile( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 			profile->m_name = CloneString( SharedGetToken() );
@@ -358,7 +356,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (!dataFile)
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected 'End'\n", filename );
-				g_engfuncs.pfnFreeFile( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 			token = SharedGetToken();
@@ -376,7 +374,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (!dataFile)
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected '='\n", filename );
-				g_engfuncs.pfnFreeFile( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 
@@ -384,7 +382,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (strcmp( "=", token ))
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected '='\n", filename );
-				g_engfuncs.pfnFreeFile( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 
@@ -393,7 +391,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (!dataFile)
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected attribute value\n", filename );
-				g_engfuncs.pfnFreeFile( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 			token = SharedGetToken();
@@ -528,7 +526,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 		}
 	}
 
-	g_engfuncs.pfnFreeFile( dataPointer );
+	engine::FreeFile( dataPointer );
 
 	// free the templates
 	for( BotProfileList::iterator iter = templateList.begin(); iter != templateList.end(); ++iter )
@@ -675,7 +673,7 @@ int BotProfileManager::FindVoiceBankIndex( const char *filename )
  */
 const BotProfile *BotProfileManager::GetRandomProfile( BotDifficultyType difficulty, BotProfileTeamType team ) const
 {
-#ifndef g_engfuncs.pfnRandomLong
+#ifndef engine::RandomLong
 	return nullptr;	// we don't need random profiles when we're not in the game dll
 #else
 	BotProfileList::const_iterator iter;
@@ -694,7 +692,7 @@ const BotProfile *BotProfileManager::GetRandomProfile( BotDifficultyType difficu
 		return nullptr;
 
 	// select one at random
-	int which = g_engfuncs.pfnRandomLong( 0, validCount-1 );
+	int which = engine::RandomLong( 0, validCount-1 );
 	for( iter = m_profileList.begin(); iter != m_profileList.end(); ++iter )
 	{
 		const BotProfile *profile = *iter;

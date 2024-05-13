@@ -33,10 +33,10 @@ void util::PrecacheWeapon(const char* szClassname)
 {
 	Entity* pent;
 
-	pent = g_engfuncs.pfnCreateNamedEntity(MAKE_STRING(szClassname));
+	pent = engine::CreateNamedEntity(MAKE_STRING(szClassname));
 	if (pent == nullptr)
 	{
-		g_engfuncs.pfnAlertMessage(at_console, "NULL Ent in UTIL_PrecacheOtherWeapon\n");
+		engine::AlertMessage(at_console, "NULL Ent in UTIL_PrecacheOtherWeapon\n");
 		return;
 	}
 
@@ -55,7 +55,7 @@ void util::PrecacheWeapon(const char* szClassname)
 		CBasePlayerWeapon::WeaponInfoArray[weapon->GetID()] = info;
 	}
 
-	g_engfuncs.pfnRemoveEntity(pent);
+	engine::RemoveEntity(pent);
 }
 
 // called by worldspawn
@@ -76,56 +76,56 @@ void W_Precache()
 		util::PrecacheOther("weaponbox");
 	}
 
-	g_sModelIndexShell = g_engfuncs.pfnPrecacheModel("models/shell.mdl");
+	g_sModelIndexShell = engine::PrecacheModel("models/shell.mdl");
 
-	g_sModelIndexLaser = g_engfuncs.pfnPrecacheModel("sprites/laserbeam.spr");
-	g_sModelIndexLaserDot = g_engfuncs.pfnPrecacheModel("sprites/laserdot.spr");
-	g_sModelIndexFireball = g_engfuncs.pfnPrecacheModel("sprites/zerogxplode.spr");
-	g_sModelIndexWExplosion = g_engfuncs.pfnPrecacheModel("sprites/WXplo1.spr");
-	g_sModelIndexSmoke = g_engfuncs.pfnPrecacheModel("sprites/steam1.spr");
-	g_sModelIndexBubbles = g_engfuncs.pfnPrecacheModel("sprites/bubble.spr");
-	g_sModelIndexBloodSpray = g_engfuncs.pfnPrecacheModel("sprites/bloodspray.spr");
-	g_sModelIndexBloodDrop = g_engfuncs.pfnPrecacheModel("sprites/blood.spr");
+	g_sModelIndexLaser = engine::PrecacheModel("sprites/laserbeam.spr");
+	g_sModelIndexLaserDot = engine::PrecacheModel("sprites/laserdot.spr");
+	g_sModelIndexFireball = engine::PrecacheModel("sprites/zerogxplode.spr");
+	g_sModelIndexWExplosion = engine::PrecacheModel("sprites/WXplo1.spr");
+	g_sModelIndexSmoke = engine::PrecacheModel("sprites/steam1.spr");
+	g_sModelIndexBubbles = engine::PrecacheModel("sprites/bubble.spr");
+	g_sModelIndexBloodSpray = engine::PrecacheModel("sprites/bloodspray.spr");
+	g_sModelIndexBloodDrop = engine::PrecacheModel("sprites/blood.spr");
 
-	g_engfuncs.pfnPrecacheModel("models/grenade.mdl");
-	g_engfuncs.pfnPrecacheModel("models/w_grenade.mdl");
-	g_engfuncs.pfnPrecacheModel("sprites/explode1.spr");
+	engine::PrecacheModel("models/grenade.mdl");
+	engine::PrecacheModel("models/w_grenade.mdl");
+	engine::PrecacheModel("sprites/explode1.spr");
 
-	g_engfuncs.pfnPrecacheModel("models/shell.mdl");
-	g_engfuncs.pfnPrecacheModel("models/shotgunshell.mdl");
+	engine::PrecacheModel("models/shell.mdl");
+	engine::PrecacheModel("models/shotgunshell.mdl");
 
-	g_engfuncs.pfnPrecacheSound("weapons/debris1.wav");
-	g_engfuncs.pfnPrecacheSound("weapons/debris2.wav");
-	g_engfuncs.pfnPrecacheSound("weapons/debris3.wav");
+	engine::PrecacheSound("weapons/debris1.wav");
+	engine::PrecacheSound("weapons/debris2.wav");
+	engine::PrecacheSound("weapons/debris3.wav");
 
-	g_engfuncs.pfnPrecacheSound("weapons/grenade_hit1.wav");
-	g_engfuncs.pfnPrecacheSound("weapons/grenade_hit2.wav");
-	g_engfuncs.pfnPrecacheSound("weapons/grenade_hit3.wav");
+	engine::PrecacheSound("weapons/grenade_hit1.wav");
+	engine::PrecacheSound("weapons/grenade_hit2.wav");
+	engine::PrecacheSound("weapons/grenade_hit3.wav");
 
-	g_engfuncs.pfnPrecacheSound("weapons/bullet_hit1.wav");
-	g_engfuncs.pfnPrecacheSound("weapons/bullet_hit2.wav");
+	engine::PrecacheSound("weapons/bullet_hit1.wav");
+	engine::PrecacheSound("weapons/bullet_hit2.wav");
 
-	g_engfuncs.pfnPrecacheSound("items/weapondrop1.wav");
+	engine::PrecacheSound("items/weapondrop1.wav");
 
-	g_engfuncs.pfnPrecacheSound("items/9mmclip1.wav");
-	g_engfuncs.pfnPrecacheSound("items/9mmclip2.wav");
+	engine::PrecacheSound("items/9mmclip1.wav");
+	engine::PrecacheSound("items/9mmclip2.wav");
 
-	g_engfuncs.pfnPrecacheSound("weapons/desert_eagle_sight.wav");
-	g_engfuncs.pfnPrecacheSound("weapons/desert_eagle_sight2.wav");
+	engine::PrecacheSound("weapons/desert_eagle_sight.wav");
+	engine::PrecacheSound("weapons/desert_eagle_sight2.wav");
 
-	g_engfuncs.pfnPrecacheSound("items/itembk2.wav");
-	g_engfuncs.pfnPrecacheSound("items/gunpickup2.wav");
+	engine::PrecacheSound("items/itembk2.wav");
+	engine::PrecacheSound("items/gunpickup2.wav");
 
-	g_engfuncs.pfnPrecacheSound("weapons/ric1.wav");
-	g_engfuncs.pfnPrecacheSound("weapons/ric2.wav");
-	g_engfuncs.pfnPrecacheSound("weapons/ric3.wav");
-	g_engfuncs.pfnPrecacheSound("weapons/ric4.wav");
-	g_engfuncs.pfnPrecacheSound("weapons/ric5.wav");
+	engine::PrecacheSound("weapons/ric1.wav");
+	engine::PrecacheSound("weapons/ric2.wav");
+	engine::PrecacheSound("weapons/ric3.wav");
+	engine::PrecacheSound("weapons/ric4.wav");
+	engine::PrecacheSound("weapons/ric5.wav");
 
 #ifdef HALFLIFE_GRENADES
-	g_engfuncs.pfnPrecacheSound("weapons/ax1.wav");
-	g_engfuncs.pfnPrecacheSound("weapons/grenade.wav");
-	g_engfuncs.pfnPrecacheSound("weapons/timer.wav");
+	engine::PrecacheSound("weapons/ax1.wav");
+	engine::PrecacheSound("weapons/grenade.wav");
+	engine::PrecacheSound("weapons/timer.wav");
 #endif
 }
 
@@ -149,7 +149,7 @@ bool CBasePlayerWeapon::Spawn()
 	v.movetype = MOVETYPE_TOSS;
 	v.solid = SOLID_TRIGGER;
 
-	g_engfuncs.pfnDropToFloor(edict());
+	engine::DropToFloor(edict());
 
 	m_iClip = iMaxClip();
 
@@ -168,17 +168,17 @@ void CBasePlayerWeapon::Precache()
 
 	if (info.pszView != nullptr)
 	{
-		g_engfuncs.pfnPrecacheModel(info.pszView);
+		engine::PrecacheModel(info.pszView);
 	}
 
 	if (info.pszWorld != nullptr)
 	{
-		g_engfuncs.pfnPrecacheModel(info.pszWorld);
+		engine::PrecacheModel(info.pszWorld);
 	}
 
 	if (info.pszPlayer != nullptr)
 	{
-		g_engfuncs.pfnPrecacheModel(info.pszPlayer);
+		engine::PrecacheModel(info.pszPlayer);
 	}
 }
 
@@ -265,7 +265,7 @@ CBaseEntity* CBasePlayerWeapon::Respawn()
 		pNewWeapon->ClearTouch();
 		pNewWeapon->SetThink(&CBasePlayerWeapon::AttemptToMaterialize);
 
-		g_engfuncs.pfnDropToFloor(edict());
+		engine::DropToFloor(edict());
 
 		pNewWeapon->v.nextthink = g_pGameRules->FlWeaponRespawnTime(this);
 	}
@@ -360,7 +360,7 @@ void CBasePlayerWeapon::SendWeaponAnim(int iAnim)
 
 	m_pPlayer->v.weaponanim = iAnim;
 
-	if (skiplocal && g_engfuncs.pfnCanSkipPlayer(m_pPlayer->edict()))
+	if (skiplocal && engine::CanSkipPlayer(m_pPlayer->edict()))
 		return;
 
 	MessageBegin(MSG_ONE, SVC_WEAPONANIM, m_pPlayer);
@@ -374,8 +374,8 @@ void CBasePlayerWeapon::Deploy()
 {
 	const auto info = GetInfo();
 
-	m_pPlayer->v.viewmodel = g_engfuncs.pfnModelIndex(info.pszView);
-	m_pPlayer->v.weaponmodel = g_engfuncs.pfnModelIndex(info.pszPlayer);
+	m_pPlayer->v.viewmodel = engine::ModelIndex(info.pszView);
+	m_pPlayer->v.weaponmodel = engine::ModelIndex(info.pszPlayer);
 	strcpy(m_pPlayer->m_szAnimExtention, info.pszAnimExt);
 
 	SendWeaponAnim(info.iAnims[kWeaponAnimDeploy]);

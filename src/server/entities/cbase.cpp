@@ -322,7 +322,7 @@ static void EntvarsKeyvalue(Entity* entity, KeyValueData* pkvd)
 		case FIELD_MODELNAME:
 		case FIELD_SOUNDNAME:
 		case FIELD_STRING:
-			(*(int*)((char*)entity + pField->fieldOffset)) = g_engfuncs.pfnAllocString(pkvd->szValue);
+			(*(int*)((char*)entity + pField->fieldOffset)) = engine::AllocString(pkvd->szValue);
 			break;
 
 		case FIELD_TIME:
@@ -345,7 +345,7 @@ static void EntvarsKeyvalue(Entity* entity, KeyValueData* pkvd)
 		case FIELD_EDICT:
 		case FIELD_ENTITY:
 		case FIELD_POINTER:
-			g_engfuncs.pfnAlertMessage(at_error, "Bad field in entity!!\n");
+			engine::AlertMessage(at_error, "Bad field in entity!!\n");
 			break;
 		}
 		pkvd->fHandled = 1;
@@ -420,7 +420,7 @@ void DispatchThink(Entity* pent)
 	{
 #ifdef HALFLIFE_SAVERESTORE
 		if (FBitSet(pEntity->v.flags, FL_DORMANT))
-			g_engfuncs.pfnAlertMessage(at_error, "Dormant entity %s is thinking!!\n", STRING(pEntity->v.classname));
+			engine::AlertMessage(at_error, "Dormant entity %s is thinking!!\n", STRING(pEntity->v.classname));
 #endif
 
 		pEntity->Think();
@@ -448,7 +448,7 @@ void DispatchSave(Entity* pent, SAVERESTOREDATA* pSaveData)
 		ENTITYTABLE* pTable = &pSaveData->pTable[pSaveData->currentIndex];
 
 		if (pTable->pent != pent)
-			g_engfuncs.pfnAlertMessage(at_error, "ENTITY TABLE OR INDEX IS WRONG!!!!\n");
+			engine::AlertMessage(at_error, "ENTITY TABLE OR INDEX IS WRONG!!!!\n");
 
 		if ((pEntity->ObjectCaps() & FCAP_DONT_SAVE) != 0)
 			return;
@@ -517,7 +517,7 @@ CBaseEntity* FindGlobalEntity(string_t classname, string_t globalname)
 	{
 		if (!streq(pReturn->v.classname, STRING(classname)))
 		{
-			g_engfuncs.pfnAlertMessage(at_console, "Global entity found %s, wrong class %s\n", STRING(globalname), STRING(pReturn->v.classname));
+			engine::AlertMessage(at_console, "Global entity found %s, wrong class %s\n", STRING(globalname), STRING(pReturn->v.classname));
 			pReturn = nullptr;
 		}
 	}
@@ -567,7 +567,7 @@ int DispatchRestore(Entity* pent, SAVERESTOREDATA* pSaveData, int globalEntity)
 			CBaseEntity* pNewEntity = FindGlobalEntity(tmpVars.classname, tmpVars.globalname);
 			if (pNewEntity)
 			{
-				//				g_engfuncs.pfnAlertMessage( at_console, "Overlay %s with %s\n", STRING(pNewEntity->v.classname), STRING(tmpVars.classname) );
+				//				engine::AlertMessage( at_console, "Overlay %s with %s\n", STRING(pNewEntity->v.classname), STRING(tmpVars.classname) );
 				// Tell the restore code we're overlaying a global entity from another level
 				restoreHelper.SetGlobalMode(true); // Don't overwrite global fields
 				pSaveData->vecLandmarkOffset = (pSaveData->vecLandmarkOffset - pNewEntity->v.mins) + tmpVars.mins;
@@ -601,14 +601,14 @@ int DispatchRestore(Entity* pent, SAVERESTOREDATA* pSaveData, int globalEntity)
 #if 0
 		if ( pEntity && !FStringNull(pEntity->v.globalname) && 0 != globalEntity ) 
 		{
-			g_engfuncs.pfnAlertMessage( at_console, "Global %s is %s\n", STRING(pEntity->v.globalname), STRING(pEntity->v.model) );
+			engine::AlertMessage( at_console, "Global %s is %s\n", STRING(pEntity->v.globalname), STRING(pEntity->v.model) );
 		}
 #endif
 
 		// Is this an overriding global entity (coming over the transition), or one restoring in a level
 		if (0 != globalEntity)
 		{
-			//			g_engfuncs.pfnAlertMessage( at_console, "After: %f %f %f %s\n", pEntity->v.origin.x, pEntity->v.origin.y, pEntity->v.origin.z, STRING(pEntity->v.model) );
+			//			engine::AlertMessage( at_console, "After: %f %f %f %s\n", pEntity->v.origin.x, pEntity->v.origin.y, pEntity->v.origin.z, STRING(pEntity->v.model) );
 			pSaveData->vecLandmarkOffset = oldOffset;
 			if (pEntity)
 			{
@@ -632,7 +632,7 @@ int DispatchRestore(Entity* pent, SAVERESTOREDATA* pSaveData, int globalEntity)
 			}
 			else
 			{
-				g_engfuncs.pfnAlertMessage(at_error, "Global Entity %s (%s) not in table!!!\n", STRING(pEntity->v.globalname), STRING(pEntity->v.classname));
+				engine::AlertMessage(at_error, "Global Entity %s (%s) not in table!!!\n", STRING(pEntity->v.globalname), STRING(pEntity->v.classname));
 				// Spawned entities default to 'On'
 				gGlobalState.EntityAdd(pEntity->v.globalname, gpGlobals->mapname, GLOBAL_ON);
 			}
@@ -878,7 +878,7 @@ bool CBaseEntity::Restore(CRestore& restore)
 		maxs = v.maxs;
 
 
-		g_engfuncs.pfnPrecacheModel((char*)STRING(v.model));
+		engine::PrecacheModel((char*)STRING(v.model));
 		SetModel(v.model);
 		SetSize(mins, maxs); // Reset them
 	}
@@ -937,19 +937,19 @@ void CBaseEntity::SetObjectCollisionBox()
 void CBaseEntity::SetOrigin(const Vector& org)
 {
 	v.origin = org;
-	g_engfuncs.pfnSetOrigin(&v, org);
+	engine::SetOrigin(&v, org);
 }
 
 
 void CBaseEntity::SetSize(const Vector& mins, const Vector& maxs)
 {
-	g_engfuncs.pfnSetSize(&v, mins, maxs);
+	engine::SetSize(&v, mins, maxs);
 }
 
 
 void CBaseEntity::SetModel(const char* name)
 {
-	g_engfuncs.pfnSetModel(&v, name);
+	engine::SetModel(&v, name);
 }
 
 
@@ -1004,11 +1004,11 @@ bool CBaseEntity::ShouldToggle(USE_TYPE useType, bool currentState)
 // will keep a pointer to it after this call.
 CBaseEntity* CBaseEntity::Create(const char* szName, const Vector& vecOrigin, const Vector& vecAngles, Entity& owner)
 {
-	auto pent = g_engfuncs.pfnCreateNamedEntity(MAKE_STRING(szName));
+	auto pent = engine::CreateNamedEntity(MAKE_STRING(szName));
 
 	if (pent == nullptr)
 	{
-		g_engfuncs.pfnAlertMessage(at_console, "NULL Ent in Create!\n");
+		engine::AlertMessage(at_console, "NULL Ent in Create!\n");
 		return nullptr;
 	}
 

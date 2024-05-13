@@ -895,7 +895,7 @@ bool CNavArea::SpliceEdit( CNavArea *other )
 	else
 	{
 		// both have valid, but different places - pick on at random
-		if (g_engfuncs.pfnRandomLong( 0, 100 ) < 50)
+		if (engine::RandomLong( 0, 100 ) < 50)
 			newArea->SetPlace( GetPlace() );
 		else
 			newArea->SetPlace( other->GetPlace() );
@@ -1759,7 +1759,7 @@ void BuildLadders( void )
 		ladder->m_bottomArea = TheNavAreaGrid.GetNearestNavArea( &center, true );
 		if (!ladder->m_bottomArea)
 		{
-			g_engfuncs.pfnAlertMessage( at_console, "ERROR: Unconnected ladder bottom at ( %g, %g, %g )\n", ladder->m_bottom.x, ladder->m_bottom.y, ladder->m_bottom.z );
+			engine::AlertMessage( at_console, "ERROR: Unconnected ladder bottom at ( %g, %g, %g )\n", ladder->m_bottom.x, ladder->m_bottom.y, ladder->m_bottom.z );
 		}
 		else
 		{
@@ -1797,7 +1797,7 @@ void BuildLadders( void )
 
 		// can't include behind area, since it is not used when going up a ladder
 		if (!ladder->m_topForwardArea && !ladder->m_topLeftArea && !ladder->m_topRightArea)
-			g_engfuncs.pfnAlertMessage( at_console, "ERROR: Unconnected ladder top at ( %g, %g, %g )\n", ladder->m_top.x, ladder->m_top.y, ladder->m_top.z );
+			engine::AlertMessage( at_console, "ERROR: Unconnected ladder top at ( %g, %g, %g )\n", ladder->m_top.x, ladder->m_top.y, ladder->m_top.z );
 
 		// store reference to ladder in the area(s)
 		if (ladder->m_topForwardArea)
@@ -2301,7 +2301,7 @@ float CNavArea::GetDistanceSquaredToPoint( const Vector *pos ) const
 CNavArea *CNavArea::GetRandomAdjacentArea( NavDirType dir ) const
 {
 	int count = m_connect[ dir ].size();
-	int which = g_engfuncs.pfnRandomLong( 0, count-1 );
+	int which = engine::RandomLong( 0, count-1 );
 
 	int i = 0;
 	NavConnectList::const_iterator iter;
@@ -3492,7 +3492,7 @@ const Vector *FindNearbyHidingSpot( CBaseEntity *me, const Vector *pos, CNavArea
 
 		if (collector.m_count)
 		{
-			int which = g_engfuncs.pfnRandomLong( 0, collector.m_count-1 );
+			int which = engine::RandomLong( 0, collector.m_count-1 );
 			return collector.m_hidingSpot[ which ];
 		}
 		else
@@ -3503,7 +3503,7 @@ const Vector *FindNearbyHidingSpot( CBaseEntity *me, const Vector *pos, CNavArea
 
 			if (collector.m_count)
 			{
-				int which = g_engfuncs.pfnRandomLong( 0, collector.m_count-1 );
+				int which = engine::RandomLong( 0, collector.m_count-1 );
 				return collector.m_hidingSpot[ which ];
 			}
 
@@ -3537,7 +3537,7 @@ const Vector *FindNearbyHidingSpot( CBaseEntity *me, const Vector *pos, CNavArea
 	}
 
 	// select a hiding spot at random
-	int which = g_engfuncs.pfnRandomLong( 0, collector.m_count-1 );
+	int which = engine::RandomLong( 0, collector.m_count-1 );
 	return collector.m_hidingSpot[ which ];
 }
 
@@ -3556,7 +3556,7 @@ const Vector *FindRandomHidingSpot( CBaseEntity *me, Place place, bool isSniper 
 
 		if (collector.m_count)
 		{
-			int which = g_engfuncs.pfnRandomLong( 0, collector.m_count-1 );
+			int which = engine::RandomLong( 0, collector.m_count-1 );
 			return collector.m_hidingSpot[ which ];
 		}
 		else
@@ -3567,7 +3567,7 @@ const Vector *FindRandomHidingSpot( CBaseEntity *me, Place place, bool isSniper 
 
 			if (collector.m_count)
 			{
-				int which = g_engfuncs.pfnRandomLong( 0, collector.m_count-1 );
+				int which = engine::RandomLong( 0, collector.m_count-1 );
 				return collector.m_hidingSpot[ which ];
 			}
 
@@ -3583,7 +3583,7 @@ const Vector *FindRandomHidingSpot( CBaseEntity *me, Place place, bool isSniper 
 		return nullptr;
 
 	// select a hiding spot at random
-	int which = g_engfuncs.pfnRandomLong( 0, collector.m_count-1 );
+	int which = engine::RandomLong( 0, collector.m_count-1 );
 	return collector.m_hidingSpot[ which ];
 }
 
@@ -3699,7 +3699,7 @@ const Vector *FindNearbyRetreatSpot( CBaseEntity *me, const Vector *start, CNavA
 		return nullptr;
 
 	// all remaining spots are ok - pick one at random
-	int which = g_engfuncs.pfnRandomLong( 0, collector.m_count-1 );
+	int which = engine::RandomLong( 0, collector.m_count-1 );
 	return collector.m_hidingSpot[ which ];
 }
 
@@ -3839,7 +3839,7 @@ void CNavArea::DrawConnectedAreas( void )
 	// shuffle dirSet[]
 	for( int swapCount=0; swapCount < 3; ++swapCount )
 	{
-		int swapI = g_engfuncs.pfnRandomLong( 0, NUM_DIRECTIONS-1 );
+		int swapI = engine::RandomLong( 0, NUM_DIRECTIONS-1 );
 		int nextI = swapI + 1;
 		if (nextI >= NUM_DIRECTIONS)
 			nextI = 0;

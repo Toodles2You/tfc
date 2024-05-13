@@ -47,11 +47,11 @@ Trace::Trace(const Vector& start, const Vector& end, int ignore, int traceFlags)
 
 	TraceResult trace;
 
-    g_engfuncs.pfnTraceLine(
+    engine::TraceLine(
         const_cast<Vector&>(start),
         const_cast<Vector&>(end),
         flags,
-        g_engfuncs.pfnPEntityOfEntIndex(ignore),
+        engine::PEntityOfEntIndex(ignore),
         &trace);
 
     result = 0;
@@ -65,7 +65,7 @@ Trace::Trace(const Vector& start, const Vector& end, int ignore, int traceFlags)
     normal = trace.vecPlaneNormal;
     if (trace.pHit != nullptr)
     {
-        entity = g_engfuncs.pfnIndexOfEdict(trace.pHit);
+        entity = engine::IndexOfEdict(trace.pHit);
     }
     else
     {

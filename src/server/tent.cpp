@@ -45,7 +45,7 @@ void tent::Ricochet(const Vector& position, float scale)
 
 void tent::TeleportSplash(CBaseEntity* entity)
 {
-	g_engfuncs.pfnPlaybackEvent(
+	engine::PlaybackEvent(
 		FEV_GLOBAL | FEV_RELIABLE,
 		entity->edict(),
 		g_usTeleport,
@@ -68,7 +68,7 @@ void tent::Explosion(
 	bool smoke,
 	bool sparks)
 {
-	g_engfuncs.pfnPlaybackEvent(
+	engine::PlaybackEvent(
 		FEV_GLOBAL | FEV_RELIABLE,
 		CWorld::World->edict(),
 		g_usExplosion,
@@ -89,7 +89,7 @@ void tent::SpawnCorpse(CBaseEntity* entity, const int gibMode)
 {
 	Vector attackAngles = util::VecToAngles(g_vecAttackDir);
 
-	g_engfuncs.pfnPlaybackEvent(
+	engine::PlaybackEvent(
 		FEV_GLOBAL | FEV_RELIABLE,
 		entity->edict(),
 		g_usGibbed,

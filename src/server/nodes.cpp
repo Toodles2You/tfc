@@ -121,7 +121,7 @@ bool CGraph::AllocNodes()
 	// could not malloc space for all the nodes!
 	if (!m_pNodes)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "**ERROR**\nCouldn't malloc %d nodes!\n", m_cNodes);
+		engine::AlertMessage(at_aiconsole, "**ERROR**\nCouldn't malloc %d nodes!\n", m_cNodes);
 		return false;
 	}
 
@@ -195,7 +195,7 @@ Entity* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
 	}
 	else
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Unsupported PathEnt:\n'%s'\n", STRING(pevLinkEnt->classname));
+		engine::AlertMessage(at_aiconsole, "Unsupported PathEnt:\n'%s'\n", STRING(pevLinkEnt->classname));
 		return nullptr;
 	}
 }
@@ -214,13 +214,13 @@ bool CGraph::HandleLinkEnt(int iNode, Entity* pevLinkEnt, int afCapMask, NODEQUE
 
 	if (0 == m_fGraphPresent || 0 == m_fGraphPointersSet)
 	{ // protect us in the case that the node graph isn't available
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Graph not ready!\n");
+		engine::AlertMessage(at_aiconsole, "Graph not ready!\n");
 		return false;
 	}
 
 	if (pevLinkEnt == nullptr)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "dead path ent!\n");
+		engine::AlertMessage(at_aiconsole, "dead path ent!\n");
 		return true;
 	}
 	pentWorld = nullptr;
@@ -275,7 +275,7 @@ bool CGraph::HandleLinkEnt(int iNode, Entity* pevLinkEnt, int afCapMask, NODEQUE
 	}
 	else
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Unhandled Ent in Path %s\n", STRING(pevLinkEnt->classname));
+		engine::AlertMessage(at_aiconsole, "Unhandled Ent in Path %s\n", STRING(pevLinkEnt->classname));
 		return false;
 	}
 
@@ -324,7 +324,7 @@ int	CGraph:: FindNearestLink ( const Vector &vecTestPoint, int *piNearestLink, b
 
 		if ( m_pNodes[ i ].m_cNumLinks <= 0 )
 		{// this shouldn't happen!
-			g_engfuncs.pfnAlertMessage ( at_aiconsole, "**Node %d has no links\n", i );
+			engine::AlertMessage ( at_aiconsole, "**Node %d has no links\n", i );
 			continue;
 		}
 
@@ -428,7 +428,7 @@ int	CGraph:: FindNearestLink ( const Vector &vecTestPoint, int *piNearestLink, b
 	}
 */
 
-	g_engfuncs.pfnAlertMessage ( at_aiconsole, "%d Checked\n", cChecked );
+	engine::AlertMessage ( at_aiconsole, "%d Checked\n", cChecked );
 	return fSuccess;
 }
 
@@ -446,7 +446,7 @@ int CGraph::HullIndex(const CBaseEntity* pEntity)
 	else if (pEntity->v.mins == Vector(-32, -32, 0))
 		return NODE_LARGE_HULL;
 
-	//	g_engfuncs.pfnAlertMessage ( at_aiconsole, "Unknown Hull Mins!\n" );
+	//	engine::AlertMessage ( at_aiconsole, "Unknown Hull Mins!\n" );
 	return NODE_HUMAN_HULL;
 }
 
@@ -483,14 +483,14 @@ float CGraph::PathLength(int iStart, int iDest, int iHull, int afCapMask)
 	{
 		if (iMaxLoop-- <= 0)
 		{
-			g_engfuncs.pfnAlertMessage(at_console, "Route Failure\n");
+			engine::AlertMessage(at_console, "Route Failure\n");
 			return 0;
 		}
 
 		iNext = NextNodeInRoute(iCurrentNode, iDest, iHull, iCap);
 		if (iCurrentNode == iNext)
 		{
-			//g_engfuncs.pfnAlertMessage(at_aiconsole, "SVD: Can't get there from here..\n");
+			//engine::AlertMessage(at_aiconsole, "SVD: Can't get there from here..\n");
 			return 0;
 		}
 
@@ -498,7 +498,7 @@ float CGraph::PathLength(int iStart, int iDest, int iHull, int afCapMask)
 		HashSearch(iCurrentNode, iNext, iLink);
 		if (iLink < 0)
 		{
-			g_engfuncs.pfnAlertMessage(at_console, "HashLinks is broken from %d to %d.\n", iCurrentNode, iDest);
+			engine::AlertMessage(at_console, "HashLinks is broken from %d to %d.\n", iCurrentNode, iDest);
 			return 0;
 		}
 		CLink& link = Link(iLink);
@@ -523,7 +523,7 @@ int CGraph::NextNodeInRoute(int iCurrentNode, int iDest, int iHull, int iCap)
 	while (nCount > 0)
 	{
 		char ch = *pRoute++;
-		//g_engfuncs.pfnAlertMessage(at_aiconsole, "C(%d)", ch);
+		//engine::AlertMessage(at_aiconsole, "C(%d)", ch);
 		if (ch < 0)
 		{
 			// Sequence phrase
@@ -533,17 +533,17 @@ int CGraph::NextNodeInRoute(int iCurrentNode, int iDest, int iHull, int iCap)
 			{
 				iNext = iDest;
 				nCount = 0;
-				//g_engfuncs.pfnAlertMessage(at_aiconsole, "SEQ: iNext/iDest=%d\n", iNext);
+				//engine::AlertMessage(at_aiconsole, "SEQ: iNext/iDest=%d\n", iNext);
 			}
 			else
 			{
-				//g_engfuncs.pfnAlertMessage(at_aiconsole, "SEQ: nCount + ch (%d + %d)\n", nCount, ch);
+				//engine::AlertMessage(at_aiconsole, "SEQ: nCount + ch (%d + %d)\n", nCount, ch);
 				nCount = nCount - ch;
 			}
 		}
 		else
 		{
-			//g_engfuncs.pfnAlertMessage(at_aiconsole, "C(%d)", *pRoute);
+			//engine::AlertMessage(at_aiconsole, "C(%d)", *pRoute);
 
 			// Repeat phrase
 			//
@@ -555,11 +555,11 @@ int CGraph::NextNodeInRoute(int iCurrentNode, int iDest, int iHull, int iCap)
 				else if (iNext < 0)
 					iNext += m_cNodes;
 				nCount = 0;
-				//g_engfuncs.pfnAlertMessage(at_aiconsole, "REP: iNext=%d\n", iNext);
+				//engine::AlertMessage(at_aiconsole, "REP: iNext=%d\n", iNext);
 			}
 			else
 			{
-				//g_engfuncs.pfnAlertMessage(at_aiconsole, "REP: nCount - ch+1 (%d - %d+1)\n", nCount, ch);
+				//engine::AlertMessage(at_aiconsole, "REP: nCount - ch+1 (%d - %d+1)\n", nCount, ch);
 				nCount = nCount - ch - 1;
 			}
 			pRoute++;
@@ -586,13 +586,13 @@ int CGraph::FindShortestPath(int* piPath, int iStart, int iDest, int iHull, int 
 
 	if (0 == m_fGraphPresent || 0 == m_fGraphPointersSet)
 	{ // protect us in the case that the node graph isn't available or built
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Graph not ready!\n");
+		engine::AlertMessage(at_aiconsole, "Graph not ready!\n");
 		return 0;
 	}
 
 	if (iStart < 0 || iStart > m_cNodes)
 	{ // The start node is bad?
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Can't build a path, iStart is %d!\n", iStart);
+		engine::AlertMessage(at_aiconsole, "Can't build a path, iStart is %d!\n", iStart);
 		return 0;
 	}
 
@@ -614,7 +614,7 @@ int CGraph::FindShortestPath(int* piPath, int iStart, int iDest, int iHull, int 
 		iCurrentNode = iStart;
 		int iNext;
 
-		//g_engfuncs.pfnAlertMessage(at_aiconsole, "GOAL: %d to %d\n", iStart, iDest);
+		//engine::AlertMessage(at_aiconsole, "GOAL: %d to %d\n", iStart, iDest);
 
 		// Until we arrive at the destination
 		//
@@ -623,19 +623,19 @@ int CGraph::FindShortestPath(int* piPath, int iStart, int iDest, int iHull, int 
 			iNext = NextNodeInRoute(iCurrentNode, iDest, iHull, iCap);
 			if (iCurrentNode == iNext)
 			{
-				//g_engfuncs.pfnAlertMessage(at_aiconsole, "SVD: Can't get there from here..\n");
+				//engine::AlertMessage(at_aiconsole, "SVD: Can't get there from here..\n");
 				return 0;
 				break;
 			}
 			if (iNumPathNodes >= MAX_PATH_SIZE)
 			{
-				//g_engfuncs.pfnAlertMessage(at_aiconsole, "SVD: Don't return the entire path.\n");
+				//engine::AlertMessage(at_aiconsole, "SVD: Don't return the entire path.\n");
 				break;
 			}
 			piPath[iNumPathNodes++] = iNext;
 			iCurrentNode = iNext;
 		}
-		//g_engfuncs.pfnAlertMessage( at_aiconsole, "SVD: Path with %d nodes.\n", iNumPathNodes);
+		//engine::AlertMessage( at_aiconsole, "SVD: Path with %d nodes.\n", iNumPathNodes);
 	}
 	else
 	{
@@ -689,7 +689,7 @@ int CGraph::FindShortestPath(int* piPath, int iStart, int iDest, int iHull, int 
 				iVisitNode = INodeLink(iCurrentNode, i);
 				if ((m_pLinkPool[m_pNodes[iCurrentNode].m_iFirstLink + i].m_afLinkInfo & iHullMask) != iHullMask)
 				{ // monster is too large to walk this connection
-					//g_engfuncs.pfnAlertMessage ( at_aiconsole, "fat ass %d/%d\n",m_pLinkPool[ m_pNodes[ iCurrentNode ].m_iFirstLink + i ].m_afLinkInfo, iMonsterHull );
+					//engine::AlertMessage ( at_aiconsole, "fat ass %d/%d\n",m_pLinkPool[ m_pNodes[ iCurrentNode ].m_iFirstLink + i ].m_afLinkInfo, iMonsterHull );
 					continue;
 				}
 				// check the connection from the current node to the node we're about to mark visited and push into the queue
@@ -779,9 +779,9 @@ int CGraph::FindShortestPath(int* piPath, int iStart, int iDest, int iHull, int 
 inline unsigned int Hash(void* p, int len)
 {
 	CRC32_t ulCrc;
-	g_engfuncs.pfnCRC32_Init(&ulCrc);
-	g_engfuncs.pfnCRC32_ProcessBuffer(&ulCrc, p, len);
-	return g_engfuncs.pfnCRC32_Final(ulCrc);
+	engine::CRC32_Init(&ulCrc);
+	engine::CRC32_ProcessBuffer(&ulCrc, p, len);
+	return engine::CRC32_Final(ulCrc);
 }
 
 void inline CalcBounds(int& Lower, int& Upper, int Goal, int Best)
@@ -873,7 +873,7 @@ int CGraph::FindNearestNode(const Vector& vecOrigin, int afNodeTypes)
 
 	if (0 == m_fGraphPresent || 0 == m_fGraphPointersSet)
 	{ // protect us in the case that the node graph isn't available
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Graph not ready!\n");
+		engine::AlertMessage(at_aiconsole, "Graph not ready!\n");
 		return -1;
 	}
 
@@ -882,12 +882,12 @@ int CGraph::FindNearestNode(const Vector& vecOrigin, int afNodeTypes)
 	unsigned int iHash = (CACHE_SIZE - 1) & Hash((void*)(const float*)vecOrigin, sizeof(vecOrigin));
 	if (m_Cache[iHash].v == vecOrigin)
 	{
-		//g_engfuncs.pfnAlertMessage(at_aiconsole, "Cache Hit.\n");
+		//engine::AlertMessage(at_aiconsole, "Cache Hit.\n");
 		return m_Cache[iHash].n;
 	}
 	else
 	{
-		//g_engfuncs.pfnAlertMessage(at_aiconsole, "Cache Miss.\n");
+		//engine::AlertMessage(at_aiconsole, "Cache Miss.\n");
 	}
 
 	// Mark all points as unchecked.
@@ -1092,7 +1092,7 @@ int CGraph::FindNearestNode(const Vector& vecOrigin, int afNodeTypes)
 
 	if (iNearestCheck != m_iNearest)
 	{
-		g_engfuncs.pfnAlertMessage( at_aiconsole, "NOT closest %d(%f,%f,%f) %d(%f,%f,%f).\n",
+		engine::AlertMessage( at_aiconsole, "NOT closest %d(%f,%f,%f) %d(%f,%f,%f).\n",
 			iNearestCheck,
 			m_pNodes[iNearestCheck].m_vecOriginPeek.x,
 			m_pNodes[iNearestCheck].m_vecOriginPeek.y,
@@ -1104,7 +1104,7 @@ int CGraph::FindNearestNode(const Vector& vecOrigin, int afNodeTypes)
 	}
 	if (m_iNearest == -1)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "All that work for nothing.\n");
+		engine::AlertMessage(at_aiconsole, "All that work for nothing.\n");
 	}
 #endif
 	m_Cache[iHash].v = vecOrigin;
@@ -1125,13 +1125,13 @@ void CGraph::ShowNodeConnections(int iNode)
 
 	if (0 == m_fGraphPresent || 0 == m_fGraphPointersSet)
 	{ // protect us in the case that the node graph isn't available or built
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Graph not ready!\n");
+		engine::AlertMessage(at_aiconsole, "Graph not ready!\n");
 		return;
 	}
 
 	if (iNode < 0)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Can't show connections for node %d\n", iNode);
+		engine::AlertMessage(at_aiconsole, "Can't show connections for node %d\n", iNode);
 		return;
 	}
 
@@ -1141,7 +1141,7 @@ void CGraph::ShowNodeConnections(int iNode)
 
 	if (pNode->m_cNumLinks <= 0)
 	{ // no connections!
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "**No Connections!\n");
+		engine::AlertMessage(at_aiconsole, "**No Connections!\n");
 	}
 
 	for (i = 0; i < pNode->m_cNumLinks; i++)
@@ -1191,7 +1191,7 @@ int CGraph::LinkVisibleNodes(CLink* pLinkPool, FSFile& file, int* piBadNode)
 
 	if (m_cNodes <= 0)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "No Nodes!\n");
+		engine::AlertMessage(at_aiconsole, "No Nodes!\n");
 		return 0;
 	}
 
@@ -1199,7 +1199,7 @@ int CGraph::LinkVisibleNodes(CLink* pLinkPool, FSFile& file, int* piBadNode)
 	// file.
 	if (!file)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "**LinkVisibleNodes:\ncan't write to file.");
+		engine::AlertMessage(at_aiconsole, "**LinkVisibleNodes:\ncan't write to file.");
 	}
 	else
 	{
@@ -1329,14 +1329,14 @@ int CGraph::LinkVisibleNodes(CLink* pLinkPool, FSFile& file, int* piBadNode)
 			// we need to allow for a larger initial link pool.
 			if (cLinksThisNode == MAX_NODE_INITIAL_LINKS)
 			{
-				g_engfuncs.pfnAlertMessage(at_aiconsole, "**LinkVisibleNodes:\nNode %d has NodeLinks > MAX_NODE_INITIAL_LINKS", i);
+				engine::AlertMessage(at_aiconsole, "**LinkVisibleNodes:\nNode %d has NodeLinks > MAX_NODE_INITIAL_LINKS", i);
 				file.Printf("** NODE %d HAS NodeLinks > MAX_NODE_INITIAL_LINKS **\n", i);
 				*piBadNode = i;
 				return 0;
 			}
 			else if (cTotalLinks > MAX_NODE_INITIAL_LINKS * m_cNodes)
 			{ // this is paranoia
-				g_engfuncs.pfnAlertMessage(at_aiconsole, "**LinkVisibleNodes:\nTotalLinks > MAX_NODE_INITIAL_LINKS * NUMNODES");
+				engine::AlertMessage(at_aiconsole, "**LinkVisibleNodes:\nTotalLinks > MAX_NODE_INITIAL_LINKS * NUMNODES");
 				*piBadNode = i;
 				return 0;
 			}
@@ -1578,7 +1578,7 @@ bool CNodeEnt::Spawn()
 
 	if (WorldGraph.m_cNodes >= MAX_NODES)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "cNodes > MAX_NODES\n");
+		engine::AlertMessage(at_aiconsole, "cNodes > MAX_NODES\n");
 		return;
 	}
 
@@ -1682,7 +1682,7 @@ void CTestHull::BuildNodeGraph()
 	pTempPool = (CLink*)calloc(sizeof(CLink), (WorldGraph.m_cNodes * MAX_NODE_INITIAL_LINKS));
 	if (!pTempPool)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "**Could not malloc TempPool!\n");
+		engine::AlertMessage(at_aiconsole, "**Could not malloc TempPool!\n");
 		return;
 	}
 
@@ -1695,7 +1695,7 @@ void CTestHull::BuildNodeGraph()
 
 	if (!file)
 	{ // file error
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Couldn't create %s!\n", nrpFileName.c_str());
+		engine::AlertMessage(at_aiconsole, "Couldn't create %s!\n", nrpFileName.c_str());
 
 		if (pTempPool)
 		{
@@ -1732,7 +1732,7 @@ void CTestHull::BuildNodeGraph()
 		{
 			// do nothing
 		}
-		else if (g_engfuncs.pfnPointContents(WorldGraph.m_pNodes[i].m_vecOrigin) == CONTENTS_WATER)
+		else if (engine::PointContents(WorldGraph.m_pNodes[i].m_vecOrigin) == CONTENTS_WATER)
 		{
 			WorldGraph.m_pNodes[i].m_afNodeInfo |= bits_NODE_WATER;
 		}
@@ -1778,7 +1778,7 @@ void CTestHull::BuildNodeGraph()
 
 	if (0 == cPoolLinks)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "**ConnectVisibleNodes FAILED!\n");
+		engine::AlertMessage(at_aiconsole, "**ConnectVisibleNodes FAILED!\n");
 
 		SetThink(&CTestHull::ShowBadNode); // send the hull off to show the offending node.
 		//v.solid = SOLID_NOT;
@@ -1840,13 +1840,13 @@ void CTestHull::BuildNodeGraph()
 
 				if (!FBitSet(v.flags, FL_ONGROUND))
 				{
-					g_engfuncs.pfnAlertMessage(at_aiconsole, "OFFGROUND!\n");
+					engine::AlertMessage(at_aiconsole, "OFFGROUND!\n");
 				}
 
 				// now build a yaw that points to the dest node, and get the distance.
 				if (j < 0)
 				{
-					g_engfuncs.pfnAlertMessage(at_aiconsole, "**** j = %d ****\n", j);
+					engine::AlertMessage(at_aiconsole, "**** j = %d ****\n", j);
 					if (pTempPool)
 					{
 						free(pTempPool);
@@ -1885,7 +1885,7 @@ void CTestHull::BuildNodeGraph()
 						if ((step + stepSize) >= (flDist - 1))
 							stepSize = (flDist - step) - 1;
 
-						if (!g_engfuncs.pfnWalkMove(&v, flYaw, stepSize, MoveMode))
+						if (!engine::WalkMove(&v, flYaw, stepSize, MoveMode))
 						{ // can't take the next step
 
 							fWalkFailed = true;
@@ -1895,7 +1895,7 @@ void CTestHull::BuildNodeGraph()
 
 					if (!fWalkFailed && (v.origin - vecSpot).Length() > 64)
 					{
-						// g_engfuncs.pfnAlertMessage( at_console, "bogus walk\n");
+						// engine::AlertMessage( at_console, "bogus walk\n");
 						// we thought we
 						fWalkFailed = true;
 					}
@@ -1959,7 +1959,7 @@ void CTestHull::BuildNodeGraph()
 
 	if (!WorldGraph.m_pLinkPool)
 	{ // couldn't make the link pool!
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Couldn't malloc LinkPool!\n");
+		engine::AlertMessage(at_aiconsole, "Couldn't malloc LinkPool!\n");
 		if (pTempPool)
 		{
 			free(pTempPool);
@@ -2031,7 +2031,7 @@ void CTestHull::BuildNodeGraph()
 	file.Printf("-------------------------------------------------------------------------------\n");
 
 
-	g_engfuncs.pfnAlertMessage(at_aiconsole, "%d Nodes, %d Connections\n", WorldGraph.m_cNodes, cPoolLinks);
+	engine::AlertMessage(at_aiconsole, "%d Nodes, %d Connections\n", WorldGraph.m_cNodes, cPoolLinks);
 
 	// This is used for FindNearestNode
 	//
@@ -2068,7 +2068,7 @@ void CTestHull::BuildNodeGraph()
 
 	// save the node graph for this level
 	WorldGraph.FSaveGraph(STRING(gpGlobals->mapname));
-	g_engfuncs.pfnAlertMessage(at_console, "Done.\n");
+	engine::AlertMessage(at_console, "Done.\n");
 }
 
 
@@ -2084,7 +2084,7 @@ void CTestHull::PathFind()
 
 	if (0 == WorldGraph.m_fGraphPresent || 0 == WorldGraph.m_fGraphPointersSet)
 	{ // protect us in the case that the node graph isn't available
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Graph not ready!\n");
+		engine::AlertMessage(at_aiconsole, "Graph not ready!\n");
 		return;
 	}
 
@@ -2092,11 +2092,11 @@ void CTestHull::PathFind()
 
 	if (0 == iPathSize)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "No Path!\n");
+		engine::AlertMessage(at_aiconsole, "No Path!\n");
 		return;
 	}
 
-	g_engfuncs.pfnAlertMessage(at_aiconsole, "%d\n", iPathSize);
+	engine::AlertMessage(at_aiconsole, "%d\n", iPathSize);
 
 	pNode = &WorldGraph.m_pNodes[iPath[0]];
 
@@ -2359,7 +2359,7 @@ bool CGraph::FLoadGraph(const char* szMapName)
 	{
 		// This file was written by a different build of the dll!
 		//
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "**ERROR** Graph version is %d, expected %d\n", iVersion, GRAPH_VERSION);
+		engine::AlertMessage(at_aiconsole, "**ERROR** Graph version is %d, expected %d\n", iVersion, GRAPH_VERSION);
 		return false;
 	}
 
@@ -2386,7 +2386,7 @@ bool CGraph::FLoadGraph(const char* szMapName)
 
 	if (!m_pNodes)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "**ERROR**\nCouldn't malloc %d nodes!\n", m_cNodes);
+		engine::AlertMessage(at_aiconsole, "**ERROR**\nCouldn't malloc %d nodes!\n", m_cNodes);
 		return false;
 	}
 
@@ -2405,7 +2405,7 @@ bool CGraph::FLoadGraph(const char* szMapName)
 
 	if (!m_pLinkPool)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "**ERROR**\nCouldn't malloc %d link!\n", m_cLinks);
+		engine::AlertMessage(at_aiconsole, "**ERROR**\nCouldn't malloc %d link!\n", m_cLinks);
 		return false;
 	}
 
@@ -2422,7 +2422,7 @@ bool CGraph::FLoadGraph(const char* szMapName)
 	m_di = (DIST_INFO*)calloc(sizeof(DIST_INFO), m_cNodes);
 	if (!m_di)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "***ERROR**\nCouldn't malloc %d entries sorting nodes!\n", m_cNodes);
+		engine::AlertMessage(at_aiconsole, "***ERROR**\nCouldn't malloc %d entries sorting nodes!\n", m_cNodes);
 		return false;
 	}
 
@@ -2440,7 +2440,7 @@ bool CGraph::FLoadGraph(const char* szMapName)
 	m_pRouteInfo = (char*)calloc(sizeof(char), m_nRouteInfo);
 	if (!m_pRouteInfo)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "***ERROR**\nCounldn't malloc %d route bytes!\n", m_nRouteInfo);
+		engine::AlertMessage(at_aiconsole, "***ERROR**\nCounldn't malloc %d route bytes!\n", m_nRouteInfo);
 		return false;
 	}
 	m_CheckedCounter = 0;
@@ -2463,7 +2463,7 @@ bool CGraph::FLoadGraph(const char* szMapName)
 	m_pHashLinks = (short*)calloc(sizeof(short), m_nHashLinks);
 	if (!m_pHashLinks)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "***ERROR**\nCounldn't malloc %d hash link bytes!\n", m_nHashLinks);
+		engine::AlertMessage(at_aiconsole, "***ERROR**\nCounldn't malloc %d hash link bytes!\n", m_nHashLinks);
 		return false;
 	}
 
@@ -2482,7 +2482,7 @@ bool CGraph::FLoadGraph(const char* szMapName)
 
 	if (length != 0)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "***WARNING***:Node graph was longer than expected by %d bytes.!\n", length);
+		engine::AlertMessage(at_aiconsole, "***WARNING***:Node graph was longer than expected by %d bytes.!\n", length);
 	}
 
 	return true;
@@ -2496,7 +2496,7 @@ bool CGraph::FSaveGraph(const char* szMapName)
 {
 	if (0 == m_fGraphPresent || 0 == m_fGraphPointersSet)
 	{ // protect us in the case that the node graph isn't available or built
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Graph not ready!\n");
+		engine::AlertMessage(at_aiconsole, "Graph not ready!\n");
 		return false;
 	}
 
@@ -2507,11 +2507,11 @@ bool CGraph::FSaveGraph(const char* szMapName)
 
 	FSFile file{fileName.c_str(), "wb", "GAMECONFIG"};
 
-	g_engfuncs.pfnAlertMessage(at_aiconsole, "Created: %s\n", fileName.c_str());
+	engine::AlertMessage(at_aiconsole, "Created: %s\n", fileName.c_str());
 
 	if (!file)
 	{ // couldn't create
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Couldn't Create: %s\n", fileName.c_str());
+		engine::AlertMessage(at_aiconsole, "Couldn't Create: %s\n", fileName.c_str());
 		return false;
 	}
 
@@ -2575,7 +2575,7 @@ bool CGraph::FSetGraphPointers()
 			{
 				// the ent isn't around anymore? Either there is a major problem, or it was removed from the world
 				// ( like a func_breakable that's been destroyed or something ). Make sure that LinkEnt is null.
-				g_engfuncs.pfnAlertMessage(at_aiconsole, "**Could not find model %s\n", name);
+				engine::AlertMessage(at_aiconsole, "**Could not find model %s\n", name);
 				m_pLinkPool[i].m_pLinkEnt = nullptr;
 			}
 			else
@@ -2622,7 +2622,7 @@ bool CGraph::CheckNODFile(const char* szMapName)
 	{
 		if (iCompare > 0)
 		{ // BSP file is newer.
-			g_engfuncs.pfnAlertMessage(at_aiconsole, ".NOD File will be updated\n\n");
+			engine::AlertMessage(at_aiconsole, ".NOD File will be updated\n\n");
 			retValue = false;
 		}
 	}
@@ -2649,9 +2649,9 @@ void CGraph::HashInsert(int iSrcNode, int iDestNode, int iKey)
 	np.iSrc = iSrcNode;
 	np.iDest = iDestNode;
 	CRC32_t dwHash;
-	g_engfuncs.pfnCRC32_Init(&dwHash);
-	g_engfuncs.pfnCRC32_ProcessBuffer(&dwHash, &np, sizeof(np));
-	dwHash = g_engfuncs.pfnCRC32_Final(dwHash);
+	engine::CRC32_Init(&dwHash);
+	engine::CRC32_ProcessBuffer(&dwHash, &np, sizeof(np));
+	dwHash = engine::CRC32_Final(dwHash);
 
 	int di = m_HashPrimes[dwHash & 15];
 	int i = (dwHash >> 4) % m_nHashLinks;
@@ -2671,9 +2671,9 @@ void CGraph::HashSearch(int iSrcNode, int iDestNode, int& iKey)
 	np.iSrc = iSrcNode;
 	np.iDest = iDestNode;
 	CRC32_t dwHash;
-	g_engfuncs.pfnCRC32_Init(&dwHash);
-	g_engfuncs.pfnCRC32_ProcessBuffer(&dwHash, &np, sizeof(np));
-	dwHash = g_engfuncs.pfnCRC32_Final(dwHash);
+	engine::CRC32_Init(&dwHash);
+	engine::CRC32_ProcessBuffer(&dwHash, &np, sizeof(np));
+	dwHash = engine::CRC32_Final(dwHash);
 
 	int di = m_HashPrimes[dwHash & 15];
 	int i = (dwHash >> 4) % m_nHashLinks;
@@ -2764,7 +2764,7 @@ void CGraph::HashChoosePrimes(int TableSize)
 	//
 	for (iPrime = 0; iPrime < 16 - 1; iPrime++)
 	{
-		int Pick = g_engfuncs.pfnRandomLong(0, 15 - iPrime);
+		int Pick = engine::RandomLong(0, 15 - iPrime);
 		int Temp = m_HashPrimes[Pick];
 		m_HashPrimes[Pick] = m_HashPrimes[15 - iPrime];
 		m_HashPrimes[15 - iPrime] = Temp;
@@ -2846,7 +2846,7 @@ void CGraph::BuildLinkLookups()
 	m_pHashLinks = (short*)calloc(sizeof(short), m_nHashLinks);
 	if (!m_pHashLinks)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Couldn't allocated Link Lookup Table.\n");
+		engine::AlertMessage(at_aiconsole, "Couldn't allocated Link Lookup Table.\n");
 		return;
 	}
 	int i;
@@ -2868,7 +2868,7 @@ void CGraph::BuildLinkLookups()
 		HashSearch(link.m_iSrcNode, link.m_iDestNode, iKey);
 		if (iKey != i)
 		{
-			g_engfuncs.pfnAlertMessage(at_aiconsole, "HashLinks don't match (%d versus %d)\n", i, iKey);
+			engine::AlertMessage(at_aiconsole, "HashLinks don't match (%d versus %d)\n", i, iKey);
 		}
 	}
 #endif
@@ -2884,7 +2884,7 @@ void CGraph::BuildRegionTables()
 	m_di = (DIST_INFO*)calloc(sizeof(DIST_INFO), m_cNodes);
 	if (!m_di)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Couldn't allocated node ordering array.\n");
+		engine::AlertMessage(at_aiconsole, "Couldn't allocated node ordering array.\n");
 		return;
 	}
 
@@ -3163,7 +3163,7 @@ void CGraph::ComputeStaticRoutingTables()
 								}
 								else
 								{
-									g_engfuncs.pfnAlertMessage(at_aiconsole, "Nodes need sorting (%d,%d)!\n", iLastNode, iFrom);
+									engine::AlertMessage(at_aiconsole, "Nodes need sorting (%d,%d)!\n", iLastNode, iFrom);
 								}
 								cRepeats = 0;
 
@@ -3259,7 +3259,7 @@ void CGraph::ComputeStaticRoutingTables()
 						}
 						else
 						{
-							g_engfuncs.pfnAlertMessage(at_aiconsole, "Nodes need sorting (%d,%d)!\n", iLastNode, iFrom);
+							engine::AlertMessage(at_aiconsole, "Nodes need sorting (%d,%d)!\n", iLastNode, iFrom);
 						}
 					}
 					if (0 != cSequence)
@@ -3310,7 +3310,7 @@ void CGraph::ComputeStaticRoutingTables()
 				}
 			}
 		}
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Size of Routes = %d\n", nTotalCompressedSize);
+		engine::AlertMessage(at_aiconsole, "Size of Routes = %d\n", nTotalCompressedSize);
 	}
 
 	delete[] Routes;
@@ -3392,7 +3392,7 @@ void CGraph::TestRoutingTables()
 							}
 							if (!bFound)
 							{
-								g_engfuncs.pfnAlertMessage(at_aiconsole, "No link.\n");
+								engine::AlertMessage(at_aiconsole, "No link.\n");
 							}
 						}
 
@@ -3417,7 +3417,7 @@ void CGraph::TestRoutingTables()
 							}
 							if (!bFound)
 							{
-								g_engfuncs.pfnAlertMessage(at_aiconsole, "No link.\n");
+								engine::AlertMessage(at_aiconsole, "No link.\n");
 							}
 						}
 						if (fabs(flDistance1 - flDistance2) > 0.10)
@@ -3426,18 +3426,18 @@ void CGraph::TestRoutingTables()
 						if (cPathSize1 != cPathSize2 || memcmp(pMyPath, pMyPath2, sizeof(int) * cPathSize1) != 0)
 						{
 #endif
-							g_engfuncs.pfnAlertMessage(at_aiconsole, "Routing is inconsistent!!!\n");
-							g_engfuncs.pfnAlertMessage(at_aiconsole, "(%d to %d |%d/%d)1:", iFrom, iTo, iHull, iCap);
+							engine::AlertMessage(at_aiconsole, "Routing is inconsistent!!!\n");
+							engine::AlertMessage(at_aiconsole, "(%d to %d |%d/%d)1:", iFrom, iTo, iHull, iCap);
 							for (int i = 0; i < cPathSize1; i++)
 							{
-								g_engfuncs.pfnAlertMessage(at_aiconsole, "%d ", pMyPath[i]);
+								engine::AlertMessage(at_aiconsole, "%d ", pMyPath[i]);
 							}
-							g_engfuncs.pfnAlertMessage(at_aiconsole, "\n(%d to %d |%d/%d)2:", iFrom, iTo, iHull, iCap);
+							engine::AlertMessage(at_aiconsole, "\n(%d to %d |%d/%d)2:", iFrom, iTo, iHull, iCap);
 							for (int i = 0; i < cPathSize2; i++)
 							{
-								g_engfuncs.pfnAlertMessage(at_aiconsole, "%d ", pMyPath2[i]);
+								engine::AlertMessage(at_aiconsole, "%d ", pMyPath2[i]);
 							}
-							g_engfuncs.pfnAlertMessage(at_aiconsole, "\n");
+							engine::AlertMessage(at_aiconsole, "\n");
 							m_fRoutingComplete = 0;
 							cPathSize1 = FindShortestPath(pMyPath, iFrom, iTo, iHull, iCapMask);
 							m_fRoutingComplete = 1;
@@ -3500,7 +3500,7 @@ bool CNodeViewer::Spawn()
 {
 	if (0 == WorldGraph.m_fGraphPresent || 0 == WorldGraph.m_fGraphPointersSet)
 	{ // protect us in the case that the node graph isn't available or built
-		g_engfuncs.pfnAlertMessage(at_console, "Graph not ready!\n");
+		engine::AlertMessage(at_console, "Graph not ready!\n");
 		return false;
 	}
 
@@ -3528,13 +3528,13 @@ bool CNodeViewer::Spawn()
 
 	if (m_iBaseNode < 0)
 	{
-		g_engfuncs.pfnAlertMessage(at_console, "No nearby node\n");
+		engine::AlertMessage(at_console, "No nearby node\n");
 		return;
 	}
 
 	m_nVisited = 0;
 
-	g_engfuncs.pfnAlertMessage(at_aiconsole, "basenode %d\n", m_iBaseNode);
+	engine::AlertMessage(at_aiconsole, "basenode %d\n", m_iBaseNode);
 
 	if (WorldGraph.m_cNodes < 128)
 	{
@@ -3553,7 +3553,7 @@ bool CNodeViewer::Spawn()
 		do
 		{
 			end = m_nVisited;
-			// g_engfuncs.pfnAlertMessage( at_console, "%d :", m_nVisited );
+			// engine::AlertMessage( at_console, "%d :", m_nVisited );
 			for (end = m_nVisited; start < end; start++)
 			{
 				FindNodeConnections(m_aFrom[start]);
@@ -3562,7 +3562,7 @@ bool CNodeViewer::Spawn()
 		} while (end != m_nVisited);
 	}
 
-	g_engfuncs.pfnAlertMessage(at_aiconsole, "%d nodes\n", m_nVisited);
+	engine::AlertMessage(at_aiconsole, "%d nodes\n", m_nVisited);
 
 	m_iDraw = 0;
 	SetThink(&CNodeViewer::DrawThink);

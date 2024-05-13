@@ -749,7 +749,7 @@ bool SaveNavigationMap( const char *filename )
 	if (bspFilename == nullptr)
 		return false;
 
-	unsigned int bspSize = (unsigned int)g_engfuncs.pfnGetFileSize( bspFilename );
+	unsigned int bspSize = (unsigned int)engine::GetFileSize( bspFilename );
 	CONSOLE_ECHO( "Size of bsp file '%s' is %u bytes.\n", bspFilename, bspSize );
 
 	_write( fd, &bspSize, sizeof(unsigned int) );
@@ -829,7 +829,7 @@ void LoadLocationFile( const char *filename )
 		strcpy( dot, ".loc" );
 
 		int locDataLength;
-		char *locDataFile = (char *)g_engfuncs.pfnLoadFileForMe( const_cast<char *>( locFilename ), &locDataLength );
+		char *locDataFile = (char *)engine::LoadFileForMe( const_cast<char *>( locFilename ), &locDataLength );
 		char *locData = locDataFile;
 
 		if (locData)
@@ -873,7 +873,7 @@ void LoadLocationFile( const char *filename )
 				}
 			}
 
-			g_engfuncs.pfnFreeFile( locDataFile );
+			engine::FreeFile( locDataFile );
 		}
 	}
 }
@@ -939,7 +939,7 @@ void SanityCheckNavigationMap( const char *mapName )
 			return;
 		}
 
-		unsigned int bspSize = (unsigned int)g_engfuncs.pfnGetFileSize( bspFilename );
+		unsigned int bspSize = (unsigned int)engine::GetFileSize( bspFilename );
 
 		if (bspSize != saveBspSize)
 		{
@@ -1008,7 +1008,7 @@ NavErrorType LoadNavigationMap( void )
 		if (bspFilename == nullptr)
 			return NAV_INVALID_FILE;
 
-		unsigned int bspSize = (unsigned int)g_engfuncs.pfnGetFileSize( bspFilename );
+		unsigned int bspSize = (unsigned int)engine::GetFileSize( bspFilename );
 
 		if (bspSize != saveBspSize)
 		{

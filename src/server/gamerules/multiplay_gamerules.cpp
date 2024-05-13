@@ -143,17 +143,17 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 
 	m_intermissionTime = 0.0F;
 
-	if (!g_engfuncs.pfnIsDedicatedServer())
+	if (!engine::IsDedicatedServer())
 	{
-		char* lservercfgfile = (char*)g_engfuncs.pfnCVarGetString("lservercfgfile");
+		char* lservercfgfile = (char*)engine::CVarGetString("lservercfgfile");
 
 		if (lservercfgfile && '\0' != lservercfgfile[0])
 		{
 			char szCommand[256];
 
-			g_engfuncs.pfnAlertMessage(at_console, "Executing listen server config file\n");
+			engine::AlertMessage(at_console, "Executing listen server config file\n");
 			sprintf(szCommand, "exec %s\n", lservercfgfile);
-			g_engfuncs.pfnServerCommand(szCommand);
+			engine::ServerCommand(szCommand);
 		}
 	}
 
@@ -179,12 +179,12 @@ bool CHalfLifeMultiplay::PrivilegedCommand(CBasePlayer* pPlayer, const char* pcm
 		if (pPlayer->v.movetype != MOVETYPE_NOCLIP)
 		{
 			pPlayer->v.movetype = MOVETYPE_NOCLIP;
-			g_engfuncs.pfnClientPrintf(pPlayer->edict(), print_console, "noclip ON\n");
+			engine::ClientPrintf(pPlayer->edict(), print_console, "noclip ON\n");
 		}
 		else
 		{
 			pPlayer->v.movetype = MOVETYPE_WALK;
-			g_engfuncs.pfnClientPrintf(pPlayer->edict(), print_console, "noclip OFF\n");
+			engine::ClientPrintf(pPlayer->edict(), print_console, "noclip OFF\n");
 		}
 		return true;
 	}
@@ -193,12 +193,12 @@ bool CHalfLifeMultiplay::PrivilegedCommand(CBasePlayer* pPlayer, const char* pcm
 		if ((pPlayer->v.flags & FL_GODMODE) == 0)
 		{
 			pPlayer->v.flags |= FL_GODMODE;
-			g_engfuncs.pfnClientPrintf(pPlayer->edict(), print_console, "godmode ON\n");
+			engine::ClientPrintf(pPlayer->edict(), print_console, "godmode ON\n");
 		}
 		else
 		{
 			pPlayer->v.flags &= ~FL_GODMODE;
-			g_engfuncs.pfnClientPrintf(pPlayer->edict(), print_console, "godmode OFF\n");
+			engine::ClientPrintf(pPlayer->edict(), print_console, "godmode OFF\n");
 		}
 		return true;
 	}
@@ -207,12 +207,12 @@ bool CHalfLifeMultiplay::PrivilegedCommand(CBasePlayer* pPlayer, const char* pcm
 		if ((pPlayer->v.flags & FL_NOTARGET) == 0)
 		{
 			pPlayer->v.flags |= FL_NOTARGET;
-			g_engfuncs.pfnClientPrintf(pPlayer->edict(), print_console, "notarget ON\n");
+			engine::ClientPrintf(pPlayer->edict(), print_console, "notarget ON\n");
 		}
 		else
 		{
 			pPlayer->v.flags &= ~FL_NOTARGET;
-			g_engfuncs.pfnClientPrintf(pPlayer->edict(), print_console, "notarget OFF\n");
+			engine::ClientPrintf(pPlayer->edict(), print_console, "notarget OFF\n");
 		}
 		return true;
 	}
@@ -235,9 +235,9 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 
 	if (strcmp(pcmd, "jointeam") == 0)
 	{
-		if (g_engfuncs.pfnCmd_Argc() > 1)
+		if (engine::Cmd_Argc() > 1)
 		{
-			auto teamIndex = atoi(g_engfuncs.pfnCmd_Argv(1));
+			auto teamIndex = atoi(engine::Cmd_Argv(1));
 			bool autoTeam = false;
 
 			if (teamIndex == 5)
@@ -269,16 +269,16 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 	 && pPlayer->v.iuser1 != OBS_DEATHCAM
 	 && pPlayer->v.iuser1 != OBS_FIXED)
 	{
-		if (g_engfuncs.pfnCmd_Argc() > 1)
+		if (engine::Cmd_Argc() > 1)
 		{
 			if (strcmp(pcmd, "specmode") == 0)
 			{
-				pPlayer->Observer_SetMode(atoi(g_engfuncs.pfnCmd_Argv(1)));
+				pPlayer->Observer_SetMode(atoi(engine::Cmd_Argv(1)));
 				return true;
 			}
 			else if (strcmp(pcmd, "follownext") == 0)
 			{
-				pPlayer->Observer_FindNextPlayer(atoi(g_engfuncs.pfnCmd_Argv(1)) != 0);
+				pPlayer->Observer_FindNextPlayer(atoi(engine::Cmd_Argv(1)) != 0);
 				return true;
 			}
 		}
@@ -382,8 +382,8 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 
 	util::LogPrintf("\"%s<%i><%s><>\" connected\n",
 		name,
-		g_engfuncs.pfnGetPlayerUserId(pl->edict()),
-		g_engfuncs.pfnGetPlayerAuthId(pl->edict()));
+		engine::GetPlayerUserId(pl->edict()),
+		engine::GetPlayerAuthId(pl->edict()));
 
 	CGameRules::InitHUD(pl);
 
@@ -462,8 +462,8 @@ void CHalfLifeMultiplay::ClientDisconnected(Entity* pClient)
 
 			util::LogPrintf("\"%s<%i><%s><>\" disconnected\n",
 				STRING(pPlayer->v.netname),
-				g_engfuncs.pfnGetPlayerUserId(pPlayer->edict()),
-				g_engfuncs.pfnGetPlayerAuthId(pPlayer->edict()));
+				engine::GetPlayerUserId(pPlayer->edict()),
+				engine::GetPlayerAuthId(pPlayer->edict()));
 		}
 	}
 }
@@ -699,27 +699,27 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 	{
 		util::LogPrintf("\"%s<%i><%s><>\" committed suicide with \"%s\"\n",
 			STRING(pVictim->v.netname),
-			g_engfuncs.pfnGetPlayerUserId(pVictim->edict()),
-			g_engfuncs.pfnGetPlayerAuthId(pVictim->edict()),
+			engine::GetPlayerUserId(pVictim->edict()),
+			engine::GetPlayerAuthId(pVictim->edict()),
 			killerWeapon);
 	}
 	else if (killer->IsClient())
 	{
 		util::LogPrintf("\"%s<%i><%s><>\" killed \"%s<%i><%s><>\" with \"%s\"\n",
 			STRING(killer->v.netname),
-			g_engfuncs.pfnGetPlayerUserId(killer->edict()),
-			g_engfuncs.pfnGetPlayerAuthId(killer->edict()),
+			engine::GetPlayerUserId(killer->edict()),
+			engine::GetPlayerAuthId(killer->edict()),
 			STRING(killer->v.netname),
-			g_engfuncs.pfnGetPlayerUserId(pVictim->edict()),
-			g_engfuncs.pfnGetPlayerAuthId(pVictim->edict()),
+			engine::GetPlayerUserId(pVictim->edict()),
+			engine::GetPlayerAuthId(pVictim->edict()),
 			killerWeapon);
 	}
 	else
 	{
 		util::LogPrintf("\"%s<%i><%s><>\" died\n",
 			STRING(pVictim->v.netname),
-			g_engfuncs.pfnGetPlayerUserId(pVictim->edict()),
-			g_engfuncs.pfnGetPlayerAuthId(pVictim->edict()),
+			engine::GetPlayerUserId(pVictim->edict()),
+			engine::GetPlayerAuthId(pVictim->edict()),
 			killerWeapon);
 	}
 
@@ -800,7 +800,7 @@ float CHalfLifeMultiplay::FlWeaponTryRespawn(CBasePlayerWeapon* pWeapon)
 {
 	if (pWeapon && (pWeapon->iFlags() & WEAPON_FLAG_LIMITINWORLD) != 0)
 	{
-		if (g_engfuncs.pfnNumberOfEntities() < (gpGlobals->maxEntities - ENTITY_INTOLERANCE))
+		if (engine::NumberOfEntities() < (gpGlobals->maxEntities - ENTITY_INTOLERANCE))
 			return 0;
 
 		// we're past the entity tolerance level,  so delay the respawn
@@ -948,7 +948,7 @@ CSpawnPoint *CHalfLifeMultiplay::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
 		return CGameRules::GetPlayerSpawnSpot(pPlayer);
 	}
 
-	auto index = g_engfuncs.pfnRandomLong(0, numValid - 1);
+	auto index = engine::RandomLong(0, numValid - 1);
 	auto spawn = m_validSpawnPoints[index];
 
 	spawn->m_lastSpawnTime = gpGlobals->time;
@@ -987,7 +987,7 @@ void CHalfLifeMultiplay::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 	auto spawn = new CSpawnPoint {pEntity};
 
 #if 0
-	g_engfuncs.pfnAlertMessage(
+	engine::AlertMessage(
 		at_aiconsole,
 		"%s %lu at (%g, %g, %g)\n",
 		STRING(pEntity->v.classname),
@@ -1116,7 +1116,7 @@ int CHalfLifeMultiplay::GetDefaultPlayerTeam(CBasePlayer* pPlayer)
 	}
 
 	/* Choose a team */
-	return candidates[g_engfuncs.pfnRandomLong(1, numCandidates) - 1];
+	return candidates[engine::RandomLong(1, numCandidates) - 1];
 }
 
 
@@ -1207,8 +1207,8 @@ bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, b
 	
 	util::LogPrintf("\"%s<%i><%s><>\" joined team %s\n",
 		STRING(pPlayer->v.netname),
-		g_engfuncs.pfnGetPlayerUserId(pPlayer->edict()),
-		g_engfuncs.pfnGetPlayerAuthId(pPlayer->edict()),
+		engine::GetPlayerUserId(pPlayer->edict()),
+		engine::GetPlayerAuthId(pPlayer->edict()),
 		GetIndexedTeamName(teamIndex));
 
 	return true;
@@ -1334,11 +1334,11 @@ void CHalfLifeMultiplay::SendMOTDToClient(CBasePlayer* player)
 	// read from the MOTD.txt file
 	int length, char_count = 0;
 	char* pFileList;
-	char* aFileList = pFileList = (char*)g_engfuncs.pfnLoadFileForMe((char*)g_engfuncs.pfnCVarGetString("motdfile"), &length);
+	char* aFileList = pFileList = (char*)engine::LoadFileForMe((char*)engine::CVarGetString("motdfile"), &length);
 
 	// send the server name
 	MessageBegin(MSG_ONE, gmsgServerName, player);
-	WriteString(g_engfuncs.pfnCVarGetString("hostname"));
+	WriteString(engine::CVarGetString("hostname"));
 	WriteString(STRING(gpGlobals->mapname));
 	MessageEnd();
 
@@ -1378,7 +1378,7 @@ void CHalfLifeMultiplay::SendMOTDToClient(CBasePlayer* player)
 		MessageEnd();
 	}
 
-	g_engfuncs.pfnFreeFile(aFileList);
+	engine::FreeFile(aFileList);
 }
 
 

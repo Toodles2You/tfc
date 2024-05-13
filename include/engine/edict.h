@@ -249,7 +249,7 @@ template <class T>
 [[nodiscard]]
 T* Entity::Create()
 {
-	Entity* entity = g_engfuncs.pfnCreateEntity();
+	Entity* entity = engine::CreateEntity();
 
 	if (entity != nullptr)
 	{

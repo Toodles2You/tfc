@@ -56,7 +56,7 @@ bool CBaseDMStart::KeyValue(KeyValueData* pkvd)
 {
 	if (streq(pkvd->szKeyName, "master"))
 	{
-		v.netname = g_engfuncs.pfnAllocString(pkvd->szValue);
+		v.netname = engine::AllocString(pkvd->szValue);
 		return true;
 	}
 
@@ -167,7 +167,7 @@ bool CBaseEntity::KeyValue(KeyValueData* pkvd)
 	}
 	else if (streq(pkvd->szKeyName, "killtarget"))
 	{
-		m_iszKillTarget = g_engfuncs.pfnAllocString(pkvd->szValue);
+		m_iszKillTarget = engine::AllocString(pkvd->szValue);
 		return true;
 	}
 
@@ -181,7 +181,7 @@ void util::FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEnt
 	if (!targetName)
 		return;
 
-	g_engfuncs.pfnAlertMessage(at_aiconsole, "Firing: (%s)\n", targetName);
+	engine::AlertMessage(at_aiconsole, "Firing: (%s)\n", targetName);
 
 	for (;;)
 	{
@@ -191,7 +191,7 @@ void util::FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEnt
 
 		if ((pTarget->v.flags & FL_KILLME) == 0) // Don't use dying ents
 		{
-			g_engfuncs.pfnAlertMessage(at_aiconsole, "Found: %s, firing (%s)\n", STRING(pTarget->v.classname), targetName);
+			engine::AlertMessage(at_aiconsole, "Found: %s, firing (%s)\n", STRING(pTarget->v.classname), targetName);
 			pTarget->Use(pActivator, pCaller, useType, value);
 		}
 	}
@@ -251,13 +251,13 @@ void CBaseEntity::UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float va
 	{
 		CBaseEntity* pentKillTarget = nullptr;
 
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "KillTarget: %s\n", STRING(m_iszKillTarget));
+		engine::AlertMessage(at_aiconsole, "KillTarget: %s\n", STRING(m_iszKillTarget));
 		pentKillTarget = util::FindEntityByTargetname(nullptr, STRING(m_iszKillTarget));
 		while (pentKillTarget != nullptr)
 		{
 			pentKillTarget->Remove();
 
-			g_engfuncs.pfnAlertMessage(at_aiconsole, "killing %s\n", STRING(pentKillTarget->v.classname));
+			engine::AlertMessage(at_aiconsole, "killing %s\n", STRING(pentKillTarget->v.classname));
 			pentKillTarget = util::FindEntityByClassname(pentKillTarget, STRING(m_iszKillTarget));
 		}
 	}
@@ -359,7 +359,7 @@ bool CBaseToggle::KeyValue(KeyValueData* pkvd)
 	}
 	else if (streq(pkvd->szKeyName, "master"))
 	{
-		m_sMaster = g_engfuncs.pfnAllocString(pkvd->szValue);
+		m_sMaster = engine::AllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "distance"))

@@ -24,17 +24,17 @@ void CCrowbar::Precache()
 	CBasePlayerWeapon::Precache();
 
 #ifdef GAME_DLL
-	g_engfuncs.pfnPrecacheSound("weapons/cbar_hit1.wav");
-	g_engfuncs.pfnPrecacheSound("weapons/cbar_hit2.wav");
+	engine::PrecacheSound("weapons/cbar_hit1.wav");
+	engine::PrecacheSound("weapons/cbar_hit2.wav");
 
-	g_engfuncs.pfnPrecacheSound("weapons/cbar_hitbod1.wav");
-	g_engfuncs.pfnPrecacheSound("weapons/cbar_hitbod2.wav");
-	g_engfuncs.pfnPrecacheSound("weapons/cbar_hitbod3.wav");
+	engine::PrecacheSound("weapons/cbar_hitbod1.wav");
+	engine::PrecacheSound("weapons/cbar_hitbod2.wav");
+	engine::PrecacheSound("weapons/cbar_hitbod3.wav");
 
-	g_engfuncs.pfnPrecacheSound("weapons/cbar_miss1.wav");
+	engine::PrecacheSound("weapons/cbar_miss1.wav");
 #endif
 
-	m_usPrimaryAttack = g_engfuncs.pfnPrecacheEvent(1, "events/crowbar.sc");
+	m_usPrimaryAttack = engine::PrecacheEvent(1, "events/crowbar.sc");
 }
 
 
@@ -77,7 +77,7 @@ void CCrowbar::PrimaryAttack()
 		hit = kCrowbarHitWorld;
 
 #ifdef GAME_DLL
-		auto other = g_engfuncs.pfnPEntityOfEntIndex(trace.entity);
+		auto other = engine::PEntityOfEntIndex(trace.entity);
 
 		if (other->solid != SOLID_BSP && other->movetype != MOVETYPE_PUSHSTEP)
 		{
@@ -107,7 +107,7 @@ void CCrowbar::PrimaryAttack()
 	}
 
 #ifdef GAME_DLL
-	auto other = g_engfuncs.pfnPEntityOfEntIndex(trace.entity)->Get<CBaseEntity>();
+	auto other = engine::PEntityOfEntIndex(trace.entity)->Get<CBaseEntity>();
 
 	other->TraceAttack(
 		m_pPlayer,

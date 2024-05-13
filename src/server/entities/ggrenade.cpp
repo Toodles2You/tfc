@@ -102,7 +102,7 @@ void CGrenade::BounceTouch(CBaseEntity* pOther)
 		// add a bit of static friction
 		v.velocity = v.velocity * 0.8;
 
-		v.sequence = g_engfuncs.pfnRandomLong(1, 1);
+		v.sequence = engine::RandomLong(1, 1);
 		ResetSequenceInfo();
 	}
 	else
@@ -126,7 +126,7 @@ void CGrenade::BounceTouch(CBaseEntity* pOther)
 
 void CGrenade::BounceSound()
 {
-	switch (g_engfuncs.pfnRandomLong(0, 2))
+	switch (engine::RandomLong(0, 2))
 	{
 	case 0: EmitSound("weapons/grenade_hit1.wav", CHAN_VOICE, 0.25F); break;
 	case 1: EmitSound("weapons/grenade_hit2.wav", CHAN_VOICE, 0.25F); break;
@@ -183,7 +183,7 @@ CGrenade* CGrenade::ShootContact(CBaseEntity* owner, Vector vecStart, Vector vec
 	pGrenade->v.owner = owner->edict();
 
 	// Tumble in air
-	pGrenade->v.avelocity.x = g_engfuncs.pfnRandomFloat(-100, -500);
+	pGrenade->v.avelocity.x = engine::RandomFloat(-100, -500);
 
 	// Explode on contact
 	pGrenade->SetTouch(&CGrenade::ExplodeTouch);
@@ -296,7 +296,7 @@ void CPrimeGrenade::Throw(throw_e mode)
 		SetThink(&CPrimeGrenade::TumbleThink);
 		v.nextthink = gpGlobals->time + 0.1;
 
-		v.sequence = g_engfuncs.pfnRandomLong(3, 6);
+		v.sequence = engine::RandomLong(3, 6);
 		v.framerate = 1.0;
 		ResetSequenceInfo();
 	}

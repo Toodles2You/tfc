@@ -42,7 +42,7 @@ template <class T> T * CreateBot( const BotProfile *profile )
 
 	UTIL_ConstructBotNetName(netname, 64, profile);
 
-	pentBot = g_engfuncs.pfnCreateFakeClient( netname );
+	pentBot = engine::CreateFakeClient( netname );
 
 	if ( pentBot == nullptr )
 	{
@@ -53,7 +53,7 @@ template <class T> T * CreateBot( const BotProfile *profile )
 	{
 		T * pBot = nullptr;
 
-		g_engfuncs.pfnFreeEntPrivateData(pentBot);
+		engine::FreeEntPrivateData(pentBot);
 
 		pentBot->flags |= FL_FAKECLIENT;
 
@@ -388,7 +388,7 @@ inline bool CBot::IsPlayerLookingAtMe( CBasePlayer *other ) const
 inline void CBot::CmdStart(const usercmd_t& cmd, unsigned int randomSeed)
 {
 	CBasePlayer::CmdStart(cmd, randomSeed);
-	m_randomSeed = g_engfuncs.pfnRandomLong(0, 255);
+	m_randomSeed = engine::RandomLong(0, 255);
 }
 
 

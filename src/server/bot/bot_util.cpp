@@ -140,7 +140,7 @@ int UTIL_HumansInGame( bool ignoreSpectators )
 	}
 
 	/*
-	if ( g_engfuncs.pfnIsDedicatedServer() && !ignoreSpectators )
+	if ( engine::IsDedicatedServer() && !ignoreSpectators )
 	{
 		// If we're counting humans, including spectators, don't count the dedicated server
 		--iCount;
@@ -236,7 +236,7 @@ bool UTIL_KickBotFromTeam( int kickTeam )
 		if (!player->IsAlive() && (kickTeam == -1 || player->TeamNumber() == kickTeam))
 		{
 			// its a bot on the right team - kick it
-			g_engfuncs.pfnServerCommand( util::VarArgs( "kick \"%s\"\n", STRING( player->v.netname ) ) );
+			engine::ServerCommand( util::VarArgs( "kick \"%s\"\n", STRING( player->v.netname ) ) );
 
 			return true;
 		}
@@ -260,7 +260,7 @@ bool UTIL_KickBotFromTeam( int kickTeam )
 		if ((kickTeam == -1 || player->TeamNumber() == kickTeam))
 		{
 			// its a bot on the right team - kick it
-			g_engfuncs.pfnServerCommand( util::VarArgs( "kick \"%s\"\n", STRING( player->v.netname ) ) );
+			engine::ServerCommand( util::VarArgs( "kick \"%s\"\n", STRING( player->v.netname ) ) );
 
 			return true;
 		}
@@ -556,7 +556,7 @@ void CONSOLE_ECHO( char * pszMsg, ... )
 	vsprintf( szStr, pszMsg, argptr );
 	va_end( argptr );
 
-	(*g_engfuncs.pfnServerPrint)( szStr );
+	engine::ServerPrint( szStr );
 }
 
 
@@ -570,7 +570,7 @@ void CONSOLE_ECHO_LOGGED( char * pszMsg, ... )
 	vsprintf( szStr, pszMsg, argptr );
 	va_end( argptr );
 
-	(*g_engfuncs.pfnServerPrint)( szStr );
+	engine::ServerPrint( szStr );
 	util::LogPrintf( szStr );
 }
 
@@ -578,74 +578,74 @@ void CONSOLE_ECHO_LOGGED( char * pszMsg, ... )
 //------------------------------------------------------------------------------------------------------------
 void BotPrecache( void )
 {
-	s_iBeamSprite = g_engfuncs.pfnPrecacheModel( "sprites/smoke.spr" );
-	g_engfuncs.pfnPrecacheSound( "buttons/bell1.wav" );
-	g_engfuncs.pfnPrecacheSound( "buttons/blip1.wav" );
-	g_engfuncs.pfnPrecacheSound( "buttons/blip2.wav" );
-	g_engfuncs.pfnPrecacheSound( "buttons/button11.wav" );
-	g_engfuncs.pfnPrecacheSound( "buttons/latchunlocked2.wav" );
-	g_engfuncs.pfnPrecacheSound( "buttons/lightswitch2.wav" );
+	s_iBeamSprite = engine::PrecacheModel( "sprites/smoke.spr" );
+	engine::PrecacheSound( "buttons/bell1.wav" );
+	engine::PrecacheSound( "buttons/blip1.wav" );
+	engine::PrecacheSound( "buttons/blip2.wav" );
+	engine::PrecacheSound( "buttons/button11.wav" );
+	engine::PrecacheSound( "buttons/latchunlocked2.wav" );
+	engine::PrecacheSound( "buttons/lightswitch2.wav" );
 
 #ifdef CSTRIKE
-	g_engfuncs.pfnPrecacheSound( "ambience/quail1.wav" );
+	engine::PrecacheSound( "ambience/quail1.wav" );
 
 	/// @todo This is for the Tutor - move it somewhere sane
-	g_engfuncs.pfnPrecacheSound( "events/tutor_msg.wav" );
-	g_engfuncs.pfnPrecacheSound( "events/enemy_died.wav" );
-	g_engfuncs.pfnPrecacheSound( "events/friend_died.wav" );
+	engine::PrecacheSound( "events/tutor_msg.wav" );
+	engine::PrecacheSound( "events/enemy_died.wav" );
+	engine::PrecacheSound( "events/friend_died.wav" );
 
 	/// @todo This is for the Career mode UI - move it somewhere sane
-	g_engfuncs.pfnPrecacheSound( "events/task_complete.wav" );
+	engine::PrecacheSound( "events/task_complete.wav" );
 #endif
 
 #ifdef TERRORSTRIKE
 	/// @todo Zombie mode experiment
-	g_engfuncs.pfnPrecacheSound( "zombie/attack1.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/attack2.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/attack3.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/attack4.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/attack5.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/bark1.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/bark2.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/bark3.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/bark4.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/bark5.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/bark6.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/bark7.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/breathing1.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/breathing2.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/breathing3.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/breathing4.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/groan1.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/groan2.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/groan3.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/hiss1.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/hiss2.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/hiss3.wav" );
-	g_engfuncs.pfnPrecacheSound( "ambience/the_horror2.wav" );
-	g_engfuncs.pfnPrecacheSound( "scientist/scream20.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/human_hurt1.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/human_hurt2.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/human_hurt3.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/human_hurt4.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/shout_reloading1.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/shout_reloading2.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/shout_reloading3.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/deep_heartbeat.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/deep_heartbeat_fast.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/deep_heartbeat_very_fast.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/deep_heartbeat_stopping.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/zombie_step1.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/zombie_step2.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/zombie_step3.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/zombie_step4.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/zombie_step5.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/zombie_step6.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/zombie_step7.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/fear1.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/fear2.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/fear3.wav" );
-	g_engfuncs.pfnPrecacheSound( "zombie/fear4.wav" );
+	engine::PrecacheSound( "zombie/attack1.wav" );
+	engine::PrecacheSound( "zombie/attack2.wav" );
+	engine::PrecacheSound( "zombie/attack3.wav" );
+	engine::PrecacheSound( "zombie/attack4.wav" );
+	engine::PrecacheSound( "zombie/attack5.wav" );
+	engine::PrecacheSound( "zombie/bark1.wav" );
+	engine::PrecacheSound( "zombie/bark2.wav" );
+	engine::PrecacheSound( "zombie/bark3.wav" );
+	engine::PrecacheSound( "zombie/bark4.wav" );
+	engine::PrecacheSound( "zombie/bark5.wav" );
+	engine::PrecacheSound( "zombie/bark6.wav" );
+	engine::PrecacheSound( "zombie/bark7.wav" );
+	engine::PrecacheSound( "zombie/breathing1.wav" );
+	engine::PrecacheSound( "zombie/breathing2.wav" );
+	engine::PrecacheSound( "zombie/breathing3.wav" );
+	engine::PrecacheSound( "zombie/breathing4.wav" );
+	engine::PrecacheSound( "zombie/groan1.wav" );
+	engine::PrecacheSound( "zombie/groan2.wav" );
+	engine::PrecacheSound( "zombie/groan3.wav" );
+	engine::PrecacheSound( "zombie/hiss1.wav" );
+	engine::PrecacheSound( "zombie/hiss2.wav" );
+	engine::PrecacheSound( "zombie/hiss3.wav" );
+	engine::PrecacheSound( "ambience/the_horror2.wav" );
+	engine::PrecacheSound( "scientist/scream20.wav" );
+	engine::PrecacheSound( "zombie/human_hurt1.wav" );
+	engine::PrecacheSound( "zombie/human_hurt2.wav" );
+	engine::PrecacheSound( "zombie/human_hurt3.wav" );
+	engine::PrecacheSound( "zombie/human_hurt4.wav" );
+	engine::PrecacheSound( "zombie/shout_reloading1.wav" );
+	engine::PrecacheSound( "zombie/shout_reloading2.wav" );
+	engine::PrecacheSound( "zombie/shout_reloading3.wav" );
+	engine::PrecacheSound( "zombie/deep_heartbeat.wav" );
+	engine::PrecacheSound( "zombie/deep_heartbeat_fast.wav" );
+	engine::PrecacheSound( "zombie/deep_heartbeat_very_fast.wav" );
+	engine::PrecacheSound( "zombie/deep_heartbeat_stopping.wav" );
+	engine::PrecacheSound( "zombie/zombie_step1.wav" );
+	engine::PrecacheSound( "zombie/zombie_step2.wav" );
+	engine::PrecacheSound( "zombie/zombie_step3.wav" );
+	engine::PrecacheSound( "zombie/zombie_step4.wav" );
+	engine::PrecacheSound( "zombie/zombie_step5.wav" );
+	engine::PrecacheSound( "zombie/zombie_step6.wav" );
+	engine::PrecacheSound( "zombie/zombie_step7.wav" );
+	engine::PrecacheSound( "zombie/fear1.wav" );
+	engine::PrecacheSound( "zombie/fear2.wav" );
+	engine::PrecacheSound( "zombie/fear3.wav" );
+	engine::PrecacheSound( "zombie/fear4.wav" );
 #endif // TERRORSTRIKE
 }
 

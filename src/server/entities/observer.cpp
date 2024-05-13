@@ -79,7 +79,7 @@ void CBasePlayer::Observer_FindNextPlayer(bool bReverse)
 		// Move to the target
 		SetOrigin(m_hObserverTarget->v.origin);
 
-		// g_engfuncs.pfnAlertMessage( at_console, "Now Tracking %s\n", STRING( m_hObserverTarget->v.netname ) );
+		// engine::AlertMessage( at_console, "Now Tracking %s\n", STRING( m_hObserverTarget->v.netname ) );
 
 		// Store the target in pev so the physics DLL can get to it
 		if (v.iuser1 != OBS_ROAMING)

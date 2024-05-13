@@ -95,7 +95,7 @@ bool CBubbling::Spawn()
 
 void CBubbling::Precache()
 {
-	m_bubbleModel = g_engfuncs.pfnPrecacheModel("sprites/bubble.spr"); // Precache bubble sprite
+	m_bubbleModel = engine::PrecacheModel("sprites/bubble.spr"); // Precache bubble sprite
 }
 
 
@@ -179,13 +179,13 @@ void CBeam::Precache()
 void CBeam::SetStartEntity(int entityIndex)
 {
 	v.sequence = (entityIndex & 0x0FFF) | (v.sequence & 0xF000);
-	v.owner = g_engfuncs.pfnPEntityOfEntIndex(entityIndex);
+	v.owner = engine::PEntityOfEntIndex(entityIndex);
 }
 
 void CBeam::SetEndEntity(int entityIndex)
 {
 	v.skin = (entityIndex & 0x0FFF) | (v.skin & 0xF000);
-	v.aiment = g_engfuncs.pfnPEntityOfEntIndex(entityIndex);
+	v.aiment = engine::PEntityOfEntIndex(entityIndex);
 }
 
 
@@ -194,7 +194,7 @@ const Vector& CBeam::GetStartPos()
 {
 	if (GetType() == BEAM_ENTS)
 	{
-		Entity* pent = g_engfuncs.pfnPEntityOfEntIndex(GetStartEntity());
+		Entity* pent = engine::PEntityOfEntIndex(GetStartEntity());
 		return pent->origin;
 	}
 	return v.origin;
@@ -209,7 +209,7 @@ const Vector& CBeam::GetEndPos()
 		return v.angles;
 	}
 
-	Entity* pent = g_engfuncs.pfnPEntityOfEntIndex(GetEndEntity());
+	Entity* pent = engine::PEntityOfEntIndex(GetEndEntity());
 	if (pent)
 		return pent->origin;
 	return v.angles;
@@ -237,7 +237,7 @@ void CBeam::BeamInit(const char* pSpriteName, int width)
 	SetFrame(0);
 	SetScrollRate(0);
 	v.model = MAKE_STRING(pSpriteName);
-	SetTexture(g_engfuncs.pfnPrecacheModel((char*)pSpriteName));
+	SetTexture(engine::PrecacheModel((char*)pSpriteName));
 	SetWidth(width);
 	v.skin = 0;
 	v.sequence = 0;
@@ -329,7 +329,7 @@ void CBeam::TriggerTouch(CBaseEntity* pOther)
 			CBaseEntity* pOwner = v.owner->Get<CBaseEntity>();
 			pOwner->Use(pOther, this, USE_TOGGLE, 0);
 		}
-		g_engfuncs.pfnAlertMessage(at_console, "Firing targets!!!\n");
+		engine::AlertMessage(at_console, "Firing targets!!!\n");
 	}
 }
 
@@ -343,7 +343,7 @@ CBaseEntity* CBeam::RandomTargetname(const char* szName)
 	while ((pNewEntity = util::FindEntityByTargetname(pNewEntity, szName)) != nullptr)
 	{
 		total++;
-		if (g_engfuncs.pfnRandomLong(0, total - 1) < 1)
+		if (engine::RandomLong(0, total - 1) < 1)
 			pEntity = pNewEntity;
 	}
 	return pEntity;
@@ -485,7 +485,7 @@ bool CLightning::Spawn()
 
 void CLightning::Precache()
 {
-	m_spriteTexture = g_engfuncs.pfnPrecacheModel((char*)STRING(m_iszSpriteName));
+	m_spriteTexture = engine::PrecacheModel((char*)STRING(m_iszSpriteName));
 	CBeam::Precache();
 }
 
@@ -501,12 +501,12 @@ bool CLightning::KeyValue(KeyValueData* pkvd)
 {
 	if (streq(pkvd->szKeyName, "LightningStart"))
 	{
-		m_iszStartEntity = g_engfuncs.pfnAllocString(pkvd->szValue);
+		m_iszStartEntity = engine::AllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "LightningEnd"))
 	{
-		m_iszEndEntity = g_engfuncs.pfnAllocString(pkvd->szValue);
+		m_iszEndEntity = engine::AllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "life"))
@@ -536,7 +536,7 @@ bool CLightning::KeyValue(KeyValueData* pkvd)
 	}
 	else if (streq(pkvd->szKeyName, "texture"))
 	{
-		m_iszSpriteName = g_engfuncs.pfnAllocString(pkvd->szValue);
+		m_iszSpriteName = engine::AllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "framestart"))
@@ -620,7 +620,7 @@ void CLightning::StrikeThink()
 	if (m_life != 0)
 	{
 		if ((v.spawnflags & SF_BEAM_RANDOM) != 0)
-			v.nextthink = gpGlobals->time + m_life + g_engfuncs.pfnRandomFloat(0, m_restrike);
+			v.nextthink = gpGlobals->time + m_life + engine::RandomFloat(0, m_restrike);
 		else
 			v.nextthink = gpGlobals->time + m_life + m_restrike;
 	}
@@ -638,7 +638,7 @@ void CLightning::StrikeThink()
 			if (pStart != nullptr)
 				RandomPoint(pStart->v.origin);
 			else
-				g_engfuncs.pfnAlertMessage(at_console, "env_beam: unknown entity \"%s\"\n", STRING(m_iszStartEntity));
+				engine::AlertMessage(at_console, "env_beam: unknown entity \"%s\"\n", STRING(m_iszStartEntity));
 		}
 		return;
 	}
@@ -794,7 +794,7 @@ void CLightning::RandomArea()
 	{
 		Vector vecSrc = v.origin;
 
-		Vector vecDir1 = Vector(g_engfuncs.pfnRandomFloat(-1.0, 1.0), g_engfuncs.pfnRandomFloat(-1.0, 1.0), g_engfuncs.pfnRandomFloat(-1.0, 1.0));
+		Vector vecDir1 = Vector(engine::RandomFloat(-1.0, 1.0), engine::RandomFloat(-1.0, 1.0), engine::RandomFloat(-1.0, 1.0));
 		vecDir1 = vecDir1.Normalize();
 		TraceResult tr1;
 		util::TraceLine(vecSrc, vecSrc + vecDir1 * m_radius, util::ignore_monsters, this, &tr1);
@@ -805,7 +805,7 @@ void CLightning::RandomArea()
 		Vector vecDir2;
 		do
 		{
-			vecDir2 = Vector(g_engfuncs.pfnRandomFloat(-1.0, 1.0), g_engfuncs.pfnRandomFloat(-1.0, 1.0), g_engfuncs.pfnRandomFloat(-1.0, 1.0));
+			vecDir2 = Vector(engine::RandomFloat(-1.0, 1.0), engine::RandomFloat(-1.0, 1.0), engine::RandomFloat(-1.0, 1.0));
 		} while (DotProduct(vecDir1, vecDir2) > 0);
 		vecDir2 = vecDir2.Normalize();
 		TraceResult tr2;
@@ -835,7 +835,7 @@ void CLightning::RandomPoint(Vector& vecSrc)
 
 	for (iLoops = 0; iLoops < 10; iLoops++)
 	{
-		Vector vecDir1 = Vector(g_engfuncs.pfnRandomFloat(-1.0, 1.0), g_engfuncs.pfnRandomFloat(-1.0, 1.0), g_engfuncs.pfnRandomFloat(-1.0, 1.0));
+		Vector vecDir1 = Vector(engine::RandomFloat(-1.0, 1.0), engine::RandomFloat(-1.0, 1.0), engine::RandomFloat(-1.0, 1.0));
 		vecDir1 = vecDir1.Normalize();
 		TraceResult tr1;
 		util::TraceLine(vecSrc, vecSrc + vecDir1 * m_radius, util::ignore_monsters, this, &tr1);
@@ -960,9 +960,9 @@ bool CLaser::Spawn()
 
 void CLaser::Precache()
 {
-	v.modelindex = g_engfuncs.pfnPrecacheModel((char*)STRING(v.model));
+	v.modelindex = engine::PrecacheModel((char*)STRING(v.model));
 	if (!FStringNull(m_iszSpriteName))
-		g_engfuncs.pfnPrecacheModel((char*)STRING(m_iszSpriteName));
+		engine::PrecacheModel((char*)STRING(m_iszSpriteName));
 }
 
 
@@ -970,7 +970,7 @@ bool CLaser::KeyValue(KeyValueData* pkvd)
 {
 	if (streq(pkvd->szKeyName, "LaserTarget"))
 	{
-		v.message = g_engfuncs.pfnAllocString(pkvd->szValue);
+		v.message = engine::AllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "width"))
@@ -990,12 +990,12 @@ bool CLaser::KeyValue(KeyValueData* pkvd)
 	}
 	else if (streq(pkvd->szKeyName, "texture"))
 	{
-		v.model = g_engfuncs.pfnAllocString(pkvd->szValue);
+		v.model = engine::AllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "EndSprite"))
 	{
-		m_iszSpriteName = g_engfuncs.pfnAllocString(pkvd->szValue);
+		m_iszSpriteName = engine::AllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "framestart"))
@@ -1114,10 +1114,10 @@ bool CGlow::Spawn()
 	v.effects = 0;
 	v.frame = 0;
 
-	g_engfuncs.pfnPrecacheModel((char*)STRING(v.model));
+	engine::PrecacheModel((char*)STRING(v.model));
 	SetModel(v.model);
 
-	m_maxFrame = (float)g_engfuncs.pfnModelFrames(v.modelindex) - 1;
+	m_maxFrame = (float)engine::ModelFrames(v.modelindex) - 1;
 	if (m_maxFrame > 1.0 && v.framerate != 0)
 		v.nextthink = gpGlobals->time + 0.1;
 
@@ -1162,7 +1162,7 @@ bool CSprite::Spawn()
 	Precache();
 	SetModel(v.model);
 
-	m_maxFrame = (float)g_engfuncs.pfnModelFrames(v.modelindex) - 1;
+	m_maxFrame = (float)engine::ModelFrames(v.modelindex) - 1;
 	if (!FStringNull(v.targetname) && (v.spawnflags & SF_SPRITE_STARTON) == 0)
 		TurnOff();
 	else
@@ -1181,7 +1181,7 @@ bool CSprite::Spawn()
 
 void CSprite::Precache()
 {
-	g_engfuncs.pfnPrecacheModel((char*)STRING(v.model));
+	engine::PrecacheModel((char*)STRING(v.model));
 
 	// Reset attachment after save/restore
 	if (v.aiment)
@@ -1535,14 +1535,14 @@ bool CMessage::Spawn()
 void CMessage::Precache()
 {
 	if (!FStringNull(v.noise))
-		g_engfuncs.pfnPrecacheSound((char*)STRING(v.noise));
+		engine::PrecacheSound((char*)STRING(v.noise));
 }
 
 bool CMessage::KeyValue(KeyValueData* pkvd)
 {
 	if (streq(pkvd->szKeyName, "messagesound"))
 	{
-		v.noise = g_engfuncs.pfnAllocString(pkvd->szValue);
+		v.noise = engine::AllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "messagevolume"))
@@ -1606,7 +1606,7 @@ public:
 
 void CEnvFunnel::Precache()
 {
-	m_iSprite = g_engfuncs.pfnPrecacheModel("sprites/flare6.spr");
+	m_iSprite = engine::PrecacheModel("sprites/flare6.spr");
 }
 
 LINK_ENTITY_TO_CLASS(env_funnel, CEnvFunnel);
@@ -1660,8 +1660,8 @@ public:
 
 void CEnvBeverage::Precache()
 {
-	g_engfuncs.pfnPrecacheModel("models/can.mdl");
-	g_engfuncs.pfnPrecacheSound("weapons/g_bounce3.wav");
+	engine::PrecacheModel("models/can.mdl");
+	engine::PrecacheSound("weapons/g_bounce3.wav");
 }
 
 LINK_ENTITY_TO_CLASS(env_beverage, CEnvBeverage);
@@ -1679,7 +1679,7 @@ void CEnvBeverage::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE u
 	if (v.skin == 6)
 	{
 		// random
-		pCan->v.skin = g_engfuncs.pfnRandomLong(0, 5);
+		pCan->v.skin = engine::RandomLong(0, 5);
 	}
 	else
 	{

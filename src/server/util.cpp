@@ -32,7 +32,7 @@
 
 inline void MessageBegin(int dest, int type, const Vector& origin, CBaseEntity* entity)
 {
-	g_engfuncs.pfnMessageBegin(
+	engine::MessageBegin(
 		dest,
 		type,
 		origin,
@@ -41,7 +41,7 @@ inline void MessageBegin(int dest, int type, const Vector& origin, CBaseEntity* 
 
 inline void MessageBegin(int dest, int type, CBaseEntity* entity)
 {
-	g_engfuncs.pfnMessageBegin(
+	engine::MessageBegin(
 		dest,
 		type,
 		nullptr,
@@ -164,7 +164,7 @@ void util::SetGroupTrace(int groupmask, int op)
 	g_groupmask = groupmask;
 	g_groupop = op;
 
-	g_engfuncs.pfnSetGroupMask(g_groupmask, g_groupop);
+	engine::SetGroupMask(g_groupmask, g_groupop);
 }
 
 void util::UnsetGroupTrace()
@@ -172,7 +172,7 @@ void util::UnsetGroupTrace()
 	g_groupmask = 0;
 	g_groupop = 0;
 
-	g_engfuncs.pfnSetGroupMask(0, 0);
+	engine::SetGroupMask(0, 0);
 }
 
 // Smart version, it'll clean itself up when it pops off stack
@@ -184,7 +184,7 @@ util::GroupTrace::GroupTrace(int groupmask, int op)
 	g_groupmask = groupmask;
 	g_groupop = op;
 
-	g_engfuncs.pfnSetGroupMask(g_groupmask, g_groupop);
+	engine::SetGroupMask(g_groupmask, g_groupop);
 }
 
 util::GroupTrace::~GroupTrace()
@@ -192,12 +192,12 @@ util::GroupTrace::~GroupTrace()
 	g_groupmask = m_oldgroupmask;
 	g_groupop = m_oldgroupop;
 
-	g_engfuncs.pfnSetGroupMask(g_groupmask, g_groupop);
+	engine::SetGroupMask(g_groupmask, g_groupop);
 }
 
 Entity* util::GetEntityList()
 {
-	return g_engfuncs.pfnPEntityOfEntOffset(0);
+	return engine::PEntityOfEntOffset(0);
 }
 
 CBaseEntity* util::GetLocalPlayer()
@@ -241,7 +241,7 @@ float util::AngleDiff(float destAngle, float srcAngle)
 Vector util::VecToAngles(const Vector& vec)
 {
 	float rgflVecOut[3];
-	g_engfuncs.pfnVecToAngles(vec, rgflVecOut);
+	engine::VecToAngles(vec, rgflVecOut);
 	return Vector(rgflVecOut);
 }
 
@@ -364,12 +364,12 @@ util::EntityIterator::EntityIterator(const char* key, const char* value, CBaseEn
 	_key = key;
 	_value = value;
 	_start = (start != nullptr) ? &start->v : &CWorld::World->v;
-	_current = g_engfuncs.pfnFindEntityByString(_start, _key, _value);
+	_current = engine::FindEntityByString(_start, _key, _value);
 }
 
 void util::EntityIterator::operator++()
 {
-	_current = g_engfuncs.pfnFindEntityByString(_current, _key, _value);
+	_current = engine::FindEntityByString(_current, _key, _value);
 }
 
 util::EntityIterator::operator bool()
@@ -387,7 +387,7 @@ CBaseEntity* util::FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& v
 	else
 		pentEntity = nullptr;
 
-	pentEntity = g_engfuncs.pfnFindEntityInSphere(pentEntity, vecCenter, flRadius);
+	pentEntity = engine::FindEntityInSphere(pentEntity, vecCenter, flRadius);
 
 	if (pentEntity != nullptr && OFFSET(pentEntity) != 0)
 		return pentEntity->Get<CBaseEntity>();
@@ -404,9 +404,9 @@ CBaseEntity* util::FindEntityByString(CBaseEntity* pStartEntity, const char* szK
 		entity = &pStartEntity->v;
 	}
 
-	entity = g_engfuncs.pfnFindEntityByString(entity, szKeyword, szValue);
+	entity = engine::FindEntityByString(entity, szKeyword, szValue);
 
-	if (entity != nullptr && g_engfuncs.pfnEntOffsetOfPEntity(entity) != 0)
+	if (entity != nullptr && engine::EntOffsetOfPEntity(entity) != 0)
 	{
 		return entity->Get<CBaseEntity>();
 	}
@@ -458,7 +458,7 @@ CBaseEntity* util::PlayerByIndex(int playerIndex)
 
 	if (playerIndex > 0 && playerIndex <= gpGlobals->maxClients)
 	{
-		auto entity = g_engfuncs.pfnPEntityOfEntIndex(playerIndex);
+		auto entity = engine::PEntityOfEntIndex(playerIndex);
 
 		if (entity != nullptr && !entity->IsFree())
 		{
@@ -472,7 +472,7 @@ CBaseEntity* util::PlayerByIndex(int playerIndex)
 
 void util::MakeVectors(const Vector& vecAngles)
 {
-	g_engfuncs.pfnMakeVectors(vecAngles);
+	engine::MakeVectors(vecAngles);
 }
 
 
@@ -481,12 +481,12 @@ void util::MakeAimVectors(const Vector& vecAngles)
 	float rgflVec[3];
 	vecAngles.CopyToArray(rgflVec);
 	rgflVec[0] = -rgflVec[0];
-	g_engfuncs.pfnMakeVectors(rgflVec);
+	engine::MakeVectors(rgflVec);
 }
 
 void util::MakeInvVectors(const Vector& vec, globalvars_t* pgv)
 {
-	g_engfuncs.pfnMakeVectors(vec);
+	engine::MakeVectors(vec);
 
 	pgv->v_right = pgv->v_right * -1;
 
@@ -806,13 +806,13 @@ void util::ShowMessageAll(const char* pString)
 void util::TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, CBaseEntity* ignore, TraceResult* ptr)
 {
 	//TODO: define constants
-	g_engfuncs.pfnTraceLine(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0) | (ignore_glass == ignoreGlass ? 0x100 : 0), ignore ? ignore->edict() : nullptr, ptr);
+	engine::TraceLine(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0) | (ignore_glass == ignoreGlass ? 0x100 : 0), ignore ? ignore->edict() : nullptr, ptr);
 }
 
 
 void util::TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, CBaseEntity* ignore, TraceResult* ptr)
 {
-	g_engfuncs.pfnTraceLine(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), ignore ? ignore->edict() : nullptr, ptr);
+	engine::TraceLine(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), ignore ? ignore->edict() : nullptr, ptr);
 }
 
 
@@ -839,11 +839,11 @@ bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CB
 
 	if (hull == point_hull)
 	{	
-		g_engfuncs.pfnTraceLine(start, end, traceFlags, ignoreEnt, tr);
+		engine::TraceLine(start, end, traceFlags, ignoreEnt, tr);
 	}
 	else
 	{
-		g_engfuncs.pfnTraceHull(start, end, traceFlags, hull, ignoreEnt, tr);
+		engine::TraceHull(start, end, traceFlags, hull, ignoreEnt, tr);
 	}
 
 	if ((flags & kTraceBoxModel) != 0 && tr->flFraction != 1.0F)
@@ -851,11 +851,11 @@ bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CB
 		TraceResult tr2;
 		if (hull == point_hull)
 		{
-			g_engfuncs.pfnTraceLine(tr->vecEndPos, end, traceFlags, ignoreEnt, &tr2);
+			engine::TraceLine(tr->vecEndPos, end, traceFlags, ignoreEnt, &tr2);
 		}
 		else
 		{
-			g_engfuncs.pfnTraceHull(start, end, traceFlags, hull, ignoreEnt, &tr2);
+			engine::TraceHull(start, end, traceFlags, hull, ignoreEnt, &tr2);
 		}
 		
 		if (tr2.flFraction != 1.0F && tr2.pHit == tr->pHit)
@@ -870,12 +870,12 @@ bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CB
 
 void util::TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, Entity* pentIgnore, TraceResult* ptr)
 {
-	g_engfuncs.pfnTraceHull(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), hullNumber, pentIgnore, ptr);
+	engine::TraceHull(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), hullNumber, pentIgnore, ptr);
 }
 
 void util::TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, Entity* pentModel, TraceResult* ptr)
 {
-	g_engfuncs.pfnTraceModel(vecStart, vecEnd, hullNumber, pentModel, ptr);
+	engine::TraceModel(vecStart, vecEnd, hullNumber, pentModel, ptr);
 }
 
 
@@ -899,13 +899,13 @@ TraceResult util::GetGlobalTrace()
 
 float util::VecToYaw(const Vector& vec)
 {
-	return g_engfuncs.pfnVecToYaw(vec);
+	return engine::VecToYaw(vec);
 }
 
 
 void util::ParticleEffect(const Vector& vecOrigin, const Vector& vecDirection, unsigned int ulColor, unsigned int ulCount)
 {
-	g_engfuncs.pfnParticleEffect(vecOrigin, vecDirection, (float)ulColor, (float)ulCount);
+	engine::ParticleEffect(vecOrigin, vecDirection, (float)ulColor, (float)ulCount);
 }
 
 
@@ -989,7 +989,7 @@ char* util::VarArgs(const char* format, ...)
 Vector util::GetAimVector(Entity* pent, float flSpeed)
 {
 	Vector tmp;
-	g_engfuncs.pfnGetAimVector(pent, flSpeed, tmp);
+	engine::GetAimVector(pent, flSpeed, tmp);
 	return tmp;
 }
 
@@ -1004,7 +1004,7 @@ bool util::IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator)
 			return pMaster->IsTriggered(pActivator);
 		}
 
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Master was null or not a master!\n");
+		engine::AlertMessage(at_aiconsole, "Master was null or not a master!\n");
 	}
 
 	// if this isn't a master entity, just say yes.
@@ -1051,7 +1051,7 @@ void util::StringToVector(Vector& pVector, const char* pString)
 	if (j < 2)
 	{
 		/*
-		g_engfuncs.pfnAlertMessage( at_error, "Bad field in entity!! %s:%s == \"%s\"\n",
+		engine::AlertMessage( at_error, "Bad field in entity!! %s:%s == \"%s\"\n",
 			pkvd->szClassName, pkvd->szKeyName, pkvd->szValue );
 		*/
 		for (j = j + 1; j < 3; j++)
@@ -1119,17 +1119,17 @@ void util::PrecacheOther(const char* szClassname)
 {
 	Entity* pent;
 
-	pent = g_engfuncs.pfnCreateNamedEntity(MAKE_STRING(szClassname));
+	pent = engine::CreateNamedEntity(MAKE_STRING(szClassname));
 	if (pent == nullptr)
 	{
-		g_engfuncs.pfnAlertMessage(at_console, "NULL Ent in util::PrecacheOther\n");
+		engine::AlertMessage(at_console, "NULL Ent in util::PrecacheOther\n");
 		return;
 	}
 
 	CBaseEntity* pEntity = pent->Get<CBaseEntity>();
 	if (pEntity)
 		pEntity->Precache();
-	g_engfuncs.pfnRemoveEntity(pent);
+	engine::RemoveEntity(pent);
 }
 
 //=========================================================
@@ -1146,7 +1146,7 @@ void util::LogPrintf(const char* fmt, ...)
 	va_end(argptr);
 
 	// Print to server console
-	g_engfuncs.pfnAlertMessage(at_logged, "%s", string);
+	engine::AlertMessage(at_logged, "%s", string);
 }
 
 //=========================================================

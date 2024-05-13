@@ -51,7 +51,7 @@ static bool SV_InitServer()
 
 	if (UTIL_IsValveGameDirectory())
 	{
-		g_engfuncs.pfnServerPrint("This mod has detected that it is being run from a Valve game directory which is not supported\n"
+		engine::ServerPrint("This mod has detected that it is being run from a Valve game directory which is not supported\n"
 			"Run this mod from its intended location\n\nThe game will now shut down\n");
 		return false;
 	}
@@ -63,35 +63,35 @@ static bool SV_InitServer()
 // This gets called one time when the game is initialied
 void GameDLLInit()
 {
-	g_psv_cheats = g_engfuncs.pfnCVarGetPointer("sv_cheats");
-	mp_consistency = g_engfuncs.pfnCVarGetPointer("mp_consistency");
+	g_psv_cheats = engine::CVarGetPointer("sv_cheats");
+	mp_consistency = engine::CVarGetPointer("mp_consistency");
 
 	if (!SV_InitServer())
 	{
-		g_engfuncs.pfnServerPrint("Error initializing server\n");
+		engine::ServerPrint("Error initializing server\n");
 		//Shut the game down as soon as possible.
-		g_engfuncs.pfnServerCommand("quit\n");
+		engine::ServerCommand("quit\n");
 		return;
 	}
 
-	g_engfuncs.pfnCVarRegister(&allow_spectators);
+	engine::CVarRegister(&allow_spectators);
 
-	g_engfuncs.pfnCVarRegister(&teamplay);
-	g_engfuncs.pfnCVarRegister(&fraglimit);
-	g_engfuncs.pfnCVarRegister(&timelimit);
+	engine::CVarRegister(&teamplay);
+	engine::CVarRegister(&fraglimit);
+	engine::CVarRegister(&timelimit);
 
-	g_engfuncs.pfnCVarRegister(&friendlyfire);
-	g_engfuncs.pfnCVarRegister(&falldamage);
-	g_engfuncs.pfnCVarRegister(&weaponstay);
-	g_engfuncs.pfnCVarRegister(&forcerespawn);
-	g_engfuncs.pfnCVarRegister(&aimcrosshair);
-	g_engfuncs.pfnCVarRegister(&decalfrequency);
-	g_engfuncs.pfnCVarRegister(&teamlist);
-	g_engfuncs.pfnCVarRegister(&teamoverride);
-	g_engfuncs.pfnCVarRegister(&defaultteam);
-	g_engfuncs.pfnCVarRegister(&allowmonsters);
+	engine::CVarRegister(&friendlyfire);
+	engine::CVarRegister(&falldamage);
+	engine::CVarRegister(&weaponstay);
+	engine::CVarRegister(&forcerespawn);
+	engine::CVarRegister(&aimcrosshair);
+	engine::CVarRegister(&decalfrequency);
+	engine::CVarRegister(&teamlist);
+	engine::CVarRegister(&teamoverride);
+	engine::CVarRegister(&defaultteam);
+	engine::CVarRegister(&allowmonsters);
 
-	g_engfuncs.pfnCVarRegister(&mp_chattime);
+	engine::CVarRegister(&mp_chattime);
 
 	CVoteManager::RegisterCvars();
 

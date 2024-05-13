@@ -89,7 +89,7 @@ bool CMonsterMaker::KeyValue(KeyValueData* pkvd)
 	}
 	else if (streq(pkvd->szKeyName, "monstertype"))
 	{
-		m_iszMonsterClassname = g_engfuncs.pfnAllocString(pkvd->szValue);
+		m_iszMonsterClassname = engine::AllocString(pkvd->szValue);
 		return true;
 	}
 
@@ -187,11 +187,11 @@ void CMonsterMaker::MakeMonster()
 		return;
 	}
 
-	pent = g_engfuncs.pfnCreateNamedEntity(m_iszMonsterClassname);
+	pent = engine::CreateNamedEntity(m_iszMonsterClassname);
 
 	if (pent == nullptr)
 	{
-		g_engfuncs.pfnAlertMessage(at_console, "NULL Ent in MonsterMaker!\n");
+		engine::AlertMessage(at_console, "NULL Ent in MonsterMaker!\n");
 		return;
 	}
 

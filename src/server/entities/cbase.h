@@ -334,7 +334,7 @@ public:
 
 	Entity* edict() { return &v; }
 #ifdef GAME_DLL
-	int entindex() { return g_engfuncs.pfnIndexOfEdict(&v); }
+	int entindex() { return engine::IndexOfEdict(&v); }
 #else
 	int entindex();
 #endif

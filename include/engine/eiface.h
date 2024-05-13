@@ -354,7 +354,7 @@ typedef struct saverestore_s
 typedef enum _fieldtypes
 {
 	FIELD_FLOAT = 0,	   // Any floating point value
-	FIELD_STRING,		   // A string ID (return from g_engfuncs.pfnAllocString)
+	FIELD_STRING,		   // A string ID (return from pfnAllocString)
 	FIELD_ENTITY,		   // An entity offset (EntityOffset)
 	FIELD_CLASSPTR,		   // CBaseEntity *
 	FIELD_EHANDLE,		   // Entity handle

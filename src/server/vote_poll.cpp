@@ -94,8 +94,8 @@ void IPoll::ClientVote(unsigned int playerIndex, unsigned int option)
 
 	util::LogPrintf("\"%s<%i><%s><>\" voted for option %i\n",
 		STRING(player->v.netname),
-		g_engfuncs.pfnGetPlayerUserId(player->edict()),
-		g_engfuncs.pfnGetPlayerAuthId(player->edict()),
+		engine::GetPlayerUserId(player->edict()),
+		engine::GetPlayerAuthId(player->edict()),
 		option - 1);
 }
 
@@ -161,7 +161,7 @@ void IPoll::End()
 	}
 
 	const int winner =
-        candidates[g_engfuncs.pfnRandomLong(1, candidates.size()) - 1];
+        candidates[engine::RandomLong(1, candidates.size()) - 1];
 	
 	float percent = 100.0F;
 

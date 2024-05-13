@@ -73,7 +73,7 @@ float CBaseAnimating::StudioFrameAdvance(float flInterval)
 //=========================================================
 int CBaseAnimating::LookupActivity(int activity)
 {
-	void* pmodel = g_engfuncs.pfnGetModelPtr(&v);
+	void* pmodel = engine::GetModelPtr(&v);
 
 	return studio::LookupActivity(pmodel, activity);
 }
@@ -86,7 +86,7 @@ int CBaseAnimating::LookupActivity(int activity)
 //=========================================================
 int CBaseAnimating::LookupActivityHeaviest(int activity)
 {
-	void* pmodel = g_engfuncs.pfnGetModelPtr(&v);
+	void* pmodel = engine::GetModelPtr(&v);
 
 	return studio::LookupActivityHeaviest(pmodel, activity);
 }
@@ -95,7 +95,7 @@ int CBaseAnimating::LookupActivityHeaviest(int activity)
 //=========================================================
 int CBaseAnimating::LookupSequence(const char* label)
 {
-	void* pmodel = g_engfuncs.pfnGetModelPtr(&v);
+	void* pmodel = engine::GetModelPtr(&v);
 
 	return studio::LookupSequence(pmodel, label);
 }
@@ -105,7 +105,7 @@ int CBaseAnimating::LookupSequence(const char* label)
 //=========================================================
 void CBaseAnimating::ResetSequenceInfo()
 {
-	void* pmodel = g_engfuncs.pfnGetModelPtr(&v);
+	void* pmodel = engine::GetModelPtr(&v);
 
 	studio::GetSequenceInfo(pmodel, v.sequence, &m_flFrameRate, &m_flGroundSpeed);
 	m_fSequenceLoops = ((GetSequenceFlags() & STUDIO_LOOPING) != 0);
@@ -121,7 +121,7 @@ void CBaseAnimating::ResetSequenceInfo()
 //=========================================================
 int CBaseAnimating::GetSequenceFlags()
 {
-	void* pmodel = g_engfuncs.pfnGetModelPtr(&v);
+	void* pmodel = engine::GetModelPtr(&v);
 
 	return studio::GetSequenceFlags(pmodel, v.sequence);
 }
@@ -133,11 +133,11 @@ void CBaseAnimating::DispatchAnimEvents(float flInterval)
 {
 	MonsterEvent_t event;
 
-	void* pmodel = g_engfuncs.pfnGetModelPtr(&v);
+	void* pmodel = engine::GetModelPtr(&v);
 
 	if (!pmodel)
 	{
-		g_engfuncs.pfnAlertMessage(at_aiconsole, "Gibbed monster is thinking!\n");
+		engine::AlertMessage(at_aiconsole, "Gibbed monster is thinking!\n");
 		return;
 	}
 
@@ -169,7 +169,7 @@ void CBaseAnimating::DispatchAnimEvents(float flInterval)
 //=========================================================
 float CBaseAnimating::SetBoneController(int iController, float flValue)
 {
-	void* pmodel = g_engfuncs.pfnGetModelPtr(&v);
+	void* pmodel = engine::GetModelPtr(&v);
 
 	return studio::SetController(pmodel, v.controller, iController, flValue);
 }
@@ -178,7 +178,7 @@ float CBaseAnimating::SetBoneController(int iController, float flValue)
 //=========================================================
 void CBaseAnimating::InitBoneControllers()
 {
-	void* pmodel = g_engfuncs.pfnGetModelPtr(&v);
+	void* pmodel = engine::GetModelPtr(&v);
 
 	studio::SetController(pmodel, v.controller, 0, 0.0);
 	studio::SetController(pmodel, v.controller, 1, 0.0);
@@ -190,7 +190,7 @@ void CBaseAnimating::InitBoneControllers()
 //=========================================================
 float CBaseAnimating::SetBlending(int iBlender, float flValue)
 {
-	void* pmodel = g_engfuncs.pfnGetModelPtr(&v);
+	void* pmodel = engine::GetModelPtr(&v);
 
 	return studio::SetBlending(pmodel, v.sequence, v.blending, iBlender, flValue);
 }
@@ -199,21 +199,21 @@ float CBaseAnimating::SetBlending(int iBlender, float flValue)
 //=========================================================
 void CBaseAnimating::GetBonePosition(int iBone, Vector& origin, Vector& angles)
 {
-	g_engfuncs.pfnGetBonePosition(&v, iBone, origin, angles);
+	engine::GetBonePosition(&v, iBone, origin, angles);
 }
 
 //=========================================================
 //=========================================================
 void CBaseAnimating::GetAttachment(int iAttachment, Vector& origin, Vector& angles)
 {
-	g_engfuncs.pfnGetAttachment(&v, iAttachment, origin, angles);
+	engine::GetAttachment(&v, iAttachment, origin, angles);
 }
 
 //=========================================================
 //=========================================================
 int CBaseAnimating::FindTransition(int iEndingSequence, int iGoalSequence, int* piDir)
 {
-	void* pmodel = g_engfuncs.pfnGetModelPtr(&v);
+	void* pmodel = engine::GetModelPtr(&v);
 
 	if (piDir == nullptr)
 	{
@@ -230,18 +230,18 @@ int CBaseAnimating::FindTransition(int iEndingSequence, int iGoalSequence, int* 
 
 void CBaseAnimating::SetBodygroup(int iGroup, int iValue)
 {
-	studio::SetBodygroup(g_engfuncs.pfnGetModelPtr(&v), v.body, iGroup, iValue);
+	studio::SetBodygroup(engine::GetModelPtr(&v), v.body, iGroup, iValue);
 }
 
 int CBaseAnimating::GetBodygroup(int iGroup)
 {
-	return studio::GetBodygroup(g_engfuncs.pfnGetModelPtr(&v), v.body, iGroup);
+	return studio::GetBodygroup(engine::GetModelPtr(&v), v.body, iGroup);
 }
 
 
 bool CBaseAnimating::ExtractBbox(int sequence, Vector& mins, Vector& maxs)
 {
-	return studio::ExtractBbox(g_engfuncs.pfnGetModelPtr(&v), sequence, mins, maxs);
+	return studio::ExtractBbox(engine::GetModelPtr(&v), sequence, mins, maxs);
 }
 
 //=========================================================

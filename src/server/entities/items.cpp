@@ -42,9 +42,9 @@ bool CItem::Spawn()
 	SetSize(Vector(-16, -16, 0), Vector(16, 16, 16));
 	SetTouch(&CItem::ItemTouch);
 
-	if (g_engfuncs.pfnDropToFloor(&v) == 0)
+	if (engine::DropToFloor(&v) == 0)
 	{
-		g_engfuncs.pfnAlertMessage(at_error, "Item %s fell out of level at %f,%f,%f", STRING(v.classname), v.origin.x, v.origin.y, v.origin.z);
+		engine::AlertMessage(at_error, "Item %s fell out of level at %f,%f,%f", STRING(v.classname), v.origin.x, v.origin.y, v.origin.z);
 		return false;
 	}
 
@@ -145,8 +145,8 @@ public:
 			v.netname = v.classname;
 		}
 
-		g_engfuncs.pfnPrecacheModel(STRING(v.model));
-		g_engfuncs.pfnPrecacheSound(STRING(v.noise));
+		engine::PrecacheModel(STRING(v.model));
+		engine::PrecacheSound(STRING(v.noise));
 
 		SetModel(v.model);
 	}

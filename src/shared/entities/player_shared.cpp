@@ -98,7 +98,7 @@ CBasePlayer::PlaybackEvent(
 	qboolean bParam2,
 	unsigned int flags)
 {
-	g_engfuncs.pfnPlaybackEvent(
+	engine::PlaybackEvent(
 		flags,
 		edict(),
 		event,

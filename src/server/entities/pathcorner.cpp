@@ -65,7 +65,7 @@ bool CPathCorner::Spawn()
 {
 	if (FStringNull(v.targetname))
 	{
-		g_engfuncs.pfnAlertMessage(at_console, "path_corner without a targetname\n");
+		engine::AlertMessage(at_console, "path_corner without a targetname\n");
 		return false;
 	}
 	return true;
@@ -91,7 +91,7 @@ bool CPathTrack::KeyValue(KeyValueData* pkvd)
 {
 	if (streq(pkvd->szKeyName, "altpath"))
 	{
-		m_altName = g_engfuncs.pfnAllocString(pkvd->szValue);
+		m_altName = engine::AllocString(pkvd->szValue);
 		return true;
 	}
 
@@ -146,7 +146,7 @@ void CPathTrack::Link()
 			}
 		}
 		else
-			g_engfuncs.pfnAlertMessage(at_console, "Dead end link %s\n", STRING(v.target));
+			engine::AlertMessage(at_console, "Dead end link %s\n", STRING(v.target));
 	}
 
 	// Find "alternate" path
@@ -344,7 +344,7 @@ CPathTrack* CPathTrack::Nearest(Vector origin)
 		deadCount++;
 		if (deadCount > 9999)
 		{
-			g_engfuncs.pfnAlertMessage(at_error, "Bad sequence of path_tracks from %s", STRING(v.targetname));
+			engine::AlertMessage(at_error, "Bad sequence of path_tracks from %s", STRING(v.targetname));
 			return nullptr;
 		}
 		delta = origin - ppath->v.origin;

@@ -318,50 +318,50 @@ void CBaseDoor::Precache()
 	switch (m_bMoveSnd)
 	{
 	case 0:
-		v.noiseMoving = g_engfuncs.pfnAllocString("common/null.wav");
+		v.noiseMoving = engine::AllocString("common/null.wav");
 		break;
 	case 1:
-		g_engfuncs.pfnPrecacheSound("doors/doormove1.wav");
-		v.noiseMoving = g_engfuncs.pfnAllocString("doors/doormove1.wav");
+		engine::PrecacheSound("doors/doormove1.wav");
+		v.noiseMoving = engine::AllocString("doors/doormove1.wav");
 		break;
 	case 2:
-		g_engfuncs.pfnPrecacheSound("doors/doormove2.wav");
-		v.noiseMoving = g_engfuncs.pfnAllocString("doors/doormove2.wav");
+		engine::PrecacheSound("doors/doormove2.wav");
+		v.noiseMoving = engine::AllocString("doors/doormove2.wav");
 		break;
 	case 3:
-		g_engfuncs.pfnPrecacheSound("doors/doormove3.wav");
-		v.noiseMoving = g_engfuncs.pfnAllocString("doors/doormove3.wav");
+		engine::PrecacheSound("doors/doormove3.wav");
+		v.noiseMoving = engine::AllocString("doors/doormove3.wav");
 		break;
 	case 4:
-		g_engfuncs.pfnPrecacheSound("doors/doormove4.wav");
-		v.noiseMoving = g_engfuncs.pfnAllocString("doors/doormove4.wav");
+		engine::PrecacheSound("doors/doormove4.wav");
+		v.noiseMoving = engine::AllocString("doors/doormove4.wav");
 		break;
 	case 5:
-		g_engfuncs.pfnPrecacheSound("doors/doormove5.wav");
-		v.noiseMoving = g_engfuncs.pfnAllocString("doors/doormove5.wav");
+		engine::PrecacheSound("doors/doormove5.wav");
+		v.noiseMoving = engine::AllocString("doors/doormove5.wav");
 		break;
 	case 6:
-		g_engfuncs.pfnPrecacheSound("doors/doormove6.wav");
-		v.noiseMoving = g_engfuncs.pfnAllocString("doors/doormove6.wav");
+		engine::PrecacheSound("doors/doormove6.wav");
+		v.noiseMoving = engine::AllocString("doors/doormove6.wav");
 		break;
 	case 7:
-		g_engfuncs.pfnPrecacheSound("doors/doormove7.wav");
-		v.noiseMoving = g_engfuncs.pfnAllocString("doors/doormove7.wav");
+		engine::PrecacheSound("doors/doormove7.wav");
+		v.noiseMoving = engine::AllocString("doors/doormove7.wav");
 		break;
 	case 8:
-		g_engfuncs.pfnPrecacheSound("doors/doormove8.wav");
-		v.noiseMoving = g_engfuncs.pfnAllocString("doors/doormove8.wav");
+		engine::PrecacheSound("doors/doormove8.wav");
+		v.noiseMoving = engine::AllocString("doors/doormove8.wav");
 		break;
 	case 9:
-		g_engfuncs.pfnPrecacheSound("doors/doormove9.wav");
-		v.noiseMoving = g_engfuncs.pfnAllocString("doors/doormove9.wav");
+		engine::PrecacheSound("doors/doormove9.wav");
+		v.noiseMoving = engine::AllocString("doors/doormove9.wav");
 		break;
 	case 10:
-		g_engfuncs.pfnPrecacheSound("doors/doormove10.wav");
-		v.noiseMoving = g_engfuncs.pfnAllocString("doors/doormove10.wav");
+		engine::PrecacheSound("doors/doormove10.wav");
+		v.noiseMoving = engine::AllocString("doors/doormove10.wav");
 		break;
 	default:
-		v.noiseMoving = g_engfuncs.pfnAllocString("common/null.wav");
+		v.noiseMoving = engine::AllocString("common/null.wav");
 		break;
 	}
 
@@ -369,42 +369,42 @@ void CBaseDoor::Precache()
 	switch (m_bStopSnd)
 	{
 	case 0:
-		v.noiseArrived = g_engfuncs.pfnAllocString("common/null.wav");
+		v.noiseArrived = engine::AllocString("common/null.wav");
 		break;
 	case 1:
-		g_engfuncs.pfnPrecacheSound("doors/doorstop1.wav");
-		v.noiseArrived = g_engfuncs.pfnAllocString("doors/doorstop1.wav");
+		engine::PrecacheSound("doors/doorstop1.wav");
+		v.noiseArrived = engine::AllocString("doors/doorstop1.wav");
 		break;
 	case 2:
-		g_engfuncs.pfnPrecacheSound("doors/doorstop2.wav");
-		v.noiseArrived = g_engfuncs.pfnAllocString("doors/doorstop2.wav");
+		engine::PrecacheSound("doors/doorstop2.wav");
+		v.noiseArrived = engine::AllocString("doors/doorstop2.wav");
 		break;
 	case 3:
-		g_engfuncs.pfnPrecacheSound("doors/doorstop3.wav");
-		v.noiseArrived = g_engfuncs.pfnAllocString("doors/doorstop3.wav");
+		engine::PrecacheSound("doors/doorstop3.wav");
+		v.noiseArrived = engine::AllocString("doors/doorstop3.wav");
 		break;
 	case 4:
-		g_engfuncs.pfnPrecacheSound("doors/doorstop4.wav");
-		v.noiseArrived = g_engfuncs.pfnAllocString("doors/doorstop4.wav");
+		engine::PrecacheSound("doors/doorstop4.wav");
+		v.noiseArrived = engine::AllocString("doors/doorstop4.wav");
 		break;
 	case 5:
-		g_engfuncs.pfnPrecacheSound("doors/doorstop5.wav");
-		v.noiseArrived = g_engfuncs.pfnAllocString("doors/doorstop5.wav");
+		engine::PrecacheSound("doors/doorstop5.wav");
+		v.noiseArrived = engine::AllocString("doors/doorstop5.wav");
 		break;
 	case 6:
-		g_engfuncs.pfnPrecacheSound("doors/doorstop6.wav");
-		v.noiseArrived = g_engfuncs.pfnAllocString("doors/doorstop6.wav");
+		engine::PrecacheSound("doors/doorstop6.wav");
+		v.noiseArrived = engine::AllocString("doors/doorstop6.wav");
 		break;
 	case 7:
-		g_engfuncs.pfnPrecacheSound("doors/doorstop7.wav");
-		v.noiseArrived = g_engfuncs.pfnAllocString("doors/doorstop7.wav");
+		engine::PrecacheSound("doors/doorstop7.wav");
+		v.noiseArrived = engine::AllocString("doors/doorstop7.wav");
 		break;
 	case 8:
-		g_engfuncs.pfnPrecacheSound("doors/doorstop8.wav");
-		v.noiseArrived = g_engfuncs.pfnAllocString("doors/doorstop8.wav");
+		engine::PrecacheSound("doors/doorstop8.wav");
+		v.noiseArrived = engine::AllocString("doors/doorstop8.wav");
 		break;
 	default:
-		v.noiseArrived = g_engfuncs.pfnAllocString("common/null.wav");
+		v.noiseArrived = engine::AllocString("common/null.wav");
 		break;
 	}
 
@@ -413,15 +413,15 @@ void CBaseDoor::Precache()
 	if (0 != m_bLockedSound)
 	{
 		pszSound = ButtonSound((int)m_bLockedSound);
-		g_engfuncs.pfnPrecacheSound(pszSound);
-		m_ls.sLockedSound = g_engfuncs.pfnAllocString(pszSound);
+		engine::PrecacheSound(pszSound);
+		m_ls.sLockedSound = engine::AllocString(pszSound);
 	}
 
 	if (0 != m_bUnlockedSound)
 	{
 		pszSound = ButtonSound((int)m_bUnlockedSound);
-		g_engfuncs.pfnPrecacheSound(pszSound);
-		m_ls.sUnlockedSound = g_engfuncs.pfnAllocString(pszSound);
+		engine::PrecacheSound(pszSound);
+		m_ls.sUnlockedSound = engine::AllocString(pszSound);
 	}
 
 	// get sentence group names, for doors which are directly 'touched' to open
@@ -429,31 +429,31 @@ void CBaseDoor::Precache()
 	switch (m_bLockedSentence)
 	{
 	case 1:
-		m_ls.sLockedSentence = g_engfuncs.pfnAllocString("NA");
+		m_ls.sLockedSentence = engine::AllocString("NA");
 		break; // access denied
 	case 2:
-		m_ls.sLockedSentence = g_engfuncs.pfnAllocString("ND");
+		m_ls.sLockedSentence = engine::AllocString("ND");
 		break; // security lockout
 	case 3:
-		m_ls.sLockedSentence = g_engfuncs.pfnAllocString("NF");
+		m_ls.sLockedSentence = engine::AllocString("NF");
 		break; // blast door
 	case 4:
-		m_ls.sLockedSentence = g_engfuncs.pfnAllocString("NFIRE");
+		m_ls.sLockedSentence = engine::AllocString("NFIRE");
 		break; // fire door
 	case 5:
-		m_ls.sLockedSentence = g_engfuncs.pfnAllocString("NCHEM");
+		m_ls.sLockedSentence = engine::AllocString("NCHEM");
 		break; // chemical door
 	case 6:
-		m_ls.sLockedSentence = g_engfuncs.pfnAllocString("NRAD");
+		m_ls.sLockedSentence = engine::AllocString("NRAD");
 		break; // radiation door
 	case 7:
-		m_ls.sLockedSentence = g_engfuncs.pfnAllocString("NCON");
+		m_ls.sLockedSentence = engine::AllocString("NCON");
 		break; // gen containment
 	case 8:
-		m_ls.sLockedSentence = g_engfuncs.pfnAllocString("NH");
+		m_ls.sLockedSentence = engine::AllocString("NH");
 		break; // maintenance door
 	case 9:
-		m_ls.sLockedSentence = g_engfuncs.pfnAllocString("NG");
+		m_ls.sLockedSentence = engine::AllocString("NG");
 		break; // broken door
 
 	default:
@@ -464,28 +464,28 @@ void CBaseDoor::Precache()
 	switch (m_bUnlockedSentence)
 	{
 	case 1:
-		m_ls.sUnlockedSentence = g_engfuncs.pfnAllocString("EA");
+		m_ls.sUnlockedSentence = engine::AllocString("EA");
 		break; // access granted
 	case 2:
-		m_ls.sUnlockedSentence = g_engfuncs.pfnAllocString("ED");
+		m_ls.sUnlockedSentence = engine::AllocString("ED");
 		break; // security door
 	case 3:
-		m_ls.sUnlockedSentence = g_engfuncs.pfnAllocString("EF");
+		m_ls.sUnlockedSentence = engine::AllocString("EF");
 		break; // blast door
 	case 4:
-		m_ls.sUnlockedSentence = g_engfuncs.pfnAllocString("EFIRE");
+		m_ls.sUnlockedSentence = engine::AllocString("EFIRE");
 		break; // fire door
 	case 5:
-		m_ls.sUnlockedSentence = g_engfuncs.pfnAllocString("ECHEM");
+		m_ls.sUnlockedSentence = engine::AllocString("ECHEM");
 		break; // chemical door
 	case 6:
-		m_ls.sUnlockedSentence = g_engfuncs.pfnAllocString("ERAD");
+		m_ls.sUnlockedSentence = engine::AllocString("ERAD");
 		break; // radiation door
 	case 7:
-		m_ls.sUnlockedSentence = g_engfuncs.pfnAllocString("ECON");
+		m_ls.sUnlockedSentence = engine::AllocString("ECON");
 		break; // gen containment
 	case 8:
-		m_ls.sUnlockedSentence = g_engfuncs.pfnAllocString("EH");
+		m_ls.sUnlockedSentence = engine::AllocString("EH");
 		break; // maintenance door
 
 	default:
@@ -920,42 +920,42 @@ void CMomentaryDoor::Precache()
 	switch (m_bMoveSnd)
 	{
 	case 0:
-		v.noiseMoving = g_engfuncs.pfnAllocString("common/null.wav");
+		v.noiseMoving = engine::AllocString("common/null.wav");
 		break;
 	case 1:
-		g_engfuncs.pfnPrecacheSound("doors/doormove1.wav");
-		v.noiseMoving = g_engfuncs.pfnAllocString("doors/doormove1.wav");
+		engine::PrecacheSound("doors/doormove1.wav");
+		v.noiseMoving = engine::AllocString("doors/doormove1.wav");
 		break;
 	case 2:
-		g_engfuncs.pfnPrecacheSound("doors/doormove2.wav");
-		v.noiseMoving = g_engfuncs.pfnAllocString("doors/doormove2.wav");
+		engine::PrecacheSound("doors/doormove2.wav");
+		v.noiseMoving = engine::AllocString("doors/doormove2.wav");
 		break;
 	case 3:
-		g_engfuncs.pfnPrecacheSound("doors/doormove3.wav");
-		v.noiseMoving = g_engfuncs.pfnAllocString("doors/doormove3.wav");
+		engine::PrecacheSound("doors/doormove3.wav");
+		v.noiseMoving = engine::AllocString("doors/doormove3.wav");
 		break;
 	case 4:
-		g_engfuncs.pfnPrecacheSound("doors/doormove4.wav");
-		v.noiseMoving = g_engfuncs.pfnAllocString("doors/doormove4.wav");
+		engine::PrecacheSound("doors/doormove4.wav");
+		v.noiseMoving = engine::AllocString("doors/doormove4.wav");
 		break;
 	case 5:
-		g_engfuncs.pfnPrecacheSound("doors/doormove5.wav");
-		v.noiseMoving = g_engfuncs.pfnAllocString("doors/doormove5.wav");
+		engine::PrecacheSound("doors/doormove5.wav");
+		v.noiseMoving = engine::AllocString("doors/doormove5.wav");
 		break;
 	case 6:
-		g_engfuncs.pfnPrecacheSound("doors/doormove6.wav");
-		v.noiseMoving = g_engfuncs.pfnAllocString("doors/doormove6.wav");
+		engine::PrecacheSound("doors/doormove6.wav");
+		v.noiseMoving = engine::AllocString("doors/doormove6.wav");
 		break;
 	case 7:
-		g_engfuncs.pfnPrecacheSound("doors/doormove7.wav");
-		v.noiseMoving = g_engfuncs.pfnAllocString("doors/doormove7.wav");
+		engine::PrecacheSound("doors/doormove7.wav");
+		v.noiseMoving = engine::AllocString("doors/doormove7.wav");
 		break;
 	case 8:
-		g_engfuncs.pfnPrecacheSound("doors/doormove8.wav");
-		v.noiseMoving = g_engfuncs.pfnAllocString("doors/doormove8.wav");
+		engine::PrecacheSound("doors/doormove8.wav");
+		v.noiseMoving = engine::AllocString("doors/doormove8.wav");
 		break;
 	default:
-		v.noiseMoving = g_engfuncs.pfnAllocString("common/null.wav");
+		v.noiseMoving = engine::AllocString("common/null.wav");
 		break;
 	}
 }
