@@ -127,7 +127,7 @@ static float V_CalcRoll(Vector angles, Vector velocity, float rollangle, float r
 	float value;
 	Vector forward, right, up;
 
-	AngleVectors(angles, forward, right, up);
+	AngleVectors(angles, &forward, &right, &up);
 
 	side = DotProduct(velocity, right);
 	sign = side < 0 ? -1 : 1;
@@ -423,7 +423,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	// offsets
 	angles = pparams->cl_viewangles;
 
-	AngleVectors(angles, pparams->forward, pparams->right, pparams->up);
+	AngleVectors(angles, &pparams->forward, &pparams->right, &pparams->up);
 
 	// Treating cam_ofs[2] as the distance
 	if (0 != CL_IsThirdPerson())
@@ -437,7 +437,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 		camAngles = ofs;
 		camAngles[ROLL] = 0;
 
-		AngleVectors(camAngles, camForward, camRight, camUp);
+		AngleVectors(camAngles, &camForward, &camRight, &camUp);
 
 		for (i = 0; i < 3; i++)
 		{

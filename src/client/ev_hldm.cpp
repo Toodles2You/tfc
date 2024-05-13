@@ -448,7 +448,7 @@ static void EV_FireBullets(
 		};
 
 		Vector forward, right, up;
-		AngleVectors(angles, forward, right, up);
+		AngleVectors(angles, &forward, &right, &up);
 
 		pmtrace_t tr;
 		gEngfuncs.pEventAPI->EV_PlayerTrace(gun, gun + forward * distance, PM_NORMAL, -1, &tr);
@@ -478,7 +478,7 @@ static void EV_FireBullets(
 void CMP5::EV_PrimaryAttack(event_args_t* args)
 {
 	Vector up, right, forward;
-	AngleVectors(args->angles, forward, right, up);
+	AngleVectors(args->angles, &forward, &right, &up);
 
 	if (EV_IsLocal(args->entindex))
 	{
@@ -560,7 +560,7 @@ void CCrowbar::EV_PrimaryAttack(event_args_t* args)
 		gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
 
 		Vector forward, right, up;
-		AngleVectors(args->angles, forward, right, up);
+		AngleVectors(args->angles, &forward, &right, &up);
 
 		gEngfuncs.pEventAPI->EV_PlayerTrace(gun, gun + forward * 64, PM_NORMAL, -1, &tr);
 
@@ -833,7 +833,7 @@ static void EV_SpawnGibs(event_args_t* args, int count)
 	Vector velocity, dir;
 	auto body = 0;
 	Vector forward;
-	AngleVectors(args->angles, forward, nullptr, nullptr);
+	AngleVectors(args->angles, &forward, nullptr, nullptr);
 	forward = forward * -1.0f;
 	while (--count >= 0)
 	{

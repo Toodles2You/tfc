@@ -128,7 +128,7 @@ static void V_GetChaseOrigin(Vector& angles, Vector& origin, float distance, Vec
 	cl_entity_t* ent = nullptr;
 
 	// Trace back from the target using the player's view angles
-	AngleVectors(angles, forward, nullptr, nullptr);
+	AngleVectors(angles, &forward, nullptr, nullptr);
 
 	forward = -forward;
 
@@ -564,7 +564,7 @@ void V_GetMapFreePosition(Vector& cl_angles, Vector& origin, Vector& angles)
 	zScaledTarget[2] = gHUD.m_Spectator.m_mapOrigin[2] * ((90.0f - angles[0]) / 90.0f);
 
 
-	AngleVectors(angles, forward, nullptr, nullptr);
+	AngleVectors(angles, &forward, nullptr, nullptr);
 
 	forward.NormalizeInPlace();
 
@@ -607,7 +607,7 @@ void V_GetMapChasePosition(int target, Vector& cl_angles, Vector& origin, Vector
 	origin[2] *= ((90.0f - angles[0]) / 90.0f);
 	angles[2] = 0.0f; // don't roll angle (if chased player is dead)
 
-	AngleVectors(angles, forward, nullptr, nullptr);
+	AngleVectors(angles, &forward, nullptr, nullptr);
 
 	forward.NormalizeInPlace();
 

@@ -45,7 +45,7 @@ static void GetCrosshairTarget(pmtrace_t* tr, float distance)
 	// Determine our last predicted origin
 	origin = HUD_GetLastOrg();
 
-	AngleVectors(angles, forward, right, up);
+	AngleVectors(angles, &forward, &right, &up);
 
 	vecSrc = origin;
 

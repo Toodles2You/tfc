@@ -335,7 +335,7 @@ void CAM_Think()
 	{
 		// check new ideal
 		pnt = origin;
-		AngleVectors(camAngles, camForward, camRight, camUp);
+		AngleVectors(camAngles, &camForward, &camRight, &camUp);
 		for (i = 0; i < 3; i++)
 			pnt[i] += -dist * camForward[i];
 
@@ -391,7 +391,7 @@ void CAM_Think()
 		camAngles[ROLL] = 0;
 
 		pnt = origin;
-		AngleVectors(camAngles, camForward, camRight, camUp);
+		AngleVectors(camAngles, &camForward, &camRight, &camUp);
 		for (i = 0; i < 3; i++)
 			pnt[i] += -dist * camForward[i];
 
