@@ -319,21 +319,6 @@ void VectorInverse(float* v)
 	v[2] = -v[2];
 }
 
-void VectorScale(const float* in, float scale, float* out)
-{
-	out[0] = in[0] * scale;
-	out[1] = in[1] * scale;
-	out[2] = in[2] * scale;
-}
-
-int Q_log2(int val)
-{
-	int answer = 0;
-	while ((val >>= 1) != 0)
-		answer++;
-	return answer;
-}
-
 void VectorMatrix(const Vector& forward, Vector& right, Vector& up)
 {
 	Vector tmp;
@@ -358,7 +343,7 @@ void VectorMatrix(const Vector& forward, Vector& right, Vector& up)
 	VectorNormalize(up);
 }
 
-void VectorAngles(const float* forward, float* angles)
+void VectorAngles(const Vector& forward, Vector& angles)
 {
 	double tmp, yaw, pitch;
 

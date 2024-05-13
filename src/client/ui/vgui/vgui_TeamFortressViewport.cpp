@@ -1299,7 +1299,7 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 		// in first person mode colorize player names
 		if (0 != player && name)
 		{
-			float* color = gHUD.GetClientColor(player);
+			auto color = gHUD.GetClientColor(player);
 			int r = color[0] * 255;
 			int g = color[1] * 255;
 			int b = color[2] * 255;

@@ -428,10 +428,10 @@ bool CSave::WriteFields(const char* pname, void* pBaseData, TYPEDESCRIPTION* pFi
 			WriteInt(pTest->fieldName, entityArray, pTest->fieldSize);
 			break;
 		case FIELD_POSITION_VECTOR:
-			WritePositionVector(pTest->fieldName, (float*)pOutputData, pTest->fieldSize);
+			WritePositionVector(pTest->fieldName, pOutputData, pTest->fieldSize);
 			break;
 		case FIELD_VECTOR:
-			WriteVector(pTest->fieldName, (float*)pOutputData, pTest->fieldSize);
+			WriteVector(pTest->fieldName, pOutputData, pTest->fieldSize);
 			break;
 
 		case FIELD_BOOLEAN:

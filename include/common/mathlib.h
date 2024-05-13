@@ -63,10 +63,9 @@ void VectorMA(const float* veca, float scale, const float* vecb, float* vecc);
 bool VectorCompare(const float* v1, const float* v2);
 float Length(const float* v);
 void CrossProduct(const float* v1, const float* v2, float* cross);
+float Distance(const float* v1, const float* v2);
 float VectorNormalize(float* v); // returns vector length
 void VectorInverse(float* v);
-void VectorScale(const float* in, float scale, float* out);
-int Q_log2(int val);
 
 void R_ConcatRotations(float in1[3][3], float in2[3][3], float out[3][3]);
 void R_ConcatTransforms(float in1[3][4], float in2[3][4], float out[3][4]);
@@ -92,7 +91,7 @@ float AngleBetweenVectors(const float* v1, const float* v2);
 
 
 void VectorMatrix(const Vector& forward, Vector& right, Vector& up);
-void VectorAngles(const float* forward, float* angles);
+void VectorAngles(const Vector& forward, Vector& angles);
 
 int InvertMatrix(const float* m, float* out);
 

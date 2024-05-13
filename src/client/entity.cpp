@@ -421,7 +421,7 @@ void HUD_TempEntUpdate(
 						{
 							// Chop spark speeds a bit more
 							//
-							VectorScale(pTemp->entity.baseline.origin, 0.6, pTemp->entity.baseline.origin);
+							pTemp->entity.baseline.origin = pTemp->entity.baseline.origin * 0.6F;
 
 							if (Length(pTemp->entity.baseline.origin) < 10)
 							{
@@ -485,9 +485,8 @@ void HUD_TempEntUpdate(
 
 						if (damp != 1)
 						{
-
-							VectorScale(pTemp->entity.baseline.origin, damp, pTemp->entity.baseline.origin);
-							VectorScale(pTemp->entity.angles, 0.9, pTemp->entity.angles);
+							pTemp->entity.baseline.origin = pTemp->entity.baseline.origin * damp;
+							pTemp->entity.angles = pTemp->entity.angles * 0.9F;
 						}
 					}
 				}

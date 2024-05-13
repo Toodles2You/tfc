@@ -35,7 +35,6 @@
 
 int CL_IsThirdPerson();
 void CL_CameraOffset(float* ofs);
-void VectorAngles(const float* forward, float* angles);
 
 void V_CalcSpectatorRefdef(ref_params_t* pparams);
 
@@ -271,7 +270,7 @@ static void V_DropPunchAngle(float frametime)
 		len = VectorNormalize(ev_punchangle);
 		len -= (10.0 + len * 0.5) * frametime;
 		len = std::max(len, 0.0F);
-		VectorScale(ev_punchangle, len, ev_punchangle);
+		ev_punchangle = ev_punchangle * len;
 		return;
 	}
 
@@ -494,10 +493,8 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	}
 
 	// Add in the punchangle, if any
-	VectorAdd(pparams->viewangles, pparams->punchangle, pparams->viewangles);
-
 	// Include client side punch, too
-	VectorAdd(pparams->viewangles, (float*)&ev_punchangle, pparams->viewangles);
+	pparams->viewangles = pparams->viewangles + pparams->punchangle + ev_punchangle;
 
 	V_DropPunchAngle(pparams->frametime);
 

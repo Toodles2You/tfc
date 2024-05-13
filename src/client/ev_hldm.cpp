@@ -126,7 +126,7 @@ static void EV_Bubbles(const Vector& origin, float radius)
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
 // original traceline endpoints used by the attacker.
 // returns volume of strike instrument (crowbar) to play
-static float EV_PlayTextureSound(int idx, pmtrace_t* ptr, float* vecSrc, float* vecEnd)
+static float EV_PlayTextureSound(int idx, pmtrace_t* ptr, const Vector& vecSrc, const Vector& vecEnd)
 {
 	// hit the world, try to play sound based on texture material type
 	char chTextureType = CHAR_TEX_CONCRETE;
@@ -147,7 +147,11 @@ static float EV_PlayTextureSound(int idx, pmtrace_t* ptr, float* vecSrc, float* 
 	if (entity == 0)
 	{
 		// get texture from entity or world (world is ent(0))
-		pTextureName = (char*)gEngfuncs.pEventAPI->EV_TraceTexture(ptr->ent, vecSrc, vecEnd);
+		pTextureName =
+			(char*)gEngfuncs.pEventAPI->EV_TraceTexture(
+				ptr->ent,
+				const_cast<Vector&>(vecSrc),
+				const_cast<Vector&>(vecEnd));
 
 		if (pTextureName)
 		{

@@ -37,9 +37,6 @@ enum
 };
 
 int PM_GetPhysEntInfo(int ent);
-void NormalizeAngles(float* angles);
-float Distance(const float* v1, const float* v2);
-void VectorAngles(const float* forward, float* angles);
 
 extern Vector vJumpOrigin;
 extern Vector vJumpAngles;
@@ -133,7 +130,7 @@ static void V_GetChaseOrigin(float* angles, float* origin, float distance, float
 	// Trace back from the target using the player's view angles
 	AngleVectors(angles, forward, NULL, NULL);
 
-	VectorScale(forward, -1, forward);
+	forward = -forward;
 
 	vecStart = origin;
 

@@ -1029,7 +1029,7 @@ bool util::TeamsMatch(const char* pTeamName1, const char* pTeamName2)
 }
 
 
-void util::StringToVector(float* pVector, const char* pString)
+void util::StringToVector(Vector& pVector, const char* pString)
 {
 	char *pstr, *pfront, tempString[128];
 	int j;

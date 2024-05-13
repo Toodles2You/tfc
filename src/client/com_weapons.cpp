@@ -99,7 +99,7 @@ void HUD_PlaySound(const char* sound, float volume)
 		return;
 	}
 
-	gEngfuncs.pfnPlaySoundByNameAtLocation(sound, volume, (float*)&g_finalstate.playerstate.origin);
+	gEngfuncs.pfnPlaySoundByNameAtLocation(sound, volume, g_finalstate.playerstate.origin);
 }
 
 

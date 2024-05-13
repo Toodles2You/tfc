@@ -42,7 +42,6 @@ extern cvar_t* in_joystick;
 #endif
 
 void V_Init();
-void VectorAngles(const float* forward, float* angles);
 int CL_ButtonBits(bool);
 
 static int in_impulse = 0;

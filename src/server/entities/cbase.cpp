@@ -336,7 +336,7 @@ static void EntvarsKeyvalue(Entity* entity, KeyValueData* pkvd)
 
 		case FIELD_POSITION_VECTOR:
 		case FIELD_VECTOR:
-			util::StringToVector((float*)((char*)entity + pField->fieldOffset), pkvd->szValue);
+			util::StringToVector(*(Vector*)((char*)entity + pField->fieldOffset), pkvd->szValue);
 			break;
 
 		default:

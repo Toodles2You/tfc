@@ -372,7 +372,7 @@ void TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, En
 Vector GetAimVector(Entity* pent, float flSpeed);
 
 bool IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator);
-void StringToVector(float* pVector, const char* pString);
+void StringToVector(Vector& pVector, const char* pString);
 void StringToIntArray(int* pVector, int count, const char* pString);
 Vector ClampVectorToBox(const Vector& input, const Vector& clampSize);
 float Approach(float target, float value, float speed);

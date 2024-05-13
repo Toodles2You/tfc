@@ -357,7 +357,7 @@ bool CFuncRotating::KeyValue(KeyValueData* pkvd)
 	else if (streq(pkvd->szKeyName, "spawnorigin"))
 	{
 		Vector tmp;
-		util::StringToVector((float*)tmp, pkvd->szValue);
+		util::StringToVector(tmp, pkvd->szValue);
 		if (tmp != g_vecZero)
 			v.origin = tmp;
 		return true;

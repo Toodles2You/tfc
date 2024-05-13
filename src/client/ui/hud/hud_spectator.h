@@ -24,7 +24,6 @@ enum
 #define OVERVIEW_TILE_SIZE 128 // don't change this
 #define OVERVIEW_MAX_LAYERS 1
 
-extern void VectorAngles(const float* forward, float* angles);
 void NormalizeAngles(float* angles);
 
 //-----------------------------------------------------------------------------

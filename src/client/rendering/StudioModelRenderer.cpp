@@ -678,7 +678,10 @@ void CStudioModelRenderer::StudioFxTransform(cl_entity_t* ent, float transform[3
 			int axis = gEngfuncs.pfnRandomLong(0, 1);
 			if (axis == 1) // Choose between x & z
 				axis = 2;
-			VectorScale(transform[axis], gEngfuncs.pfnRandomFloat(1, 1.484), transform[axis]);
+			float random = gEngfuncs.pfnRandomFloat(1, 1.484);
+			transform[axis][0] *= random;
+			transform[axis][1] *= random;
+			transform[axis][2] *= random;
 		}
 		else if (gEngfuncs.pfnRandomLong(0, 49) == 0)
 		{
@@ -1876,7 +1879,7 @@ void CStudioModelRenderer::StudioSetupChrome(int bone)
 	Vector right;
 	Vector origin;
 
-	VectorScale(m_vRenderOrigin, -1, origin);
+	origin = m_vRenderOrigin * -1.0F;
 	origin.x += (*m_pbonetransform)[bone][0][3];
 	origin.y += (*m_pbonetransform)[bone][1][3];
 	origin.z += (*m_pbonetransform)[bone][2][3];
