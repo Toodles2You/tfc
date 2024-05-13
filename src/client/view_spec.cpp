@@ -134,7 +134,7 @@ static void V_GetChaseOrigin(Vector& angles, Vector& origin, float distance, Vec
 
 	vecStart = origin;
 
-	VectorMA(vecStart, distance, forward, vecEnd);
+	vecEnd = vecStart + distance * forward;
 
 	while (maxLoops > 0)
 	{
@@ -168,7 +168,7 @@ static void V_GetChaseOrigin(Vector& angles, Vector& origin, float distance, Vec
 		maxLoops--;
 	}
 
-	VectorMA(trace->endpos, 4, trace->plane.normal, returnvec);
+	returnvec = trace->endpos + 4 * trace->plane.normal;
 
 	v_lastDistance = Distance(trace->endpos, origin); // real distance without offset
 }
@@ -568,7 +568,7 @@ void V_GetMapFreePosition(Vector& cl_angles, Vector& origin, Vector& angles)
 
 	forward.NormalizeInPlace();
 
-	VectorMA(zScaledTarget, -(4096.0f / gHUD.m_Spectator.m_mapZoom), forward, origin);
+	origin = zScaledTarget + -(4096.0f / gHUD.m_Spectator.m_mapZoom) * forward;
 }
 
 void V_GetMapChasePosition(int target, Vector& cl_angles, Vector& origin, Vector& angles)
@@ -611,7 +611,7 @@ void V_GetMapChasePosition(int target, Vector& cl_angles, Vector& origin, Vector
 
 	forward.NormalizeInPlace();
 
-	VectorMA(origin, -1536, forward, origin);
+	origin = origin + -1536 * forward;
 }
 
 

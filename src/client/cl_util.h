@@ -161,8 +161,6 @@ inline void PlaySound(int iSound, float vol) { gEngfuncs.pfnPlaySoundByIndex(iSo
 
 void ScaleColors(int& r, int& g, int& b, int a);
 
-void VectorMA(const float* veca, float scale, const float* vecb, float* vecc);
-
 // disable 'possible loss of data converting float to int' warning message
 #pragma warning(disable : 4244)
 // disable 'truncation from 'const double' to 'float' warning message

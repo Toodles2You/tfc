@@ -17,12 +17,8 @@
 #define	ROLL	2
 #endif
 
-#define FDotProduct( a, b ) (fabs((a[0])*(b[0])) + fabs((a[1])*(b[1])) + fabs((a[2])*(b[2])))
-
-void	AngleMatrix (const float *angles, float (*matrix)[4] );
-bool	VectorCompare (const float *v1, const float *v2);
-void	CrossProduct (const float *v1, const float *v2, float *cross);
-void	VectorTransform (const float *in1, float in2[3][4], float *out);
+void	AngleMatrix (const Vector& angles, float (*matrix)[4] );
+void	VectorTransform (const Vector& in1, float in2[3][4], Vector& out);
 void	ConcatTransforms (float in1[3][4], float in2[3][4], float out[3][4]);
 void	MatrixCopy( float in[3][4], float out[3][4] );
 void	QuaternionMatrix( vec4_t quaternion, float (*matrix)[4] );

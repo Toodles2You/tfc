@@ -49,7 +49,7 @@ static void GetCrosshairTarget(pmtrace_t* tr, float distance)
 
 	vecSrc = origin;
 
-	VectorMA(vecSrc, distance, forward, vecEnd);
+	vecEnd = vecSrc + distance * forward;
 
 	gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_STUDIO_BOX, -1, tr);
 

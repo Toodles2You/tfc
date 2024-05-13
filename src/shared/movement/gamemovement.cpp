@@ -342,7 +342,7 @@ int CHalfLifeMovement::FlyMove()
                     pmove->Con_DPrintf("More than 2 planes\n");
                     break;
                 }
-                CrossProduct(planes[0], planes[1], dir);
+                dir = CrossProduct(planes[0], planes[1]);
                 d = DotProduct(dir, pmove->velocity);
                 pmove->velocity = dir * d;
             }

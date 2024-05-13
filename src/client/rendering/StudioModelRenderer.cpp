@@ -241,7 +241,7 @@ void CStudioModelRenderer::StudioCalcBoneQuaterion(int frame, float s, mstudiobo
 		}
 	}
 
-	if (!VectorCompare(angle1, angle2))
+	if (angle1 != angle2)
 	{
 		AngleQuaternion(angle1, q1);
 		AngleQuaternion(angle2, q2);
@@ -1883,15 +1883,13 @@ void CStudioModelRenderer::StudioSetupChrome(int bone)
 	Vector right;
 	Vector origin;
 
-	origin = m_vRenderOrigin * -1.0F;
+	origin = -m_vRenderOrigin;
 	origin.x += (*m_pbonetransform)[bone][0][3];
 	origin.y += (*m_pbonetransform)[bone][1][3];
 	origin.z += (*m_pbonetransform)[bone][2][3];
 	origin.NormalizeInPlace();
-	CrossProduct(origin, m_vRight, up);
-	up.NormalizeInPlace();
-	CrossProduct(origin, up, right);
-	right.NormalizeInPlace();
+	up = CrossProduct(origin, m_vRight).Normalize();
+	right = CrossProduct(origin, up).Normalize();
 
 	VectorIRotate(up, (*m_pbonetransform)[bone], m_vChromeUp[bone]);
 	VectorIRotate(right, (*m_pbonetransform)[bone], m_vChromeRight[bone]);
