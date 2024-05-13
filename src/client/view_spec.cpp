@@ -57,7 +57,7 @@ int v_cameraMode = CAM_MODE_FOCUS;
 bool v_resetCamera = true;
 
 
-static void V_SmoothInterpolateAngles(float* startAngle, float* endAngle, float* finalAngle, float degreesPerSec)
+static void V_SmoothInterpolateAngles(Vector& startAngle, Vector& endAngle, Vector& finalAngle, float degreesPerSec)
 {
 	float absd, frac, d, threshhold;
 
@@ -115,7 +115,7 @@ static void V_SmoothInterpolateAngles(float* startAngle, float* endAngle, float*
 
 
 // Get the origin of the Observer based around the target's position and angles
-static void V_GetChaseOrigin(float* angles, float* origin, float distance, float* returnvec)
+static void V_GetChaseOrigin(Vector& angles, Vector& origin, float distance, Vector& returnvec)
 {
 	Vector vecEnd;
 	Vector forward;
@@ -174,7 +174,7 @@ static void V_GetChaseOrigin(float* angles, float* origin, float distance, float
 }
 
 
-static void V_GetDeathCam(int victim, int killer, float* cl_angles, float* origin, float* angle)
+static void V_GetDeathCam(int victim, int killer, Vector& cl_angles, Vector& origin, Vector& angle)
 {
 	Vector newAngle;
 	Vector newOrigin;
@@ -204,7 +204,7 @@ static void V_GetDeathCam(int victim, int killer, float* cl_angles, float* origi
 	// get new angle towards second target
 	if (killerEnt != nullptr && killerEnt != victimEnt)
 	{
-		VectorSubtract(killerEnt->origin, victimEnt->origin, newAngle);
+		newAngle = killerEnt->origin - victimEnt->origin;
 		VectorAngles(newAngle, newAngle);
 		newAngle[0] = -newAngle[0];
 		cl_angles = newAngle;
@@ -226,7 +226,7 @@ static void V_GetDeathCam(int victim, int killer, float* cl_angles, float* origi
 }
 
 
-static void V_GetSingleTargetCam(cl_entity_t* ent1, float* angle, float* origin)
+static void V_GetSingleTargetCam(cl_entity_t* ent1, Vector& angle, Vector& origin)
 {
 	Vector newAngle;
 	Vector newOrigin;
@@ -292,7 +292,7 @@ static void V_GetSingleTargetCam(cl_entity_t* ent1, float* angle, float* origin)
 }
 
 
-static float MaxAngleBetweenAngles(float* a1, float* a2)
+static float MaxAngleBetweenAngles(Vector& a1, Vector& a2)
 {
 	float d, maxd = 0.0f;
 
@@ -320,7 +320,7 @@ static float MaxAngleBetweenAngles(float* a1, float* a2)
 	return maxd;
 }
 
-void V_GetDoubleTargetsCam(cl_entity_t* ent1, cl_entity_t* ent2, float* angle, float* origin)
+void V_GetDoubleTargetsCam(cl_entity_t* ent1, cl_entity_t* ent2, Vector& angle, Vector& origin)
 {
 	Vector newAngle;
 	Vector newOrigin;
@@ -350,7 +350,7 @@ void V_GetDoubleTargetsCam(cl_entity_t* ent1, cl_entity_t* ent2, float* angle, f
 		newOrigin[2] += 8; // object, tricky, must be above bomb in CS
 
 	// get new angle towards second target
-	VectorSubtract(ent2->origin, ent1->origin, newAngle);
+	newAngle = ent2->origin - ent1->origin;
 
 	VectorAngles(newAngle, newAngle);
 	newAngle[0] = -newAngle[0];
@@ -398,12 +398,12 @@ void V_GetDoubleTargetsCam(cl_entity_t* ent1, cl_entity_t* ent2, float* angle, f
 		origin[2] += 16.0f * (1.0f - (v_lastDistance / 64.0f));
 
 	// calculate angle to second target
-	VectorSubtract(ent2->origin, origin, tempVec);
+	tempVec = ent2->origin - origin;
 	VectorAngles(tempVec, tempVec);
 	tempVec[0] = -tempVec[0];
 }
 
-void V_GetDirectedChasePosition(cl_entity_t* ent1, cl_entity_t* ent2, float* angle, float* origin)
+void V_GetDirectedChasePosition(cl_entity_t* ent1, cl_entity_t* ent2, Vector& angle, Vector& origin)
 {
 
 	if (v_resetCamera)
@@ -499,9 +499,7 @@ void V_GetChasePos(int target, float* cl_angles, Vector& origin, Vector& angles)
 		}
 
 
-		origin = ent->origin;
-
-		VectorAdd(origin, VEC_VIEW, origin); // some offset
+		origin = ent->origin + VEC_VIEW; // some offset
 
 		V_GetChaseOrigin(angles, origin, cl_chasedist->value, origin);
 	}
@@ -539,19 +537,19 @@ void V_GetInEyePos(int target, Vector& origin, Vector& angles)
 	if (ent->curstate.solid == SOLID_NOT)
 	{
 		angles[ROLL] = 80; // dead view angle
-		VectorAdd(origin, VEC_DEAD_VIEW, origin);
+		origin = origin + VEC_DEAD_VIEW;
 	}
 	else if (ent->curstate.usehull == 1)
 	{
-		VectorAdd(origin, VEC_DUCK_VIEW, origin);
+		origin = origin + VEC_DUCK_VIEW;
 	}
 	else
 		// exacty eye position can't be caluculated since it depends on
 		// client values like cl_bobcycle, this offset matches the default values
-		VectorAdd(origin, VEC_VIEW, origin);
+		origin = origin + VEC_VIEW;
 }
 
-void V_GetMapFreePosition(float* cl_angles, float* origin, float* angles)
+void V_GetMapFreePosition(Vector& cl_angles, Vector& origin, Vector& angles)
 {
 	Vector forward;
 	Vector zScaledTarget;
@@ -568,7 +566,7 @@ void V_GetMapFreePosition(float* cl_angles, float* origin, float* angles)
 
 	AngleVectors(angles, forward, NULL, NULL);
 
-	VectorNormalize(forward);
+	forward.NormalizeInPlace();
 
 	VectorMA(zScaledTarget, -(4096.0f / gHUD.m_Spectator.m_mapZoom), forward, origin);
 }
@@ -611,7 +609,7 @@ void V_GetMapChasePosition(int target, Vector& cl_angles, Vector& origin, Vector
 
 	AngleVectors(angles, forward, NULL, NULL);
 
-	VectorNormalize(forward);
+	forward.NormalizeInPlace();
 
 	VectorMA(origin, -1536, forward, origin);
 }

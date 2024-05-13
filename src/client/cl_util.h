@@ -161,10 +161,7 @@ inline void PlaySound(int iSound, float vol) { gEngfuncs.pfnPlaySoundByIndex(iSo
 
 void ScaleColors(int& r, int& g, int& b, int a);
 
-float Length(const float* v);
 void VectorMA(const float* veca, float scale, const float* vecb, float* vecc);
-float VectorNormalize(float* v);
-void VectorInverse(float* v);
 
 // disable 'possible loss of data converting float to int' warning message
 #pragma warning(disable : 4244)

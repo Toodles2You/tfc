@@ -349,7 +349,7 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 
 void CBasePlayer::DecrementTimers(const int msec)
 {
-	float len = VectorNormalize(v.punchangle);
+	float len = v.punchangle.NormalizeInPlace();
 	if (len != 0.0F)
 	{
 		len -= (10.0F + len * 0.5F) * (msec / 1000.0F);

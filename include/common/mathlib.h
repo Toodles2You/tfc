@@ -45,27 +45,11 @@ extern int nanmask;
 
 #define IS_NAN(x) (((*(int*)&x) & nanmask) == nanmask)
 
-#define VectorSubtract(a, b, c)   \
-	{                             \
-		(c)[0] = (a)[0] - (b)[0]; \
-		(c)[1] = (a)[1] - (b)[1]; \
-		(c)[2] = (a)[2] - (b)[2]; \
-	}
-#define VectorAdd(a, b, c)        \
-	{                             \
-		(c)[0] = (a)[0] + (b)[0]; \
-		(c)[1] = (a)[1] + (b)[1]; \
-		(c)[2] = (a)[2] + (b)[2]; \
-	}
-
 void VectorMA(const float* veca, float scale, const float* vecb, float* vecc);
 
 bool VectorCompare(const float* v1, const float* v2);
-float Length(const float* v);
 void CrossProduct(const float* v1, const float* v2, float* cross);
-float Distance(const float* v1, const float* v2);
-float VectorNormalize(float* v); // returns vector length
-void VectorInverse(float* v);
+float Distance(const Vector& v1, const Vector& v2);
 
 void R_ConcatRotations(float in1[3][3], float in2[3][3], float out[3][3]);
 void R_ConcatTransforms(float in1[3][4], float in2[3][4], float out[3][4]);

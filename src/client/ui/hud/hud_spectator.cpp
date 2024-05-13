@@ -73,8 +73,7 @@ void SpectatorSpray()
 		return;
 
 	AngleVectors(v_angles, forward, NULL, NULL);
-	forward = forward * 128.0F;
-	VectorAdd(forward, v_origin, forward);
+	forward = forward * 128.0F + v_origin;
 	pmtrace_t* trace = gEngfuncs.PM_TraceLine(v_origin, forward, PM_TRACELINE_PHYSENTSONLY, 2, -1);
 	if (trace->fraction != 1.0)
 	{
@@ -592,10 +591,8 @@ void CHudSpectator::Draw(const float time)
 	{
 		Vector right;
 		AngleVectors(v_angles, NULL, right, NULL);
-		VectorNormalize(right);
-		right = right * m_moveDelta;
 
-		VectorAdd(m_mapOrigin, right, m_mapOrigin)
+		m_mapOrigin = m_mapOrigin + right.Normalize() * m_moveDelta;
 	}
 
 	// Only draw the icon names only if map mode is in Main Mode
@@ -1586,12 +1583,12 @@ void CHudSpectator::DrawOverviewEntities()
 		offset[1] = YPROJECT(offset[1]);
 		offset[2] = 0.0f;
 
-		VectorSubtract(offset, screen, offset);
+		offset = offset - screen;
 
 		int playerNum = ent->index - 1;
 
 		m_vPlayerPos[playerNum][0] = screen[0];
-		m_vPlayerPos[playerNum][1] = screen[1] + Length(offset);
+		m_vPlayerPos[playerNum][1] = screen[1] + offset.Length();
 		m_vPlayerPos[playerNum][2] = 1; // mark player as visible
 	}
 

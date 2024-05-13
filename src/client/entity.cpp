@@ -301,7 +301,7 @@ void HUD_TempEntUpdate(
 
 				pClient = gEngfuncs.GetEntityByIndex(pTemp->clientIndex);
 
-				VectorAdd(pClient->origin, pTemp->tentOffset, pTemp->entity.origin);
+				pTemp->entity.origin = pClient->origin + pTemp->tentOffset;
 			}
 			else if ((pTemp->flags & FTENT_SINEWAVE) != 0)
 			{
@@ -423,7 +423,7 @@ void HUD_TempEntUpdate(
 							//
 							pTemp->entity.baseline.origin = pTemp->entity.baseline.origin * 0.6F;
 
-							if (Length(pTemp->entity.baseline.origin) < 10)
+							if (pTemp->entity.baseline.origin.Length() < 10)
 							{
 								pTemp->entity.baseline.framerate = 0.0;
 							}

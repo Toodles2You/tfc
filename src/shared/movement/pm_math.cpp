@@ -231,8 +231,8 @@ AngleBetweenVectors
 float AngleBetweenVectors(const Vector& v1, const Vector& v2)
 {
 	float angle;
-	float l1 = Length(v1);
-	float l2 = Length(v2);
+	float l1 = v1.Length();
+	float l2 = v2.Length();
 
 	if (0 == l1 || 0 == l2)
 		return 0.0f;
@@ -275,48 +275,9 @@ void CrossProduct(const float* v1, const float* v2, float* cross)
 	cross[2] = v1[0] * v2[1] - v1[1] * v2[0];
 }
 
-float Length(const float* v)
+float Distance(const Vector& v1, const Vector& v2)
 {
-	int i;
-	float length = 0.0f;
-
-	for (i = 0; i < 3; i++)
-		length += v[i] * v[i];
-	length = sqrt(length); // FIXME
-
-	return length;
-}
-
-float Distance(const float* v1, const float* v2)
-{
-	Vector d;
-	VectorSubtract(v2, v1, d);
-	return Length(d);
-}
-
-float VectorNormalize(float* v)
-{
-	float length, ilength;
-
-	length = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-	length = sqrt(length); // FIXME
-
-	if (0 != length)
-	{
-		ilength = 1 / length;
-		v[0] *= ilength;
-		v[1] *= ilength;
-		v[2] *= ilength;
-	}
-
-	return length;
-}
-
-void VectorInverse(float* v)
-{
-	v[0] = -v[0];
-	v[1] = -v[1];
-	v[2] = -v[2];
+	return (v2 - v1).Length();
 }
 
 void VectorMatrix(const Vector& forward, Vector& right, Vector& up)
@@ -338,9 +299,9 @@ void VectorMatrix(const Vector& forward, Vector& right, Vector& up)
 	tmp[1] = 0;
 	tmp[2] = 1.0;
 	CrossProduct(forward, tmp, right);
-	VectorNormalize(right);
+	right.NormalizeInPlace();
 	CrossProduct(right, forward, up);
-	VectorNormalize(up);
+	up.NormalizeInPlace();
 }
 
 void VectorAngles(const Vector& forward, Vector& angles)

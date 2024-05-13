@@ -900,17 +900,17 @@ void SetObjectCollisionBox(Entity* entity)
 		max = 0;
 		for (i = 0; i < 3; i++)
 		{
-			v = fabs(((float*)entity->mins)[i]);
+			v = fabs(entity->mins[i]);
 			if (v > max)
 				max = v;
-			v = fabs(((float*)entity->maxs)[i]);
+			v = fabs(entity->maxs[i]);
 			if (v > max)
 				max = v;
 		}
 		for (i = 0; i < 3; i++)
 		{
-			((float*)entity->absmin)[i] = ((float*)entity->origin)[i] - max;
-			((float*)entity->absmax)[i] = ((float*)entity->origin)[i] + max;
+			entity->absmin[i] = entity->origin[i] - max;
+			entity->absmax[i] = entity->origin[i] + max;
 		}
 	}
 	else

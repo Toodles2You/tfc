@@ -524,7 +524,11 @@ void CStudioModelRenderer::StudioSetUpTransform(bool trivial_accept)
 
 		m_vRight.CopyToArray(viewmatrix[0]);
 		m_vUp.CopyToArray(viewmatrix[1]);
-		VectorInverse(viewmatrix[1]);
+
+		viewmatrix[1][0] = -viewmatrix[1][0];
+		viewmatrix[1][1] = -viewmatrix[1][1];
+		viewmatrix[1][2] = -viewmatrix[1][2];
+
 		m_vNormal.CopyToArray(viewmatrix[2]);
 
 		(*m_protationmatrix)[0][3] = modelpos[0] - m_vRenderOrigin[0];
@@ -1883,11 +1887,11 @@ void CStudioModelRenderer::StudioSetupChrome(int bone)
 	origin.x += (*m_pbonetransform)[bone][0][3];
 	origin.y += (*m_pbonetransform)[bone][1][3];
 	origin.z += (*m_pbonetransform)[bone][2][3];
-	VectorNormalize(origin);
+	origin.NormalizeInPlace();
 	CrossProduct(origin, m_vRight, up);
-	VectorNormalize(up);
+	up.NormalizeInPlace();
 	CrossProduct(origin, up, right);
-	VectorNormalize(right);
+	right.NormalizeInPlace();
 
 	VectorIRotate(up, (*m_pbonetransform)[bone], m_vChromeUp[bone]);
 	VectorIRotate(right, (*m_pbonetransform)[bone], m_vChromeRight[bone]);

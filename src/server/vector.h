@@ -122,16 +122,16 @@ public:
 		return Vector(x * flLen, y * flLen, z * flLen);
 	}
 
-	[[nodiscard]] float NormalizeInPlace() const
+	[[nodiscard]] float NormalizeInPlace()
 	{
 		float flLen = Length();
 		if (flLen != 0)
 		{
 			flLen = 1 / flLen;
 		}
-		*((vec_t*)&x) *= flLen;
-		*((vec_t*)&y) *= flLen;
-		*((vec_t*)&z) *= flLen;
+		x *= flLen;
+		y *= flLen;
+		z *= flLen;
 		return flLen;
 	}
 

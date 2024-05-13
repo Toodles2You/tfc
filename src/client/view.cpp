@@ -33,9 +33,6 @@
 
 #include <algorithm>
 
-int CL_IsThirdPerson();
-void CL_CameraOffset(float* ofs);
-
 void V_CalcSpectatorRefdef(ref_params_t* pparams);
 
 extern cvar_t* cl_rollangle;
@@ -223,7 +220,7 @@ static void V_CalcIntermissionRefdef(ref_params_t* pparams)
 
 	if (!gHUD.IsObserver() && !gHUD.IsSpectator())
 	{
-		VectorAdd(pparams->vieworg, pparams->viewheight, pparams->vieworg);
+		pparams->vieworg = pparams->vieworg + pparams->viewheight;
 	}
 
 	pparams->viewangles = pparams->cl_viewangles;
@@ -267,7 +264,7 @@ static void V_DropPunchAngle(float frametime)
 	if (v_oldpunch->value == 1)
 	{
 		float len;
-		len = VectorNormalize(ev_punchangle);
+		len = ev_punchangle.NormalizeInPlace();
 		len -= (10.0 + len * 0.5) * frametime;
 		len = std::max(len, 0.0F);
 		ev_punchangle = ev_punchangle * len;
@@ -352,7 +349,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 		}
 	}
 
-	VectorAdd(pparams->vieworg, pparams->viewheight, pparams->vieworg);
+	pparams->vieworg = pparams->vieworg + pparams->viewheight;
 
 	pparams->viewangles = pparams->cl_viewangles;
 
@@ -457,7 +454,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	// Use predicted origin as view origin.
 	view->origin = pparams->simorg;
 	view->origin[2] += (waterOffset);
-	VectorAdd(view->origin, pparams->viewheight, view->origin);
+	view->origin = view->origin + pparams->viewheight;
 
 	// Let the viewmodel shake at about 10% of the amplitude
 	gEngfuncs.V_ApplyShake(view->origin, view->angles, 0.9);
