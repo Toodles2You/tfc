@@ -178,7 +178,7 @@ void CHudHealth::Draw(const float time)
 	int a, x, y;
 	int HealthWidth;
 
-	if (0 != gEngfuncs.IsSpectateOnly())
+	if (0 != client::IsSpectateOnly())
 		return;
 
 	a = GetAlpha();
@@ -289,8 +289,8 @@ bool CHudHealth::DrawPain(float time)
 	{
 		shade = 255 * std::max(m_fAttackFront, 0.5F);
 
-		x = gHUD.GetWidth() / 2 - SPR_Width(m_hSprite, 0) / 2;
-		y = gHUD.GetHeight() / 2 - SPR_Height(m_hSprite, 0) * 3;
+		x = gHUD.GetWidth() / 2 - client::SPR_Width(m_hSprite, 0) / 2;
+		y = gHUD.GetHeight() / 2 - client::SPR_Height(m_hSprite, 0) * 3;
 		gHUD.DrawHudSprite(m_hSprite, 0, nullptr, x, y, CHud::COLOR_DEFAULT, shade);
 		m_fAttackFront = std::max(m_fAttackFront - fFade, 0.0F);
 	}
@@ -301,8 +301,8 @@ bool CHudHealth::DrawPain(float time)
 	{
 		shade = 255 * std::max(m_fAttackRight, 0.5F);
 
-		x = gHUD.GetWidth() / 2 + SPR_Width(m_hSprite, 1) * 2;
-		y = gHUD.GetHeight() / 2 - SPR_Height(m_hSprite, 1) / 2;
+		x = gHUD.GetWidth() / 2 + client::SPR_Width(m_hSprite, 1) * 2;
+		y = gHUD.GetHeight() / 2 - client::SPR_Height(m_hSprite, 1) / 2;
 		gHUD.DrawHudSprite(m_hSprite, 1, nullptr, x, y, CHud::COLOR_DEFAULT, shade);
 		m_fAttackRight = std::max(m_fAttackRight - fFade, 0.0F);
 	}
@@ -313,8 +313,8 @@ bool CHudHealth::DrawPain(float time)
 	{
 		shade = 255 * std::max(m_fAttackRear, 0.5F);
 
-		x = gHUD.GetWidth() / 2 - SPR_Width(m_hSprite, 2) / 2;
-		y = gHUD.GetHeight() / 2 + SPR_Height(m_hSprite, 2) * 2;
+		x = gHUD.GetWidth() / 2 - client::SPR_Width(m_hSprite, 2) / 2;
+		y = gHUD.GetHeight() / 2 + client::SPR_Height(m_hSprite, 2) * 2;
 		gHUD.DrawHudSprite(m_hSprite, 2, nullptr, x, y, CHud::COLOR_DEFAULT, shade);
 		m_fAttackRear = std::max(m_fAttackRear - fFade, 0.0F);
 	}
@@ -325,8 +325,8 @@ bool CHudHealth::DrawPain(float time)
 	{
 		shade = 255 * std::max(m_fAttackLeft, 0.5F);
 
-		x = gHUD.GetWidth() / 2 - SPR_Width(m_hSprite, 3) * 3;
-		y = gHUD.GetHeight() / 2 - SPR_Height(m_hSprite, 3) / 2;
+		x = gHUD.GetWidth() / 2 - client::SPR_Width(m_hSprite, 3) * 3;
+		y = gHUD.GetHeight() / 2 - client::SPR_Height(m_hSprite, 3) / 2;
 		gHUD.DrawHudSprite(m_hSprite, 3, nullptr, x, y, CHud::COLOR_DEFAULT, shade);
 
 		m_fAttackLeft = std::max(m_fAttackLeft - fFade, 0.0F);

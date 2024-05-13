@@ -159,7 +159,7 @@ char* GetVGUITGAName(const char* pszName)
 		i = 640;
 	sprintf(sz, pszName, i);
 
-	gamedir = gEngfuncs.pfnGetGameDirectory();
+	gamedir = client::GetGameDirectory();
 	sprintf(gd, "%s/gfx/vgui/%s.tga", gamedir, sz);
 
 	return gd;
@@ -535,7 +535,7 @@ public:
 		{
 			// send a message to close the command menu
 			// this needs to be a message, since a direct call screws the timing
-			gEngfuncs.pfnClientCmd("ForceCloseCommandMenu\n");
+			client::ClientCmd("ForceCloseCommandMenu\n");
 		}
 	}
 	void mouseReleased(MouseCode code, Panel* panel) override
@@ -642,9 +642,9 @@ TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : P
 
 	UpdatePlayerMenu(m_PlayerMenu);
 
-	gEngfuncs.pfnAddCommand("servermotd", Viewport_ServerMOTD);
-	gEngfuncs.pfnAddCommand("missionbriefing", Viewport_MapBriefing);
-	gEngfuncs.pfnAddCommand("changeteam", Viewport_ChangeTeam);
+	client::AddCommand("servermotd", Viewport_ServerMOTD);
+	client::AddCommand("missionbriefing", Viewport_MapBriefing);
+	client::AddCommand("changeteam", Viewport_ChangeTeam);
 }
 
 //-----------------------------------------------------------------------------
@@ -717,10 +717,10 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 
 	// Read Command Menu from the txt file
 	char token[1024];
-	char* pfile = (char*)gEngfuncs.COM_LoadFile(menuFile, 5, nullptr);
+	char* pfile = (char*)client::COM_LoadFile(menuFile, 5, nullptr);
 	if (!pfile)
 	{
-		gEngfuncs.Con_DPrintf("Unable to open %s\n", menuFile);
+		client::Con_DPrintf("Unable to open %s\n", menuFile);
 		SetCurrentCommandMenu(nullptr);
 		return newIndex;
 	}
@@ -735,7 +735,7 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 	// Now start parsing the menu structure
 	m_pCurrentCommandMenu = m_pCommandMenus[newIndex];
 	char szLastButtonText[32] = "file start";
-	pfile = gEngfuncs.COM_ParseFile(pfile, token);
+	pfile = client::COM_ParseFile(pfile, token);
 	while ((strlen(token) > 0) && (m_iNumMenus < MAX_MENUS))
 	{
 		// Keep looping until we hit the end of this menu
@@ -758,7 +758,7 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 			// We should never be here without a Command Menu
 			if (!m_pCurrentCommandMenu)
 			{
-				gEngfuncs.Con_Printf("Error in %s file after '%s'.\n", menuFile, szLastButtonText);
+				client::Con_Printf("Error in %s file after '%s'.\n", menuFile, szLastButtonText);
 				m_iInitialized = false;
 				return newIndex;
 			}
@@ -773,18 +773,18 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 				iCustom = true;
 
 				// Get the next token
-				pfile = gEngfuncs.COM_ParseFile(pfile, token);
+				pfile = client::COM_ParseFile(pfile, token);
 			}
 			// See if it's a map
 			else if (0 == strcmp(cCustom, "MAP"))
 			{
 				// Get the mapname
-				pfile = gEngfuncs.COM_ParseFile(pfile, token);
+				pfile = client::COM_ParseFile(pfile, token);
 				strncpy(szMap, token, MAX_MAPNAME);
 				szMap[MAX_MAPNAME - 1] = '\0';
 
 				// Get the next token
-				pfile = gEngfuncs.COM_ParseFile(pfile, token);
+				pfile = client::COM_ParseFile(pfile, token);
 			}
 			else if (0 == strncmp(cCustom, "TEAM", 4)) // TEAM1, TEAM2, TEAM3, TEAM4
 			{
@@ -792,13 +792,13 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 				iTeamOnly = atoi(cCustom + 4);
 
 				// Get the next token
-				pfile = gEngfuncs.COM_ParseFile(pfile, token);
+				pfile = client::COM_ParseFile(pfile, token);
 			}
 			else if (0 == strncmp(cCustom, "TOGGLE", 6))
 			{
 				iToggle = true;
 				// Get the next token
-				pfile = gEngfuncs.COM_ParseFile(pfile, token);
+				pfile = client::COM_ParseFile(pfile, token);
 			}
 			else
 			{
@@ -810,7 +810,7 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 			cText[31] = '\0';
 
 			// Get the button text
-			pfile = gEngfuncs.COM_ParseFile(pfile, token);
+			pfile = client::COM_ParseFile(pfile, token);
 
 			CHudTextMessage::LocaliseTextString(token, cText, sizeof(cText));
 
@@ -818,7 +818,7 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 			strcpy(szLastButtonText, cText);
 
 			// Get the button command
-			pfile = gEngfuncs.COM_ParseFile(pfile, token);
+			pfile = client::COM_ParseFile(pfile, token);
 			strncpy(cCommand, token, cCommandLength);
 			cCommand[cCommandLength - 1] = '\0';
 
@@ -830,7 +830,7 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 				pButton = CreateCustomButton(cText, cCommand, iButtonY);
 
 				// Get the next token to see if we're a menu
-				pfile = gEngfuncs.COM_ParseFile(pfile, token);
+				pfile = client::COM_ParseFile(pfile, token);
 
 				if (token[0] == '{')
 				{
@@ -884,7 +884,7 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 			{
 				if (m_iNumMenus >= MAX_MENUS)
 				{
-					gEngfuncs.Con_Printf("Too many menus in %s past '%s'\n", menuFile, szLastButtonText);
+					client::Con_Printf("Too many menus in %s past '%s'\n", menuFile, szLastButtonText);
 				}
 				else if (pButton)
 				{
@@ -908,19 +908,19 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 			// Get the next token
 			if (bGetExtraToken)
 			{
-				pfile = gEngfuncs.COM_ParseFile(pfile, token);
+				pfile = client::COM_ParseFile(pfile, token);
 			}
 		}
 
 		// Move back up a menu
 		m_pCurrentCommandMenu = m_pCurrentCommandMenu->GetParentMenu();
 
-		pfile = gEngfuncs.COM_ParseFile(pfile, token);
+		pfile = client::COM_ParseFile(pfile, token);
 	}
 
 	SetCurrentMenu(nullptr);
 	SetCurrentCommandMenu(nullptr);
-	gEngfuncs.COM_FreeFile(pfile);
+	client::COM_FreeFile(pfile);
 
 	m_iInitialized = true;
 	return newIndex;
@@ -1030,9 +1030,9 @@ void TeamFortressViewport::ShowCommandMenu(int menuIndex)
 	UpdateCursorState();
 
 	// get command menu parameters
-	for (int i = 2; i < gEngfuncs.Cmd_Argc(); i++)
+	for (int i = 2; i < client::Cmd_Argc(); i++)
 	{
-		const char* param = gEngfuncs.Cmd_Argv(i - 1);
+		const char* param = client::Cmd_Argv(i - 1);
 		if (param)
 		{
 			if (m_pCurrentCommandMenu->KeyInput(param[0]))
@@ -1151,7 +1151,7 @@ void TeamFortressViewport::InputPlayerSpecial()
 
 	{
 		// if it's any other class, just send the command down to the server
-		EngineClientCmd("_special");
+		client::ClientCmd("_special");
 	}
 }
 
@@ -1193,7 +1193,7 @@ void TeamFortressViewport::UpdatePlayerMenu(int menuIndex)
 		//if ( g_PlayerInfoList[i].name == nullptr )
 		//	continue; // empty player slot, skip
 
-		pEnt = gEngfuncs.GetEntityByIndex(i);
+		pEnt = client::GetEntityByIndex(i);
 
 		if (!gHUD.m_Spectator.IsActivePlayer(pEnt))
 			continue;
@@ -1269,11 +1269,11 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 		strcpy(bottomText, GetSpectatorLabel(gHUD.GetObserverMode()));
 		strcpy(helpString2, GetSpectatorLabel(gHUD.GetObserverMode()));
 
-		if (0 != gEngfuncs.IsSpectateOnly())
+		if (0 != client::IsSpectateOnly())
 			strcat(helpString2, " - HLTV");
 
 		// check if we're locked onto a target, show the player's name
-		if ((gHUD.GetObserverTarget() > 0) && (gHUD.GetObserverTarget() <= gEngfuncs.GetMaxClients()) && (gHUD.GetObserverMode() != OBS_ROAMING))
+		if ((gHUD.GetObserverTarget() > 0) && (gHUD.GetObserverTarget() <= client::GetMaxClients()) && (gHUD.GetObserverMode() != OBS_ROAMING))
 		{
 			player = gHUD.GetObserverTarget();
 		}
@@ -1329,7 +1329,7 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 		// update extra info field
 		char szText[64];
 
-		if (0 != gEngfuncs.IsSpectateOnly())
+		if (0 != client::IsSpectateOnly())
 		{
 			// in HLTV mode show number of spectators
 			snprintf(szText, 63, "%s: %d", CHudTextMessage::BufferedLocaliseTextString("#Spectators"), gHUD.m_Spectator.m_iSpectatorNumber);
@@ -1338,7 +1338,7 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 		{
 			// otherwise show map name
 			char szMapName[64];
-			COM_FileBase(gEngfuncs.pfnGetLevelName(), szMapName);
+			COM_FileBase(client::GetLevelName(), szMapName);
 
 			snprintf(szText, 63, "%s: %s", CHudTextMessage::BufferedLocaliseTextString("#Spec_Map"), szMapName);
 		}
@@ -1402,14 +1402,14 @@ void TeamFortressViewport::SetCurrentMenu(CMenuPanel* pMenu)
 	if (m_pCurrentMenu)
 	{
 		// Don't open menus in demo playback
-		if (0 != gEngfuncs.pDemoAPI->IsPlayingback())
+		if (0 != client::demo::IsPlayingback())
 			return;
 
 		m_pCurrentMenu->Open();
 	}
 	else
 	{
-		gEngfuncs.pfnClientCmd("closemenus;");
+		client::ClientCmd("closemenus;");
 	}
 }
 
@@ -1443,7 +1443,7 @@ CMenuPanel* TeamFortressViewport::CreateTextWindow(int iTextToShow)
 		}
 		else
 		{
-			const char* level = gEngfuncs.pfnGetLevelName();
+			const char* level = client::GetLevelName();
 			if (!level)
 				return nullptr;
 
@@ -1468,7 +1468,7 @@ CMenuPanel* TeamFortressViewport::CreateTextWindow(int iTextToShow)
 			}
 		}
 
-		pfile = (char*)gEngfuncs.COM_LoadFile(sz, 5, nullptr);
+		pfile = (char*)client::COM_LoadFile(sz, 5, nullptr);
 
 		if (pfile != nullptr)
 			cText = pfile;
@@ -1495,7 +1495,7 @@ CMenuPanel* TeamFortressViewport::CreateTextWindow(int iTextToShow)
 	pMOTDPanel->setParent(this);
 
 	if (pfile)
-		gEngfuncs.COM_FreeFile(pfile);
+		client::COM_FreeFile(pfile);
 
 	return pMOTDPanel;
 }
@@ -1507,7 +1507,7 @@ void TeamFortressViewport::ShowVGUIMenu(int iMenu)
 	CMenuPanel* pNewMenu = nullptr;
 
 	// Don't open menus in demo playback
-	if (0 != gEngfuncs.pDemoAPI->IsPlayingback())
+	if (0 != client::demo::IsPlayingback())
 		return;
 
 	// Don't open any menus except the MOTD during intermission
@@ -1625,7 +1625,7 @@ void TeamFortressViewport::HideTopMenu()
 CMenuPanel* TeamFortressViewport::ShowTeamMenu()
 {
 	// Don't open menus in demo playback
-	if (0 != gEngfuncs.pDemoAPI->IsPlayingback())
+	if (0 != client::demo::IsPlayingback())
 		return nullptr;
 
 	m_pTeamMenu->Reset();
@@ -1647,7 +1647,7 @@ void TeamFortressViewport::CreateTeamMenu()
 CMenuPanel* TeamFortressViewport::ShowClassMenu()
 {
 	// Don't open menus in demo playback
-	if (0 != gEngfuncs.pDemoAPI->IsPlayingback())
+	if (0 != client::demo::IsPlayingback())
 		return nullptr;
 
 	m_pClassMenu->Reset();
@@ -1712,7 +1712,7 @@ void TeamFortressViewport::UpdateCursorState()
 	}
 
 	// Don't reset mouse in demo playback
-	if (0 == gEngfuncs.pDemoAPI->IsPlayingback())
+	if (0 == client::demo::IsPlayingback())
 	{
 		Mouse_Reset();
 	}
@@ -1731,7 +1731,7 @@ void TeamFortressViewport::GetAllPlayersInfo()
 {
 	for (int i = 1; i < MAX_PLAYERS_HUD; i++)
 	{
-		gEngfuncs.pfnGetPlayerInfo(i, &g_PlayerInfoList[i]);
+		client::GetPlayerInfo(i, &g_PlayerInfoList[i]);
 	}
 }
 
@@ -1839,7 +1839,7 @@ bool TeamFortressViewport::SlotInput(int iSlot)
 // Direct Key Input
 bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurrentBinding)
 {
-	if (!down || 0 != gEngfuncs.Con_IsVisible())
+	if (!down || 0 != client::Con_IsVisible())
 	{
 		return true;
 	}
@@ -2027,16 +2027,16 @@ bool TeamFortressViewport::MsgFunc_MOTD(const char* pszName, int iSize, void* pb
 
 	if (gotAllMOTD == 2)
 	{
-		char* motd = (char*)gEngfuncs.COM_LoadFile("motd.txt", 5, nullptr);
+		char* motd = (char*)client::COM_LoadFile("motd.txt", 5, nullptr);
 		if (motd != nullptr)
 		{
 			strncpy(m_szMOTD, motd, sizeof(m_szMOTD) - 1);
 			m_szMOTD[sizeof(m_szMOTD) - 1] = '\0';
 
-			gEngfuncs.COM_FreeFile(motd);
+			client::COM_FreeFile(motd);
 		}
 
-		if (0 == gEngfuncs.IsSpectateOnly())
+		if (0 == client::IsSpectateOnly())
 		{
 			ShowVGUIMenu(MENU_INTRO);
 		}
@@ -2049,7 +2049,7 @@ bool TeamFortressViewport::MsgFunc_MOTD(const char* pszName, int iSize, void* pb
 	m_szMOTD[sizeof(m_szMOTD) - 1] = '\0';
 
 	// don't show MOTD for HLTV spectators
-	if (m_iGotAllMOTD && 0 == gEngfuncs.IsSpectateOnly())
+	if (m_iGotAllMOTD && 0 == client::IsSpectateOnly())
 	{
 		ShowVGUIMenu(MENU_INTRO);
 	}
@@ -2128,7 +2128,7 @@ bool TeamFortressViewport::MsgFunc_ExtraInfo(const char* pszName, int iSize, voi
 		info.lefthanded = (flags & 2) != 0;
 		info.bot = (flags & 4) != 0;
 
-		auto localPlayer = gEngfuncs.GetLocalPlayer();
+		auto localPlayer = client::GetLocalPlayer();
 
 		/* Not a LAN game. */
 		if (g_PlayerInfoList[localPlayer->index].m_nSteamID != 0)

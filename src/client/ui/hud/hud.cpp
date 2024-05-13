@@ -332,8 +332,8 @@ void CHud::Init()
 	// VGUI Menus
 	HOOK_MESSAGE(VGUIMenu);
 
-	gEngfuncs.pfnRegisterVariable("hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO); // controls whether or not to suicide immediately on TF class switch
-	gEngfuncs.pfnRegisterVariable("hud_takesshots", "0", FCVAR_ARCHIVE);					   // controls whether or not to automatically take screenshots at the end of a round
+	client::RegisterVariable("hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO); // controls whether or not to suicide immediately on TF class switch
+	client::RegisterVariable("hud_takesshots", "0", FCVAR_ARCHIVE);					   // controls whether or not to automatically take screenshots at the end of a round
 
 	m_cColors[CHud::COLOR_DEFAULT].r = 255;
 	m_cColors[CHud::COLOR_DEFAULT].g = 255;
@@ -357,25 +357,25 @@ void CHud::Init()
 
 	m_iFOV = 0;
 
-	zoom_sensitivity_ratio = gEngfuncs.pfnRegisterVariable("zoom_sensitivity_ratio", "1.0", 0);
-	cl_fov = gEngfuncs.pfnRegisterVariable("cl_fov", "90", FCVAR_ARCHIVE);
-	m_pCvarCrosshair = gEngfuncs.pfnGetCvarPointer("crosshair");
-	m_pCvarStealMouse = gEngfuncs.pfnRegisterVariable("hud_capturemouse", "0", FCVAR_ARCHIVE);
-	m_pCvarDraw = gEngfuncs.pfnRegisterVariable("hud_draw", "1", FCVAR_ARCHIVE);
-	m_pCvarWidescreen = gEngfuncs.pfnRegisterVariable("hud_widescreen", "1", FCVAR_ARCHIVE);
-	m_pCvarColor = gEngfuncs.pfnRegisterVariable("hud_color", "FFA000", FCVAR_ARCHIVE);
-	m_pCvarTeamColor = gEngfuncs.pfnRegisterVariable("hud_teamcolor", "1", FCVAR_ARCHIVE);
-	cl_rollangle = gEngfuncs.pfnRegisterVariable("cl_rollangle", "2.0", FCVAR_ARCHIVE);
-	cl_rollspeed = gEngfuncs.pfnRegisterVariable("cl_rollspeed", "200", FCVAR_ARCHIVE);
-	cl_bobtilt = gEngfuncs.pfnRegisterVariable("cl_bobtilt", "0", FCVAR_ARCHIVE);
-	r_decals = gEngfuncs.pfnGetCvarPointer("r_decals");
-	violence_hblood = gEngfuncs.pfnGetCvarPointer("violence_hblood");
-	violence_hgibs = gEngfuncs.pfnGetCvarPointer("violence_hgibs");
-	m_pCvarSuitVolume = gEngfuncs.pfnGetCvarPointer("suitvolume");
+	zoom_sensitivity_ratio = client::RegisterVariable("zoom_sensitivity_ratio", "1.0", 0);
+	cl_fov = client::RegisterVariable("cl_fov", "90", FCVAR_ARCHIVE);
+	m_pCvarCrosshair = client::GetCvarPointer("crosshair");
+	m_pCvarStealMouse = client::RegisterVariable("hud_capturemouse", "0", FCVAR_ARCHIVE);
+	m_pCvarDraw = client::RegisterVariable("hud_draw", "1", FCVAR_ARCHIVE);
+	m_pCvarWidescreen = client::RegisterVariable("hud_widescreen", "1", FCVAR_ARCHIVE);
+	m_pCvarColor = client::RegisterVariable("hud_color", "FFA000", FCVAR_ARCHIVE);
+	m_pCvarTeamColor = client::RegisterVariable("hud_teamcolor", "1", FCVAR_ARCHIVE);
+	cl_rollangle = client::RegisterVariable("cl_rollangle", "2.0", FCVAR_ARCHIVE);
+	cl_rollspeed = client::RegisterVariable("cl_rollspeed", "200", FCVAR_ARCHIVE);
+	cl_bobtilt = client::RegisterVariable("cl_bobtilt", "0", FCVAR_ARCHIVE);
+	r_decals = client::GetCvarPointer("r_decals");
+	violence_hblood = client::GetCvarPointer("violence_hblood");
+	violence_hgibs = client::GetCvarPointer("violence_hgibs");
+	m_pCvarSuitVolume = client::GetCvarPointer("suitvolume");
 
-	cl_autowepswitch = gEngfuncs.pfnRegisterVariable("cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO);
-	cl_grenadetoggle = gEngfuncs.pfnRegisterVariable("cl_grenadetoggle", "0", FCVAR_ARCHIVE | FCVAR_USERINFO);
-	cl_righthand = gEngfuncs.pfnRegisterVariable("cl_righthand", "1", FCVAR_ARCHIVE | FCVAR_USERINFO);
+	cl_autowepswitch = client::RegisterVariable("cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO);
+	cl_grenadetoggle = client::RegisterVariable("cl_grenadetoggle", "0", FCVAR_ARCHIVE | FCVAR_USERINFO);
+	cl_righthand = client::RegisterVariable("cl_righthand", "1", FCVAR_ARCHIVE | FCVAR_USERINFO);
 
 	m_pSpriteList = nullptr;
 
@@ -460,7 +460,7 @@ int CHud::GetSpriteIndex(const char* SpriteName)
 void CHud::VidInit()
 {
 	m_scrinfo.iSize = sizeof(m_scrinfo);
-	GetScreenInfo(&m_scrinfo);
+	client::GetScreenInfo(&m_scrinfo);
 
 	if (ScreenWidth < 640)
 		m_iRes = 320;
@@ -489,7 +489,7 @@ void CHud::VidInit()
 	if (!m_pSpriteList)
 	{
 		// we need to load the hud.txt, and all sprites within
-		m_pSpriteList = SPR_GetList("sprites/hud.txt", &m_iSpriteCountAllRes);
+		m_pSpriteList = client::SPR_GetList("sprites/hud.txt", &m_iSpriteCountAllRes);
 
 		if (m_pSpriteList)
 		{
@@ -517,7 +517,7 @@ void CHud::VidInit()
 				{
 					char sz[256];
 					sprintf(sz, "sprites/%s.spr", p->szSprite);
-					m_rghSprites[index] = SPR_Load(sz);
+					m_rghSprites[index] = client::SPR_Load(sz);
 					m_rgrcRects[index] = p->rc;
 					strncpy(&m_rgszSpriteNames[index * MAX_SPRITE_NAME_LENGTH], p->szName, MAX_SPRITE_NAME_LENGTH);
 
@@ -540,7 +540,7 @@ void CHud::VidInit()
 			{
 				char sz[256];
 				sprintf(sz, "sprites/%s.spr", p->szSprite);
-				m_rghSprites[index] = SPR_Load(sz);
+				m_rghSprites[index] = client::SPR_Load(sz);
 				index++;
 			}
 
@@ -551,7 +551,7 @@ void CHud::VidInit()
 	// assumption: number_1, number_2, etc, are all listed and loaded sequentially
 	m_HUD_number_0 = GetSpriteIndex("number_0");
 
-	m_hBackground = SPR_Load("sprites/background.spr");
+	m_hBackground = client::SPR_Load("sprites/background.spr");
 
 	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
 
@@ -630,7 +630,7 @@ bool HUD_IsGame(const char* game)
 	const char* gamedir;
 	char gd[1024];
 
-	gamedir = gEngfuncs.pfnGetGameDirectory();
+	gamedir = client::GetGameDirectory();
 	if (gamedir && '\0' != gamedir[0])
 	{
 		COM_FileBase(gamedir, gd);
@@ -649,7 +649,7 @@ Returns last FOV
 */
 float HUD_GetFOV()
 {
-	if (0 != gEngfuncs.pDemoAPI->IsRecording())
+	if (0 != client::demo::IsRecording())
 	{
 		// Write it
 		int i = 0;
@@ -662,7 +662,7 @@ float HUD_GetFOV()
 		Demo_WriteBuffer(TYPE_ZOOM, i, buf);
 	}
 
-	if (0 != gEngfuncs.pDemoAPI->IsPlayingback())
+	if (0 != client::demo::IsPlayingback())
 	{
 		gHUD.m_iFOV = g_demozoom;
 	}
@@ -673,7 +673,7 @@ void CHud::Update_SetFOV(int iFov)
 {
 	if (cl_fov->value < FOV_MIN || cl_fov->value > FOV_MAX)
 	{
-		gEngfuncs.Cvar_SetValue(
+		client::Cvar_SetValue(
 			"cl_fov", std::clamp(cl_fov->value, FOV_MIN, FOV_MAX));
 	}
 
@@ -793,7 +793,7 @@ const Vector& CHud::GetClientColor(int clientIndex) const
 
 bool CHud::IsAlive()
 {
-	return !g_PlayerExtraInfo[gEngfuncs.GetLocalPlayer()->index].dead;
+	return !g_PlayerExtraInfo[client::GetLocalPlayer()->index].dead;
 }
 
 int CHud::GetObserverMode()
@@ -818,5 +818,5 @@ bool CHud::IsObserver()
 
 bool CHud::IsSpectator()
 {
-	return g_iTeamNumber == TEAM_SPECTATORS || gEngfuncs.IsSpectateOnly() != 0;
+	return g_iTeamNumber == TEAM_SPECTATORS || client::IsSpectateOnly() != 0;
 }

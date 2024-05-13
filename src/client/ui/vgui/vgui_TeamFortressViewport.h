@@ -639,7 +639,7 @@ public:
 
 	virtual void actionPerformed(Panel* panel)
 	{
-		gEngfuncs.pfnClientCmd(m_pszCommand);
+		client::ClientCmd(m_pszCommand);
 
 		if (m_iCloseVGUIMenu)
 			gViewPort->HideTopMenu();
@@ -808,7 +808,7 @@ private:
 public:
 	CMenuHandler_ToggleCvar( char * cvarname )
 	{
-		m_cvar = gEngfuncs.pfnGetCvarPointer( cvarname );
+		m_cvar = client::GetCvarPointer( cvarname );
 	}
 
 	virtual void actionPerformed(Panel* panel)
@@ -1138,7 +1138,7 @@ public:
 
 	virtual bool IsNotValid()
 	{
-		const char *level = gEngfuncs.pfnGetLevelName();
+		const char *level = client::GetLevelName();
 		if (!level)
 			return true;
 
@@ -1186,7 +1186,7 @@ public:
 	ToggleCommandButton( const char* cvarname, const char* text,int x,int y,int wide,int tall, bool flat ) : 
 	  CommandButton( text, x, y, wide, tall, false, flat )
 	 {
-		m_cvar = gEngfuncs.pfnGetCvarPointer( cvarname );
+		m_cvar = client::GetCvarPointer( cvarname );
 
 			// Put a > to show it's a submenu
 		pLabelOn = new CImageLabel( "checked", 0, 0 );
@@ -1267,7 +1267,7 @@ public:
 	SpectToggleButton( const char* cvarname, const char* text,int x,int y,int wide,int tall, bool flat ) : 
 	  CommandButton( text, x, y, wide, tall, false, flat )
 	 {
-		m_cvar = gEngfuncs.pfnGetCvarPointer( cvarname );
+		m_cvar = client::GetCvarPointer( cvarname );
 
 		// Put a > to show it's a submenu
 		pLabelOn = new CImageLabel( "checked", 0, 0 );
@@ -1357,7 +1357,7 @@ public:
 	SpectToggleButton( const char* cvarname, const char* text,int x,int y,int wide,int tall, bool flat ) : 
 	  ToggleCommandButton( cvarname, text, x, y, wide, tall, flat, true )
 	 {
-		m_cvar = gEngfuncs.pfnGetCvarPointer( cvarname );
+		m_cvar = client::GetCvarPointer( cvarname );
 
 			// Put a > to show it's a submenu
 		pLabelOn = new CImageLabel( "checked", 0, 0 );
@@ -1539,7 +1539,7 @@ public:
 		if ((GetMenuID() == MENU_INTRO || GetMenuID() == MENU_MAPBRIEFING)
 		 && g_iTeamNumber == TEAM_UNASSIGNED && GetNextMenu() == nullptr)
 		{
-			gEngfuncs.pfnClientCmd("jointeam 5\n");
+			client::ClientCmd("jointeam 5\n");
 		}
 
 		if ( m_iRemoveMe )

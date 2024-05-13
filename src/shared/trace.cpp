@@ -80,8 +80,8 @@ Trace::Trace(const Vector& start, const Vector& end, int ignore, int traceFlags)
 
 Trace::Trace(const Vector& start, const Vector& end, int ignore, int traceFlags)
 {
-	gEngfuncs.pEventAPI->EV_SetSolidPlayers(ignore - 1);
-	gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
+	client::event::SetSolidPlayers(ignore - 1);
+	client::event::SetTraceHull(kHullPoint);
 
     int flags = PM_NORMAL;
     if ((traceFlags & kIgnoreMonsters) != 0) flags |= PM_STUDIO_IGNORE;
@@ -90,7 +90,7 @@ Trace::Trace(const Vector& start, const Vector& end, int ignore, int traceFlags)
 
     pmtrace_t trace;
 
-    gEngfuncs.pEventAPI->EV_PlayerTrace(
+    client::event::PlayerTrace(
         const_cast<Vector&>(start),
         const_cast<Vector&>(end),
         flags,

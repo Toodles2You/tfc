@@ -10,7 +10,7 @@
 #include "hud.h"
 #include "cl_util.h"
 
-// Triangle rendering apis are in gEngfuncs.pTriAPI
+// Triangle rendering apis are in client::pTriAPI
 
 #include "const.h"
 #include "entity_state.h"

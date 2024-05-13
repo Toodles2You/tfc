@@ -43,7 +43,7 @@ void CStudioModelRenderer::Init()
 	m_pCvarHiModels = IEngineStudio.GetCvar("cl_himodels");
 	m_pCvarDeveloper = IEngineStudio.GetCvar("developer");
 	m_pCvarDrawEntities = IEngineStudio.GetCvar("r_drawentities");
-	m_pCvarUseTriAPI = gEngfuncs.pfnRegisterVariable("gl_use_triapi", "1", FCVAR_ARCHIVE);
+	m_pCvarUseTriAPI = client::RegisterVariable("gl_use_triapi", "1", FCVAR_ARCHIVE);
 
 	m_pChromeSprite = IEngineStudio.GetChromeSprite();
 
@@ -381,7 +381,7 @@ mstudioanim_t* CStudioModelRenderer::StudioGetAnim(model_t* m_pSubModel, mstudio
 
 	if (!IEngineStudio.Cache_Check((struct cache_user_s*)&(paSequences[pseqdesc->seqgroup])))
 	{
-		gEngfuncs.Con_DPrintf("loading %s\n", pseqgroup->name);
+		client::Con_DPrintf("loading %s\n", pseqgroup->name);
 		IEngineStudio.LoadCacheFile(pseqgroup->name, (struct cache_user_s*)&paSequences[pseqdesc->seqgroup]);
 	}
 	return (mstudioanim_t*)((byte*)paSequences[pseqdesc->seqgroup].data + pseqdesc->animindex);
@@ -677,24 +677,24 @@ void CStudioModelRenderer::StudioFxTransform(cl_entity_t* ent, float transform[3
 	{
 	case kRenderFxDistort:
 	case kRenderFxHologram:
-		if (gEngfuncs.pfnRandomLong(0, 49) == 0)
+		if (client::RandomLong(0, 49) == 0)
 		{
-			int axis = gEngfuncs.pfnRandomLong(0, 1);
+			int axis = client::RandomLong(0, 1);
 			if (axis == 1) // Choose between x & z
 				axis = 2;
-			float random = gEngfuncs.pfnRandomFloat(1, 1.484);
+			float random = client::RandomFloat(1, 1.484);
 			transform[axis][0] *= random;
 			transform[axis][1] *= random;
 			transform[axis][2] *= random;
 		}
-		else if (gEngfuncs.pfnRandomLong(0, 49) == 0)
+		else if (client::RandomLong(0, 49) == 0)
 		{
 			float offset;
-			int axis = gEngfuncs.pfnRandomLong(0, 1);
+			int axis = client::RandomLong(0, 1);
 			if (axis == 1) // Choose between x & z
 				axis = 2;
-			offset = gEngfuncs.pfnRandomFloat(-10, 10);
-			transform[gEngfuncs.pfnRandomLong(0, 2)][3] += offset;
+			offset = client::RandomFloat(-10, 10);
+			transform[client::RandomLong(0, 2)][3] += offset;
 		}
 		break;
 	case kRenderFxExplode:
@@ -1123,7 +1123,7 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 		bool result;
 		bool save_interp;
 
-		if (m_pCurrentEntity->curstate.iuser4 <= 0 || m_pCurrentEntity->curstate.iuser4 > gEngfuncs.GetMaxClients())
+		if (m_pCurrentEntity->curstate.iuser4 <= 0 || m_pCurrentEntity->curstate.iuser4 > client::GetMaxClients())
 			return false;
 
 		// get copy of player
@@ -1194,7 +1194,7 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 		// copy attachments into global entity array
 		if (m_pCurrentEntity->index > 0)
 		{
-			cl_entity_t* ent = gEngfuncs.GetEntityByIndex(m_pCurrentEntity->index);
+			cl_entity_t* ent = client::GetEntityByIndex(m_pCurrentEntity->index);
 
 			memcpy(ent->attachment, m_pCurrentEntity->attachment, sizeof(Vector) * 4);
 		}
@@ -1216,7 +1216,7 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 
 		if (m_pCurrentEntity == IEngineStudio.GetViewEntity())
 		{
-			cl_entity_t* player = gEngfuncs.GetLocalPlayer();
+			cl_entity_t* player = client::GetLocalPlayer();
 
 			if (player != nullptr)
 			{
@@ -1423,7 +1423,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 
 	m_nPlayerIndex = pplayer->number - 1;
 
-	if (m_nPlayerIndex < 0 || m_nPlayerIndex >= gEngfuncs.GetMaxClients())
+	if (m_nPlayerIndex < 0 || m_nPlayerIndex >= client::GetMaxClients())
 		return false;
 
 
@@ -1510,7 +1510,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		// copy attachments into global entity array
 		if (m_pCurrentEntity->index > 0)
 		{
-			cl_entity_t* ent = gEngfuncs.GetEntityByIndex(m_pCurrentEntity->index);
+			cl_entity_t* ent = client::GetEntityByIndex(m_pCurrentEntity->index);
 
 			memcpy(ent->attachment, m_pCurrentEntity->attachment, sizeof(Vector) * 4);
 		}
@@ -1546,7 +1546,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 			const auto currentIndex = currentEntity->index;
 
 			/* Ensure the player exists, just to be safe. */
-			cl_entity_t *playerEntity = gEngfuncs.GetEntityByIndex(pplayer->number);
+			cl_entity_t *playerEntity = client::GetEntityByIndex(pplayer->number);
 			if (playerEntity != nullptr)
 			{
 				/* Fill the state of the engine's current entity with that of the actual player entity. */
@@ -1610,7 +1610,7 @@ void CStudioModelRenderer::StudioCalcAttachments()
 
 	if (m_pStudioHeader->numattachments > 4)
 	{
-		gEngfuncs.Con_DPrintf("Too many attachments on %s\n", m_pCurrentEntity->model->name);
+		client::Con_DPrintf("Too many attachments on %s\n", m_pCurrentEntity->model->name);
 		exit(-1);
 	}
 
@@ -1659,7 +1659,7 @@ void CStudioModelRenderer::StudioRenderModel()
 
 		if (0 == IEngineStudio.IsHardware())
 		{
-			gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
+			client::tri::RenderMode(kRenderTransAdd);
 		}
 
 		IEngineStudio.SetForceFaceFlags(STUDIO_NF_CHROME);
@@ -1667,7 +1667,7 @@ void CStudioModelRenderer::StudioRenderModel()
 		const auto useTriAPI = StudioUseTriAPI();
 		m_bUseTriAPI = false;
 
-		gEngfuncs.pTriAPI->SpriteTexture(m_pChromeSprite, 0);
+		client::tri::SpriteTexture(m_pChromeSprite, 0);
 		m_pCurrentEntity->curstate.renderfx = kRenderFxGlowShell;
 
 		if (invisible)
@@ -1678,7 +1678,7 @@ void CStudioModelRenderer::StudioRenderModel()
 		StudioRenderFinal();
 		if (0 == IEngineStudio.IsHardware())
 		{
-			gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
+			client::tri::RenderMode(kRenderNormal);
 		}
 
 		if (invisible)
@@ -1726,9 +1726,9 @@ void CStudioModelRenderer::StudioRenderFinal_Software()
 
 	if (m_pCvarDrawEntities->value == 4)
 	{
-		gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
+		client::tri::RenderMode(kRenderTransAdd);
 		IEngineStudio.StudioDrawHulls();
-		gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
+		client::tri::RenderMode(kRenderNormal);
 	}
 
 	if (m_pCvarDrawEntities->value == 5)
@@ -1777,14 +1777,14 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware()
 
 			if (m_fFlipModel)
 			{
-				gEngfuncs.pTriAPI->CullFace(TRI_NONE);
+				client::tri::CullFace(TRI_NONE);
 			}
 
 			StudioDrawPoints();
 
 			if (m_fFlipModel)
 			{
-				gEngfuncs.pTriAPI->CullFace(TRI_NONE);
+				client::tri::CullFace(TRI_NONE);
 			}
 
 			IEngineStudio.GL_StudioDrawShadow();
@@ -1793,9 +1793,9 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware()
 
 	if (m_pCvarDrawEntities->value == 4)
 	{
-		gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
+		client::tri::RenderMode(kRenderTransAdd);
 		IEngineStudio.StudioDrawHulls();
-		gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
+		client::tri::RenderMode(kRenderNormal);
 	}
 
 	IEngineStudio.RestoreRenderer();
@@ -1827,9 +1827,9 @@ StudioShouldFlipModel
 */
 bool CStudioModelRenderer::StudioShouldFlipModel()
 {
-	if (gEngfuncs.GetViewModel() == m_pCurrentEntity)
+	if (client::GetViewModel() == m_pCurrentEntity)
 	{
-		return g_PlayerExtraInfo[gEngfuncs.GetLocalPlayer()->index].lefthanded;
+		return g_PlayerExtraInfo[client::GetLocalPlayer()->index].lefthanded;
 	}
 	else if (m_pPlayerInfo != nullptr)
 	{
@@ -2067,7 +2067,7 @@ void CStudioModelRenderer::StudioDrawPoints()
 	/* Avoid unneeded state switches. */
 	auto previousRenderMode = -1;
 
-	gEngfuncs.pTriAPI->CullFace(m_fFlipModel ? TRI_NONE : TRI_FRONT);
+	client::tri::CullFace(m_fFlipModel ? TRI_NONE : TRI_FRONT);
 
 	for (j = 0; j < m_pSubModel->nummesh; j++)
 	{
@@ -2106,33 +2106,33 @@ void CStudioModelRenderer::StudioDrawPoints()
 		{
 			if (i < 0)
 			{
-				gEngfuncs.pTriAPI->Begin(TRI_TRIANGLE_FAN);
+				client::tri::Begin(TRI_TRIANGLE_FAN);
 				i = -i;
 			}
 			else
 			{
-				gEngfuncs.pTriAPI->Begin(TRI_TRIANGLE_STRIP);
+				client::tri::Begin(TRI_TRIANGLE_STRIP);
 			}
 
 			for (; i > 0; i--, pTriCmds += 4)
 			{
 				if (chrome)
 				{
-					gEngfuncs.pTriAPI->TexCoord2f(m_vChromeValues[pTriCmds[1]].x * s, m_vChromeValues[pTriCmds[1]].y * t);
+					client::tri::TexCoord2f(m_vChromeValues[pTriCmds[1]].x * s, m_vChromeValues[pTriCmds[1]].y * t);
 				}
 				else
 				{
-					gEngfuncs.pTriAPI->TexCoord2f(pTriCmds[2] * s, pTriCmds[3] * t);
+					client::tri::TexCoord2f(pTriCmds[2] * s, pTriCmds[3] * t);
 				}
 
-				gEngfuncs.pTriAPI->Color4f(m_vLightValues[pTriCmds[1]].x, m_vLightValues[pTriCmds[1]].y, m_vLightValues[pTriCmds[1]].z, renderamt);
+				client::tri::Color4f(m_vLightValues[pTriCmds[1]].x, m_vLightValues[pTriCmds[1]].y, m_vLightValues[pTriCmds[1]].z, renderamt);
 
-				gEngfuncs.pTriAPI->Vertex3fv(m_vVertexTransform[pTriCmds[0]]);
+				client::tri::Vertex3fv(m_vVertexTransform[pTriCmds[0]]);
 			}
 
-			gEngfuncs.pTriAPI->End();
+			client::tri::End();
 		}
 	}
 
-	gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
+	client::tri::RenderMode(kRenderNormal);
 }

@@ -99,7 +99,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 	pWeapon->hAmmo2 = 0;
 
 	sprintf(sz, "sprites/%s.txt", pWeapon->szName);
-	client_sprite_t* pList = SPR_GetList(sz, &i);
+	client_sprite_t* pList = client::SPR_GetList(sz, &i);
 
 	if (!pList)
 		return;
@@ -110,7 +110,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 	if (p)
 	{
 		sprintf(sz, "sprites/%s.spr", p->szSprite);
-		pWeapon->hCrosshair = SPR_Load(sz);
+		pWeapon->hCrosshair = client::SPR_Load(sz);
 		pWeapon->rcCrosshair = p->rc;
 	}
 	else
@@ -120,7 +120,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 	if (p)
 	{
 		sprintf(sz, "sprites/%s.spr", p->szSprite);
-		pWeapon->hAutoaim = SPR_Load(sz);
+		pWeapon->hAutoaim = client::SPR_Load(sz);
 		pWeapon->rcAutoaim = p->rc;
 	}
 	else
@@ -130,7 +130,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 	if (p)
 	{
 		sprintf(sz, "sprites/%s.spr", p->szSprite);
-		pWeapon->hZoomedCrosshair = SPR_Load(sz);
+		pWeapon->hZoomedCrosshair = client::SPR_Load(sz);
 		pWeapon->rcZoomedCrosshair = p->rc;
 	}
 	else
@@ -143,7 +143,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 	if (p)
 	{
 		sprintf(sz, "sprites/%s.spr", p->szSprite);
-		pWeapon->hZoomedAutoaim = SPR_Load(sz);
+		pWeapon->hZoomedAutoaim = client::SPR_Load(sz);
 		pWeapon->rcZoomedAutoaim = p->rc;
 	}
 	else
@@ -156,7 +156,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 	if (p)
 	{
 		sprintf(sz, "sprites/%s.spr", p->szSprite);
-		pWeapon->hInactive = SPR_Load(sz);
+		pWeapon->hInactive = client::SPR_Load(sz);
 		pWeapon->rcInactive = p->rc;
 
 		gHR.iHistoryGap = std::max(gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top);
@@ -168,7 +168,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 	if (p)
 	{
 		sprintf(sz, "sprites/%s.spr", p->szSprite);
-		pWeapon->hActive = SPR_Load(sz);
+		pWeapon->hActive = client::SPR_Load(sz);
 		pWeapon->rcActive = p->rc;
 	}
 	else
@@ -178,7 +178,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 	if (p)
 	{
 		sprintf(sz, "sprites/%s.spr", p->szSprite);
-		pWeapon->hAmmo = SPR_Load(sz);
+		pWeapon->hAmmo = client::SPR_Load(sz);
 		pWeapon->rcAmmo = p->rc;
 
 		gHR.iHistoryGap = std::max(gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top);
@@ -190,7 +190,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 	if (p)
 	{
 		sprintf(sz, "sprites/%s.spr", p->szSprite);
-		pWeapon->hAmmo2 = SPR_Load(sz);
+		pWeapon->hAmmo2 = client::SPR_Load(sz);
 		pWeapon->rcAmmo2 = p->rc;
 
 		gHR.iHistoryGap = std::max(gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top);
@@ -277,10 +277,10 @@ bool CHudAmmo::Init()
 	HOOK_COMMAND("invprev", PrevWeapon);
 	HOOK_COMMAND("lastinv", LastWeapon);
 
-	gEngfuncs.pfnRegisterVariable("hud_drawhistory_time", "5", 0);
-	hud_fastswitch = gEngfuncs.pfnRegisterVariable("hud_fastswitch", "0", FCVAR_ARCHIVE); // controls whether or not weapons can be selected in one keypress
-	hud_selection_fadeout = gEngfuncs.pfnRegisterVariable("hud_selection_fadeout", "0.5", FCVAR_ARCHIVE);
-	hud_selection_timeout = gEngfuncs.pfnRegisterVariable("hud_selection_timeout", "1.5", FCVAR_ARCHIVE);
+	client::RegisterVariable("hud_drawhistory_time", "5", 0);
+	hud_fastswitch = client::RegisterVariable("hud_fastswitch", "0", FCVAR_ARCHIVE); // controls whether or not weapons can be selected in one keypress
+	hud_selection_fadeout = client::RegisterVariable("hud_selection_fadeout", "0.5", FCVAR_ARCHIVE);
+	hud_selection_timeout = client::RegisterVariable("hud_selection_timeout", "1.5", FCVAR_ARCHIVE);
 
 	gWR.Init();
 	gHR.Init();
@@ -373,7 +373,7 @@ void CHudAmmo::Think()
 		gpActiveSel = nullptr;
 		gHUD.m_iKeyBits &= ~IN_ATTACK;
 
-		PlaySound("common/wpn_select.wav", 1);
+		client::PlaySoundByName("common/wpn_select.wav", VOL_NORM);
 	}
 }
 
@@ -443,10 +443,10 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 		else
 		{
 			gpActiveSel = (WEAPON*)1;
-			gHUD.m_Ammo.m_flSelectionTime = gEngfuncs.GetClientTime();
+			gHUD.m_Ammo.m_flSelectionTime = client::GetClientTime();
 		}
 
-		PlaySound("common/wpn_denyselect.wav", 1);
+		client::PlaySoundByName("common/wpn_denyselect.wav", VOL_NORM);
 	}
 	else
 	{
@@ -460,15 +460,15 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 		else
 		{
 			gpActiveSel = weapon;
-			gHUD.m_Ammo.m_flSelectionTime = gEngfuncs.GetClientTime();
+			gHUD.m_Ammo.m_flSelectionTime = client::GetClientTime();
 
 			if (newSlot)
 			{
-				PlaySound("common/wpn_hudon.wav", 1);
+				client::PlaySoundByName("common/wpn_hudon.wav", VOL_NORM);
 			}
 			else
 			{
-				PlaySound("common/wpn_moveselect.wav", 1);
+				client::PlaySoundByName("common/wpn_moveselect.wav", VOL_NORM);
 			}
 		}
 	}
@@ -615,7 +615,7 @@ bool CHudAmmo::MsgFunc_HitFeedback(const char* pszName, int iSize, void* pbuf)
 		pitch = pitch * std::max(1.5F - (damage / 100.0F), 0.5F);
 	}
 
-	gEngfuncs.pfnPlaySoundByNameAtPitch(
+	client::PlaySoundByNameAtPitch(
 		sample,
 		gHUD.m_pCvarSuitVolume->value,
 		pitch);
@@ -691,10 +691,12 @@ void CHudAmmo::UserCmd_Close()
 	{
 		gpLastSel = gpActiveSel;
 		gpActiveSel = nullptr;
-		PlaySound("common/wpn_hudoff.wav", 1);
+		client::PlaySoundByName("common/wpn_hudoff.wav", VOL_NORM);
 	}
 	else
-		EngineClientCmd("escape");
+	{
+		client::ClientCmd("escape");
+	}
 }
 
 
@@ -706,7 +708,7 @@ void CHudAmmo::UserCmd_NextWeapon()
 	if (!gpActiveSel || gpActiveSel == (WEAPON*)1)
 	{
 		gpActiveSel = m_pWeapon;
-		m_flSelectionTime = gEngfuncs.GetClientTime();
+		m_flSelectionTime = client::GetClientTime();
 		open = true;
 	}
 
@@ -738,14 +740,14 @@ void CHudAmmo::UserCmd_NextWeapon()
 					}
 					if (open || gpActiveSel->iSlot != wsp->iSlot)
 					{
-						PlaySound("common/wpn_hudon.wav", 1);
+						client::PlaySoundByName("common/wpn_hudon.wav", VOL_NORM);
 					}
 					else
 					{
-						PlaySound("common/wpn_moveselect.wav", 1);
+						client::PlaySoundByName("common/wpn_moveselect.wav", VOL_NORM);
 					}
 					gpActiveSel = wsp;
-					m_flSelectionTime = gEngfuncs.GetClientTime();
+					m_flSelectionTime = client::GetClientTime();
 					return;
 				}
 			}
@@ -756,7 +758,7 @@ void CHudAmmo::UserCmd_NextWeapon()
 		slot = 0; // start looking from the first slot again
 	}
 
-	PlaySound("common/wpn_denyselect.wav", 1);
+	client::PlaySoundByName("common/wpn_denyselect.wav", VOL_NORM);
 	gpActiveSel = nullptr;
 }
 
@@ -768,7 +770,7 @@ void CHudAmmo::UserCmd_PrevWeapon()
 	if (!gpActiveSel || gpActiveSel == (WEAPON*)1)
 	{
 		gpActiveSel = m_pWeapon;
-		m_flSelectionTime = gEngfuncs.GetClientTime();
+		m_flSelectionTime = client::GetClientTime();
 		open = true;
 	}
 
@@ -800,14 +802,14 @@ void CHudAmmo::UserCmd_PrevWeapon()
 					}
 					if (open || gpActiveSel->iSlot != wsp->iSlot)
 					{
-						PlaySound("common/wpn_hudon.wav", 1);
+						client::PlaySoundByName("common/wpn_hudon.wav", VOL_NORM);
 					}
 					else
 					{
-						PlaySound("common/wpn_moveselect.wav", 1);
+						client::PlaySoundByName("common/wpn_moveselect.wav", VOL_NORM);
 					}
 					gpActiveSel = wsp;
-					m_flSelectionTime = gEngfuncs.GetClientTime();
+					m_flSelectionTime = client::GetClientTime();
 					return;
 				}
 			}
@@ -818,7 +820,7 @@ void CHudAmmo::UserCmd_PrevWeapon()
 		slot = MAX_WEAPON_SLOTS - 1;
 	}
 
-	PlaySound("common/wpn_denyselect.wav", 1);
+	client::PlaySoundByName("common/wpn_denyselect.wav", VOL_NORM);
 	gpActiveSel = nullptr;
 }
 
@@ -839,7 +841,7 @@ void CHudAmmo::UserCmd_LastWeapon()
 	}
 	else
 	{
-		PlaySound("common/wpn_denyselect.wav", 1);
+		client::PlaySoundByName("common/wpn_denyselect.wav", VOL_NORM);
 	}
 }
 

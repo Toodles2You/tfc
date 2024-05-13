@@ -82,7 +82,7 @@ void HUD_SendWeaponAnim(int iAnim, int body, bool force)
 	}
 
 	// Tell animation system new info
-	gEngfuncs.pfnWeaponAnim(iAnim, body);
+	client::WeaponAnim(iAnim, body);
 }
 
 /*
@@ -99,7 +99,7 @@ void HUD_PlaySound(const char* sound, float volume)
 		return;
 	}
 
-	gEngfuncs.pfnPlaySoundByNameAtLocation(sound, volume, g_finalstate.playerstate.origin);
+	client::PlaySoundByNameAtLocation(sound, volume, g_finalstate.playerstate.origin);
 }
 
 

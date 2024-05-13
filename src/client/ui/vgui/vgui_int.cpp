@@ -28,12 +28,12 @@ using namespace vgui;
 
 void VGui_ViewportPaintBackground(int extents[4])
 {
-	gEngfuncs.VGui_ViewportPaintBackground(extents);
+	client::VGui_ViewportPaintBackground(extents);
 }
 
 void* VGui_GetPanel()
 {
-	return (Panel*)gEngfuncs.VGui_GetPanel();
+	return (Panel*)client::VGui_GetPanel();
 }
 
 void VGui_Startup()

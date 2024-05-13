@@ -63,7 +63,7 @@ CMiniMem* CMiniMem::Instance()
 
 void CMiniMem::ProcessAll()
 {
-	const float time = gEngfuncs.GetClientTime();
+	const float time = client::GetClientTime();
 
 	//Clear list of visible particles.
 	_visibleParticles = 0;
@@ -93,7 +93,7 @@ void CMiniMem::ProcessAll()
 
 		if (effect->CheckVisibility())
 		{
-			auto player = gEngfuncs.GetLocalPlayer();
+			auto player = client::GetLocalPlayer();
 			effect->SetPlayerDistance((player->origin - effect->m_vOrigin).LengthSquared());
 
 			++_visibleParticles;

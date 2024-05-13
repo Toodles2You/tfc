@@ -56,7 +56,7 @@ bool CHudDeathNotice::Init()
 {
 	HOOK_MESSAGE(DeathMsg);
 
-	hud_deathnotice_time = gEngfuncs.pfnRegisterVariable("hud_deathnotice_time", "6", 0);
+	hud_deathnotice_time = client::RegisterVariable("hud_deathnotice_time", "6", 0);
 
 	return CHudBase::Init();
 }
@@ -175,7 +175,7 @@ void CHudDeathNotice::Draw(const float time)
 			// Draw killers name
 			if (item->KillerColor)
 			{
-				gEngfuncs.pfnDrawSetTextColor(
+				client::DrawSetTextColor(
 					item->KillerColor->x,
 					item->KillerColor->y,
 					item->KillerColor->z);
@@ -185,12 +185,12 @@ void CHudDeathNotice::Draw(const float time)
 			// Draw accomplices name, if any
 			if (item->szAccomplice[0] != '\0')
 			{
-				gEngfuncs.pfnDrawSetTextColor(r / 255.0F, g / 255.0F, b / 255.0F);
+				client::DrawSetTextColor(r / 255.0F, g / 255.0F, b / 255.0F);
 				x = gHUD.DrawHudString(" + ", x, centerY - m_string_height);
 
 				if (item->AccompliceColor)
 				{
-					gEngfuncs.pfnDrawSetTextColor(
+					client::DrawSetTextColor(
 						item->AccompliceColor->x,
 						item->AccompliceColor->y,
 						item->AccompliceColor->z);
@@ -219,21 +219,21 @@ void CHudDeathNotice::Draw(const float time)
 		{
 			if (item->AccompliceColor)
 			{
-				gEngfuncs.pfnDrawSetTextColor(
+				client::DrawSetTextColor(
 					item->AccompliceColor->x,
 					item->AccompliceColor->y,
 					item->AccompliceColor->z);
 			}
 			x = gHUD.DrawHudString(item->szAccomplice, x, centerY - m_string_height);
 
-			gEngfuncs.pfnDrawSetTextColor(r / 255.0F, g / 255.0F, b / 255.0F);
+			client::DrawSetTextColor(r / 255.0F, g / 255.0F, b / 255.0F);
 			x = gHUD.DrawHudString(" finished off ", x, centerY - m_string_height);
 		}
 
 		// Draw victims name
 		if (item->VictimColor)
 		{
-			gEngfuncs.pfnDrawSetTextColor(
+			client::DrawSetTextColor(
 				item->VictimColor->x,
 				item->VictimColor->y,
 				item->VictimColor->z);

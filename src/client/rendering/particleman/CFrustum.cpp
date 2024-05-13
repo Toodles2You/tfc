@@ -38,10 +38,10 @@ void CFrustum::NormalizeFrustumPlane(float frustum[6][4], int side)
 void CFrustum::CalculateFrustum()
 {
 	float proj[16];
-	gEngfuncs.pTriAPI->GetMatrix(GL_PROJECTION_MATRIX, proj);
+	client::tri::GetMatrix(GL_PROJECTION_MATRIX, proj);
 
 	float modl[16];
-	gEngfuncs.pTriAPI->GetMatrix(GL_MODELVIEW_MATRIX, modl);
+	client::tri::GetMatrix(GL_MODELVIEW_MATRIX, modl);
 
 	float frustum[16]{};
 

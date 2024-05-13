@@ -48,8 +48,8 @@ void CHudTrain::Draw(const float time)
 		int x, y;
 
 		// This should show up to the right and part way up the armor number
-		y = gHUD.GetHeight() - SPR_Height(m_hSprite, 0) - gHUD.m_iFontHeight;
-		x = gHUD.GetWidth() / 3 + SPR_Width(m_hSprite, 0) / 4;
+		y = gHUD.GetHeight() - client::SPR_Height(m_hSprite, 0) - gHUD.m_iFontHeight;
+		x = gHUD.GetWidth() / 3 + client::SPR_Width(m_hSprite, 0) / 4;
 
 		gHUD.DrawHudSprite(m_hSprite, m_iPos - 1, nullptr, x, y, CHud::COLOR_PRIMARY, 255);
 	}

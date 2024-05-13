@@ -23,4 +23,10 @@ typedef struct demo_api_s
 	void (*WriteBuffer)(int size, unsigned char* buffer);
 } demo_api_t;
 
-extern demo_api_t demoapi;
+namespace client::demo
+{
+inline int (*IsRecording)(void);
+inline int (*IsPlayingback)(void);
+inline int (*IsTimeDemo)(void);
+inline void (*WriteBuffer)(int size, unsigned char* buffer);
+} /* namespace client::demo */

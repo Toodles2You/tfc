@@ -21,8 +21,6 @@
 
 float CL_KeyState(kbutton_t* key);
 
-extern cl_enginefunc_t gEngfuncs;
-
 //-------------------------------------------------- Constants
 
 #define CAM_DIST_DELTA 1.0
@@ -85,7 +83,7 @@ void CAM_EndDistance();
 
 void SDL_GetCursorPos(Point* p)
 {
-	gEngfuncs.GetMousePosition(&p->x, &p->y);
+	client::GetMousePosition(&p->x, &p->y);
 	//	SDL_GetMouseState( &p->x, &p->y );
 }
 
@@ -184,7 +182,7 @@ void CAM_Think()
 #ifdef LATER
 	if (cam_contain->value)
 	{
-		gEngfuncs.GetClientOrigin(origin);
+		client::GetClientOrigin(origin);
 		ext[0] = ext[1] = ext[2] = 0.0;
 	}
 #endif
@@ -206,12 +204,12 @@ void CAM_Think()
 		{
 
 			//keep the camera within certain limits around the player (ie avoid certain bad viewing angles)
-			if (cam_mouse.x > gEngfuncs.GetWindowCenterX())
+			if (cam_mouse.x > client::GetWindowCenterX())
 			{
 				//if ((camAngles[YAW]>=225.0)||(camAngles[YAW]<135.0))
 				if (camAngles[YAW] < c_maxyaw->value)
 				{
-					camAngles[YAW] += (CAM_ANGLE_MOVE) * ((cam_mouse.x - gEngfuncs.GetWindowCenterX()) / 2);
+					camAngles[YAW] += (CAM_ANGLE_MOVE) * ((cam_mouse.x - client::GetWindowCenterX()) / 2);
 				}
 				if (camAngles[YAW] > c_maxyaw->value)
 				{
@@ -219,12 +217,12 @@ void CAM_Think()
 					camAngles[YAW] = c_maxyaw->value;
 				}
 			}
-			else if (cam_mouse.x < gEngfuncs.GetWindowCenterX())
+			else if (cam_mouse.x < client::GetWindowCenterX())
 			{
 				//if ((camAngles[YAW]<=135.0)||(camAngles[YAW]>225.0))
 				if (camAngles[YAW] > c_minyaw->value)
 				{
-					camAngles[YAW] -= (CAM_ANGLE_MOVE) * ((gEngfuncs.GetWindowCenterX() - cam_mouse.x) / 2);
+					camAngles[YAW] -= (CAM_ANGLE_MOVE) * ((client::GetWindowCenterX() - cam_mouse.x) / 2);
 				}
 				if (camAngles[YAW] < c_minyaw->value)
 				{
@@ -235,22 +233,22 @@ void CAM_Think()
 			//check for y delta values and adjust accordingly
 			//eventually adjust PITCH based on amount of movement
 			//also make sure camera is within bounds
-			if (cam_mouse.y > gEngfuncs.GetWindowCenterY())
+			if (cam_mouse.y > client::GetWindowCenterY())
 			{
 				if (camAngles[PITCH] < c_maxpitch->value)
 				{
-					camAngles[PITCH] += (CAM_ANGLE_MOVE) * ((cam_mouse.y - gEngfuncs.GetWindowCenterY()) / 2);
+					camAngles[PITCH] += (CAM_ANGLE_MOVE) * ((cam_mouse.y - client::GetWindowCenterY()) / 2);
 				}
 				if (camAngles[PITCH] > c_maxpitch->value)
 				{
 					camAngles[PITCH] = c_maxpitch->value;
 				}
 			}
-			else if (cam_mouse.y < gEngfuncs.GetWindowCenterY())
+			else if (cam_mouse.y < client::GetWindowCenterY())
 			{
 				if (camAngles[PITCH] > c_minpitch->value)
 				{
-					camAngles[PITCH] -= (CAM_ANGLE_MOVE) * ((gEngfuncs.GetWindowCenterY() - cam_mouse.y) / 2);
+					camAngles[PITCH] -= (CAM_ANGLE_MOVE) * ((client::GetWindowCenterY() - cam_mouse.y) / 2);
 				}
 				if (camAngles[PITCH] < c_minpitch->value)
 				{
@@ -271,7 +269,7 @@ void CAM_Think()
 				cam_old_mouse_x = cam_mouse.x;
 				cam_old_mouse_y = cam_mouse.y;
 			}
-			SDL_SetCursorPos(gEngfuncs.GetWindowCenterX(), gEngfuncs.GetWindowCenterY());
+			SDL_SetCursorPos(client::GetWindowCenterX(), client::GetWindowCenterY());
 		}
 	}
 
@@ -302,22 +300,22 @@ void CAM_Think()
 
 	if (cam_distancemove)
 	{
-		if (cam_mouse.y > gEngfuncs.GetWindowCenterY())
+		if (cam_mouse.y > client::GetWindowCenterY())
 		{
 			if (dist < c_maxdistance->value)
 			{
-				dist += CAM_DIST_DELTA * ((cam_mouse.y - gEngfuncs.GetWindowCenterY()) / 2);
+				dist += CAM_DIST_DELTA * ((cam_mouse.y - client::GetWindowCenterY()) / 2);
 			}
 			if (dist > c_maxdistance->value)
 			{
 				dist = c_maxdistance->value;
 			}
 		}
-		else if (cam_mouse.y < gEngfuncs.GetWindowCenterY())
+		else if (cam_mouse.y < client::GetWindowCenterY())
 		{
 			if (dist > c_mindistance->value)
 			{
-				dist -= (CAM_DIST_DELTA) * ((gEngfuncs.GetWindowCenterY() - cam_mouse.y) / 2);
+				dist -= (CAM_DIST_DELTA) * ((client::GetWindowCenterY() - cam_mouse.y) / 2);
 			}
 			if (dist < c_mindistance->value)
 			{
@@ -328,7 +326,7 @@ void CAM_Think()
 		//since we are done with the mouse
 		cam_old_mouse_x = cam_mouse.x * gHUD.GetSensitivity();
 		cam_old_mouse_y = cam_mouse.y * gHUD.GetSensitivity();
-		SDL_SetCursorPos(gEngfuncs.GetWindowCenterX(), gEngfuncs.GetWindowCenterY());
+		SDL_SetCursorPos(client::GetWindowCenterX(), client::GetWindowCenterY());
 	}
 #ifdef LATER
 	if (cam_contain->value)
@@ -362,7 +360,7 @@ void CAM_Think()
 	// Move towards ideal
 	camAngles = cam_ofs;
 
-	gEngfuncs.GetViewAngles(viewangles);
+	client::GetViewAngles(viewangles);
 
 	if (0 != cam_snapto->value)
 	{
@@ -436,7 +434,7 @@ void CAM_ToThirdPerson()
 	}
 #endif
 
-	gEngfuncs.GetViewAngles(viewangles);
+	client::GetViewAngles(viewangles);
 
 	if (!cam_thirdperson)
 	{
@@ -447,14 +445,14 @@ void CAM_ToThirdPerson()
 		cam_ofs[2] = CAM_MIN_DIST;
 	}
 
-	gEngfuncs.Cvar_SetValue("cam_command", 0);
+	client::Cvar_SetValue("cam_command", 0);
 }
 
 void CAM_ToFirstPerson()
 {
 	cam_thirdperson = false;
 
-	gEngfuncs.Cvar_SetValue("cam_command", 0);
+	client::Cvar_SetValue("cam_command", 0);
 }
 
 void CAM_ToggleSnapto()
@@ -464,46 +462,46 @@ void CAM_ToggleSnapto()
 
 void CAM_Init()
 {
-	gEngfuncs.pfnAddCommand("+campitchup", CAM_PitchUpDown);
-	gEngfuncs.pfnAddCommand("-campitchup", CAM_PitchUpUp);
-	gEngfuncs.pfnAddCommand("+campitchdown", CAM_PitchDownDown);
-	gEngfuncs.pfnAddCommand("-campitchdown", CAM_PitchDownUp);
-	gEngfuncs.pfnAddCommand("+camyawleft", CAM_YawLeftDown);
-	gEngfuncs.pfnAddCommand("-camyawleft", CAM_YawLeftUp);
-	gEngfuncs.pfnAddCommand("+camyawright", CAM_YawRightDown);
-	gEngfuncs.pfnAddCommand("-camyawright", CAM_YawRightUp);
-	gEngfuncs.pfnAddCommand("+camin", CAM_InDown);
-	gEngfuncs.pfnAddCommand("-camin", CAM_InUp);
-	gEngfuncs.pfnAddCommand("+camout", CAM_OutDown);
-	gEngfuncs.pfnAddCommand("-camout", CAM_OutUp);
-	gEngfuncs.pfnAddCommand("thirdperson", CAM_ToThirdPerson);
-	gEngfuncs.pfnAddCommand("firstperson", CAM_ToFirstPerson);
-	gEngfuncs.pfnAddCommand("+cammousemove", CAM_StartMouseMove);
-	gEngfuncs.pfnAddCommand("-cammousemove", CAM_EndMouseMove);
-	gEngfuncs.pfnAddCommand("+camdistance", CAM_StartDistance);
-	gEngfuncs.pfnAddCommand("-camdistance", CAM_EndDistance);
-	gEngfuncs.pfnAddCommand("snapto", CAM_ToggleSnapto);
+	client::AddCommand("+campitchup", CAM_PitchUpDown);
+	client::AddCommand("-campitchup", CAM_PitchUpUp);
+	client::AddCommand("+campitchdown", CAM_PitchDownDown);
+	client::AddCommand("-campitchdown", CAM_PitchDownUp);
+	client::AddCommand("+camyawleft", CAM_YawLeftDown);
+	client::AddCommand("-camyawleft", CAM_YawLeftUp);
+	client::AddCommand("+camyawright", CAM_YawRightDown);
+	client::AddCommand("-camyawright", CAM_YawRightUp);
+	client::AddCommand("+camin", CAM_InDown);
+	client::AddCommand("-camin", CAM_InUp);
+	client::AddCommand("+camout", CAM_OutDown);
+	client::AddCommand("-camout", CAM_OutUp);
+	client::AddCommand("thirdperson", CAM_ToThirdPerson);
+	client::AddCommand("firstperson", CAM_ToFirstPerson);
+	client::AddCommand("+cammousemove", CAM_StartMouseMove);
+	client::AddCommand("-cammousemove", CAM_EndMouseMove);
+	client::AddCommand("+camdistance", CAM_StartDistance);
+	client::AddCommand("-camdistance", CAM_EndDistance);
+	client::AddCommand("snapto", CAM_ToggleSnapto);
 
-	cam_command = gEngfuncs.pfnRegisterVariable("cam_command", "0", 0);		  // tells camera to go to thirdperson
-	cam_snapto = gEngfuncs.pfnRegisterVariable("cam_snapto", "0", 0);		  // snap to thirdperson view
-	cam_idealyaw = gEngfuncs.pfnRegisterVariable("cam_idealyaw", "0", 0);	  // thirdperson yaw
-	cam_idealpitch = gEngfuncs.pfnRegisterVariable("cam_idealpitch", "0", 0); // thirperson pitch
-	cam_idealdist = gEngfuncs.pfnRegisterVariable("cam_idealdist", "64", 0);  // thirdperson distance
-	cam_contain = gEngfuncs.pfnRegisterVariable("cam_contain", "0", 0);		  // contain camera to world
+	cam_command = client::RegisterVariable("cam_command", "0", 0);		  // tells camera to go to thirdperson
+	cam_snapto = client::RegisterVariable("cam_snapto", "0", 0);		  // snap to thirdperson view
+	cam_idealyaw = client::RegisterVariable("cam_idealyaw", "0", 0);	  // thirdperson yaw
+	cam_idealpitch = client::RegisterVariable("cam_idealpitch", "0", 0); // thirperson pitch
+	cam_idealdist = client::RegisterVariable("cam_idealdist", "64", 0);  // thirdperson distance
+	cam_contain = client::RegisterVariable("cam_contain", "0", 0);		  // contain camera to world
 
-	c_maxpitch = gEngfuncs.pfnRegisterVariable("c_maxpitch", "90.0", 0);
-	c_minpitch = gEngfuncs.pfnRegisterVariable("c_minpitch", "0.0", 0);
-	c_maxyaw = gEngfuncs.pfnRegisterVariable("c_maxyaw", "135.0", 0);
-	c_minyaw = gEngfuncs.pfnRegisterVariable("c_minyaw", "-135.0", 0);
-	c_maxdistance = gEngfuncs.pfnRegisterVariable("c_maxdistance", "200.0", 0);
-	c_mindistance = gEngfuncs.pfnRegisterVariable("c_mindistance", "30.0", 0);
+	c_maxpitch = client::RegisterVariable("c_maxpitch", "90.0", 0);
+	c_minpitch = client::RegisterVariable("c_minpitch", "0.0", 0);
+	c_maxyaw = client::RegisterVariable("c_maxyaw", "135.0", 0);
+	c_minyaw = client::RegisterVariable("c_minyaw", "-135.0", 0);
+	c_maxdistance = client::RegisterVariable("c_maxdistance", "200.0", 0);
+	c_mindistance = client::RegisterVariable("c_mindistance", "30.0", 0);
 }
 
 void CAM_ClearStates()
 {
 	Vector viewangles;
 
-	gEngfuncs.GetViewAngles(viewangles);
+	client::GetViewAngles(viewangles);
 
 	cam_pitchup.state = 0;
 	cam_pitchdown.state = 0;
@@ -613,7 +611,7 @@ void CAM_EndDistance()
 
 int CL_IsThirdPerson()
 {
-	return static_cast<int>(cam_thirdperson || (gHUD.IsObserver() && (gHUD.GetObserverTarget() == gEngfuncs.GetLocalPlayer()->index)));
+	return static_cast<int>(cam_thirdperson || (gHUD.IsObserver() && (gHUD.GetObserverTarget() == client::GetLocalPlayer()->index)));
 }
 
 void CL_CameraOffset(float* ofs)

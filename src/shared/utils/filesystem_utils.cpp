@@ -101,7 +101,7 @@ static bool FileSystem_InitializeGameDirectory()
 	g_ModDirectoryName.resize(BufferSize);
 
 #ifdef CLIENT_DLL
-	g_ModDirectoryName = gEngfuncs.pfnGetGameDirectory();
+	g_ModDirectoryName = client::GetGameDirectory();
 #else
 	engine::GetGameDir(g_ModDirectoryName.data());
 	g_ModDirectoryName.resize(std::strlen(g_ModDirectoryName.c_str()));

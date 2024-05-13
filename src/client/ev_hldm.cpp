@@ -55,13 +55,13 @@ static float EV_WaterLevel(const Vector& position, float minz, float maxz)
 	Vector midUp = position;
 	midUp.z = minz;
 
-	if (gEngfuncs.PM_PointContents(midUp, nullptr) != CONTENTS_WATER)
+	if (client::PM_PointContents(midUp, nullptr) != CONTENTS_WATER)
 	{
 		return minz;
 	}
 
 	midUp.z = maxz;
-	if (gEngfuncs.PM_PointContents(midUp, nullptr) == CONTENTS_WATER)
+	if (client::PM_PointContents(midUp, nullptr) == CONTENTS_WATER)
 	{
 		return maxz;
 	}
@@ -70,7 +70,7 @@ static float EV_WaterLevel(const Vector& position, float minz, float maxz)
 	while (diff > 1.0)
 	{
 		midUp.z = minz + diff / 2.0;
-		if (gEngfuncs.PM_PointContents(midUp, nullptr) == CONTENTS_WATER)
+		if (client::PM_PointContents(midUp, nullptr) == CONTENTS_WATER)
 		{
 			minz = midUp.z;
 		}
@@ -101,7 +101,7 @@ static void EV_BubbleTrail(Vector from, Vector to, int count)
 		flHeight = flHeight + to.z - from.z;
 	}
 
-	gEngfuncs.pEfxAPI->R_BubbleTrail(
+	client::efx::BubbleTrail(
 		from,
 		to,
 		flHeight,
@@ -120,7 +120,7 @@ static void EV_Bubbles(const Vector& origin, float radius)
 	auto height = EV_WaterLevel(mid, mid.z, mid.z + 1024);
 	height = height - mins.z;
 	
-	gEngfuncs.pEfxAPI->R_Bubbles(mins, maxs, height, g_sModelIndexBubbles, 100, 8);
+	client::efx::Bubbles(mins, maxs, height, g_sModelIndexBubbles, 100, 8);
 }
 
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
@@ -140,7 +140,7 @@ static float EV_PlayTextureSound(int idx, pmtrace_t* ptr, const Vector& vecSrc, 
 	char texname[64];
 	char szbuffer[64];
 
-	entity = gEngfuncs.pEventAPI->EV_IndexFromTrace(ptr);
+	entity = client::event::IndexFromTrace(ptr);
 
 	chTextureType = 0;
 
@@ -148,7 +148,7 @@ static float EV_PlayTextureSound(int idx, pmtrace_t* ptr, const Vector& vecSrc, 
 	{
 		// get texture from entity or world (world is ent(0))
 		pTextureName =
-			(char*)gEngfuncs.pEventAPI->EV_TraceTexture(
+			(char*)client::event::TraceTexture(
 				ptr->ent,
 				const_cast<Vector&>(vecSrc),
 				const_cast<Vector&>(vecEnd));
@@ -263,7 +263,7 @@ static float EV_PlayTextureSound(int idx, pmtrace_t* ptr, const Vector& vecSrc, 
 	}
 
 	// play material hit sound
-	gEngfuncs.pEventAPI->EV_PlaySound(0, ptr->endpos, CHAN_STATIC, rgsz[gEngfuncs.pfnRandomLong(0, cnt - 1)], fvol, fattn, 0, 96 + gEngfuncs.pfnRandomLong(0, 0xf));
+	client::event::PlaySound(0, ptr->endpos, CHAN_STATIC, rgsz[client::RandomLong(0, cnt - 1)], fvol, fattn, 0, 96 + client::RandomLong(0, 0xf));
 	return fvolbar;
 }
 
@@ -274,13 +274,13 @@ static void EV_DecalTrace(pmtrace_t *tr, char *decal)
 		return;
 	}
 
-	physent_t *pe = gEngfuncs.pEventAPI->EV_GetPhysent(tr->ent);
+	physent_t *pe = client::event::GetPhysent(tr->ent);
 
 	if (decal && decal[0] && pe && (pe->solid == SOLID_BSP || pe->movetype == MOVETYPE_PUSHSTEP))
 	{
-		gEngfuncs.pEfxAPI->R_DecalShoot(
-			gEngfuncs.pEfxAPI->Draw_DecalIndex(gEngfuncs.pEfxAPI->Draw_DecalIndexFromName(decal)), 
-			gEngfuncs.pEventAPI->EV_IndexFromTrace(tr),
+		client::efx::DecalShoot(
+			client::efx::Draw_DecalIndex(client::efx::Draw_DecalIndexFromName(decal)), 
+			client::event::IndexFromTrace(tr),
 			0,
 			tr->endpos,
 			0
@@ -291,7 +291,7 @@ static void EV_DecalTrace(pmtrace_t *tr, char *decal)
 static inline char* EV_DecalName(char* format, int count)
 {
 	static char sz[32];
-	sprintf(sz, format, gEngfuncs.pfnRandomLong(1, count));
+	sprintf(sz, format, client::RandomLong(1, count));
 	return sz;
 }
 
@@ -310,18 +310,18 @@ static inline char* EV_DamageDecal(physent_t* pe)
 
 static void EV_GunshotDecalTrace(pmtrace_t* pTrace, char* decalName)
 {
-	gEngfuncs.pEfxAPI->R_BulletImpactParticles(pTrace->endpos);
+	client::efx::BulletImpactParticles(pTrace->endpos);
 
-	int iRand = gEngfuncs.pfnRandomLong(0, 0x7FFF);
+	int iRand = client::RandomLong(0, 0x7FFF);
 	if (iRand < (0x7fff / 2)) // not every bullet makes a sound.
 	{
 		switch (iRand % 5)
 		{
-		case 0: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-		case 1: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-		case 2: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-		case 3: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-		case 4: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+		case 0: client::event::PlaySound(-1, pTrace->endpos, 0, "weapons/ric1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+		case 1: client::event::PlaySound(-1, pTrace->endpos, 0, "weapons/ric2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+		case 2: client::event::PlaySound(-1, pTrace->endpos, 0, "weapons/ric3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+		case 3: client::event::PlaySound(-1, pTrace->endpos, 0, "weapons/ric4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+		case 4: client::event::PlaySound(-1, pTrace->endpos, 0, "weapons/ric5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
 		}
 	}
 
@@ -338,11 +338,11 @@ static void EV_BloodTrace(Vector pos, Vector dir, int damage)
 	for (int i = 0; i < count; i++)
 	{
 		traceDir = dir * -1;
-		traceDir.x += gEngfuncs.pfnRandomFloat(-noise, noise);
-		traceDir.y += gEngfuncs.pfnRandomFloat(-noise, noise);
-		traceDir.z += gEngfuncs.pfnRandomFloat(-noise, noise);
+		traceDir.x += client::RandomFloat(-noise, noise);
+		traceDir.y += client::RandomFloat(-noise, noise);
+		traceDir.z += client::RandomFloat(-noise, noise);
 
-		gEngfuncs.pEventAPI->EV_PlayerTrace(pos, pos + traceDir * -172, PM_WORLD_ONLY, -1, &tr);
+		client::event::PlayerTrace(pos, pos + traceDir * -172, PM_WORLD_ONLY, -1, &tr);
 
 		if (tr.fraction != 1.0f)
 		{
@@ -353,7 +353,7 @@ static void EV_BloodTrace(Vector pos, Vector dir, int damage)
 
 static void EV_DecalGunshot(pmtrace_t* pTrace, Vector vecDir)
 {
-	physent_t* pe = gEngfuncs.pEventAPI->EV_GetPhysent(pTrace->ent);
+	physent_t* pe = client::event::GetPhysent(pTrace->ent);
 
 	if (!pe)
 	{
@@ -361,7 +361,7 @@ static void EV_DecalGunshot(pmtrace_t* pTrace, Vector vecDir)
 	}
 
 	if (pe->solid == SOLID_BSP
-	 && gEngfuncs.PM_PointContents(pTrace->endpos, nullptr) != CONTENTS_SKY)
+	 && client::PM_PointContents(pTrace->endpos, nullptr) != CONTENTS_SKY)
 	{
 		EV_GunshotDecalTrace(pTrace, EV_DamageDecal(pe));
 	}
@@ -387,7 +387,7 @@ static void EV_CheckTracer(
 #if 0
 	if (EV_IsLocal(entindex) && CL_IsThirdPerson() == 0)
 	{
-		muzzle = gEngfuncs.GetViewModel()->attachment[0];
+		muzzle = client::GetViewModel()->attachment[0];
 	}
 	else
 #endif
@@ -425,10 +425,10 @@ static void EV_FireBullets(
 
 	EV_GetGunPosition(args, gun, args->origin);
 	
-	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(true, true);
-	gEngfuncs.pEventAPI->EV_PushPMStates();
-	gEngfuncs.pEventAPI->EV_SetSolidPlayers(args->entindex - 1);
-	gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
+	client::event::SetUpPlayerPrediction(true, true);
+	client::event::PushPMStates();
+	client::event::SetSolidPlayers(args->entindex - 1);
+	client::event::SetTraceHull(kHullPoint);
 
 	for (auto i = 0; i < count; i++)
 	{
@@ -451,7 +451,7 @@ static void EV_FireBullets(
 		AngleVectors(angles, &forward, &right, &up);
 
 		pmtrace_t tr;
-		gEngfuncs.pEventAPI->EV_PlayerTrace(gun, gun + forward * distance, PM_NORMAL, -1, &tr);
+		client::event::PlayerTrace(gun, gun + forward * distance, PM_NORMAL, -1, &tr);
 
 		EV_CheckTracer(
 			args->entindex,
@@ -472,7 +472,7 @@ static void EV_FireBullets(
 		}
 	}
 
-	gEngfuncs.pEventAPI->EV_PopPMStates();
+	client::event::PopPMStates();
 }
 
 void CMP5::EV_PrimaryAttack(event_args_t* args)
@@ -484,10 +484,10 @@ void CMP5::EV_PrimaryAttack(event_args_t* args)
 	{
 		EV_MuzzleFlash();
 
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(
-			kAnimFire1 + gEngfuncs.pfnRandomLong(0, 2), 0);
+		client::event::WeaponAnimation(
+			kAnimFire1 + client::RandomLong(0, 2), 0);
 
-		V_PunchAxis(0, gEngfuncs.pfnRandomFloat(-2, 2));
+		V_PunchAxis(0, client::RandomFloat(-2, 2));
 	}
 
 	Vector shellOrigin, shellVelocity;
@@ -495,13 +495,13 @@ void CMP5::EV_PrimaryAttack(event_args_t* args)
 	EV_EjectBrass(shellOrigin, shellVelocity, args->angles[YAW], g_sModelIndexShell, TE_BOUNCE_SHELL);
 
 	const char* sample;
-	switch (gEngfuncs.pfnRandomLong(0, 1))
+	switch (client::RandomLong(0, 1))
 	{
 	case 0: sample = "weapons/hks1.wav"; break;
 	case 1: sample = "weapons/hks2.wav"; break;
 	}
 
-	gEngfuncs.pEventAPI->EV_PlaySound(
+	client::event::PlaySound(
 		args->entindex,
 		args->origin,
 		CHAN_WEAPON,
@@ -509,7 +509,7 @@ void CMP5::EV_PrimaryAttack(event_args_t* args)
 		VOL_NORM,
 		ATTN_NORM,
 		0,
-		gEngfuncs.pfnRandomLong(94, 109));
+		client::RandomLong(94, 109));
 
 	EV_FireBullets(args, args->iparam1, Vector2D(6, 6), args->iparam2, 8192, false, 2);
 }
@@ -518,19 +518,19 @@ void CMP5::EV_SecondaryAttack(event_args_t* args)
 {
 	if (EV_IsLocal(args->entindex))
 	{
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimLaunch, 0);
+		client::event::WeaponAnimation(kAnimLaunch, 0);
 
 		V_PunchAxis(0, -10);
 	}
 
 	const char* sample;
-	switch (gEngfuncs.pfnRandomLong(0, 1))
+	switch (client::RandomLong(0, 1))
 	{
 	case 0: sample = "weapons/glauncher.wav"; break;
 	case 1: sample = "weapons/glauncher2.wav"; break;
 	}
 
-	gEngfuncs.pEventAPI->EV_PlaySound(
+	client::event::PlaySound(
 		args->entindex,
 		args->origin,
 		CHAN_WEAPON,
@@ -538,7 +538,7 @@ void CMP5::EV_SecondaryAttack(event_args_t* args)
 		VOL_NORM,
 		ATTN_NORM,
 		0,
-		gEngfuncs.pfnRandomLong(94, 109));
+		client::RandomLong(94, 109));
 }
 
 static int g_iSwing;
@@ -555,14 +555,14 @@ void CCrowbar::EV_PrimaryAttack(event_args_t* args)
 
 	if (!reliable)
 	{
-		gEngfuncs.pEventAPI->EV_PushPMStates();
-		gEngfuncs.pEventAPI->EV_SetSolidPlayers(args->entindex - 1);
-		gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
+		client::event::PushPMStates();
+		client::event::SetSolidPlayers(args->entindex - 1);
+		client::event::SetTraceHull(kHullPoint);
 
 		Vector forward, right, up;
 		AngleVectors(args->angles, &forward, &right, &up);
 
-		gEngfuncs.pEventAPI->EV_PlayerTrace(gun, gun + forward * 64, PM_NORMAL, -1, &tr);
+		client::event::PlayerTrace(gun, gun + forward * 64, PM_NORMAL, -1, &tr);
 
 		if (EV_IsLocal(args->entindex))
 		{
@@ -571,7 +571,7 @@ void CCrowbar::EV_PrimaryAttack(event_args_t* args)
 
 		if (tr.fraction != 1.0F)
 		{
-			auto ent = gEngfuncs.pEventAPI->EV_GetPhysent(tr.ent);
+			auto ent = client::event::GetPhysent(tr.ent);
 
 			if (ent->solid != SOLID_BSP && ent->movetype != MOVETYPE_PUSHSTEP)
 			{
@@ -594,14 +594,14 @@ void CCrowbar::EV_PrimaryAttack(event_args_t* args)
 		{
 			switch (g_iSwing % 3)
 			{
-			case 0: gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimAttack1Miss, 0); break;
-			case 1: gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimAttack2Miss, 0); break;
-			case 2: gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimAttack3Miss, 0); break;
+			case 0: client::event::WeaponAnimation(kAnimAttack1Miss, 0); break;
+			case 1: client::event::WeaponAnimation(kAnimAttack2Miss, 0); break;
+			case 2: client::event::WeaponAnimation(kAnimAttack3Miss, 0); break;
 			}
 		}
 
 		//Play Swing sound
-		gEngfuncs.pEventAPI->EV_PlaySound(
+		client::event::PlaySound(
 			args->entindex,
 			args->origin,
 			CHAN_WEAPON,
@@ -617,9 +617,9 @@ void CCrowbar::EV_PrimaryAttack(event_args_t* args)
 		{
 			switch (g_iSwing % 3)
 			{
-			case 0: gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimAttack1Hit, 0); break;
-			case 1: gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimAttack2Hit, 0); break;
-			case 2: gEngfuncs.pEventAPI->EV_WeaponAnimation(kAnimAttack3Hit, 0); break;
+			case 0: client::event::WeaponAnimation(kAnimAttack1Hit, 0); break;
+			case 1: client::event::WeaponAnimation(kAnimAttack2Hit, 0); break;
+			case 2: client::event::WeaponAnimation(kAnimAttack3Hit, 0); break;
 			}
 		}
 
@@ -627,7 +627,7 @@ void CCrowbar::EV_PrimaryAttack(event_args_t* args)
 
 		if (hit == kCrowbarHitWorld)
 		{
-			switch (gEngfuncs.pfnRandomLong(0, 1))
+			switch (client::RandomLong(0, 1))
 			{
 				case 0: sample = "weapons/cbar_hit1.wav"; break;
 				case 1: sample = "weapons/cbar_hit2.wav"; break;
@@ -635,7 +635,7 @@ void CCrowbar::EV_PrimaryAttack(event_args_t* args)
 		}
 		else
 		{
-			switch (gEngfuncs.pfnRandomLong(0, 2))
+			switch (client::RandomLong(0, 2))
 			{
 				case 0: sample = "weapons/cbar_hitbod1.wav"; break;
 				case 1: sample = "weapons/cbar_hitbod2.wav"; break;
@@ -643,7 +643,7 @@ void CCrowbar::EV_PrimaryAttack(event_args_t* args)
 			}
 		}
 
-		gEngfuncs.pEventAPI->EV_PlaySound(
+		client::event::PlaySound(
 			args->entindex,
 			args->origin,
 			CHAN_ITEM,
@@ -656,7 +656,7 @@ void CCrowbar::EV_PrimaryAttack(event_args_t* args)
 	
 	if (!reliable)
 	{
-		gEngfuncs.pEventAPI->EV_PopPMStates();
+		client::event::PopPMStates();
 	}
 }
 
@@ -674,7 +674,7 @@ void EV_LaserDotOn(event_args_t* args)
 	{
 		if (pLaserDot != nullptr)
 		{
-			pLaserDot->die = gEngfuncs.GetClientTime();
+			pLaserDot->die = client::GetClientTime();
 			pLaserDot = nullptr;
 		}
 		return;
@@ -684,7 +684,7 @@ void EV_LaserDotOn(event_args_t* args)
 	{
 		if (bMakeNoise)
 		{
-			gEngfuncs.pEventAPI->EV_PlaySound(
+			client::event::PlaySound(
 				args->entindex,
 				args->origin,
 				CHAN_WEAPON,
@@ -695,7 +695,7 @@ void EV_LaserDotOn(event_args_t* args)
 				PITCH_NORM);
 		}
 		
-		pLaserDot = gEngfuncs.pEfxAPI->R_TempSprite(
+		pLaserDot = client::efx::TempSprite(
 			args->origin,
 			g_vecZero,
 			1.0,
@@ -711,7 +711,7 @@ void EV_LaserDotOn(event_args_t* args)
 
 	if (flSuspendTime > 0 && pLaserDot != nullptr)
 	{
-		pLaserDot->entity.baseline.fuser4 = gEngfuncs.GetClientTime() + flSuspendTime;
+		pLaserDot->entity.baseline.fuser4 = client::GetClientTime() + flSuspendTime;
 		pLaserDot->flags |= FTENT_NOMODEL;
 	}
 	#endif
@@ -729,7 +729,7 @@ void EV_LaserDotOff(event_args_t* args)
 	{
 		if (bMakeNoise)
 		{
-			gEngfuncs.pEventAPI->EV_PlaySound(
+			client::event::PlaySound(
 				args->entindex,
 				args->origin,
 				CHAN_WEAPON,
@@ -740,7 +740,7 @@ void EV_LaserDotOff(event_args_t* args)
 				PITCH_NORM);
 		}
 		
-		pLaserDot->die = gEngfuncs.GetClientTime();
+		pLaserDot->die = client::GetClientTime();
 		pLaserDot = nullptr;
 	}
 	#endif
@@ -798,11 +798,11 @@ void EV_TrainPitchAdjust(event_args_t* args)
 
 	if (stop)
 	{
-		gEngfuncs.pEventAPI->EV_StopSound(idx, CHAN_STATIC, sz);
+		client::event::StopSound(idx, CHAN_STATIC, sz);
 	}
 	else
 	{
-		gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_STATIC, sz, m_flVolume, ATTN_NORM, SND_CHANGE_PITCH, pitch);
+		client::event::PlaySound(idx, origin, CHAN_STATIC, sz, m_flVolume, ATTN_NORM, SND_CHANGE_PITCH, pitch);
 	}
 }
 
@@ -810,14 +810,14 @@ static void EV_GibTouch(struct tempent_s* ent, struct pmtrace_s* ptr)
 {
 	EV_DecalTrace(ptr, EV_DecalName("{blood%i", 6));
 
-	switch (gEngfuncs.pfnRandomLong(0, 25))
+	switch (client::RandomLong(0, 25))
 	{
-	case 0: gEngfuncs.pEventAPI->EV_PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-	case 1: gEngfuncs.pEventAPI->EV_PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-	case 2: gEngfuncs.pEventAPI->EV_PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-	case 3: gEngfuncs.pEventAPI->EV_PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-	case 4: gEngfuncs.pEventAPI->EV_PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh6.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-	case 5: gEngfuncs.pEventAPI->EV_PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh7.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	case 0: client::event::PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	case 1: client::event::PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	case 2: client::event::PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	case 3: client::event::PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	case 4: client::event::PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh6.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	case 5: client::event::PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh7.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
 	default: break;
 	}
 }
@@ -825,9 +825,9 @@ static void EV_GibTouch(struct tempent_s* ent, struct pmtrace_s* ptr)
 static void EV_SpawnGibs(event_args_t* args, int count)
 {
 	auto rotate = Vector(
-		gEngfuncs.pfnRandomLong(-100, 100),
-		gEngfuncs.pfnRandomLong(-100, 100),
-		gEngfuncs.pfnRandomLong(-100, 100)
+		client::RandomLong(-100, 100),
+		client::RandomLong(-100, 100),
+		client::RandomLong(-100, 100)
 	);
 	TEMPENTITY *gib;
 	Vector velocity, dir;
@@ -838,14 +838,14 @@ static void EV_SpawnGibs(event_args_t* args, int count)
 	while (--count >= 0)
 	{
 		dir = forward;
-		dir[0] += gEngfuncs.pfnRandomFloat(-0.30, 0.30);
-		dir[1] += gEngfuncs.pfnRandomFloat(-0.30, 0.30);
-		dir[2] += gEngfuncs.pfnRandomFloat(-0.30, 0.30);
+		dir[0] += client::RandomFloat(-0.30, 0.30);
+		dir[1] += client::RandomFloat(-0.30, 0.30);
+		dir[2] += client::RandomFloat(-0.30, 0.30);
 
-		velocity = dir * gEngfuncs.pfnRandomFloat(500, 1200);
+		velocity = dir * client::RandomFloat(500, 1200);
 		velocity[2] += 600;
 
-		gib = gEngfuncs.pEfxAPI->R_TempModel(args->origin, velocity, rotate, 15.0f, g_sModelIndexGibs, TE_BOUNCE_NULL);
+		gib = client::efx::TempModel(args->origin, velocity, rotate, 15.0f, g_sModelIndexGibs, TE_BOUNCE_NULL);
 
 		if (gib != nullptr)
 		{
@@ -854,25 +854,25 @@ static void EV_SpawnGibs(event_args_t* args, int count)
 			gib->hitcallback = EV_GibTouch;
 		}
 
-		body = gEngfuncs.pfnRandomLong(1, 5);
+		body = client::RandomLong(1, 5);
 	}
 }
 
 static void EV_SpawnCorpse(event_args_t* args)
 {
-	auto player = gEngfuncs.GetEntityByIndex(args->entindex);
+	auto player = client::GetEntityByIndex(args->entindex);
 	if (player == nullptr)
 	{
 		return;
 	}
 
-	auto model = gEngfuncs.hudGetModelByIndex(g_sModelIndexPlayer);
+	auto model = client::hudGetModelByIndex(g_sModelIndexPlayer);
 	if (model == nullptr)
 	{
 		return;
 	}
 	
-	auto gib = gEngfuncs.pEfxAPI->CL_TempEntAllocHigh(args->origin, model);
+	auto gib = client::efx::TempEntAllocHigh(args->origin, model);
 	if (gib == nullptr)
 	{
 		return;
@@ -887,7 +887,7 @@ static void EV_SpawnCorpse(event_args_t* args)
 	gib->entity.curstate.renderfx = kRenderFxDeadPlayer;
 	gib->entity.curstate.iuser4 = args->entindex;
 	gib->entity.baseline = gib->entity.curstate;
-	gib->die = gEngfuncs.GetClientTime() + 15.0F;
+	gib->die = client::GetClientTime() + 15.0F;
 }
 
 void EV_Gibbed(event_args_t* args)
@@ -896,7 +896,7 @@ void EV_Gibbed(event_args_t* args)
 	 && (args->iparam2 == GIB_ALWAYS
 	 || (args->iparam2 == GIB_NORMAL && args->fparam2 < -40.0f)))
 	{
-		gEngfuncs.pEventAPI->EV_PlaySound(
+		client::event::PlaySound(
 			0,
 			args->origin,
 			CHAN_STATIC,
@@ -914,7 +914,7 @@ void EV_Gibbed(event_args_t* args)
 
 void EV_Teleport(event_args_t* args)
 {
-	gEngfuncs.pEventAPI->EV_PlaySound(
+	client::event::PlaySound(
 		0,
 		args->origin,
 		CHAN_STATIC,
@@ -924,7 +924,7 @@ void EV_Teleport(event_args_t* args)
 		0,
 		PITCH_NORM);
 
-	gEngfuncs.pEfxAPI->R_TeleportSplash(args->origin);
+	client::efx::TeleportSplash(args->origin);
 }
 
 static void EV_SmokeCallback(TEMPENTITY* ent, float frametime, float currenttime)
@@ -944,7 +944,7 @@ static void EV_SmokeCallback(TEMPENTITY* ent, float frametime, float currenttime
 		return;
 	}
 
-	auto smonk = gEngfuncs.pEfxAPI->R_TempSprite(
+	auto smonk = client::efx::TempSprite(
 		ent->entity.origin,
 		ent->entity.angles,
 		1.0F,
@@ -957,7 +957,7 @@ static void EV_SmokeCallback(TEMPENTITY* ent, float frametime, float currenttime
 
 	if (smonk)
 	{
-		gEngfuncs.pEfxAPI->R_Sprite_Smoke(
+		client::efx::Sprite_Smoke(
 			smonk,
 			(ent->entity.curstate.iuser1 - 50) * 0.08);
 	}
@@ -966,12 +966,12 @@ static void EV_SmokeCallback(TEMPENTITY* ent, float frametime, float currenttime
 void EV_Explosion(event_args_t* args)
 {
 	const auto underwater =
-		gEngfuncs.PM_PointContents(args->origin, nullptr) == CONTENTS_WATER;
+		client::PM_PointContents(args->origin, nullptr) == CONTENTS_WATER;
 
-	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
-	gEngfuncs.pEventAPI->EV_PushPMStates();
-	gEngfuncs.pEventAPI->EV_SetSolidPlayers(-1);
-	gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
+	client::event::SetUpPlayerPrediction(false, true);
+	client::event::PushPMStates();
+	client::event::SetSolidPlayers(-1);
+	client::event::SetTraceHull(kHullPoint);
 
 	Vector dir = args->angles;
 	if (dir == g_vecZero)
@@ -985,7 +985,7 @@ void EV_Explosion(event_args_t* args)
 	Vector origin = args->origin;
 
 	pmtrace_t tr;
-	gEngfuncs.pEventAPI->EV_PlayerTrace(
+	client::event::PlayerTrace(
 		origin,
 		origin + dir * 64,
 		PM_WORLD_ONLY,
@@ -1005,7 +1005,7 @@ void EV_Explosion(event_args_t* args)
 		sprite = g_sModelIndexWExplosion;
 	}
 
-	gEngfuncs.pEfxAPI->R_Explosion(
+	client::efx::Explosion(
 		origin,
 		sprite,
 		scale,
@@ -1014,18 +1014,18 @@ void EV_Explosion(event_args_t* args)
 
 	EV_DecalTrace(&tr, EV_DecalName("{scorch%i", 3));
 
-	gEngfuncs.pEventAPI->EV_PopPMStates();
+	client::event::PopPMStates();
 
 	const char* sample;
 
-	switch (gEngfuncs.pfnRandomLong(0, 2))
+	switch (client::RandomLong(0, 2))
 	{
 	case 0: sample = "weapons/debris1.wav"; break;
 	case 1: sample = "weapons/debris2.wav"; break;
 	case 2: sample = "weapons/debris3.wav"; break;
 	}
 
-	gEngfuncs.pEventAPI->EV_PlaySound(
+	client::event::PlaySound(
 		-1,
 		tr.endpos,
 		CHAN_STATIC,
@@ -1037,13 +1037,13 @@ void EV_Explosion(event_args_t* args)
 
 	if (args->bparam1)
 	{
-		auto smonk = gEngfuncs.pEfxAPI->CL_TempEntAllocNoModel(origin);
+		auto smonk = client::efx::TempEntAllocNoModel(origin);
 		if (smonk)
 		{
 			smonk->flags |= FTENT_CLIENTCUSTOM;
 			smonk->callback = EV_SmokeCallback;
-			smonk->die = gEngfuncs.GetClientTime() + 3.0F;
-			smonk->entity.curstate.fuser1 = gEngfuncs.GetClientTime() + 0.3F;
+			smonk->die = client::GetClientTime() + 3.0F;
+			smonk->entity.curstate.fuser1 = client::GetClientTime() + 0.3F;
 			smonk->entity.curstate.iuser1 = args->iparam1;
 			smonk->entity.curstate.iuser2 = underwater ? 1 : 0;
 		}
@@ -1052,9 +1052,9 @@ void EV_Explosion(event_args_t* args)
 	if (args->bparam2 && !underwater)
 	{
 		/* Toodles: Why don't these work right, Gabe? */
-		for (auto i = gEngfuncs.pfnRandomLong(0, 3); i > 0; i--)
+		for (auto i = client::RandomLong(0, 3); i > 0; i--)
 		{
-			gEngfuncs.pEfxAPI->R_SparkShower(origin);
+			client::efx::SparkShower(origin);
 		}
 	}
 }
@@ -1063,10 +1063,10 @@ int MSG_Blood(const char* name, int size, void* buf)
 {
 	BEGIN_READ(buf, size);
 
-	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
-	gEngfuncs.pEventAPI->EV_PushPMStates();
-	gEngfuncs.pEventAPI->EV_SetSolidPlayers(-1);
-	gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
+	client::event::SetUpPlayerPrediction(false, true);
+	client::event::PushPMStates();
+	client::event::SetSolidPlayers(-1);
+	client::event::SetTraceHull(kHullPoint);
 
 	Vector traceDir;
 	traceDir.x = READ_FLOAT();
@@ -1095,7 +1095,7 @@ int MSG_Blood(const char* name, int size, void* buf)
 
 		if ((traceFlags & (1 << i)) != 0)
 		{
-			gEngfuncs.pEfxAPI->R_BloodStream(
+			client::efx::BloodStream(
 				traceEndPos,
 				-traceDir,
 				70,
@@ -1103,7 +1103,7 @@ int MSG_Blood(const char* name, int size, void* buf)
 		}
 		else
 		{
-			gEngfuncs.pEfxAPI->R_BloodSprite(
+			client::efx::BloodSprite(
 				traceEndPos,
 				BLOOD_COLOR_RED,
 				g_sModelIndexBloodSpray,
@@ -1116,7 +1116,7 @@ int MSG_Blood(const char* name, int size, void* buf)
 		EV_BloodTrace(traceEndPos, traceDir, 4);
 	}
 
-	gEngfuncs.pEventAPI->EV_PopPMStates();
+	client::event::PopPMStates();
 
 	return true;
 }
@@ -1136,16 +1136,16 @@ int MSG_PredictedSound(const char* name, int size, void* buf)
 
 	if (EV_IsLocal(entindex))
 	{
-		entity = gEngfuncs.GetLocalPlayer();
+		entity = client::GetLocalPlayer();
 	}
 	else
 	{
-		entity = gEngfuncs.GetEntityByIndex(entindex);
+		entity = client::GetEntityByIndex(entindex);
 	}
 
 	if (entity != nullptr)
 	{
-		gEngfuncs.pEventAPI->EV_PlaySound(
+		client::event::PlaySound(
 			entindex,
 			entity->origin,
 			channel,
@@ -1168,34 +1168,34 @@ Associate script file name with callback functions.
 */
 void EV_HookEvents()
 {
-	gEngfuncs.pfnHookEvent("events/mp5.sc", CMP5::EV_PrimaryAttack);
-	gEngfuncs.pfnHookEvent("events/mp52.sc", CMP5::EV_SecondaryAttack);
-	gEngfuncs.pfnHookEvent("events/crowbar.sc", CCrowbar::EV_PrimaryAttack);
-	gEngfuncs.pfnHookEvent("events/laser_on.sc", EV_LaserDotOn);
-	gEngfuncs.pfnHookEvent("events/laser_off.sc", EV_LaserDotOff);
-	gEngfuncs.pfnHookEvent("events/gibs.sc", EV_Gibbed);
-	gEngfuncs.pfnHookEvent("events/teleport.sc", EV_Teleport);
-	gEngfuncs.pfnHookEvent("events/explosion.sc", EV_Explosion);
-	gEngfuncs.pfnHookEvent("events/train.sc", EV_TrainPitchAdjust);
+	client::HookEvent("events/mp5.sc", CMP5::EV_PrimaryAttack);
+	client::HookEvent("events/mp52.sc", CMP5::EV_SecondaryAttack);
+	client::HookEvent("events/crowbar.sc", CCrowbar::EV_PrimaryAttack);
+	client::HookEvent("events/laser_on.sc", EV_LaserDotOn);
+	client::HookEvent("events/laser_off.sc", EV_LaserDotOff);
+	client::HookEvent("events/gibs.sc", EV_Gibbed);
+	client::HookEvent("events/teleport.sc", EV_Teleport);
+	client::HookEvent("events/explosion.sc", EV_Explosion);
+	client::HookEvent("events/train.sc", EV_TrainPitchAdjust);
 
-	gEngfuncs.pfnHookUserMsg("Blood", MSG_Blood);
-	gEngfuncs.pfnHookUserMsg("PredSound", MSG_PredictedSound);
+	client::HookUserMsg("Blood", MSG_Blood);
+	client::HookUserMsg("PredSound", MSG_PredictedSound);
 }
 
 void EV_Init()
 {
-	g_sModelIndexPlayer = gEngfuncs.pEventAPI->EV_FindModelIndex("models/player.mdl");
-	g_sModelIndexGibs = gEngfuncs.pEventAPI->EV_FindModelIndex("models/hgibs.mdl");
-	g_sModelIndexShell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shell.mdl");
+	g_sModelIndexPlayer = client::event::FindModelIndex("models/player.mdl");
+	g_sModelIndexGibs = client::event::FindModelIndex("models/hgibs.mdl");
+	g_sModelIndexShell = client::event::FindModelIndex("models/shell.mdl");
 
-	g_sModelIndexLaser = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/laserbeam.spr");
-	g_sModelIndexLaserDot = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/laserdot.spr");
-	g_sModelIndexFireball = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/zerogxplode.spr");
-	g_sModelIndexWExplosion = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/WXplo1.spr");
-	g_sModelIndexSmoke = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/steam1.spr");
-	g_sModelIndexBubbles = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/bubble.spr");
-	g_sModelIndexBloodSpray = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/bloodspray.spr");
-	g_sModelIndexBloodDrop = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/blood.spr");
+	g_sModelIndexLaser = client::event::FindModelIndex("sprites/laserbeam.spr");
+	g_sModelIndexLaserDot = client::event::FindModelIndex("sprites/laserdot.spr");
+	g_sModelIndexFireball = client::event::FindModelIndex("sprites/zerogxplode.spr");
+	g_sModelIndexWExplosion = client::event::FindModelIndex("sprites/WXplo1.spr");
+	g_sModelIndexSmoke = client::event::FindModelIndex("sprites/steam1.spr");
+	g_sModelIndexBubbles = client::event::FindModelIndex("sprites/bubble.spr");
+	g_sModelIndexBloodSpray = client::event::FindModelIndex("sprites/bloodspray.spr");
+	g_sModelIndexBloodDrop = client::event::FindModelIndex("sprites/blood.spr");
 
 	if (pLaserDot != nullptr)
 	{

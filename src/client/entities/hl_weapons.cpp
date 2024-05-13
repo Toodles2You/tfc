@@ -75,8 +75,8 @@ static void HUD_AlertMessage(ALERT_TYPE atype, const char* szFmt, ...)
 	vsprintf(string, szFmt, argptr);
 	va_end(argptr);
 
-	gEngfuncs.Con_Printf("cl:  ");
-	gEngfuncs.Con_Printf(string);
+	client::Con_Printf("cl:  ");
+	client::Con_Printf(string);
 }
 
 
@@ -131,7 +131,7 @@ void CBaseEntity::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 
 int CBaseEntity::entindex()
 {
-	return gEngfuncs.GetLocalPlayer()->index;
+	return client::GetLocalPlayer()->index;
 }
 
 
@@ -154,7 +154,7 @@ static void HUD_PlaybackEvent(int flags, const Entity* pInvoker, unsigned short 
 	// Weapon prediction events are assumed to occur at the player's origin
 	org = g_finalstate.playerstate.origin;
 	ang = player->v.v_angle + player->v.punchangle * 2;
-	gEngfuncs.pfnPlaybackEvent(flags, pInvoker, eventindex, delay, org, ang, fparam1, fparam2, iparam1, iparam2, bparam1, bparam2);
+	client::PlaybackEvent(flags, pInvoker, eventindex, delay, org, ang, fparam1, fparam2, iparam1, iparam2, bparam1, bparam2);
 }
 
 
@@ -166,7 +166,7 @@ static Entity* HUD_GetEntityByIndex(int index)
 
 static void* HUD_GetModelPtr(Entity* edict)
 {
-	model_t* model = gEngfuncs.hudGetModelByIndex(edict->modelindex);
+	model_t* model = client::hudGetModelByIndex(edict->modelindex);
 
 	if (model == nullptr || model->type != mod_studio)
 	{
@@ -229,7 +229,7 @@ static void HUD_SpawnClientWeapons()
 	spawned = true;
 
 	// Fill in current time
-	gpGlobals->time = gEngfuncs.GetClientTime();
+	gpGlobals->time = client::GetClientTime();
 
 	// Handled locally
 	engine::AlertMessage = HUD_AlertMessage;
@@ -241,12 +241,12 @@ static void HUD_SpawnClientWeapons()
 	engine::PEntityOfEntIndexAllEntities = HUD_GetEntityByIndex;
 
 	// Pass through to engine
-	engine::PrecacheEvent = gEngfuncs.pfnPrecacheEvent;
-	engine::RandomFloat = gEngfuncs.pfnRandomFloat;
-	engine::RandomLong = gEngfuncs.pfnRandomLong;
-	engine::CVarGetPointer = gEngfuncs.pfnGetCvarPointer;
-	engine::CVarGetString = gEngfuncs.pfnGetCvarString;
-	engine::CVarGetFloat = gEngfuncs.pfnGetCvarFloat;
+	engine::PrecacheEvent = client::PrecacheEvent;
+	engine::RandomFloat = client::RandomFloat;
+	engine::RandomLong = client::RandomLong;
+	engine::CVarGetPointer = client::GetCvarPointer;
+	engine::CVarGetString = client::GetCvarString;
+	engine::CVarGetFloat = client::GetCvarFloat;
 
 	// Allocate slots for the players
 	for (auto i = 0; i <= MAX_PLAYERS; i++)
@@ -345,7 +345,7 @@ void HUD_ProcessPlayerState(struct entity_state_s* dst, const struct entity_stat
 	g_PlayerExtraInfo[dst->number].dead = dst->health <= 0;
 
 	// Save off some data so other areas of the Client DLL can get to it
-	cl_entity_t* localPlayer = gEngfuncs.GetLocalPlayer(); // Get the local player's index
+	cl_entity_t* localPlayer = client::GetLocalPlayer(); // Get the local player's index
 	if (dst->number == localPlayer->index)
 	{
 		g_iPlayerClass = dst->playerclass;
@@ -389,7 +389,7 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 
 	HUD_InitClientWeapons();
 
-	gpGlobals->time = gEngfuncs.GetClientTime();
+	gpGlobals->time = client::GetClientTime();
 	gpGlobals->frametime = cmd->msec / 1000.0f;
 
 	// Store pointer to our destination entity_state_t so we can get our origin, etc. from it
@@ -414,7 +414,7 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 
 	player->SetPrefsFromUserinfo(nullptr);
 
-	gEngfuncs.GetViewAngles(player->v.v_angle);
+	client::GetViewAngles(player->v.v_angle);
 	player->v.button = cmd->buttons;
 	player->m_afButtonLast = from->playerstate.oldbuttons;
 	player->m_WeaponBits = gHUD.m_iWeaponBits;

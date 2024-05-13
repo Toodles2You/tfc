@@ -369,7 +369,7 @@ void CImageLabel::LoadImage(const char* pImageName)
 		// try to load file resolution independent
 
 		char sz[256];
-		sprintf(sz, "%s/%s", gEngfuncs.pfnGetGameDirectory(), pImageName);
+		sprintf(sz, "%s/%s", client::GetGameDirectory(), pImageName);
 		FileInputStream fis(sz, false);
 		m_pTGA = new BitmapTGA(&fis, true);
 		fis.close();

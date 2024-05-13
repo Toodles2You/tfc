@@ -155,7 +155,7 @@ void V_CalcGunAngle(ref_params_t* pparams)
 {
 	cl_entity_t* viewent;
 
-	viewent = gEngfuncs.GetViewModel();
+	viewent = client::GetViewModel();
 	if (!viewent)
 		return;
 
@@ -195,7 +195,7 @@ static void V_CalcViewRoll(ref_params_t* pparams)
 	float side;
 	cl_entity_t* viewentity;
 
-	viewentity = gEngfuncs.GetEntityByIndex(pparams->viewentity);
+	viewentity = client::GetEntityByIndex(pparams->viewentity);
 	if (!viewentity)
 		return;
 
@@ -211,10 +211,10 @@ static void V_CalcIntermissionRefdef(ref_params_t* pparams)
 	float old;
 
 	// ent is the player model ( visible when out of body )
-	ent = gEngfuncs.GetLocalPlayer();
+	ent = client::GetLocalPlayer();
 
 	// view is the weapon model (only visible from inside body )
-	view = gEngfuncs.GetViewModel();
+	view = client::GetViewModel();
 
 	pparams->vieworg = pparams->simorg;
 
@@ -233,7 +233,7 @@ static void V_CalcIntermissionRefdef(ref_params_t* pparams)
 
 	V_AddIdle(pparams);
 
-	if (0 != gEngfuncs.IsSpectateOnly())
+	if (0 != client::IsSpectateOnly())
 	{
 		// in HLTV we must go to 'intermission' position by ourself
 		pparams->vieworg = gHUD.m_Spectator.m_cameraOrigin;
@@ -319,18 +319,18 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	cl_entity_t* pwater;
 	static bob_params_t bobParams;
 
-	if (0 != gEngfuncs.IsSpectateOnly())
+	if (0 != client::IsSpectateOnly())
 	{
-		ent = gEngfuncs.GetEntityByIndex(gHUD.GetObserverTarget());
+		ent = client::GetEntityByIndex(gHUD.GetObserverTarget());
 	}
 	else
 	{
 		// ent is the player model ( visible when out of body )
-		ent = gEngfuncs.GetLocalPlayer();
+		ent = client::GetLocalPlayer();
 	}
 
 	// view is the weapon model (only visible from inside body )
-	view = gEngfuncs.GetViewModel();
+	view = client::GetViewModel();
 
 	// refresh position
 	pparams->vieworg = pparams->simorg;
@@ -353,8 +353,8 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 
 	pparams->viewangles = pparams->cl_viewangles;
 
-	gEngfuncs.V_CalcShake();
-	gEngfuncs.V_ApplyShake(pparams->vieworg, pparams->viewangles, 1.0);
+	client::V_CalcShake();
+	client::V_ApplyShake(pparams->vieworg, pparams->viewangles, 1.0);
 
 	// Check for problems around water, move the viewer artificially if necessary
 	// -- this prevents drawing errors in GL due to waves
@@ -368,10 +368,10 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 
 		if (0 != pparams->hardware)
 		{
-			waterEntity = gEngfuncs.PM_WaterEntity(pparams->simorg);
+			waterEntity = client::PM_WaterEntity(pparams->simorg);
 			if (waterEntity >= 0 && waterEntity < pparams->max_entities)
 			{
-				pwater = gEngfuncs.GetEntityByIndex(waterEntity);
+				pwater = client::GetEntityByIndex(waterEntity);
 				if (pwater && (pwater->model != nullptr))
 				{
 					waterDist += (pwater->curstate.scale * 16); // Add in wave height
@@ -391,7 +391,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 			point[2] -= waterDist;
 			for (i = 0; i < waterDist; i++)
 			{
-				contents = gEngfuncs.PM_PointContents(point, nullptr);
+				contents = client::PM_PointContents(point, nullptr);
 				if (contents > CONTENTS_WATER)
 					break;
 				point[2] += 1;
@@ -405,7 +405,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 
 			for (i = 0; i < waterDist; i++)
 			{
-				contents = gEngfuncs.PM_PointContents(point, nullptr);
+				contents = client::PM_PointContents(point, nullptr);
 				if (contents <= CONTENTS_WATER)
 					break;
 				point[2] -= 1;
@@ -457,7 +457,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	view->origin = view->origin + pparams->viewheight;
 
 	// Let the viewmodel shake at about 10% of the amplitude
-	gEngfuncs.V_ApplyShake(view->origin, view->angles, 0.9);
+	client::V_ApplyShake(view->origin, view->angles, 0.9);
 
 	if (cl_bob->value != 0.0F)
 	{
@@ -527,7 +527,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	if (pparams->viewentity > pparams->maxclients)
 	{
 		cl_entity_t* viewentity;
-		viewentity = gEngfuncs.GetEntityByIndex(pparams->viewentity);
+		viewentity = client::GetEntityByIndex(pparams->viewentity);
 		if (viewentity)
 		{
 			pparams->vieworg = viewentity->origin;
@@ -564,13 +564,13 @@ void V_CalcRefdef(ref_params_t* pparams)
 
 void V_Init()
 {
-	v_oldpunch = gEngfuncs.pfnRegisterVariable("v_oldpunch", "0", 0);
+	v_oldpunch = client::RegisterVariable("v_oldpunch", "0", 0);
 
-	cl_bobcycle = gEngfuncs.pfnRegisterVariable("cl_bobcycle", "0.8", 0);
-	cl_bob = gEngfuncs.pfnRegisterVariable("cl_bob", "0.01", 0);
-	cl_bobup = gEngfuncs.pfnRegisterVariable("cl_bobup", "0.5", 0);
-	cl_waterdist = gEngfuncs.pfnRegisterVariable("cl_waterdist", "4", 0);
-	cl_chasedist = gEngfuncs.pfnRegisterVariable("cl_chasedist", "112", 0);
-	cl_bobview = gEngfuncs.pfnRegisterVariable("cl_bobview", "0", 0);
+	cl_bobcycle = client::RegisterVariable("cl_bobcycle", "0.8", 0);
+	cl_bob = client::RegisterVariable("cl_bob", "0.01", 0);
+	cl_bobup = client::RegisterVariable("cl_bobup", "0.5", 0);
+	cl_waterdist = client::RegisterVariable("cl_waterdist", "4", 0);
+	cl_chasedist = client::RegisterVariable("cl_chasedist", "112", 0);
+	cl_bobview = client::RegisterVariable("cl_bobview", "0", 0);
 }
 

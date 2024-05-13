@@ -28,7 +28,7 @@
 
 bool CHudStatusBar::Init()
 {
-	hud_expireid = gEngfuncs.pfnRegisterVariable("hud_expireid", "0.2", FCVAR_ARCHIVE);
+	hud_expireid = client::RegisterVariable("hud_expireid", "0.2", FCVAR_ARCHIVE);
 
 	return CHudBase::Init();
 }
@@ -76,7 +76,7 @@ void CHudStatusBar::Draw(const float time)
 	gHUD.GetHudStringSize(m_szStatusBar, textWidth, textHeight);
 
 	auto color = gHUD.GetClientColor(m_targetIndex);
-	gEngfuncs.pfnDrawSetTextColor(color[0], color[1], color[2]);
+	client::DrawSetTextColor(color[0], color[1], color[2]);
 
 	int x = std::max(0, std::max(2, ((int)gHUD.GetWidth() - textWidth)) >> 1);
 	int y = (gHUD.GetHeight() >> 1) + textHeight * 4;
@@ -96,6 +96,6 @@ void CHudStatusBar::UpdateStatusBar(cl_entity_t* entity)
 	}
 
 	m_targetIndex = entity->index;
-	m_targetExpireTime = gEngfuncs.GetClientTime();
+	m_targetExpireTime = client::GetClientTime();
 	SetActive(true);
 }

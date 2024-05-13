@@ -138,14 +138,14 @@ static void V_GetChaseOrigin(Vector& angles, Vector& origin, float distance, Vec
 
 	while (maxLoops > 0)
 	{
-		trace = gEngfuncs.PM_TraceLine(vecStart, vecEnd, PM_TRACELINE_PHYSENTSONLY, 2, ignoreent);
+		trace = client::PM_TraceLine(vecStart, vecEnd, PM_TRACELINE_PHYSENTSONLY, 2, ignoreent);
 
 		// WARNING! trace->ent is is the number in physent list not the normal entity number
 
 		if (trace->ent <= 0)
 			break; // we hit the world or nothing, stop trace
 
-		ent = gEngfuncs.GetEntityByIndex(PM_GetPhysEntInfo(trace->ent));
+		ent = client::GetEntityByIndex(PM_GetPhysEntInfo(trace->ent));
 
 		if (ent == nullptr)
 			break;
@@ -181,11 +181,11 @@ static void V_GetDeathCam(int victim, int killer, Vector& cl_angles, Vector& ori
 
 	float distance = 168.0f;
 
-	cl_entity_t* victimEnt = gEngfuncs.GetEntityByIndex(victim);
+	cl_entity_t* victimEnt = client::GetEntityByIndex(victim);
 	cl_entity_t* killerEnt = nullptr;
 	if (killer != 0)
 	{
-		killerEnt = gEngfuncs.GetEntityByIndex(killer);
+		killerEnt = client::GetEntityByIndex(killer);
 	}
 
 	v_lastDistance += v_frametime * 96.0f; // move unit per seconds back
@@ -464,7 +464,7 @@ void V_GetChasePos(int target, float* cl_angles, Vector& origin, Vector& angles)
 
 	if (0 != target)
 	{
-		ent = gEngfuncs.GetEntityByIndex(target);
+		ent = client::GetEntityByIndex(target);
 	}
 
 	if (!ent)
@@ -480,7 +480,7 @@ void V_GetChasePos(int target, float* cl_angles, Vector& origin, Vector& angles)
 	if (0 != gHUD.m_Spectator.m_autoDirector->value)
 	{
 		if (0 != gHUD.GetObserverTarget2())
-			V_GetDirectedChasePosition(ent, gEngfuncs.GetEntityByIndex(gHUD.GetObserverTarget2()),
+			V_GetDirectedChasePosition(ent, client::GetEntityByIndex(gHUD.GetObserverTarget2()),
 				angles, origin);
 		else
 			V_GetDirectedChasePosition(ent, (cl_entity_t*)0xFFFFFFFF,
@@ -524,7 +524,7 @@ void V_GetInEyePos(int target, Vector& origin, Vector& angles)
 	}
 
 
-	cl_entity_t* ent = gEngfuncs.GetEntityByIndex(target);
+	cl_entity_t* ent = client::GetEntityByIndex(target);
 
 	if (!ent)
 		return;
@@ -577,7 +577,7 @@ void V_GetMapChasePosition(int target, Vector& cl_angles, Vector& origin, Vector
 
 	if (0 != target)
 	{
-		cl_entity_t* ent = gEngfuncs.GetEntityByIndex(target);
+		cl_entity_t* ent = client::GetEntityByIndex(target);
 
 		if (0 != gHUD.m_Spectator.m_autoDirector->value)
 		{
@@ -622,7 +622,7 @@ void V_CalcSpectatorRefdef(ref_params_t* pparams)
 	static int lastWeaponModelIndex = 0;
 	static int lastViewModelIndex = 0;
 
-	cl_entity_t* ent = gEngfuncs.GetEntityByIndex(gHUD.GetObserverTarget());
+	cl_entity_t* ent = client::GetEntityByIndex(gHUD.GetObserverTarget());
 
 	pparams->onlyClientDraw = 0;
 

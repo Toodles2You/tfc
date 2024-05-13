@@ -37,7 +37,7 @@ bool CHudStatusIcons::Init()
 void CHudStatusIcons::VidInit()
 {
 #ifdef HALFLIFE_GRENADES
-	m_hTimer = SPR_Load("sprites/timer.spr");
+	m_hTimer = client::SPR_Load("sprites/timer.spr");
 
 	int i = gHUD.GetSpriteIndex("grenade");
 	m_hGrenade = gHUD.GetSprite(i);
@@ -58,7 +58,7 @@ void CHudStatusIcons::Reset()
 // Draw status icons along the left-hand side of the screen
 void CHudStatusIcons::Draw(const float time)
 {
-	if (0 != gEngfuncs.IsSpectateOnly())
+	if (0 != client::IsSpectateOnly())
 	{
 		return;
 	}
@@ -91,7 +91,7 @@ void CHudStatusIcons::Draw(const float time)
 
 bool CHudStatusIcons::DrawTimer(float flTime)
 {	
-	int timerFrames = SPR_Frames(m_hTimer);
+	int timerFrames = client::SPR_Frames(m_hTimer);
 
 	float timerDelta = (flTime - (m_flTimerStart + 0.8)) / 3.1;
 	int timerFrame = std::floor(timerFrames * std::max(timerDelta, 0.0F));
@@ -107,8 +107,8 @@ bool CHudStatusIcons::DrawTimer(float flTime)
 
 	int y = gHUD.GetHeight() - (gHUD.m_iFontHeight >> 1);
 
-	int timerWidth = SPR_Width(m_hTimer, timerFrame);
-	int timerHeight = SPR_Height(m_hTimer, timerFrame);
+	int timerWidth = client::SPR_Width(m_hTimer, timerFrame);
+	int timerHeight = client::SPR_Height(m_hTimer, timerFrame);
 	float timerAlpha = std::min((flTime - m_flTimerStart) / 0.8F, 1.0F);
 
 #if 0
@@ -228,14 +228,14 @@ void CHudStatusIcons::EnableIcon(const char* pszIconName, int red, int green, in
 	// Hack: Play Timer sound when a grenade icon is played (in 0.8 seconds)
 	if (added && strstr(m_IconList[i].szSpriteName, "grenade"))
 	{
-		cl_entity_t* pthisplayer = gEngfuncs.GetLocalPlayer();
+		cl_entity_t* pthisplayer = client::GetLocalPlayer();
 
-		gEngfuncs.pEventAPI->EV_StopSound(
+		client::event::StopSound(
 			pthisplayer->index,
 			CHAN_STATIC,
 			"weapons/timer.wav");
 
-		gEngfuncs.pEventAPI->EV_PlaySound(
+		client::event::PlaySound(
 			pthisplayer->index,
 			pthisplayer->origin,
 			CHAN_STATIC,

@@ -89,7 +89,7 @@ void SpectatorPanel::ActionSignal(int cmd)
 
 
 	default:
-		gEngfuncs.Con_DPrintf("Unknown SpectatorPanel ActionSingal %i.\n", cmd);
+		client::Con_DPrintf("Unknown SpectatorPanel ActionSingal %i.\n", cmd);
 		break;
 	}
 }
@@ -338,7 +338,7 @@ void SpectatorPanel::EnableInsetView(bool isEnabled)
 		// short black bar to see full inset
 		m_TopBorder->setBounds(XRES(offset), 0, XRES(640 - offset), PANEL_HEIGHT);
 
-		if (0 != gEngfuncs.IsSpectateOnly())
+		if (0 != client::IsSpectateOnly())
 		{
 			m_TopBanner->setVisible(true);
 			m_TopBanner->setPos(XRES(offset), 0);
@@ -354,7 +354,7 @@ void SpectatorPanel::EnableInsetView(bool isEnabled)
 	{
 		// full black bar, no inset border
 		// show banner only in real HLTV mode
-		if (0 != gEngfuncs.IsSpectateOnly())
+		if (0 != client::IsSpectateOnly())
 		{
 			m_TopBanner->setVisible(true);
 			m_TopBanner->setPos(0, 0);

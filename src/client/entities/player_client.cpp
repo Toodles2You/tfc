@@ -99,14 +99,14 @@ void CBaseEntity::EmitSoundPredicted(const char* sample, int channel, float volu
 		return;
 	}
 
-	auto player = gEngfuncs.GetLocalPlayer();
+	auto player = client::GetLocalPlayer();
 
 	if (!player)
     {
 		return;
     }
 
-	gEngfuncs.pEventAPI->EV_PlaySound(player->index, player->origin, channel, sample, volume, attenuation, flags, pitch);
+	client::event::PlaySound(player->index, player->origin, channel, sample, volume, attenuation, flags, pitch);
 }
 
 

@@ -339,11 +339,11 @@ void CHudMessage::Draw(const float time)
 			int y = YPosition(m_pGameTitle->y, fullHeight);
 
 
-			SPR_Set(gHUD.GetSprite(m_HUD_title_half), brightness * m_pGameTitle->r1, brightness * m_pGameTitle->g1, brightness * m_pGameTitle->b1);
-			SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_title_half));
+			client::SPR_Set(gHUD.GetSprite(m_HUD_title_half), brightness * m_pGameTitle->r1, brightness * m_pGameTitle->g1, brightness * m_pGameTitle->b1);
+			client::SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_title_half));
 
-			SPR_Set(gHUD.GetSprite(m_HUD_title_life), brightness * m_pGameTitle->r1, brightness * m_pGameTitle->g1, brightness * m_pGameTitle->b1);
-			SPR_DrawAdditive(0, x + halfWidth, y, &gHUD.GetSpriteRect(m_HUD_title_life));
+			client::SPR_Set(gHUD.GetSprite(m_HUD_title_life), brightness * m_pGameTitle->r1, brightness * m_pGameTitle->g1, brightness * m_pGameTitle->b1);
+			client::SPR_DrawAdditive(0, x + halfWidth, y, &gHUD.GetSpriteRect(m_HUD_title_life));
 
 			drawn = 1;
 		}

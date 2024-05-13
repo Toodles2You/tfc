@@ -44,7 +44,7 @@ void Demo_WriteBuffer(int type, int size, unsigned char* buffer)
 	memcpy(&buf[pos], buffer, size);
 
 	// Write full buffer out
-	gEngfuncs.pDemoAPI->WriteBuffer(size + sizeof(int), buf);
+	client::demo::WriteBuffer(size + sizeof(int), buf);
 }
 
 /*
@@ -91,7 +91,7 @@ void Demo_ReadBuffer(int size, unsigned char* buffer)
 		i += sizeof(float);
 		break;
 	default:
-		gEngfuncs.Con_DPrintf("Unknown demo buffer type, skipping.\n");
+		client::Con_DPrintf("Unknown demo buffer type, skipping.\n");
 		break;
 	}
 }

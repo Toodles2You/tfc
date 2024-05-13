@@ -208,7 +208,7 @@ void CHudMenu::SelectMenuItem(int menu_item)
 	{
 		char szbuf[32];
 		sprintf(szbuf, "menuselect %d\n", menu_item);
-		EngineClientCmd(szbuf);
+		client::ClientCmd(szbuf);
 
 		// remove the menu
 		m_fMenuDisplayed = kNone;

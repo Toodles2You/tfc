@@ -54,17 +54,14 @@ void IParticleMan_Active::ApplyForce(Vector vOrigin, Vector vDirection, float fl
 	member.m_vDirection = vDirection;
 	member.m_flRadius = flRadius;
 	member.m_flStrength = flStrength;
-	member.m_flDieTime = gEngfuncs.GetClientTime() + flDuration;
+	member.m_flDieTime = client::GetClientTime() + flDuration;
 
 	g_pForceList.push_back(member);
 }
 
 void IParticleMan_Active::SetUp(cl_enginefunc_t* pEnginefuncs)
 {
-	//Note: disabled because we're in the client dll.
-	//std::memcpy(&gEngfuncs, pEnginefuncs, sizeof(gEngfuncs));
-
-	cl_pmanstats = gEngfuncs.pfnRegisterVariable("cl_pmanstats", "0", 0);
+	cl_pmanstats = client::RegisterVariable("cl_pmanstats", "0", 0);
 }
 
 CBaseParticle* IParticleMan_Active::CreateParticle(Vector org, Vector normal, model_s* sprite, float size, float brightness, const char* classname)
@@ -88,7 +85,7 @@ void IParticleMan_Active::SetVariables(float flGravity, Vector vViewAngles)
 {
 	g_flGravity = flGravity;
 
-	if (gEngfuncs.GetClientTime() != g_flOldTime)
+	if (client::GetClientTime() != g_flOldTime)
 	{
 		g_vViewAngles = vViewAngles;
 	}
@@ -98,7 +95,7 @@ void IParticleMan_Active::Update()
 {
 	g_pParticleMan = this;
 
-	const float time = gEngfuncs.GetClientTime();
+	const float time = client::GetClientTime();
 
 	for (std::size_t i = 0; i < g_pForceList.size();)
 	{
@@ -132,7 +129,7 @@ void IParticleMan_Active::Update()
 	if (nullptr != cl_pmanstats && cl_pmanstats->value == 1)
 	{
 		//TODO: engine doesn't support printing size_t, use local printf
-		gEngfuncs.Con_NPrintf(15, "Number of Particles: %d", static_cast<int>(CMiniMem::Instance()->GetTotalParticles()));
-		gEngfuncs.Con_NPrintf(16, "Particles Drawn: %d", static_cast<int>(CMiniMem::Instance()->GetDrawnParticles()));
+		client::Con_NPrintf(15, "Number of Particles: %d", static_cast<int>(CMiniMem::Instance()->GetTotalParticles()));
+		client::Con_NPrintf(16, "Particles Drawn: %d", static_cast<int>(CMiniMem::Instance()->GetDrawnParticles()));
 	}
 }

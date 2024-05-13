@@ -91,24 +91,24 @@ bool CHud::MsgFunc_GameMode(const char* pszName, int iSize, void* pbuf)
 	
 	m_gameMode = static_cast<gamemode_e>(READ_BYTE());
 	
-	gEngfuncs.Con_DPrintf("Gamemode: ");
+	client::Con_DPrintf("Gamemode: ");
 
 	switch (m_gameMode)
 	{
 		default:
-			gEngfuncs.Con_DPrintf("Unknown\n");
+			client::Con_DPrintf("Unknown\n");
 			break;
 		case kGamemodeSingleplayer:
-			gEngfuncs.Con_DPrintf("Singleplayer\n");
+			client::Con_DPrintf("Singleplayer\n");
 			break;
 		case kGamemodeCooperative:
-			gEngfuncs.Con_DPrintf("Cooperative\n");
+			client::Con_DPrintf("Cooperative\n");
 			break;
 		case kGamemodeDeathmatch:
-			gEngfuncs.Con_DPrintf("Deathmatch\n");
+			client::Con_DPrintf("Deathmatch\n");
 			break;
 		case kGamemodeTeamplay:
-			gEngfuncs.Con_DPrintf("Teamplay\n");
+			client::Con_DPrintf("Teamplay\n");
 			break;
 	}
 

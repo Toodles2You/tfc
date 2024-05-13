@@ -89,7 +89,7 @@ void HUD_TxferPredictionData(struct entity_state_s* ps, const struct entity_stat
 	pcd->iuser3 = ppcd->iuser3;
 	pcd->iuser4 = ppcd->iuser4;
 
-	if (0 != gEngfuncs.IsSpectateOnly())
+	if (0 != client::IsSpectateOnly())
 	{
 		// in specator mode we tell the engine who we want to spectate and how
 		// iuser3 is not used for duck prevention (since the spectator can't duck at all)
@@ -130,23 +130,23 @@ void HUD_StudioEvent(const struct mstudioevent_s* event, const struct cl_entity_
 	switch (event->event)
 	{
 	case 5001:
-		gEngfuncs.pEfxAPI->R_MuzzleFlash(const_cast<cl_entity_t*>(entity)->attachment[0], atoi(event->options));
+		client::efx::MuzzleFlash(const_cast<cl_entity_t*>(entity)->attachment[0], atoi(event->options));
 		break;
 	case 5011:
-		gEngfuncs.pEfxAPI->R_MuzzleFlash(const_cast<cl_entity_t*>(entity)->attachment[1], atoi(event->options));
+		client::efx::MuzzleFlash(const_cast<cl_entity_t*>(entity)->attachment[1], atoi(event->options));
 		break;
 	case 5021:
-		gEngfuncs.pEfxAPI->R_MuzzleFlash(const_cast<cl_entity_t*>(entity)->attachment[2], atoi(event->options));
+		client::efx::MuzzleFlash(const_cast<cl_entity_t*>(entity)->attachment[2], atoi(event->options));
 		break;
 	case 5031:
-		gEngfuncs.pEfxAPI->R_MuzzleFlash(const_cast<cl_entity_t*>(entity)->attachment[3], atoi(event->options));
+		client::efx::MuzzleFlash(const_cast<cl_entity_t*>(entity)->attachment[3], atoi(event->options));
 		break;
 	case 5002:
-		gEngfuncs.pEfxAPI->R_SparkEffect(const_cast<cl_entity_t*>(entity)->attachment[0], atoi(event->options), -100, 100);
+		client::efx::SparkEffect(const_cast<cl_entity_t*>(entity)->attachment[0], atoi(event->options), -100, 100);
 		break;
 	// Client side sound
 	case 5004:
-		gEngfuncs.pfnPlaySoundByNameAtLocation((char*)event->options, 1.0, const_cast<cl_entity_t*>(entity)->attachment[0]);
+		client::PlaySoundByNameAtLocation((char*)event->options, 1.0, const_cast<cl_entity_t*>(entity)->attachment[0]);
 		break;
 	default:
 		break;
@@ -177,7 +177,7 @@ void HUD_TempEntUpdate(
 
 	Vector vAngles;
 
-	gEngfuncs.GetViewAngles(vAngles);
+	client::GetViewAngles(vAngles);
 
 	if (g_pParticleMan)
 		g_pParticleMan->SetVariables(cl_gravity, vAngles);
@@ -190,13 +190,13 @@ void HUD_TempEntUpdate(
 	// that the client has the player list. We run this code once when we detect any COLLIDEALL
 	// tent, then set this bool to true so the code doesn't get run again if there's more than
 	// one COLLIDEALL ent for this update. (often are).
-	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
+	client::event::SetUpPlayerPrediction(false, true);
 
 	// Store off the old count
-	gEngfuncs.pEventAPI->EV_PushPMStates();
+	client::event::PushPMStates();
 
 	// Now add in all of the players.
-	gEngfuncs.pEventAPI->EV_SetSolidPlayers(-1);
+	client::event::SetSolidPlayers(-1);
 
 	// !!!BUGBUG	-- This needs to be time based
 	gTempEntFrame = (gTempEntFrame + 1) & 31;
@@ -275,7 +275,7 @@ void HUD_TempEntUpdate(
 				if (client_time > pTemp->entity.baseline.scale)
 				{
 					// Show Sparks
-					gEngfuncs.pEfxAPI->R_SparkEffect(pTemp->entity.origin, 8, -200, 200);
+					client::efx::SparkEffect(pTemp->entity.origin, 8, -200, 200);
 
 					// Reduce life
 					pTemp->entity.baseline.framerate -= 0.1;
@@ -299,7 +299,7 @@ void HUD_TempEntUpdate(
 			{
 				cl_entity_t* pClient;
 
-				pClient = gEngfuncs.GetEntityByIndex(pTemp->clientIndex);
+				pClient = client::GetEntityByIndex(pTemp->clientIndex);
 
 				pTemp->entity.origin = pClient->origin + pTemp->tentOffset;
 			}
@@ -383,14 +383,14 @@ void HUD_TempEntUpdate(
 					pmtrace_t pmtrace;
 					physent_t* pe;
 
-					gEngfuncs.pEventAPI->EV_SetTraceHull(hull);
+					client::event::SetTraceHull(hull);
 
-					gEngfuncs.pEventAPI->EV_PlayerTrace(pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX, -1, &pmtrace);
+					client::event::PlayerTrace(pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX, -1, &pmtrace);
 
 
 					if (pmtrace.fraction != 1)
 					{
-						pe = gEngfuncs.pEventAPI->EV_GetPhysent(pmtrace.ent);
+						pe = client::event::GetPhysent(pmtrace.ent);
 
 						if (0 == pmtrace.ent || (pe->info != pTemp->clientIndex))
 						{
@@ -408,9 +408,9 @@ void HUD_TempEntUpdate(
 				{
 					pmtrace_t pmtrace;
 
-					gEngfuncs.pEventAPI->EV_SetTraceHull(hull);
+					client::event::SetTraceHull(hull);
 
-					gEngfuncs.pEventAPI->EV_PlayerTrace(pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX | PM_WORLD_ONLY, -1, &pmtrace);
+					client::event::PlayerTrace(pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX | PM_WORLD_ONLY, -1, &pmtrace);
 
 					if (pmtrace.fraction != 1)
 					{
@@ -495,7 +495,7 @@ void HUD_TempEntUpdate(
 
 			if ((pTemp->flags & FTENT_FLICKER) != 0 && gTempEntFrame == pTemp->entity.curstate.effects)
 			{
-				dlight_t* dl = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
+				dlight_t* dl = client::efx::AllocDlight(0);
 				dl->origin = pTemp->entity.origin;
 				dl->radius = 60;
 				dl->color.r = 255;
@@ -515,7 +515,7 @@ void HUD_TempEntUpdate(
 				{
 					sequence = 0;
 				}
-				gEngfuncs.pEfxAPI->R_RocketTrail(pTemp->entity.prevstate.origin, pTemp->entity.origin, sequence);
+				client::efx::RocketTrail(pTemp->entity.prevstate.origin, pTemp->entity.origin, sequence);
 			}
 
 			if ((pTemp->flags & FTENT_GRAVITY) != 0)
@@ -550,7 +550,7 @@ void HUD_TempEntUpdate(
 
 finish:
 	// Restore state info
-	gEngfuncs.pEventAPI->EV_PopPMStates();
+	client::event::PopPMStates();
 }
 
 /*

@@ -34,7 +34,7 @@ Return's the requested cl_entity_t
 */
 struct cl_entity_s* GetEntity(int idx)
 {
-	return gEngfuncs.GetEntityByIndex(idx);
+	return client::GetEntityByIndex(idx);
 }
 
 /*
@@ -46,7 +46,7 @@ Return's the current weapon/view model
 */
 struct cl_entity_s* GetViewEntity()
 {
-	return gEngfuncs.GetViewModel();
+	return client::GetViewModel();
 }
 
 /*
@@ -58,7 +58,7 @@ Creates a tracer effect
 */
 void EV_CreateTracer(const Vector& start, const Vector& end)
 {
-	gEngfuncs.pEfxAPI->R_TracerEffect(const_cast<Vector&>(start), const_cast<Vector&>(end));
+	client::efx::TracerEffect(const_cast<Vector&>(start), const_cast<Vector&>(end));
 }
 
 /*
@@ -70,7 +70,7 @@ Is the entity's index in the player range?
 */
 bool EV_IsPlayer(int idx)
 {
-	if (idx >= 1 && idx <= gEngfuncs.GetMaxClients())
+	if (idx >= 1 && idx <= client::GetMaxClients())
 		return true;
 
 	return false;
@@ -86,7 +86,7 @@ Is the entity == the local player
 bool EV_IsLocal(int idx)
 {
 	// check if we are in some way in first person spec mode
-	return gEngfuncs.pEventAPI->EV_IsLocal(idx - 1) != 0;
+	return client::event::IsLocal(idx - 1) != 0;
 }
 
 /*
@@ -110,7 +110,7 @@ void EV_GetGunPosition(event_args_t* args, Vector& pos, const Vector& origin)
 		if (EV_IsLocal(idx))
 		{
 			// Grab predicted result for local player
-			gEngfuncs.pEventAPI->EV_LocalPlayerViewheight(view_ofs);
+			client::event::LocalPlayerViewheight(view_ofs);
 		}
 		else if (args->ducking == 1)
 		{
@@ -133,7 +133,7 @@ void EV_EjectBrass(const Vector& origin, const Vector& velocity, float rotation,
 	Vector endpos {0.0F, rotation, 0.0F};
 
 	auto shell =
-		gEngfuncs.pEfxAPI->R_TempModel(
+		client::efx::TempModel(
 			const_cast<Vector&>(origin),
 			const_cast<Vector&>(velocity),
 			endpos,
@@ -165,14 +165,14 @@ void EV_GetDefaultShellInfo(struct event_args_s* args, const Vector& origin, con
 
 	Vector view_ofs = VEC_VIEW;
 
-	fR = gEngfuncs.pfnRandomFloat(50, 70);
-	fU = gEngfuncs.pfnRandomFloat(100, 150);
+	fR = client::RandomFloat(50, 70);
+	fU = client::RandomFloat(100, 150);
 
 	if (EV_IsPlayer(idx))
 	{
 		if (EV_IsLocal(idx))
 		{
-			gEngfuncs.pEventAPI->EV_LocalPlayerViewheight(view_ofs);
+			client::event::LocalPlayerViewheight(view_ofs);
 		}
 		else if (args->ducking == 1)
 		{

@@ -98,7 +98,7 @@ public:
 
 	// Called when a player starts or stops talking.
 	// entindex is -1 to represent the local client talking (before the data comes back from the server). 
-	// When the server acknowledges that the local client is talking, then entindex will be gEngfuncs.GetLocalPlayer().
+	// When the server acknowledges that the local client is talking, then entindex will be client::GetLocalPlayer().
 	// entindex is -2 to represent the local client's voice being acked by the server.
 	void	UpdateSpeakerStatus(int entindex, bool bTalking);
 
