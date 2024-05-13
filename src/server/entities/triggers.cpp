@@ -136,7 +136,7 @@ bool CAutoTrigger::KeyValue(KeyValueData* pkvd)
 {
 	if (streq(pkvd->szKeyName, "globalstate"))
 	{
-		m_globalstate = ALLOC_STRING(pkvd->szValue);
+		m_globalstate = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "triggerstate"))
@@ -326,7 +326,7 @@ bool CMultiManager::KeyValue(KeyValueData* pkvd)
 			char tmp[128];
 
 			util::StripToken(pkvd->szKeyName, tmp);
-			m_iTargetName[m_cTargets] = ALLOC_STRING(tmp);
+			m_iTargetName[m_cTargets] = g_engfuncs.pfnAllocString(tmp);
 			m_flTargetDelay[m_cTargets] = atof(pkvd->szValue);
 			m_cTargets++;
 			return true;
@@ -452,7 +452,7 @@ void CMultiManager::ManagerReport()
 
 	for (cIndex = 0; cIndex < m_cTargets; cIndex++)
 	{
-		ALERT(at_console, "%s %f\n", STRING(m_iTargetName[cIndex]), m_flTargetDelay[cIndex]);
+		g_engfuncs.pfnAlertMessage(at_console, "%s %f\n", STRING(m_iTargetName[cIndex]), m_flTargetDelay[cIndex]);
 	}
 }
 #endif
@@ -713,20 +713,20 @@ void PlayCDTrack(int iTrack)
 
 	if (iTrack < -1 || iTrack > 30)
 	{
-		ALERT(at_console, "TriggerCDAudio - Track %d out of range\n");
+		g_engfuncs.pfnAlertMessage(at_console, "TriggerCDAudio - Track %d out of range\n");
 		return;
 	}
 
 	if (iTrack == -1)
 	{
-		CLIENT_COMMAND(pClient->edict(), "cd stop\n");
+		g_engfuncs.pfnClientCommand(pClient->edict(), "cd stop\n");
 	}
 	else
 	{
 		char string[64];
 
 		sprintf(string, "cd play %3d\n", iTrack);
-		CLIENT_COMMAND(pClient->edict(), string);
+		g_engfuncs.pfnClientCommand(pClient->edict(), string);
 	}
 }
 
@@ -831,7 +831,7 @@ bool CTriggerHurt::Spawn()
 	if ((m_bitsDamageInflict & DMG_RADIATION) != 0)
 	{
 		SetThink(&CTriggerHurt::RadiationThink);
-		v.nextthink = gpGlobals->time + RANDOM_FLOAT(0.0, 0.5);
+		v.nextthink = gpGlobals->time + g_engfuncs.pfnRandomFloat(0.0, 0.5);
 	}
 #endif
 
@@ -871,7 +871,7 @@ void CTriggerHurt::RadiationThink()
 	v.origin = (v.absmin + v.absmax) * 0.5;
 	v.view_ofs = v.view_ofs * 0.0;
 
-	pentPlayer = FIND_CLIENT_IN_PVS(edict());
+	pentPlayer = g_engfuncs.pfnFindClientInPVS(edict());
 
 	v.origin = origin;
 	v.view_ofs = view_ofs;
@@ -1295,20 +1295,20 @@ bool CChangeLevel::KeyValue(KeyValueData* pkvd)
 	if (streq(pkvd->szKeyName, "map"))
 	{
 		if (strlen(pkvd->szValue) >= kMapNameMost)
-			ALERT(at_error, "Map name '%s' too long (32 chars)\n", pkvd->szValue);
+			g_engfuncs.pfnAlertMessage(at_error, "Map name '%s' too long (32 chars)\n", pkvd->szValue);
 		strcpy(m_szMapName, pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "landmark"))
 	{
 		if (strlen(pkvd->szValue) >= kMapNameMost)
-			ALERT(at_error, "Landmark name '%s' too long (32 chars)\n", pkvd->szValue);
+			g_engfuncs.pfnAlertMessage(at_error, "Landmark name '%s' too long (32 chars)\n", pkvd->szValue);
 		strcpy(m_szLandmarkName, pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "changetarget"))
 	{
-		m_changeTarget = ALLOC_STRING(pkvd->szValue);
+		m_changeTarget = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "changedelay"))
@@ -1325,19 +1325,19 @@ bool CChangeLevel::Spawn()
 {
 	if (streq(m_szMapName, ""))
 	{
-		ALERT(at_console, "a trigger_changelevel doesn't have a map");
+		g_engfuncs.pfnAlertMessage(at_console, "a trigger_changelevel doesn't have a map");
 		return false;
 	}
 
 	if (streq(m_szLandmarkName, ""))
 	{
-		ALERT(at_console, "trigger_changelevel to %s doesn't have a landmark", m_szMapName);
+		g_engfuncs.pfnAlertMessage(at_console, "trigger_changelevel to %s doesn't have a landmark", m_szMapName);
 		return false;
 	}
 
 	if (0 == stricmp(m_szMapName, STRING(gpGlobals->mapname)))
 	{
-		ALERT(at_error, "trigger_changelevel points to the current map (%s), which does not work\n", STRING(gpGlobals->mapname));
+		g_engfuncs.pfnAlertMessage(at_error, "trigger_changelevel points to the current map (%s), which does not work\n", STRING(gpGlobals->mapname));
 		return false;
 	}
 
@@ -1348,7 +1348,7 @@ bool CChangeLevel::Spawn()
 	InitTrigger();
 	if ((v.spawnflags & SF_CHANGELEVEL_USEONLY) == 0)
 		SetTouch(&CChangeLevel::TouchChangeLevel);
-	//	ALERT( at_console, "TRANSITION: %s (%s)\n", m_szMapName, m_szLandmarkName );
+	//	g_engfuncs.pfnAlertMessage( at_console, "TRANSITION: %s (%s)\n", m_szMapName, m_szLandmarkName );
 
 	return true;
 }
@@ -1367,7 +1367,7 @@ Entity* CChangeLevel::FindLandmark(const char* pLandmarkName)
 		else
 			pentLandmark = util::FindEntityByTargetname(pentLandmark, pLandmarkName);
 	}
-	ALERT(at_error, "Can't find landmark %s\n", pLandmarkName);
+	g_engfuncs.pfnAlertMessage(at_error, "Can't find landmark %s\n", pLandmarkName);
 	return nullptr;
 }
 
@@ -1401,7 +1401,7 @@ void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 	CBaseEntity* pPlayer = util::GetLocalPlayer();
 	if (!InTransitionVolume(pPlayer, m_szLandmarkName))
 	{
-		ALERT(at_aiconsole, "Player isn't in the transition volume %s, aborting\n", m_szLandmarkName);
+		g_engfuncs.pfnAlertMessage(at_aiconsole, "Player isn't in the transition volume %s, aborting\n", m_szLandmarkName);
 		return;
 	}
 
@@ -1419,7 +1419,7 @@ void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 			DispatchSpawn(pFireAndDie->edict());
 		}
 	}
-	// This object will get removed in the call to CHANGE_LEVEL, copy the params into "safe" memory
+	// This object will get removed in the call to g_engfuncs.pfnChangeLevel, copy the params into "safe" memory
 	strcpy(st_szNextMap, m_szMapName);
 
 	m_hActivator = pActivator;
@@ -1433,9 +1433,9 @@ void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 		strcpy(st_szNextSpot, m_szLandmarkName);
 		gpGlobals->vecLandmarkOffset = pentLandmark->origin;
 	}
-	//	ALERT( at_console, "Level touches %d levels\n", ChangeList( levels, 16 ) );
-	ALERT(at_console, "CHANGE LEVEL: %s %s\n", st_szNextMap, st_szNextSpot);
-	CHANGE_LEVEL(st_szNextMap, st_szNextSpot);
+	//	g_engfuncs.pfnAlertMessage( at_console, "Level touches %d levels\n", ChangeList( levels, 16 ) );
+	g_engfuncs.pfnAlertMessage(at_console, "CHANGE LEVEL: %s %s\n", st_szNextMap, st_szNextSpot);
+	g_engfuncs.pfnChangeLevel(st_szNextMap, st_szNextSpot);
 }
 
 //
@@ -1590,7 +1590,7 @@ int CChangeLevel::ChangeList(LEVELLIST* pLevelList, int maxList)
 							entityFlags[entityCount] = flags;
 							entityCount++;
 							if (entityCount > MAX_ENTITY)
-								ALERT(at_error, "Too many entities across a transition!");
+								g_engfuncs.pfnAlertMessage(at_error, "Too many entities across a transition!");
 						}
 					}
 				}
@@ -1802,7 +1802,7 @@ void CTriggerSave::SaveTouch(CBaseEntity* pOther)
 
 	ClearTouch();
 	Remove();
-	SERVER_COMMAND("autosave\n");
+	g_engfuncs.pfnServerCommand("autosave\n");
 }
 
 
@@ -1892,7 +1892,7 @@ void CRevertSaved::LoadThink()
 {
 	if (!util::IsMultiplayer())
 	{
-		SERVER_COMMAND("reload\n");
+		g_engfuncs.pfnServerCommand("reload\n");
 	}
 }
 #endif
@@ -1964,9 +1964,9 @@ bool CTriggerEndSection::KeyValue(KeyValueData* pkvd)
 {
 	if (streq(pkvd->szKeyName, "section"))
 	{
-		//		m_iszSectionName = ALLOC_STRING( pkvd->szValue );
+		//		m_iszSectionName = g_engfuncs.pfnAllocString( pkvd->szValue );
 		// Store this in message so we don't have to write save/restore for this ent
-		v.message = ALLOC_STRING(pkvd->szValue);
+		v.message = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 
@@ -2035,7 +2035,7 @@ bool CTriggerChangeTarget::KeyValue(KeyValueData* pkvd)
 {
 	if (streq(pkvd->szKeyName, "m_iszNewTarget"))
 	{
-		m_iszNewTarget = ALLOC_STRING(pkvd->szValue);
+		m_iszNewTarget = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 

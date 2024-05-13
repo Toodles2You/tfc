@@ -28,7 +28,7 @@
 
 bool CHudStatusBar::Init()
 {
-	hud_expireid = CVAR_CREATE("hud_expireid", "0.2", FCVAR_ARCHIVE);
+	hud_expireid = gEngfuncs.pfnRegisterVariable("hud_expireid", "0.2", FCVAR_ARCHIVE);
 
 	return CHudBase::Init();
 }

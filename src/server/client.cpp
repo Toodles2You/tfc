@@ -285,10 +285,10 @@ void Host_Say(Entity* pEntity, bool teamonly)
 	char szTemp[256];
 	const char* cpSay = "say";
 	const char* cpSayTeam = "say_team";
-	const char* pcmd = CMD_ARGV(0);
+	const char* pcmd = g_engfuncs.pfnCmd_Argv(0);
 
 	// We can get a raw string now, without the "say " prepended
-	if (CMD_ARGC() == 0)
+	if (g_engfuncs.pfnCmd_Argc() == 0)
 		return;
 
 	auto player = pEntity->Get<CBasePlayer>();
@@ -299,9 +299,9 @@ void Host_Say(Entity* pEntity, bool teamonly)
 
 	if (!stricmp(pcmd, cpSay) || !stricmp(pcmd, cpSayTeam))
 	{
-		if (CMD_ARGC() >= 2)
+		if (g_engfuncs.pfnCmd_Argc() >= 2)
 		{
-			p = (char*)CMD_ARGS();
+			p = (char*)g_engfuncs.pfnCmd_Args();
 		}
 		else
 		{
@@ -311,9 +311,9 @@ void Host_Say(Entity* pEntity, bool teamonly)
 	}
 	else // Raw text, need to prepend argv[0]
 	{
-		if (CMD_ARGC() >= 2)
+		if (g_engfuncs.pfnCmd_Argc() >= 2)
 		{
-			sprintf(szTemp, "%s %s", (char*)pcmd, (char*)CMD_ARGS());
+			sprintf(szTemp, "%s %s", (char*)pcmd, (char*)g_engfuncs.pfnCmd_Args());
 		}
 		else
 		{
@@ -418,10 +418,10 @@ ClientCommand
 called each time a player uses a "cmd" command
 ============
 */
-// Use CMD_ARGV,  CMD_ARGV, and CMD_ARGC to get pointers the character string command.
+// Use g_engfuncs.pfnCmd_Argv,  g_engfuncs.pfnCmd_Argv, and g_engfuncs.pfnCmd_Argc to get pointers the character string command.
 void ClientCommand(Entity* pEntity)
 {
-	const char* pcmd = CMD_ARGV(0);
+	const char* pcmd = g_engfuncs.pfnCmd_Argv(0);
 	const char* pstr;
 
 	auto player = pEntity->Get<CBasePlayer>();
@@ -448,26 +448,26 @@ void ClientCommand(Entity* pEntity)
 	{
 		if (g_pGameRules->IsPlayerPrivileged(player))
 		{
-			int iszItem = ALLOC_STRING(CMD_ARGV(1)); // Make a copy of the classname
+			int iszItem = g_engfuncs.pfnAllocString(g_engfuncs.pfnCmd_Argv(1)); // Make a copy of the classname
 			player->GiveNamedItem(STRING(iszItem));
 		}
 	}
 	else if (streq(pcmd, "drop"))
 	{
 		// player is dropping an item.
-		player->DropPlayerWeapon((char*)CMD_ARGV(1));
+		player->DropPlayerWeapon((char*)g_engfuncs.pfnCmd_Argv(1));
 	}
 	else if (streq(pcmd, "fov"))
 	{
 		if (g_pGameRules->IsPlayerPrivileged(player))
 		{
-			if (CMD_ARGC() > 1)
+			if (g_engfuncs.pfnCmd_Argc() > 1)
 			{
-				player->m_iFOV = atoi(CMD_ARGV(1));
+				player->m_iFOV = atoi(g_engfuncs.pfnCmd_Argv(1));
 			}
 			else
 			{
-				CLIENT_PRINTF(pEntity, print_console, util::VarArgs("\"fov\" is \"%d\"\n", (int)player->m_iFOV));
+				g_engfuncs.pfnClientPrintf(pEntity, print_console, util::VarArgs("\"fov\" is \"%d\"\n", (int)player->m_iFOV));
 			}
 		}
 	}
@@ -603,7 +603,7 @@ void ServerActivate(Entity* pEdictList, int edictCount, int clientMax)
 		}
 		else
 		{
-			ALERT(at_console, "Can't instance %s\n", STRING(pEdictList[i].classname));
+			g_engfuncs.pfnAlertMessage(at_console, "Can't instance %s\n", STRING(pEdictList[i].classname));
 		}
 	}
 
@@ -696,7 +696,7 @@ static void LoadNextMap()
 		g_MapsToLoad.shrink_to_fit();
 	}
 
-	SERVER_COMMAND(util::VarArgs("map \"%s\"\n", mapName.c_str()));
+	g_engfuncs.pfnServerCommand(util::VarArgs("map \"%s\"\n", mapName.c_str()));
 }
 
 static void LoadAllMaps()
@@ -735,9 +735,9 @@ static void LoadAllMaps()
 
 	if (!g_MapsToLoad.empty())
 	{
-		if (CMD_ARGC() == 2)
+		if (g_engfuncs.pfnCmd_Argc() == 2)
 		{
-			const char* firstMapToLoad = CMD_ARGV(1);
+			const char* firstMapToLoad = g_engfuncs.pfnCmd_Argv(1);
 
 			// Clear out all maps that would have been loaded before this one.
 			if (auto it = std::find(g_MapsToLoad.begin(), g_MapsToLoad.end(), firstMapToLoad);
@@ -807,107 +807,107 @@ void StartFrame()
 void ClientPrecache()
 {
 	// setup precaches always needed
-	PRECACHE_SOUND("player/sprayer.wav"); // spray paint sound
+	g_engfuncs.pfnPrecacheSound("player/sprayer.wav"); // spray paint sound
 
-	PRECACHE_SOUND("player/pl_jumpland2.wav");
-	PRECACHE_SOUND("player/pl_fallpain3.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_jumpland2.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_fallpain3.wav");
 
-	PRECACHE_SOUND("player/pl_step1.wav"); // walk on concrete
-	PRECACHE_SOUND("player/pl_step2.wav");
-	PRECACHE_SOUND("player/pl_step3.wav");
-	PRECACHE_SOUND("player/pl_step4.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_step1.wav"); // walk on concrete
+	g_engfuncs.pfnPrecacheSound("player/pl_step2.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_step3.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_step4.wav");
 
-	PRECACHE_SOUND("common/npc_step1.wav"); // NPC walk on concrete
-	PRECACHE_SOUND("common/npc_step2.wav");
-	PRECACHE_SOUND("common/npc_step3.wav");
-	PRECACHE_SOUND("common/npc_step4.wav");
+	g_engfuncs.pfnPrecacheSound("common/npc_step1.wav"); // NPC walk on concrete
+	g_engfuncs.pfnPrecacheSound("common/npc_step2.wav");
+	g_engfuncs.pfnPrecacheSound("common/npc_step3.wav");
+	g_engfuncs.pfnPrecacheSound("common/npc_step4.wav");
 
-	PRECACHE_SOUND("player/pl_metal1.wav"); // walk on metal
-	PRECACHE_SOUND("player/pl_metal2.wav");
-	PRECACHE_SOUND("player/pl_metal3.wav");
-	PRECACHE_SOUND("player/pl_metal4.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_metal1.wav"); // walk on metal
+	g_engfuncs.pfnPrecacheSound("player/pl_metal2.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_metal3.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_metal4.wav");
 
-	PRECACHE_SOUND("player/pl_dirt1.wav"); // walk on dirt
-	PRECACHE_SOUND("player/pl_dirt2.wav");
-	PRECACHE_SOUND("player/pl_dirt3.wav");
-	PRECACHE_SOUND("player/pl_dirt4.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_dirt1.wav"); // walk on dirt
+	g_engfuncs.pfnPrecacheSound("player/pl_dirt2.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_dirt3.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_dirt4.wav");
 
-	PRECACHE_SOUND("player/pl_duct1.wav"); // walk in duct
-	PRECACHE_SOUND("player/pl_duct2.wav");
-	PRECACHE_SOUND("player/pl_duct3.wav");
-	PRECACHE_SOUND("player/pl_duct4.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_duct1.wav"); // walk in duct
+	g_engfuncs.pfnPrecacheSound("player/pl_duct2.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_duct3.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_duct4.wav");
 
-	PRECACHE_SOUND("player/pl_grate1.wav"); // walk on grate
-	PRECACHE_SOUND("player/pl_grate2.wav");
-	PRECACHE_SOUND("player/pl_grate3.wav");
-	PRECACHE_SOUND("player/pl_grate4.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_grate1.wav"); // walk on grate
+	g_engfuncs.pfnPrecacheSound("player/pl_grate2.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_grate3.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_grate4.wav");
 
-	PRECACHE_SOUND("player/pl_slosh1.wav"); // walk in shallow water
-	PRECACHE_SOUND("player/pl_slosh2.wav");
-	PRECACHE_SOUND("player/pl_slosh3.wav");
-	PRECACHE_SOUND("player/pl_slosh4.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_slosh1.wav"); // walk in shallow water
+	g_engfuncs.pfnPrecacheSound("player/pl_slosh2.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_slosh3.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_slosh4.wav");
 
-	PRECACHE_SOUND("player/pl_tile1.wav"); // walk on tile
-	PRECACHE_SOUND("player/pl_tile2.wav");
-	PRECACHE_SOUND("player/pl_tile3.wav");
-	PRECACHE_SOUND("player/pl_tile4.wav");
-	PRECACHE_SOUND("player/pl_tile5.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_tile1.wav"); // walk on tile
+	g_engfuncs.pfnPrecacheSound("player/pl_tile2.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_tile3.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_tile4.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_tile5.wav");
 
-	PRECACHE_SOUND("player/pl_swim1.wav"); // breathe bubbles
-	PRECACHE_SOUND("player/pl_swim2.wav");
-	PRECACHE_SOUND("player/pl_swim3.wav");
-	PRECACHE_SOUND("player/pl_swim4.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_swim1.wav"); // breathe bubbles
+	g_engfuncs.pfnPrecacheSound("player/pl_swim2.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_swim3.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_swim4.wav");
 
-	PRECACHE_SOUND("player/pl_ladder1.wav"); // climb ladder rung
-	PRECACHE_SOUND("player/pl_ladder2.wav");
-	PRECACHE_SOUND("player/pl_ladder3.wav");
-	PRECACHE_SOUND("player/pl_ladder4.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_ladder1.wav"); // climb ladder rung
+	g_engfuncs.pfnPrecacheSound("player/pl_ladder2.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_ladder3.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_ladder4.wav");
 
-	PRECACHE_SOUND("player/pl_wade1.wav"); // wade in water
-	PRECACHE_SOUND("player/pl_wade2.wav");
-	PRECACHE_SOUND("player/pl_wade3.wav");
-	PRECACHE_SOUND("player/pl_wade4.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_wade1.wav"); // wade in water
+	g_engfuncs.pfnPrecacheSound("player/pl_wade2.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_wade3.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_wade4.wav");
 
-	PRECACHE_SOUND("debris/wood1.wav"); // hit wood texture
-	PRECACHE_SOUND("debris/wood2.wav");
-	PRECACHE_SOUND("debris/wood3.wav");
+	g_engfuncs.pfnPrecacheSound("debris/wood1.wav"); // hit wood texture
+	g_engfuncs.pfnPrecacheSound("debris/wood2.wav");
+	g_engfuncs.pfnPrecacheSound("debris/wood3.wav");
 
-	PRECACHE_SOUND("plats/train_use1.wav"); // use a train
+	g_engfuncs.pfnPrecacheSound("plats/train_use1.wav"); // use a train
 
-	PRECACHE_SOUND("buttons/spark5.wav"); // hit computer texture
-	PRECACHE_SOUND("buttons/spark6.wav");
-	PRECACHE_SOUND("debris/glass1.wav");
-	PRECACHE_SOUND("debris/glass2.wav");
-	PRECACHE_SOUND("debris/glass3.wav");
+	g_engfuncs.pfnPrecacheSound("buttons/spark5.wav"); // hit computer texture
+	g_engfuncs.pfnPrecacheSound("buttons/spark6.wav");
+	g_engfuncs.pfnPrecacheSound("debris/glass1.wav");
+	g_engfuncs.pfnPrecacheSound("debris/glass2.wav");
+	g_engfuncs.pfnPrecacheSound("debris/glass3.wav");
 
 	// player gib sounds
-	PRECACHE_SOUND("common/bodysplat.wav");
+	g_engfuncs.pfnPrecacheSound("common/bodysplat.wav");
 
 	// player pain sounds
-	PRECACHE_SOUND("player/pl_pain2.wav");
-	PRECACHE_SOUND("player/pl_pain4.wav");
-	PRECACHE_SOUND("player/pl_pain5.wav");
-	PRECACHE_SOUND("player/pl_pain6.wav");
-	PRECACHE_SOUND("player/pl_pain7.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_pain2.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_pain4.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_pain5.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_pain6.wav");
+	g_engfuncs.pfnPrecacheSound("player/pl_pain7.wav");
 
-	g_sModelIndexPlayer = PRECACHE_MODEL("models/player.mdl");
-	g_sModelIndexGibs = PRECACHE_MODEL("models/hgibs.mdl");
+	g_sModelIndexPlayer = g_engfuncs.pfnPrecacheModel("models/player.mdl");
+	g_sModelIndexGibs = g_engfuncs.pfnPrecacheModel("models/hgibs.mdl");
 
 	// hud sounds
 
-	PRECACHE_SOUND("common/wpn_hudoff.wav");
-	PRECACHE_SOUND("common/wpn_hudon.wav");
-	PRECACHE_SOUND("common/wpn_moveselect.wav");
-	PRECACHE_SOUND("common/wpn_select.wav");
-	PRECACHE_SOUND("common/wpn_denyselect.wav");
+	g_engfuncs.pfnPrecacheSound("common/wpn_hudoff.wav");
+	g_engfuncs.pfnPrecacheSound("common/wpn_hudon.wav");
+	g_engfuncs.pfnPrecacheSound("common/wpn_moveselect.wav");
+	g_engfuncs.pfnPrecacheSound("common/wpn_select.wav");
+	g_engfuncs.pfnPrecacheSound("common/wpn_denyselect.wav");
 
-	PRECACHE_SOUND("misc/r_tele1.wav");
+	g_engfuncs.pfnPrecacheSound("misc/r_tele1.wav");
 
-	PRECACHE_SOUND("common/null.wav");
+	g_engfuncs.pfnPrecacheSound("common/null.wav");
 
-	g_usGibbed = PRECACHE_EVENT(1, "events/gibs.sc");
-	g_usTeleport = PRECACHE_EVENT(1, "events/teleport.sc");
-	g_usExplosion = PRECACHE_EVENT(1, "events/explosion.sc");
+	g_usGibbed = g_engfuncs.pfnPrecacheEvent(1, "events/gibs.sc");
+	g_usTeleport = g_engfuncs.pfnPrecacheEvent(1, "events/teleport.sc");
+	g_usExplosion = g_engfuncs.pfnPrecacheEvent(1, "events/explosion.sc");
 }
 
 /*
@@ -950,13 +950,13 @@ void PlayerCustomization(Entity* pEntity, customization_t* pCust)
 
 	if (!pPlayer)
 	{
-		ALERT(at_console, "PlayerCustomization:  Couldn't get player!\n");
+		g_engfuncs.pfnAlertMessage(at_console, "PlayerCustomization:  Couldn't get player!\n");
 		return;
 	}
 
 	if (!pCust)
 	{
-		ALERT(at_console, "PlayerCustomization:  NULL customization!\n");
+		g_engfuncs.pfnAlertMessage(at_console, "PlayerCustomization:  NULL customization!\n");
 		return;
 	}
 
@@ -971,7 +971,7 @@ void PlayerCustomization(Entity* pEntity, customization_t* pCust)
 		// Ignore for now.
 		break;
 	default:
-		ALERT(at_console, "PlayerCustomization:  Unknown customization type!\n");
+		g_engfuncs.pfnAlertMessage(at_console, "PlayerCustomization:  Unknown customization type!\n");
 		break;
 	}
 }
@@ -1124,7 +1124,7 @@ int AddToFullPack(struct entity_state_s* state, int e, Entity* ent, Entity* host
 		// If pSet is nullptr, then the test will always succeed and the entity will be added to the update
 		if ((entity->ObjectCaps() & FCAP_NET_ALWAYS_SEND) == 0)
 		{
-			if (!ENGINE_CHECK_VISIBILITY(ent, pSet))
+			if (!g_engfuncs.pfnCheckVisibility(ent, pSet))
 			{
 				return 0;
 			}
@@ -1250,12 +1250,12 @@ static entity_field_alias_t entity_field_alias[] =
 
 void Entity_FieldInit(struct delta_s* pFields)
 {
-	entity_field_alias[FIELD_ORIGIN0].field = DELTA_FINDFIELD(pFields, entity_field_alias[FIELD_ORIGIN0].name);
-	entity_field_alias[FIELD_ORIGIN1].field = DELTA_FINDFIELD(pFields, entity_field_alias[FIELD_ORIGIN1].name);
-	entity_field_alias[FIELD_ORIGIN2].field = DELTA_FINDFIELD(pFields, entity_field_alias[FIELD_ORIGIN2].name);
-	entity_field_alias[FIELD_ANGLES0].field = DELTA_FINDFIELD(pFields, entity_field_alias[FIELD_ANGLES0].name);
-	entity_field_alias[FIELD_ANGLES1].field = DELTA_FINDFIELD(pFields, entity_field_alias[FIELD_ANGLES1].name);
-	entity_field_alias[FIELD_ANGLES2].field = DELTA_FINDFIELD(pFields, entity_field_alias[FIELD_ANGLES2].name);
+	entity_field_alias[FIELD_ORIGIN0].field = g_engfuncs.pfnDeltaFindField(pFields, entity_field_alias[FIELD_ORIGIN0].name);
+	entity_field_alias[FIELD_ORIGIN1].field = g_engfuncs.pfnDeltaFindField(pFields, entity_field_alias[FIELD_ORIGIN1].name);
+	entity_field_alias[FIELD_ORIGIN2].field = g_engfuncs.pfnDeltaFindField(pFields, entity_field_alias[FIELD_ORIGIN2].name);
+	entity_field_alias[FIELD_ANGLES0].field = g_engfuncs.pfnDeltaFindField(pFields, entity_field_alias[FIELD_ANGLES0].name);
+	entity_field_alias[FIELD_ANGLES1].field = g_engfuncs.pfnDeltaFindField(pFields, entity_field_alias[FIELD_ANGLES1].name);
+	entity_field_alias[FIELD_ANGLES2].field = g_engfuncs.pfnDeltaFindField(pFields, entity_field_alias[FIELD_ANGLES2].name);
 }
 
 /*
@@ -1281,37 +1281,37 @@ void Entity_Encode(struct delta_s* pFields, const unsigned char* from, const uns
 	t = (entity_state_t*)to;
 
 	// Never send origin to local player, it's sent with more resolution in clientdata_t structure
-	const bool localplayer = (t->number - 1) == ENGINE_CURRENT_PLAYER();
+	const bool localplayer = (t->number - 1) == g_engfuncs.pfnGetCurrentPlayer();
 	if (localplayer)
 	{
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN0].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN1].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN2].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN0].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN1].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN2].field);
 	}
 
 	if ((t->impacttime != 0) && (t->starttime != 0))
 	{
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN0].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN1].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN2].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN0].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN1].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN2].field);
 
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ANGLES0].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ANGLES1].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ANGLES2].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ANGLES0].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ANGLES1].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ANGLES2].field);
 	}
 
 	if ((t->movetype == MOVETYPE_FOLLOW) &&
 		(t->aiment != 0))
 	{
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN0].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN1].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN2].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN0].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN1].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN2].field);
 	}
 	else if (t->aiment != f->aiment)
 	{
-		DELTA_SETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN0].field);
-		DELTA_SETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN1].field);
-		DELTA_SETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN2].field);
+		g_engfuncs.pfnDeltaSetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN0].field);
+		g_engfuncs.pfnDeltaSetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN1].field);
+		g_engfuncs.pfnDeltaSetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN2].field);
 	}
 }
 
@@ -1324,9 +1324,9 @@ static entity_field_alias_t player_field_alias[] =
 
 void Player_FieldInit(struct delta_s* pFields)
 {
-	player_field_alias[FIELD_ORIGIN0].field = DELTA_FINDFIELD(pFields, player_field_alias[FIELD_ORIGIN0].name);
-	player_field_alias[FIELD_ORIGIN1].field = DELTA_FINDFIELD(pFields, player_field_alias[FIELD_ORIGIN1].name);
-	player_field_alias[FIELD_ORIGIN2].field = DELTA_FINDFIELD(pFields, player_field_alias[FIELD_ORIGIN2].name);
+	player_field_alias[FIELD_ORIGIN0].field = g_engfuncs.pfnDeltaFindField(pFields, player_field_alias[FIELD_ORIGIN0].name);
+	player_field_alias[FIELD_ORIGIN1].field = g_engfuncs.pfnDeltaFindField(pFields, player_field_alias[FIELD_ORIGIN1].name);
+	player_field_alias[FIELD_ORIGIN2].field = g_engfuncs.pfnDeltaFindField(pFields, player_field_alias[FIELD_ORIGIN2].name);
 }
 
 /*
@@ -1351,26 +1351,26 @@ void Player_Encode(struct delta_s* pFields, const unsigned char* from, const uns
 	t = (entity_state_t*)to;
 
 	// Never send origin to local player, it's sent with more resolution in clientdata_t structure
-	const bool localplayer = (t->number - 1) == ENGINE_CURRENT_PLAYER();
+	const bool localplayer = (t->number - 1) == g_engfuncs.pfnGetCurrentPlayer();
 	if (localplayer)
 	{
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN0].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN1].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN2].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN0].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN1].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN2].field);
 	}
 
 	if ((t->movetype == MOVETYPE_FOLLOW) &&
 		(t->aiment != 0))
 	{
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN0].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN1].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN2].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN0].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN1].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN2].field);
 	}
 	else if (t->aiment != f->aiment)
 	{
-		DELTA_SETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN0].field);
-		DELTA_SETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN1].field);
-		DELTA_SETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN2].field);
+		g_engfuncs.pfnDeltaSetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN0].field);
+		g_engfuncs.pfnDeltaSetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN1].field);
+		g_engfuncs.pfnDeltaSetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN2].field);
 	}
 }
 
@@ -1399,15 +1399,15 @@ entity_field_alias_t custom_entity_field_alias[] =
 
 void Custom_Entity_FieldInit(struct delta_s* pFields)
 {
-	custom_entity_field_alias[CUSTOMFIELD_ORIGIN0].field = DELTA_FINDFIELD(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN0].name);
-	custom_entity_field_alias[CUSTOMFIELD_ORIGIN1].field = DELTA_FINDFIELD(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN1].name);
-	custom_entity_field_alias[CUSTOMFIELD_ORIGIN2].field = DELTA_FINDFIELD(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN2].name);
-	custom_entity_field_alias[CUSTOMFIELD_ANGLES0].field = DELTA_FINDFIELD(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES0].name);
-	custom_entity_field_alias[CUSTOMFIELD_ANGLES1].field = DELTA_FINDFIELD(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES1].name);
-	custom_entity_field_alias[CUSTOMFIELD_ANGLES2].field = DELTA_FINDFIELD(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES2].name);
-	custom_entity_field_alias[CUSTOMFIELD_SKIN].field = DELTA_FINDFIELD(pFields, custom_entity_field_alias[CUSTOMFIELD_SKIN].name);
-	custom_entity_field_alias[CUSTOMFIELD_SEQUENCE].field = DELTA_FINDFIELD(pFields, custom_entity_field_alias[CUSTOMFIELD_SEQUENCE].name);
-	custom_entity_field_alias[CUSTOMFIELD_ANIMTIME].field = DELTA_FINDFIELD(pFields, custom_entity_field_alias[CUSTOMFIELD_ANIMTIME].name);
+	custom_entity_field_alias[CUSTOMFIELD_ORIGIN0].field = g_engfuncs.pfnDeltaFindField(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN0].name);
+	custom_entity_field_alias[CUSTOMFIELD_ORIGIN1].field = g_engfuncs.pfnDeltaFindField(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN1].name);
+	custom_entity_field_alias[CUSTOMFIELD_ORIGIN2].field = g_engfuncs.pfnDeltaFindField(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN2].name);
+	custom_entity_field_alias[CUSTOMFIELD_ANGLES0].field = g_engfuncs.pfnDeltaFindField(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES0].name);
+	custom_entity_field_alias[CUSTOMFIELD_ANGLES1].field = g_engfuncs.pfnDeltaFindField(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES1].name);
+	custom_entity_field_alias[CUSTOMFIELD_ANGLES2].field = g_engfuncs.pfnDeltaFindField(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES2].name);
+	custom_entity_field_alias[CUSTOMFIELD_SKIN].field = g_engfuncs.pfnDeltaFindField(pFields, custom_entity_field_alias[CUSTOMFIELD_SKIN].name);
+	custom_entity_field_alias[CUSTOMFIELD_SEQUENCE].field = g_engfuncs.pfnDeltaFindField(pFields, custom_entity_field_alias[CUSTOMFIELD_SEQUENCE].name);
+	custom_entity_field_alias[CUSTOMFIELD_ANIMTIME].field = g_engfuncs.pfnDeltaFindField(pFields, custom_entity_field_alias[CUSTOMFIELD_ANIMTIME].name);
 }
 
 /*
@@ -1437,29 +1437,29 @@ void Custom_Encode(struct delta_s* pFields, const unsigned char* from, const uns
 
 	if (beamType != BEAM_POINTS && beamType != BEAM_ENTPOINT)
 	{
-		DELTA_UNSETBYINDEX(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN0].field);
-		DELTA_UNSETBYINDEX(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN1].field);
-		DELTA_UNSETBYINDEX(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN2].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN0].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN1].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN2].field);
 	}
 
 	if (beamType != BEAM_POINTS)
 	{
-		DELTA_UNSETBYINDEX(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES0].field);
-		DELTA_UNSETBYINDEX(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES1].field);
-		DELTA_UNSETBYINDEX(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES2].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES0].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES1].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES2].field);
 	}
 
 	if (beamType != BEAM_ENTS && beamType != BEAM_ENTPOINT)
 	{
-		DELTA_UNSETBYINDEX(pFields, custom_entity_field_alias[CUSTOMFIELD_SKIN].field);
-		DELTA_UNSETBYINDEX(pFields, custom_entity_field_alias[CUSTOMFIELD_SEQUENCE].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, custom_entity_field_alias[CUSTOMFIELD_SKIN].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, custom_entity_field_alias[CUSTOMFIELD_SEQUENCE].field);
 	}
 
 	// animtime is compared by rounding first
 	// see if we really shouldn't actually send it
 	if ((int)f->animtime == (int)t->animtime)
 	{
-		DELTA_UNSETBYINDEX(pFields, custom_entity_field_alias[CUSTOMFIELD_ANIMTIME].field);
+		g_engfuncs.pfnDeltaUnsetFieldByIndex(pFields, custom_entity_field_alias[CUSTOMFIELD_ANIMTIME].field);
 	}
 }
 
@@ -1472,9 +1472,9 @@ Allows game .dll to override network encoding of certain types of entities and t
 */
 void RegisterEncoders()
 {
-	DELTA_ADDENCODER("Entity_Encode", Entity_Encode);
-	DELTA_ADDENCODER("Custom_Encode", Custom_Encode);
-	DELTA_ADDENCODER("Player_Encode", Player_Encode);
+	g_engfuncs.pfnDeltaAddEncoder("Entity_Encode", Entity_Encode);
+	g_engfuncs.pfnDeltaAddEncoder("Custom_Encode", Custom_Encode);
+	g_engfuncs.pfnDeltaAddEncoder("Player_Encode", Player_Encode);
 }
 
 int GetWeaponData(Entity* player, struct weapon_data_s* info)
@@ -1623,7 +1623,7 @@ void CreateInstancedBaselines()
 ================================
 InconsistentFile
 
-One of the ENGINE_FORCE_UNMODIFIED files failed the consistency check for the specified player
+One of the pfnForceUnmodified files failed the consistency check for the specified player
  Return 0 to allow the client to continue, 1 to force immediate disconnection ( with an optional disconnect message of up to 256 characters )
 ================================
 */

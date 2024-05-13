@@ -277,10 +277,10 @@ bool CHudAmmo::Init()
 	HOOK_COMMAND("invprev", PrevWeapon);
 	HOOK_COMMAND("lastinv", LastWeapon);
 
-	CVAR_CREATE("hud_drawhistory_time", "5", 0);
-	hud_fastswitch = CVAR_CREATE("hud_fastswitch", "0", FCVAR_ARCHIVE); // controls whether or not weapons can be selected in one keypress
-	hud_selection_fadeout = CVAR_CREATE("hud_selection_fadeout", "0.5", FCVAR_ARCHIVE);
-	hud_selection_timeout = CVAR_CREATE("hud_selection_timeout", "1.5", FCVAR_ARCHIVE);
+	gEngfuncs.pfnRegisterVariable("hud_drawhistory_time", "5", 0);
+	hud_fastswitch = gEngfuncs.pfnRegisterVariable("hud_fastswitch", "0", FCVAR_ARCHIVE); // controls whether or not weapons can be selected in one keypress
+	hud_selection_fadeout = gEngfuncs.pfnRegisterVariable("hud_selection_fadeout", "0.5", FCVAR_ARCHIVE);
+	hud_selection_timeout = gEngfuncs.pfnRegisterVariable("hud_selection_timeout", "1.5", FCVAR_ARCHIVE);
 
 	gWR.Init();
 	gHR.Init();

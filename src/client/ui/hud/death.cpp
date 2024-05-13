@@ -56,7 +56,7 @@ bool CHudDeathNotice::Init()
 {
 	HOOK_MESSAGE(DeathMsg);
 
-	hud_deathnotice_time = CVAR_CREATE("hud_deathnotice_time", "6", 0);
+	hud_deathnotice_time = gEngfuncs.pfnRegisterVariable("hud_deathnotice_time", "6", 0);
 
 	return CHudBase::Init();
 }

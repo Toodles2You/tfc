@@ -138,8 +138,8 @@ bool CGameRules::IsPlayerPrivileged(CBasePlayer* pPlayer)
 
 CGameRules* InstallGameRules()
 {
-	SERVER_COMMAND("exec game.cfg\n");
-	SERVER_EXECUTE();
+	g_engfuncs.pfnServerCommand("exec game.cfg\n");
+	g_engfuncs.pfnServerExecute();
 
 	gpGlobals->teamplay = teamplay.value;
 

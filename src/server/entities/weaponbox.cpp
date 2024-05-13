@@ -99,7 +99,7 @@ CWeaponBox::~CWeaponBox()
 //=========================================================
 void CWeaponBox::Precache()
 {
-	PRECACHE_MODEL("models/w_weaponbox.mdl");
+	g_engfuncs.pfnPrecacheModel("models/w_weaponbox.mdl");
 }
 
 //=========================================================
@@ -245,7 +245,7 @@ bool CWeaponBox::PackAmmo(int iType, int iCount)
 {
 	if (iCount != 0)
 	{
-		//ALERT ( at_console, "Packed %d rounds of %i\n", iCount, iType );
+		//g_engfuncs.pfnAlertMessage ( at_console, "Packed %d rounds of %i\n", iCount, iType );
 		m_rgAmmo[iType] += iCount;
 		return true;
 	}

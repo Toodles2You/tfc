@@ -27,43 +27,43 @@ void LinkUserMessages()
 		return;
 	}
 
-	gmsgHealth = REG_USER_MSG("Health", 2);
-	gmsgDamage = REG_USER_MSG("Damage", 12);
-	gmsgBattery = REG_USER_MSG("Battery", 2);
+	gmsgHealth = g_engfuncs.pfnRegUserMsg("Health", 2);
+	gmsgDamage = g_engfuncs.pfnRegUserMsg("Damage", 12);
+	gmsgBattery = g_engfuncs.pfnRegUserMsg("Battery", 2);
 #ifdef HALFLIFE_TRAINCONTROL
-	gmsgTrain = REG_USER_MSG("Train", 1);
+	gmsgTrain = g_engfuncs.pfnRegUserMsg("Train", 1);
 #endif
-	//gmsgHudText = REG_USER_MSG( "HudTextPro", -1 );
-	gmsgHudText = REG_USER_MSG("HudText", -1); // we don't use the message but 3rd party addons may!
-	gmsgSayText = REG_USER_MSG("SayText", -1);
-	gmsgTextMsg = REG_USER_MSG("TextMsg", -1);
-	gmsgResetHUD = REG_USER_MSG("ResetHUD", 0); // called every respawn
-	gmsgInitHUD = REG_USER_MSG("InitHUD", 0);	// called every time a new player joins the server
-	gmsgShowGameTitle = REG_USER_MSG("GameTitle", 1);
-	gmsgDeathMsg = REG_USER_MSG("DeathMsg", -1);
-	gmsgScoreInfo = REG_USER_MSG("ScoreInfo", 5);
-	gmsgExtraInfo = REG_USER_MSG("ExtraInfo", 3);
-	gmsgTeamScore = REG_USER_MSG("TeamScore", 3); // sets the score of a team on the scoreboard
-	gmsgGameMode = REG_USER_MSG("GameMode", 1);
-	gmsgMOTD = REG_USER_MSG("MOTD", -1);
-	gmsgVGUIMenu = REG_USER_MSG("VGUIMenu", 1);
-	gmsgServerName = REG_USER_MSG("ServerName", -1);
-	gmsgAmmoPickup = REG_USER_MSG("AmmoPickup", 2);
-	gmsgWeapPickup = REG_USER_MSG("WeapPickup", 1);
-	gmsgItemPickup = REG_USER_MSG("ItemPickup", -1);
-	gmsgShowMenu = REG_USER_MSG("ShowMenu", -1);
-	gmsgVoteMenu = REG_USER_MSG("VoteMenu", -1);
-	gmsgShake = REG_USER_MSG("ScreenShake", sizeof(ScreenShake));
-	gmsgFade = REG_USER_MSG("ScreenFade", sizeof(ScreenFade));
-	gmsgTeamNames = REG_USER_MSG("TeamNames", -1);
-	gmsgAllowSpec = REG_USER_MSG("AllowSpec", 1);
+	//gmsgHudText = g_engfuncs.pfnRegUserMsg( "HudTextPro", -1 );
+	gmsgHudText = g_engfuncs.pfnRegUserMsg("HudText", -1); // we don't use the message but 3rd party addons may!
+	gmsgSayText = g_engfuncs.pfnRegUserMsg("SayText", -1);
+	gmsgTextMsg = g_engfuncs.pfnRegUserMsg("TextMsg", -1);
+	gmsgResetHUD = g_engfuncs.pfnRegUserMsg("ResetHUD", 0); // called every respawn
+	gmsgInitHUD = g_engfuncs.pfnRegUserMsg("InitHUD", 0);	// called every time a new player joins the server
+	gmsgShowGameTitle = g_engfuncs.pfnRegUserMsg("GameTitle", 1);
+	gmsgDeathMsg = g_engfuncs.pfnRegUserMsg("DeathMsg", -1);
+	gmsgScoreInfo = g_engfuncs.pfnRegUserMsg("ScoreInfo", 5);
+	gmsgExtraInfo = g_engfuncs.pfnRegUserMsg("ExtraInfo", 3);
+	gmsgTeamScore = g_engfuncs.pfnRegUserMsg("TeamScore", 3); // sets the score of a team on the scoreboard
+	gmsgGameMode = g_engfuncs.pfnRegUserMsg("GameMode", 1);
+	gmsgMOTD = g_engfuncs.pfnRegUserMsg("MOTD", -1);
+	gmsgVGUIMenu = g_engfuncs.pfnRegUserMsg("VGUIMenu", 1);
+	gmsgServerName = g_engfuncs.pfnRegUserMsg("ServerName", -1);
+	gmsgAmmoPickup = g_engfuncs.pfnRegUserMsg("AmmoPickup", 2);
+	gmsgWeapPickup = g_engfuncs.pfnRegUserMsg("WeapPickup", 1);
+	gmsgItemPickup = g_engfuncs.pfnRegUserMsg("ItemPickup", -1);
+	gmsgShowMenu = g_engfuncs.pfnRegUserMsg("ShowMenu", -1);
+	gmsgVoteMenu = g_engfuncs.pfnRegUserMsg("VoteMenu", -1);
+	gmsgShake = g_engfuncs.pfnRegUserMsg("ScreenShake", sizeof(ScreenShake));
+	gmsgFade = g_engfuncs.pfnRegUserMsg("ScreenFade", sizeof(ScreenFade));
+	gmsgTeamNames = g_engfuncs.pfnRegUserMsg("TeamNames", -1);
+	gmsgAllowSpec = g_engfuncs.pfnRegUserMsg("AllowSpec", 1);
 
-	gmsgWeapons = REG_USER_MSG("Weapons", 8);
-	gmsgAmmo = REG_USER_MSG("Ammo", AMMO_TYPES);
+	gmsgWeapons = g_engfuncs.pfnRegUserMsg("Weapons", 8);
+	gmsgAmmo = g_engfuncs.pfnRegUserMsg("Ammo", AMMO_TYPES);
 
-	gmsgHitFeedback = REG_USER_MSG("HitFeedback", 4);
-	gmsgBlood = REG_USER_MSG("Blood", -1);
-	gmsgPredictedSound = REG_USER_MSG("PredSound", -1);
+	gmsgHitFeedback = g_engfuncs.pfnRegUserMsg("HitFeedback", 4);
+	gmsgBlood = g_engfuncs.pfnRegUserMsg("Blood", -1);
+	gmsgPredictedSound = g_engfuncs.pfnRegUserMsg("PredSound", -1);
 
-	gmsgStatusIcon = REG_USER_MSG("StatusIcon", -1);
+	gmsgStatusIcon = g_engfuncs.pfnRegUserMsg("StatusIcon", -1);
 }

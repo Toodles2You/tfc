@@ -192,24 +192,24 @@ void Bot_ServerCommand()
 
 void Bot_RegisterCvars()
 {
-	CVAR_REGISTER(&cv_bot_traceview);
-	CVAR_REGISTER(&cv_bot_stop);
-	CVAR_REGISTER(&cv_bot_show_nav);
-	CVAR_REGISTER(&cv_bot_show_danger);
-	CVAR_REGISTER(&cv_bot_nav_edit);
-	CVAR_REGISTER(&cv_bot_nav_zdraw);
-	CVAR_REGISTER(&cv_bot_walk);
-	CVAR_REGISTER(&cv_bot_difficulty);
-	CVAR_REGISTER(&cv_bot_debug);
-	CVAR_REGISTER(&cv_bot_quicksave);
-	CVAR_REGISTER(&cv_bot_quota);
-	CVAR_REGISTER(&cv_bot_quota_match);
-	CVAR_REGISTER(&cv_bot_prefix);
-	CVAR_REGISTER(&cv_bot_join_team);
-	CVAR_REGISTER(&cv_bot_join_after_player);
-	CVAR_REGISTER(&cv_bot_auto_vacate);
-	CVAR_REGISTER(&cv_bot_zombie);
-	CVAR_REGISTER(&cv_bot_defer_to_human);
-	CVAR_REGISTER(&cv_bot_chatter);
-	CVAR_REGISTER(&cv_bot_profile_db);
+	g_engfuncs.pfnCVarRegister(&cv_bot_traceview);
+	g_engfuncs.pfnCVarRegister(&cv_bot_stop);
+	g_engfuncs.pfnCVarRegister(&cv_bot_show_nav);
+	g_engfuncs.pfnCVarRegister(&cv_bot_show_danger);
+	g_engfuncs.pfnCVarRegister(&cv_bot_nav_edit);
+	g_engfuncs.pfnCVarRegister(&cv_bot_nav_zdraw);
+	g_engfuncs.pfnCVarRegister(&cv_bot_walk);
+	g_engfuncs.pfnCVarRegister(&cv_bot_difficulty);
+	g_engfuncs.pfnCVarRegister(&cv_bot_debug);
+	g_engfuncs.pfnCVarRegister(&cv_bot_quicksave);
+	g_engfuncs.pfnCVarRegister(&cv_bot_quota);
+	g_engfuncs.pfnCVarRegister(&cv_bot_quota_match);
+	g_engfuncs.pfnCVarRegister(&cv_bot_prefix);
+	g_engfuncs.pfnCVarRegister(&cv_bot_join_team);
+	g_engfuncs.pfnCVarRegister(&cv_bot_join_after_player);
+	g_engfuncs.pfnCVarRegister(&cv_bot_auto_vacate);
+	g_engfuncs.pfnCVarRegister(&cv_bot_zombie);
+	g_engfuncs.pfnCVarRegister(&cv_bot_defer_to_human);
+	g_engfuncs.pfnCVarRegister(&cv_bot_chatter);
+	g_engfuncs.pfnCVarRegister(&cv_bot_profile_db);
 }

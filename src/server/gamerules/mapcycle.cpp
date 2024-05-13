@@ -182,7 +182,7 @@ static bool ReloadMapCycleFile(char* filename, mapcycle_t* cycle)
 	char szMap[32];
 	int length;
 	char* pFileList;
-	char* aFileList = pFileList = (char*)LOAD_FILE_FOR_ME(filename, &length);
+	char* aFileList = pFileList = (char*)g_engfuncs.pfnLoadFileForMe(filename, &length);
 	bool hasbuffer;
 	mapcycle_item_s *item, *newlist = nullptr, *next;
 
@@ -212,7 +212,7 @@ static bool ReloadMapCycleFile(char* filename, mapcycle_t* cycle)
 			}
 
 			// Check map
-			if (IS_MAP_VALID(szMap))
+			if (g_engfuncs.pfnIsMapValid(szMap))
 			{
 				// Create entry
 				char* s;
@@ -256,11 +256,11 @@ static bool ReloadMapCycleFile(char* filename, mapcycle_t* cycle)
 			}
 			else
 			{
-				ALERT(at_console, "Skipping %s from mapcycle, not a valid map\n", szMap);
+				g_engfuncs.pfnAlertMessage(at_console, "Skipping %s from mapcycle, not a valid map\n", szMap);
 			}
 		}
 
-		FREE_FILE(aFileList);
+		g_engfuncs.pfnFreeFile(aFileList);
 	}
 
 	// Fixup circular list pointer
@@ -375,7 +375,7 @@ static void ExtractCommandString(char* s, char* szCommand)
 
 static bool CheckMapCycle()
 {
-	char* mapcfile = (char*)CVAR_GET_STRING("mapcyclefile");
+	char* mapcfile = (char*)g_engfuncs.pfnCVarGetString("mapcyclefile");
 
 	// Has the map cycle filename changed?
 	if (stricmp(mapcfile, szPreviousMapCycleFile))
@@ -386,7 +386,7 @@ static bool CheckMapCycle()
 
 		if (!ReloadMapCycleFile(mapcfile, &mapcycle) || (!mapcycle.items))
 		{
-			ALERT(at_console, "Unable to load map cycle file %s\n", mapcfile);
+			g_engfuncs.pfnAlertMessage(at_console, "Unable to load map cycle file %s\n", mapcfile);
 			return false;
 		}
 	}
@@ -414,7 +414,7 @@ void CHalfLifeMultiplay::ChangeLevel()
 	{
 		EnterState(GR_STATE_GAME_OVER);
 
-		ALERT(at_console, "CHANGE LEVEL: %s\n", nextlevel.c_str());
+		g_engfuncs.pfnAlertMessage(at_console, "CHANGE LEVEL: %s\n", nextlevel.c_str());
 
 		g_engfuncs.pfnChangeLevel(nextlevel.c_str(), nullptr);
 		nextlevel.clear();
@@ -493,27 +493,27 @@ void CHalfLifeMultiplay::ChangeLevel()
 		strcpy(szRules, item->rulebuffer);
 	}
 
-	if (!IS_MAP_VALID(szNextMap))
+	if (!g_engfuncs.pfnIsMapValid(szNextMap))
 	{
 		strcpy(szNextMap, szFirstMapInList);
 	}
 
 	EnterState(GR_STATE_GAME_OVER);
 
-	ALERT(at_console, "CHANGE LEVEL: %s\n", szNextMap);
+	g_engfuncs.pfnAlertMessage(at_console, "CHANGE LEVEL: %s\n", szNextMap);
 	if (0 != minplayers || 0 != maxplayers)
 	{
-		ALERT(at_console, "PLAYER COUNT:  min %i max %i current %i\n", minplayers, maxplayers, curplayers);
+		g_engfuncs.pfnAlertMessage(at_console, "PLAYER COUNT:  min %i max %i current %i\n", minplayers, maxplayers, curplayers);
 	}
 	if (strlen(szRules) > 0)
 	{
-		ALERT(at_console, "RULES:  %s\n", szRules);
+		g_engfuncs.pfnAlertMessage(at_console, "RULES:  %s\n", szRules);
 	}
 
-	CHANGE_LEVEL(szNextMap, nullptr);
+	g_engfuncs.pfnChangeLevel(szNextMap, nullptr);
 	if (strlen(szCommands) > 0)
 	{
-		SERVER_COMMAND(szCommands);
+		g_engfuncs.pfnServerCommand(szCommands);
 	}
 }
 

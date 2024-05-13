@@ -63,35 +63,35 @@ static bool SV_InitServer()
 // This gets called one time when the game is initialied
 void GameDLLInit()
 {
-	g_psv_cheats = CVAR_GET_POINTER("sv_cheats");
+	g_psv_cheats = g_engfuncs.pfnCVarGetPointer("sv_cheats");
 	mp_consistency = g_engfuncs.pfnCVarGetPointer("mp_consistency");
 
 	if (!SV_InitServer())
 	{
 		g_engfuncs.pfnServerPrint("Error initializing server\n");
 		//Shut the game down as soon as possible.
-		SERVER_COMMAND("quit\n");
+		g_engfuncs.pfnServerCommand("quit\n");
 		return;
 	}
 
-	CVAR_REGISTER(&allow_spectators);
+	g_engfuncs.pfnCVarRegister(&allow_spectators);
 
-	CVAR_REGISTER(&teamplay);
-	CVAR_REGISTER(&fraglimit);
-	CVAR_REGISTER(&timelimit);
+	g_engfuncs.pfnCVarRegister(&teamplay);
+	g_engfuncs.pfnCVarRegister(&fraglimit);
+	g_engfuncs.pfnCVarRegister(&timelimit);
 
-	CVAR_REGISTER(&friendlyfire);
-	CVAR_REGISTER(&falldamage);
-	CVAR_REGISTER(&weaponstay);
-	CVAR_REGISTER(&forcerespawn);
-	CVAR_REGISTER(&aimcrosshair);
-	CVAR_REGISTER(&decalfrequency);
-	CVAR_REGISTER(&teamlist);
-	CVAR_REGISTER(&teamoverride);
-	CVAR_REGISTER(&defaultteam);
-	CVAR_REGISTER(&allowmonsters);
+	g_engfuncs.pfnCVarRegister(&friendlyfire);
+	g_engfuncs.pfnCVarRegister(&falldamage);
+	g_engfuncs.pfnCVarRegister(&weaponstay);
+	g_engfuncs.pfnCVarRegister(&forcerespawn);
+	g_engfuncs.pfnCVarRegister(&aimcrosshair);
+	g_engfuncs.pfnCVarRegister(&decalfrequency);
+	g_engfuncs.pfnCVarRegister(&teamlist);
+	g_engfuncs.pfnCVarRegister(&teamoverride);
+	g_engfuncs.pfnCVarRegister(&defaultteam);
+	g_engfuncs.pfnCVarRegister(&allowmonsters);
 
-	CVAR_REGISTER(&mp_chattime);
+	g_engfuncs.pfnCVarRegister(&mp_chattime);
 
 	CVoteManager::RegisterCvars();
 

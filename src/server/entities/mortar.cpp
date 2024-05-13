@@ -68,12 +68,12 @@ bool CFuncMortarField::KeyValue(KeyValueData* pkvd)
 {
 	if (streq(pkvd->szKeyName, "m_iszXController"))
 	{
-		m_iszXController = ALLOC_STRING(pkvd->szValue);
+		m_iszXController = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "m_iszYController"))
 	{
-		m_iszYController = ALLOC_STRING(pkvd->szValue);
+		m_iszYController = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "m_flSpread"))
@@ -111,9 +111,9 @@ bool CFuncMortarField::Spawn()
 
 void CFuncMortarField::Precache()
 {
-	PRECACHE_SOUND("weapons/mortar.wav");
-	PRECACHE_SOUND("weapons/mortarhit.wav");
-	PRECACHE_MODEL("sprites/lgtning.spr");
+	g_engfuncs.pfnPrecacheSound("weapons/mortar.wav");
+	g_engfuncs.pfnPrecacheSound("weapons/mortarhit.wav");
+	g_engfuncs.pfnPrecacheModel("sprites/lgtning.spr");
 }
 
 
@@ -122,8 +122,8 @@ void CFuncMortarField::FieldUse(CBaseEntity* pActivator, CBaseEntity* pCaller, U
 {
 	Vector vecStart;
 
-	vecStart.x = RANDOM_FLOAT(v.mins.x, v.maxs.x);
-	vecStart.y = RANDOM_FLOAT(v.mins.y, v.maxs.y);
+	vecStart.x = g_engfuncs.pfnRandomFloat(v.mins.x, v.maxs.x);
+	vecStart.y = g_engfuncs.pfnRandomFloat(v.mins.y, v.maxs.y);
 	vecStart.z = v.maxs.z;
 
 	switch (m_fControl)
@@ -161,14 +161,14 @@ void CFuncMortarField::FieldUse(CBaseEntity* pActivator, CBaseEntity* pCaller, U
 	break;
 	}
 
-	EmitSound("weapons/mortar.wav", CHAN_VOICE, VOL_NORM, ATTN_NONE, RANDOM_LONG(95, 124));
+	EmitSound("weapons/mortar.wav", CHAN_VOICE, VOL_NORM, ATTN_NONE, g_engfuncs.pfnRandomLong(95, 124));
 
 	float t = 2.5;
 	for (int i = 0; i < m_iCount; i++)
 	{
 		Vector vecSpot = vecStart;
-		vecSpot.x += RANDOM_FLOAT(-m_flSpread, m_flSpread);
-		vecSpot.y += RANDOM_FLOAT(-m_flSpread, m_flSpread);
+		vecSpot.x += g_engfuncs.pfnRandomFloat(-m_flSpread, m_flSpread);
+		vecSpot.y += g_engfuncs.pfnRandomFloat(-m_flSpread, m_flSpread);
 
 		TraceResult tr;
 		util::TraceLine(vecSpot, vecSpot + Vector(0, 0, -1) * 4096, util::ignore_monsters, this, &tr);
@@ -179,7 +179,7 @@ void CFuncMortarField::FieldUse(CBaseEntity* pActivator, CBaseEntity* pCaller, U
 
 		CBaseEntity* pMortar = Create("monster_mortar", tr.vecEndPos, Vector(0, 0, 0), *pentOwner);
 		pMortar->v.nextthink = gpGlobals->time + t;
-		t += RANDOM_FLOAT(0.2, 0.5);
+		t += g_engfuncs.pfnRandomFloat(0.2, 0.5);
 	}
 }
 
@@ -217,7 +217,7 @@ bool CMortar::Spawn()
 
 void CMortar::Precache()
 {
-	m_spriteTexture = PRECACHE_MODEL("sprites/lgtning.spr");
+	m_spriteTexture = g_engfuncs.pfnPrecacheModel("sprites/lgtning.spr");
 }
 
 void CMortar::MortarExplode()

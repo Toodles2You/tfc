@@ -44,7 +44,7 @@ bool CItem::Spawn()
 
 	if (g_engfuncs.pfnDropToFloor(&v) == 0)
 	{
-		ALERT(at_error, "Item %s fell out of level at %f,%f,%f", STRING(v.classname), v.origin.x, v.origin.y, v.origin.z);
+		g_engfuncs.pfnAlertMessage(at_error, "Item %s fell out of level at %f,%f,%f", STRING(v.classname), v.origin.x, v.origin.y, v.origin.z);
 		return false;
 	}
 

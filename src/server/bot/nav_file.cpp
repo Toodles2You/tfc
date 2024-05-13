@@ -829,7 +829,7 @@ void LoadLocationFile( const char *filename )
 		strcpy( dot, ".loc" );
 
 		int locDataLength;
-		char *locDataFile = (char *)LOAD_FILE_FOR_ME( const_cast<char *>( locFilename ), &locDataLength );
+		char *locDataFile = (char *)g_engfuncs.pfnLoadFileForMe( const_cast<char *>( locFilename ), &locDataLength );
 		char *locData = locDataFile;
 
 		if (locData)
@@ -873,7 +873,7 @@ void LoadLocationFile( const char *filename )
 				}
 			}
 
-			FREE_FILE( locDataFile );
+			g_engfuncs.pfnFreeFile( locDataFile );
 		}
 	}
 }

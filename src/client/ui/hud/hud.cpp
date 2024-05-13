@@ -332,8 +332,8 @@ void CHud::Init()
 	// VGUI Menus
 	HOOK_MESSAGE(VGUIMenu);
 
-	CVAR_CREATE("hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO); // controls whether or not to suicide immediately on TF class switch
-	CVAR_CREATE("hud_takesshots", "0", FCVAR_ARCHIVE);					   // controls whether or not to automatically take screenshots at the end of a round
+	gEngfuncs.pfnRegisterVariable("hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO); // controls whether or not to suicide immediately on TF class switch
+	gEngfuncs.pfnRegisterVariable("hud_takesshots", "0", FCVAR_ARCHIVE);					   // controls whether or not to automatically take screenshots at the end of a round
 
 	m_cColors[CHud::COLOR_DEFAULT].r = 255;
 	m_cColors[CHud::COLOR_DEFAULT].g = 255;
@@ -357,23 +357,23 @@ void CHud::Init()
 
 	m_iFOV = 0;
 
-	zoom_sensitivity_ratio = CVAR_CREATE("zoom_sensitivity_ratio", "1.0", 0);
+	zoom_sensitivity_ratio = gEngfuncs.pfnRegisterVariable("zoom_sensitivity_ratio", "1.0", 0);
 	cl_fov = gEngfuncs.pfnRegisterVariable("cl_fov", "90", FCVAR_ARCHIVE);
 	m_pCvarCrosshair = gEngfuncs.pfnGetCvarPointer("crosshair");
-	m_pCvarStealMouse = CVAR_CREATE("hud_capturemouse", "0", FCVAR_ARCHIVE);
-	m_pCvarDraw = CVAR_CREATE("hud_draw", "1", FCVAR_ARCHIVE);
-	m_pCvarWidescreen = CVAR_CREATE("hud_widescreen", "1", FCVAR_ARCHIVE);
-	m_pCvarColor = CVAR_CREATE("hud_color", "FFA000", FCVAR_ARCHIVE);
-	m_pCvarTeamColor = CVAR_CREATE("hud_teamcolor", "1", FCVAR_ARCHIVE);
-	cl_rollangle = CVAR_CREATE("cl_rollangle", "2.0", FCVAR_ARCHIVE);
-	cl_rollspeed = CVAR_CREATE("cl_rollspeed", "200", FCVAR_ARCHIVE);
-	cl_bobtilt = CVAR_CREATE("cl_bobtilt", "0", FCVAR_ARCHIVE);
+	m_pCvarStealMouse = gEngfuncs.pfnRegisterVariable("hud_capturemouse", "0", FCVAR_ARCHIVE);
+	m_pCvarDraw = gEngfuncs.pfnRegisterVariable("hud_draw", "1", FCVAR_ARCHIVE);
+	m_pCvarWidescreen = gEngfuncs.pfnRegisterVariable("hud_widescreen", "1", FCVAR_ARCHIVE);
+	m_pCvarColor = gEngfuncs.pfnRegisterVariable("hud_color", "FFA000", FCVAR_ARCHIVE);
+	m_pCvarTeamColor = gEngfuncs.pfnRegisterVariable("hud_teamcolor", "1", FCVAR_ARCHIVE);
+	cl_rollangle = gEngfuncs.pfnRegisterVariable("cl_rollangle", "2.0", FCVAR_ARCHIVE);
+	cl_rollspeed = gEngfuncs.pfnRegisterVariable("cl_rollspeed", "200", FCVAR_ARCHIVE);
+	cl_bobtilt = gEngfuncs.pfnRegisterVariable("cl_bobtilt", "0", FCVAR_ARCHIVE);
 	r_decals = gEngfuncs.pfnGetCvarPointer("r_decals");
 	violence_hblood = gEngfuncs.pfnGetCvarPointer("violence_hblood");
 	violence_hgibs = gEngfuncs.pfnGetCvarPointer("violence_hgibs");
 	m_pCvarSuitVolume = gEngfuncs.pfnGetCvarPointer("suitvolume");
 
-	cl_autowepswitch = CVAR_CREATE("cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO);
+	cl_autowepswitch = gEngfuncs.pfnRegisterVariable("cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO);
 	cl_grenadetoggle = gEngfuncs.pfnRegisterVariable("cl_grenadetoggle", "0", FCVAR_ARCHIVE | FCVAR_USERINFO);
 	cl_righthand = gEngfuncs.pfnRegisterVariable("cl_righthand", "1", FCVAR_ARCHIVE | FCVAR_USERINFO);
 

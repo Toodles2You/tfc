@@ -68,7 +68,7 @@ bool CRuleEntity::KeyValue(KeyValueData* pkvd)
 {
 	if (streq(pkvd->szKeyName, "master"))
 	{
-		SetMaster(ALLOC_STRING(pkvd->szValue));
+		SetMaster(g_engfuncs.pfnAllocString(pkvd->szValue));
 		return true;
 	}
 
@@ -240,7 +240,7 @@ public:
 	bool KeyValue(KeyValueData* pkvd) override;
 
 	inline bool MessageToAll() { return (v.spawnflags & SF_ENVTEXT_ALLPLAYERS) != 0; }
-	inline void MessageSet(const char* pMessage) { v.message = ALLOC_STRING(pMessage); }
+	inline void MessageSet(const char* pMessage) { v.message = g_engfuncs.pfnAllocString(pMessage); }
 	inline const char* MessageGet() { return STRING(v.message); }
 
 private:
@@ -540,22 +540,22 @@ bool CGamePlayerZone::KeyValue(KeyValueData* pkvd)
 {
 	if (streq(pkvd->szKeyName, "intarget"))
 	{
-		m_iszInTarget = ALLOC_STRING(pkvd->szValue);
+		m_iszInTarget = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "outtarget"))
 	{
-		m_iszOutTarget = ALLOC_STRING(pkvd->szValue);
+		m_iszOutTarget = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "incount"))
 	{
-		m_iszInCount = ALLOC_STRING(pkvd->szValue);
+		m_iszInCount = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "outcount"))
 	{
-		m_iszOutCount = ALLOC_STRING(pkvd->szValue);
+		m_iszOutCount = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 
@@ -827,7 +827,7 @@ bool CGamePlayerEquip::KeyValue(KeyValueData* pkvd)
 
 			util::StripToken(pkvd->szKeyName, tmp);
 
-			m_weaponNames[i] = ALLOC_STRING(tmp);
+			m_weaponNames[i] = g_engfuncs.pfnAllocString(tmp);
 			m_weaponCount[i] = atoi(pkvd->szValue);
 			m_weaponCount[i] = std::max(1, m_weaponCount[i]);
 			return true;

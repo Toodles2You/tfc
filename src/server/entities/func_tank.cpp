@@ -215,12 +215,12 @@ bool CFuncTank::Spawn()
 void CFuncTank::Precache()
 {
 	if (!FStringNull(m_iszSpriteSmoke))
-		PRECACHE_MODEL((char*)STRING(m_iszSpriteSmoke));
+		g_engfuncs.pfnPrecacheModel((char*)STRING(m_iszSpriteSmoke));
 	if (!FStringNull(m_iszSpriteFlash))
-		PRECACHE_MODEL((char*)STRING(m_iszSpriteFlash));
+		g_engfuncs.pfnPrecacheModel((char*)STRING(m_iszSpriteFlash));
 
 	if (!FStringNull(v.noise))
-		PRECACHE_SOUND((char*)STRING(v.noise));
+		g_engfuncs.pfnPrecacheSound((char*)STRING(v.noise));
 }
 
 
@@ -283,17 +283,17 @@ bool CFuncTank::KeyValue(KeyValueData* pkvd)
 	}
 	else if (streq(pkvd->szKeyName, "spritesmoke"))
 	{
-		m_iszSpriteSmoke = ALLOC_STRING(pkvd->szValue);
+		m_iszSpriteSmoke = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "spriteflash"))
 	{
-		m_iszSpriteFlash = ALLOC_STRING(pkvd->szValue);
+		m_iszSpriteFlash = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "rotatesound"))
 	{
-		v.noise = ALLOC_STRING(pkvd->szValue);
+		v.noise = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "persistence"))
@@ -328,7 +328,7 @@ bool CFuncTank::KeyValue(KeyValueData* pkvd)
 	}
 	else if (streq(pkvd->szKeyName, "master"))
 	{
-		m_iszMaster = ALLOC_STRING(pkvd->szValue);
+		m_iszMaster = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 
@@ -364,7 +364,7 @@ bool CFuncTank::StartControl(CBasePlayer* pController)
 			return false;
 	}
 
-	ALERT(at_console, "using TANK!\n");
+	g_engfuncs.pfnAlertMessage(at_console, "using TANK!\n");
 
 	m_pController = pController;
 	m_pController->SetWeaponHolstered(true);
@@ -383,7 +383,7 @@ void CFuncTank::StopControl()
 
 	m_pController->SetWeaponHolstered(false);
 
-	ALERT(at_console, "stopped using TANK\n");
+	g_engfuncs.pfnAlertMessage(at_console, "stopped using TANK\n");
 
 	v.nextthink = 0;
 	m_pController = nullptr;
@@ -481,7 +481,7 @@ void CFuncTank::Think()
 void CFuncTank::TrackTarget()
 {
 	TraceResult tr;
-	Entity* pPlayer = FIND_CLIENT_IN_PVS(edict());
+	Entity* pPlayer = g_engfuncs.pfnFindClientInPVS(edict());
 	bool updateTime = false, lineOfSight;
 	Vector angles, direction, targetPosition, barrelEnd;
 	Entity* pTarget;
@@ -658,9 +658,9 @@ void CFuncTank::Fire(const Vector& barrelEnd, const Vector& forward, CBaseEntity
 		if (!FStringNull(m_iszSpriteSmoke))
 		{
 			CSprite* pSprite = CSprite::SpriteCreate(STRING(m_iszSpriteSmoke), barrelEnd, true);
-			pSprite->AnimateAndDie(RANDOM_FLOAT(15.0, 20.0));
+			pSprite->AnimateAndDie(g_engfuncs.pfnRandomFloat(15.0, 20.0));
 			pSprite->SetTransparency(kRenderTransAlpha, v.rendercolor.x, v.rendercolor.y, v.rendercolor.z, 255, kRenderFxNone);
-			pSprite->v.velocity.z = RANDOM_FLOAT(40, 80);
+			pSprite->v.velocity.z = g_engfuncs.pfnRandomFloat(40, 80);
 			pSprite->SetScale(m_spriteScale);
 		}
 		if (!FStringNull(m_iszSpriteFlash))
@@ -683,8 +683,8 @@ void CFuncTank::TankTrace(const Vector& vecStart, const Vector& vecForward, cons
 {
 	// get circular gaussian spread
 	float x, y;
-	x = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
-	y = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
+	x = g_engfuncs.pfnRandomFloat(-0.5, 0.5) + g_engfuncs.pfnRandomFloat(-0.5, 0.5);
+	y = g_engfuncs.pfnRandomFloat(-0.5, 0.5) + g_engfuncs.pfnRandomFloat(-0.5, 0.5);
 
 	Vector vecDir = vecForward +
 					x * vecSpread.x * gpGlobals->v_right +
@@ -788,7 +788,7 @@ void CFuncTankLaser::Activate()
 	if (!GetLaser())
 	{
 		Remove();
-		ALERT(at_error, "Laser tank with no env_laser!\n");
+		g_engfuncs.pfnAlertMessage(at_error, "Laser tank with no env_laser!\n");
 	}
 	else
 	{
@@ -801,7 +801,7 @@ bool CFuncTankLaser::KeyValue(KeyValueData* pkvd)
 {
 	if (streq(pkvd->szKeyName, "laserentity"))
 	{
-		v.message = ALLOC_STRING(pkvd->szValue);
+		v.message = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 
@@ -1015,7 +1015,7 @@ void CFuncTankControls::Think()
 
 	if (pTarget == nullptr)
 	{
-		ALERT(at_console, "No tank %s\n", STRING(v.target));
+		g_engfuncs.pfnAlertMessage(at_console, "No tank %s\n", STRING(v.target));
 		return;
 	}
 

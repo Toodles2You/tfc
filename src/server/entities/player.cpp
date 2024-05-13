@@ -97,7 +97,7 @@ void CBasePlayer::Pain()
 {
 	float flRndSound; //sound randomizer
 
-	flRndSound = RANDOM_FLOAT(0, 1);
+	flRndSound = g_engfuncs.pfnRandomFloat(0, 1);
 
 	if (flRndSound <= 0.33)
 		EmitSound("player/pl_pain5.wav", CHAN_VOICE);
@@ -145,7 +145,7 @@ void CBasePlayer::DeathSound()
 	*/
 
 	// temporarily using pain sounds for death sounds
-	switch (RANDOM_LONG(1, 5))
+	switch (g_engfuncs.pfnRandomLong(1, 5))
 	{
 	case 1: EmitSound("player/pl_pain5.wav", CHAN_VOICE); break;
 	case 2: EmitSound("player/pl_pain6.wav", CHAN_VOICE); break;
@@ -598,7 +598,7 @@ void CBasePlayer::PlayerDeathFrame()
 	{
 		if (m_afButtonPressed != 0)
 		{
-			SERVER_COMMAND("reload\n");
+			g_engfuncs.pfnServerCommand("reload\n");
 		}
 	}
 }
@@ -889,7 +889,7 @@ void CBasePlayer::PreThink()
 
 			if (!pTrain || (pTrain->ObjectCaps() & FCAP_DIRECTIONAL_USE) == 0 || !pTrain->OnControls(this))
 			{
-				//ALERT( at_error, "In train mode with no train!\n" );
+				//g_engfuncs.pfnAlertMessage( at_error, "In train mode with no train!\n" );
 				v.flags &= ~FL_ONTRAIN;
 				m_iTrain = TRAIN_NEW | TRAIN_OFF;
 				return;
@@ -1069,7 +1069,7 @@ bool CBasePlayer::Restore(CRestore& restore)
 	// landmark isn't present.
 	if (0 == pSaveData->fUseLandmark)
 	{
-		ALERT(at_console, "No Landmark:%s\n", pSaveData->szLandmarkName);
+		g_engfuncs.pfnAlertMessage(at_console, "No Landmark:%s\n", pSaveData->szLandmarkName);
 
 		// default to normal spawn
 		auto spawn = g_pGameRules->GetPlayerSpawnSpot(this);
@@ -1159,7 +1159,7 @@ void CSprayCan::Think()
 
 	playernum = ENTINDEX(v.owner);
 
-	// ALERT(at_console, "Spray by player %i, %i of %i\n", playernum, (int)(v.frame + 1), nFrames);
+	// g_engfuncs.pfnAlertMessage(at_console, "Spray by player %i, %i of %i\n", playernum, (int)(v.frame + 1), nFrames);
 
 	util::MakeVectors(v.angles);
 	util::TraceLine(v.origin, v.origin + gpGlobals->v_forward * 128, util::ignore_monsters, pPlayer, &tr);
@@ -1182,7 +1182,7 @@ static Entity* GiveNamedItem_Common(CBaseEntity* toWhom, const char* pszName)
 	Entity* pent = g_engfuncs.pfnCreateNamedEntity(istr);
 	if (pent == nullptr)
 	{
-		ALERT(at_console, "NULL Ent in GiveNamedItem!\n");
+		g_engfuncs.pfnAlertMessage(at_console, "NULL Ent in GiveNamedItem!\n");
 		return nullptr;
 	}
 	pent->origin = toWhom->v.origin;
@@ -1300,20 +1300,20 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 		pEntity = util::FindEntityForward(this);
 		if (pEntity)
 		{
-			ALERT(at_console, "Classname: %s", STRING(pEntity->v.classname));
+			g_engfuncs.pfnAlertMessage(at_console, "Classname: %s", STRING(pEntity->v.classname));
 
 			if (!FStringNull(pEntity->v.targetname))
 			{
-				ALERT(at_console, " - Targetname: %s\n", STRING(pEntity->v.targetname));
+				g_engfuncs.pfnAlertMessage(at_console, " - Targetname: %s\n", STRING(pEntity->v.targetname));
 			}
 			else
 			{
-				ALERT(at_console, " - TargetName: No Targetname\n");
+				g_engfuncs.pfnAlertMessage(at_console, " - TargetName: No Targetname\n");
 			}
 
-			ALERT(at_console, "Model: %s\n", STRING(pEntity->v.model));
+			g_engfuncs.pfnAlertMessage(at_console, "Model: %s\n", STRING(pEntity->v.model));
 			if (!FStringNull(pEntity->v.globalname))
-				ALERT(at_console, "Globalname: %s\n", STRING(pEntity->v.globalname));
+				g_engfuncs.pfnAlertMessage(at_console, "Globalname: %s\n", STRING(pEntity->v.globalname));
 		}
 		break;
 
@@ -1328,9 +1328,9 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 		util::TraceLine(start, end, util::ignore_monsters, this, &tr);
 		if (tr.pHit)
 			pWorld = tr.pHit;
-		const char* pTextureName = TRACE_TEXTURE(pWorld, start, end);
+		const char* pTextureName = g_engfuncs.pfnTraceTexture(pWorld, start, end);
 		if (pTextureName)
-			ALERT(at_console, "Texture: %s (%c)\n", pTextureName, PM_FindTextureType(pTextureName));
+			g_engfuncs.pfnAlertMessage(at_console, "Texture: %s (%c)\n", pTextureName, PM_FindTextureType(pTextureName));
 	}
 	break;
 
@@ -1363,7 +1363,7 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 	{
 		if (WorldGraph.IsAvailable())
 		{
-			ALERT(at_console, "%d\n", WorldGraph.FindNearestNode(v.origin, bits_NODE_GROUP_REALM));
+			g_engfuncs.pfnAlertMessage(at_console, "%d\n", WorldGraph.FindNearestNode(v.origin, bits_NODE_GROUP_REALM));
 			WorldGraph.ShowNodeConnections(WorldGraph.FindNearestNode(v.origin, bits_NODE_GROUP_REALM));
 		}
 	}

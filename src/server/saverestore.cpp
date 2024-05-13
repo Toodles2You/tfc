@@ -171,7 +171,7 @@ unsigned short CSaveRestoreBuffer::TokenHash(const char* pszToken)
 	if (0 == m_data.tokenCount || nullptr == m_data.pTokens)
 	{
 		//if we're here it means trigger_changelevel is trying to actually save something when it's not supposed to.
-		ALERT(at_error, "No token table array in TokenHash()!\n");
+		g_engfuncs.pfnAlertMessage(at_error, "No token table array in TokenHash()!\n");
 		return 0;
 	}
 
@@ -184,7 +184,7 @@ unsigned short CSaveRestoreBuffer::TokenHash(const char* pszToken)
 		if (i > 50 && !beentheredonethat)
 		{
 			beentheredonethat = true;
-			ALERT(at_error, "CSaveRestoreBuffer :: TokenHash() is getting too full!\n");
+			g_engfuncs.pfnAlertMessage(at_error, "CSaveRestoreBuffer :: TokenHash() is getting too full!\n");
 		}
 #endif
 
@@ -201,7 +201,7 @@ unsigned short CSaveRestoreBuffer::TokenHash(const char* pszToken)
 
 	// Token hash table full!!!
 	// [Consider doing overflow table(s) after the main table & limiting linear hash table search]
-	ALERT(at_error, "CSaveRestoreBuffer :: TokenHash() is COMPLETELY FULL!\n");
+	g_engfuncs.pfnAlertMessage(at_error, "CSaveRestoreBuffer :: TokenHash() is COMPLETELY FULL!\n");
 	return 0;
 }
 
@@ -270,7 +270,7 @@ void CSave::WriteString(const char* pname, const int* stringId, int count)
 #else
 #if 0
 	if ( count != 1 )
-		ALERT( at_error, "No string arrays!\n" );
+		g_engfuncs.pfnAlertMessage( at_error, "No string arrays!\n" );
 	WriteString( pname, (char *)STRING(*stringId) );
 #endif
 
@@ -337,11 +337,11 @@ void CSave::WriteFunction(const char* pname, void** data, int count)
 {
 	const char* functionName;
 
-	functionName = NAME_FOR_FUNCTION((uint32)*data);
+	functionName = g_engfuncs.pfnNameForFunction((uint32)*data);
 	if (functionName)
 		BufferField(pname, strlen(functionName) + 1, functionName);
 	else
-		ALERT(at_error, "Invalid function pointer in entity!\n");
+		g_engfuncs.pfnAlertMessage(at_error, "Invalid function pointer in entity!\n");
 }
 
 
@@ -403,7 +403,7 @@ bool CSave::WriteFields(const char* pname, void* pBaseData, TYPEDESCRIPTION* pFi
 		case FIELD_ENTITY:
 		case FIELD_EHANDLE:
 			if (pTest->fieldSize > MAX_ENTITYARRAY)
-				ALERT(at_error, "Can't save more than %d entities in an array!!!\n", MAX_ENTITYARRAY);
+				g_engfuncs.pfnAlertMessage(at_error, "Can't save more than %d entities in an array!!!\n", MAX_ENTITYARRAY);
 			for (j = 0; j < pTest->fieldSize; j++)
 			{
 				switch (pTest->fieldType)
@@ -472,7 +472,7 @@ bool CSave::WriteFields(const char* pname, void* pBaseData, TYPEDESCRIPTION* pFi
 			WriteFunction(pTest->fieldName, (void**)pOutputData, pTest->fieldSize);
 			break;
 		default:
-			ALERT(at_error, "Bad field type\n");
+			g_engfuncs.pfnAlertMessage(at_error, "Bad field type\n");
 		}
 	}
 
@@ -511,7 +511,7 @@ void CSave::BufferHeader(const char* pname, int size)
 {
 	short hashvalue = TokenHash(pname);
 	if (size > 1 << (sizeof(short) * 8))
-		ALERT(at_error, "CSave :: BufferHeader() size parameter exceeds 'short'!\n");
+		g_engfuncs.pfnAlertMessage(at_error, "CSave :: BufferHeader() size parameter exceeds 'short'!\n");
 	BufferData((const char*)&size, sizeof(short));
 	BufferData((const char*)&hashvalue, sizeof(short));
 }
@@ -521,7 +521,7 @@ void CSave::BufferData(const char* pdata, int size)
 {
 	if (m_data.size + size > m_data.bufferSize)
 	{
-		ALERT(at_error, "Save/Restore overflow!\n");
+		g_engfuncs.pfnAlertMessage(at_error, "Save/Restore overflow!\n");
 		m_data.size = m_data.bufferSize;
 		return;
 	}
@@ -595,16 +595,16 @@ int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCoun
 						{
 							int string;
 
-							string = ALLOC_STRING((char*)pInputData);
+							string = g_engfuncs.pfnAllocString((char*)pInputData);
 
 							*((int*)pOutputData) = string;
 
 							if (!FStringNull(string) && m_precache)
 							{
 								if (pTest->fieldType == FIELD_MODELNAME)
-									PRECACHE_MODEL((char*)STRING(string));
+									g_engfuncs.pfnPrecacheModel((char*)STRING(string));
 								else if (pTest->fieldType == FIELD_SOUNDNAME)
-									PRECACHE_SOUND((char*)STRING(string));
+									g_engfuncs.pfnPrecacheSound((char*)STRING(string));
 							}
 						}
 						break;
@@ -691,18 +691,18 @@ int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCoun
 						if (strlen((char*)pInputData) == 0)
 							*((int*)pOutputData) = 0;
 						else
-							*((int*)pOutputData) = FUNCTION_FROM_NAME((char*)pInputData);
+							*((int*)pOutputData) = g_engfuncs.pfnFunctionFromName((char*)pInputData);
 						break;
 
 					default:
-						ALERT(at_error, "Bad field type\n");
+						g_engfuncs.pfnAlertMessage(at_error, "Bad field type\n");
 					}
 				}
 			}
 #if 0
 			else
 			{
-				ALERT( at_console, "Skipping global field %s\n", pName );
+				g_engfuncs.pfnAlertMessage( at_console, "Skipping global field %s\n", pName );
 			}
 #endif
 			return fieldNumber;
@@ -732,7 +732,7 @@ bool CRestore::ReadFields(const char* pname, void* pBaseData, TYPEDESCRIPTION* p
 	// Check the struct name
 	if (token != TokenHash(pname)) // Field Set marker
 	{
-		//		ALERT( at_error, "Expected %s found %s!\n", pname, BufferPointer() );
+		//		g_engfuncs.pfnAlertMessage( at_error, "Expected %s found %s!\n", pname, BufferPointer() );
 		BufferRewind(2 * sizeof(short));
 		return false;
 	}
@@ -821,7 +821,7 @@ void CRestore::BufferReadBytes(char* pOutput, int size)
 
 	if ((m_data.size + size) > m_data.bufferSize)
 	{
-		ALERT(at_error, "Restore overflow!\n");
+		g_engfuncs.pfnAlertMessage(at_error, "Restore overflow!\n");
 		m_data.size = m_data.bufferSize;
 		return;
 	}

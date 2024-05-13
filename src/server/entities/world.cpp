@@ -128,11 +128,11 @@ bool CDecal::KeyValue(KeyValueData* pkvd)
 {
 	if (streq(pkvd->szKeyName, "texture"))
 	{
-		v.skin = DECAL_INDEX(pkvd->szValue);
+		v.skin = g_engfuncs.pfnDecalIndex(pkvd->szValue);
 
 		if (v.skin < 0)
 		{
-			ALERT(at_console, "Can't find decal %s\n", pkvd->szValue);
+			g_engfuncs.pfnAlertMessage(at_console, "Can't find decal %s\n", pkvd->szValue);
 		}
 
 		return true;
@@ -180,11 +180,11 @@ void CGlobalState::DumpGlobals()
 	static const char* estates[] = {"Off", "On", "Dead"};
 	globalentity_t* pTest;
 
-	ALERT(at_console, "-- Globals --\n");
+	g_engfuncs.pfnAlertMessage(at_console, "-- Globals --\n");
 	pTest = m_pList;
 	while (pTest)
 	{
-		ALERT(at_console, "%s: %s (%s)\n", pTest->name, pTest->levelName, estates[pTest->state]);
+		g_engfuncs.pfnAlertMessage(at_console, "%s: %s (%s)\n", pTest->name, pTest->levelName, estates[pTest->state]);
 		pTest = pTest->pNext;
 	}
 }
@@ -360,7 +360,7 @@ CWorld::CWorld(Entity* containingEntity) : CBaseEntity(containingEntity)
 {
 	if (World)
 	{
-		ALERT(at_error, "Do not create multiple instances of worldspawn\n");
+		g_engfuncs.pfnAlertMessage(at_error, "Do not create multiple instances of worldspawn\n");
 		return;
 	}
 
@@ -415,20 +415,20 @@ void CWorld::Precache()
 	BotPrecache();
 #endif
 
-	LIGHT_STYLE(0, "m");
-	LIGHT_STYLE(1, "mmnmmommommnonmmonqnmmo");
-	LIGHT_STYLE(2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
-	LIGHT_STYLE(3, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg");
-	LIGHT_STYLE(4, "mamamamamama");
-	LIGHT_STYLE(5, "jklmnopqrstuvwxyzyxwvutsrqponmlkj");
-	LIGHT_STYLE(6, "nmonqnmomnmomomno");
-	LIGHT_STYLE(7, "mmmaaaabcdefgmmmmaaaammmaamm");
-	LIGHT_STYLE(8, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa");
-	LIGHT_STYLE(9, "aaaaaaaazzzzzzzz");
-	LIGHT_STYLE(10, "mmamammmmammamamaaamammma");
-	LIGHT_STYLE(11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
-	LIGHT_STYLE(12, "mmnnmmnnnmmnn");
-	LIGHT_STYLE(63, "a");
+	g_engfuncs.pfnLightStyle(0, "m");
+	g_engfuncs.pfnLightStyle(1, "mmnmmommommnonmmonqnmmo");
+	g_engfuncs.pfnLightStyle(2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
+	g_engfuncs.pfnLightStyle(3, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg");
+	g_engfuncs.pfnLightStyle(4, "mamamamamama");
+	g_engfuncs.pfnLightStyle(5, "jklmnopqrstuvwxyzyxwvutsrqponmlkj");
+	g_engfuncs.pfnLightStyle(6, "nmonqnmomnmomomno");
+	g_engfuncs.pfnLightStyle(7, "mmmaaaabcdefgmmmmaaaammmaamm");
+	g_engfuncs.pfnLightStyle(8, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa");
+	g_engfuncs.pfnLightStyle(9, "aaaaaaaazzzzzzzz");
+	g_engfuncs.pfnLightStyle(10, "mmamammmmammamamaaamammma");
+	g_engfuncs.pfnLightStyle(11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
+	g_engfuncs.pfnLightStyle(12, "mmnnmmnnnmmnn");
+	g_engfuncs.pfnLightStyle(63, "a");
 
 #ifdef HALFLIFE_NODEGRAPH
 	WorldGraph.InitGraph();
@@ -444,12 +444,12 @@ void CWorld::Precache()
 		{ // Load the node graph for this level
 			if (!WorldGraph.FLoadGraph((char*)STRING(gpGlobals->mapname)))
 			{ // couldn't load, so alloc and prepare to build a graph.
-				ALERT(at_console, "*Error opening .NOD file\n");
+				g_engfuncs.pfnAlertMessage(at_console, "*Error opening .NOD file\n");
 				WorldGraph.AllocNodes();
 			}
 			else
 			{
-				ALERT(at_console, "\n*Graph Loaded!\n");
+				g_engfuncs.pfnAlertMessage(at_console, "\n*Graph Loaded!\n");
 			}
 		}
 
@@ -458,9 +458,9 @@ void CWorld::Precache()
 	}
 #endif
 
-	CVAR_SET_FLOAT("sv_zmax", (v.speed > 0) ? v.speed : 4096);
+	g_engfuncs.pfnCVarSetFloat("sv_zmax", (v.speed > 0) ? v.speed : 4096);
 
-	CVAR_SET_FLOAT("mp_defaultteam", ((v.spawnflags & SF_WORLD_FORCETEAM) != 0) ? 1 : 0);
+	g_engfuncs.pfnCVarSetFloat("mp_defaultteam", ((v.spawnflags & SF_WORLD_FORCETEAM) != 0) ? 1 : 0);
 }
 
 
@@ -469,7 +469,7 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 	if (streq(pkvd->szKeyName, "skyname"))
 	{
 		// Sent over net now.
-		CVAR_SET_STRING("sv_skyname", pkvd->szValue);
+		g_engfuncs.pfnCVarSetString("sv_skyname", pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "sounds"))
@@ -481,7 +481,7 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 	{
 		// Sent over net now.
 		v.scale = atof(pkvd->szValue) * (1.0 / 8.0);
-		CVAR_SET_FLOAT("sv_wateramp", v.scale);
+		g_engfuncs.pfnCVarSetFloat("sv_wateramp", v.scale);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "MaxRange"))
@@ -491,7 +491,7 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 	}
 	else if (streq(pkvd->szKeyName, "chaptertitle"))
 	{
-		v.netname = ALLOC_STRING(pkvd->szValue);
+		v.netname = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "startdark"))
@@ -508,7 +508,7 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 		// Single player only.  Clear save directory if set
 		if (0 != atoi(pkvd->szValue))
 		{
-			CVAR_SET_FLOAT("sv_newunit", 1);
+			g_engfuncs.pfnCVarSetFloat("sv_newunit", 1);
 		}
 		return true;
 	}
@@ -523,7 +523,7 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 	}
 	else if (streq(pkvd->szKeyName, "mapteams"))
 	{
-		v.team = ALLOC_STRING(pkvd->szValue);
+		v.team = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "defaultteam"))
@@ -548,12 +548,12 @@ void CWorld::PostSpawn()
 		{
 			if (!WorldGraph.FSetGraphPointers())
 			{
-				ALERT(at_console, "**Graph pointers were not set!\n");
+				g_engfuncs.pfnAlertMessage(at_console, "**Graph pointers were not set!\n");
 				return;
 			}
 			else
 			{
-				ALERT(at_console, "**Graph Pointers Set!\n");
+				g_engfuncs.pfnAlertMessage(at_console, "**Graph Pointers Set!\n");
 			}
 		}
 	}

@@ -229,7 +229,7 @@ bool CAmbientGeneric::Spawn()
 
 	if (FStringNull(v.message) || strlen(szSoundFile) < 1)
 	{
-		ALERT(at_error, "EMPTY AMBIENT AT: %f, %f, %f\n", v.origin.x, v.origin.y, v.origin.z);
+		g_engfuncs.pfnAlertMessage(at_error, "EMPTY AMBIENT AT: %f, %f, %f\n", v.origin.x, v.origin.y, v.origin.z);
 		return false;
 	}
 	v.solid = SOLID_NOT;
@@ -265,7 +265,7 @@ void CAmbientGeneric::Precache()
 	if (!FStringNull(v.message) && strlen(szSoundFile) > 1)
 	{
 		if (*szSoundFile != '!')
-			PRECACHE_SOUND(szSoundFile);
+			g_engfuncs.pfnPrecacheSound(szSoundFile);
 	}
 	// init all dynamic modulation parms
 	InitModulationParms();
@@ -428,7 +428,7 @@ void CAmbientGeneric::RampThink()
 			break;
 		case LFO_RANDOM:
 			if (pos == 255)
-				m_dpv.lfomult = RANDOM_LONG(0, 255);
+				m_dpv.lfomult = g_engfuncs.pfnRandomLong(0, 255);
 			break;
 		case LFO_TRIANGLE:
 		default:
@@ -952,9 +952,9 @@ void CEnvSound::Think()
 {
 	const bool shouldThinkFast = [this]()
 	{
-		// get pointer to client if visible; FIND_CLIENT_IN_PVS will
+		// get pointer to client if visible; g_engfuncs.pfnFindClientInPVS will
 		// cycle through visible clients on consecutive calls.
-		Entity* pentPlayer = FIND_CLIENT_IN_PVS(edict());
+		Entity* pentPlayer = g_engfuncs.pfnFindClientInPVS(edict());
 
 		if (pentPlayer == nullptr)
 			return false; // no player in pvs of sound entity, slow it down
@@ -1030,7 +1030,7 @@ void CEnvSound::Think()
 bool CEnvSound::Spawn()
 {
 	// spread think times
-	v.nextthink = gpGlobals->time + RANDOM_FLOAT(0.0, 0.5);
+	v.nextthink = gpGlobals->time + g_engfuncs.pfnRandomFloat(0.0, 0.5);
 	return true;
 }
 
@@ -1076,8 +1076,8 @@ void USENTENCEG_InitLRU(unsigned char* plru, int count)
 	// randomize array
 	for (i = 0; i < (count * 4); i++)
 	{
-		j = RANDOM_LONG(0, count - 1);
-		k = RANDOM_LONG(0, count - 1);
+		j = g_engfuncs.pfnRandomLong(0, count - 1);
+		k = g_engfuncs.pfnRandomLong(0, count - 1);
 		temp = plru[j];
 		plru[j] = plru[k];
 		plru[k] = temp;
@@ -1247,7 +1247,7 @@ int SENTENCEG_PlayRndSz(CBaseEntity* entity, const char* szgroupname,
 	isentenceg = SENTENCEG_GetIndex(szgroupname);
 	if (isentenceg < 0)
 	{
-		ALERT(at_console, "No such sentence group %s\n", szgroupname);
+		g_engfuncs.pfnAlertMessage(at_console, "No such sentence group %s\n", szgroupname);
 		return -1;
 	}
 
@@ -1355,7 +1355,7 @@ void SENTENCEG_Init()
 
 		if (gcallsentences >= CVOXFILESENTENCEMAX)
 		{
-			ALERT(at_error, "Too many sentences in sentences.txt!\n");
+			g_engfuncs.pfnAlertMessage(at_error, "Too many sentences in sentences.txt!\n");
 			break;
 		}
 
@@ -1364,7 +1364,7 @@ void SENTENCEG_Init()
 		const char* pString = buffer + i;
 
 		if (strlen(pString) >= CBSENTENCENAME_MAX)
-			ALERT(at_warning, "Sentence %s longer than %d letters\n", pString, CBSENTENCENAME_MAX - 1);
+			g_engfuncs.pfnAlertMessage(at_warning, "Sentence %s longer than %d letters\n", pString, CBSENTENCENAME_MAX - 1);
 
 		strcpy(gszallsentencenames[gcallsentences++], pString);
 
@@ -1393,7 +1393,7 @@ void SENTENCEG_Init()
 			isentencegs++;
 			if (isentencegs >= CSENTENCEG_MAX)
 			{
-				ALERT(at_error, "Too many sentence groups in sentences.txt!\n");
+				g_engfuncs.pfnAlertMessage(at_error, "Too many sentence groups in sentences.txt!\n");
 				break;
 			}
 
@@ -1475,7 +1475,7 @@ void CBaseEntity::EmitSound(
 		}
 		else
 		{
-			ALERT(at_aiconsole, "Unable to find %s in sentences.txt\n", sample);
+			g_engfuncs.pfnAlertMessage(at_aiconsole, "Unable to find %s in sentences.txt\n", sample);
 		}
 	}
 	else
@@ -1646,7 +1646,7 @@ bool CSpeaker::Spawn()
 
 	if (0 == m_preset && (FStringNull(v.message) || strlen(szSoundFile) < 1))
 	{
-		ALERT(at_error, "SPEAKER with no Level/Sentence! at: %f, %f, %f\n", v.origin.x, v.origin.y, v.origin.z);
+		g_engfuncs.pfnAlertMessage(at_error, "SPEAKER with no Level/Sentence! at: %f, %f, %f\n", v.origin.x, v.origin.y, v.origin.z);
 		return false;
 	}
 	v.solid = SOLID_NOT;
@@ -1672,7 +1672,7 @@ void CSpeaker::Precache()
 {
 	if (!FBitSet(v.spawnflags, SPEAKER_START_SILENT))
 		// set first announcement time for random n second
-		v.nextthink = gpGlobals->time + RANDOM_FLOAT(5.0, 15.0);
+		v.nextthink = gpGlobals->time + g_engfuncs.pfnRandomFloat(5.0, 15.0);
 }
 void CSpeaker::SpeakerThink()
 {
@@ -1717,11 +1717,11 @@ void CSpeaker::SpeakerThink()
 		// make random announcement from sentence group
 
 		if (SENTENCEG_PlayRndSz(this, szSoundFile, flvolume, flattenuation, flags, pitch) < 0)
-			ALERT(at_console, "Level Design Error!\nSPEAKER has bad sentence group name: %s\n", szSoundFile);
+			g_engfuncs.pfnAlertMessage(at_console, "Level Design Error!\nSPEAKER has bad sentence group name: %s\n", szSoundFile);
 
 		// set next announcement time for random 5 to 10 minute delay
 		v.nextthink = gpGlobals->time +
-						 RANDOM_FLOAT(ANNOUNCE_MINUTES_MIN * 60.0, ANNOUNCE_MINUTES_MAX * 60.0);
+						 g_engfuncs.pfnRandomFloat(ANNOUNCE_MINUTES_MIN * 60.0, ANNOUNCE_MINUTES_MAX * 60.0);
 	}
 
 	return;

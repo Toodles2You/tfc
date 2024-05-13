@@ -68,7 +68,7 @@ bool CLight::KeyValue(KeyValueData* pkvd)
 	}
 	else if (streq(pkvd->szKeyName, "pattern"))
 	{
-		m_iszPattern = ALLOC_STRING(pkvd->szValue);
+		m_iszPattern = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 
@@ -86,11 +86,11 @@ bool CLight::Spawn()
 	if (m_iStyle >= 32)
 	{
 		if (FBitSet(v.spawnflags, SF_LIGHT_START_OFF))
-			LIGHT_STYLE(m_iStyle, "a");
+			g_engfuncs.pfnLightStyle(m_iStyle, "a");
 		else if (!FStringNull(m_iszPattern))
-			LIGHT_STYLE(m_iStyle, (char*)STRING(m_iszPattern));
+			g_engfuncs.pfnLightStyle(m_iStyle, (char*)STRING(m_iszPattern));
 		else
-			LIGHT_STYLE(m_iStyle, "m");
+			g_engfuncs.pfnLightStyle(m_iStyle, "m");
 	}
 
 	return true;
@@ -107,14 +107,14 @@ void CLight::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType
 		if (FBitSet(v.spawnflags, SF_LIGHT_START_OFF))
 		{
 			if (!FStringNull(m_iszPattern))
-				LIGHT_STYLE(m_iStyle, (char*)STRING(m_iszPattern));
+				g_engfuncs.pfnLightStyle(m_iStyle, (char*)STRING(m_iszPattern));
 			else
-				LIGHT_STYLE(m_iStyle, "m");
+				g_engfuncs.pfnLightStyle(m_iStyle, "m");
 			ClearBits(v.spawnflags, SF_LIGHT_START_OFF);
 		}
 		else
 		{
-			LIGHT_STYLE(m_iStyle, "a");
+			g_engfuncs.pfnLightStyle(m_iStyle, "a");
 			SetBits(v.spawnflags, SF_LIGHT_START_OFF);
 		}
 	}
@@ -161,11 +161,11 @@ bool CEnvLight::KeyValue(KeyValueData* pkvd)
 		b = pow(b / 114.0, 0.6) * 264;
 
 		sprintf(szColor, "%d", r);
-		CVAR_SET_STRING("sv_skycolor_r", szColor);
+		g_engfuncs.pfnCVarSetString("sv_skycolor_r", szColor);
 		sprintf(szColor, "%d", g);
-		CVAR_SET_STRING("sv_skycolor_g", szColor);
+		g_engfuncs.pfnCVarSetString("sv_skycolor_g", szColor);
 		sprintf(szColor, "%d", b);
-		CVAR_SET_STRING("sv_skycolor_b", szColor);
+		g_engfuncs.pfnCVarSetString("sv_skycolor_b", szColor);
 
 		return true;
 	}
@@ -180,11 +180,11 @@ bool CEnvLight::Spawn()
 	util::MakeAimVectors(v.angles);
 
 	sprintf(szVector, "%f", gpGlobals->v_forward.x);
-	CVAR_SET_STRING("sv_skyvec_x", szVector);
+	g_engfuncs.pfnCVarSetString("sv_skyvec_x", szVector);
 	sprintf(szVector, "%f", gpGlobals->v_forward.y);
-	CVAR_SET_STRING("sv_skyvec_y", szVector);
+	g_engfuncs.pfnCVarSetString("sv_skyvec_y", szVector);
 	sprintf(szVector, "%f", gpGlobals->v_forward.z);
-	CVAR_SET_STRING("sv_skyvec_z", szVector);
+	g_engfuncs.pfnCVarSetString("sv_skyvec_z", szVector);
 
 	return CLight::Spawn();
 }

@@ -164,7 +164,7 @@ void util::SetGroupTrace(int groupmask, int op)
 	g_groupmask = groupmask;
 	g_groupop = op;
 
-	ENGINE_SETGROUPMASK(g_groupmask, g_groupop);
+	g_engfuncs.pfnSetGroupMask(g_groupmask, g_groupop);
 }
 
 void util::UnsetGroupTrace()
@@ -172,7 +172,7 @@ void util::UnsetGroupTrace()
 	g_groupmask = 0;
 	g_groupop = 0;
 
-	ENGINE_SETGROUPMASK(0, 0);
+	g_engfuncs.pfnSetGroupMask(0, 0);
 }
 
 // Smart version, it'll clean itself up when it pops off stack
@@ -184,7 +184,7 @@ util::GroupTrace::GroupTrace(int groupmask, int op)
 	g_groupmask = groupmask;
 	g_groupop = op;
 
-	ENGINE_SETGROUPMASK(g_groupmask, g_groupop);
+	g_engfuncs.pfnSetGroupMask(g_groupmask, g_groupop);
 }
 
 util::GroupTrace::~GroupTrace()
@@ -192,7 +192,7 @@ util::GroupTrace::~GroupTrace()
 	g_groupmask = m_oldgroupmask;
 	g_groupop = m_oldgroupop;
 
-	ENGINE_SETGROUPMASK(g_groupmask, g_groupop);
+	g_engfuncs.pfnSetGroupMask(g_groupmask, g_groupop);
 }
 
 Entity* util::GetEntityList()
@@ -387,7 +387,7 @@ CBaseEntity* util::FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& v
 	else
 		pentEntity = nullptr;
 
-	pentEntity = FIND_ENTITY_IN_SPHERE(pentEntity, vecCenter, flRadius);
+	pentEntity = g_engfuncs.pfnFindEntityInSphere(pentEntity, vecCenter, flRadius);
 
 	if (pentEntity != nullptr && OFFSET(pentEntity) != 0)
 		return pentEntity->Get<CBaseEntity>();
@@ -472,7 +472,7 @@ CBaseEntity* util::PlayerByIndex(int playerIndex)
 
 void util::MakeVectors(const Vector& vecAngles)
 {
-	MAKE_VECTORS(vecAngles);
+	g_engfuncs.pfnMakeVectors(vecAngles);
 }
 
 
@@ -481,12 +481,12 @@ void util::MakeAimVectors(const Vector& vecAngles)
 	float rgflVec[3];
 	vecAngles.CopyToArray(rgflVec);
 	rgflVec[0] = -rgflVec[0];
-	MAKE_VECTORS(rgflVec);
+	g_engfuncs.pfnMakeVectors(rgflVec);
 }
 
 void util::MakeInvVectors(const Vector& vec, globalvars_t* pgv)
 {
-	MAKE_VECTORS(vec);
+	g_engfuncs.pfnMakeVectors(vec);
 
 	pgv->v_right = pgv->v_right * -1;
 
@@ -806,13 +806,13 @@ void util::ShowMessageAll(const char* pString)
 void util::TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, CBaseEntity* ignore, TraceResult* ptr)
 {
 	//TODO: define constants
-	TRACE_LINE(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0) | (ignore_glass == ignoreGlass ? 0x100 : 0), ignore ? ignore->edict() : nullptr, ptr);
+	g_engfuncs.pfnTraceLine(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0) | (ignore_glass == ignoreGlass ? 0x100 : 0), ignore ? ignore->edict() : nullptr, ptr);
 }
 
 
 void util::TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, CBaseEntity* ignore, TraceResult* ptr)
 {
-	TRACE_LINE(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), ignore ? ignore->edict() : nullptr, ptr);
+	g_engfuncs.pfnTraceLine(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), ignore ? ignore->edict() : nullptr, ptr);
 }
 
 
@@ -870,7 +870,7 @@ bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CB
 
 void util::TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, Entity* pentIgnore, TraceResult* ptr)
 {
-	TRACE_HULL(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), hullNumber, pentIgnore, ptr);
+	g_engfuncs.pfnTraceHull(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), hullNumber, pentIgnore, ptr);
 }
 
 void util::TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, Entity* pentModel, TraceResult* ptr)
@@ -899,13 +899,13 @@ TraceResult util::GetGlobalTrace()
 
 float util::VecToYaw(const Vector& vec)
 {
-	return VEC_TO_YAW(vec);
+	return g_engfuncs.pfnVecToYaw(vec);
 }
 
 
 void util::ParticleEffect(const Vector& vecOrigin, const Vector& vecDirection, unsigned int ulColor, unsigned int ulCount)
 {
-	PARTICLE_EFFECT(vecOrigin, vecDirection, (float)ulColor, (float)ulCount);
+	g_engfuncs.pfnParticleEffect(vecOrigin, vecDirection, (float)ulColor, (float)ulCount);
 }
 
 
@@ -989,7 +989,7 @@ char* util::VarArgs(const char* format, ...)
 Vector util::GetAimVector(Entity* pent, float flSpeed)
 {
 	Vector tmp;
-	GET_AIM_VECTOR(pent, flSpeed, tmp);
+	g_engfuncs.pfnGetAimVector(pent, flSpeed, tmp);
 	return tmp;
 }
 
@@ -1004,7 +1004,7 @@ bool util::IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator)
 			return pMaster->IsTriggered(pActivator);
 		}
 
-		ALERT(at_aiconsole, "Master was null or not a master!\n");
+		g_engfuncs.pfnAlertMessage(at_aiconsole, "Master was null or not a master!\n");
 	}
 
 	// if this isn't a master entity, just say yes.
@@ -1051,7 +1051,7 @@ void util::StringToVector(Vector& pVector, const char* pString)
 	if (j < 2)
 	{
 		/*
-		ALERT( at_error, "Bad field in entity!! %s:%s == \"%s\"\n",
+		g_engfuncs.pfnAlertMessage( at_error, "Bad field in entity!! %s:%s == \"%s\"\n",
 			pkvd->szClassName, pkvd->szKeyName, pkvd->szValue );
 		*/
 		for (j = j + 1; j < 3; j++)
@@ -1122,7 +1122,7 @@ void util::PrecacheOther(const char* szClassname)
 	pent = g_engfuncs.pfnCreateNamedEntity(MAKE_STRING(szClassname));
 	if (pent == nullptr)
 	{
-		ALERT(at_console, "NULL Ent in util::PrecacheOther\n");
+		g_engfuncs.pfnAlertMessage(at_console, "NULL Ent in util::PrecacheOther\n");
 		return;
 	}
 
@@ -1146,7 +1146,7 @@ void util::LogPrintf(const char* fmt, ...)
 	va_end(argptr);
 
 	// Print to server console
-	ALERT(at_logged, "%s", string);
+	g_engfuncs.pfnAlertMessage(at_logged, "%s", string);
 }
 
 //=========================================================

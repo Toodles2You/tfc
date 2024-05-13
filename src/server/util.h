@@ -27,7 +27,7 @@ class CBaseEntity;
 
 inline globalvars_t* gpGlobals = nullptr;
 
-// Use this instead of ALLOC_STRING on constant strings
+// Use this instead of g_engfuncs.pfnAllocString on constant strings
 #define STRING(offset) ((const char*)(gpGlobals->pStringBase + (unsigned int)(offset)))
 #define MAKE_STRING(str) ((uint64)(str) - (uint64)(STRING(0)))
 
@@ -39,7 +39,7 @@ inline EntityOffset OFFSET(const Entity* pent)
 #ifndef NDEBUG
 	if (pent == nullptr)
 	{
-		ALERT(at_error, "Bad ent in OFFSET()\n");
+		g_engfuncs.pfnAlertMessage(at_error, "Bad ent in OFFSET()\n");
 	}
 #endif
 	return (*g_engfuncs.pfnEntOffsetOfPEntity)(pent);
@@ -223,8 +223,8 @@ int SENTENCEG_PlaySequentialSz(CBaseEntity* entity, const char* szrootname, floa
 int SENTENCEG_GetIndex(const char* szrootname);
 int SENTENCEG_Lookup(const char* sample, char* sentencenum);
 
-#define PLAYBACK_EVENT(flags, who, index) PLAYBACK_EVENT_FULL(flags, who, index, 0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
-#define PLAYBACK_EVENT_DELAY(flags, who, index, delay) PLAYBACK_EVENT_FULL(flags, who, index, delay, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
+#define PLAYBACK_EVENT(flags, who, index) g_engfuncs.pfnPlaybackEvent(flags, who, index, 0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
+#define PLAYBACK_EVENT_DELAY(flags, who, index, delay) g_engfuncs.pfnPlaybackEvent(flags, who, index, delay, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 
 /**
 *	@brief Helper type to run a function when the helper is destroyed.

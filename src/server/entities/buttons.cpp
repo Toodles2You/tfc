@@ -64,7 +64,7 @@ bool CEnvGlobal::KeyValue(KeyValueData* pkvd)
 {
 	if (streq(pkvd->szKeyName, "globalstate")) // State name
 	{
-		m_globalstate = ALLOC_STRING(pkvd->szValue);
+		m_globalstate = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "triggermode"))
@@ -159,7 +159,7 @@ bool CMultiSource::KeyValue(KeyValueData* pkvd)
 		return true;
 	else if (streq(pkvd->szKeyName, "globalstate"))
 	{
-		m_globalstate = ALLOC_STRING(pkvd->szValue);
+		m_globalstate = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 
@@ -193,7 +193,7 @@ void CMultiSource::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE u
 	// if we didn't find it, report error and leave
 	if (i > m_iTotal)
 	{
-		ALERT(at_console, "MultiSrc:Used by non member %s.\n", STRING(pCaller->v.classname));
+		g_engfuncs.pfnAlertMessage(at_console, "MultiSrc:Used by non member %s.\n", STRING(pCaller->v.classname));
 		return;
 	}
 
@@ -204,7 +204,7 @@ void CMultiSource::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE u
 	//
 	if (IsTriggered(pActivator))
 	{
-		ALERT(at_aiconsole, "Multisource %s enabled (%d inputs)\n", STRING(v.targetname), m_iTotal);
+		g_engfuncs.pfnAlertMessage(at_aiconsole, "Multisource %s enabled (%d inputs)\n", STRING(v.targetname), m_iTotal);
 		USE_TYPE useType = USE_TOGGLE;
 		if (!FStringNull(m_globalstate))
 			useType = USE_ON;
@@ -287,12 +287,12 @@ void CBaseButton::Precache()
 
 	if (FBitSet(v.spawnflags, SF_BUTTON_SPARK_IF_OFF)) // this button should spark in OFF state
 	{
-		PRECACHE_SOUND("buttons/spark1.wav");
-		PRECACHE_SOUND("buttons/spark2.wav");
-		PRECACHE_SOUND("buttons/spark3.wav");
-		PRECACHE_SOUND("buttons/spark4.wav");
-		PRECACHE_SOUND("buttons/spark5.wav");
-		PRECACHE_SOUND("buttons/spark6.wav");
+		g_engfuncs.pfnPrecacheSound("buttons/spark1.wav");
+		g_engfuncs.pfnPrecacheSound("buttons/spark2.wav");
+		g_engfuncs.pfnPrecacheSound("buttons/spark3.wav");
+		g_engfuncs.pfnPrecacheSound("buttons/spark4.wav");
+		g_engfuncs.pfnPrecacheSound("buttons/spark5.wav");
+		g_engfuncs.pfnPrecacheSound("buttons/spark6.wav");
 	}
 
 	// get door button sounds, for doors which require buttons to open
@@ -300,15 +300,15 @@ void CBaseButton::Precache()
 	if (0 != m_bLockedSound)
 	{
 		pszSound = ButtonSound((int)m_bLockedSound);
-		PRECACHE_SOUND(pszSound);
-		m_ls.sLockedSound = ALLOC_STRING(pszSound);
+		g_engfuncs.pfnPrecacheSound(pszSound);
+		m_ls.sLockedSound = g_engfuncs.pfnAllocString(pszSound);
 	}
 
 	if (0 != m_bUnlockedSound)
 	{
 		pszSound = ButtonSound((int)m_bUnlockedSound);
-		PRECACHE_SOUND(pszSound);
-		m_ls.sUnlockedSound = ALLOC_STRING(pszSound);
+		g_engfuncs.pfnPrecacheSound(pszSound);
+		m_ls.sUnlockedSound = g_engfuncs.pfnAllocString(pszSound);
 	}
 
 	// get sentence group names, for doors which are directly 'touched' to open
@@ -389,7 +389,7 @@ bool CBaseButton::KeyValue(KeyValueData* pkvd)
 {
 	if (streq(pkvd->szKeyName, "changetarget"))
 	{
-		m_strChangeTarget = ALLOC_STRING(pkvd->szValue);
+		m_strChangeTarget = g_engfuncs.pfnAllocString(pkvd->szValue);
 		return true;
 	}
 	else if (streq(pkvd->szKeyName, "locked_sound"))
@@ -464,8 +464,8 @@ bool CBaseButton::Spawn()
 	//a sound of 0 should not make a sound
 	//----------------------------------------------------
 	pszSound = ButtonSound(m_sounds);
-	PRECACHE_SOUND(pszSound);
-	v.noise = ALLOC_STRING(pszSound);
+	g_engfuncs.pfnPrecacheSound(pszSound);
+	v.noise = g_engfuncs.pfnAllocString(pszSound);
 
 	Precache();
 
@@ -613,9 +613,9 @@ static void DoSpark(CBaseEntity *entity, const Vector& location)
 	Vector tmp = location + entity->v.size * 0.5;
 	tent::Sparks(tmp);
 
-	float flVolume = RANDOM_FLOAT(0.25, 0.75) * 0.4; //random volume range
+	float flVolume = g_engfuncs.pfnRandomFloat(0.25, 0.75) * 0.4; //random volume range
 	const char *sample;
-	switch ((int)(RANDOM_FLOAT(0, 1) * 6))
+	switch ((int)(g_engfuncs.pfnRandomFloat(0, 1) * 6))
 	{
 	case 0: sample ="buttons/spark1.wav"; break;
 	case 1: sample ="buttons/spark2.wav"; break;
@@ -631,7 +631,7 @@ static void DoSpark(CBaseEntity *entity, const Vector& location)
 void CBaseButton::ButtonSpark()
 {
 	SetThink(&CBaseButton::ButtonSpark);
-	v.nextthink = v.ltime + (0.1 + RANDOM_FLOAT(0, 1.5)); // spark again at random interval
+	v.nextthink = v.ltime + (0.1 + g_engfuncs.pfnRandomFloat(0, 1.5)); // spark again at random interval
 
 	DoSpark(this, v.absmin);
 }
@@ -875,8 +875,8 @@ bool CRotButton::Spawn()
 	//a sound of 0 should not make a sound
 	//----------------------------------------------------
 	pszSound = ButtonSound(m_sounds);
-	PRECACHE_SOUND(pszSound);
-	v.noise = ALLOC_STRING(pszSound);
+	g_engfuncs.pfnPrecacheSound(pszSound);
+	v.noise = g_engfuncs.pfnAllocString(pszSound);
 
 	// set the axis of rotation
 	CBaseToggle::AxisDir(this);
@@ -1012,8 +1012,8 @@ bool CMomentaryRotButton::Spawn()
 	SetModel(v.model);
 
 	const char* pszSound = ButtonSound(m_sounds);
-	PRECACHE_SOUND(pszSound);
-	v.noise = ALLOC_STRING(pszSound);
+	g_engfuncs.pfnPrecacheSound(pszSound);
+	v.noise = g_engfuncs.pfnAllocString(pszSound);
 	m_lastUsed = false;
 
 	return true;
@@ -1223,7 +1223,7 @@ bool CEnvSpark::Spawn()
 	else
 		SetThink(&CEnvSpark::SparkThink);
 
-	v.nextthink = gpGlobals->time + (0.1 + RANDOM_FLOAT(0, 1.5));
+	v.nextthink = gpGlobals->time + (0.1 + g_engfuncs.pfnRandomFloat(0, 1.5));
 
 	if (m_flDelay <= 0)
 		m_flDelay = 1.5;
@@ -1236,12 +1236,12 @@ bool CEnvSpark::Spawn()
 
 void CEnvSpark::Precache()
 {
-	PRECACHE_SOUND("buttons/spark1.wav");
-	PRECACHE_SOUND("buttons/spark2.wav");
-	PRECACHE_SOUND("buttons/spark3.wav");
-	PRECACHE_SOUND("buttons/spark4.wav");
-	PRECACHE_SOUND("buttons/spark5.wav");
-	PRECACHE_SOUND("buttons/spark6.wav");
+	g_engfuncs.pfnPrecacheSound("buttons/spark1.wav");
+	g_engfuncs.pfnPrecacheSound("buttons/spark2.wav");
+	g_engfuncs.pfnPrecacheSound("buttons/spark3.wav");
+	g_engfuncs.pfnPrecacheSound("buttons/spark4.wav");
+	g_engfuncs.pfnPrecacheSound("buttons/spark5.wav");
+	g_engfuncs.pfnPrecacheSound("buttons/spark6.wav");
 }
 
 bool CEnvSpark::KeyValue(KeyValueData* pkvd)
@@ -1264,7 +1264,7 @@ bool CEnvSpark::KeyValue(KeyValueData* pkvd)
 
 void EXPORT CEnvSpark::SparkThink()
 {
-	v.nextthink = gpGlobals->time + 0.1 + RANDOM_FLOAT(0, m_flDelay);
+	v.nextthink = gpGlobals->time + 0.1 + g_engfuncs.pfnRandomFloat(0, m_flDelay);
 	DoSpark(this, v.origin);
 }
 
@@ -1272,7 +1272,7 @@ void EXPORT CEnvSpark::SparkStart(CBaseEntity* pActivator, CBaseEntity* pCaller,
 {
 	SetUse(&CEnvSpark::SparkStop);
 	SetThink(&CEnvSpark::SparkThink);
-	v.nextthink = gpGlobals->time + (0.1 + RANDOM_FLOAT(0, m_flDelay));
+	v.nextthink = gpGlobals->time + (0.1 + g_engfuncs.pfnRandomFloat(0, m_flDelay));
 }
 
 void EXPORT CEnvSpark::SparkStop(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)

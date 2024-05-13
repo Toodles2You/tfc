@@ -145,15 +145,15 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 
 	if (!g_engfuncs.pfnIsDedicatedServer())
 	{
-		char* lservercfgfile = (char*)CVAR_GET_STRING("lservercfgfile");
+		char* lservercfgfile = (char*)g_engfuncs.pfnCVarGetString("lservercfgfile");
 
 		if (lservercfgfile && '\0' != lservercfgfile[0])
 		{
 			char szCommand[256];
 
-			ALERT(at_console, "Executing listen server config file\n");
+			g_engfuncs.pfnAlertMessage(at_console, "Executing listen server config file\n");
 			sprintf(szCommand, "exec %s\n", lservercfgfile);
-			SERVER_COMMAND(szCommand);
+			g_engfuncs.pfnServerCommand(szCommand);
 		}
 	}
 
@@ -235,9 +235,9 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 
 	if (strcmp(pcmd, "jointeam") == 0)
 	{
-		if (CMD_ARGC() > 1)
+		if (g_engfuncs.pfnCmd_Argc() > 1)
 		{
-			auto teamIndex = atoi(CMD_ARGV(1));
+			auto teamIndex = atoi(g_engfuncs.pfnCmd_Argv(1));
 			bool autoTeam = false;
 
 			if (teamIndex == 5)
@@ -269,16 +269,16 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 	 && pPlayer->v.iuser1 != OBS_DEATHCAM
 	 && pPlayer->v.iuser1 != OBS_FIXED)
 	{
-		if (CMD_ARGC() > 1)
+		if (g_engfuncs.pfnCmd_Argc() > 1)
 		{
 			if (strcmp(pcmd, "specmode") == 0)
 			{
-				pPlayer->Observer_SetMode(atoi(CMD_ARGV(1)));
+				pPlayer->Observer_SetMode(atoi(g_engfuncs.pfnCmd_Argv(1)));
 				return true;
 			}
 			else if (strcmp(pcmd, "follownext") == 0)
 			{
-				pPlayer->Observer_FindNextPlayer(atoi(CMD_ARGV(1)) != 0);
+				pPlayer->Observer_FindNextPlayer(atoi(g_engfuncs.pfnCmd_Argv(1)) != 0);
 				return true;
 			}
 		}
@@ -800,7 +800,7 @@ float CHalfLifeMultiplay::FlWeaponTryRespawn(CBasePlayerWeapon* pWeapon)
 {
 	if (pWeapon && (pWeapon->iFlags() & WEAPON_FLAG_LIMITINWORLD) != 0)
 	{
-		if (NUMBER_OF_ENTITIES() < (gpGlobals->maxEntities - ENTITY_INTOLERANCE))
+		if (g_engfuncs.pfnNumberOfEntities() < (gpGlobals->maxEntities - ENTITY_INTOLERANCE))
 			return 0;
 
 		// we're past the entity tolerance level,  so delay the respawn
@@ -987,7 +987,7 @@ void CHalfLifeMultiplay::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 	auto spawn = new CSpawnPoint {pEntity};
 
 #if 0
-	ALERT(
+	g_engfuncs.pfnAlertMessage(
 		at_aiconsole,
 		"%s %lu at (%g, %g, %g)\n",
 		STRING(pEntity->v.classname),
@@ -1334,11 +1334,11 @@ void CHalfLifeMultiplay::SendMOTDToClient(CBasePlayer* player)
 	// read from the MOTD.txt file
 	int length, char_count = 0;
 	char* pFileList;
-	char* aFileList = pFileList = (char*)LOAD_FILE_FOR_ME((char*)CVAR_GET_STRING("motdfile"), &length);
+	char* aFileList = pFileList = (char*)g_engfuncs.pfnLoadFileForMe((char*)g_engfuncs.pfnCVarGetString("motdfile"), &length);
 
 	// send the server name
 	MessageBegin(MSG_ONE, gmsgServerName, player);
-	WriteString(CVAR_GET_STRING("hostname"));
+	WriteString(g_engfuncs.pfnCVarGetString("hostname"));
 	WriteString(STRING(gpGlobals->mapname));
 	MessageEnd();
 
@@ -1378,7 +1378,7 @@ void CHalfLifeMultiplay::SendMOTDToClient(CBasePlayer* player)
 		MessageEnd();
 	}
 
-	FREE_FILE(aFileList);
+	g_engfuncs.pfnFreeFile(aFileList);
 }
 
 

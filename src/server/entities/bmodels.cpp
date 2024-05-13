@@ -255,7 +255,7 @@ bool CFuncIllusionary::Spawn()
 	// I'd rather eat the network bandwidth of this than figure out how to save/restore
 	// these entities after they have been moved to the client, or respawn them ala Quake
 	// Perhaps we can do this in deathmatch only.
-	//	MAKE_STATIC(&v);
+	//	g_engfuncs.pfnMakeStatic(&v);
 	return true;
 }
 
@@ -465,9 +465,9 @@ void CFuncRotating::Precache()
 	{
 		// if a path is set for a wave, use it
 
-		PRECACHE_SOUND(szSoundFile);
+		g_engfuncs.pfnPrecacheSound(szSoundFile);
 
-		v.noiseRunning = ALLOC_STRING(szSoundFile);
+		v.noiseRunning = g_engfuncs.pfnAllocString(szSoundFile);
 	}
 	else
 	{
@@ -475,38 +475,38 @@ void CFuncRotating::Precache()
 		switch (m_sounds)
 		{
 		case 1:
-			PRECACHE_SOUND("fans/fan1.wav");
-			v.noiseRunning = ALLOC_STRING("fans/fan1.wav");
+			g_engfuncs.pfnPrecacheSound("fans/fan1.wav");
+			v.noiseRunning = g_engfuncs.pfnAllocString("fans/fan1.wav");
 			break;
 		case 2:
-			PRECACHE_SOUND("fans/fan2.wav");
-			v.noiseRunning = ALLOC_STRING("fans/fan2.wav");
+			g_engfuncs.pfnPrecacheSound("fans/fan2.wav");
+			v.noiseRunning = g_engfuncs.pfnAllocString("fans/fan2.wav");
 			break;
 		case 3:
-			PRECACHE_SOUND("fans/fan3.wav");
-			v.noiseRunning = ALLOC_STRING("fans/fan3.wav");
+			g_engfuncs.pfnPrecacheSound("fans/fan3.wav");
+			v.noiseRunning = g_engfuncs.pfnAllocString("fans/fan3.wav");
 			break;
 		case 4:
-			PRECACHE_SOUND("fans/fan4.wav");
-			v.noiseRunning = ALLOC_STRING("fans/fan4.wav");
+			g_engfuncs.pfnPrecacheSound("fans/fan4.wav");
+			v.noiseRunning = g_engfuncs.pfnAllocString("fans/fan4.wav");
 			break;
 		case 5:
-			PRECACHE_SOUND("fans/fan5.wav");
-			v.noiseRunning = ALLOC_STRING("fans/fan5.wav");
+			g_engfuncs.pfnPrecacheSound("fans/fan5.wav");
+			v.noiseRunning = g_engfuncs.pfnAllocString("fans/fan5.wav");
 			break;
 
 		case 0:
 		default:
 			if (!FStringNull(v.message) && strlen(szSoundFile) > 0)
 			{
-				PRECACHE_SOUND(szSoundFile);
+				g_engfuncs.pfnPrecacheSound(szSoundFile);
 
-				v.noiseRunning = ALLOC_STRING(szSoundFile);
+				v.noiseRunning = g_engfuncs.pfnAllocString(szSoundFile);
 				break;
 			}
 			else
 			{
-				v.noiseRunning = ALLOC_STRING("common/null.wav");
+				v.noiseRunning = g_engfuncs.pfnAllocString("common/null.wav");
 				break;
 			}
 		}
@@ -968,7 +968,7 @@ void CPendulum::RopeTouch(CBaseEntity* pOther)
 {
 	if (!pOther->IsPlayer())
 	{ // not a player!
-		ALERT(at_console, "Not a client\n");
+		g_engfuncs.pfnAlertMessage(at_console, "Not a client\n");
 		return;
 	}
 
