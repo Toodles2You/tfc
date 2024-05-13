@@ -33,7 +33,7 @@ void CBaseSpectator::SpectatorConnect()
 	v.solid = SOLID_NOT;
 	v.movetype = MOVETYPE_NOCLIP;
 
-	m_pGoalEnt = NULL;
+	m_pGoalEnt = nullptr;
 }
 
 /*
@@ -56,7 +56,7 @@ Called by SpectatorThink if the spectator entered an impulse
 */
 void CBaseSpectator::SpectatorImpulseCommand()
 {
-	static CBaseEntity* pGoal = NULL;
+	static CBaseEntity* pGoal = nullptr;
 	CBaseEntity* pPreviousGoal;
 	CBaseEntity* pCurrentGoal;
 	bool bFound;
@@ -141,7 +141,7 @@ bool CBaseSpectator::Spawn()
 	v.solid = SOLID_NOT;
 	v.movetype = MOVETYPE_NOCLIP;
 
-	m_pGoalEnt = NULL;
+	m_pGoalEnt = nullptr;
 
 	return true;
 }

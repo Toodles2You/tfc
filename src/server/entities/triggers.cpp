@@ -853,7 +853,7 @@ void CTriggerHurt::RadiationThink()
 {
 
 	Entity* pentPlayer;
-	CBasePlayer* pPlayer = NULL;
+	CBasePlayer* pPlayer = nullptr;
 	float flRange;
 	Vector vecSpot1;
 	Vector vecSpot2;
@@ -1096,7 +1096,7 @@ void CBaseTrigger::ActivateMultiTrigger(CBaseEntity* pActivator)
 
 	if (streq(v.classname, "trigger_secret"))
 	{
-		if (v.enemy == NULL || (v.enemy->flags & FL_CLIENT) == 0)
+		if (v.enemy == nullptr || (v.enemy->flags & FL_CLIENT) == 0)
 			return;
 		gpGlobals->found_secrets++;
 	}
@@ -1368,7 +1368,7 @@ Entity* CChangeLevel::FindLandmark(const char* pLandmarkName)
 			pentLandmark = util::FindEntityByTargetname(pentLandmark, pLandmarkName);
 	}
 	ALERT(at_error, "Can't find landmark %s\n", pLandmarkName);
-	return NULL;
+	return nullptr;
 }
 
 
@@ -1424,7 +1424,7 @@ void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 
 	m_hActivator = pActivator;
 	UseTargets(pActivator, USE_TOGGLE, 0);
-	st_szNextSpot[0] = 0; // Init landmark to NULL
+	st_szNextSpot[0] = 0; // Init landmark to nullptr
 
 	// look for a landmark entity
 	pentLandmark = FindLandmark(m_szLandmarkName);
@@ -1461,7 +1461,7 @@ bool CChangeLevel::InTransitionVolume(CBaseEntity* pEntity, char* pVolumeName)
 	// If you're following another entity, follow it through the transition (weapons follow the player)
 	if (pEntity->v.movetype == MOVETYPE_FOLLOW)
 	{
-		if (pEntity->v.aiment != NULL)
+		if (pEntity->v.aiment != nullptr)
 			pEntity = pEntity->v.aiment->Get<CBaseEntity>();
 	}
 
@@ -1691,7 +1691,7 @@ void CTriggerPush::Touch(CBaseEntity* pOther)
 
 void CBaseTrigger::TeleportTouch(CBaseEntity* pOther)
 {
-	CBaseEntity* pentTarget = NULL;
+	CBaseEntity* pentTarget = nullptr;
 
 	// Only teleport monsters or clients
 	if (!FBitSet(pOther->v.flags, FL_CLIENT | FL_MONSTER))
@@ -2050,7 +2050,7 @@ bool CTriggerChangeTarget::Spawn()
 
 void CTriggerChangeTarget::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
-	CBaseEntity* pTarget = util::FindEntityByString(NULL, "targetname", STRING(v.target));
+	CBaseEntity* pTarget = util::FindEntityByString(nullptr, "targetname", STRING(v.target));
 
 	if (pTarget)
 	{

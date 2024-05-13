@@ -211,7 +211,7 @@ const char *CBotManager::GetNavMapFilename( void ) const
 
 //--------------------------------------------------------------------------------------------------------------
 /**
- * Invoked when given player does given event (some events have NULL player).
+ * Invoked when given player does given event (some events have nullptr player).
  * Events are propogated to all bots.
  *
  * @todo This has become the game-wide event dispatcher. We should restructure this.
@@ -223,7 +223,7 @@ void CBotManager::OnEvent( GameEventType event, CBaseEntity *entity, CBaseEntity
 	{
 		CBasePlayer *player = static_cast<CBasePlayer *>( util::PlayerByIndex( i ) );
 
-		if (player == NULL)
+		if (player == nullptr)
 			continue;
 
 		if (STRING(player->v.netname)[0] == '\0')

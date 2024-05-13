@@ -67,24 +67,24 @@ CStudioModelRenderer::CStudioModelRenderer()
 	m_fDoInterp = true;
 	m_fGaitEstimation = true;
 	m_fFlipModel = false;
-	m_pCurrentEntity = NULL;
-	m_pCvarHiModels = NULL;
-	m_pCvarDeveloper = NULL;
-	m_pCvarDrawEntities = NULL;
-	m_pChromeSprite = NULL;
-	m_pStudioModelCount = NULL;
-	m_pModelsDrawn = NULL;
-	m_protationmatrix = NULL;
-	m_paliastransform = NULL;
-	m_pbonetransform = NULL;
-	m_plighttransform = NULL;
-	m_pStudioHeader = NULL;
-	m_pBodyPart = NULL;
-	m_pSubModel = NULL;
-	m_pPlayerInfo = NULL;
-	m_pRenderModel = NULL;
-	m_pTextureHeader = NULL;
-	m_pCvarUseTriAPI = NULL;
+	m_pCurrentEntity = nullptr;
+	m_pCvarHiModels = nullptr;
+	m_pCvarDeveloper = nullptr;
+	m_pCvarDrawEntities = nullptr;
+	m_pChromeSprite = nullptr;
+	m_pStudioModelCount = nullptr;
+	m_pModelsDrawn = nullptr;
+	m_protationmatrix = nullptr;
+	m_paliastransform = nullptr;
+	m_pbonetransform = nullptr;
+	m_plighttransform = nullptr;
+	m_pStudioHeader = nullptr;
+	m_pBodyPart = nullptr;
+	m_pSubModel = nullptr;
+	m_pPlayerInfo = nullptr;
+	m_pRenderModel = nullptr;
+	m_pTextureHeader = nullptr;
+	m_pCvarUseTriAPI = nullptr;
 }
 
 /*
@@ -373,7 +373,7 @@ mstudioanim_t* CStudioModelRenderer::StudioGetAnim(model_t* m_pSubModel, mstudio
 
 	paSequences = (cache_user_t*)m_pSubModel->submodels;
 
-	if (paSequences == NULL)
+	if (paSequences == nullptr)
 	{
 		paSequences = (cache_user_t*)IEngineStudio.Mem_Calloc(16, sizeof(cache_user_t));
 		m_pSubModel->submodels = (dmodel_t*)paSequences;
@@ -1430,7 +1430,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 	m_pRenderModel = IEngineStudio.SetupPlayerModel(m_nPlayerIndex);
 
 
-	if (m_pRenderModel == NULL)
+	if (m_pRenderModel == nullptr)
 		return false;
 
 	m_bUseTriAPI =
@@ -1455,7 +1455,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		StudioProcessGait(pplayer);
 
 		m_pPlayerInfo->gaitsequence = pplayer->gaitsequence;
-		m_pPlayerInfo = NULL;
+		m_pPlayerInfo = nullptr;
 
 		StudioSetUpTransform(false);
 		m_pCurrentEntity->angles = orig_angles;
@@ -1501,7 +1501,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 	StudioSaveBones();
 	m_pPlayerInfo->renderframe = m_nFrameCount;
 
-	m_pPlayerInfo = NULL;
+	m_pPlayerInfo = nullptr;
 
 	if ((flags & STUDIO_EVENTS) != 0)
 	{
@@ -1569,7 +1569,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 			StudioRenderModel();
 		}
 
-		m_pPlayerInfo = NULL;
+		m_pPlayerInfo = nullptr;
 
 		if (0 != pplayer->weaponmodel)
 		{

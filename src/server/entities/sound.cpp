@@ -1332,7 +1332,7 @@ void SENTENCEG_Init()
 		return;
 
 	// for each line in the file...
-	while (memfgets(pMemFile, fileSize, filePos, buffer, 511) != NULL)
+	while (memfgets(pMemFile, fileSize, filePos, buffer, 511) != nullptr)
 	{
 		// skip whitespace
 		i = 0;
@@ -1562,15 +1562,15 @@ static char* memfgets(byte* pMemFile, int fileSize, int& filePos, char* pBuffer,
 {
 	// Bullet-proofing
 	if (!pMemFile || !pBuffer)
-		return NULL;
+		return nullptr;
 
 	if (filePos >= fileSize)
-		return NULL;
+		return nullptr;
 
 	int i = filePos;
 	int last = fileSize;
 
-	// fgets always NULL terminates, so only read bufferSize-1 characters
+	// fgets always nullptr terminates, so only read bufferSize-1 characters
 	if (last - filePos > (bufferSize - 1))
 		last = filePos + (bufferSize - 1);
 
@@ -1603,7 +1603,7 @@ static char* memfgets(byte* pMemFile, int fileSize, int& filePos, char* pBuffer,
 	}
 
 	// No data read, bail
-	return NULL;
+	return nullptr;
 }
 
 // ===================================================================================

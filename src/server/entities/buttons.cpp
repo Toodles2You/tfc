@@ -208,7 +208,7 @@ void CMultiSource::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE u
 		USE_TYPE useType = USE_TOGGLE;
 		if (!FStringNull(m_globalstate))
 			useType = USE_ON;
-		UseTargets(NULL, useType, 0);
+		UseTargets(nullptr, useType, 0);
 	}
 }
 
@@ -434,7 +434,7 @@ bool CBaseButton::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	ClearTouch();
 
 	m_hActivator = attacker;
-	if (m_hActivator == NULL)
+	if (m_hActivator == nullptr)
 		return false;
 
 	if (code == BUTTON_RETURN)

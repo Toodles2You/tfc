@@ -212,7 +212,7 @@ void Mouse_Deactivate()
 
 static void Mouse_Startup()
 {
-	if (0 != gEngfuncs.CheckParm("-nomouse", NULL))
+	if (0 != gEngfuncs.CheckParm("-nomouse", nullptr))
 		return;
 
 	g_iVisibleMouse = true;
@@ -222,16 +222,16 @@ static void Mouse_Startup()
 
 	if (mouseparmsvalid)
 	{
-		if (0 != gEngfuncs.CheckParm("-noforcemspd", NULL))
+		if (0 != gEngfuncs.CheckParm("-noforcemspd", nullptr))
 			newmouseparms[2] = originalmouseparms[2];
 
-		if (0 != gEngfuncs.CheckParm("-noforcemaccel", NULL))
+		if (0 != gEngfuncs.CheckParm("-noforcemaccel", nullptr))
 		{
 			newmouseparms[0] = originalmouseparms[0];
 			newmouseparms[1] = originalmouseparms[1];
 		}
 
-		if (0 != gEngfuncs.CheckParm("-noforcemparms", NULL))
+		if (0 != gEngfuncs.CheckParm("-noforcemparms", nullptr))
 		{
 			newmouseparms[0] = originalmouseparms[0];
 			newmouseparms[1] = originalmouseparms[1];
@@ -497,7 +497,7 @@ void Mouse_Init()
 
 #ifdef WIN32
 	m_rawinput = gEngfuncs.pfnGetCvarPointer("m_rawinput");
-	m_bMouseThread = gEngfuncs.CheckParm("-mousethread", NULL) != NULL;
+	m_bMouseThread = gEngfuncs.CheckParm("-mousethread", nullptr) != nullptr;
 	m_mousethread_sleep = gEngfuncs.pfnRegisterVariable("m_mousethread_sleep", "10", FCVAR_ARCHIVE);
 
 	if (!Mouse_UseRawInput() && m_bMouseThread && m_mousethread_sleep)

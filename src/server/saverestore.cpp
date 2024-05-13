@@ -60,7 +60,7 @@ CSaveRestoreBuffer::~CSaveRestoreBuffer() = default;
 
 int CSaveRestoreBuffer::EntityIndex(CBaseEntity* pEntity)
 {
-	if (pEntity == NULL)
+	if (pEntity == nullptr)
 		return -1;
 	return EntityIndex(&pEntity->v);
 }
@@ -73,7 +73,7 @@ int CSaveRestoreBuffer::EntityIndex(EntityOffset eoLookup)
 
 int CSaveRestoreBuffer::EntityIndex(Entity* pentLookup)
 {
-	if (pentLookup == NULL)
+	if (pentLookup == nullptr)
 		return -1;
 
 	int i;
@@ -92,7 +92,7 @@ int CSaveRestoreBuffer::EntityIndex(Entity* pentLookup)
 Entity* CSaveRestoreBuffer::EntityFromIndex(int entityIndex)
 {
 	if (entityIndex < 0)
-		return NULL;
+		return nullptr;
 
 	int i;
 	ENTITYTABLE* pTable;
@@ -103,7 +103,7 @@ Entity* CSaveRestoreBuffer::EntityFromIndex(int entityIndex)
 		if (pTable->id == entityIndex)
 			return pTable->pent;
 	}
-	return NULL;
+	return nullptr;
 }
 
 
@@ -614,7 +614,7 @@ int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCoun
 						if (pent)
 							*((Entity**)pOutputData) = pent;
 						else
-							*((Entity**)pOutputData) = NULL;
+							*((Entity**)pOutputData) = nullptr;
 						break;
 					case FIELD_CLASSPTR:
 						entityIndex = *(int*)pInputData;
@@ -622,7 +622,7 @@ int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCoun
 						if (pent)
 							*((CBaseEntity**)pOutputData) = pent->Get<CBaseEntity>();
 						else
-							*((CBaseEntity**)pOutputData) = NULL;
+							*((CBaseEntity**)pOutputData) = nullptr;
 						break;
 					case FIELD_EDICT:
 						entityIndex = *(int*)pInputData;
@@ -637,7 +637,7 @@ int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCoun
 						if (pent)
 							*((EHANDLE*)pOutputData) = pent->Get<CBaseEntity>();
 						else
-							*((EHANDLE*)pOutputData) = NULL;
+							*((EHANDLE*)pOutputData) = nullptr;
 						break;
 					case FIELD_ENTITY:
 						entityIndex = *(int*)pInputData;
@@ -835,7 +835,7 @@ void CRestore::BufferReadBytes(char* pOutput, int size)
 
 void CRestore::BufferSkipBytes(int bytes)
 {
-	BufferReadBytes(NULL, bytes);
+	BufferReadBytes(nullptr, bytes);
 }
 
 int CRestore::BufferSkipZString()

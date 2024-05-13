@@ -304,7 +304,7 @@ CBaseEntity* FindEntityByTargetname(CBaseEntity* pStartEntity, const char* szNam
 CBaseEntity* FindEntityGeneric(const char* szName, Vector& vecSrc, float flRadius);
 
 // returns a CBaseEntity pointer to a player by index.  Only returns if the player is spawned and connected
-// otherwise returns NULL
+// otherwise returns nullptr
 // Index is 1 based
 CBaseEntity* PlayerByIndex(int playerIndex);
 
@@ -390,14 +390,14 @@ void PrecacheOther(const char* szClassname);
 void PrecacheWeapon(const char* szClassname);
 
 // prints a message to each client
-void ClientPrintAll(int msg_dest, const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL);
-inline void CenterPrintAll(const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL)
+void ClientPrintAll(int msg_dest, const char* msg_name, const char* param1 = nullptr, const char* param2 = nullptr, const char* param3 = nullptr, const char* param4 = nullptr);
+inline void CenterPrintAll(const char* msg_name, const char* param1 = nullptr, const char* param2 = nullptr, const char* param3 = nullptr, const char* param4 = nullptr)
 {
 	ClientPrintAll(HUD_PRINTCENTER, msg_name, param1, param2, param3, param4);
 }
 
 // prints messages through the HUD
-void ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL);
+void ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1 = nullptr, const char* param2 = nullptr, const char* param3 = nullptr, const char* param4 = nullptr);
 
 void ClientHearVox(CBaseEntity* client, const char* sentence);
 void ClientHearVoxAll(const char* sentence);

@@ -41,7 +41,7 @@ inline SteamFile::~SteamFile()
 
 inline bool SteamFile::Read( void *data, int length )
 {
-	if (length > m_bytesLeft || m_cursor == NULL || m_bytesLeft <= 0)
+	if (length > m_bytesLeft || m_cursor == nullptr || m_bytesLeft <= 0)
 		return false;
 
 	byte *readCursor = static_cast<byte *>( data );

@@ -29,7 +29,7 @@
 #include "ammohistory.h"
 #include "vgui_TeamFortressViewport.h"
 
-WEAPON* gpActiveSel; // NULL means off, 1 means just the menu bar, otherwise
+WEAPON* gpActiveSel; // nullptr means off, 1 means just the menu bar, otherwise
 					 // this points to the active weapon menu item
 WEAPON* gpLastSel;	 // Last weapon menu selection
 
@@ -202,7 +202,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 // Returns the first weapon for a given slot.
 WEAPON* WeaponsResource::GetFirstPos(int iSlot)
 {
-	WEAPON* pret = NULL;
+	WEAPON* pret = nullptr;
 
 	for (int i = 0; i < MAX_WEAPON_POSITIONS; i++)
 	{
@@ -292,7 +292,7 @@ void CHudAmmo::Reset()
 {
 	CHudBase::Reset();
 
-	gpActiveSel = NULL;
+	gpActiveSel = nullptr;
 
 	m_flSelectionTime = -1000.0F;
 	m_flHitFeedbackTime = -1000.0F;
@@ -370,7 +370,7 @@ void CHudAmmo::Think()
 		}
 
 		gpLastSel = gpActiveSel;
-		gpActiveSel = NULL;
+		gpActiveSel = nullptr;
 		gHUD.m_iKeyBits &= ~IN_ATTACK;
 
 		PlaySound("common/wpn_select.wav", 1);
@@ -397,7 +397,7 @@ HSPRITE* WeaponsResource::GetAmmoPicFromWeapon(int iAmmoId, Rect& rect)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -690,7 +690,7 @@ void CHudAmmo::UserCmd_Close()
 	if (gpActiveSel)
 	{
 		gpLastSel = gpActiveSel;
-		gpActiveSel = NULL;
+		gpActiveSel = nullptr;
 		PlaySound("common/wpn_hudoff.wav", 1);
 	}
 	else
@@ -757,7 +757,7 @@ void CHudAmmo::UserCmd_NextWeapon()
 	}
 
 	PlaySound("common/wpn_denyselect.wav", 1);
-	gpActiveSel = NULL;
+	gpActiveSel = nullptr;
 }
 
 // Selects the previous item in the menu
@@ -819,7 +819,7 @@ void CHudAmmo::UserCmd_PrevWeapon()
 	}
 
 	PlaySound("common/wpn_denyselect.wav", 1);
-	gpActiveSel = NULL;
+	gpActiveSel = nullptr;
 }
 
 // Selects the previous item in the menu
@@ -1230,7 +1230,7 @@ iCount is the number of items in the pList
 client_sprite_t* GetSpriteList(client_sprite_t* pList, const char* psz, int iRes, int iCount)
 {
 	if (!pList)
-		return NULL;
+		return nullptr;
 
 	int i = iCount;
 	client_sprite_t* p = pList;
@@ -1242,5 +1242,5 @@ client_sprite_t* GetSpriteList(client_sprite_t* pList, const char* psz, int iRes
 		p++;
 	}
 
-	return NULL;
+	return nullptr;
 }

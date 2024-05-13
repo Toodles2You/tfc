@@ -332,7 +332,7 @@ inline bool IsEntityWalkable( Entity *entity, unsigned int flags )
 inline bool IsWalkableTraceLineClear( Vector &from, Vector &to, unsigned int flags = 0 )
 {
 	TraceResult result;
-	Entity *ignore = NULL;
+	Entity *ignore = nullptr;
 	Vector useFrom = from;
 
 	while (true)

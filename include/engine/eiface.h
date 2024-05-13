@@ -198,10 +198,10 @@ typedef struct enginefuncs_s
 	void (*pfnCvar_RegisterVariable)(cvar_t* variable);
 	void (*pfnFadeClientVolume)(const Entity* pEdict, int fadePercent, int fadeOutSeconds, int holdTime, int fadeInSeconds);
 	void (*pfnSetClientMaxspeed)(const Entity* pEdict, float fNewMaxspeed);
-	Entity* (*pfnCreateFakeClient)(const char* netname); // returns NULL if fake client can't be created
+	Entity* (*pfnCreateFakeClient)(const char* netname); // returns nullptr if fake client can't be created
 	void (*pfnRunPlayerMove)(Entity* fakeclient, const float* viewangles, float forwardmove, float sidemove, float upmove, unsigned short buttons, byte impulse, byte msec);
 	int (*pfnNumberOfEntities)();
-	char* (*pfnGetInfoKeyBuffer)(Entity* e); // passing in NULL gets the serverinfo
+	char* (*pfnGetInfoKeyBuffer)(Entity* e); // passing in nullptr gets the serverinfo
 	char* (*pfnInfoKeyValue)(char* infobuffer, const char* key);
 	void (*pfnSetKeyValue)(char* infobuffer, const char* key, const char* value);
 	void (*pfnSetClientKeyValue)(int clientIndex, char* infobuffer, const char* key, const char* value);

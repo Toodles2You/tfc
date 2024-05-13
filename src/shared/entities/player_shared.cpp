@@ -185,7 +185,7 @@ void CBasePlayer::PostThink()
 
 #ifdef HALFLIFE_TANKCONTROL
 #ifdef GAME_DLL
-	if (m_pTank != NULL)
+	if (m_pTank != nullptr)
 	{
 		if (m_pTank->OnControls(this) && 0 == v.weaponmodel)
 		{
@@ -194,7 +194,7 @@ void CBasePlayer::PostThink()
 		else
 		{ // they've moved off the platform
 			m_pTank->Use(this, this, USE_OFF, 0);
-			m_pTank = NULL;
+			m_pTank = nullptr;
 		}
 	}
 #endif

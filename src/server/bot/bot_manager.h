@@ -45,7 +45,7 @@ private:
 	int m_id;																	///< weapon id
 	CGrenade *m_entity;												///< the entity
 	Vector m_detonationPosition;							///< the location where the grenade detonated (smoke)
-	float m_dieTimestamp;											///< time this should go away after m_entity is NULL
+	float m_dieTimestamp;											///< time this should go away after m_entity is nullptr
 };
 
 typedef std::list<ActiveGrenade *> ActiveGrenadeList;
@@ -75,10 +75,10 @@ public:
 	const char *GetNavMapFilename( void ) const;				///< return the filename for this map's "nav" file
 
 	/**
-	 * Invoked when event occurs in the game (some events have NULL entity).
+	 * Invoked when event occurs in the game (some events have nullptr entity).
 	 * Events are propogated to all bots.
 	 */
-	virtual void OnEvent( GameEventType event, CBaseEntity *entity = NULL, CBaseEntity *other = NULL );
+	virtual void OnEvent( GameEventType event, CBaseEntity *entity = nullptr, CBaseEntity *other = nullptr );
 
 	virtual unsigned int GetPlayerPriority( CBasePlayer *player ) const = 0;	///< return priority of player (0 = max pri)
 	

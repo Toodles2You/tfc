@@ -10,7 +10,7 @@
 
 NavDirType Opposite[ NUM_DIRECTIONS ] = { SOUTH, WEST, NORTH, EAST };
 
-CNavNode *CNavNode::m_list = NULL;
+CNavNode *CNavNode::m_list = nullptr;
 unsigned int CNavNode::m_listLength = 0;
 
 Extent NodeMapExtent;
@@ -29,7 +29,7 @@ CNavNode::CNavNode( const Vector *pos, const Vector *normal, CNavNode *parent )
 	m_id = nextID++;
 
 	for( int i=0; i<NUM_DIRECTIONS; i++ )
-		m_to[ i ] = NULL;
+		m_to[ i ] = nullptr;
 
 	m_visited = 0;
 	m_parent = parent;
@@ -39,7 +39,7 @@ CNavNode::CNavNode( const Vector *pos, const Vector *normal, CNavNode *parent )
 	m_listLength++;
 
 	m_isCovered = false;
-	m_area = NULL;
+	m_area = nullptr;
 
 	m_attributeFlags = 0;
 
@@ -75,7 +75,7 @@ const CNavNode *CNavNode::GetNode( const Vector *pos )
 			return node;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 //--------------------------------------------------------------------------------------------------------------

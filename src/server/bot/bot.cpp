@@ -27,7 +27,7 @@ float g_flBotFullThinkInterval	= 1.0 / 10.0;	// full AI only 10 times per second
 CBot::CBot( Entity* containingEntity ) : CBasePlayer(containingEntity)
 {
 	// the profile will be attached after this instance is constructed
-	m_profile = NULL;
+	m_profile = nullptr;
 
 	// assign this bot a unique ID
 	static unsigned int nextID = 1;
@@ -312,7 +312,7 @@ bool CBot::IsActiveWeaponOutOfAmmo( void ) const
 {
 	CBasePlayerWeapon *gun = GetActiveWeapon();
 
-	if (gun == NULL)
+	if (gun == nullptr)
 		return true;
 
 	if (gun->m_iClip < 0)
@@ -400,7 +400,7 @@ byte CBot::ThrottledMsec( void ) const
 //--------------------------------------------------------------------------------------------------------------
 
 // Nasty Hack.  See client.cpp/ClientCommand()
-const char *BotArgs[4] = { NULL };
+const char *BotArgs[4] = { nullptr };
 bool UseBotArgs = false;
 
 /**
@@ -456,7 +456,7 @@ int CBot::GetEnemiesRemaining( void ) const
 	{
 		CBaseEntity *player = util::PlayerByIndex( i );
 
-		if (player == NULL)
+		if (player == nullptr)
 			continue;
 
 		if (STRING(player->v.netname)[0] == '\0')
@@ -486,7 +486,7 @@ int CBot::GetFriendsRemaining( void ) const
 	{
 		CBaseEntity *player = util::PlayerByIndex( i );
 
-		if (player == NULL)
+		if (player == nullptr)
 			continue;
 
 		if (STRING(player->v.netname)[0] == '\0')
@@ -515,14 +515,14 @@ bool CBot::IsLocalPlayerWatchingMe( void ) const
 {
 	// avoid crash during spawn
 #if 0
-	if (pev == NULL)
+	if (pev == nullptr)
 		return false;
 #endif
 
 	int myIndex = const_cast<CBot *>(this)->entindex();
 
 	CBasePlayer *player = static_cast<CBasePlayer *>(util::GetLocalPlayer());
-	if (player == NULL)
+	if (player == nullptr)
 		return false;
 
 	if (player->IsObserver())
@@ -576,11 +576,11 @@ void CBot::PrintIfWatched( char *format, ... ) const
 		va_list varg;
 		char buffer[1024];
 
-		// prefix the message with the bot's name (this can be NULL if bot was just added)
+		// prefix the message with the bot's name (this can be nullptr if bot was just added)
 		const char *name;
 #if 0
-		if (pev == NULL)
-			name = "(NULL pev)";
+		if (pev == nullptr)
+			name = "(nullptr pev)";
 		else
 #endif
 			name = STRING(v.netname);
@@ -617,7 +617,7 @@ void ActiveGrenade::OnEntityGone( void )									///< called when the grenade in
 		m_dieTimestamp = gpGlobals->time + smokeLingerTime;
 	}
 #endif
-	m_entity = NULL;
+	m_entity = nullptr;
 }
 
 //--------------------------------------------------------------------------------------------------------------

@@ -36,7 +36,7 @@ bool CHudGeiger::Init()
 
 	m_iGeigerRange = 0;
 
-	srand((unsigned)time(NULL));
+	srand((unsigned)time(nullptr));
 
 	return CHudBase::Init();
 }

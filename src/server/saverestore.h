@@ -179,7 +179,7 @@ public:
 	void EntityUpdate(string_t globalname, string_t mapname);
 	const globalentity_t* EntityFromTable(string_t globalname);
 	GLOBALESTATE EntityGetState(string_t globalname);
-	bool EntityInTable(string_t globalname) { return Find(globalname) != NULL; }
+	bool EntityInTable(string_t globalname) { return Find(globalname) != nullptr; }
 
 #ifdef HALFLIFE_SAVERESTORE
 	bool Save(CSave& save);

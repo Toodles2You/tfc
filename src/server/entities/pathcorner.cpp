@@ -171,8 +171,8 @@ bool CPathTrack::Spawn()
 	v.solid = SOLID_TRIGGER;
 	SetSize(Vector(-8, -8, -8), Vector(8, 8, 8));
 
-	m_pnext = NULL;
-	m_pprevious = NULL;
+	m_pnext = nullptr;
+	m_pprevious = nullptr;
 // DEBUGGING CODE
 #if PATH_SPARKLE_DEBUG
 	SetThink(Sparkle);
@@ -192,10 +192,10 @@ void CPathTrack::Activate()
 CPathTrack* CPathTrack::ValidPath(CPathTrack* ppath, bool testFlag)
 {
 	if (!ppath)
-		return NULL;
+		return nullptr;
 
 	if (testFlag && FBitSet(ppath->v.spawnflags, SF_PATH_DISABLED))
-		return NULL;
+		return nullptr;
 
 	return ppath;
 }
@@ -261,7 +261,7 @@ CPathTrack* CPathTrack::LookAhead(Vector* origin, float dist, bool move)
 				{
 					if (!move)
 						Project(pcurrent->GetNext(), pcurrent, origin, dist);
-					return NULL;
+					return nullptr;
 				}
 				pcurrent = pcurrent->GetPrevious();
 			}
@@ -276,7 +276,7 @@ CPathTrack* CPathTrack::LookAhead(Vector* origin, float dist, bool move)
 				currentPos = pcurrent->v.origin;
 				*origin = currentPos;
 				if (!ValidPath(pcurrent->GetPrevious(), move)) // If there is no previous node, or it's disabled, return now.
-					return NULL;
+					return nullptr;
 
 				pcurrent = pcurrent->GetPrevious();
 			}
@@ -292,14 +292,14 @@ CPathTrack* CPathTrack::LookAhead(Vector* origin, float dist, bool move)
 			{
 				if (!move)
 					Project(pcurrent->GetPrevious(), pcurrent, origin, dist);
-				return NULL;
+				return nullptr;
 			}
 			Vector dir = pcurrent->GetNext()->v.origin - currentPos;
 			float length = dir.Length();
 			if (0 == length && !ValidPath(pcurrent->GetNext()->GetNext(), move))
 			{
 				if (dist == originalDist) // HACK -- up against a dead end
-					return NULL;
+					return nullptr;
 				return pcurrent;
 			}
 			if (length > dist) // enough left in this path to move
@@ -345,7 +345,7 @@ CPathTrack* CPathTrack::Nearest(Vector origin)
 		if (deadCount > 9999)
 		{
 			ALERT(at_error, "Bad sequence of path_tracks from %s", STRING(v.targetname));
-			return NULL;
+			return nullptr;
 		}
 		delta = origin - ppath->v.origin;
 		delta.z = 0;

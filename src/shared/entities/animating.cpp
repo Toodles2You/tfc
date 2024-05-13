@@ -215,7 +215,7 @@ int CBaseAnimating::FindTransition(int iEndingSequence, int iGoalSequence, int* 
 {
 	void* pmodel = g_engfuncs.pfnGetModelPtr(&v);
 
-	if (piDir == NULL)
+	if (piDir == nullptr)
 	{
 		int iDir;
 		int sequence = studio::FindTransition(pmodel, iEndingSequence, iGoalSequence, &iDir);

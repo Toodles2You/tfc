@@ -51,7 +51,7 @@ void CHudTrain::Draw(const float time)
 		y = gHUD.GetHeight() - SPR_Height(m_hSprite, 0) - gHUD.m_iFontHeight;
 		x = gHUD.GetWidth() / 3 + SPR_Width(m_hSprite, 0) / 4;
 
-		gHUD.DrawHudSprite(m_hSprite, m_iPos - 1, NULL, x, y, CHud::COLOR_PRIMARY, 255);
+		gHUD.DrawHudSprite(m_hSprite, m_iPos - 1, nullptr, x, y, CHud::COLOR_PRIMARY, 255);
 	}
 }
 

@@ -39,7 +39,7 @@ void CBasePlayer::Observer_FindNextPlayer(bool bReverse)
 	else
 		iStart = ENTINDEX(edict());
 	int iCurrent = iStart;
-	m_hObserverTarget = NULL;
+	m_hObserverTarget = nullptr;
 	int iDir = bReverse ? -1 : 1;
 
 	do
@@ -141,11 +141,11 @@ void CBasePlayer::Observer_CheckTarget()
 		return;
 
 	// try to find a traget if we have no current one
-	if (m_hObserverTarget == NULL)
+	if (m_hObserverTarget == nullptr)
 	{
 		Observer_FindNextPlayer(false);
 
-		if (m_hObserverTarget == NULL)
+		if (m_hObserverTarget == nullptr)
 		{
 			// no target found at all
 
@@ -210,26 +210,26 @@ void CBasePlayer::Observer_SetMode(int iMode)
 			iMode = OBS_CHASE_FREE;
 	}
 	// verify observer target again
-	if (m_hObserverTarget != NULL)
+	if (m_hObserverTarget != nullptr)
 	{
 		CBaseEntity* pEnt = m_hObserverTarget;
 
-		if ((pEnt == this) || (pEnt == NULL))
-			m_hObserverTarget = NULL;
+		if ((pEnt == this) || (pEnt == nullptr))
+			m_hObserverTarget = nullptr;
 		else if (!pEnt->IsPlayer())
-			m_hObserverTarget = NULL;
+			m_hObserverTarget = nullptr;
 	}
 
 	// set spectator mode
 	v.iuser1 = iMode;
 
 	// if we are not roaming, we need a valid target to track
-	if ((iMode != OBS_ROAMING) && (m_hObserverTarget == NULL))
+	if ((iMode != OBS_ROAMING) && (m_hObserverTarget == nullptr))
 	{
 		Observer_FindNextPlayer(false);
 
 		// if we didn't find a valid target switch to roaming
-		if (m_hObserverTarget == NULL)
+		if (m_hObserverTarget == nullptr)
 		{
 			if (IsSpectator())
 			{

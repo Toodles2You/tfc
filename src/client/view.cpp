@@ -225,7 +225,7 @@ static void V_CalcIntermissionRefdef(ref_params_t* pparams)
 
 	pparams->viewangles = pparams->cl_viewangles;
 
-	view->model = NULL;
+	view->model = nullptr;
 
 	// always idle in intermission
 	old = v_idlescale;
@@ -372,7 +372,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 			if (waterEntity >= 0 && waterEntity < pparams->max_entities)
 			{
 				pwater = gEngfuncs.GetEntityByIndex(waterEntity);
-				if (pwater && (pwater->model != NULL))
+				if (pwater && (pwater->model != nullptr))
 				{
 					waterDist += (pwater->curstate.scale * 16); // Add in wave height
 				}
@@ -391,7 +391,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 			point[2] -= waterDist;
 			for (i = 0; i < waterDist; i++)
 			{
-				contents = gEngfuncs.PM_PointContents(point, NULL);
+				contents = gEngfuncs.PM_PointContents(point, nullptr);
 				if (contents > CONTENTS_WATER)
 					break;
 				point[2] += 1;
@@ -405,7 +405,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 
 			for (i = 0; i < waterDist; i++)
 			{
-				contents = gEngfuncs.PM_PointContents(point, NULL);
+				contents = gEngfuncs.PM_PointContents(point, nullptr);
 				if (contents <= CONTENTS_WATER)
 					break;
 				point[2] -= 1;

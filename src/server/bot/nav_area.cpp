@@ -52,7 +52,7 @@ NavAreaList TheNavAreaList;
 NavLadderList TheNavLadderList;
 
 unsigned int CNavArea::m_masterMarker = 1;
-CNavArea *CNavArea::m_openList = NULL;
+CNavArea *CNavArea::m_openList = nullptr;
 
 bool CNavArea::m_isReset = false;
 static float lastDrawTimestamp = 0.0f;
@@ -161,7 +161,7 @@ HidingSpot *GetHidingSpotByID( unsigned int id )
 			return spot;
 	}	
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -172,7 +172,7 @@ HidingSpot *GetHidingSpotByID( unsigned int id )
 void CNavArea::Initialize( void )
 {
 	m_marker = 0;
-	m_parent = NULL;
+	m_parent = nullptr;
 	m_parentHow = GO_NORTH;
 	m_attributeFlags = 0;
 	m_place = 0;
@@ -190,8 +190,8 @@ void CNavArea::Initialize( void )
 	// set an ID for splitting and other interactive editing - loads will overwrite this
 	m_id = m_nextID++;
 
-	m_prevHash = NULL;
-	m_nextHash = NULL;
+	m_prevHash = nullptr;
+	m_nextHash = nullptr;
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -509,8 +509,8 @@ void CNavArea::AssignNodes( CNavArea *area )
  */
 bool CNavArea::SplitEdit( bool splitAlongX, float splitEdge, CNavArea **outAlpha, CNavArea **outBeta )
 {
-	CNavArea *alpha = NULL;
-	CNavArea *beta = NULL;
+	CNavArea *alpha = nullptr;
+	CNavArea *beta = nullptr;
 
 	if (splitAlongX)
 	{
@@ -747,7 +747,7 @@ void CNavArea::FinishSplitEdit( CNavArea *newArea, NavDirType ignoreEdge )
  */
 bool CNavArea::SpliceEdit( CNavArea *other )
 {
-	CNavArea *newArea = NULL;
+	CNavArea *newArea = nullptr;
 	Vector nw, ne, se, sw;
 
 	if (m_extent.lo.x > other->m_extent.hi.x)
@@ -1021,7 +1021,7 @@ void DestroyNavigationMap( void )
 		next = node->m_next;
 		delete node;
 	}
-	CNavNode::m_list = NULL;
+	CNavNode::m_list = nullptr;
 
 	// reset the grid
 	TheNavAreaGrid.Reset();
@@ -1057,9 +1057,9 @@ void CNavArea::Strip( void )
 /**
  * Start at given position and find first area in given direction
  */
-inline CNavArea *FindFirstAreaInDirection( const Vector *start, NavDirType dir, float range, float beneathLimit, CBaseEntity *traceIgnore = NULL, Vector *closePos = NULL )
+inline CNavArea *FindFirstAreaInDirection( const Vector *start, NavDirType dir, float range, float beneathLimit, CBaseEntity *traceIgnore = nullptr, Vector *closePos = nullptr )
 {
-	CNavArea *area = NULL;
+	CNavArea *area = nullptr;
 
 	Vector pos = *start;
 
@@ -1144,12 +1144,12 @@ inline CNavArea *findJumpDownArea( const Vector *fromPos, NavDirType dir )
 	AddDirectionVector( &start, dir, GenerationStepSize/2.0f );
 
 	Vector toPos;
-	CNavArea *downArea = FindFirstAreaInDirection( &start, dir, 4.0f * GenerationStepSize, DeathDrop, NULL, &toPos );
+	CNavArea *downArea = FindFirstAreaInDirection( &start, dir, 4.0f * GenerationStepSize, DeathDrop, nullptr, &toPos );
 
 	if (downArea && testJumpDown( fromPos, &toPos ))
 		return downArea;
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -1211,7 +1211,7 @@ void ConnectGeneratedAreas( void )
 		if (node)
 		{
 			CNavNode *end = area->m_node[ SOUTH_EAST ]->GetConnectedNode( NORTH );
-			/// @todo Figure out why cs_backalley gets a NULL node in here...
+			/// @todo Figure out why cs_backalley gets a nullptr node in here...
 			for( ; node && node != end; node = node->GetConnectedNode( EAST ) )
 			{
 				CNavNode *adj = node->GetConnectedNode( SOUTH );
@@ -1530,7 +1530,7 @@ bool TestArea( CNavNode *node, int width, int height )
 				return false;
 
 			horizNode = horizNode->GetConnectedNode( EAST );
-			if (horizNode == NULL)
+			if (horizNode == nullptr)
 				return false;
 
 			// nodes must lie on/near the plane
@@ -1543,7 +1543,7 @@ bool TestArea( CNavNode *node, int width, int height )
 		}
 
 		vertNode = vertNode->GetConnectedNode( SOUTH );
-		if (vertNode == NULL)
+		if (vertNode == nullptr)
 			return false;
 
 		// nodes must lie on/near the plane
@@ -1563,7 +1563,7 @@ bool TestArea( CNavNode *node, int width, int height )
 		for( int x=0; x<width; x++ )
 		{
 			horizNode = horizNode->GetConnectedNode( EAST );
-			if (horizNode == NULL)
+			if (horizNode == nullptr)
 				return false;
 
 			// nodes must lie on/near the plane
@@ -1587,9 +1587,9 @@ int BuildArea( CNavNode *node, int width, int height )
 	//CONSOLE_ECHO( "BuildArea( #%d, %d, %d )\n", node->GetID(), width, height );
 
 	CNavNode *nwNode = node;
-	CNavNode *neNode = NULL;
-	CNavNode *swNode = NULL;
-	CNavNode *seNode = NULL;
+	CNavNode *neNode = nullptr;
+	CNavNode *swNode = nullptr;
+	CNavNode *seNode = nullptr;
 
 	CNavNode *vertNode = node;
 	CNavNode *horizNode;
@@ -1625,7 +1625,7 @@ int BuildArea( CNavNode *node, int width, int height )
 
 	if (!nwNode || !neNode || !seNode || !swNode)
 	{
-		CONSOLE_ECHO( "ERROR: BuildArea - NULL node.\n" );
+		CONSOLE_ECHO( "ERROR: BuildArea - nullptr node.\n" );
 		return -1;
 	}
 
@@ -1651,7 +1651,7 @@ void BuildLadders( void )
 	DestroyLadders();
 
 	TraceResult result;
-	CBaseEntity *entity = util::FindEntityByClassname( NULL, "func_ladder" );
+	CBaseEntity *entity = util::FindEntityByClassname( nullptr, "func_ladder" );
 	while( entity != nullptr )
 	{
 		CNavLadder *ladder = new CNavLadder;
@@ -1778,22 +1778,22 @@ void BuildLadders( void )
 		// find "ahead" area
 		ladder->m_topForwardArea = FindFirstAreaInDirection( &center, OppositeDirection( ladder->m_dir ), nearLadderRange, 120.0f, entity );
 		if (ladder->m_topForwardArea == ladder->m_bottomArea)
-			ladder->m_topForwardArea = NULL;
+			ladder->m_topForwardArea = nullptr;
 
 		// find "left" area
 		ladder->m_topLeftArea = FindFirstAreaInDirection( &center, DirectionLeft( ladder->m_dir ), nearLadderRange, 120.0f, entity );
 		if (ladder->m_topLeftArea == ladder->m_bottomArea)
-			ladder->m_topLeftArea = NULL;
+			ladder->m_topLeftArea = nullptr;
 
 		// find "right" area
 		ladder->m_topRightArea = FindFirstAreaInDirection( &center, DirectionRight( ladder->m_dir ), nearLadderRange, 120.0f, entity );
 		if (ladder->m_topRightArea == ladder->m_bottomArea)
-			ladder->m_topRightArea = NULL;
+			ladder->m_topRightArea = nullptr;
 
 		// find "behind" area - must look farther, since ladder is against the wall away from this area
 		ladder->m_topBehindArea = FindFirstAreaInDirection( &center, ladder->m_dir, 2.0f*nearLadderRange, 120.0f, entity );
 		if (ladder->m_topBehindArea == ladder->m_bottomArea)
-			ladder->m_topBehindArea = NULL;
+			ladder->m_topBehindArea = nullptr;
 
 		// can't include behind area, since it is not used when going up a ladder
 		if (!ladder->m_topForwardArea && !ladder->m_topLeftArea && !ladder->m_topRightArea)
@@ -1824,7 +1824,7 @@ void BuildLadders( void )
 		for( int a=0; a<4; ++a )
 		{
 			CNavArea *topArea = topAreaList[a];
-			if (topArea == NULL)
+			if (topArea == nullptr)
 				continue;
 
 			Vector close;
@@ -2313,7 +2313,7 @@ CNavArea *CNavArea::GetRandomAdjacentArea( NavDirType dir ) const
 		i++;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -2640,16 +2640,16 @@ void CNavArea::AddToOpenList( void )
 	m_openMarker = m_masterMarker;
 
 	// if list is empty, add and return
-	if (m_openList == NULL)
+	if (m_openList == nullptr)
 	{
 		m_openList = this;
-		this->m_prevOpen = NULL;
-		this->m_nextOpen = NULL;
+		this->m_prevOpen = nullptr;
+		this->m_nextOpen = nullptr;
 		return;
 	}
 
 	// insert self in ascending cost order
-	CNavArea *area, *last = NULL;
+	CNavArea *area, *last = nullptr;
 	for( area = m_openList; area; area = area->m_nextOpen )
 	{
 		if (this->GetTotalCost() < area->GetTotalCost())
@@ -2676,7 +2676,7 @@ void CNavArea::AddToOpenList( void )
 		last->m_nextOpen = this;
 
 		this->m_prevOpen = last;
-		this->m_nextOpen = NULL;
+		this->m_nextOpen = nullptr;
 	}
 }
 
@@ -2736,7 +2736,7 @@ void CNavArea::ClearSearchLists( void )
 	// effectively clears all open list pointers and closed flags
 	CNavArea::MakeNewMarker();
 
-	m_openList = NULL;
+	m_openList = nullptr;
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -2769,7 +2769,7 @@ const Vector *CNavArea::GetCorner( NavCornerType corner ) const
 			return &m_extent.hi;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -3081,7 +3081,7 @@ SpotEncounter *CNavArea::GetSpotEncounter( const CNavArea *from, const CNavArea 
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -3276,7 +3276,7 @@ float CNavArea::GetDanger( int teamID )
  */
 void IncreaseDangerNearby( int teamID, float amount, CNavArea *startArea, const Vector *pos, float maxRadius )
 {
-	if (startArea == NULL)
+	if (startArea == nullptr)
 		return;
 
 	CNavArea::MakeNewMarker();
@@ -3481,8 +3481,8 @@ public:
  */
 const Vector *FindNearbyHidingSpot( CBaseEntity *me, const Vector *pos, CNavArea *startArea, float maxRange, bool isSniper, bool useNearest )
 {
-	if (startArea == NULL)
-		return NULL;
+	if (startArea == nullptr)
+		return nullptr;
 
 	// collect set of nearby hiding spots
 	if (isSniper)
@@ -3516,12 +3516,12 @@ const Vector *FindNearbyHidingSpot( CBaseEntity *me, const Vector *pos, CNavArea
 	SearchSurroundingAreas( startArea, pos, collector, maxRange );
 
 	if (collector.m_count == 0)
-		return NULL;
+		return nullptr;
 
 	if (useNearest)
 	{
 		// return closest hiding spot
-		const Vector *closest = NULL;
+		const Vector *closest = nullptr;
 		float closeRangeSq = 9999999999.9f;
 		for( int i=0; i<collector.m_count; ++i )
 		{
@@ -3551,7 +3551,7 @@ const Vector *FindRandomHidingSpot( CBaseEntity *me, Place place, bool isSniper 
 	// collect set of nearby hiding spots
 	if (isSniper)
 	{
-		CollectHidingSpotsFunctor collector( me, NULL, -1.0f, HidingSpot::IDEAL_SNIPER_SPOT, place );
+		CollectHidingSpotsFunctor collector( me, nullptr, -1.0f, HidingSpot::IDEAL_SNIPER_SPOT, place );
 		ForAllAreas( collector );
 
 		if (collector.m_count)
@@ -3562,7 +3562,7 @@ const Vector *FindRandomHidingSpot( CBaseEntity *me, Place place, bool isSniper 
 		else
 		{
 			// no ideal sniping spots, look for "good" sniping spots
-			CollectHidingSpotsFunctor collector( me, NULL, -1.0f, HidingSpot::GOOD_SNIPER_SPOT, place );
+			CollectHidingSpotsFunctor collector( me, nullptr, -1.0f, HidingSpot::GOOD_SNIPER_SPOT, place );
 			ForAllAreas( collector );
 
 			if (collector.m_count)
@@ -3576,11 +3576,11 @@ const Vector *FindRandomHidingSpot( CBaseEntity *me, Place place, bool isSniper 
 	}
 
 	// collect hiding spots with decent "cover"
-	CollectHidingSpotsFunctor collector( me, NULL, -1.0f, HidingSpot::IN_COVER, place );
+	CollectHidingSpotsFunctor collector( me, nullptr, -1.0f, HidingSpot::IN_COVER, place );
 	ForAllAreas( collector );
 
 	if (collector.m_count == 0)
-		return NULL;
+		return nullptr;
 
 	// select a hiding spot at random
 	int which = RANDOM_LONG( 0, collector.m_count-1 );
@@ -3650,15 +3650,15 @@ bool IsCrossingLineOfFire( const Vector &start, const Vector &finish, CBaseEntit
  */
 const Vector *FindNearbyRetreatSpot( CBaseEntity *me, const Vector *start, CNavArea *startArea, float maxRange, int avoidTeam, bool useCrouchAreas )
 {
-	if (startArea == NULL)
-		return NULL;
+	if (startArea == nullptr)
+		return nullptr;
 
 	// collect hiding spots with decent "cover"
 	CollectHidingSpotsFunctor collector( me, start, maxRange, HidingSpot::IN_COVER, UNDEFINED_PLACE, useCrouchAreas );
 	SearchSurroundingAreas( startArea, start, collector, maxRange );
 
 	if (collector.m_count == 0)
-		return NULL;
+		return nullptr;
 
 	// find the closest unoccupied hiding spot that crosses the least lines of fire and has the best cover
 	for( int i=0; i<collector.m_count; ++i )
@@ -3696,7 +3696,7 @@ const Vector *FindNearbyRetreatSpot( CBaseEntity *me, const Vector *start, CNavA
 	}
 
 	if (collector.m_count <= 0)
-		return NULL;
+		return nullptr;
 
 	// all remaining spots are ok - pick one at random
 	int which = RANDOM_LONG( 0, collector.m_count-1 );
@@ -3738,8 +3738,8 @@ int CNavArea::GetPlayerCount( int teamID, CBasePlayer *ignore ) const
 }
 
 //--------------------------------------------------------------------------------------------------------------
-static CNavArea *markedArea = NULL;
-static CNavArea *lastSelectedArea = NULL;
+static CNavArea *markedArea = nullptr;
+static CNavArea *lastSelectedArea = nullptr;
 static NavCornerType markedCorner = NUM_CORNERS;
 
 static bool isCreatingNavArea = false;						///< if true, we are manually creating a new nav area
@@ -3761,8 +3761,8 @@ CNavArea *GetMarkedArea( void )
  */
 void EditNavAreasReset( void )
 {
-	markedArea = NULL;
-	lastSelectedArea = NULL;
+	markedArea = nullptr;
+	lastSelectedArea = nullptr;
 	isCreatingNavArea = false;
 	editTimestamp = 0.0f;
 	isPlacePainting = false;
@@ -3807,7 +3807,7 @@ void DrawHidingSpots( const CNavArea *area )
 void CNavArea::DrawConnectedAreas( void )
 {
 	CBasePlayer *player = static_cast<CBasePlayer *>(util::GetLocalPlayer());
-	if (player == NULL)
+	if (player == nullptr)
 		return;
 
 	CGameBotManager *ctrl = static_cast<CGameBotManager *>( g_pBotMan );
@@ -4009,7 +4009,7 @@ void EditNavAreas( NavEditCmdType cmd )
 	CGameBotManager *ctrl = static_cast<CGameBotManager *>( g_pBotMan );
 
 	CBasePlayer *player = static_cast<CBasePlayer *>(util::GetLocalPlayer());
-	if (player == NULL)
+	if (player == nullptr)
 		return;
 
 	// don't draw too often on fast video cards or the areas may not appear (odd video effect)
@@ -4101,7 +4101,7 @@ void EditNavAreas( NavEditCmdType cmd )
 	}
 
 	Vector dir;
-	util::MakeVectorsPrivate( player->v.v_angle, dir, NULL, NULL );
+	util::MakeVectorsPrivate( player->v.v_angle, dir, nullptr, nullptr );
 
 	Vector from = player->v.origin + player->v.view_ofs;	// eye position
 	Vector to = from + maxRange * dir;
@@ -4309,7 +4309,7 @@ void EditNavAreas( NavEditCmdType cmd )
 					UTIL_DrawBeamPoints( from, to, beamTime, 255, 255, 255 );
 
 				// draw the area we are pointing at and all connected areas
-				if (doDraw && (cv_bot_traceview.value != 11 || markedArea == NULL))
+				if (doDraw && (cv_bot_traceview.value != 11 || markedArea == nullptr))
 					area->DrawConnectedAreas();
 
 
@@ -4373,7 +4373,7 @@ void EditNavAreas( NavEditCmdType cmd )
 						if (markedArea)
 						{
 							util::GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
-							markedArea = NULL;
+							markedArea = nullptr;
 						}
 						else
 						{
@@ -4396,11 +4396,11 @@ void EditNavAreas( NavEditCmdType cmd )
 						if (markedArea)
 						{
 							util::GetLocalPlayer()->EmitSound("buttons/blip1.wav", CHAN_ITEM); 
-							markedArea = NULL;
+							markedArea = nullptr;
 						}
 						else
 						{
-							markedArea = NULL;
+							markedArea = nullptr;
 							for( NavAreaList::iterator iter = TheNavAreaList.begin(); iter != TheNavAreaList.end(); ++iter )
 							{
 								CNavArea *area = *iter;
@@ -4623,7 +4623,7 @@ void EditNavAreas( NavEditCmdType cmd )
 		cmd != EDIT_MARK_UNNAMED && cmd != EDIT_WARP_TO_MARK &&
 		cmd != EDIT_SELECT_CORNER && cmd != EDIT_RAISE_CORNER && cmd != EDIT_LOWER_CORNER &&
 		cmd != EDIT_NONE)
-		markedArea = NULL;
+		markedArea = nullptr;
 
 	// if our last command was not affecting the corner, clear the corner selection
 	if (cmd != EDIT_SELECT_CORNER && cmd != EDIT_RAISE_CORNER && cmd != EDIT_LOWER_CORNER && cmd != EDIT_NONE)
@@ -4649,7 +4649,7 @@ bool GetGroundHeight( const Vector *pos, float *height, Vector *normal )
 	float offset;
 	Vector from;
 	TraceResult result;
-	Entity *ignore = NULL;
+	Entity *ignore = nullptr;
 	float ground = 0.0f;
 
 	const float maxOffset = 100.0f;
@@ -4768,7 +4768,7 @@ public:
 			if (area->GetID() == BlockedID[i])
 				return -1.0f;
 
-		if (fromArea == NULL)
+		if (fromArea == nullptr)
 		{
 			// first area in path, no cost
 			return 0.0f;
@@ -4860,7 +4860,7 @@ void CNavArea::ComputeApproachAreas( void )
 	
 		// make first path to far away area
 		ApproachAreaCost cost;
-		if (NavAreaBuildPath( this, farArea, NULL, cost ) == false)
+		if (NavAreaBuildPath( this, farArea, nullptr, cost ) == false)
 			continue;
 
 		//
@@ -4916,7 +4916,7 @@ void CNavArea::ComputeApproachAreas( void )
 
 				if (a == m_approachCount)
 				{
-					m_approach[ m_approachCount ].prev.area = (block >= 2) ? path[block-2] : NULL;
+					m_approach[ m_approachCount ].prev.area = (block >= 2) ? path[block-2] : nullptr;
 
 					m_approach[ m_approachCount ].here.area = path[block-1];
 					m_approach[ m_approachCount ].prevToHereHow = path[block-1]->GetParentHow();
@@ -4933,7 +4933,7 @@ void CNavArea::ComputeApproachAreas( void )
 
 			// find another path to 'farArea'
 			ApproachAreaCost cost;
-			if (NavAreaBuildPath( this, farArea, NULL, cost ) == false)
+			if (NavAreaBuildPath( this, farArea, nullptr, cost ) == false)
 			{
 				// can't find a path to 'farArea' means all exits have been already tested and blocked
 				break;
@@ -4953,14 +4953,14 @@ CNavAreaGrid TheNavAreaGrid;
 
 CNavAreaGrid::CNavAreaGrid( void ) : m_cellSize( 300.0f )
 {
-	m_grid = NULL;
+	m_grid = nullptr;
 	Reset();
 }
 
 CNavAreaGrid::~CNavAreaGrid()
 {
 	delete [] m_grid;
-	m_grid = NULL;
+	m_grid = nullptr;
 }
 
 /**
@@ -4971,13 +4971,13 @@ void CNavAreaGrid::Reset( void )
 	if (m_grid)
 		delete [] m_grid;
 
-	m_grid = NULL;
+	m_grid = nullptr;
 	m_gridSizeX = 0;
 	m_gridSizeY = 0;
 
 	// clear the hash table
 	for( int i=0; i<HASH_TABLE_SIZE; ++i )
-		m_hashTable[i] = NULL;
+		m_hashTable[i] = nullptr;
 
 	m_areaCount = 0;
 
@@ -5024,7 +5024,7 @@ void CNavAreaGrid::AddNavArea( CNavArea *area )
 	if (m_hashTable[key])
 	{
 		// add to head of list in this slot
-		area->m_prevHash = NULL;
+		area->m_prevHash = nullptr;
 		area->m_nextHash = m_hashTable[key];
 		m_hashTable[key]->m_prevHash = area;
 		m_hashTable[key] = area;
@@ -5033,8 +5033,8 @@ void CNavAreaGrid::AddNavArea( CNavArea *area )
 	{
 		// first entry in this slot
 		m_hashTable[key] = area;
-		area->m_nextHash = NULL;
-		area->m_prevHash = NULL;
+		area->m_nextHash = nullptr;
+		area->m_prevHash = nullptr;
 	}
 
 	++m_areaCount;
@@ -5070,7 +5070,7 @@ void CNavAreaGrid::RemoveNavArea( CNavArea *area )
 		m_hashTable[key] = area->m_nextHash;
 
 		if (m_hashTable[key])
-			m_hashTable[key]->m_prevHash = NULL;
+			m_hashTable[key]->m_prevHash = nullptr;
 	}
 
 	if (area->m_nextHash)
@@ -5086,8 +5086,8 @@ void CNavAreaGrid::RemoveNavArea( CNavArea *area )
  */
 CNavArea *CNavAreaGrid::GetNavArea( const Vector *pos, float beneathLimit ) const
 {
-	if (m_grid == NULL)
-		return NULL;
+	if (m_grid == nullptr)
+		return nullptr;
 
 	// get list in cell that contains position
 	int x = WorldToGridX( pos->x );
@@ -5096,7 +5096,7 @@ CNavArea *CNavAreaGrid::GetNavArea( const Vector *pos, float beneathLimit ) cons
 
 
 	// search cell list to find correct area
-	CNavArea *use = NULL;
+	CNavArea *use = nullptr;
 	float useZ = -99999999.9f;
 	Vector testPos = *pos + Vector( 0, 0, 5 );
 
@@ -5139,10 +5139,10 @@ CNavArea *CNavAreaGrid::GetNavArea( const Vector *pos, float beneathLimit ) cons
  */
 CNavArea *CNavAreaGrid::GetNearestNavArea( const Vector *pos, bool anyZ ) const
 {
-	if (m_grid == NULL)
-		return NULL;
+	if (m_grid == nullptr)
+		return nullptr;
 
-	CNavArea *close = NULL;
+	CNavArea *close = nullptr;
 	float closeDistSq = 99999999.9f;
 
 	// quick check
@@ -5155,7 +5155,7 @@ CNavArea *CNavAreaGrid::GetNearestNavArea( const Vector *pos, bool anyZ ) const
 	source.x = pos->x;
 	source.y = pos->y;
 	if (GetGroundHeight( pos, &source.z ) == false)
-		return NULL;
+		return nullptr;
 
 	source.z += HalfHumanHeight;
 
@@ -5198,7 +5198,7 @@ CNavArea *CNavAreaGrid::GetNearestNavArea( const Vector *pos, bool anyZ ) const
 CNavArea *CNavAreaGrid::GetNavAreaByID( unsigned int id ) const
 {
 	if (id == 0)
-		return NULL;
+		return nullptr;
 
 	int key = ComputeHashKey( id );
 
@@ -5206,7 +5206,7 @@ CNavArea *CNavAreaGrid::GetNavAreaByID( unsigned int id ) const
 		if (area->GetID() == id)
 			return area;
 
-	return NULL;
+	return nullptr;
 }
 
 //--------------------------------------------------------------------------------------------------------------

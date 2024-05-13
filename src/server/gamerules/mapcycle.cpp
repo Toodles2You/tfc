@@ -60,8 +60,8 @@ static void DestroyMapCycle(mapcycle_t* cycle)
 
 		delete cycle->items;
 	}
-	cycle->items = NULL;
-	cycle->next_item = NULL;
+	cycle->items = nullptr;
+	cycle->next_item = nullptr;
 }
 
 static char com_token[1500];
@@ -82,14 +82,14 @@ static char* COM_Parse(char* data)
 	com_token[0] = 0;
 
 	if (!data)
-		return NULL;
+		return nullptr;
 
 // skip whitespace
 skipwhite:
 	while ((c = *data) <= ' ')
 	{
 		if (c == 0)
-			return NULL; // end of file;
+			return nullptr; // end of file;
 		data++;
 	}
 
@@ -184,7 +184,7 @@ static bool ReloadMapCycleFile(char* filename, mapcycle_t* cycle)
 	char* pFileList;
 	char* aFileList = pFileList = (char*)LOAD_FILE_FOR_ME(filename, &length);
 	bool hasbuffer;
-	mapcycle_item_s *item, *newlist = NULL, *next;
+	mapcycle_item_s *item, *newlist = nullptr, *next;
 
 	if (pFileList && 0 != length)
 	{
@@ -510,7 +510,7 @@ void CHalfLifeMultiplay::ChangeLevel()
 		ALERT(at_console, "RULES:  %s\n", szRules);
 	}
 
-	CHANGE_LEVEL(szNextMap, NULL);
+	CHANGE_LEVEL(szNextMap, nullptr);
 	if (strlen(szCommands) > 0)
 	{
 		SERVER_COMMAND(szCommands);

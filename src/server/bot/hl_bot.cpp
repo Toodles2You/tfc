@@ -101,7 +101,7 @@ bool CHLBot::IsVisible(const Vector* pos, bool testFOV = false)
 }
 
 
-bool CHLBot::IsVisible(CBasePlayer* player, bool testFOV = false, unsigned char* visParts = NULL)
+bool CHLBot::IsVisible(CBasePlayer* player, bool testFOV = false, unsigned char* visParts = nullptr)
 {
     if (!player->IsPlayer() || !player->IsAlive())
     {

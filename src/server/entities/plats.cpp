@@ -1372,7 +1372,7 @@ void CFuncTrackTrain::Find()
 	if (!m_ppath->Is(Type::Track))
 	{
 		ALERT(at_error, "func_track_train must be on a path of path_track\n");
-		m_ppath = NULL;
+		m_ppath = nullptr;
 		return;
 	}
 
@@ -1401,13 +1401,13 @@ void CFuncTrackTrain::Find()
 
 void CFuncTrackTrain::NearestPath()
 {
-	CBaseEntity* pTrack = NULL;
-	CBaseEntity* pNearest = NULL;
+	CBaseEntity* pTrack = nullptr;
+	CBaseEntity* pNearest = nullptr;
 	float dist, closest;
 
 	closest = 1024;
 
-	while ((pTrack = util::FindEntityInSphere(pTrack, v.origin, 1024)) != NULL)
+	while ((pTrack = util::FindEntityInSphere(pTrack, v.origin, 1024)) != nullptr)
 	{
 		// filter out non-tracks
 		if (pTrack->Is(Type::Track))
@@ -1555,7 +1555,7 @@ LINK_ENTITY_TO_CLASS(func_traincontrols, CFuncTrainControls);
 
 void CFuncTrainControls::Find()
 {
-	CBaseEntity* pTarget = NULL;
+	CBaseEntity* pTarget = nullptr;
 
 	do
 	{
@@ -1874,7 +1874,7 @@ void CFuncTrackChange::GoDown()
 	if (m_code == TRAIN_FOLLOWING)
 	{
 		UpdateTrain(m_start);
-		m_train->m_ppath = NULL;
+		m_train->m_ppath = nullptr;
 	}
 }
 
@@ -1911,7 +1911,7 @@ void CFuncTrackChange::GoUp()
 	if (m_code == TRAIN_FOLLOWING)
 	{
 		UpdateTrain(m_end);
-		m_train->m_ppath = NULL;
+		m_train->m_ppath = nullptr;
 	}
 }
 
@@ -2059,7 +2059,7 @@ void CFuncTrackAuto::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE
 	else if (m_toggle_state == TS_AT_BOTTOM)
 		pTarget = m_trackBottom;
 	else
-		pTarget = NULL;
+		pTarget = nullptr;
 
 	if (pActivator->Is(Type::ChooChooTrain))
 	{

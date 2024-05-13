@@ -95,8 +95,8 @@ extern Vector	UTIL_ComputeOrigin( CBaseEntity * pEntity );
 extern Vector	UTIL_ComputeOrigin( Entity * pentEdict );
 extern void		UTIL_DrawBeamFromEnt( int iIndex, Vector vecEnd, int iLifetime, byte bRed, byte bGreen, byte bBlue );
 extern void		UTIL_DrawBeamPoints( Vector vecStart, Vector vecEnd, int iLifetime, byte bRed, byte bGreen, byte bBlue );
-extern CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, float *distance = NULL, CBasePlayer *ignore = NULL );
-extern CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, int team, float *distance = NULL, CBasePlayer *ignore = NULL );
+extern CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, float *distance = nullptr, CBasePlayer *ignore = nullptr );
+extern CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, int team, float *distance = nullptr, CBasePlayer *ignore = nullptr );
 extern CBasePlayer *UTIL_GetClosestEnemyPlayer( CBasePlayer *self, float *distance );
 extern bool UTIL_KickBotFromTeam( int kickTeam ); ///< kick a bot from the given team. If no bot exists on the team, return false.
 
@@ -224,7 +224,7 @@ private:
  */
 inline bool IsEntityValid( CBaseEntity *entity )
 {
-	if (entity == NULL)
+	if (entity == nullptr)
 		return false;
 
 	if (STRING(entity->v.netname)[0] == '\0')
@@ -246,7 +246,7 @@ inline bool IsEntityValid( CBaseEntity *entity )
  */
 inline bool IsIntersecting2D( const Vector &startA, const Vector &endA, 
 															const Vector &startB, const Vector &endB, 
-															Vector *result = NULL )
+															Vector *result = nullptr )
 {
 	float denom = (endA.x - startA.x) * (endB.y - startB.y) - (endA.y - startA.y) * (endB.x - startB.x);
 	if (denom == 0.0f)

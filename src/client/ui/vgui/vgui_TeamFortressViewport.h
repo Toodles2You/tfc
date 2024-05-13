@@ -218,10 +218,10 @@ public:
 	ColorButton( const char* text,int x,int y,int wide,int tall, bool bNoHighlight, bool bFlat ) : 
 	  CommandButton( text, x, y, wide, tall, bNoHighlight, bFlat  ) 
 	  {
-		  ArmedColor = NULL;
-		  UnArmedColor = NULL;
-		  ArmedBorderColor = NULL;
-		  UnArmedBorderColor = NULL;
+		  ArmedColor = nullptr;
+		  UnArmedColor = nullptr;
+		  ArmedBorderColor = nullptr;
+		  UnArmedBorderColor = nullptr;
 	  }
 	
 
@@ -1448,7 +1448,7 @@ public:
 		if (m_bBeingDragged)
 			setBorder(m_pBorder);
 		else
-			setBorder(NULL);
+			setBorder(nullptr);
 	}
 };
 
@@ -1500,7 +1500,7 @@ public:
 
 	virtual void Reset( void )
 	{
-		m_pNextMenu = NULL;
+		m_pNextMenu = nullptr;
 		m_iIsActive = false;
 		m_flOpenTime = 0;
 	}

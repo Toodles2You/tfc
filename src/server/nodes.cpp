@@ -62,7 +62,7 @@ void CGraph::InitGraph()
 	if (m_pLinkPool)
 	{
 		free(m_pLinkPool);
-		m_pLinkPool = NULL;
+		m_pLinkPool = nullptr;
 	}
 
 	// Free the node info
@@ -70,13 +70,13 @@ void CGraph::InitGraph()
 	if (m_pNodes)
 	{
 		free(m_pNodes);
-		m_pNodes = NULL;
+		m_pNodes = nullptr;
 	}
 
 	if (m_di)
 	{
 		free(m_di);
-		m_di = NULL;
+		m_di = nullptr;
 	}
 
 	// Free the routing info.
@@ -84,13 +84,13 @@ void CGraph::InitGraph()
 	if (m_pRouteInfo)
 	{
 		free(m_pRouteInfo);
-		m_pRouteInfo = NULL;
+		m_pRouteInfo = nullptr;
 	}
 
 	if (m_pHashLinks)
 	{
 		free(m_pHashLinks);
-		m_pHashLinks = NULL;
+		m_pHashLinks = nullptr;
 	}
 
 	// Zero node and link counts
@@ -151,9 +151,9 @@ Entity* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
 
 	pevLinkEnt = pLink->m_pLinkEnt;
 	if (!pevLinkEnt)
-		return NULL;
+		return nullptr;
 
-	pentSearch = NULL; // start search at the top of the ent list.
+	pentSearch = nullptr; // start search at the top of the ent list.
 
 	auto link = pevLinkEnt->Get<CBaseEntity>();
 
@@ -196,7 +196,7 @@ Entity* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
 	else
 	{
 		ALERT(at_aiconsole, "Unsupported PathEnt:\n'%s'\n", STRING(pevLinkEnt->classname));
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -223,7 +223,7 @@ bool CGraph::HandleLinkEnt(int iNode, Entity* pevLinkEnt, int afCapMask, NODEQUE
 		ALERT(at_aiconsole, "dead path ent!\n");
 		return true;
 	}
-	pentWorld = NULL;
+	pentWorld = nullptr;
 
 	auto link = pevLinkEnt->Get<CBaseEntity>();
 
@@ -693,7 +693,7 @@ int CGraph::FindShortestPath(int* piPath, int iStart, int iDest, int iHull, int 
 					continue;
 				}
 				// check the connection from the current node to the node we're about to mark visited and push into the queue
-				if (m_pLinkPool[m_pNodes[iCurrentNode].m_iFirstLink + i].m_pLinkEnt != NULL)
+				if (m_pLinkPool[m_pNodes[iCurrentNode].m_iFirstLink + i].m_pLinkEnt != nullptr)
 				{ // there's a brush ent in the way! Don't mark this node or put it into the queue unless the monster can negotiate it
 
 					if (!HandleLinkEnt(iCurrentNode, m_pLinkPool[m_pNodes[iCurrentNode].m_iFirstLink + i].m_pLinkEnt, afCapMask, NODEGRAPH_STATIC))
@@ -1228,7 +1228,7 @@ int CGraph::LinkVisibleNodes(CLink* pLinkPool, FSFile& file, int* piBadNode)
 		{											   // clear out the important fields in the link pool for this node
 			pLinkPool[cTotalLinks + z].m_iSrcNode = i; // so each link knows which node it originates from
 			pLinkPool[cTotalLinks + z].m_iDestNode = 0;
-			pLinkPool[cTotalLinks + z].m_pLinkEnt = NULL;
+			pLinkPool[cTotalLinks + z].m_pLinkEnt = nullptr;
 		}
 
 		m_pNodes[i].m_iFirstLink = cTotalLinks;
@@ -1256,7 +1256,7 @@ int CGraph::LinkVisibleNodes(CLink* pLinkPool, FSFile& file, int* piBadNode)
 			}
 #endif
 
-			tr.pHit = NULL; // clear every time so we don't get stuck with last trace's hit ent
+			tr.pHit = nullptr; // clear every time so we don't get stuck with last trace's hit ent
 			pTraceEnt = 0;
 
 			util::TraceLine(m_pNodes[i].m_vecOrigin,
@@ -2373,11 +2373,11 @@ bool CGraph::FLoadGraph(const char* szMapName)
 
 	// Set the pointers to zero, just in case we run out of memory.
 	//
-	m_pNodes = NULL;
-	m_pLinkPool = NULL;
-	m_di = NULL;
-	m_pRouteInfo = NULL;
-	m_pHashLinks = NULL;
+	m_pNodes = nullptr;
+	m_pLinkPool = nullptr;
+	m_di = nullptr;
+	m_pRouteInfo = nullptr;
+	m_pHashLinks = nullptr;
 
 
 	// Malloc for the nodes
@@ -2559,14 +2559,14 @@ bool CGraph::FSetGraphPointers()
 	for (i = 0; i < m_cLinks; i++)
 	{ // go through all of the links
 
-		if (m_pLinkPool[i].m_pLinkEnt != NULL)
+		if (m_pLinkPool[i].m_pLinkEnt != nullptr)
 		{
 			char name[5];
 			// when graphs are saved, any valid pointers are will be non-zero, signifying that we should
-			// reset those pointers upon reloading. Any pointers that were NULL when the graph was saved
-			// will be NULL when reloaded, and will ignored by this function.
+			// reset those pointers upon reloading. Any pointers that were nullptr when the graph was saved
+			// will be nullptr when reloaded, and will ignored by this function.
 
-			// m_szLinkEntModelname is not necessarily NULL terminated (so we can store it in a more alignment-friendly 4 bytes)
+			// m_szLinkEntModelname is not necessarily nullptr terminated (so we can store it in a more alignment-friendly 4 bytes)
 			memcpy(name, m_pLinkPool[i].m_szLinkEntModelname, 4);
 			name[4] = 0;
 			pentLinkEnt = util::FindEntityByString(nullptr, "model", name);
@@ -2576,7 +2576,7 @@ bool CGraph::FSetGraphPointers()
 				// the ent isn't around anymore? Either there is a major problem, or it was removed from the world
 				// ( like a func_breakable that's been destroyed or something ). Make sure that LinkEnt is null.
 				ALERT(at_aiconsole, "**Could not find model %s\n", name);
-				m_pLinkPool[i].m_pLinkEnt = NULL;
+				m_pLinkPool[i].m_pLinkEnt = nullptr;
 			}
 			else
 			{

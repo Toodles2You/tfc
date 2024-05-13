@@ -518,7 +518,7 @@ CBaseEntity* FindGlobalEntity(string_t classname, string_t globalname)
 		if (!streq(pReturn->v.classname, STRING(classname)))
 		{
 			ALERT(at_console, "Global entity found %s, wrong class %s\n", STRING(globalname), STRING(pReturn->v.classname));
-			pReturn = NULL;
+			pReturn = nullptr;
 		}
 	}
 
@@ -693,9 +693,9 @@ Entity* EHANDLE::Get()
 		if (m_pent->GetSerialNumber() == m_serialnumber)
 			return m_pent;
 		else
-			return NULL;
+			return nullptr;
 	}
-	return NULL;
+	return nullptr;
 };
 
 Entity* EHANDLE::Set(Entity* pent)
@@ -727,7 +727,7 @@ CBaseEntity* EHANDLE::operator=(CBaseEntity* pEntity)
 	}
 	else
 	{
-		m_pent = NULL;
+		m_pent = nullptr;
 		m_serialnumber = 0;
 	}
 	return pEntity;
@@ -1009,7 +1009,7 @@ CBaseEntity* CBaseEntity::Create(const char* szName, const Vector& vecOrigin, co
 	if (pent == nullptr)
 	{
 		ALERT(at_console, "NULL Ent in Create!\n");
-		return NULL;
+		return nullptr;
 	}
 
 	auto entity = pent->Get<CBaseEntity>();

@@ -21,7 +21,7 @@ public:
 	void Update() override;
 
 	bool IsVisible(const Vector* pos, bool testFOV = false) override;
-	bool IsVisible(CBasePlayer* player, bool testFOV = false, unsigned char* visParts = NULL) override;
+	bool IsVisible(CBasePlayer* player, bool testFOV = false, unsigned char* visParts = nullptr) override;
 
 	bool IsEnemyPartVisible(VisiblePartType part) override;
 

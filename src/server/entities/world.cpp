@@ -149,14 +149,14 @@ CGlobalState::CGlobalState()
 
 void CGlobalState::Reset()
 {
-	m_pList = NULL;
+	m_pList = nullptr;
 	m_listCount = 0;
 }
 
 globalentity_t* CGlobalState::Find(string_t globalname)
 {
 	if (FStringNull(globalname))
-		return NULL;
+		return nullptr;
 
 	globalentity_t* pTest;
 	const char* pEntityName = STRING(globalname);

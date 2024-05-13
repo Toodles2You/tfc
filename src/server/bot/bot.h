@@ -35,7 +35,7 @@ template <class T> T * CreateBot( const BotProfile *profile )
 	if ( UTIL_ClientsInGame() >= gpGlobals->maxClients )
 	{
 		CONSOLE_ECHO( "Unable to create bot: Server is full (%d/%d clients).\n", UTIL_ClientsInGame(), gpGlobals->maxClients );
-		return NULL;
+		return nullptr;
 	}
 
 	char netname[64];
@@ -47,11 +47,11 @@ template <class T> T * CreateBot( const BotProfile *profile )
 	if ( pentBot == nullptr )
 	{
 		CONSOLE_ECHO( "Unable to create bot: pfnCreateFakeClient() returned null.\n" );
-		return NULL;
+		return nullptr;
 	}
 	else
 	{
-		T * pBot = NULL;
+		T * pBot = nullptr;
 
 		g_engfuncs.pfnFreeEntPrivateData(pentBot);
 
@@ -147,8 +147,8 @@ public:
 
 	virtual void OnTouchingWeapon( CWeaponBox *box ) { }	///< invoked when in contact with a CWeaponBox
 
-	/// invoked when event occurs in the game (some events have NULL entities)
-	virtual void OnEvent( GameEventType event, CBaseEntity *entity = NULL, CBaseEntity *other = NULL ) { }
+	/// invoked when event occurs in the game (some events have nullptr entities)
+	virtual void OnEvent( GameEventType event, CBaseEntity *entity = nullptr, CBaseEntity *other = nullptr ) { }
 
 	//------------------------------------------------------------------------------------
 	// Vision
@@ -166,7 +166,7 @@ public:
 
 	#define CHECK_FOV true
 	virtual bool IsVisible( const Vector *pos, bool testFOV = false ) = 0;	///< return true if we can see the point
-	virtual bool IsVisible( CBasePlayer *player, bool testFOV = false, unsigned char *visParts = NULL ) = 0;	///< return true if we can see any part of the player
+	virtual bool IsVisible( CBasePlayer *player, bool testFOV = false, unsigned char *visParts = nullptr ) = 0;	///< return true if we can see any part of the player
 
 	virtual bool IsEnemyPartVisible( VisiblePartType part ) = 0;	///< if enemy is visible, return the part we see
 
@@ -206,7 +206,7 @@ public:
 
 protected:
 	// Do a "client command" - useful for invoking menu choices, etc.
-	void ClientCommand( const char *cmd, const char *arg1 = NULL, const char *arg2 = NULL, const char *arg3 = NULL );
+	void ClientCommand( const char *cmd, const char *arg1 = nullptr, const char *arg2 = nullptr, const char *arg3 = nullptr );
 
 	const BotProfile *m_profile;							///< the "personality" profile of this bot
 
@@ -290,7 +290,7 @@ inline CBasePlayerWeapon *CBot::GetActiveWeapon( void ) const
 inline bool CBot::IsActiveWeaponReloading( void ) const
 {
 	CBasePlayerWeapon *gun = GetActiveWeapon();
-	if (gun == NULL)
+	if (gun == nullptr)
 		return false;
 
 	return gun->m_fInReload;
@@ -300,7 +300,7 @@ inline bool CBot::IsActiveWeaponReloading( void ) const
 inline bool CBot::IsActiveWeaponRecoilHigh( void ) const
 {
 	CBasePlayerWeapon *gun = GetActiveWeapon();
-	if (gun == NULL)
+	if (gun == nullptr)
 		return false;
 
 	const float highRecoil = 0.4f;

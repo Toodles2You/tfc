@@ -314,7 +314,7 @@ public:
 	void EXPORT SUB_CallUseToggle() { this->Use(this, this, USE_TOGGLE, 0); }
 	bool ShouldToggle(USE_TYPE useType, bool currentState);
 
-	virtual CBaseEntity* Respawn() { return NULL; }
+	virtual CBaseEntity* Respawn() { return nullptr; }
 
 	virtual void UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value);
 	// Do the bounding boxes of these two intersect?

@@ -14,7 +14,7 @@
 #include "shared_util.h"
 #include "simple_checksum.h"
 
-BotProfileManager *TheBotProfiles = NULL;
+BotProfileManager *TheBotProfiles = nullptr;
 
 //--------------------------------------------------------------------------------------------------------------
 // A little explanation is in order here.  This file is in game_shared.  It is supposed to be able to be compiled
@@ -63,11 +63,11 @@ const char* BotProfile::GetWeaponPreferenceAsString( int i ) const
 {
 #ifdef CSTRIKE
 	if ( i < 0 || i >= m_weaponPreferenceCount )
-		return NULL;
+		return nullptr;
 
 	return WeaponIDToAlias( m_weaponPreference[ i ] );
 #else
-	return NULL;
+	return nullptr;
 #endif
 }
 
@@ -127,9 +127,9 @@ BotProfileManager::BotProfileManager( void )
 	m_nextSkin = 0;
 	for (int i=0; i<NumCustomSkins; ++i)
 	{
-		m_skins[i] = NULL;
-		m_skinFilenames[i] = NULL;
-		m_skinModelnames[i] = NULL;
+		m_skins[i] = nullptr;
+		m_skinFilenames[i] = nullptr;
+		m_skinModelnames[i] = nullptr;
 	}
 }
 
@@ -143,7 +143,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 	char *dataPointer = (char *)LOAD_FILE_FOR_ME( const_cast<char *>( filename ), &dataLength );
 	const char *dataFile = dataPointer;
 
-	if (dataFile == NULL)
+	if (dataFile == nullptr)
 	{
 #ifdef CSTRIKE
 		if ( UTIL_IsGame( "czero" ) )
@@ -289,7 +289,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 		// do inheritance in order of appearance
 		if (!isTemplate && !isDefault)
 		{
-			const BotProfile *inherit = NULL;
+			const BotProfile *inherit = nullptr;
 
 			// template names are separated by "+"
 			while(true)
@@ -308,7 +308,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 					}
 				}
 
-				if (inherit == NULL)
+				if (inherit == nullptr)
 				{
 					CONSOLE_ECHO( "Error parsing '%s' - invalid template reference '%s'\n", filename, token );
 					FREE_FILE( dataPointer );
@@ -318,7 +318,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 				// inherit the data
 				profile->Inherit( inherit, &defaultProfile );
 
-				if (c == NULL)
+				if (c == nullptr)
 					break;
 				
 				token = c+1;
@@ -486,7 +486,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 						if (!stricmp( BotDifficultyName[i], token ))
 							profile->m_difficultyFlags |= (1 << i);
 
-					if (c == NULL)
+					if (c == nullptr)
 						break;
 					
 					token = c+1;
@@ -564,17 +564,17 @@ void BotProfileManager::Reset( void )
 		if ( m_skins[i] )
 		{
 			delete[] m_skins[i];
-			m_skins[i] = NULL;
+			m_skins[i] = nullptr;
 		}
 		if ( m_skinFilenames[i] )
 		{
 			delete[] m_skinFilenames[i];
-			m_skinFilenames[i] = NULL;
+			m_skinFilenames[i] = nullptr;
 		}
 		if ( m_skinModelnames[i] )
 		{
 			delete[] m_skinModelnames[i];
-			m_skinModelnames[i] = NULL;
+			m_skinModelnames[i] = nullptr;
 		}
 	}
 }
@@ -587,7 +587,7 @@ const char * BotProfileManager::GetCustomSkin( int index )
 {
 	if ( index < FirstCustomSkin || index > LastCustomSkin )
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	return m_skins[ index - FirstCustomSkin ];
@@ -601,7 +601,7 @@ const char * BotProfileManager::GetCustomSkinFname( int index )
 {
 	if ( index < FirstCustomSkin || index > LastCustomSkin )
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	return m_skinFilenames[ index - FirstCustomSkin ];
@@ -615,7 +615,7 @@ const char * BotProfileManager::GetCustomSkinModelname( int index )
 {
 	if ( index < FirstCustomSkin || index > LastCustomSkin )
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	return m_skinModelnames[ index - FirstCustomSkin ];
@@ -676,7 +676,7 @@ int BotProfileManager::FindVoiceBankIndex( const char *filename )
 const BotProfile *BotProfileManager::GetRandomProfile( BotDifficultyType difficulty, BotProfileTeamType team ) const
 {
 #ifndef RANDOM_LONG
-	return NULL;	// we don't need random profiles when we're not in the game dll
+	return nullptr;	// we don't need random profiles when we're not in the game dll
 #else
 	BotProfileList::const_iterator iter;
 
@@ -691,7 +691,7 @@ const BotProfile *BotProfileManager::GetRandomProfile( BotDifficultyType difficu
 	}
 
 	if (validCount == 0)
-		return NULL;
+		return nullptr;
 
 	// select one at random
 	int which = RANDOM_LONG( 0, validCount-1 );
@@ -704,7 +704,7 @@ const BotProfile *BotProfileManager::GetRandomProfile( BotDifficultyType difficu
 				return profile;
 	}
 
-	return NULL;
+	return nullptr;
 #endif;
 }
 

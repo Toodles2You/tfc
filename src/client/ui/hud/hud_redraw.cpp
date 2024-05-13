@@ -87,7 +87,7 @@ bool CHud::Redraw(float flTime, bool intermission)
 	}
 	else
 	{
-		auto ulRGB = strtoul(m_pCvarColor->string, NULL, 16);
+		auto ulRGB = strtoul(m_pCvarColor->string, nullptr, 16);
 		m_cColors[CHud::COLOR_PRIMARY].r = (ulRGB & 0xFF0000) >> 16;
 		m_cColors[CHud::COLOR_PRIMARY].g = (ulRGB & 0xFF00) >> 8;
 		m_cColors[CHud::COLOR_PRIMARY].b = (ulRGB & 0xFF);

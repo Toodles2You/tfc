@@ -28,7 +28,7 @@ private:
 	WEAPON rgWeapons[WEAPON_TYPES]; // Weapons Array
 
 	// counts of weapons * ammo
-	WEAPON* rgSlots[MAX_WEAPON_SLOTS + 1][MAX_WEAPON_POSITIONS + 1]; // The slots currently in use by weapons.  The value is a pointer to the weapon;  if it's NULL, no weapon is there
+	WEAPON* rgSlots[MAX_WEAPON_SLOTS + 1][MAX_WEAPON_POSITIONS + 1]; // The slots currently in use by weapons.  The value is a pointer to the weapon;  if it's nullptr, no weapon is there
 	byte riAmmo[AMMO_TYPES];										 // count of each ammo type
 	byte riMaxAmmo[AMMO_TYPES];
 
@@ -59,7 +59,7 @@ public:
 
 	void DropWeapon(WEAPON* wp)
 	{
-		rgSlots[wp->iSlot][wp->iSlotPos] = NULL;
+		rgSlots[wp->iSlot][wp->iSlotPos] = nullptr;
 	}
 
 	void DropAllWeapons()

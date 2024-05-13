@@ -63,7 +63,7 @@ static bool FileSystem_InitializeGameDirectory()
 	const std::size_t BufferSize = MAX_PATH + 1;
 	gameDirectory.resize(BufferSize);
 
-	const DWORD charactersWritten = GetModuleFileNameA(NULL, gameDirectory.data(), BufferSize);
+	const DWORD charactersWritten = GetModuleFileNameA(nullptr, gameDirectory.data(), BufferSize);
 
 	if (charactersWritten == BufferSize)
 	{

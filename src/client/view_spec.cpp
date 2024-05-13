@@ -125,10 +125,10 @@ static void V_GetChaseOrigin(Vector& angles, Vector& origin, float distance, Vec
 
 	int ignoreent = -1; // first, ignore no entity
 
-	cl_entity_t* ent = NULL;
+	cl_entity_t* ent = nullptr;
 
 	// Trace back from the target using the player's view angles
-	AngleVectors(angles, forward, NULL, NULL);
+	AngleVectors(angles, forward, nullptr, nullptr);
 
 	forward = -forward;
 
@@ -147,7 +147,7 @@ static void V_GetChaseOrigin(Vector& angles, Vector& origin, float distance, Vec
 
 		ent = gEngfuncs.GetEntityByIndex(PM_GetPhysEntInfo(trace->ent));
 
-		if (ent == NULL)
+		if (ent == nullptr)
 			break;
 
 		// hit non-player solid BSP , stop here
@@ -460,7 +460,7 @@ void V_GetDirectedChasePosition(cl_entity_t* ent1, cl_entity_t* ent2, Vector& an
 
 void V_GetChasePos(int target, float* cl_angles, Vector& origin, Vector& angles)
 {
-	cl_entity_t* ent = NULL;
+	cl_entity_t* ent = nullptr;
 
 	if (0 != target)
 	{
@@ -564,7 +564,7 @@ void V_GetMapFreePosition(Vector& cl_angles, Vector& origin, Vector& angles)
 	zScaledTarget[2] = gHUD.m_Spectator.m_mapOrigin[2] * ((90.0f - angles[0]) / 90.0f);
 
 
-	AngleVectors(angles, forward, NULL, NULL);
+	AngleVectors(angles, forward, nullptr, nullptr);
 
 	forward.NormalizeInPlace();
 
@@ -607,7 +607,7 @@ void V_GetMapChasePosition(int target, Vector& cl_angles, Vector& origin, Vector
 	origin[2] *= ((90.0f - angles[0]) / 90.0f);
 	angles[2] = 0.0f; // don't roll angle (if chased player is dead)
 
-	AngleVectors(angles, forward, NULL, NULL);
+	AngleVectors(angles, forward, nullptr, nullptr);
 
 	forward.NormalizeInPlace();
 

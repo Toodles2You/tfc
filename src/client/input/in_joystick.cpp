@@ -64,7 +64,7 @@ std::uint32_t joy_oldbuttonstate, joy_oldpovstate;
 int joy_id;
 std::uint32_t joy_numbuttons;
 
-SDL_GameController* s_pJoystick = NULL;
+SDL_GameController* s_pJoystick = nullptr;
 
 // none of these cvars are saved over a session
 // this means that advanced controller configuration needs to be executed
@@ -102,7 +102,7 @@ static bool joy_avail, joy_advancedinit, joy_haspov;
 static void IN_StartupJoystick()
 {
 	// abort startup if user requests no joystick
-	if (0 != gEngfuncs.CheckParm("-nojoy", NULL))
+	if (0 != gEngfuncs.CheckParm("-nojoy", nullptr))
 		return;
 
 	// assume no joystick

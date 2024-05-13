@@ -124,7 +124,7 @@ void CBaseEntity::UpdateOnRemove()
 			if (WorldGraph.m_pLinkPool[i].m_pLinkEnt == &v)
 			{
 				// if this link has a link ent which is the same ent that is removing itself, remove it!
-				WorldGraph.m_pLinkPool[i].m_pLinkEnt = NULL;
+				WorldGraph.m_pLinkPool[i].m_pLinkEnt = nullptr;
 			}
 		}
 	}
@@ -237,7 +237,7 @@ void CBaseEntity::UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float va
 		}
 		else
 		{
-			pTemp->v.owner = NULL;
+			pTemp->v.owner = nullptr;
 		}
 
 		return;

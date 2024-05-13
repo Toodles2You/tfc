@@ -524,7 +524,7 @@ void ClientUserInfoChanged(Entity* pEntity, char* infobuffer)
 		sName[sizeof(sName) - 1] = '\0';
 
 		// First parse the name and remove any %'s
-		for (char* pApersand = sName; pApersand != NULL && *pApersand != 0; pApersand++)
+		for (char* pApersand = sName; pApersand != nullptr && *pApersand != 0; pApersand++)
 		{
 			// Replace it with a space
 			if (*pApersand == '%')
@@ -1030,7 +1030,7 @@ void SpectatorThink(Entity* pEntity)
 SetupVisibility
 
 A client can have a separate "view entity" indicating that his/her view should depend on the origin of that
-view entity.  If that's the case, then pViewEntity will be non-NULL and will be used.  Otherwise, the current
+view entity.  If that's the case, then pViewEntity will be non-nullptr and will be used.  Otherwise, the current
 entity's origin is used.  Either is offset by the view_ofs to get the eye position.
 
 From the eye position, we set up the PAS and PVS to use for filtering network messages to the client.  At this point, we could
@@ -1052,8 +1052,8 @@ void SetupVisibility(Entity* pViewEntity, Entity* pClient, unsigned char** pvs, 
 
 	if ((pClient->flags & FL_PROXY) != 0)
 	{
-		*pvs = NULL; // the spectator proxy sees
-		*pas = NULL; // and hears everything
+		*pvs = nullptr; // the spectator proxy sees
+		*pas = nullptr; // and hears everything
 		return;
 	}
 
@@ -1121,7 +1121,7 @@ int AddToFullPack(struct entity_state_s* state, int e, Entity* ent, Entity* host
 		}
 
 		// Ignore if not the host and not touching a PVS/PAS leaf
-		// If pSet is NULL, then the test will always succeed and the entity will be added to the update
+		// If pSet is nullptr, then the test will always succeed and the entity will be added to the update
 		if ((entity->ObjectCaps() & FCAP_NET_ALWAYS_SEND) == 0)
 		{
 			if (!ENGINE_CHECK_VISIBILITY(ent, pSet))

@@ -289,7 +289,7 @@ bool CBaseDoor::Spawn()
 
 	m_toggle_state = TS_AT_BOTTOM;
 
-	// if the door is flagged for USE button activation only, use NULL touch function
+	// if the door is flagged for USE button activation only, use nullptr touch function
 	if (FBitSet(v.spawnflags, SF_DOOR_USE_ONLY))
 	{
 		ClearTouch();
@@ -552,7 +552,7 @@ bool CBaseDoor::DoorActivate()
 	else
 	{ // door should open
 
-		if (m_bHealthValue > 0 && m_hActivator != NULL && m_hActivator->IsPlayer())
+		if (m_bHealthValue > 0 && m_hActivator != nullptr && m_hActivator->IsPlayer())
 		{ // give health if player opened the door (medikit)
 			m_hActivator->GiveHealth(m_bHealthValue, DMG_GENERIC);
 		}
@@ -588,7 +588,7 @@ void CBaseDoor::DoorGoUp()
 	{
 		float sign = 1.0;
 
-		if (m_hActivator != NULL)
+		if (m_hActivator != nullptr)
 		{
 			pevActivator = m_hActivator;
 
@@ -703,8 +703,8 @@ void CBaseDoor::DoorHitBottom()
 
 void CBaseDoor::Blocked(CBaseEntity* pOther)
 {
-	CBaseEntity* pentTarget = NULL;
-	CBaseDoor* pDoor = NULL;
+	CBaseEntity* pentTarget = nullptr;
+	CBaseDoor* pDoor = nullptr;
 
 
 	// Hurt the blocker a little.

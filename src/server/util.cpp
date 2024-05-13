@@ -59,7 +59,7 @@ CBaseEntity* util::FindEntityForward(CBaseEntity* pMe)
 		CBaseEntity* pHit = tr.pHit->Get<CBaseEntity>();
 		return pHit;
 	}
-	return NULL;
+	return nullptr;
 }
 
 static unsigned int glSeed = 0;
@@ -385,13 +385,13 @@ CBaseEntity* util::FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& v
 	if (pStartEntity)
 		pentEntity = pStartEntity->edict();
 	else
-		pentEntity = NULL;
+		pentEntity = nullptr;
 
 	pentEntity = FIND_ENTITY_IN_SPHERE(pentEntity, vecCenter, flRadius);
 
 	if (pentEntity != nullptr && OFFSET(pentEntity) != 0)
 		return pentEntity->Get<CBaseEntity>();
-	return NULL;
+	return nullptr;
 }
 
 
@@ -427,15 +427,15 @@ CBaseEntity* util::FindEntityByTargetname(CBaseEntity* pStartEntity, const char*
 
 CBaseEntity* util::FindEntityGeneric(const char* szWhatever, Vector& vecSrc, float flRadius)
 {
-	CBaseEntity* pEntity = NULL;
+	CBaseEntity* pEntity = nullptr;
 
-	pEntity = util::FindEntityByTargetname(NULL, szWhatever);
+	pEntity = util::FindEntityByTargetname(nullptr, szWhatever);
 	if (pEntity)
 		return pEntity;
 
-	CBaseEntity* pSearch = NULL;
+	CBaseEntity* pSearch = nullptr;
 	float flMaxDist2 = flRadius * flRadius;
-	while ((pSearch = util::FindEntityByClassname(pSearch, szWhatever)) != NULL)
+	while ((pSearch = util::FindEntityByClassname(pSearch, szWhatever)) != nullptr)
 	{
 		float flDist2 = (pSearch->v.origin - vecSrc).Length();
 		flDist2 = flDist2 * flDist2;
@@ -450,7 +450,7 @@ CBaseEntity* util::FindEntityGeneric(const char* szWhatever, Vector& vecSrc, flo
 
 
 // returns a CBaseEntity pointer to a player by index.  Only returns if the player is spawned and connected
-// otherwise returns NULL
+// otherwise returns nullptr
 // Index is 1 based
 CBaseEntity* util::PlayerByIndex(int playerIndex)
 {

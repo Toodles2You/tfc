@@ -187,7 +187,7 @@ char *GetBspFilename( const char *navFilename )
 
 	int len = strlen( bspFilename );
 	if (len < 3)
-		return NULL;
+		return nullptr;
 
 	bspFilename[ len-3 ] = 'b';
 	bspFilename[ len-2 ] = 's';
@@ -361,7 +361,7 @@ void CNavArea::Save( int fd, unsigned int version )
 			{
 				SpotOrder *order = &(*oiter);
 
-				// order->spot may be NULL if we've loaded a nav mesh that has been edited but not re-analyzed
+				// order->spot may be nullptr if we've loaded a nav mesh that has been edited but not re-analyzed
 				unsigned int id = (order->spot) ? order->spot->GetID() : 0;
 				_write( fd, &id, sizeof(unsigned int) );
 
@@ -582,7 +582,7 @@ NavErrorType CNavArea::PostLoad( void )
 
 			unsigned int id = connect->id;
 			connect->area = TheNavAreaGrid.GetNavAreaByID( id );
-			if (id && connect->area == NULL)
+			if (id && connect->area == nullptr)
 			{
 				CONSOLE_ECHO( "ERROR: Corrupt navigation data. Cannot connect Navigation Areas.\n" );
 				error = NAV_CORRUPT_DATA;
@@ -594,21 +594,21 @@ NavErrorType CNavArea::PostLoad( void )
 	for( int a=0; a<m_approachCount; ++a )
 	{
 		m_approach[a].here.area = TheNavAreaGrid.GetNavAreaByID( m_approach[a].here.id );
-		if (m_approach[a].here.id && m_approach[a].here.area == NULL)
+		if (m_approach[a].here.id && m_approach[a].here.area == nullptr)
 		{
 			CONSOLE_ECHO( "ERROR: Corrupt navigation data. Missing Approach Area (here).\n" );
 			error = NAV_CORRUPT_DATA;
 		}
 
 		m_approach[a].prev.area = TheNavAreaGrid.GetNavAreaByID( m_approach[a].prev.id );
-		if (m_approach[a].prev.id && m_approach[a].prev.area == NULL)
+		if (m_approach[a].prev.id && m_approach[a].prev.area == nullptr)
 		{
 			CONSOLE_ECHO( "ERROR: Corrupt navigation data. Missing Approach Area (prev).\n" );
 			error = NAV_CORRUPT_DATA;
 		}
 
 		m_approach[a].next.area = TheNavAreaGrid.GetNavAreaByID( m_approach[a].next.id );
-		if (m_approach[a].next.id && m_approach[a].next.area == NULL)
+		if (m_approach[a].next.id && m_approach[a].next.area == nullptr)
 		{
 			CONSOLE_ECHO( "ERROR: Corrupt navigation data. Missing Approach Area (next).\n" );
 			error = NAV_CORRUPT_DATA;
@@ -622,14 +622,14 @@ NavErrorType CNavArea::PostLoad( void )
 		e = &(*iter);
 
 		e->from.area = TheNavAreaGrid.GetNavAreaByID( e->from.id );
-		if (e->from.area == NULL)
+		if (e->from.area == nullptr)
 		{
 			CONSOLE_ECHO( "ERROR: Corrupt navigation data. Missing \"from\" Navigation Area for Encounter Spot.\n" );
 			error = NAV_CORRUPT_DATA;
 		}
 
 		e->to.area = TheNavAreaGrid.GetNavAreaByID( e->to.id );
-		if (e->to.area == NULL)
+		if (e->to.area == nullptr)
 		{
 			CONSOLE_ECHO( "ERROR: Corrupt navigation data. Missing \"to\" Navigation Area for Encounter Spot.\n" );
 			error = NAV_CORRUPT_DATA;
@@ -653,7 +653,7 @@ NavErrorType CNavArea::PostLoad( void )
 			SpotOrder *order = &(*oiter);
 
 			order->spot = GetHidingSpotByID( order->id );
-			if (order->spot == NULL)
+			if (order->spot == nullptr)
 			{
 				CONSOLE_ECHO( "ERROR: Corrupt navigation data. Missing Hiding Spot\n" );
 				error = NAV_CORRUPT_DATA;
@@ -710,7 +710,7 @@ inline void COM_FixSlashes( char *pname )
  */
 bool SaveNavigationMap( const char *filename )
 {
-	if (filename == NULL)
+	if (filename == nullptr)
 		return false;
 
 	//
@@ -746,7 +746,7 @@ bool SaveNavigationMap( const char *filename )
 	// get size of source bsp file and store it in the nav file
 	// so we can test if the bsp changed since the nav file was made
 	char *bspFilename = GetBspFilename( filename );
-	if (bspFilename == NULL)
+	if (bspFilename == nullptr)
 		return false;
 
 	unsigned int bspSize = (unsigned int)g_engfuncs.pfnGetFileSize( bspFilename );
@@ -857,7 +857,7 @@ void LoadLocationFile( const char *filename )
 				while(true)
 				{
 					locData = MP_COM_Parse( locData );
-					if (locData == NULL)
+					if (locData == nullptr)
 						break;
 
 					areaID = atoi( MP_COM_GetToken() );
@@ -933,7 +933,7 @@ void SanityCheckNavigationMap( const char *mapName )
 		navFile.Read( &saveBspSize, sizeof(unsigned int) );
 
 		// verify size
-		if (bspFilename == NULL)
+		if (bspFilename == nullptr)
 		{
 			CONSOLE_ECHO( "ERROR: No map corresponds to navigation file %s.\n", navFilename );
 			return;
@@ -1005,7 +1005,7 @@ NavErrorType LoadNavigationMap( void )
 
 		// verify size
 		char *bspFilename = GetBspFilename( filename );
-		if (bspFilename == NULL)
+		if (bspFilename == nullptr)
 			return NAV_INVALID_FILE;
 
 		unsigned int bspSize = (unsigned int)g_engfuncs.pfnGetFileSize( bspFilename );

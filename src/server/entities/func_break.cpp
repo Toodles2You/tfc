@@ -206,7 +206,7 @@ const char* CBreakable::pSoundsGlass[] =
 
 const char** CBreakable::MaterialSoundList(Materials precacheMaterial, int& soundCount)
 {
-	const char** pSoundList = NULL;
+	const char** pSoundList = nullptr;
 
 	switch (precacheMaterial)
 	{
@@ -537,7 +537,7 @@ void CBreakable::Die()
 
 	Vector vecSpot;		// shard origin
 	Vector vecVelocity; // shard velocity
-	CBaseEntity* pEntity = NULL;
+	CBaseEntity* pEntity = nullptr;
 	char cFlag = 0;
 	int pitch;
 	float fvol;
@@ -680,7 +680,7 @@ void CBreakable::Die()
 		for (int i = 0; i < count; i++)
 		{
 			ClearBits(pList[i]->v.flags, FL_ONGROUND);
-			pList[i]->v.groundentity = NULL;
+			pList[i]->v.groundentity = nullptr;
 		}
 	}
 
@@ -689,7 +689,7 @@ void CBreakable::Die()
 
 	v.solid = SOLID_NOT;
 	// Fire targets on break
-	UseTargets(NULL, USE_TOGGLE, 0);
+	UseTargets(nullptr, USE_TOGGLE, 0);
 
 	if (!FStringNull(m_iszSpawnObject))
 	{

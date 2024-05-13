@@ -338,9 +338,9 @@ CBaseEntity* CBeam::RandomTargetname(const char* szName)
 {
 	int total = 0;
 
-	CBaseEntity* pEntity = NULL;
-	CBaseEntity* pNewEntity = NULL;
-	while ((pNewEntity = util::FindEntityByTargetname(pNewEntity, szName)) != NULL)
+	CBaseEntity* pEntity = nullptr;
+	CBaseEntity* pNewEntity = nullptr;
+	while ((pNewEntity = util::FindEntityByTargetname(pNewEntity, szName)) != nullptr)
 	{
 		total++;
 		if (RANDOM_LONG(0, total - 1) < 1)
@@ -635,7 +635,7 @@ void CLightning::StrikeThink()
 		else
 		{
 			CBaseEntity* pStart = RandomTargetname(STRING(m_iszStartEntity));
-			if (pStart != NULL)
+			if (pStart != nullptr)
 				RandomPoint(pStart->v.origin);
 			else
 				ALERT(at_console, "env_beam: unknown entity \"%s\"\n", STRING(m_iszStartEntity));
@@ -646,7 +646,7 @@ void CLightning::StrikeThink()
 	CBaseEntity* pStart = RandomTargetname(STRING(m_iszStartEntity));
 	CBaseEntity* pEnd = RandomTargetname(STRING(m_iszEndEntity));
 
-	if (pStart != NULL && pEnd != NULL)
+	if (pStart != nullptr && pEnd != nullptr)
 	{
 		if (IsPointEntity(pStart) || IsPointEntity(pEnd))
 		{
@@ -945,7 +945,7 @@ bool CLaser::Spawn()
 	if (!m_pSprite && !FStringNull(m_iszSpriteName))
 		m_pSprite = CSprite::SpriteCreate(STRING(m_iszSpriteName), v.origin, true);
 	else
-		m_pSprite = NULL;
+		m_pSprite = nullptr;
 
 	if (m_pSprite)
 		m_pSprite->SetTransparency(kRenderGlow, v.rendercolor.x, v.rendercolor.y, v.rendercolor.z, v.renderamt, v.renderfx);
@@ -1562,7 +1562,7 @@ bool CMessage::KeyValue(KeyValueData* pkvd)
 
 void CMessage::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
-	CBaseEntity* pPlayer = NULL;
+	CBaseEntity* pPlayer = nullptr;
 
 	if ((v.spawnflags & SF_MESSAGE_ALL) != 0)
 		util::ShowMessageAll(STRING(v.message));

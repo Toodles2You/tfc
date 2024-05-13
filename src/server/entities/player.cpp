@@ -470,10 +470,10 @@ void CBasePlayer::PackDeadPlayerWeapons()
 void CBasePlayer::RemoveAllWeapons()
 {
 #ifdef HALFLIFE_TANKCONTROL
-	if (m_pTank != NULL)
+	if (m_pTank != nullptr)
 	{
 		m_pTank->Use(this, this, USE_OFF, 0);
-		m_pTank = NULL;
+		m_pTank = nullptr;
 	}
 #endif
 
@@ -508,10 +508,10 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 	g_pGameRules->PlayerKilled(this, attacker, inflictor, accomplice, bitsDamageType);
 
 #ifdef HALFLIFE_TANKCONTROL
-	if (m_pTank != NULL)
+	if (m_pTank != nullptr)
 	{
 		m_pTank->Use(this, this, USE_OFF, 0);
-		m_pTank = NULL;
+		m_pTank = nullptr;
 	}
 #endif
 
@@ -616,10 +616,10 @@ void CBasePlayer::StartObserver()
 		m_pActiveWeapon->Holster();
 
 #ifdef HALFLIFE_TANKCONTROL
-	if (m_pTank != NULL)
+	if (m_pTank != nullptr)
 	{
 		m_pTank->Use(this, this, USE_OFF, 0);
-		m_pTank = NULL;
+		m_pTank = nullptr;
 	}
 #endif
 
@@ -1843,7 +1843,7 @@ LINK_ENTITY_TO_CLASS(player_weaponstrip, CStripWeapons);
 
 void CStripWeapons::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
-	CBasePlayer* pPlayer = NULL;
+	CBasePlayer* pPlayer = nullptr;
 
 	if (pActivator && pActivator->IsPlayer())
 	{

@@ -509,7 +509,7 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 	}
 
 	bool addDefault;
-	CBaseEntity* pWeaponEntity = NULL;
+	CBaseEntity* pWeaponEntity = nullptr;
 
 	//Ensure the player switches to the Glock on spawn regardless of setting
 	const int originalAutoWepSwitch = pPlayer->m_iAutoWepSwitch;

@@ -337,9 +337,9 @@ void CBaseEntity::Look(int iDistance)
 	// DON'T let visibility information from last frame sit around!
 	// ClearConditions(bits_COND_SEE_HATE | bits_COND_SEE_DISLIKE | bits_COND_SEE_ENEMY | bits_COND_SEE_FEAR | bits_COND_SEE_NEMESIS | bits_COND_SEE_CLIENT);
 
-	m_pLink = NULL;
+	m_pLink = nullptr;
 
-	CBaseEntity* pSightEnt = NULL; // the current visible entity that we're dealing with
+	CBaseEntity* pSightEnt = nullptr; // the current visible entity that we're dealing with
 
 	// See no evil if prisoner is set
 	CBaseEntity* pList[100];
@@ -382,10 +382,10 @@ CBaseEntity* CBaseEntity::BestVisibleEnemy()
 
 	iNearest = 8192; // so first visible entity will become the closest.
 	pNextEnt = m_pLink;
-	pReturn = NULL;
+	pReturn = nullptr;
 	// iBestRelationship = R_NO;
 
-	while (pNextEnt != NULL)
+	while (pNextEnt != nullptr)
 	{
 		if (pNextEnt->IsAlive())
 		{

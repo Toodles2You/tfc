@@ -377,7 +377,7 @@ void CHud::Init()
 	cl_grenadetoggle = gEngfuncs.pfnRegisterVariable("cl_grenadetoggle", "0", FCVAR_ARCHIVE | FCVAR_USERINFO);
 	cl_righthand = gEngfuncs.pfnRegisterVariable("cl_righthand", "1", FCVAR_ARCHIVE | FCVAR_USERINFO);
 
-	m_pSpriteList = NULL;
+	m_pSpriteList = nullptr;
 
 	// Clear any old HUD list
 	if (m_pHudList)
@@ -389,7 +389,7 @@ void CHud::Init()
 			m_pHudList = m_pHudList->pNext;
 			free(pList);
 		}
-		m_pHudList = NULL;
+		m_pHudList = nullptr;
 	}
 
 	// In case we get messages before the first update -- time will be valid
@@ -417,7 +417,7 @@ void CHud::Init()
 
 	m_Menu.Init();
 
-	MsgFunc_ResetHUD(0, 0, NULL);
+	MsgFunc_ResetHUD(0, 0, nullptr);
 }
 
 // CHud destructor
@@ -437,7 +437,7 @@ CHud::~CHud()
 			m_pHudList = m_pHudList->pNext;
 			free(pList);
 		}
-		m_pHudList = NULL;
+		m_pHudList = nullptr;
 	}
 }
 

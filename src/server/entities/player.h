@@ -110,7 +110,7 @@ public:
 #endif
 
 #ifdef HALFLIFE_TANKCONTROL
-	EHANDLE m_pTank;		 // the tank which the player is currently controlling,  NULL if no tank
+	EHANDLE m_pTank;		 // the tank which the player is currently controlling,  nullptr if no tank
 #endif
 
 	float m_fDeadTime;		 // the time at which the player died  (used in PlayerDeathFrame())

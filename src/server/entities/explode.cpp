@@ -139,5 +139,5 @@ void ExplosionCreate(const Vector& center, const Vector& angles, Entity* pOwner,
 		pExplosion->v.spawnflags |= SF_ENVEXPLOSION_NODAMAGE;
 
 	pExplosion->Spawn();
-	pExplosion->Use(NULL, NULL, USE_TOGGLE, 0);
+	pExplosion->Use(nullptr, nullptr, USE_TOGGLE, 0);
 }

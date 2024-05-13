@@ -354,7 +354,7 @@ bool CFuncTank::OnControls(CBaseEntity* other)
 
 bool CFuncTank::StartControl(CBasePlayer* pController)
 {
-	if (m_pController != NULL)
+	if (m_pController != nullptr)
 		return false;
 
 	// Team only or disabled?
@@ -386,7 +386,7 @@ void CFuncTank::StopControl()
 	ALERT(at_console, "stopped using TANK\n");
 
 	v.nextthink = 0;
-	m_pController = NULL;
+	m_pController = nullptr;
 
 	if (IsActive())
 		v.nextthink = v.ltime + 1.0;
@@ -401,7 +401,7 @@ void CFuncTank::ControllerPostFrame()
 	if ((m_pController->v.button & IN_ATTACK) != 0)
 	{
 		Vector vecForward;
-		util::MakeVectorsPrivate(v.angles, vecForward, NULL, NULL);
+		util::MakeVectorsPrivate(v.angles, vecForward, nullptr, nullptr);
 
 		m_fireLast = gpGlobals->time - (1 / m_fireRate) - 0.01; // to make sure the gun doesn't fire too many bullets
 
@@ -597,7 +597,7 @@ void CFuncTank::TrackTarget()
 	{
 		bool fire = false;
 		Vector forward;
-		util::MakeVectorsPrivate(v.angles, forward, NULL, NULL);
+		util::MakeVectorsPrivate(v.angles, forward, nullptr, nullptr);
 
 		if ((v.spawnflags & SF_TANK_LINEOFSIGHT) != 0)
 		{
@@ -1006,7 +1006,7 @@ void CFuncTankControls::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_T
 
 void CFuncTankControls::Think()
 {
-	CBaseEntity* pTarget = NULL;
+	CBaseEntity* pTarget = nullptr;
 
 	do
 	{
