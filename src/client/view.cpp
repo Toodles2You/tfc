@@ -33,10 +33,6 @@
 
 #include <algorithm>
 
-int CL_IsThirdPerson();
-void CL_CameraOffset(float* ofs);
-void VectorAngles(const float* forward, float* angles);
-
 void V_CalcSpectatorRefdef(ref_params_t* pparams);
 
 extern cvar_t* cl_rollangle;
@@ -131,7 +127,7 @@ static float V_CalcRoll(Vector angles, Vector velocity, float rollangle, float r
 	float value;
 	Vector forward, right, up;
 
-	AngleVectors(angles, forward, right, up);
+	AngleVectors(angles, &forward, &right, &up);
 
 	side = DotProduct(velocity, right);
 	sign = side < 0 ? -1 : 1;
@@ -159,7 +155,7 @@ void V_CalcGunAngle(ref_params_t* pparams)
 {
 	cl_entity_t* viewent;
 
-	viewent = gEngfuncs.GetViewModel();
+	viewent = client::GetViewModel();
 	if (!viewent)
 		return;
 
@@ -171,8 +167,8 @@ void V_CalcGunAngle(ref_params_t* pparams)
 	viewent->angles[PITCH] += v_idlescale * sin(pparams->time * v_ipitch_cycle.value) * v_ipitch_level.value;
 	viewent->angles[YAW] -= v_idlescale * sin(pparams->time * v_iyaw_cycle.value) * v_iyaw_level.value;
 
-	VectorCopy(viewent->angles, viewent->curstate.angles);
-	VectorCopy(viewent->angles, viewent->latched.prevangles);
+	viewent->curstate.angles = viewent->angles;
+	viewent->latched.prevangles = viewent->angles;
 }
 
 
@@ -199,7 +195,7 @@ static void V_CalcViewRoll(ref_params_t* pparams)
 	float side;
 	cl_entity_t* viewentity;
 
-	viewentity = gEngfuncs.GetEntityByIndex(pparams->viewentity);
+	viewentity = client::GetEntityByIndex(pparams->viewentity);
 	if (!viewentity)
 		return;
 
@@ -215,21 +211,21 @@ static void V_CalcIntermissionRefdef(ref_params_t* pparams)
 	float old;
 
 	// ent is the player model ( visible when out of body )
-	ent = gEngfuncs.GetLocalPlayer();
+	ent = client::GetLocalPlayer();
 
 	// view is the weapon model (only visible from inside body )
-	view = gEngfuncs.GetViewModel();
+	view = client::GetViewModel();
 
-	VectorCopy(pparams->simorg, pparams->vieworg);
+	pparams->vieworg = pparams->simorg;
 
 	if (!gHUD.IsObserver() && !gHUD.IsSpectator())
 	{
-		VectorAdd(pparams->vieworg, pparams->viewheight, pparams->vieworg);
+		pparams->vieworg = pparams->vieworg + pparams->viewheight;
 	}
 
-	VectorCopy(pparams->cl_viewangles, pparams->viewangles);
+	pparams->viewangles = pparams->cl_viewangles;
 
-	view->model = NULL;
+	view->model = nullptr;
 
 	// always idle in intermission
 	old = v_idlescale;
@@ -237,11 +233,11 @@ static void V_CalcIntermissionRefdef(ref_params_t* pparams)
 
 	V_AddIdle(pparams);
 
-	if (0 != gEngfuncs.IsSpectateOnly())
+	if (0 != client::IsSpectateOnly())
 	{
 		// in HLTV we must go to 'intermission' position by ourself
-		VectorCopy(gHUD.m_Spectator.m_cameraOrigin, pparams->vieworg);
-		VectorCopy(gHUD.m_Spectator.m_cameraAngles, pparams->viewangles);
+		pparams->vieworg = gHUD.m_Spectator.m_cameraOrigin;
+		pparams->viewangles = gHUD.m_Spectator.m_cameraAngles;
 	}
 
 	v_idlescale = old;
@@ -268,10 +264,10 @@ static void V_DropPunchAngle(float frametime)
 	if (v_oldpunch->value == 1)
 	{
 		float len;
-		len = VectorNormalize(ev_punchangle);
+		len = ev_punchangle.NormalizeInPlace();
 		len -= (10.0 + len * 0.5) * frametime;
 		len = std::max(len, 0.0F);
-		VectorScale(ev_punchangle, len, ev_punchangle);
+		ev_punchangle = ev_punchangle * len;
 		return;
 	}
 
@@ -323,21 +319,21 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	cl_entity_t* pwater;
 	static bob_params_t bobParams;
 
-	if (0 != gEngfuncs.IsSpectateOnly())
+	if (0 != client::IsSpectateOnly())
 	{
-		ent = gEngfuncs.GetEntityByIndex(gHUD.GetObserverTarget());
+		ent = client::GetEntityByIndex(gHUD.GetObserverTarget());
 	}
 	else
 	{
 		// ent is the player model ( visible when out of body )
-		ent = gEngfuncs.GetLocalPlayer();
+		ent = client::GetLocalPlayer();
 	}
 
 	// view is the weapon model (only visible from inside body )
-	view = gEngfuncs.GetViewModel();
+	view = client::GetViewModel();
 
 	// refresh position
-	VectorCopy(pparams->simorg, pparams->vieworg);
+	pparams->vieworg = pparams->simorg;
 
 	if (cl_bob->value != 0.0F)
 	{
@@ -353,12 +349,12 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 		}
 	}
 
-	VectorAdd(pparams->vieworg, pparams->viewheight, pparams->vieworg);
+	pparams->vieworg = pparams->vieworg + pparams->viewheight;
 
-	VectorCopy(pparams->cl_viewangles, pparams->viewangles);
+	pparams->viewangles = pparams->cl_viewangles;
 
-	gEngfuncs.V_CalcShake();
-	gEngfuncs.V_ApplyShake(pparams->vieworg, pparams->viewangles, 1.0);
+	client::V_CalcShake();
+	client::V_ApplyShake(pparams->vieworg, pparams->viewangles, 1.0);
 
 	// Check for problems around water, move the viewer artificially if necessary
 	// -- this prevents drawing errors in GL due to waves
@@ -372,11 +368,11 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 
 		if (0 != pparams->hardware)
 		{
-			waterEntity = gEngfuncs.PM_WaterEntity(pparams->simorg);
+			waterEntity = client::PM_WaterEntity(pparams->simorg);
 			if (waterEntity >= 0 && waterEntity < pparams->max_entities)
 			{
-				pwater = gEngfuncs.GetEntityByIndex(waterEntity);
-				if (pwater && (pwater->model != NULL))
+				pwater = client::GetEntityByIndex(waterEntity);
+				if (pwater && (pwater->model != nullptr))
 				{
 					waterDist += (pwater->curstate.scale * 16); // Add in wave height
 				}
@@ -387,7 +383,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 			waterEntity = 0; // Don't need this in software
 		}
 
-		VectorCopy(pparams->vieworg, point);
+		point = pparams->vieworg;
 
 		// Eyes are above water, make sure we're above the waves
 		if (pparams->waterlevel == kWaterLevelWaist)
@@ -395,7 +391,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 			point[2] -= waterDist;
 			for (i = 0; i < waterDist; i++)
 			{
-				contents = gEngfuncs.PM_PointContents(point, NULL);
+				contents = client::PM_PointContents(point, nullptr);
 				if (contents > CONTENTS_WATER)
 					break;
 				point[2] += 1;
@@ -409,7 +405,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 
 			for (i = 0; i < waterDist; i++)
 			{
-				contents = gEngfuncs.PM_PointContents(point, NULL);
+				contents = client::PM_PointContents(point, nullptr);
 				if (contents <= CONTENTS_WATER)
 					break;
 				point[2] -= 1;
@@ -425,9 +421,9 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	V_AddIdle(pparams);
 
 	// offsets
-	VectorCopy(pparams->cl_viewangles, angles);
+	angles = pparams->cl_viewangles;
 
-	AngleVectors(angles, pparams->forward, pparams->right, pparams->up);
+	AngleVectors(angles, &pparams->forward, &pparams->right, &pparams->up);
 
 	// Treating cam_ofs[2] as the distance
 	if (0 != CL_IsThirdPerson())
@@ -436,12 +432,12 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 
 		ofs[0] = ofs[1] = ofs[2] = 0.0;
 
-		CL_CameraOffset((float*)&ofs);
+		CL_CameraOffset(ofs);
 
-		VectorCopy(ofs, camAngles);
+		camAngles = ofs;
 		camAngles[ROLL] = 0;
 
-		AngleVectors(camAngles, camForward, camRight, camUp);
+		AngleVectors(camAngles, &camForward, &camRight, &camUp);
 
 		for (i = 0; i < 3; i++)
 		{
@@ -450,18 +446,18 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	}
 
 	// Give gun our viewangles
-	VectorCopy(pparams->cl_viewangles, view->angles);
+	view->angles = pparams->cl_viewangles;
 
 	// set up gun position
 	V_CalcGunAngle(pparams);
 
 	// Use predicted origin as view origin.
-	VectorCopy(pparams->simorg, view->origin);
+	view->origin = pparams->simorg;
 	view->origin[2] += (waterOffset);
-	VectorAdd(view->origin, pparams->viewheight, view->origin);
+	view->origin = view->origin + pparams->viewheight;
 
 	// Let the viewmodel shake at about 10% of the amplitude
-	gEngfuncs.V_ApplyShake(view->origin, view->angles, 0.9);
+	client::V_ApplyShake(view->origin, view->angles, 0.9);
 
 	if (cl_bob->value != 0.0F)
 	{
@@ -482,7 +478,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 			view->angles[ROLL] -= bob * 1;
 			view->angles[PITCH] -= bob * 0.3;
 
-			VectorCopy(view->angles, view->curstate.angles);
+			view->curstate.angles = view->angles;
 		}
 	}
 	else
@@ -494,10 +490,8 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	}
 
 	// Add in the punchangle, if any
-	VectorAdd(pparams->viewangles, pparams->punchangle, pparams->viewangles);
-
 	// Include client side punch, too
-	VectorAdd(pparams->viewangles, (float*)&ev_punchangle, pparams->viewangles);
+	pparams->viewangles = pparams->viewangles + pparams->punchangle + ev_punchangle;
 
 	V_DropPunchAngle(pparams->frametime);
 
@@ -506,7 +500,7 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	v_lastAngles = pparams->viewangles;
 	if (0 != CL_IsThirdPerson())
 	{
-		VectorCopy(camAngles, pparams->viewangles);
+		pparams->viewangles = camAngles;
 	}
 
 	//Apply this at all times
@@ -533,11 +527,11 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 	if (pparams->viewentity > pparams->maxclients)
 	{
 		cl_entity_t* viewentity;
-		viewentity = gEngfuncs.GetEntityByIndex(pparams->viewentity);
+		viewentity = client::GetEntityByIndex(pparams->viewentity);
 		if (viewentity)
 		{
-			VectorCopy(viewentity->origin, pparams->vieworg);
-			VectorCopy(viewentity->angles, pparams->viewangles);
+			pparams->vieworg = viewentity->origin;
+			pparams->viewangles = viewentity->angles;
 
 			// Store off overridden viewangles
 			v_angles = pparams->viewangles;
@@ -570,13 +564,13 @@ void V_CalcRefdef(ref_params_t* pparams)
 
 void V_Init()
 {
-	v_oldpunch = gEngfuncs.pfnRegisterVariable("v_oldpunch", "0", 0);
+	v_oldpunch = client::RegisterVariable("v_oldpunch", "0", 0);
 
-	cl_bobcycle = gEngfuncs.pfnRegisterVariable("cl_bobcycle", "0.8", 0);
-	cl_bob = gEngfuncs.pfnRegisterVariable("cl_bob", "0.00", 0);
-	cl_bobup = gEngfuncs.pfnRegisterVariable("cl_bobup", "0.5", 0);
-	cl_waterdist = gEngfuncs.pfnRegisterVariable("cl_waterdist", "4", 0);
-	cl_chasedist = gEngfuncs.pfnRegisterVariable("cl_chasedist", "112", 0);
-	cl_bobview = gEngfuncs.pfnRegisterVariable("cl_bobview", "0", 0);
+	cl_bobcycle = client::RegisterVariable("cl_bobcycle", "0.8", 0);
+	cl_bob = client::RegisterVariable("cl_bob", "0.00", 0);
+	cl_bobup = client::RegisterVariable("cl_bobup", "0.5", 0);
+	cl_waterdist = client::RegisterVariable("cl_waterdist", "4", 0);
+	cl_chasedist = client::RegisterVariable("cl_chasedist", "112", 0);
+	cl_bobview = client::RegisterVariable("cl_bobview", "0", 0);
 }
 

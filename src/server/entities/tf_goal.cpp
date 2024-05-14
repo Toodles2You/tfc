@@ -32,7 +32,7 @@ CTFGoal* util::FindGoal(int goal_no)
         }
     }
 
-    ALERT(at_aiconsole, "Could not find a goal with a goal_no of %i\n", goal_no);
+    engine::AlertMessage(at_aiconsole, "Could not find a goal with a goal_no of %i\n", goal_no);
     return nullptr;
 }
 
@@ -52,7 +52,7 @@ CTFGoalItem* util::FindItem(int item_no)
         }
     }
 
-    ALERT(at_aiconsole, "Could not find an item with a goal_no of %i\n", item_no);
+    engine::AlertMessage(at_aiconsole, "Could not find an item with a goal_no of %i\n", item_no);
     return nullptr;
 }
 
@@ -72,7 +72,7 @@ CTFSpawn* util::FindTeamSpawn(int spawn_no)
         }
     }
 
-    ALERT(at_aiconsole, "Could not find a spawn with a goal_no of %i\n", spawn_no);
+    engine::AlertMessage(at_aiconsole, "Could not find a spawn with a goal_no of %i\n", spawn_no);
     return nullptr;
 }
 
@@ -114,7 +114,7 @@ bool util::GroupInState(int group_no, TFGoalState state, bool check_items = fals
 
     if (!found)
     {
-        ALERT(at_aiconsole, "Could not find any goals with a group_no of %i\n", group_no);
+        engine::AlertMessage(at_aiconsole, "Could not find any goals with a group_no of %i\n", group_no);
     }
 
     return true;
@@ -183,7 +183,7 @@ void util::SetGroupState(int group_no, TFGoalState state, CBaseEntity* player = 
 
     if (!found)
     {
-        ALERT(at_aiconsole, "Could not find any goals with a group_no of %i\n", group_no);
+        engine::AlertMessage(at_aiconsole, "Could not find any goals with a group_no of %i\n", group_no);
     }
 }
 
@@ -211,7 +211,7 @@ void util::SetSpawnGroupActive(int group_no, bool active)
 
     if (!found)
     {
-        ALERT(at_aiconsole, "Could not find any spawns with a group_no of %i\n", group_no);
+        engine::AlertMessage(at_aiconsole, "Could not find any spawns with a group_no of %i\n", group_no);
     }
 }
 
@@ -230,15 +230,15 @@ void util::GoalDetpackUse(const Vector& origin, CBaseEntity* activator, CBaseEnt
             continue;
         }
 
-        if ((goal->pev->origin - origin).Length() > WEAP_DETPACK_GOAL_SIZE)
+        if ((goal->v.origin - origin).Length() > WEAP_DETPACK_GOAL_SIZE)
         {
             continue;
         }
 
         TraceResult trace;
-        util::TraceLine(goal->pev->origin, origin, util::ignore_monsters, goal, &trace);
+        util::TraceLine(goal->v.origin, origin, util::ignore_monsters, goal, &trace);
 
-        if (trace.flFraction != 1.0F && trace.pHit != activator->pev->pContainingEntity)
+        if (trace.flFraction != 1.0F && trace.pHit != activator->v.pContainingEntity)
         {
             continue;
         }
@@ -254,7 +254,7 @@ void util::GoalDetpackUse(const Vector& origin, CBaseEntity* activator, CBaseEnt
 LINK_ENTITY_TO_CLASS(info_tfgoal, CTFGoal);
 LINK_ENTITY_TO_CLASS(i_t_g, CTFGoal);
 
-CTFGoal::CTFGoal() : CBaseToggle()
+CTFGoal::CTFGoal(Entity* containingEntity) : CBaseToggle(containingEntity)
 {
     goal_min = Vector(-16, -16, 0);
     goal_max = Vector(16, 16, 56);
@@ -279,62 +279,62 @@ bool CTFGoal::KeyValue(KeyValueData* pkvd)
     if (CBaseToggle::KeyValue(pkvd))
         return true;
 
-    if (FStrEq(pkvd->szKeyName, "goal_min"))
+    if (streq(pkvd->szKeyName, "goal_min"))
     {
         util::StringToVector(goal_min, pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "goal_max"))
+    else if (streq(pkvd->szKeyName, "goal_max"))
     {
         util::StringToVector(goal_max, pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "search_time"))
+    else if (streq(pkvd->szKeyName, "search_time"))
     {
         search_time = atof(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "pausetime"))
+    else if (streq(pkvd->szKeyName, "pausetime"))
     {
         pausetime = atof(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "noise4"))
+    else if (streq(pkvd->szKeyName, "noise4"))
     {
-        noise4 = ALLOC_STRING(pkvd->szValue);
+        noise4 = engine::AllocString(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "team_drop"))
+    else if (streq(pkvd->szKeyName, "team_drop"))
     {
-        team_drop = ALLOC_STRING(pkvd->szValue);
+        team_drop = engine::AllocString(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "netname_team_drop"))
+    else if (streq(pkvd->szKeyName, "netname_team_drop"))
     {
-        netname_team_drop = ALLOC_STRING(pkvd->szValue);
+        netname_team_drop = engine::AllocString(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "non_team_drop"))
+    else if (streq(pkvd->szKeyName, "non_team_drop"))
     {
-        non_team_drop = ALLOC_STRING(pkvd->szValue);
+        non_team_drop = engine::AllocString(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "netname_non_team_drop"))
+    else if (streq(pkvd->szKeyName, "netname_non_team_drop"))
     {
-        netname_non_team_drop = ALLOC_STRING(pkvd->szValue);
+        netname_non_team_drop = engine::AllocString(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "distance"))
+    else if (streq(pkvd->szKeyName, "distance"))
     {
         distance = atof(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "attack_finished"))
+    else if (streq(pkvd->szKeyName, "attack_finished"))
     {
         attack_finished = atof(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "speed_reduction"))
+    else if (streq(pkvd->szKeyName, "speed_reduction"))
     {
         speed_reduction = atof(pkvd->szValue);
         return true;
@@ -346,32 +346,32 @@ bool CTFGoal::KeyValue(KeyValueData* pkvd)
 void CTFGoal::Precache()
 {
     if (!FStringNull(tfv.mdl))
-        g_engfuncs.pfnPrecacheModel(STRING(tfv.mdl));
-    if (!FStringNull(pev->noise))
-        g_engfuncs.pfnPrecacheSound(STRING(pev->noise));
+        engine::PrecacheModel(STRING(tfv.mdl));
+    if (!FStringNull(v.noise))
+        engine::PrecacheSound(STRING(v.noise));
 }
 
 bool CTFGoal::Spawn()
 {
     /* Toodles FIXME: Check existence? */
     Precache();
-    pev->classname = MAKE_STRING("info_tfgoal");
+    v.classname = MAKE_STRING("info_tfgoal");
 
-    const auto bIsBSPModel = !FStringNull(pev->model) && STRING(pev->model)[0] == '*';
+    const auto bIsBSPModel = !FStringNull(v.model) && STRING(v.model)[0] == '*';
 
     if (!bIsBSPModel && !FStringNull(tfv.mdl))
     {
-        g_engfuncs.pfnSetModel(edict(), STRING(tfv.mdl));
+        SetModel(tfv.mdl);
     }
     else
     {
         if (bIsBSPModel)
         {
-            SetModel(STRING(pev->model));
+            SetModel(v.model);
         }
         else if (g_bDeveloperMode)
         {
-            g_engfuncs.pfnPrecacheModel("models/presentsm.mdl");
+            engine::PrecacheModel("models/presentsm.mdl");
             SetModel("models/presentsm.mdl");
         }
     }
@@ -379,15 +379,15 @@ bool CTFGoal::Spawn()
     if (g_bDeveloperMode)
     {
         /* Render information saved in debug mode. */
-        prev_rendermode = pev->rendermode;
-        prev_renderamt = pev->renderamt;
-        prev_rendercolor = pev->rendercolor;
-        prev_renderfx = pev->renderfx;
+        prev_rendermode = v.rendermode;
+        prev_renderamt = v.renderamt;
+        prev_rendercolor = v.rendercolor;
+        prev_renderfx = v.renderfx;
     }
 
-    pev->solid = SOLID_TRIGGER;
+    v.solid = SOLID_TRIGGER;
 
-    SetOrigin(pev->origin);
+    SetOrigin(v.origin);
 
     if (!bIsBSPModel)
     {
@@ -398,10 +398,10 @@ bool CTFGoal::Spawn()
 
     if (!bIsBSPModel)
     {
-        pev->sequence = 1;
-        pev->frame = 0;
-        pev->framerate = 1.0F;
-        pev->animtime = gpGlobals->time;
+        v.sequence = 1;
+        v.frame = 0;
+        v.framerate = 1.0F;
+        v.animtime = gpGlobals->time;
     }
 
     return true;
@@ -422,16 +422,16 @@ void CTFGoal::PlaceGoal()
 
     if (IsGoalActivatedBy(TFGA_DROPTOGROUND))
     {
-        pev->movetype = MOVETYPE_TOSS;
-        const float oldZed = pev->origin.z;
-        pev->origin.z += 6;
-        if (!g_engfuncs.pfnDropToFloor(edict()))
+        v.movetype = MOVETYPE_TOSS;
+        const float oldZed = v.origin.z;
+        v.origin.z += 6;
+        if (!engine::DropToFloor(&v))
         {
 #if 1
-            ALERT(at_error, "Goal %s failed to drop to ground at %f, %f, %f\n", STRING(pev->classname), pev->origin.x, pev->origin.y, pev->origin.z);
-            pev->origin.z = oldZed;
+            engine::AlertMessage(at_error, "Goal %s failed to drop to ground at %f, %f, %f\n", STRING(v.classname), v.origin.x, v.origin.y, v.origin.z);
+            v.origin.z = oldZed;
 #else
-            ALERT(at_error, "Goal %s fell out of level at %f, %f, %f\n", STRING(pev->classname), pev->origin.x, pev->origin.y, pev->origin.z);
+            engine::AlertMessage(at_error, "Goal %s fell out of level at %f, %f, %f\n", STRING(v.classname), v.origin.x, v.origin.y, v.origin.z);
             Remove();
             return;
 #endif
@@ -439,10 +439,10 @@ void CTFGoal::PlaceGoal()
     }
 
     /* Toodles TODO: Team Fortress added FL_ITEM. Maybe make the hitbox bigger? */
-    pev->movetype = MOVETYPE_NONE;
-    pev->velocity = g_vecZero;
-    pev->oldorigin = pev->origin;
-    pev->punchangle = pev->angles;
+    v.movetype = MOVETYPE_NONE;
+    v.velocity = g_vecZero;
+    v.oldorigin = v.origin;
+    v.punchangle = v.angles;
 }
 
 void CTFGoal::StartGoal()
@@ -450,7 +450,7 @@ void CTFGoal::StartGoal()
     SetVisible(true);
     SetUse(&CTFGoal::GoalUse);
     SetThink(&CTFGoal::PlaceGoal);
-    pev->nextthink = gpGlobals->time + 0.2F;
+    v.nextthink = gpGlobals->time + 0.2F;
     if (InGoalState(TFGS_REMOVED))
     {
         RemoveGoal();
@@ -467,9 +467,9 @@ void CTFGoal::InactivateGoal()
     if (Classify() != CLASS_TFGOAL_TIMER)
     {
         if (Classify() == CLASS_TFGOAL_ITEM && IsGoalActivatedBy(TFGI_SOLID))
-            pev->solid = SOLID_BBOX;
+            v.solid = SOLID_BBOX;
         else
-            pev->solid = SOLID_TRIGGER;
+            v.solid = SOLID_TRIGGER;
     }
 
     SetGoalState(TFGS_INACTIVE);
@@ -486,13 +486,13 @@ void CTFGoal::RestoreGoal()
     if (Classify() != CLASS_TFGOAL_TIMER)
     {
         if (Classify() == CLASS_TFGOAL_ITEM && IsGoalActivatedBy(TFGI_SOLID))
-            pev->solid = SOLID_BBOX;
+            v.solid = SOLID_BBOX;
         else
-            pev->solid = SOLID_TRIGGER;
+            v.solid = SOLID_TRIGGER;
     }
     else
     {
-        pev->nextthink = gpGlobals->time + search_time;
+        v.nextthink = gpGlobals->time + search_time;
     }
 
     SetGoalState(TFGS_INACTIVE);
@@ -501,7 +501,7 @@ void CTFGoal::RestoreGoal()
 
 void CTFGoal::RemoveGoal()
 {
-    pev->solid = SOLID_NOT;
+    v.solid = SOLID_NOT;
     SetGoalState(TFGS_REMOVED);
     SetVisible(false);
 }
@@ -540,7 +540,7 @@ bool CTFGoal::IsPlayerAffected(CBaseEntity* player, CBaseEntity* activating_play
     }
 
     if (HasGoalEffects(TFGE_SAME_ENVIRONMENT)
-     && g_engfuncs.pfnPointContents(player->pev->origin) != g_engfuncs.pfnPointContents(pev->origin))
+     && engine::PointContents(player->v.origin) != engine::PointContents(v.origin))
     {
         return false;
     }
@@ -548,7 +548,7 @@ bool CTFGoal::IsPlayerAffected(CBaseEntity* player, CBaseEntity* activating_play
     /* Toodles: This was originally an early return if true. */
     if (tfv.t_length != 0)
     {
-        if ((pev->origin - player->pev->origin).LengthSquared() > tfv.t_length * tfv.t_length)
+        if ((v.origin - player->v.origin).LengthSquared() > tfv.t_length * tfv.t_length)
         {
             return false;
         }
@@ -556,7 +556,7 @@ bool CTFGoal::IsPlayerAffected(CBaseEntity* player, CBaseEntity* activating_play
         if (HasGoalEffects(TFGE_WALL))
         {
             TraceResult trace;
-            util::TraceLine(pev->origin, player->pev->origin, util::IGNORE_MONSTERS::ignore_monsters, this, &trace);
+            util::TraceLine(v.origin, player->v.origin, util::IGNORE_MONSTERS::ignore_monsters, this, &trace);
 
             if (trace.flFraction != 1.0F)
             {
@@ -660,18 +660,18 @@ void CTFGoal::DoResults(CBaseEntity* player, bool add_bonuses)
         {
             SetGoalState(TFGS_DELAYED);
             SetThink(&CTFGoal::DelayedResults);
-            pev->nextthink = gpGlobals->time + tfv.delay_time;
+            v.nextthink = gpGlobals->time + tfv.delay_time;
             m_pPlayer = player;
             m_bAddBonuses = add_bonuses;
             return;
         }
-        else if (pev->nextthink > gpGlobals->time)
+        else if (v.nextthink > gpGlobals->time)
         {
             /*
             Toodles: The original code had what seemed like a flaw where results
             could be called during delay time. This might break something. I dunno.
             */
-            ALERT(at_error, "Attempted to call results for goal %i while delaying\n", GetNumber());
+            engine::AlertMessage(at_error, "Attempted to call results for goal %i while delaying\n", GetNumber());
             return;
         }
     }
@@ -683,9 +683,9 @@ void CTFGoal::DoResults(CBaseEntity* player, bool add_bonuses)
         SetVisible(false);
     }
 
-    if (!FStringNull(pev->noise))
+    if (!FStringNull(v.noise))
     {
-        EmitSound(STRING(pev->noise), CHAN_ITEM);
+        EmitSound(STRING(v.noise), CHAN_ITEM);
     }
 
     if (tfv.increase_team1)
@@ -773,8 +773,8 @@ void CTFGoal::DoResults(CBaseEntity* player, bool add_bonuses)
 
         if (player && player->IsClient() && effect_player == player)
         {
-            if (!FStringNull(pev->message))
-                util::ShowMessage(STRING(pev->message), effect_player);
+            if (!FStringNull(v.message))
+                util::ShowMessage(STRING(v.message), effect_player);
             if (!FStringNull(tfv.ap_speak))
                 util::ClientHearVox(effect_player, STRING(tfv.ap_speak));
         }
@@ -867,16 +867,16 @@ void CTFGoal::RemoveResults(CBaseEntity* player)
 
     CBasePlayer* pl = dynamic_cast<CBasePlayer*>(player);
 
-    if (pev->health > 0.0F)
+    if (v.health > 0.0F)
     {
-        pl->TakeDamage(this, this, pev->health, DMG_GENERIC);
+        pl->TakeDamage(this, this, v.health, DMG_GENERIC);
     }
-    else if (pev->health < 0.0F)
+    else if (v.health < 0.0F)
     {
-        pl->GiveHealth(fabsf(pev->health), DMG_GENERIC);
+        pl->GiveHealth(fabsf(v.health), DMG_GENERIC);
     }
 
-    pl->pev->armorvalue = std::clamp(pl->pev->armorvalue - pev->armorvalue, 0.0F, pl->m_flArmorMax);
+    pl->v.armorvalue = std::clamp(pl->v.armorvalue - v.armorvalue, 0.0F, pl->m_flArmorMax);
     /* Toodles FIXME: Armor class */
 
     pl->GiveAmmo(-tfv.ammo_shells, AMMO_SHELLS);
@@ -904,9 +904,9 @@ void CTFGoal::RemoveResults(CBaseEntity* player)
 
     /* Toodles FIXME: Lives */
 
-    if (pev->frags)
+    if (v.frags)
     {
-        g_pGameRules->AddPointsToPlayer(pl, -pev->frags, true);
+        g_pGameRules->AddPointsToPlayer(pl, -v.frags, true);
     }
 }
 
@@ -914,7 +914,7 @@ void CTFGoal::DelayedResults()
 {
     if (!InGoalState(TFGS_DELAYED))
     {
-        ALERT(at_error, "Unexpected call to delayed results from goal %i\n", GetNumber());
+        engine::AlertMessage(at_error, "Unexpected call to delayed results from goal %i\n", GetNumber());
         return;
     }
     DoResults(m_pPlayer, m_bAddBonuses);
@@ -947,16 +947,16 @@ void CTFGoal::ApplyResults(CBaseEntity* player, CBaseEntity* activating_player, 
         }
 
         /* Toodles: Give activator credit for damage applied. */
-        if (pev->health > 0.0F)
+        if (v.health > 0.0F)
         {
-            pl->GiveHealth(pev->health, DMG_GENERIC);
+            pl->GiveHealth(v.health, DMG_GENERIC);
         }
-        else if (pev->health < 0.0F)
+        else if (v.health < 0.0F)
         {
-            pl->TakeDamage(this, activating_player, fabsf(pev->health), DMG_GENERIC);
+            pl->TakeDamage(this, activating_player, fabsf(v.health), DMG_GENERIC);
         }
 
-        pl->GiveArmor(pev->armortype, pev->armorvalue);
+        pl->GiveArmor(v.armortype, v.armorvalue);
         /* Toodles FIXME: Armor class */
 
         pl->GiveAmmo(tfv.ammo_shells, AMMO_SHELLS);
@@ -985,9 +985,9 @@ void CTFGoal::ApplyResults(CBaseEntity* player, CBaseEntity* activating_player, 
 dead_bonuses:
         /* Toodles FIXME: Lives */
 
-        if (pev->frags)
+        if (v.frags)
         {
-            g_pGameRules->AddPointsToPlayer(pl, pev->frags, true);
+            g_pGameRules->AddPointsToPlayer(pl, v.frags, true);
         }
     }
 
@@ -1019,7 +1019,7 @@ dead_bonuses:
     {
         goal = util::FindItem(tfv.axhitme);
 
-        if (goal != nullptr && goal->pev->owner == player->edict())
+        if (goal != nullptr && goal->v.owner == &player->v)
         {
             goal->RemoveFromPlayer(player, GI_DROP_REMOVEGOAL);
         }
@@ -1032,7 +1032,7 @@ dead_bonuses:
         while ((goal = (CTFGoalItem*)util::FindEntityByClassname(goal, "item_tfgoal")))
         {
             if (goal->GetGroup() == tfv.remove_item_group
-             && goal->pev->owner == activating_player->edict())
+             && goal->v.owner == &activating_player->v)
             {
                 goal->RemoveFromPlayer(player, GI_DROP_REMOVEGOAL);
             }
@@ -1054,54 +1054,54 @@ dead_bonuses:
 
 void CTFGoal::DoTriggerWork(CBaseEntity* player)
 {
-    if (FStringNull(pev->target) && FStringNull(m_iszKillTarget))
+    if (FStringNull(v.target) && FStringNull(m_iszKillTarget))
     {
         return;
     }
 
     if (m_flDelay != 0)
     {
-        CBaseEntity* pTemp = GetClassPtr((CBaseEntity*)nullptr);
-        pTemp->pev->classname = MAKE_STRING("DelayedUse");
+        auto pTemp = Entity::Create<CBaseEntity>();
+        pTemp->v.classname = MAKE_STRING("DelayedUse");
 
-        pTemp->pev->nextthink = gpGlobals->time + m_flDelay;
+        pTemp->v.nextthink = gpGlobals->time + m_flDelay;
 
         pTemp->SetThink(&CBaseEntity::DelayThink);
 
-        pTemp->pev->button = (int)USE_TOGGLE;
+        pTemp->v.button = (int)USE_TOGGLE;
         pTemp->m_iszKillTarget = m_iszKillTarget;
         pTemp->m_flDelay = 0;
-        pTemp->pev->target = pev->target;
+        pTemp->v.target = v.target;
 
         if (player && player->IsClient())
         {
-            pTemp->pev->owner = player->edict();
+            pTemp->v.owner = &player->v;
         }
         else
         {
-            pTemp->pev->owner = nullptr;
+            pTemp->v.owner = nullptr;
         }
         return;
     }
 
-    if (!FStringNull(m_iszKillTarget))
+	if (!FStringNull(m_iszKillTarget))
+	{
+		CBaseEntity* pentKillTarget = nullptr;
+
+		engine::AlertMessage(at_aiconsole, "KillTarget: %s\n", STRING(m_iszKillTarget));
+		pentKillTarget = util::FindEntityByTargetname(nullptr, STRING(m_iszKillTarget));
+		while (pentKillTarget != nullptr)
+		{
+			pentKillTarget->Remove();
+
+			engine::AlertMessage(at_aiconsole, "killing %s\n", STRING(pentKillTarget->v.classname));
+			pentKillTarget = util::FindEntityByTargetname(pentKillTarget, STRING(m_iszKillTarget));
+		}
+	}
+
+    if (!FStringNull(v.target))
     {
-        edict_t* pentKillTarget = NULL;
-
-        ALERT(at_aiconsole, "KillTarget: %s\n", STRING(m_iszKillTarget));
-        pentKillTarget = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(m_iszKillTarget));
-        while (!FNullEnt(pentKillTarget))
-        {
-            CBaseEntity::Instance(pentKillTarget)->Remove();
-
-            ALERT(at_aiconsole, "killing %s\n", STRING(pentKillTarget->v.classname));
-            pentKillTarget = FIND_ENTITY_BY_TARGETNAME(pentKillTarget, STRING(m_iszKillTarget));
-        }
-    }
-
-    if (!FStringNull(pev->target))
-    {
-        util::FireTargets(STRING(pev->target), player, this, USE_TOGGLE, 0.0F);
+        util::FireTargets(STRING(v.target), player, this, USE_TOGGLE, 0.0F);
     }
 }
 
@@ -1117,7 +1117,7 @@ void CTFGoal::SetupRespawn()
         if (tfv.wait > 0.0F)
         {
             SetThink(&CTFGoal::DoRespawn);
-            pev->nextthink = gpGlobals->time + tfv.wait;
+            v.nextthink = gpGlobals->time + tfv.wait;
         }
         return;
     }
@@ -1151,35 +1151,35 @@ void CTFGoal::SetVisible(bool visible)
 
     if (!g_bDeveloperMode && !bHasModel)
     {
-        pev->effects |= EF_NODRAW;
+        v.effects |= EF_NODRAW;
         return;
     }
 
     /* Goal items still become invisible while returning in debug mode. */
     if (visible)
     {
-        pev->effects &= ~EF_NODRAW;
+        v.effects &= ~EF_NODRAW;
     }
 
     if (!g_bDeveloperMode)
     {
         if (!visible)
         {
-            pev->effects |= EF_NODRAW;
+            v.effects |= EF_NODRAW;
         }
         return;
     }
 
     if (bHasModel && visible)
     {
-        pev->rendermode = prev_rendermode;
-        pev->renderamt = prev_renderamt;
-        pev->rendercolor = prev_rendercolor;
-        pev->renderfx = prev_renderfx;
+        v.rendermode = prev_rendermode;
+        v.renderamt = prev_renderamt;
+        v.rendercolor = prev_rendercolor;
+        v.renderfx = prev_renderfx;
     }
     else
     {
-        pev->rendermode = bHasModel ? kRenderTransTexture : kRenderTransAdd;
-        pev->renderamt = 64;
+        v.rendermode = bHasModel ? kRenderTransTexture : kRenderTransAdd;
+        v.renderamt = 64;
     }
 }

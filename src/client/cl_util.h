@@ -23,7 +23,7 @@
 #include "Platform.h"
 
 // Macros to hook function calls into the HUD object
-#define HOOK_MESSAGE(x) gEngfuncs.pfnHookUserMsg(#x, __MsgFunc_##x);
+#define HOOK_MESSAGE(x) client::HookUserMsg(#x, __MsgFunc_##x);
 
 #define DECLARE_MESSAGE(y, x)                                     \
 	int __MsgFunc_##x(const char* pszName, int iSize, void* pbuf) \
@@ -32,36 +32,12 @@
 	}
 
 
-#define HOOK_COMMAND(x, y) gEngfuncs.pfnAddCommand(x, __CmdFunc_##y);
+#define HOOK_COMMAND(x, y) client::AddCommand(x, __CmdFunc_##y);
 #define DECLARE_COMMAND(y, x) \
 	void __CmdFunc_##x()      \
 	{                         \
 		gHUD.y.UserCmd_##x(); \
 	}
-
-inline float CVAR_GET_FLOAT(const char* x) { return gEngfuncs.pfnGetCvarFloat((char*)x); }
-inline const char* CVAR_GET_STRING(const char* x) { return gEngfuncs.pfnGetCvarString((char*)x); }
-inline struct cvar_s* CVAR_CREATE(const char* cv, const char* val, const int flags) { return gEngfuncs.pfnRegisterVariable((char*)cv, (char*)val, flags); }
-
-#define SPR_Load (*gEngfuncs.pfnSPR_Load)
-#define SPR_Set (*gEngfuncs.pfnSPR_Set)
-#define SPR_Frames (*gEngfuncs.pfnSPR_Frames)
-#define SPR_GetList (*gEngfuncs.pfnSPR_GetList)
-
-// SPR_Draw  draws a the current sprite as solid
-#define SPR_Draw (*gEngfuncs.pfnSPR_Draw)
-// SPR_DrawHoles  draws the current sprites,  with color index255 not drawn (transparent)
-#define SPR_DrawHoles (*gEngfuncs.pfnSPR_DrawHoles)
-// SPR_DrawAdditive  adds the sprites RGB values to the background  (additive transulency)
-#define SPR_DrawAdditive (*gEngfuncs.pfnSPR_DrawAdditive)
-
-// SPR_EnableScissor  sets a clipping rect for HUD sprites.  (0,0) is the top-left hand corner of the screen.
-#define SPR_EnableScissor (*gEngfuncs.pfnSPR_EnableScissor)
-// SPR_DisableScissor  disables the clipping rect
-#define SPR_DisableScissor (*gEngfuncs.pfnSPR_DisableScissor)
-//
-#define FillRGBA (*gEngfuncs.pfnFillRGBA)
-
 
 // ScreenHeight returns the height of the screen, in pixels
 #define ScreenHeight (gHUD.m_scrinfo.iHeight)
@@ -77,31 +53,20 @@ inline struct cvar_s* CVAR_CREATE(const char* cv, const char* val, const int fla
 #define XRES(x) ((x) * ((float)ScreenWidth / 640))
 #define YRES(y) ((y) * ((float)ScreenHeight / 480))
 
-#define GetScreenInfo (*gEngfuncs.pfnGetScreenInfo)
-#define ServerCmd (*gEngfuncs.pfnServerCmd)
-#define EngineClientCmd (*gEngfuncs.pfnClientCmd)
-#define SetCrosshair (*gEngfuncs.pfnSetCrosshair)
-#define AngleVectors (*gEngfuncs.pfnAngleVectors)
-
-
-// Gets the height & width of a sprite,  at the specified frame
-inline int SPR_Height(HSPRITE x, int f) { return gEngfuncs.pfnSPR_Height(x, f); }
-inline int SPR_Width(HSPRITE x, int f) { return gEngfuncs.pfnSPR_Width(x, f); }
-
-inline client_textmessage_t* TextMessageGet(const char* pName) { return gEngfuncs.pfnTextMessageGet(pName); }
+inline client_textmessage_t* TextMessageGet(const char* pName) { return client::TextMessageGet(pName); }
 inline int TextMessageDrawChar(int x, int y, int number, int r, int g, int b)
 {
-	return gEngfuncs.pfnDrawCharacter(x, y, number, r, g, b);
+	return client::DrawCharacter(x, y, number, r, g, b);
 }
 
 inline int DrawConsoleString(int x, int y, const char* string)
 {
-	return gEngfuncs.pfnDrawConsoleString(x, y, (char*)string);
+	return client::DrawConsoleString(x, y, (char*)string);
 }
 
 inline void GetConsoleStringSize(const char* string, int* width, int* height)
 {
-	gEngfuncs.pfnDrawConsoleStringLen(string, width, height);
+	client::DrawConsoleStringLen(string, width, height);
 }
 
 inline int ConsoleStringLen(const char* string)
@@ -113,12 +78,12 @@ inline int ConsoleStringLen(const char* string)
 
 inline void ConsolePrint(const char* string)
 {
-	gEngfuncs.pfnConsolePrint(string);
+	client::ConsolePrint(string);
 }
 
 inline void CenterPrint(const char* string)
 {
-	gEngfuncs.pfnCenterPrint(string);
+	client::CenterPrint(string);
 }
 
 
@@ -126,7 +91,7 @@ inline char* safe_strcpy(char* dst, const char* src, int len_dst)
 {
 	if (len_dst <= 0)
 	{
-		return NULL; // this is bad
+		return nullptr; // this is bad
 	}
 
 	strncpy(dst, src, len_dst);
@@ -155,17 +120,7 @@ inline int safe_sprintf(char* dst, int len_dst, const char* format, ...)
 	return 0;
 }
 
-// sound functions
-inline void PlaySound(const char* szSound, float vol) { gEngfuncs.pfnPlaySoundByName(szSound, vol); }
-inline void PlaySound(int iSound, float vol) { gEngfuncs.pfnPlaySoundByIndex(iSound, vol); }
-
 void ScaleColors(int& r, int& g, int& b, int a);
-
-float Length(const float* v);
-void VectorMA(const float* veca, float scale, const float* vecb, float* vecc);
-void VectorScale(const float* in, float scale, float* out);
-float VectorNormalize(float* v);
-void VectorInverse(float* v);
 
 // disable 'possible loss of data converting float to int' warning message
 #pragma warning(disable : 4244)

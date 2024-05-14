@@ -83,9 +83,9 @@ public:
 	int m_iSrcNode;	 // the node that 'owns' this link ( keeps us from having to make reverse lookups )
 	int m_iDestNode; // the node on the other end of the link.
 
-	entvars_t* m_pLinkEnt; // the entity that blocks this connection (doors, etc)
+	Entity* m_pLinkEnt; // the entity that blocks this connection (doors, etc)
 
-	// m_szLinkEntModelname is not necessarily NULL terminated (so we can store it in a more alignment-friendly 4 bytes)
+	// m_szLinkEntModelname is not necessarily nullptr terminated (so we can store it in a more alignment-friendly 4 bytes)
 	char m_szLinkEntModelname[4]; // the unique name of the brush model that blocks the connection (this is kept for save/restore)
 
 	int m_afLinkInfo; // information about this link
@@ -144,7 +144,7 @@ public:
 	int m_minX, m_minY, m_minZ, m_maxX, m_maxY, m_maxZ;
 	int m_minBoxX, m_minBoxY, m_minBoxZ, m_maxBoxX, m_maxBoxY, m_maxBoxZ;
 	int m_CheckedCounter;
-	float m_RegionMin[3], m_RegionMax[3]; // The range of nodes.
+	Vector m_RegionMin, m_RegionMax; // The range of nodes.
 	CACHE_ENTRY m_Cache[CACHE_SIZE];
 
 
@@ -178,8 +178,8 @@ public:
 	};
 	// A static query means we're asking about the possiblity of handling this entity at ANY time
 	// A dynamic query means we're asking about it RIGHT NOW.  So we should query the current state
-	bool HandleLinkEnt(int iNode, entvars_t* pevLinkEnt, int afCapMask, NODEQUERY queryType);
-	entvars_t* LinkEntForLink(CLink* pLink, CNode* pNode);
+	bool HandleLinkEnt(int iNode, Entity* pevLinkEnt, int afCapMask, NODEQUERY queryType);
+	Entity* LinkEntForLink(CLink* pLink, CNode* pNode);
 	void ShowNodeConnections(int iNode);
 	void InitGraph();
 	bool IsAvailable();
@@ -216,7 +216,7 @@ public:
 	{
 #ifndef NDEBUG
 		if (!m_pNodes || i < 0 || i > m_cNodes)
-			ALERT(at_error, "Bad Node!\n");
+			engine::AlertMessage(at_error, "Bad Node!\n");
 #endif
 		return m_pNodes[i];
 	}
@@ -225,7 +225,7 @@ public:
 	{
 #ifndef NDEBUG
 		if (!m_pLinkPool || i < 0 || i > m_cLinks)
-			ALERT(at_error, "Bad link!\n");
+			engine::AlertMessage(at_error, "Bad link!\n");
 #endif
 		return m_pLinkPool[i];
 	}
@@ -269,6 +269,8 @@ public:
 //=========================================================
 class CNodeEnt : public CBaseEntity
 {
+	CNodeEnt(Entity* containingEntity) : CBaseEntity(containingEntity) {}
+
 	bool Spawn() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }

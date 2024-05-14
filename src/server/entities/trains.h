@@ -37,6 +37,10 @@
 class CPathTrack : public CPointEntity
 {
 public:
+	CPathTrack(Entity* containingEntity) : CPointEntity(containingEntity) {}
+
+	bool Is(const Type type) override { return type == Type::Track; }
+
 	DECLARE_SAVERESTORE()
 
 	bool Spawn() override;
@@ -47,10 +51,8 @@ public:
 	void Link();
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 
-	CPathTrack* ValidPath(CPathTrack* ppath, bool testFlag); // Returns ppath if enabled, NULL otherwise
+	CPathTrack* ValidPath(CPathTrack* ppath, bool testFlag); // Returns ppath if enabled, nullptr otherwise
 	void Project(CPathTrack* pstart, CPathTrack* pend, Vector* origin, float dist);
-
-	static CPathTrack* Instance(edict_t* pent);
 
 	CPathTrack* LookAhead(Vector* origin, float dist, bool move);
 	CPathTrack* Nearest(Vector origin);
@@ -73,6 +75,10 @@ public:
 class CFuncTrackTrain : public CBaseEntity
 {
 public:
+	CFuncTrackTrain(Entity* containingEntity) : CBaseEntity(containingEntity) {}
+
+	bool Is(const Type type) override { return type == Type::ChooChooTrain; }
+
 	DECLARE_SAVERESTORE()
 
 	bool Spawn() override;
@@ -89,14 +95,12 @@ public:
 
 	void NextThink(float thinkTime, bool alwaysThink);
 
-	void SetTrack(CPathTrack* track) { m_ppath = track->Nearest(pev->origin); }
-	void SetControls(entvars_t* pevControls);
-	bool OnControls(entvars_t* pev) override;
+	void SetTrack(CPathTrack* track) { m_ppath = track->Nearest(v.origin); }
+	void SetControls(CBaseEntity* other);
+	bool OnControls(CBaseEntity* other) override;
 
 	void StopSound();
 	void UpdateSound();
-
-	static CFuncTrackTrain* Instance(edict_t* pent);
 
 	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_DIRECTIONAL_USE | FCAP_NET_ALWAYS_SEND; }
 

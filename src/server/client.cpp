@@ -64,7 +64,7 @@ ClientConnect
 called when a player connects to a server
 ============
 */
-qboolean ClientConnect(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128])
+qboolean ClientConnect(Entity* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128])
 {
 	return static_cast<qboolean>(g_pGameRules->ClientConnected(pEntity, pszName, pszAddress, szRejectReason));
 }
@@ -77,24 +77,24 @@ ClientDisconnect
 called when a player disconnects from a server
 ============
 */
-void ClientDisconnect(edict_t* pEntity)
+void ClientDisconnect(Entity* pEntity)
 {
-	auto player = static_cast<CBasePlayer*>(CBaseEntity::Instance(pEntity));
+	auto player = pEntity->Get<CBasePlayer>();
 
 	if (player != nullptr)
 	{
 		/* Since the edict doesn't get deleted, fix it so it doesn't interfere. */
-		player->pev->solid = SOLID_NOT;
-		player->pev->movetype = MOVETYPE_NONE;
-		player->pev->takedamage = DAMAGE_NO;
+		player->v.solid = SOLID_NOT;
+		player->v.movetype = MOVETYPE_NONE;
+		player->v.takedamage = DAMAGE_NO;
 
 		player->InstallGameMovement(nullptr);
 
 #ifdef HALFLIFE_TANKCONTROL
-		if (player->m_pTank != NULL)
+		if (player->m_pTank != nullptr)
 		{
 			player->m_pTank->Use(player, player, USE_OFF, 0);
-			player->m_pTank = NULL;
+			player->m_pTank = nullptr;
 		}
 #endif
 
@@ -114,7 +114,7 @@ void ClientDisconnect(edict_t* pEntity)
 
 		player->SetOrigin(g_vecZero);
 
-		g_engfuncs.pfnFreeEntPrivateData(pEntity);
+		engine::FreeEntPrivateData(pEntity);
 	}
 }
 
@@ -126,10 +126,9 @@ ClientKill
 Player entered the suicide command
 ============
 */
-void ClientKill(edict_t* pEntity)
+void ClientKill(Entity* pEntity)
 {
-	entvars_t* pev = &pEntity->v;
-	CBasePlayer* pl = (CBasePlayer*)CBasePlayer::Instance(pev);
+	auto pl = pEntity->Get<CBasePlayer>();
 
 	if (!pl->IsPlayer() || !pl->IsAlive())
 	{
@@ -154,33 +153,24 @@ ClientPutInServer
 called each time a player is spawned
 ============
 */
-void ClientPutInServer(edict_t* pEntity)
+void ClientPutInServer(Entity* pEntity)
 {
 	CBasePlayer* pPlayer;
 
-	entvars_t* pev = &pEntity->v;
+	/* Allocate a player class */
+	if ((pEntity->flags & FL_FAKECLIENT) == 0)
+	{
+		engine::FreeEntPrivateData(pEntity);
+		pPlayer = pEntity->GetNew<CBasePlayer>();
+	}
+	else
+	{
+		pPlayer = pEntity->Get<CBasePlayer>();
+	}
 
-	pPlayer = GetClassPtr((CBasePlayer*)pev);
 	pPlayer->InstallGameMovement(new CHalfLifeMovement{pmove, pPlayer});
-	pPlayer->SetCustomDecalFrames(-1);
-	pPlayer->m_flNextChatTime = gpGlobals->time + CHAT_INTERVAL;
-	pPlayer->m_flNextSpeakTime = gpGlobals->time;
 
-	g_pGameRules->ClientPutInServer(pPlayer);
-
-	// Allocate a CBasePlayer for pev, and call spawn
-	pPlayer->Spawn();
-
-	// Reset interpolation during first frame
-	pPlayer->pev->effects |= EF_NOINTERP;
-
-	pPlayer->StartObserver();
-	pPlayer->pev->iuser1 = OBS_FIXED;
-	pPlayer->pev->iuser2 = 0;
-	pPlayer->pev->iuser3 = 0;
-	pPlayer->m_iObserverLastMode = OBS_FIXED;
-
-	pPlayer->m_ResetHUD = CBasePlayer::ResetHUD::Initialize;
+	g_pGameRules->PlayerSpawn(pPlayer);
 
 	if (util::IsMultiplayer())
 	{
@@ -312,21 +302,20 @@ bool Q_UnicodeValidate(const char* pUTF8)
 // or as
 // blah blah blah
 //
-void Host_Say(edict_t* pEntity, bool teamonly)
+void Host_Say(Entity* pEntity, bool teamonly)
 {
 	CBasePlayer* client;
 	char* p;
 	char szTemp[256];
 	const char* cpSay = "say";
 	const char* cpSayTeam = "say_team";
-	const char* pcmd = CMD_ARGV(0);
+	const char* pcmd = engine::Cmd_Argv(0);
 
 	// We can get a raw string now, without the "say " prepended
-	if (CMD_ARGC() == 0)
+	if (engine::Cmd_Argc() == 0)
 		return;
 
-	entvars_t* pev = &pEntity->v;
-	CBasePlayer* player = GetClassPtr((CBasePlayer*)pev);
+	auto player = pEntity->Get<CBasePlayer>();
 
 	//Not yet.
 	if (player->m_flNextChatTime > gpGlobals->time)
@@ -334,9 +323,9 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 
 	if (!stricmp(pcmd, cpSay) || !stricmp(pcmd, cpSayTeam))
 	{
-		if (CMD_ARGC() >= 2)
+		if (engine::Cmd_Argc() >= 2)
 		{
-			p = (char*)CMD_ARGS();
+			p = (char*)engine::Cmd_Args();
 		}
 		else
 		{
@@ -346,9 +335,9 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 	}
 	else // Raw text, need to prepend argv[0]
 	{
-		if (CMD_ARGC() >= 2)
+		if (engine::Cmd_Argc() >= 2)
 		{
-			sprintf(szTemp, "%s %s", (char*)pcmd, (char*)CMD_ARGS());
+			sprintf(szTemp, "%s %s", (char*)pcmd, (char*)engine::Cmd_Args());
 		}
 		else
 		{
@@ -396,39 +385,38 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 	}
 
 	// loop through all players
-	// Start with the first player.
-	// This may return the world in single player if the client types something between levels or during spawn
-	// so check it, or it will infinite loop
 
-	client = NULL;
-	while (((client = (CBasePlayer*)util::FindEntityByClassname(client, "player")) != NULL) && (!FNullEnt(client->edict())))
+	for (auto i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		if (!client->pev)
-			continue;
+		client = static_cast<CBasePlayer*>(util::PlayerByIndex(i));
 
-		if (client->edict() == pEntity)
+		if (client == nullptr || client == player || client->IsBot())
+		{
 			continue;
+		}
 
-		if (!(client->IsNetClient())) // Not a client ? (should never be true)
-			continue;
-
-		// can the receiver hear the sender? or has he muted him?
+		/* Can the receiver hear the sender, or have they muted them? */
 		if (g_VoiceGameMgr.PlayerHasBlockedPlayer(client, player))
+		{
 			continue;
+		}
 
-		if (teamonly && g_pGameRules->PlayerRelationship(client, CBaseEntity::Instance(pEntity)) != GR_TEAMMATE)
+		if (teamonly
+		 && g_pGameRules->PlayerRelationship(client, player) != GR_TEAMMATE)
+		{
 			continue;
+		}
 
 		MessageBegin(MSG_ONE, gmsgSayText, client);
-		WriteByte(player->entindex());
+		WriteByte(player->v.GetIndex());
 		WriteByte(teamonly);
 		WriteString(p);
 		MessageEnd();
 	}
 
 	// print to the sending client
-	MessageBegin(MSG_ONE, gmsgSayText, CBaseEntity::Instance(pEntity));
-	WriteByte(player->entindex());
+	MessageBegin(MSG_ONE, gmsgSayText, pEntity->Get<CBaseEntity>());
+	WriteByte(player->v.GetIndex());
 	WriteByte(teamonly);
 	WriteString(p);
 	MessageEnd();
@@ -440,9 +428,9 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 		temp = "say";
 
 	util::LogPrintf("\"%s<%i><%s><>\" %s \"%s\"\n",
-		STRING(pEntity->v.netname),
-		g_engfuncs.pfnGetPlayerUserId(pEntity),
-		g_engfuncs.pfnGetPlayerAuthId(pEntity),
+		STRING(pEntity->netname),
+		engine::GetPlayerUserId(pEntity),
+		engine::GetPlayerAuthId(pEntity),
 		temp,
 		p);
 }
@@ -454,91 +442,91 @@ ClientCommand
 called each time a player uses a "cmd" command
 ============
 */
-// Use CMD_ARGV,  CMD_ARGV, and CMD_ARGC to get pointers the character string command.
-void ClientCommand(edict_t* pEntity)
+// Use engine::Cmd_Argv,  engine::Cmd_Argv, and engine::Cmd_Argc to get pointers the character string command.
+void ClientCommand(Entity* pEntity)
 {
-	const char* pcmd = CMD_ARGV(0);
+	const char* pcmd = engine::Cmd_Argv(0);
 	const char* pstr;
 
+	auto player = pEntity->Get<CBasePlayer>();
+
 	// Is the client spawned yet?
-	if (!pEntity->pvPrivateData)
+	if (player == nullptr)
+	{
 		return;
+	}
 
-	entvars_t* pev = &pEntity->v;
-
-	auto player = GetClassPtr<CBasePlayer>(reinterpret_cast<CBasePlayer*>(&pEntity->v));
-
-	if (FStrEq(pcmd, "say"))
+	if (streq(pcmd, "say"))
 	{
 		Host_Say(pEntity, false);
 	}
-	else if (FStrEq(pcmd, "say_team"))
+	else if (streq(pcmd, "say_team"))
 	{
 		Host_Say(pEntity, true);
 	}
-	else if (FStrEq(pcmd, "fullupdate"))
+	else if (streq(pcmd, "fullupdate"))
 	{
 		player->ForceClientDllUpdate();
 	}
-	else if (FStrEq(pcmd, "give"))
+	else if (streq(pcmd, "give"))
 	{
 		if (g_pGameRules->IsPlayerPrivileged(player))
 		{
-			int iszItem = ALLOC_STRING(CMD_ARGV(1)); // Make a copy of the classname
+			int iszItem = engine::AllocString(engine::Cmd_Argv(1)); // Make a copy of the classname
 			player->GiveNamedItem(STRING(iszItem));
 		}
 	}
-	else if (FStrEq(pcmd, "drop"))
+	else if (streq(pcmd, "drop"))
 	{
 		// player is dropping an item.
-		player->DropPlayerWeapon((char*)CMD_ARGV(1));
+		player->DropPlayerWeapon((char*)engine::Cmd_Argv(1));
 	}
-	else if (FStrEq(pcmd, "fov"))
+	else if (streq(pcmd, "fov"))
 	{
 		if (g_pGameRules->IsPlayerPrivileged(player))
 		{
-			if (CMD_ARGC() > 1)
+			if (engine::Cmd_Argc() > 1)
 			{
-				player->m_iFOV = atoi(CMD_ARGV(1));
+				player->m_iFOV = atoi(engine::Cmd_Argv(1));
 			}
 			else
 			{
-				CLIENT_PRINTF(pEntity, print_console, util::VarArgs("\"fov\" is \"%d\"\n", (int)player->m_iFOV));
+				engine::ClientPrintf(pEntity, print_console, util::VarArgs("\"fov\" is \"%d\"\n", (int)player->m_iFOV));
 			}
 		}
 	}
-	else if (FStrEq(pcmd, "closemenus"))
+	else if (streq(pcmd, "closemenus"))
 	{
 	}
-	else if (FStrEq(pcmd, "saveme"))
+	else if (streq(pcmd, "saveme"))
 	{
 		player->SaveMe();
 	}
-	else if (FStrEq(pcmd, "dropitems"))
+	else if (streq(pcmd, "dropitems"))
 	{
 		if (player->IsPlayer())
 		{
 			player->RemoveGoalItems(false);
 		}
 	}
-	else if (FStrEq(pcmd, "discard"))
+	else if (streq(pcmd, "discard"))
 	{
 		player->DiscardAmmo();
 	}
-	else if (FStrEq(pcmd, "detstart"))
+	else if (streq(pcmd, "detstart"))
 	{
 		if (player->HasPlayerWeapon(WEAPON_DETPACK))
 		{
 			auto detpack = dynamic_cast<CDetpack*>(player->m_rgpPlayerWeapons[WEAPON_DETPACK]);
 			auto fuse = 5;
 
-			if (CMD_ARGC() > 1)
+			if (engine::Cmd_Argc() > 1)
 			{
 				/* Clamp the user fuse value. */
-				fuse = std::clamp(atoi(CMD_ARGV(1)), 5, 50);
+				fuse = std::clamp(atoi(engine::Cmd_Argv(1)), 5, 50);
 			}
 
-			detpack->pev->pain_finished = fuse;
+			detpack->v.pain_finished = fuse;
 		}
 	}
 	else if (g_pGameRules->ClientCommand(player, pcmd))
@@ -574,22 +562,24 @@ userinfo - gives dll a chance to modify it before
 it gets sent into the rest of the engine.
 ========================
 */
-void ClientUserInfoChanged(edict_t* pEntity, char* infobuffer)
+void ClientUserInfoChanged(Entity* pEntity, char* infobuffer)
 {
 	// Is the client spawned yet?
-	if (!pEntity->pvPrivateData)
+	if (pEntity->Get<CBasePlayer>() == nullptr)
+	{
 		return;
+	}
 
 	// msg everyone if someone changes their name,  and it isn't the first time (changing no name to current name)
-	if (!FStringNull(pEntity->v.netname) && STRING(pEntity->v.netname)[0] != 0 && !FStrEq(STRING(pEntity->v.netname), g_engfuncs.pfnInfoKeyValue(infobuffer, "name")))
+	if (!FStringNull(pEntity->netname) && STRING(pEntity->netname)[0] != 0 && !streq(pEntity->netname, engine::InfoKeyValue(infobuffer, "name")))
 	{
 		char sName[256];
-		char* pName = g_engfuncs.pfnInfoKeyValue(infobuffer, "name");
+		char* pName = engine::InfoKeyValue(infobuffer, "name");
 		strncpy(sName, pName, sizeof(sName) - 1);
 		sName[sizeof(sName) - 1] = '\0';
 
 		// First parse the name and remove any %'s
-		for (char* pApersand = sName; pApersand != NULL && *pApersand != 0; pApersand++)
+		for (char* pApersand = sName; pApersand != nullptr && *pApersand != 0; pApersand++)
 		{
 			// Replace it with a space
 			if (*pApersand == '%')
@@ -597,21 +587,21 @@ void ClientUserInfoChanged(edict_t* pEntity, char* infobuffer)
 		}
 
 		// Set the name
-		g_engfuncs.pfnSetClientKeyValue(ENTINDEX(pEntity), infobuffer, "name", sName);
+		engine::SetClientKeyValue(pEntity->GetIndex(), infobuffer, "name", sName);
 
 		if (util::IsMultiplayer())
 		{	
-			util::ClientPrintAll(HUD_PRINTTALK, "#Game_name_change", STRING(pEntity->v.netname), g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
+			util::ClientPrintAll(HUD_PRINTTALK, "#Game_name_change", STRING(pEntity->netname), engine::InfoKeyValue(infobuffer, "name"));
 
 			util::LogPrintf("\"%s<%i><%s><>\" changed name to \"%s\"\n",
-				STRING(pEntity->v.netname),
-				g_engfuncs.pfnGetPlayerUserId(pEntity),
-				g_engfuncs.pfnGetPlayerAuthId(pEntity),
-				g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
+				STRING(pEntity->netname),
+				engine::GetPlayerUserId(pEntity),
+				engine::GetPlayerAuthId(pEntity),
+				engine::InfoKeyValue(infobuffer, "name"));
 		}
 	}
 
-	g_pGameRules->ClientUserInfoChanged(GetClassPtr((CBasePlayer*)&pEntity->v), infobuffer);
+	g_pGameRules->ClientUserInfoChanged(pEntity->Get<CBasePlayer>(), infobuffer);
 }
 
 static int g_serveractive = 0;
@@ -635,7 +625,7 @@ void ServerDeactivate()
 #endif
 }
 
-void ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
+void ServerActivate(Entity* pEdictList, int edictCount, int clientMax)
 {
 	int i;
 	CBaseEntity* pClass;
@@ -646,17 +636,20 @@ void ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
 	// Clients have not been initialized yet
 	for (i = 0; i < edictCount; i++)
 	{
-		if (0 != pEdictList[i].free)
+		if (pEdictList[i].IsFree())
 			continue;
 
 		// Clients aren't necessarily initialized until ClientPutInServer()
-		if ((i > 0 && i <= clientMax) || !pEdictList[i].pvPrivateData)
+		if (i > 0 && i <= clientMax)
+		{
+			engine::FreeEntPrivateData(pEdictList + i);
 			continue;
+		}
 
-		pClass = CBaseEntity::Instance(&pEdictList[i]);
+		pClass = pEdictList[i].Get<CBaseEntity>();
 		// Activate this entity if it's got a class & isn't dormant
 #ifdef HALFLIFE_SAVERESTORE
-		if (pClass != nullptr && (pClass->pev->flags & FL_DORMANT) == 0)
+		if (pClass != nullptr && (pClass->v.flags & FL_DORMANT) == 0)
 #else
 		if (pClass != nullptr)
 #endif
@@ -665,7 +658,7 @@ void ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
 		}
 		else
 		{
-			ALERT(at_console, "Can't instance %s\n", STRING(pEdictList[i].v.classname));
+			engine::AlertMessage(at_console, "Can't instance %s\n", STRING(pEdictList[i].classname));
 		}
 	}
 
@@ -688,10 +681,9 @@ PlayerPreThink
 Called every frame before physics are run
 ================
 */
-void PlayerPreThink(edict_t* pEntity)
+void PlayerPreThink(Entity* pEntity)
 {
-	entvars_t* pev = &pEntity->v;
-	CBasePlayer* pPlayer = (CBasePlayer*)GET_PRIVATE(pEntity);
+	CBasePlayer* pPlayer = pEntity->Get<CBasePlayer>();
 
 	if (pPlayer)
 	{
@@ -706,10 +698,9 @@ PlayerPostThink
 Called every frame after physics are run
 ================
 */
-void PlayerPostThink(edict_t* pEntity)
+void PlayerPostThink(Entity* pEntity)
 {
-	entvars_t* pev = &pEntity->v;
-	CBasePlayer* pPlayer = (CBasePlayer*)GET_PRIVATE(pEntity);
+	CBasePlayer* pPlayer = pEntity->Get<CBasePlayer>();
 	const int msec = static_cast<int>(std::roundf(gpGlobals->frametime * 1000));
 
 	if (pPlayer)
@@ -760,7 +751,7 @@ static void LoadNextMap()
 		g_MapsToLoad.shrink_to_fit();
 	}
 
-	SERVER_COMMAND(util::VarArgs("map \"%s\"\n", mapName.c_str()));
+	engine::ServerCommand(util::VarArgs("map \"%s\"\n", mapName.c_str()));
 }
 
 static void LoadAllMaps()
@@ -799,9 +790,9 @@ static void LoadAllMaps()
 
 	if (!g_MapsToLoad.empty())
 	{
-		if (CMD_ARGC() == 2)
+		if (engine::Cmd_Argc() == 2)
 		{
-			const char* firstMapToLoad = CMD_ARGV(1);
+			const char* firstMapToLoad = engine::Cmd_Argv(1);
 
 			// Clear out all maps that would have been loaded before this one.
 			if (auto it = std::find(g_MapsToLoad.begin(), g_MapsToLoad.end(), firstMapToLoad);
@@ -833,9 +824,9 @@ static void LoadAllMaps()
 
 void InitMapLoadingUtils()
 {
-	g_engfuncs.pfnAddServerCommand("sv_load_all_maps", &LoadAllMaps);
+	engine::AddServerCommand("sv_load_all_maps", &LoadAllMaps);
 	// Escape hatch in case the command is executed in error.
-	g_engfuncs.pfnAddServerCommand("sv_stop_loading_all_maps", []()
+	engine::AddServerCommand("sv_stop_loading_all_maps", []()
 		{ g_MapsToLoad.clear(); });
 }
 #endif
@@ -871,132 +862,132 @@ void StartFrame()
 void ClientPrecache()
 {
 	// setup precaches always needed
-	PRECACHE_SOUND("player/sprayer.wav"); // spray paint sound
+	engine::PrecacheSound("player/sprayer.wav"); // spray paint sound
 
-	PRECACHE_SOUND("player/pl_jumpland2.wav");
-	PRECACHE_SOUND("player/pl_fallpain3.wav");
+	engine::PrecacheSound("player/pl_jumpland2.wav");
+	engine::PrecacheSound("player/pl_fallpain3.wav");
 
-	PRECACHE_SOUND("player/pl_step1.wav"); // walk on concrete
-	PRECACHE_SOUND("player/pl_step2.wav");
-	PRECACHE_SOUND("player/pl_step3.wav");
-	PRECACHE_SOUND("player/pl_step4.wav");
+	engine::PrecacheSound("player/pl_step1.wav"); // walk on concrete
+	engine::PrecacheSound("player/pl_step2.wav");
+	engine::PrecacheSound("player/pl_step3.wav");
+	engine::PrecacheSound("player/pl_step4.wav");
 
-	PRECACHE_SOUND("common/npc_step1.wav"); // NPC walk on concrete
-	PRECACHE_SOUND("common/npc_step2.wav");
-	PRECACHE_SOUND("common/npc_step3.wav");
-	PRECACHE_SOUND("common/npc_step4.wav");
+	engine::PrecacheSound("common/npc_step1.wav"); // NPC walk on concrete
+	engine::PrecacheSound("common/npc_step2.wav");
+	engine::PrecacheSound("common/npc_step3.wav");
+	engine::PrecacheSound("common/npc_step4.wav");
 
-	PRECACHE_SOUND("player/pl_metal1.wav"); // walk on metal
-	PRECACHE_SOUND("player/pl_metal2.wav");
-	PRECACHE_SOUND("player/pl_metal3.wav");
-	PRECACHE_SOUND("player/pl_metal4.wav");
+	engine::PrecacheSound("player/pl_metal1.wav"); // walk on metal
+	engine::PrecacheSound("player/pl_metal2.wav");
+	engine::PrecacheSound("player/pl_metal3.wav");
+	engine::PrecacheSound("player/pl_metal4.wav");
 
-	PRECACHE_SOUND("player/pl_dirt1.wav"); // walk on dirt
-	PRECACHE_SOUND("player/pl_dirt2.wav");
-	PRECACHE_SOUND("player/pl_dirt3.wav");
-	PRECACHE_SOUND("player/pl_dirt4.wav");
+	engine::PrecacheSound("player/pl_dirt1.wav"); // walk on dirt
+	engine::PrecacheSound("player/pl_dirt2.wav");
+	engine::PrecacheSound("player/pl_dirt3.wav");
+	engine::PrecacheSound("player/pl_dirt4.wav");
 
-	PRECACHE_SOUND("player/pl_duct1.wav"); // walk in duct
-	PRECACHE_SOUND("player/pl_duct2.wav");
-	PRECACHE_SOUND("player/pl_duct3.wav");
-	PRECACHE_SOUND("player/pl_duct4.wav");
+	engine::PrecacheSound("player/pl_duct1.wav"); // walk in duct
+	engine::PrecacheSound("player/pl_duct2.wav");
+	engine::PrecacheSound("player/pl_duct3.wav");
+	engine::PrecacheSound("player/pl_duct4.wav");
 
-	PRECACHE_SOUND("player/pl_grate1.wav"); // walk on grate
-	PRECACHE_SOUND("player/pl_grate2.wav");
-	PRECACHE_SOUND("player/pl_grate3.wav");
-	PRECACHE_SOUND("player/pl_grate4.wav");
+	engine::PrecacheSound("player/pl_grate1.wav"); // walk on grate
+	engine::PrecacheSound("player/pl_grate2.wav");
+	engine::PrecacheSound("player/pl_grate3.wav");
+	engine::PrecacheSound("player/pl_grate4.wav");
 
-	PRECACHE_SOUND("player/pl_slosh1.wav"); // walk in shallow water
-	PRECACHE_SOUND("player/pl_slosh2.wav");
-	PRECACHE_SOUND("player/pl_slosh3.wav");
-	PRECACHE_SOUND("player/pl_slosh4.wav");
+	engine::PrecacheSound("player/pl_slosh1.wav"); // walk in shallow water
+	engine::PrecacheSound("player/pl_slosh2.wav");
+	engine::PrecacheSound("player/pl_slosh3.wav");
+	engine::PrecacheSound("player/pl_slosh4.wav");
 
-	PRECACHE_SOUND("player/pl_tile1.wav"); // walk on tile
-	PRECACHE_SOUND("player/pl_tile2.wav");
-	PRECACHE_SOUND("player/pl_tile3.wav");
-	PRECACHE_SOUND("player/pl_tile4.wav");
-	PRECACHE_SOUND("player/pl_tile5.wav");
+	engine::PrecacheSound("player/pl_tile1.wav"); // walk on tile
+	engine::PrecacheSound("player/pl_tile2.wav");
+	engine::PrecacheSound("player/pl_tile3.wav");
+	engine::PrecacheSound("player/pl_tile4.wav");
+	engine::PrecacheSound("player/pl_tile5.wav");
 
-	PRECACHE_SOUND("player/pl_swim1.wav"); // breathe bubbles
-	PRECACHE_SOUND("player/pl_swim2.wav");
-	PRECACHE_SOUND("player/pl_swim3.wav");
-	PRECACHE_SOUND("player/pl_swim4.wav");
+	engine::PrecacheSound("player/pl_swim1.wav"); // breathe bubbles
+	engine::PrecacheSound("player/pl_swim2.wav");
+	engine::PrecacheSound("player/pl_swim3.wav");
+	engine::PrecacheSound("player/pl_swim4.wav");
 
-	PRECACHE_SOUND("player/pl_ladder1.wav"); // climb ladder rung
-	PRECACHE_SOUND("player/pl_ladder2.wav");
-	PRECACHE_SOUND("player/pl_ladder3.wav");
-	PRECACHE_SOUND("player/pl_ladder4.wav");
+	engine::PrecacheSound("player/pl_ladder1.wav"); // climb ladder rung
+	engine::PrecacheSound("player/pl_ladder2.wav");
+	engine::PrecacheSound("player/pl_ladder3.wav");
+	engine::PrecacheSound("player/pl_ladder4.wav");
 
-	PRECACHE_SOUND("player/pl_wade1.wav"); // wade in water
-	PRECACHE_SOUND("player/pl_wade2.wav");
-	PRECACHE_SOUND("player/pl_wade3.wav");
-	PRECACHE_SOUND("player/pl_wade4.wav");
+	engine::PrecacheSound("player/pl_wade1.wav"); // wade in water
+	engine::PrecacheSound("player/pl_wade2.wav");
+	engine::PrecacheSound("player/pl_wade3.wav");
+	engine::PrecacheSound("player/pl_wade4.wav");
 
-	PRECACHE_SOUND("debris/wood1.wav"); // hit wood texture
-	PRECACHE_SOUND("debris/wood2.wav");
-	PRECACHE_SOUND("debris/wood3.wav");
+	engine::PrecacheSound("debris/wood1.wav"); // hit wood texture
+	engine::PrecacheSound("debris/wood2.wav");
+	engine::PrecacheSound("debris/wood3.wav");
 
-	PRECACHE_SOUND("plats/train_use1.wav"); // use a train
+	engine::PrecacheSound("plats/train_use1.wav"); // use a train
 
-	PRECACHE_SOUND("buttons/spark5.wav"); // hit computer texture
-	PRECACHE_SOUND("buttons/spark6.wav");
-	PRECACHE_SOUND("debris/glass1.wav");
-	PRECACHE_SOUND("debris/glass2.wav");
-	PRECACHE_SOUND("debris/glass3.wav");
+	engine::PrecacheSound("buttons/spark5.wav"); // hit computer texture
+	engine::PrecacheSound("buttons/spark6.wav");
+	engine::PrecacheSound("debris/glass1.wav");
+	engine::PrecacheSound("debris/glass2.wav");
+	engine::PrecacheSound("debris/glass3.wav");
 
 	// player gib sounds
-	PRECACHE_SOUND("common/bodysplat.wav");
+	engine::PrecacheSound("common/bodysplat.wav");
 
 	// player pain sounds
-	PRECACHE_SOUND("player/pain1.wav");
-	PRECACHE_SOUND("player/pain2.wav");
-	PRECACHE_SOUND("player/pain3.wav");
-	PRECACHE_SOUND("player/pain4.wav");
-	PRECACHE_SOUND("player/pain5.wav");
-	PRECACHE_SOUND("player/pain6.wav");
+	engine::PrecacheSound("player/pain1.wav");
+	engine::PrecacheSound("player/pain2.wav");
+	engine::PrecacheSound("player/pain3.wav");
+	engine::PrecacheSound("player/pain4.wav");
+	engine::PrecacheSound("player/pain5.wav");
+	engine::PrecacheSound("player/pain6.wav");
 
-	PRECACHE_SOUND("player/drown1.wav");
-	PRECACHE_SOUND("player/drown2.wav");
+	engine::PrecacheSound("player/drown1.wav");
+	engine::PrecacheSound("player/drown2.wav");
 
-	PRECACHE_SOUND("player/death1.wav");
-	PRECACHE_SOUND("player/death2.wav");
-	PRECACHE_SOUND("player/death3.wav");
-	PRECACHE_SOUND("player/death4.wav");
-	PRECACHE_SOUND("player/death5.wav");
+	engine::PrecacheSound("player/death1.wav");
+	engine::PrecacheSound("player/death2.wav");
+	engine::PrecacheSound("player/death3.wav");
+	engine::PrecacheSound("player/death4.wav");
+	engine::PrecacheSound("player/death5.wav");
 
-	PRECACHE_SOUND("player/h2odeath.wav");
+	engine::PrecacheSound("player/h2odeath.wav");
 
-	g_sModelIndexPlayer = PRECACHE_MODEL("models/player/scout/scout.mdl");
-	g_sModelIndexGibs = PRECACHE_MODEL("models/hgibs.mdl");
+	g_sModelIndexPlayer = engine::PrecacheModel("models/player/scout/scout.mdl");
+	g_sModelIndexGibs = engine::PrecacheModel("models/hgibs.mdl");
 
 	// hud sounds
 
-	PRECACHE_SOUND("common/wpn_hudoff.wav");
-	PRECACHE_SOUND("common/wpn_hudon.wav");
-	PRECACHE_SOUND("common/wpn_moveselect.wav");
-	PRECACHE_SOUND("common/wpn_select.wav");
-	PRECACHE_SOUND("common/wpn_denyselect.wav");
+	engine::PrecacheSound("common/wpn_hudoff.wav");
+	engine::PrecacheSound("common/wpn_hudon.wav");
+	engine::PrecacheSound("common/wpn_moveselect.wav");
+	engine::PrecacheSound("common/wpn_select.wav");
+	engine::PrecacheSound("common/wpn_denyselect.wav");
 
-	PRECACHE_SOUND("misc/r_tele1.wav");
+	engine::PrecacheSound("misc/r_tele1.wav");
 
-	PRECACHE_SOUND("common/null.wav");
+	engine::PrecacheSound("common/null.wav");
 
-	PRECACHE_SOUND("player/plyrjmp8.wav");
+	engine::PrecacheSound("player/plyrjmp8.wav");
 
-	PRECACHE_SOUND("speech/saveme1.wav");
-	PRECACHE_SOUND("speech/saveme2.wav");
-	PRECACHE_SOUND("speech/saveme3.wav");
+	engine::PrecacheSound("speech/saveme1.wav");
+	engine::PrecacheSound("speech/saveme2.wav");
+	engine::PrecacheSound("speech/saveme3.wav");
 
-	PRECACHE_MODEL("models/backpack.mdl");
-	PRECACHE_SOUND("items/ammopickup1.wav");
-	PRECACHE_SOUND("items/ammopickup2.wav");
+	engine::PrecacheModel("models/backpack.mdl");
+	engine::PrecacheSound("items/ammopickup1.wav");
+	engine::PrecacheSound("items/ammopickup2.wav");
 
-	g_usGibbed = PRECACHE_EVENT(1, "events/gibs.sc");
-	g_usTeleport = PRECACHE_EVENT(1, "events/teleport.sc");
-	g_usExplosion = PRECACHE_EVENT(1, "events/explosion.sc");
-	g_usConcBlast = PRECACHE_EVENT(1, "events/explode/tf_concuss.sc");
-	g_usGetNailedIdiot = PRECACHE_EVENT(1, "events/explode/tf_nailgren.sc");
-	g_usTrail = PRECACHE_EVENT(1, "events/trail.sc");
+	g_usGibbed = engine::PrecacheEvent(1, "events/gibs.sc");
+	g_usTeleport = engine::PrecacheEvent(1, "events/teleport.sc");
+	g_usExplosion = engine::PrecacheEvent(1, "events/explosion.sc");
+	g_usConcBlast = engine::PrecacheEvent(1, "events/explode/tf_concuss.sc");
+	g_usGetNailedIdiot = engine::PrecacheEvent(1, "events/explode/tf_nailgren.sc");
+	g_usTrail = engine::PrecacheEvent(1, "events/trail.sc");
 }
 
 /*
@@ -1033,20 +1024,19 @@ PlayerCustomization
 A new player customization has been registered on the server
 ================
 */
-void PlayerCustomization(edict_t* pEntity, customization_t* pCust)
+void PlayerCustomization(Entity* pEntity, customization_t* pCust)
 {
-	entvars_t* pev = &pEntity->v;
-	CBasePlayer* pPlayer = (CBasePlayer*)GET_PRIVATE(pEntity);
+	CBasePlayer* pPlayer = pEntity->Get<CBasePlayer>();
 
 	if (!pPlayer)
 	{
-		ALERT(at_console, "PlayerCustomization:  Couldn't get player!\n");
+		engine::AlertMessage(at_console, "PlayerCustomization:  Couldn't get player!\n");
 		return;
 	}
 
 	if (!pCust)
 	{
-		ALERT(at_console, "PlayerCustomization:  NULL customization!\n");
+		engine::AlertMessage(at_console, "PlayerCustomization:  NULL customization!\n");
 		return;
 	}
 
@@ -1061,7 +1051,7 @@ void PlayerCustomization(edict_t* pEntity, customization_t* pCust)
 		// Ignore for now.
 		break;
 	default:
-		ALERT(at_console, "PlayerCustomization:  Unknown customization type!\n");
+		engine::AlertMessage(at_console, "PlayerCustomization:  Unknown customization type!\n");
 		break;
 	}
 }
@@ -1073,10 +1063,9 @@ SpectatorConnect
 A spectator has joined the game
 ================
 */
-void SpectatorConnect(edict_t* pEntity)
+void SpectatorConnect(Entity* pEntity)
 {
-	entvars_t* pev = &pEntity->v;
-	CBaseSpectator* pPlayer = (CBaseSpectator*)GET_PRIVATE(pEntity);
+	CBaseSpectator* pPlayer = pEntity->Get<CBaseSpectator>();
 
 	if (pPlayer)
 		pPlayer->SpectatorConnect();
@@ -1089,10 +1078,9 @@ SpectatorConnect
 A spectator has left the game
 ================
 */
-void SpectatorDisconnect(edict_t* pEntity)
+void SpectatorDisconnect(Entity* pEntity)
 {
-	entvars_t* pev = &pEntity->v;
-	CBaseSpectator* pPlayer = (CBaseSpectator*)GET_PRIVATE(pEntity);
+	CBaseSpectator* pPlayer = pEntity->Get<CBaseSpectator>();
 
 	if (pPlayer)
 		pPlayer->SpectatorDisconnect();
@@ -1105,10 +1093,9 @@ SpectatorConnect
 A spectator has sent a usercmd
 ================
 */
-void SpectatorThink(edict_t* pEntity)
+void SpectatorThink(Entity* pEntity)
 {
-	entvars_t* pev = &pEntity->v;
-	CBaseSpectator* pPlayer = (CBaseSpectator*)GET_PRIVATE(pEntity);
+	CBaseSpectator* pPlayer = pEntity->Get<CBaseSpectator>();
 
 	if (pPlayer)
 		pPlayer->SpectatorThink();
@@ -1123,7 +1110,7 @@ void SpectatorThink(edict_t* pEntity)
 SetupVisibility
 
 A client can have a separate "view entity" indicating that his/her view should depend on the origin of that
-view entity.  If that's the case, then pViewEntity will be non-NULL and will be used.  Otherwise, the current
+view entity.  If that's the case, then pViewEntity will be non-nullptr and will be used.  Otherwise, the current
 entity's origin is used.  Either is offset by the view_ofs to get the eye position.
 
 From the eye position, we set up the PAS and PVS to use for filtering network messages to the client.  At this point, we could
@@ -1132,10 +1119,10 @@ From the eye position, we set up the PAS and PVS to use for filtering network me
 NOTE:  Do not cache the values of pas and pvs, as they depend on reusable memory in the engine, they are only good for this one frame
 ================
 */
-void SetupVisibility(edict_t* pViewEntity, edict_t* pClient, unsigned char** pvs, unsigned char** pas)
+void SetupVisibility(Entity* pViewEntity, Entity* pClient, unsigned char** pvs, unsigned char** pas)
 {
 	Vector org;
-	edict_t* pView = pClient;
+	Entity* pView = pClient;
 
 	// Find the client's PVS
 	if (pViewEntity)
@@ -1143,21 +1130,21 @@ void SetupVisibility(edict_t* pViewEntity, edict_t* pClient, unsigned char** pvs
 		pView = pViewEntity;
 	}
 
-	if ((pClient->v.flags & FL_PROXY) != 0)
+	if ((pClient->flags & FL_PROXY) != 0)
 	{
-		*pvs = NULL; // the spectator proxy sees
-		*pas = NULL; // and hears everything
+		*pvs = nullptr; // the spectator proxy sees
+		*pas = nullptr; // and hears everything
 		return;
 	}
 
-	org = pView->v.origin + pView->v.view_ofs;
-	if ((pView->v.flags & FL_DUCKING) != 0)
+	org = pView->origin + pView->view_ofs;
+	if ((pView->flags & FL_DUCKING) != 0)
 	{
 		org = org + (VEC_HULL_MIN - VEC_DUCK_HULL_MIN);
 	}
 
-	*pvs = ENGINE_SET_PVS((float*)&org);
-	*pas = ENGINE_SET_PAS((float*)&org);
+	*pvs = engine::SetFatPVS(org);
+	*pas = engine::SetFatPAS(org);
 }
 
 #include "entity_state.h"
@@ -1175,7 +1162,7 @@ player is 1 if the ent/e is a player and 0 otherwise
 pSet is either the PAS or PVS that we previous set up.  We can use it to ask the engine to filter the entity against the PAS or PVS.
 we could also use the pas/ pvs that we set in SetupVisibility, if we wanted to.  Caching the value is valid in that case, but still only for the current frame
 */
-int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* host, int hostflags, int player, unsigned char* pSet)
+int AddToFullPack(struct entity_state_s* state, int e, Entity* ent, Entity* host, int hostflags, int player, unsigned char* pSet)
 {
 	// Entities with an index greater than this will corrupt the client's heap because 
 	// the index is sent with only 11 bits of precision (2^11 == 2048).
@@ -1186,35 +1173,38 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 		return 0;
 	}
 
-	int i;
+	auto entity = ent->Get<CBaseEntity>();
 
-	auto entity = reinterpret_cast<CBaseEntity*>(GET_PRIVATE(ent));
+	if (entity == nullptr)
+	{
+		return 0;
+	}
 
 	if (ent != host)
 	{
 		// don't send if flagged for NODRAW and it's not the host getting the message
-		if ((ent->v.effects & EF_NODRAW) != 0)
+		if ((ent->effects & EF_NODRAW) != 0)
 		{
 			return 0;
 		}
 
 		// Ignore ents without valid / visible models
-		if (0 == ent->v.modelindex || !STRING(ent->v.model))
+		if (0 == ent->modelindex || !STRING(ent->model))
 		{
 			return 0;
 		}
 
 		// Don't send spectators to other players
-		if ((ent->v.flags & FL_SPECTATOR) != 0)
+		if ((ent->flags & FL_SPECTATOR) != 0)
 		{
 			return 0;
 		}
 
 		// Ignore if not the host and not touching a PVS/PAS leaf
-		// If pSet is NULL, then the test will always succeed and the entity will be added to the update
+		// If pSet is nullptr, then the test will always succeed and the entity will be added to the update
 		if ((entity->ObjectCaps() & FCAP_NET_ALWAYS_SEND) == 0)
 		{
-			if (!ENGINE_CHECK_VISIBILITY((const struct edict_s*)ent, pSet))
+			if (!engine::CheckVisibility(ent, pSet))
 			{
 				return 0;
 			}
@@ -1223,27 +1213,27 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 
 
 	// Don't send entity to local client if the client says it's predicting the entity itself.
-	if ((ent->v.flags & FL_SKIPLOCALHOST) != 0)
+	if ((ent->flags & FL_SKIPLOCALHOST) != 0)
 	{
-		if ((hostflags & 1) != 0 && (ent->v.owner == host))
+		if ((hostflags & 1) != 0 && (ent->owner == host))
 			return 0;
 	}
 
-	if (0 != host->v.groupinfo)
+	if (0 != host->groupinfo)
 	{
-		util::SetGroupTrace(host->v.groupinfo, util::GROUP_OP_AND);
+		util::SetGroupTrace(host->groupinfo, util::GROUP_OP_AND);
 
 		// Should always be set, of course
-		if (0 != ent->v.groupinfo)
+		if (0 != ent->groupinfo)
 		{
 			if (util::g_groupop == util::GROUP_OP_AND)
 			{
-				if ((ent->v.groupinfo & host->v.groupinfo) == 0)
+				if ((ent->groupinfo & host->groupinfo) == 0)
 					return 0;
 			}
 			else if (util::g_groupop == util::GROUP_OP_NAND)
 			{
-				if ((ent->v.groupinfo & host->v.groupinfo) != 0)
+				if ((ent->groupinfo & host->groupinfo) != 0)
 					return 0;
 			}
 		}
@@ -1269,20 +1259,20 @@ CreateBaseline
 Creates baselines used for network encoding, especially for player data since players are not spawned until connect time.
 ===================
 */
-void CreateBaseline(int player, int eindex, struct entity_state_s* baseline, struct edict_s* entity, int playermodelindex, Vector* player_mins, Vector* player_maxs)
+void CreateBaseline(int player, int eindex, struct entity_state_s* baseline, Entity* entity, int playermodelindex, Vector* player_mins, Vector* player_maxs)
 {
-	baseline->origin = entity->v.origin;
-	baseline->angles = entity->v.angles;
-	baseline->frame = entity->v.frame;
-	baseline->skin = (short)entity->v.skin;
+	baseline->origin = entity->origin;
+	baseline->angles = entity->angles;
+	baseline->frame = entity->frame;
+	baseline->skin = (short)entity->skin;
 
 	// render information
-	baseline->rendermode = (byte)entity->v.rendermode;
-	baseline->renderamt = (byte)entity->v.renderamt;
-	baseline->rendercolor.r = (byte)entity->v.rendercolor.x;
-	baseline->rendercolor.g = (byte)entity->v.rendercolor.y;
-	baseline->rendercolor.b = (byte)entity->v.rendercolor.z;
-	baseline->renderfx = (byte)entity->v.renderfx;
+	baseline->rendermode = (byte)entity->rendermode;
+	baseline->renderamt = (byte)entity->renderamt;
+	baseline->rendercolor.r = (byte)entity->rendercolor.x;
+	baseline->rendercolor.g = (byte)entity->rendercolor.y;
+	baseline->rendercolor.b = (byte)entity->rendercolor.z;
+	baseline->renderfx = (byte)entity->renderfx;
 
 	if (0 != player)
 	{
@@ -1294,24 +1284,24 @@ void CreateBaseline(int player, int eindex, struct entity_state_s* baseline, str
 		baseline->friction = 1.0;
 		baseline->movetype = MOVETYPE_WALK;
 
-		baseline->scale = entity->v.scale;
+		baseline->scale = entity->scale;
 		baseline->solid = SOLID_SLIDEBOX;
 		baseline->framerate = 1.0;
 		baseline->gravity = 1.0;
 	}
 	else
 	{
-		baseline->mins = entity->v.mins;
-		baseline->maxs = entity->v.maxs;
+		baseline->mins = entity->mins;
+		baseline->maxs = entity->maxs;
 
 		baseline->colormap = 0;
-		baseline->modelindex = entity->v.modelindex;
-		baseline->movetype = entity->v.movetype;
+		baseline->modelindex = entity->modelindex;
+		baseline->movetype = entity->movetype;
 
-		baseline->scale = entity->v.scale;
-		baseline->solid = entity->v.solid;
-		baseline->framerate = entity->v.framerate;
-		baseline->gravity = entity->v.gravity;
+		baseline->scale = entity->scale;
+		baseline->solid = entity->solid;
+		baseline->framerate = entity->framerate;
+		baseline->gravity = entity->gravity;
 	}
 }
 
@@ -1340,12 +1330,12 @@ static entity_field_alias_t entity_field_alias[] =
 
 void Entity_FieldInit(struct delta_s* pFields)
 {
-	entity_field_alias[FIELD_ORIGIN0].field = DELTA_FINDFIELD(pFields, entity_field_alias[FIELD_ORIGIN0].name);
-	entity_field_alias[FIELD_ORIGIN1].field = DELTA_FINDFIELD(pFields, entity_field_alias[FIELD_ORIGIN1].name);
-	entity_field_alias[FIELD_ORIGIN2].field = DELTA_FINDFIELD(pFields, entity_field_alias[FIELD_ORIGIN2].name);
-	entity_field_alias[FIELD_ANGLES0].field = DELTA_FINDFIELD(pFields, entity_field_alias[FIELD_ANGLES0].name);
-	entity_field_alias[FIELD_ANGLES1].field = DELTA_FINDFIELD(pFields, entity_field_alias[FIELD_ANGLES1].name);
-	entity_field_alias[FIELD_ANGLES2].field = DELTA_FINDFIELD(pFields, entity_field_alias[FIELD_ANGLES2].name);
+	entity_field_alias[FIELD_ORIGIN0].field = engine::DeltaFindField(pFields, entity_field_alias[FIELD_ORIGIN0].name);
+	entity_field_alias[FIELD_ORIGIN1].field = engine::DeltaFindField(pFields, entity_field_alias[FIELD_ORIGIN1].name);
+	entity_field_alias[FIELD_ORIGIN2].field = engine::DeltaFindField(pFields, entity_field_alias[FIELD_ORIGIN2].name);
+	entity_field_alias[FIELD_ANGLES0].field = engine::DeltaFindField(pFields, entity_field_alias[FIELD_ANGLES0].name);
+	entity_field_alias[FIELD_ANGLES1].field = engine::DeltaFindField(pFields, entity_field_alias[FIELD_ANGLES1].name);
+	entity_field_alias[FIELD_ANGLES2].field = engine::DeltaFindField(pFields, entity_field_alias[FIELD_ANGLES2].name);
 }
 
 /*
@@ -1371,37 +1361,37 @@ void Entity_Encode(struct delta_s* pFields, const unsigned char* from, const uns
 	t = (entity_state_t*)to;
 
 	// Never send origin to local player, it's sent with more resolution in clientdata_t structure
-	const bool localplayer = (t->number - 1) == ENGINE_CURRENT_PLAYER();
+	const bool localplayer = (t->number - 1) == engine::GetCurrentPlayer();
 	if (localplayer)
 	{
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN0].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN1].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN2].field);
+		engine::DeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN0].field);
+		engine::DeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN1].field);
+		engine::DeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN2].field);
 	}
 
 	if ((t->impacttime != 0) && (t->starttime != 0))
 	{
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN0].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN1].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN2].field);
+		engine::DeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN0].field);
+		engine::DeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN1].field);
+		engine::DeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN2].field);
 
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ANGLES0].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ANGLES1].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ANGLES2].field);
+		engine::DeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ANGLES0].field);
+		engine::DeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ANGLES1].field);
+		engine::DeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ANGLES2].field);
 	}
 
 	if ((t->movetype == MOVETYPE_FOLLOW) &&
 		(t->aiment != 0))
 	{
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN0].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN1].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN2].field);
+		engine::DeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN0].field);
+		engine::DeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN1].field);
+		engine::DeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN2].field);
 	}
 	else if (t->aiment != f->aiment)
 	{
-		DELTA_SETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN0].field);
-		DELTA_SETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN1].field);
-		DELTA_SETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN2].field);
+		engine::DeltaSetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN0].field);
+		engine::DeltaSetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN1].field);
+		engine::DeltaSetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN2].field);
 	}
 }
 
@@ -1414,9 +1404,9 @@ static entity_field_alias_t player_field_alias[] =
 
 void Player_FieldInit(struct delta_s* pFields)
 {
-	player_field_alias[FIELD_ORIGIN0].field = DELTA_FINDFIELD(pFields, player_field_alias[FIELD_ORIGIN0].name);
-	player_field_alias[FIELD_ORIGIN1].field = DELTA_FINDFIELD(pFields, player_field_alias[FIELD_ORIGIN1].name);
-	player_field_alias[FIELD_ORIGIN2].field = DELTA_FINDFIELD(pFields, player_field_alias[FIELD_ORIGIN2].name);
+	player_field_alias[FIELD_ORIGIN0].field = engine::DeltaFindField(pFields, player_field_alias[FIELD_ORIGIN0].name);
+	player_field_alias[FIELD_ORIGIN1].field = engine::DeltaFindField(pFields, player_field_alias[FIELD_ORIGIN1].name);
+	player_field_alias[FIELD_ORIGIN2].field = engine::DeltaFindField(pFields, player_field_alias[FIELD_ORIGIN2].name);
 }
 
 /*
@@ -1441,26 +1431,26 @@ void Player_Encode(struct delta_s* pFields, const unsigned char* from, const uns
 	t = (entity_state_t*)to;
 
 	// Never send origin to local player, it's sent with more resolution in clientdata_t structure
-	const bool localplayer = (t->number - 1) == ENGINE_CURRENT_PLAYER();
+	const bool localplayer = (t->number - 1) == engine::GetCurrentPlayer();
 	if (localplayer)
 	{
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN0].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN1].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN2].field);
+		engine::DeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN0].field);
+		engine::DeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN1].field);
+		engine::DeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN2].field);
 	}
 
 	if ((t->movetype == MOVETYPE_FOLLOW) &&
 		(t->aiment != 0))
 	{
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN0].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN1].field);
-		DELTA_UNSETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN2].field);
+		engine::DeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN0].field);
+		engine::DeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN1].field);
+		engine::DeltaUnsetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN2].field);
 	}
 	else if (t->aiment != f->aiment)
 	{
-		DELTA_SETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN0].field);
-		DELTA_SETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN1].field);
-		DELTA_SETBYINDEX(pFields, entity_field_alias[FIELD_ORIGIN2].field);
+		engine::DeltaSetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN0].field);
+		engine::DeltaSetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN1].field);
+		engine::DeltaSetFieldByIndex(pFields, entity_field_alias[FIELD_ORIGIN2].field);
 	}
 }
 
@@ -1489,15 +1479,15 @@ entity_field_alias_t custom_entity_field_alias[] =
 
 void Custom_Entity_FieldInit(struct delta_s* pFields)
 {
-	custom_entity_field_alias[CUSTOMFIELD_ORIGIN0].field = DELTA_FINDFIELD(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN0].name);
-	custom_entity_field_alias[CUSTOMFIELD_ORIGIN1].field = DELTA_FINDFIELD(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN1].name);
-	custom_entity_field_alias[CUSTOMFIELD_ORIGIN2].field = DELTA_FINDFIELD(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN2].name);
-	custom_entity_field_alias[CUSTOMFIELD_ANGLES0].field = DELTA_FINDFIELD(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES0].name);
-	custom_entity_field_alias[CUSTOMFIELD_ANGLES1].field = DELTA_FINDFIELD(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES1].name);
-	custom_entity_field_alias[CUSTOMFIELD_ANGLES2].field = DELTA_FINDFIELD(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES2].name);
-	custom_entity_field_alias[CUSTOMFIELD_SKIN].field = DELTA_FINDFIELD(pFields, custom_entity_field_alias[CUSTOMFIELD_SKIN].name);
-	custom_entity_field_alias[CUSTOMFIELD_SEQUENCE].field = DELTA_FINDFIELD(pFields, custom_entity_field_alias[CUSTOMFIELD_SEQUENCE].name);
-	custom_entity_field_alias[CUSTOMFIELD_ANIMTIME].field = DELTA_FINDFIELD(pFields, custom_entity_field_alias[CUSTOMFIELD_ANIMTIME].name);
+	custom_entity_field_alias[CUSTOMFIELD_ORIGIN0].field = engine::DeltaFindField(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN0].name);
+	custom_entity_field_alias[CUSTOMFIELD_ORIGIN1].field = engine::DeltaFindField(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN1].name);
+	custom_entity_field_alias[CUSTOMFIELD_ORIGIN2].field = engine::DeltaFindField(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN2].name);
+	custom_entity_field_alias[CUSTOMFIELD_ANGLES0].field = engine::DeltaFindField(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES0].name);
+	custom_entity_field_alias[CUSTOMFIELD_ANGLES1].field = engine::DeltaFindField(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES1].name);
+	custom_entity_field_alias[CUSTOMFIELD_ANGLES2].field = engine::DeltaFindField(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES2].name);
+	custom_entity_field_alias[CUSTOMFIELD_SKIN].field = engine::DeltaFindField(pFields, custom_entity_field_alias[CUSTOMFIELD_SKIN].name);
+	custom_entity_field_alias[CUSTOMFIELD_SEQUENCE].field = engine::DeltaFindField(pFields, custom_entity_field_alias[CUSTOMFIELD_SEQUENCE].name);
+	custom_entity_field_alias[CUSTOMFIELD_ANIMTIME].field = engine::DeltaFindField(pFields, custom_entity_field_alias[CUSTOMFIELD_ANIMTIME].name);
 }
 
 /*
@@ -1527,29 +1517,29 @@ void Custom_Encode(struct delta_s* pFields, const unsigned char* from, const uns
 
 	if (beamType != BEAM_POINTS && beamType != BEAM_ENTPOINT)
 	{
-		DELTA_UNSETBYINDEX(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN0].field);
-		DELTA_UNSETBYINDEX(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN1].field);
-		DELTA_UNSETBYINDEX(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN2].field);
+		engine::DeltaUnsetFieldByIndex(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN0].field);
+		engine::DeltaUnsetFieldByIndex(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN1].field);
+		engine::DeltaUnsetFieldByIndex(pFields, custom_entity_field_alias[CUSTOMFIELD_ORIGIN2].field);
 	}
 
 	if (beamType != BEAM_POINTS)
 	{
-		DELTA_UNSETBYINDEX(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES0].field);
-		DELTA_UNSETBYINDEX(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES1].field);
-		DELTA_UNSETBYINDEX(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES2].field);
+		engine::DeltaUnsetFieldByIndex(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES0].field);
+		engine::DeltaUnsetFieldByIndex(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES1].field);
+		engine::DeltaUnsetFieldByIndex(pFields, custom_entity_field_alias[CUSTOMFIELD_ANGLES2].field);
 	}
 
 	if (beamType != BEAM_ENTS && beamType != BEAM_ENTPOINT)
 	{
-		DELTA_UNSETBYINDEX(pFields, custom_entity_field_alias[CUSTOMFIELD_SKIN].field);
-		DELTA_UNSETBYINDEX(pFields, custom_entity_field_alias[CUSTOMFIELD_SEQUENCE].field);
+		engine::DeltaUnsetFieldByIndex(pFields, custom_entity_field_alias[CUSTOMFIELD_SKIN].field);
+		engine::DeltaUnsetFieldByIndex(pFields, custom_entity_field_alias[CUSTOMFIELD_SEQUENCE].field);
 	}
 
 	// animtime is compared by rounding first
 	// see if we really shouldn't actually send it
 	if ((int)f->animtime == (int)t->animtime)
 	{
-		DELTA_UNSETBYINDEX(pFields, custom_entity_field_alias[CUSTOMFIELD_ANIMTIME].field);
+		engine::DeltaUnsetFieldByIndex(pFields, custom_entity_field_alias[CUSTOMFIELD_ANIMTIME].field);
 	}
 }
 
@@ -1562,16 +1552,16 @@ Allows game .dll to override network encoding of certain types of entities and t
 */
 void RegisterEncoders()
 {
-	DELTA_ADDENCODER("Entity_Encode", Entity_Encode);
-	DELTA_ADDENCODER("Custom_Encode", Custom_Encode);
-	DELTA_ADDENCODER("Player_Encode", Player_Encode);
+	engine::DeltaAddEncoder("Entity_Encode", Entity_Encode);
+	engine::DeltaAddEncoder("Custom_Encode", Custom_Encode);
+	engine::DeltaAddEncoder("Player_Encode", Player_Encode);
 }
 
-int GetWeaponData(struct edict_s* player, struct weapon_data_s* info)
+int GetWeaponData(Entity* player, struct weapon_data_s* info)
 {
 	memset(info, 0, WEAPON_TYPES * sizeof(weapon_data_t));
 
-	CBasePlayer* pl = dynamic_cast<CBasePlayer*>(CBasePlayer::Instance(player));
+	CBasePlayer* pl = player->Get<CBasePlayer>();
 
 	if (!pl)
 	{
@@ -1593,18 +1583,22 @@ Data sent to current client only
 engine sets cd to 0 before calling.
 =================
 */
-void UpdateClientData(const edict_t* ent, int sendweapons, struct clientdata_s* cd)
+void UpdateClientData(const Entity* ent, int sendweapons, struct clientdata_s* cd)
 {
-	if (ent == nullptr || ent->pvPrivateData == nullptr)
+	if (ent == nullptr)
 	{
 		return;
 	}
 
-	auto player =
-		dynamic_cast<CBasePlayer*>(CBasePlayer::Instance((edict_t*)ent));
+	auto player = const_cast<Entity*>(ent)->Get<CBasePlayer>();
 
-	cd->pushmsec = ent->v.pushmsec;
-	strcpy(cd->physinfo, g_engfuncs.pfnGetPhysicsInfoString(ent));
+	if (player == nullptr)
+	{
+		return;
+	}
+
+	cd->pushmsec = ent->pushmsec;
+	strcpy(cd->physinfo, engine::GetPhysicsInfoString(ent));
 
 	player->GetClientData(*cd, sendweapons != 0);
 }
@@ -1617,21 +1611,25 @@ We're about to run this usercmd for the specified player.  We can set up groupin
 This is the time to examine the usercmd for anything extra.  This call happens even if think does not.
 =================
 */
-void CmdStart(const edict_t* ent, const struct usercmd_s* cmd, unsigned int random_seed)
+void CmdStart(const Entity* ent, const struct usercmd_s* cmd, unsigned int random_seed)
 {
-	if (ent == nullptr || ent->pvPrivateData == nullptr)
+	if (ent == nullptr)
 	{
 		return;
 	}
 
-	auto player =
-		dynamic_cast<CBasePlayer*>(CBasePlayer::Instance((edict_t*)ent));
+	auto player = const_cast<Entity*>(ent)->Get<CBasePlayer>();
+
+	if (player == nullptr)
+	{
+		return;
+	}
 
 	player->CmdStart(*cmd, random_seed);
 
-	if (player->pev->groupinfo != 0)
+	if (player->v.groupinfo != 0)
 	{
-		util::SetGroupTrace(player->pev->groupinfo, util::GROUP_OP_AND);
+		util::SetGroupTrace(player->v.groupinfo, util::GROUP_OP_AND);
 	}
 }
 
@@ -1642,14 +1640,14 @@ CmdEnd
 Each cmdstart is exactly matched with a cmd end, clean up any group trace flags, etc. here
 =================
 */
-void CmdEnd(const edict_t* player)
+void CmdEnd(const Entity* player)
 {
-	entvars_t* pev = (entvars_t*)&player->v;
-	CBasePlayer* pl = dynamic_cast<CBasePlayer*>(CBasePlayer::Instance(pev));
-
-	if (!pl)
+	if (player == nullptr)
+	{
 		return;
-	if (pl->pev->groupinfo != 0)
+	}
+
+	if (player->groupinfo != 0)
 	{
 		util::UnsetGroupTrace();
 	}
@@ -1705,11 +1703,11 @@ void CreateInstancedBaselines()
 ================================
 InconsistentFile
 
-One of the ENGINE_FORCE_UNMODIFIED files failed the consistency check for the specified player
+One of the pfnForceUnmodified files failed the consistency check for the specified player
  Return 0 to allow the client to continue, 1 to force immediate disconnection ( with an optional disconnect message of up to 256 characters )
 ================================
 */
-int InconsistentFile(const edict_t* player, const char* filename, char* disconnect_message)
+int InconsistentFile(const Entity* player, const char* filename, char* disconnect_message)
 {
 	// Server doesn't care?
 	if (mp_consistency->value != 1.0F)

@@ -64,7 +64,7 @@ std::uint32_t joy_oldbuttonstate, joy_oldpovstate;
 int joy_id;
 std::uint32_t joy_numbuttons;
 
-SDL_GameController* s_pJoystick = NULL;
+SDL_GameController* s_pJoystick = nullptr;
 
 // none of these cvars are saved over a session
 // this means that advanced controller configuration needs to be executed
@@ -102,7 +102,7 @@ static bool joy_avail, joy_advancedinit, joy_haspov;
 static void IN_StartupJoystick()
 {
 	// abort startup if user requests no joystick
-	if (0 != gEngfuncs.CheckParm("-nojoy", NULL))
+	if (0 != client::CheckParm("-nojoy", nullptr))
 		return;
 
 	// assume no joystick
@@ -127,7 +127,7 @@ static void IN_StartupJoystick()
 
 					// mark the joystick as available and advanced initialization not completed
 					// this is needed as cvars are not available during initialization
-					gEngfuncs.Con_Printf("joystick found\n\n", SDL_GameControllerName(s_pJoystick));
+					client::Con_Printf("joystick found\n\n", SDL_GameControllerName(s_pJoystick));
 					joy_avail = true;
 					joy_advancedinit = false;
 					break;
@@ -137,7 +137,7 @@ static void IN_StartupJoystick()
 	}
 	else
 	{
-		gEngfuncs.Con_DPrintf("joystick not found -- driver not present\n\n");
+		client::Con_DPrintf("joystick not found -- driver not present\n\n");
 	}
 }
 
@@ -186,7 +186,7 @@ static void Joy_AdvancedUpdate_f()
 		if (strcmp(joy_name->string, "joystick") != 0)
 		{
 			// notify user of advanced controller
-			gEngfuncs.Con_Printf("\n%s configured\n\n", joy_name->string);
+			client::Con_Printf("\n%s configured\n\n", joy_name->string);
 		}
 
 		// advanced initialization here
@@ -245,13 +245,13 @@ void Joy_Commands()
 		if ((buttonstate & (1 << i)) != 0 && (joy_oldbuttonstate & (1 << i)) == 0)
 		{
 			key_index = (i < 4) ? K_JOY1 : K_AUX1;
-			gEngfuncs.Key_Event(key_index + i, 1);
+			client::Key_Event(key_index + i, 1);
 		}
 
 		if ((buttonstate & (1 << i)) == 0 && (joy_oldbuttonstate & (1 << i)) != 0)
 		{
 			key_index = (i < 4) ? K_JOY1 : K_AUX1;
-			gEngfuncs.Key_Event(key_index + i, 0);
+			client::Key_Event(key_index + i, 0);
 		}
 	}
 	joy_oldbuttonstate = buttonstate;
@@ -267,12 +267,12 @@ void Joy_Commands()
 		{
 			if ((povstate & (1 << i)) != 0 && (joy_oldpovstate & (1 << i)) == 0)
 			{
-				gEngfuncs.Key_Event(K_AUX29 + i, 1);
+				client::Key_Event(K_AUX29 + i, 1);
 			}
 
 			if ((povstate & (1 << i)) == 0 && (joy_oldpovstate & (1 << i)) != 0)
 			{
-				gEngfuncs.Key_Event(K_AUX29 + i, 0);
+				client::Key_Event(K_AUX29 + i, 0);
 			}
 		}
 		joy_oldpovstate = povstate;
@@ -287,7 +287,7 @@ void Joy_Move(float frametime, usercmd_t* cmd)
 	int i;
 	Vector viewangles;
 
-	gEngfuncs.GetViewAngles((float*)viewangles);
+	client::GetViewAngles(viewangles);
 
 	// complete initialization if first time in
 	// this is needed as cvars are not available at initialization time
@@ -389,32 +389,32 @@ void Joy_Move(float frametime, usercmd_t* cmd)
 
 	viewangles.x = std::clamp(viewangles.x, -cl_pitchup->value, cl_pitchdown->value);
 
-	gEngfuncs.SetViewAngles((float*)viewangles);
+	client::SetViewAngles(viewangles);
 }
 
 
 void Joy_Init()
 {
-	in_joystick = gEngfuncs.pfnRegisterVariable("joystick", "0", FCVAR_ARCHIVE);
-	joy_name = gEngfuncs.pfnRegisterVariable("joyname", "joystick", 0);
-	joy_advanced = gEngfuncs.pfnRegisterVariable("joyadvanced", "0", 0);
-	joy_advaxisx = gEngfuncs.pfnRegisterVariable("joyadvaxisx", "0", 0);
-	joy_advaxisy = gEngfuncs.pfnRegisterVariable("joyadvaxisy", "0", 0);
-	joy_advaxisz = gEngfuncs.pfnRegisterVariable("joyadvaxisz", "0", 0);
-	joy_advaxisr = gEngfuncs.pfnRegisterVariable("joyadvaxisr", "0", 0);
-	joy_advaxisu = gEngfuncs.pfnRegisterVariable("joyadvaxisu", "0", 0);
-	joy_advaxisv = gEngfuncs.pfnRegisterVariable("joyadvaxisv", "0", 0);
-	joy_forwardthreshold = gEngfuncs.pfnRegisterVariable("joyforwardthreshold", "0.15", 0);
-	joy_sidethreshold = gEngfuncs.pfnRegisterVariable("joysidethreshold", "0.15", 0);
-	joy_pitchthreshold = gEngfuncs.pfnRegisterVariable("joypitchthreshold", "0.15", 0);
-	joy_yawthreshold = gEngfuncs.pfnRegisterVariable("joyyawthreshold", "0.15", 0);
-	joy_forwardsensitivity = gEngfuncs.pfnRegisterVariable("joyforwardsensitivity", "-1.0", 0);
-	joy_sidesensitivity = gEngfuncs.pfnRegisterVariable("joysidesensitivity", "-1.0", 0);
-	joy_pitchsensitivity = gEngfuncs.pfnRegisterVariable("joypitchsensitivity", "1.0", 0);
-	joy_yawsensitivity = gEngfuncs.pfnRegisterVariable("joyyawsensitivity", "-1.0", 0);
-	joy_wwhack1 = gEngfuncs.pfnRegisterVariable("joywwhack1", "0.0", 0);
-	joy_wwhack2 = gEngfuncs.pfnRegisterVariable("joywwhack2", "0.0", 0);
+	in_joystick = client::RegisterVariable("joystick", "0", FCVAR_ARCHIVE);
+	joy_name = client::RegisterVariable("joyname", "joystick", 0);
+	joy_advanced = client::RegisterVariable("joyadvanced", "0", 0);
+	joy_advaxisx = client::RegisterVariable("joyadvaxisx", "0", 0);
+	joy_advaxisy = client::RegisterVariable("joyadvaxisy", "0", 0);
+	joy_advaxisz = client::RegisterVariable("joyadvaxisz", "0", 0);
+	joy_advaxisr = client::RegisterVariable("joyadvaxisr", "0", 0);
+	joy_advaxisu = client::RegisterVariable("joyadvaxisu", "0", 0);
+	joy_advaxisv = client::RegisterVariable("joyadvaxisv", "0", 0);
+	joy_forwardthreshold = client::RegisterVariable("joyforwardthreshold", "0.15", 0);
+	joy_sidethreshold = client::RegisterVariable("joysidethreshold", "0.15", 0);
+	joy_pitchthreshold = client::RegisterVariable("joypitchthreshold", "0.15", 0);
+	joy_yawthreshold = client::RegisterVariable("joyyawthreshold", "0.15", 0);
+	joy_forwardsensitivity = client::RegisterVariable("joyforwardsensitivity", "-1.0", 0);
+	joy_sidesensitivity = client::RegisterVariable("joysidesensitivity", "-1.0", 0);
+	joy_pitchsensitivity = client::RegisterVariable("joypitchsensitivity", "1.0", 0);
+	joy_yawsensitivity = client::RegisterVariable("joyyawsensitivity", "-1.0", 0);
+	joy_wwhack1 = client::RegisterVariable("joywwhack1", "0.0", 0);
+	joy_wwhack2 = client::RegisterVariable("joywwhack2", "0.0", 0);
 
-	gEngfuncs.pfnAddCommand("joyadvancedupdate", Joy_AdvancedUpdate_f);
+	client::AddCommand("joyadvancedupdate", Joy_AdvancedUpdate_f);
 }
 

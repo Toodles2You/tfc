@@ -16,7 +16,7 @@
 
 LINK_ENTITY_TO_CLASS(item_tfgoal, CTFGoalItem);
 
-CTFGoalItem::CTFGoalItem() : CTFGoal()
+CTFGoalItem::CTFGoalItem(Entity* containingEntity) : CTFGoal(containingEntity)
 {
 }
 
@@ -27,13 +27,13 @@ bool CTFGoalItem::Spawn()
         return false;
     }
 
-    pev->classname = MAKE_STRING("item_tfgoal");
+    v.classname = MAKE_STRING("item_tfgoal");
 
-    pev->solid = IsGoalActivatedBy(TFGI_SOLID) ? SOLID_BBOX : SOLID_TRIGGER;
+    v.solid = IsGoalActivatedBy(TFGI_SOLID) ? SOLID_BBOX : SOLID_TRIGGER;
 
-    if (FStringNull(pev->netname))
+    if (FStringNull(v.netname))
     {
-        pev->netname = MAKE_STRING("goalitem");
+        v.netname = MAKE_STRING("goalitem");
     }
 
     if (pausetime <= 0.0F)
@@ -58,26 +58,26 @@ void CTFGoalItem::ReturnItem()
 {
     SetGoalState(TFGS_INACTIVE);
 
-    pev->solid = IsGoalActivatedBy(TFGI_SOLID) ? SOLID_BBOX : SOLID_TRIGGER;
+    v.solid = IsGoalActivatedBy(TFGI_SOLID) ? SOLID_BBOX : SOLID_TRIGGER;
 
-    pev->movetype = MOVETYPE_NONE;
+    v.movetype = MOVETYPE_NONE;
     SetVisible(true);
 
     SetTouch(&CTFGoalItem::ItemTouch);
 
-    if (pev->origin == pev->oldorigin)
+    if (v.origin == v.oldorigin)
     {
         return;
     }
 
-    pev->angles = pev->punchangle;
-    SetOrigin(pev->oldorigin);
+    v.angles = v.punchangle;
+    SetOrigin(v.oldorigin);
 
     EmitSound("items/itembk2.wav", CHAN_WEAPON);
 
-    if (pev->impulse != 0)
+    if (v.impulse != 0)
     {
-        util::SetGoalState(pev->impulse, TFGS_ACTIVE, CWorld::World, &tfv);
+        util::SetGoalState(v.impulse, TFGS_ACTIVE, CWorld::World, &tfv);
     }
 
     if (IsGoalActivatedBy(TFGI_ITEMGLOWS))
@@ -85,7 +85,7 @@ void CTFGoalItem::ReturnItem()
         SetGlow(this, true);
     }
 
-    if (pev->weapons != GI_RET_GOAL)
+    if (v.weapons != GI_RET_GOAL)
     {
         CBaseEntity* effect_player;
         for (int i = 0; i < gpGlobals->maxClients; i++)
@@ -99,8 +99,8 @@ void CTFGoalItem::ReturnItem()
 
             if (effect_player->TeamNumber() == tfv.GetOwningTeam())
             {
-                if (!FStringNull(pev->noise3))
-                    util::ShowMessage(STRING(pev->noise3), effect_player);
+                if (!FStringNull(v.noise3))
+                    util::ShowMessage(STRING(v.noise3), effect_player);
             }
             else
             {
@@ -119,7 +119,7 @@ void CTFGoalItem::RemoveItem()
     }
     if (IsGoalActivatedBy(TFGI_RETURN_REMOVE))
     {
-        pev->weapons = GI_RET_TIME;
+        v.weapons = GI_RET_TIME;
         StartReturnItem(0.1F);
         return;
     }
@@ -130,7 +130,7 @@ void CTFGoalItem::SetDropTouch()
 {
     SetTouch(&CTFGoalItem::ItemTouch);
     SetThink(&CTFGoalItem::DropThink);
-    pev->nextthink = gpGlobals->time + 4.25F;
+    v.nextthink = gpGlobals->time + 4.25F;
 }
 
 /*
@@ -139,11 +139,11 @@ but, I honestly don't think it's that important.
 */
 void CTFGoalItem::DropThink()
 {
-    pev->movetype = MOVETYPE_TOSS;
+    v.movetype = MOVETYPE_TOSS;
 
     float return_time = pausetime;
 
-    int contents = g_engfuncs.pfnPointContents(pev->origin);
+    int contents = engine::PointContents(v.origin);
     switch (contents)
     {
         case CONTENTS_SLIME:
@@ -159,13 +159,13 @@ void CTFGoalItem::DropThink()
     }
 
     SetThink(&CTFGoalItem::RemoveItem);
-    pev->nextthink = gpGlobals->time + return_time;
+    v.nextthink = gpGlobals->time + return_time;
 }
 
 void CTFGoalItem::StartGoal()
 {
     SetThink(&CTFGoalItem::PlaceItem);
-    pev->nextthink = gpGlobals->time + 0.2F;
+    v.nextthink = gpGlobals->time + 0.2F;
     if (InGoalState(TFGS_REMOVED))
     {
         RemoveGoal();
@@ -174,14 +174,14 @@ void CTFGoalItem::StartGoal()
 
 void CTFGoalItem::GiveToPlayer(CBaseEntity* player, CTFGoal* activating_goal)
 {
-    pev->aiment = pev->owner = player->edict();
-    pev->movetype = MOVETYPE_FOLLOW;
-    pev->solid = SOLID_NOT;
-    SetTouch(nullptr);
+    v.aiment = v.owner = &player->v;
+    v.movetype = MOVETYPE_FOLLOW;
+    v.solid = SOLID_NOT;
+    ClearTouch();
 
-    pev->sequence = 2;
-    pev->frame = 0;
-    pev->animtime = gpGlobals->time;
+    v.sequence = 2;
+    v.frame = 0;
+    v.animtime = gpGlobals->time;
 
     if (IsGoalActivatedBy(TFGI_GLOW))
     {
@@ -229,14 +229,14 @@ void CTFGoalItem::GiveToPlayer(CBaseEntity* player, CTFGoal* activating_goal)
 
 void CTFGoalItem::RemoveFromPlayer(CBaseEntity* activating_player, int method)
 {
-    pev->owner = pev->aiment = nullptr;
-    pev->movetype = MOVETYPE_NONE;
-    pev->solid = SOLID_NOT;
-    pev->angles.x = pev->angles.z = 0.0F;
+    v.owner = v.aiment = nullptr;
+    v.movetype = MOVETYPE_NONE;
+    v.solid = SOLID_NOT;
+    v.angles.x = v.angles.z = 0.0F;
 
-    pev->sequence = 1;
-    pev->frame = 0;
-    pev->animtime = gpGlobals->time;
+    v.sequence = 1;
+    v.frame = 0;
+    v.animtime = gpGlobals->time;
 
     CTFGoalItem* goal = nullptr;
     bool remove_glow = IsGoalActivatedBy(TFGI_GLOW);
@@ -251,7 +251,7 @@ void CTFGoalItem::RemoveFromPlayer(CBaseEntity* activating_player, int method)
         {
             continue;
         }
-        if (goal->pev->owner != activating_player->edict())
+        if (goal->v.owner != &activating_player->v)
         {
             continue;
         }
@@ -345,7 +345,7 @@ void CTFGoalItem::RemoveFromPlayer(CBaseEntity* activating_player, int method)
 
         if (IsGoalActivatedBy(TFGI_RETURN_DROP))
         {
-            pev->weapons = (method == 0) ? GI_RET_DROP_DEAD : GI_RET_DROP_LIVING;
+            v.weapons = (method == 0) ? GI_RET_DROP_DEAD : GI_RET_DROP_LIVING;
             StartReturnItem();
         }
         else if (IsGoalActivatedBy(TFGI_DROP))
@@ -358,8 +358,8 @@ void CTFGoalItem::RemoveFromPlayer(CBaseEntity* activating_player, int method)
             SetGoalState(TFGS_REMOVED);
             return;
         }
-        pev->movetype = MOVETYPE_TOSS;
-        pev->flags &= ~FL_ONGROUND;
+        v.movetype = MOVETYPE_TOSS;
+        v.flags &= ~FL_ONGROUND;
         SetSize(goal_min, goal_max);
         return;
     }
@@ -367,7 +367,7 @@ void CTFGoalItem::RemoveFromPlayer(CBaseEntity* activating_player, int method)
     {
         if (IsGoalActivatedBy(TFGI_RETURN_GOAL))
         {
-            pev->weapons = GI_RET_GOAL;
+            v.weapons = GI_RET_GOAL;
             StartReturnItem();
             return;
         }
@@ -382,13 +382,13 @@ void CTFGoalItem::RemoveFromPlayer(CBaseEntity* activating_player, int method)
 
 void CTFGoalItem::DropItem(CBaseEntity* activating_player, bool alive)
 {
-    pev->movetype = MOVETYPE_TOSS;
-    SetOrigin(activating_player->pev->origin);
+    v.movetype = MOVETYPE_TOSS;
+    SetOrigin(activating_player->v.origin);
 
-    pev->velocity =
+    v.velocity =
         Vector(
-            g_engfuncs.pfnRandomFloat(-50.0F, 50.0F),
-            g_engfuncs.pfnRandomFloat(-50.0F, 50.0F),
+            engine::RandomFloat(-50.0F, 50.0F),
+            engine::RandomFloat(-50.0F, 50.0F),
             400.0F);
 
     if (IsGoalActivatedBy(TFGI_ITEMGLOWS))
@@ -398,22 +398,22 @@ void CTFGoalItem::DropItem(CBaseEntity* activating_player, bool alive)
 
     SetGoalState(TFGS_INACTIVE);
 
-    pev->solid = IsGoalActivatedBy(TFGI_SOLID) ? SOLID_BBOX : SOLID_TRIGGER;
+    v.solid = IsGoalActivatedBy(TFGI_SOLID) ? SOLID_BBOX : SOLID_TRIGGER;
 
     if (alive)
     {
-        util::MakeVectors(activating_player->pev->v_angle);
-        pev->velocity = gpGlobals->v_forward * 400.0F;
-        pev->velocity.z = 200.0F;
-        SetTouch(nullptr);
+        util::MakeVectors(activating_player->v.v_angle);
+        v.velocity = gpGlobals->v_forward * 400.0F;
+        v.velocity.z = 200.0F;
+        ClearTouch();
         SetThink(&CTFGoalItem::SetDropTouch);
-        pev->nextthink = gpGlobals->time + 0.75F;
+        v.nextthink = gpGlobals->time + 0.75F;
     }
     else
     {
         SetTouch(&CTFGoalItem::ItemTouch);
         SetThink(&CTFGoalItem::DropThink);
-        pev->nextthink = gpGlobals->time + 5.0F;
+        v.nextthink = gpGlobals->time + 5.0F;
     }
 }
 
@@ -434,7 +434,7 @@ void CTFGoalItem::ItemTouch(CBaseEntity* other)
         return;
     }
 #endif
-    if (other->edict() == pev->owner)
+    if (&other->v == v.owner)
     {
         return;
     }
@@ -462,27 +462,27 @@ void CTFGoalItem::ItemTouch(CBaseEntity* other)
 
 void CTFGoalItem::StartReturnItem(float delay)
 {
-    SetTouch(nullptr);
+    ClearTouch();
     SetThink(&CTFGoalItem::ReturnItem);
-    pev->nextthink = gpGlobals->time + delay;
-    pev->owner = pev->aiment = nullptr;
-    pev->movetype = MOVETYPE_NONE;
-    pev->solid = SOLID_NOT;
+    v.nextthink = gpGlobals->time + delay;
+    v.owner = v.aiment = nullptr;
+    v.movetype = MOVETYPE_NONE;
+    v.solid = SOLID_NOT;
     SetVisible(false);
-    pev->effects |= EF_NODRAW;
+    v.effects |= EF_NODRAW;
 }
 
 void CTFGoalItem::DoItemGroupWork(CBaseEntity* player)
 {
     if (distance)
     {
-        if (pev->pain_finished == 0)
+        if (v.pain_finished == 0)
         {
-            ALERT(at_console, "Goal item %i has a distance specified but, no pain_finished\n");
+            engine::AlertMessage(at_console, "Goal item %i has a distance specified but, no pain_finished\n");
         }
         else if (util::GroupInState(distance, TFGS_ACTIVE, true))
         {
-            CTFGoal* goal = util::FindGoal(pev->pain_finished);
+            CTFGoal* goal = util::FindGoal(v.pain_finished);
 
             if (goal != nullptr)
             {
@@ -491,20 +491,20 @@ void CTFGoalItem::DoItemGroupWork(CBaseEntity* player)
         }
     }
 
-    if (pev->speed)
+    if (v.speed)
     {
         if (attack_finished == 0)
         {
-            ALERT(at_console, "Goal item %i has a speed specified but, no attack_finished\n");
+            engine::AlertMessage(at_console, "Goal item %i has a speed specified but, no attack_finished\n");
         }
         else
         {
             CTFGoal* goal = nullptr;
             bool all_carried = true;
-            edict_t* carrier = nullptr;
+            Entity* carrier = nullptr;
             while ((goal = (CTFGoal*)util::FindEntityByClassname(goal, "item_tfgoal")) && all_carried)
             {
-                if (goal->GetGroup() != pev->speed)
+                if (goal->GetGroup() != v.speed)
                 {
                     continue;
                 }
@@ -517,9 +517,9 @@ void CTFGoalItem::DoItemGroupWork(CBaseEntity* player)
                 {
                     if (!carrier)
                     {
-                        carrier = goal->pev->owner;
+                        carrier = goal->v.owner;
                     }
-                    else if (carrier != goal->pev->owner)
+                    else if (carrier != goal->v.owner)
                     {
                         all_carried = false;
                     }
@@ -543,43 +543,43 @@ void CTFGoalItem::SetGlow(CBaseEntity* entity, bool active)
 {
     if (!active)
     {
-        entity->pev->renderfx = kRenderFxNone;
-        entity->pev->renderamt = 0;
-        entity->pev->rendercolor.x = 0;
-        entity->pev->rendercolor.y = 0;
-        entity->pev->rendercolor.z = 0;
+        entity->v.renderfx = kRenderFxNone;
+        entity->v.renderamt = 0;
+        entity->v.rendercolor.x = 0;
+        entity->v.rendercolor.y = 0;
+        entity->v.rendercolor.z = 0;
         return;
     }
-    // entity->pev->effects |= EF_LIGHT;
-    entity->pev->renderfx = kRenderFxGlowShell;
-    entity->pev->renderamt = 0;
+    // entity->v.effects |= EF_LIGHT;
+    entity->v.renderfx = kRenderFxGlowShell;
+    entity->v.renderamt = 0;
     switch (tfv.GetOwningTeam())
     {
     case TEAM_BLUE:
-        entity->pev->rendercolor.x = 0;
-        entity->pev->rendercolor.y = 0;
-        entity->pev->rendercolor.z = 255;
+        entity->v.rendercolor.x = 0;
+        entity->v.rendercolor.y = 0;
+        entity->v.rendercolor.z = 255;
         break;
     case TEAM_RED:
-        entity->pev->rendercolor.x = 255;
-        entity->pev->rendercolor.y = 0;
-        entity->pev->rendercolor.z = 0;
+        entity->v.rendercolor.x = 255;
+        entity->v.rendercolor.y = 0;
+        entity->v.rendercolor.z = 0;
         break;
     case TEAM_YELLOW:
-        entity->pev->rendercolor.x = 255;
-        entity->pev->rendercolor.y = 255;
-        entity->pev->rendercolor.z = 0;
+        entity->v.rendercolor.x = 255;
+        entity->v.rendercolor.y = 255;
+        entity->v.rendercolor.z = 0;
         break;
     case TEAM_GREEN:
-        entity->pev->rendercolor.x = 0;
-        entity->pev->rendercolor.y = 255;
-        entity->pev->rendercolor.z = 0;
+        entity->v.rendercolor.x = 0;
+        entity->v.rendercolor.y = 255;
+        entity->v.rendercolor.z = 0;
         break;
     default:
     case TEAM_UNASSIGNED:
-        entity->pev->rendercolor.x = 255;
-        entity->pev->rendercolor.y = 255;
-        entity->pev->rendercolor.z = 255;
+        entity->v.rendercolor.x = 255;
+        entity->v.rendercolor.y = 255;
+        entity->v.rendercolor.z = 255;
         break;
     }
 }

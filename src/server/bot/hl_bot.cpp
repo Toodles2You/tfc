@@ -22,7 +22,7 @@
 #include "hl_bot.h"
 
 
-CHLBot::CHLBot()
+CHLBot::CHLBot(Entity* containingEntity) : CBot(containingEntity)
 {
     m_pEnemy = nullptr;
 }
@@ -35,16 +35,16 @@ bool CHLBot::Initialize(const BotProfile* profile)
         return false;
     }
     auto model = TheBotProfiles->GetCustomSkinModelname(profile->GetSkin());
-    auto clientIndex = entindex();
+    auto clientIndex = v.GetIndex();
     if (model)
     {
-        g_engfuncs.pfnSetClientKeyValue(clientIndex, g_engfuncs.pfnGetInfoKeyBuffer(edict()), "model", model);
+        engine::SetClientKeyValue(clientIndex, engine::GetInfoKeyBuffer(&v), "model", model);
     }
-    auto color = g_engfuncs.pfnRandomLong(0, 255);
+    auto color = engine::RandomLong(0, 255);
     auto topColor = util::dtos1(color);
     auto bottomColor = util::dtos2((color + 32) % 256);
-    g_engfuncs.pfnSetClientKeyValue(clientIndex, g_engfuncs.pfnGetInfoKeyBuffer(edict()), "topcolor", topColor);
-    g_engfuncs.pfnSetClientKeyValue(clientIndex, g_engfuncs.pfnGetInfoKeyBuffer(edict()), "bottomcolor", bottomColor);
+    engine::SetClientKeyValue(clientIndex, engine::GetInfoKeyBuffer(&v), "topcolor", topColor);
+    engine::SetClientKeyValue(clientIndex, engine::GetInfoKeyBuffer(&v), "bottomcolor", bottomColor);
     return true;
 }
 
@@ -63,8 +63,8 @@ void CHLBot::Upkeep()
     }
     auto start = GetGunPosition();
     auto end = m_pEnemy->BodyTarget();
-    pev->v_angle = util::VecToAngles(end - start);
-    pev->v_angle.x = -pev->v_angle.x;
+    v.v_angle = util::VecToAngles(end - start);
+    v.v_angle.x = -v.v_angle.x;
 }
 
 
@@ -75,7 +75,7 @@ void CHLBot::Update()
         g_pGameRules->ChangePlayerTeam(this, g_pGameRules->GetDefaultPlayerTeam(this), false, false, true);
         if (g_pGameRules->GetGameMode() >= kGamemodeTeamFortress)
         {
-            dynamic_cast<CTeamFortress*>(g_pGameRules)->ChangePlayerClass(this, g_engfuncs.pfnRandomLong(PC_SCOUT, PC_MEDIC));
+            dynamic_cast<CTeamFortress*>(g_pGameRules)->ChangePlayerClass(this, engine::RandomLong(PC_SCOUT, PC_MEDIC));
         }
         return;
     }
@@ -106,7 +106,7 @@ bool CHLBot::IsVisible(const Vector* pos, bool testFOV = false)
 }
 
 
-bool CHLBot::IsVisible(CBasePlayer* player, bool testFOV = false, unsigned char* visParts = NULL)
+bool CHLBot::IsVisible(CBasePlayer* player, bool testFOV = false, unsigned char* visParts = nullptr)
 {
     if (!player->IsPlayer() || !player->IsAlive())
     {
@@ -116,7 +116,7 @@ bool CHLBot::IsVisible(CBasePlayer* player, bool testFOV = false, unsigned char*
     auto start = GetGunPosition();
     auto end = player->BodyTarget();
     util::TraceLine(start, end, util::ignore_monsters, this, &tr);
-    if (tr.flFraction != 1.0f && tr.pHit != player->edict())
+    if (tr.flFraction != 1.0f && tr.pHit != &player->v)
     {
         return false;
     }

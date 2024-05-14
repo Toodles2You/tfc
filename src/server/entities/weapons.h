@@ -140,6 +140,8 @@ constexpr const char* g_szWeaponNames[WEAPON_TYPES] =
 class CBasePlayerWeapon : public CBaseAnimating
 {
 public:
+	CBasePlayerWeapon(Entity* containingEntity) : CBaseAnimating(containingEntity) {}
+
 	DECLARE_SAVERESTORE()
 
 	void SetObjectCollisionBox() override;
@@ -228,6 +230,8 @@ inline unsigned short g_usConcBlast;
 class CTFWeapon : public CBasePlayerWeapon
 {
 public:
+	CTFWeapon(Entity* containingEntity) : CBasePlayerWeapon(containingEntity) {}
+
 	void Precache() override;
 
 	void Deploy() override;
@@ -253,6 +257,8 @@ protected:
 class CTFMelee : public CTFWeapon
 {
 public:
+	CTFMelee(Entity* containingEntity) : CTFWeapon(containingEntity) {}
+
 	enum
 	{
 		kResultMiss = 0,
@@ -276,6 +282,8 @@ protected:
 class CMedikit : public CTFMelee
 {
 public:
+	CMedikit(Entity* containingEntity) : CTFMelee(containingEntity) {}
+
 	int GetID() const override { return WEAPON_MEDIKIT; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 
@@ -288,6 +296,8 @@ protected:
 class CAxe : public CTFMelee
 {
 public:
+	CAxe(Entity* containingEntity) : CTFMelee(containingEntity) {}
+
 	int GetID() const override { return WEAPON_AXE; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 };
@@ -295,6 +305,8 @@ public:
 class CSniperRifle : public CTFWeapon
 {
 public:
+	CSniperRifle(Entity* containingEntity) : CTFWeapon(containingEntity) {}
+
 	int GetID() const override { return WEAPON_SNIPER_RIFLE; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 
@@ -329,6 +341,8 @@ protected:
 class CAutoRifle : public CTFWeapon
 {
 public:
+	CAutoRifle(Entity* containingEntity) : CTFWeapon(containingEntity) {}
+
 	int GetID() const override { return WEAPON_AUTO_RIFLE; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 };
@@ -336,6 +350,8 @@ public:
 class CShotgun : public CTFWeapon
 {
 public:
+	CShotgun(Entity* containingEntity) : CTFWeapon(containingEntity) {}
+
 	int GetID() const override { return WEAPON_TF_SHOTGUN; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 };
@@ -343,6 +359,8 @@ public:
 class CSuperShotgun : public CTFWeapon
 {
 public:
+	CSuperShotgun(Entity* containingEntity) : CTFWeapon(containingEntity) {}
+
 	int GetID() const override { return WEAPON_SUPER_SHOTGUN; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 };
@@ -350,6 +368,8 @@ public:
 class CNailgun : public CTFWeapon
 {
 public:
+	CNailgun(Entity* containingEntity) : CTFWeapon(containingEntity) {}
+
 	int GetID() const override { return WEAPON_NAILGUN; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 };
@@ -357,6 +377,8 @@ public:
 class CSuperNailgun : public CTFWeapon
 {
 public:
+	CSuperNailgun(Entity* containingEntity) : CTFWeapon(containingEntity) {}
+
 	int GetID() const override { return WEAPON_SUPER_NAILGUN; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 };
@@ -364,6 +386,8 @@ public:
 class CGrenadeLauncher : public CTFWeapon
 {
 public:
+	CGrenadeLauncher(Entity* containingEntity) : CTFWeapon(containingEntity) {}
+
 	int GetID() const override { return WEAPON_GRENADE_LAUNCHER; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 };
@@ -371,6 +395,8 @@ public:
 class CRocketLauncher : public CTFWeapon
 {
 public:
+	CRocketLauncher(Entity* containingEntity) : CTFWeapon(containingEntity) {}
+
 	int GetID() const override { return WEAPON_ROCKET_LAUNCHER; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 };
@@ -378,6 +404,8 @@ public:
 class CDetpack : public CTFWeapon
 {
 public:
+	CDetpack(Entity* containingEntity) : CTFWeapon(containingEntity) {}
+
 	int ObjectCaps() override
 	{
 		if (m_pPlayer != nullptr)
@@ -410,6 +438,8 @@ public:
 class CPipeBombLauncher : public CTFWeapon
 {
 public:
+	CPipeBombLauncher(Entity* containingEntity) : CTFWeapon(containingEntity) {}
+
 	int GetID() const override { return WEAPON_PIPEBOMB_LAUNCHER; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 
@@ -433,6 +463,8 @@ private:
 class CGrenade : public CBaseAnimating
 {
 public:
+	CGrenade(Entity* containingEntity) : CBaseAnimating(containingEntity) {}
+
 	bool Spawn() override;
 
 	int ObjectCaps() override { return CBaseAnimating::ObjectCaps() | FCAP_DONT_SAVE; }
@@ -459,6 +491,8 @@ public:
 class CPrimeGrenade : public CGrenade
 {
 public:
+	CPrimeGrenade(Entity* containingEntity) : CGrenade(containingEntity) {}
+
 	bool Spawn() override;
 	void EXPORT PrimedThink();
 
@@ -484,6 +518,8 @@ protected:
 class CCaltropCanister : public CPrimeGrenade
 {
 public:
+	CCaltropCanister(Entity* containingEntity) : CPrimeGrenade(containingEntity) {}
+
 	bool Spawn() override;
 
 	const char* GetModelName() override { return "models/caltrop.mdl"; }
@@ -501,6 +537,8 @@ private:
 class CCaltrop : public CPrimeGrenade
 {
 public:
+	CCaltrop(Entity* containingEntity) : CPrimeGrenade(containingEntity) {}
+
 	bool Spawn() override;
 	void EXPORT CaltropThink();
 	void EXPORT CaltropTouch(CBaseEntity* other);
@@ -516,6 +554,8 @@ public:
 class CConcussionGrenade : public CPrimeGrenade
 {
 public:
+	CConcussionGrenade(Entity* containingEntity) : CPrimeGrenade(containingEntity) {}
+
 	void Explode(TraceResult* pTrace, int bitsDamageType) override;
 
 	const char* GetModelName() override { return "models/conc_grenade.mdl"; }
@@ -527,6 +567,8 @@ public:
 class CFlare : public CPrimeGrenade
 {
 public:
+	CFlare(Entity* containingEntity) : CPrimeGrenade(containingEntity) {}
+
 	bool Spawn() override;
 
 	void EXPORT StickyTouch(CBaseEntity* pOther);
@@ -544,6 +586,8 @@ protected:
 class CNailGrenade : public CPrimeGrenade
 {
 public:
+	CNailGrenade(Entity* containingEntity) : CPrimeGrenade(containingEntity) {}
+
 	bool Spawn() override;
 	void Explode(TraceResult* pTrace, int bitsDamageType) override;
 	void EXPORT GetReadyToNail();
@@ -562,6 +606,8 @@ private:
 class CMirv : public CPrimeGrenade
 {
 public:
+	CMirv(Entity* containingEntity) : CPrimeGrenade(containingEntity) {}
+
 	void Explode(TraceResult* pTrace, int bitsDamageType) override;
 
 	const char* GetModelName() override { return "models/mirv_grenade.mdl"; }
@@ -576,6 +622,8 @@ private:
 class CBomblet : public CPrimeGrenade
 {
 public:
+	CBomblet(Entity* containingEntity) : CPrimeGrenade(containingEntity) {}
+
 	bool Spawn() override;
 
 	bool ShouldCollide(CBaseEntity* other) override;
@@ -589,6 +637,8 @@ public:
 class CRocket : public CGrenade
 {
 public:
+	CRocket(Entity* containingEntity) : CGrenade(containingEntity) {}
+
 	bool Spawn() override;
 
 	int ObjectCaps() override { return CBaseEntity::ObjectCaps() | FCAP_DONT_SAVE; }
@@ -607,6 +657,8 @@ public:
 class CNail : public CBaseEntity
 {
 public:
+	CNail(Entity* containingEntity) : CBaseEntity(containingEntity) {}
+
 	bool Spawn() override;
 
 	int ObjectCaps() override { return CBaseEntity::ObjectCaps() | FCAP_DONT_SAVE; }
@@ -620,6 +672,8 @@ public:
 class CPipeBomb : public CGrenade
 {
 public:
+	CPipeBomb(Entity* containingEntity) : CGrenade(containingEntity) {}
+
 	bool Spawn() override;
 
 	static CPipeBomb* CreatePipeBomb(

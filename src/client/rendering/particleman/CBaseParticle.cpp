@@ -46,7 +46,7 @@ void CBaseParticle::InitializeSprite(Vector org, Vector normal, model_s* sprite,
 	m_flDieTime = 0;
 	m_flDampingTime = 0;
 
-	m_flNextPVSCheck = gEngfuncs.GetClientTime();
+	m_flNextPVSCheck = client::GetClientTime();
 
 	m_flGravity = 0;
 	m_flNextCollisionTime = 0;
@@ -79,7 +79,7 @@ void CBaseParticle::InitializeSprite(Vector org, Vector normal, model_s* sprite,
 	m_vColor.y = 255;
 	m_vColor.z = 255;
 
-	m_flTimeCreated = gEngfuncs.GetClientTime();
+	m_flTimeCreated = client::GetClientTime();
 
 	m_vPrevOrigin = m_vOrigin = org;
 	m_vOriginalAngles = m_vAngles = normal;
@@ -89,7 +89,7 @@ void CBaseParticle::InitializeSprite(Vector org, Vector normal, model_s* sprite,
 	m_flOriginalBrightness = m_flBrightness = brightness;
 
 	Vector forward, right, up;
-	gEngfuncs.pfnAngleVectors(normal, forward, right, up);
+	client::AngleVectors(normal, forward, right, up);
 
 	const Vector scaledRight = right * size;
 	const Vector scaledUp = up * size;
@@ -105,15 +105,15 @@ bool CBaseParticle::CheckVisibility()
 {
 	const float radius = m_flSize / 5.0;
 
-	if (gEngfuncs.GetClientTime() >= m_flNextPVSCheck)
+	if (client::GetClientTime() >= m_flNextPVSCheck)
 	{
 		const Vector radiusVector{radius, radius, radius};
 		Vector mins = m_vOrigin - radiusVector;
 		Vector maxs = m_vOrigin + radiusVector;
 
-		m_bInPVS = gEngfuncs.pTriAPI->BoxInPVS(mins, maxs) != 0;
+		m_bInPVS = client::tri::BoxInPVS(mins, maxs) != 0;
 
-		m_flNextPVSCheck = gEngfuncs.GetClientTime() + 0.1;
+		m_flNextPVSCheck = client::GetClientTime() + 0.1;
 	}
 
 	if ((m_iRenderFlags & CULL_FRUSTUM_SPHERE) != 0)
@@ -148,7 +148,7 @@ bool CBaseParticle::CheckVisibility()
 
 void CBaseParticle::Draw()
 {
-	if (m_flDieTime == gEngfuncs.GetClientTime())
+	if (m_flDieTime == client::GetClientTime())
 	{
 		return;
 	}
@@ -158,7 +158,7 @@ void CBaseParticle::Draw()
 
 	if ((m_iRenderFlags & LIGHT_NONE) == 0)
 	{
-		gEngfuncs.pTriAPI->LightAtPoint(m_vOrigin, vColor);
+		client::tri::LightAtPoint(m_vOrigin, vColor);
 
 		intensity = (vColor.x + vColor.y + vColor.z) / 3.0;
 	}
@@ -198,7 +198,7 @@ void CBaseParticle::Draw()
 	resultColor.z = std::clamp(resultColor.z, 0.f, 255.f);
 
 	Vector forward, right, up;
-	gEngfuncs.pfnAngleVectors(m_vAngles, forward, right, up);
+	client::AngleVectors(m_vAngles, forward, right, up);
 
 	const float radius = m_flSize;
 	const Vector width = right * radius * m_flStretchX;
@@ -211,29 +211,29 @@ void CBaseParticle::Draw()
 	const Vector topLeft = lowLeft + height;
 	const Vector topRight = lowRight + height;
 
-	gEngfuncs.pTriAPI->SpriteTexture(m_pTexture, m_iFrame);
-	gEngfuncs.pTriAPI->RenderMode(m_iRendermode);
-	gEngfuncs.pTriAPI->CullFace(TRI_NONE);
+	client::tri::SpriteTexture(m_pTexture, m_iFrame);
+	client::tri::RenderMode(m_iRendermode);
+	client::tri::CullFace(TRI_NONE);
 
-	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-	gEngfuncs.pTriAPI->Color4f(resultColor.x / 255, resultColor.y / 255, resultColor.z / 255, m_flBrightness / 255);
+	client::tri::Begin(TRI_QUADS);
+	client::tri::Color4f(resultColor.x / 255, resultColor.y / 255, resultColor.z / 255, m_flBrightness / 255);
 
-	gEngfuncs.pTriAPI->TexCoord2f(0, 0);
-	gEngfuncs.pTriAPI->Vertex3fv(topLeft);
+	client::tri::TexCoord2f(0, 0);
+	client::tri::Vertex3fv(topLeft);
 
-	gEngfuncs.pTriAPI->TexCoord2f(0, 1);
-	gEngfuncs.pTriAPI->Vertex3fv(lowLeft);
+	client::tri::TexCoord2f(0, 1);
+	client::tri::Vertex3fv(lowLeft);
 
-	gEngfuncs.pTriAPI->TexCoord2f(1, 1);
-	gEngfuncs.pTriAPI->Vertex3fv(lowRight);
+	client::tri::TexCoord2f(1, 1);
+	client::tri::Vertex3fv(lowRight);
 
-	gEngfuncs.pTriAPI->TexCoord2f(1, 0);
-	gEngfuncs.pTriAPI->Vertex3fv(topRight);
+	client::tri::TexCoord2f(1, 0);
+	client::tri::Vertex3fv(topRight);
 
-	gEngfuncs.pTriAPI->End();
+	client::tri::End();
 
-	gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
-	gEngfuncs.pTriAPI->CullFace(TRI_FRONT);
+	client::tri::RenderMode(kRenderNormal);
+	client::tri::CullFace(TRI_FRONT);
 }
 
 void CBaseParticle::Animate(float time)
@@ -324,7 +324,7 @@ void CBaseParticle::Spin(float time)
 
 	Vector point = m_vAVelocity;
 
-	const float length = VectorNormalize(point) * 30.0 * (time - m_flTimeCreated);
+	const float length = point.Length() * 30.0 * (time - m_flTimeCreated);
 
 	m_vAngles = m_vOriginalAngles + m_vAVelocity * length;
 }
@@ -374,13 +374,13 @@ void CBaseParticle::CheckCollision(float time)
 
 	if ((m_iCollisionFlags & TRI_COLLIDEALL) != 0)
 	{
-		gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
-		gEngfuncs.pEventAPI->EV_PlayerTrace(m_vPrevOrigin, m_vOrigin, PM_STUDIO_BOX, -1, &trace);
+		client::event::SetTraceHull(kHullPoint);
+		client::event::PlayerTrace(m_vPrevOrigin, m_vOrigin, PM_STUDIO_BOX, -1, &trace);
 
 		if (trace.fraction != 1.0)
 		{
 			//Called but never used, probably unfinished code for colliding with other entities.
-			//auto entity = gEngfuncs.pEventAPI->EV_GetPhysent(trace.ent);
+			//auto entity = client::event::GetPhysent(trace.ent);
 
 			//Collided with something other than world, ignore.
 			if (0 == trace.ent)
@@ -391,8 +391,8 @@ void CBaseParticle::CheckCollision(float time)
 	}
 	else if ((m_iCollisionFlags & TRI_COLLIDEWORLD) != 0)
 	{
-		gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
-		gEngfuncs.pEventAPI->EV_PlayerTrace(m_vPrevOrigin, m_vOrigin, PM_WORLD_ONLY | PM_STUDIO_BOX, -1, &trace);
+		client::event::SetTraceHull(kHullPoint);
+		client::event::PlayerTrace(m_vPrevOrigin, m_vOrigin, PM_WORLD_ONLY | PM_STUDIO_BOX, -1, &trace);
 
 		if (trace.fraction != 1.0)
 		{
@@ -424,7 +424,7 @@ void CBaseParticle::CheckCollision(float time)
 		{
 			if ((m_iCollisionFlags & TRI_COLLIDEKILL) != 0)
 			{
-				m_flDieTime = gEngfuncs.GetClientTime();
+				m_flDieTime = client::GetClientTime();
 				dead = true;
 			}
 			else
@@ -458,7 +458,7 @@ void CBaseParticle::CheckCollision(float time)
 	}
 	else if ((m_iCollisionFlags & TRI_WATERTRACE) != 0)
 	{
-		if (gEngfuncs.PM_PointContents(m_vOrigin, nullptr) == CONTENTS_WATER && !m_bInWater)
+		if (client::PM_PointContents(m_vOrigin, nullptr) == CONTENTS_WATER && !m_bInWater)
 		{
 			Touch(m_vOrigin, {0, 0, 1}, 0);
 
@@ -466,7 +466,7 @@ void CBaseParticle::CheckCollision(float time)
 
 			if ((m_iCollisionFlags & TRI_COLLIDEKILL) != 0)
 			{
-				m_flDieTime = gEngfuncs.GetClientTime();
+				m_flDieTime = client::GetClientTime();
 			}
 		}
 	}

@@ -46,9 +46,9 @@ void tent::Ricochet(const Vector& position, float scale)
 
 void tent::TeleportSplash(CBaseEntity* entity)
 {
-	g_engfuncs.pfnPlaybackEvent(
+	engine::PlaybackEvent(
 		FEV_GLOBAL | FEV_RELIABLE,
-		entity->edict(),
+		&entity->v,
 		g_usTeleport,
 		0.0F,
 		entity->Center(),
@@ -95,9 +95,9 @@ void tent::Explosion(
 		entity = CWorld::World;
 	}
 
-	g_engfuncs.pfnPlaybackEvent(
+	engine::PlaybackEvent(
 		flags,
-		entity->pev->pContainingEntity,
+		&entity->v,
 		eventIndex,
 		0.0F,
 		origin,
@@ -116,16 +116,16 @@ void tent::SpawnCorpse(CBaseEntity* entity, const int gibMode)
 {
 	Vector attackAngles = util::VecToAngles(g_vecAttackDir);
 
-	g_engfuncs.pfnPlaybackEvent(
+	engine::PlaybackEvent(
 		FEV_GLOBAL | FEV_RELIABLE,
-		entity->edict(),
+		&entity->v,
 		g_usGibbed,
 		0.0F,
-		entity->pev->origin,
+		entity->v.origin,
 		attackAngles,
 		0.0F,
-		std::max(entity->pev->health, -99.0F),
-		entity->pev->sequence,
+		std::max(entity->v.health, -99.0F),
+		entity->v.sequence,
 		gibMode,
 		false,
 		false
@@ -135,12 +135,12 @@ void tent::SpawnCorpse(CBaseEntity* entity, const int gibMode)
 
 void tent::RocketTrail(CBaseEntity* entity, const bool flare)
 {
-	g_engfuncs.pfnPlaybackEvent(
+	engine::PlaybackEvent(
 		FEV_GLOBAL,
-		entity->edict(),
+		&entity->v,
 		g_usTrail,
 		0.0F,
-		entity->pev->origin,
+		entity->v.origin,
 		g_vecZero,
 		0.0F,
 		0.0F,
@@ -169,7 +169,7 @@ void tent::PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber)
 	WriteCoord(pTrace->vecEndPos.x);
 	WriteCoord(pTrace->vecEndPos.y);
 	WriteCoord(pTrace->vecEndPos.z);
-	WriteShort((short)ENTINDEX(pTrace->pHit));
+	WriteShort(pTrace->pHit->GetIndex());
 	WriteByte(decalNumber);
 	MessageEnd();
 }

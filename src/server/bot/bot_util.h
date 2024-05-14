@@ -67,12 +67,6 @@ extern cvar_t cv_zombie_max_spawn_time;
 #define SIGN( num )	      (((num) < 0) ? -1 : 1)
 #define ABS( num )        (SIGN(num) * (num))
 
-
-#define CREATE_FAKE_CLIENT		( *g_engfuncs.pfnCreateFakeClient )
-#define GET_USERINFO			( *g_engfuncs.pfnGetInfoKeyBuffer )
-#define SET_KEY_VALUE			( *g_engfuncs.pfnSetKeyValue )
-#define SET_CLIENT_KEY_VALUE	( *g_engfuncs.pfnSetClientKeyValue )
-
 class BotProfile;
 
 extern void   BotPrecache( void );
@@ -91,13 +85,12 @@ extern int UTIL_HumansOnTeam( int teamID, bool isAlive = false );
 
 extern int		UTIL_BotsInGame( void );
 extern bool		UTIL_IsTeamAllBots( int team );
-extern Vector	UTIL_ComputeOrigin( entvars_t * pevVars );
 extern Vector	UTIL_ComputeOrigin( CBaseEntity * pEntity );
-extern Vector	UTIL_ComputeOrigin( edict_t * pentEdict );
+extern Vector	UTIL_ComputeOrigin( Entity * pentEdict );
 extern void		UTIL_DrawBeamFromEnt( int iIndex, Vector vecEnd, int iLifetime, byte bRed, byte bGreen, byte bBlue );
 extern void		UTIL_DrawBeamPoints( Vector vecStart, Vector vecEnd, int iLifetime, byte bRed, byte bGreen, byte bBlue );
-extern CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, float *distance = NULL, CBasePlayer *ignore = NULL );
-extern CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, int team, float *distance = NULL, CBasePlayer *ignore = NULL );
+extern CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, float *distance = nullptr, CBasePlayer *ignore = nullptr );
+extern CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, int team, float *distance = nullptr, CBasePlayer *ignore = nullptr );
 extern CBasePlayer *UTIL_GetClosestEnemyPlayer( CBasePlayer *self, float *distance );
 extern bool UTIL_KickBotFromTeam( int kickTeam ); ///< kick a bot from the given team. If no bot exists on the team, return false.
 
@@ -225,17 +218,14 @@ private:
  */
 inline bool IsEntityValid( CBaseEntity *entity )
 {
-	if (entity == NULL)
+	if (entity == nullptr)
 		return false;
 
-	if (FNullEnt( entity->pev ))
-		return false;
-
-	if (FStrEq( STRING( entity->pev->netname ), "" ))
+	if (STRING(entity->v.netname)[0] == '\0')
 		return false;
 
 #ifdef HALFLIFE_SAVERESTORE
-	if (entity->pev->flags & FL_DORMANT)
+	if (entity->v.flags & FL_DORMANT)
 		return false;
 #endif
 
@@ -250,7 +240,7 @@ inline bool IsEntityValid( CBaseEntity *entity )
  */
 inline bool IsIntersecting2D( const Vector &startA, const Vector &endA, 
 															const Vector &startB, const Vector &endB, 
-															Vector *result = NULL )
+															Vector *result = nullptr )
 {
 	float denom = (endA.x - startA.x) * (endB.y - startB.y) - (endA.y - startA.y) * (endB.x - startB.x);
 	if (denom == 0.0f)

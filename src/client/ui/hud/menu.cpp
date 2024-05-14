@@ -208,7 +208,7 @@ void CHudMenu::SelectMenuItem(int menu_item)
 	{
 		char szbuf[32];
 		sprintf(szbuf, "menuselect %d\n", menu_item);
-		EngineClientCmd(szbuf);
+		client::ClientCmd(szbuf);
 
 		// remove the menu
 		m_fMenuDisplayed = kNone;
@@ -226,7 +226,7 @@ void CHudMenu::SelectMenuItem(int menu_item)
 // if this message is never received, then scores will simply be the combined totals of the players.
 bool CHudMenu::MsgFunc_ShowMenu(const char* pszName, int iSize, void* pbuf)
 {
-	char* temp = NULL;
+	char* temp = nullptr;
 
 	BEGIN_READ(pbuf, iSize);
 

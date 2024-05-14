@@ -310,14 +310,16 @@ inline bool VectorsAreEqual( const Vector *a, const Vector *b, float tolerance =
  */
 #define WALK_THRU_DOORS				0x01
 #define WALK_THRU_BREAKABLES	0x02
-inline bool IsEntityWalkable( entvars_t *entity, unsigned int flags )
+inline bool IsEntityWalkable( Entity *entity, unsigned int flags )
 {
+	auto walkable = entity->Get<CBaseEntity>();
+
 	// if we hit a door, assume its walkable because it will open when we touch it
-	if (FClassnameIs( entity, "func_door" ) || FClassnameIs( entity, "func_door_rotating" ))
+	if (walkable->Is(CBaseEntity::Type::Door))
 		return (flags & WALK_THRU_DOORS) ? true : false;
 
 	// if we hit a breakable object, assume its walkable because we will shoot it when we touch it
-	if (FClassnameIs( entity, "func_breakable" ) && entity->takedamage == DAMAGE_YES)
+	if (walkable->Is(CBaseEntity::Type::Breakable) && walkable->v.takedamage != DAMAGE_NO)
 		return (flags & WALK_THRU_BREAKABLES) ? true : false;
 
 	return false;
@@ -330,15 +332,15 @@ inline bool IsEntityWalkable( entvars_t *entity, unsigned int flags )
 inline bool IsWalkableTraceLineClear( Vector &from, Vector &to, unsigned int flags = 0 )
 {
 	TraceResult result;
-	edict_t *ignore = NULL;
+	Entity *ignore = nullptr;
 	Vector useFrom = from;
 
 	while (true)
 	{
-		util::TraceLine( useFrom, to, util::ignore_monsters, CBaseEntity::Instance(ignore), &result );
+		util::TraceLine( useFrom, to, util::ignore_monsters, ignore->Get<CBaseEntity>(), &result );
 
 		// if we hit a walkable entity, try again
-		if (result.flFraction != 1.0f && IsEntityWalkable( VARS( result.pHit ), flags ))
+		if (result.flFraction != 1.0f && IsEntityWalkable( result.pHit, flags ))
 		{
 			ignore = result.pHit;
 

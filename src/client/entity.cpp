@@ -89,7 +89,7 @@ void HUD_TxferPredictionData(struct entity_state_s* ps, const struct entity_stat
 	pcd->iuser3 = ppcd->iuser3;
 	pcd->iuser4 = ppcd->iuser4;
 
-	if (0 != gEngfuncs.IsSpectateOnly())
+	if (0 != client::IsSpectateOnly())
 	{
 		// in specator mode we tell the engine who we want to spectate and how
 		// iuser3 is not used for duck prevention (since the spectator can't duck at all)
@@ -127,33 +127,26 @@ fired during this frame, handle the event by it's tag ( e.g., muzzleflash, sound
 */
 void HUD_StudioEvent(const struct mstudioevent_s* event, const struct cl_entity_s* entity)
 {
-	bool iMuzzleFlash = true;
-
-
 	switch (event->event)
 	{
 	case 5001:
-		if (iMuzzleFlash)
-			gEngfuncs.pEfxAPI->R_MuzzleFlash((float*)&entity->attachment[0], atoi(event->options));
+		client::efx::MuzzleFlash(const_cast<cl_entity_t*>(entity)->attachment[0], atoi(event->options));
 		break;
 	case 5011:
-		if (iMuzzleFlash)
-			gEngfuncs.pEfxAPI->R_MuzzleFlash((float*)&entity->attachment[1], atoi(event->options));
+		client::efx::MuzzleFlash(const_cast<cl_entity_t*>(entity)->attachment[1], atoi(event->options));
 		break;
 	case 5021:
-		if (iMuzzleFlash)
-			gEngfuncs.pEfxAPI->R_MuzzleFlash((float*)&entity->attachment[2], atoi(event->options));
+		client::efx::MuzzleFlash(const_cast<cl_entity_t*>(entity)->attachment[2], atoi(event->options));
 		break;
 	case 5031:
-		if (iMuzzleFlash)
-			gEngfuncs.pEfxAPI->R_MuzzleFlash((float*)&entity->attachment[3], atoi(event->options));
+		client::efx::MuzzleFlash(const_cast<cl_entity_t*>(entity)->attachment[3], atoi(event->options));
 		break;
 	case 5002:
-		gEngfuncs.pEfxAPI->R_SparkEffect((float*)&entity->attachment[0], atoi(event->options), -100, 100);
+		client::efx::SparkEffect(const_cast<cl_entity_t*>(entity)->attachment[0], atoi(event->options), -100, 100);
 		break;
 	// Client side sound
 	case 5004:
-		gEngfuncs.pfnPlaySoundByNameAtLocation((char*)event->options, 1.0, (float*)&entity->attachment[0]);
+		client::PlaySoundByNameAtLocation((char*)event->options, 1.0, const_cast<cl_entity_t*>(entity)->attachment[0]);
 		break;
 	default:
 		break;
@@ -184,7 +177,7 @@ void HUD_TempEntUpdate(
 
 	Vector vAngles;
 
-	gEngfuncs.GetViewAngles((float*)vAngles);
+	client::GetViewAngles(vAngles);
 
 	if (g_pParticleMan)
 		g_pParticleMan->SetVariables(cl_gravity, vAngles);
@@ -197,13 +190,13 @@ void HUD_TempEntUpdate(
 	// that the client has the player list. We run this code once when we detect any COLLIDEALL
 	// tent, then set this bool to true so the code doesn't get run again if there's more than
 	// one COLLIDEALL ent for this update. (often are).
-	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
+	client::event::SetUpPlayerPrediction(false, true);
 
 	// Store off the old count
-	gEngfuncs.pEventAPI->EV_PushPMStates();
+	client::event::PushPMStates();
 
 	// Now add in all of the players.
-	gEngfuncs.pEventAPI->EV_SetSolidPlayers(-1);
+	client::event::SetSolidPlayers(-1);
 
 	// !!!BUGBUG	-- This needs to be time based
 	gTempEntFrame = (gTempEntFrame + 1) & 31;
@@ -224,7 +217,7 @@ void HUD_TempEntUpdate(
 		goto finish;
 	}
 
-	pprev = NULL;
+	pprev = nullptr;
 	freq = client_time * 0.01;
 	fastFreq = client_time * 5.5;
 	gravity = -frametime * cl_gravity;
@@ -273,7 +266,7 @@ void HUD_TempEntUpdate(
 
 			hull = (pTemp->entity.curstate.renderfx == kRenderFxDeadPlayer) ? kHullPlayer : kHullPoint;
 
-			VectorCopy(pTemp->entity.origin, pTemp->entity.prevstate.origin);
+			pTemp->entity.prevstate.origin = pTemp->entity.origin;
 
 			if ((pTemp->flags & FTENT_SPARKSHOWER) != 0)
 			{
@@ -282,7 +275,7 @@ void HUD_TempEntUpdate(
 				if (client_time > pTemp->entity.baseline.scale)
 				{
 					// Show Sparks
-					gEngfuncs.pEfxAPI->R_SparkEffect(pTemp->entity.origin, 8, -200, 200);
+					client::efx::SparkEffect(pTemp->entity.origin, 8, -200, 200);
 
 					// Reduce life
 					pTemp->entity.baseline.framerate -= 0.1;
@@ -306,9 +299,9 @@ void HUD_TempEntUpdate(
 			{
 				cl_entity_t* pClient;
 
-				pClient = gEngfuncs.GetEntityByIndex(pTemp->clientIndex);
+				pClient = client::GetEntityByIndex(pTemp->clientIndex);
 
-				VectorAdd(pClient->origin, pTemp->tentOffset, pTemp->entity.origin);
+				pTemp->entity.origin = pClient->origin + pTemp->tentOffset;
 			}
 			else if ((pTemp->flags & FTENT_SINEWAVE) != 0)
 			{
@@ -377,7 +370,7 @@ void HUD_TempEntUpdate(
 				pTemp->entity.angles[1] += pTemp->entity.baseline.angles[1] * frametime;
 				pTemp->entity.angles[2] += pTemp->entity.baseline.angles[2] * frametime;
 
-				VectorCopy(pTemp->entity.angles, pTemp->entity.latched.prevangles);
+				pTemp->entity.latched.prevangles = pTemp->entity.angles;
 			}
 
 			if ((pTemp->flags & (FTENT_COLLIDEALL | FTENT_COLLIDEWORLD)) != 0)
@@ -390,19 +383,19 @@ void HUD_TempEntUpdate(
 					pmtrace_t pmtrace;
 					physent_t* pe;
 
-					gEngfuncs.pEventAPI->EV_SetTraceHull(hull);
+					client::event::SetTraceHull(hull);
 
-					gEngfuncs.pEventAPI->EV_PlayerTrace(pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX, -1, &pmtrace);
+					client::event::PlayerTrace(pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX, -1, &pmtrace);
 
 
 					if (pmtrace.fraction != 1)
 					{
-						pe = gEngfuncs.pEventAPI->EV_GetPhysent(pmtrace.ent);
+						pe = client::event::GetPhysent(pmtrace.ent);
 
 						if (0 == pmtrace.ent || (pe->info != pTemp->clientIndex))
 						{
 							traceFraction = pmtrace.fraction;
-							VectorCopy(pmtrace.plane.normal, traceNormal);
+							traceNormal = pmtrace.plane.normal;
 
 							if (pTemp->hitcallback)
 							{
@@ -415,22 +408,22 @@ void HUD_TempEntUpdate(
 				{
 					pmtrace_t pmtrace;
 
-					gEngfuncs.pEventAPI->EV_SetTraceHull(hull);
+					client::event::SetTraceHull(hull);
 
-					gEngfuncs.pEventAPI->EV_PlayerTrace(pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX | PM_WORLD_ONLY, -1, &pmtrace);
+					client::event::PlayerTrace(pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX | PM_WORLD_ONLY, -1, &pmtrace);
 
 					if (pmtrace.fraction != 1)
 					{
 						traceFraction = pmtrace.fraction;
-						VectorCopy(pmtrace.plane.normal, traceNormal);
+						traceNormal = pmtrace.plane.normal;
 
 						if ((pTemp->flags & FTENT_SPARKSHOWER) != 0)
 						{
 							// Chop spark speeds a bit more
 							//
-							VectorScale(pTemp->entity.baseline.origin, 0.6, pTemp->entity.baseline.origin);
+							pTemp->entity.baseline.origin = pTemp->entity.baseline.origin * 0.6F;
 
-							if (Length(pTemp->entity.baseline.origin) < 10)
+							if (pTemp->entity.baseline.origin.Length() < 10)
 							{
 								pTemp->entity.baseline.framerate = 0.0;
 							}
@@ -448,7 +441,7 @@ void HUD_TempEntUpdate(
 					float proj, damp;
 
 					// Place at contact point
-					VectorMA(pTemp->entity.prevstate.origin, traceFraction * frametime, pTemp->entity.baseline.origin, pTemp->entity.origin);
+					pTemp->entity.origin = pTemp->entity.prevstate.origin + traceFraction * frametime * pTemp->entity.baseline.origin;
 					// Damp velocity
 					damp = pTemp->bounceFactor;
 					if ((pTemp->flags & (FTENT_GRAVITY | FTENT_SLOWGRAVITY)) != 0)
@@ -484,7 +477,7 @@ void HUD_TempEntUpdate(
 						if (damp != 0)
 						{
 							proj = DotProduct(pTemp->entity.baseline.origin, traceNormal);
-							VectorMA(pTemp->entity.baseline.origin, -proj * 2, traceNormal, pTemp->entity.baseline.origin);
+							pTemp->entity.baseline.origin = pTemp->entity.baseline.origin + -proj * 2 * traceNormal;
 							// Reflect rotation (fake)
 
 							pTemp->entity.angles[1] = -pTemp->entity.angles[1];
@@ -492,9 +485,8 @@ void HUD_TempEntUpdate(
 
 						if (damp != 1)
 						{
-
-							VectorScale(pTemp->entity.baseline.origin, damp, pTemp->entity.baseline.origin);
-							VectorScale(pTemp->entity.angles, 0.9, pTemp->entity.angles);
+							pTemp->entity.baseline.origin = pTemp->entity.baseline.origin * damp;
+							pTemp->entity.angles = pTemp->entity.angles * 0.9F;
 						}
 					}
 				}
@@ -503,8 +495,8 @@ void HUD_TempEntUpdate(
 
 			if ((pTemp->flags & FTENT_FLICKER) != 0 && gTempEntFrame == pTemp->entity.curstate.effects)
 			{
-				dlight_t* dl = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
-				VectorCopy(pTemp->entity.origin, dl->origin);
+				dlight_t* dl = client::efx::AllocDlight(0);
+				dl->origin = pTemp->entity.origin;
 				dl->radius = 60;
 				dl->color.r = 255;
 				dl->color.g = 120;
@@ -523,7 +515,7 @@ void HUD_TempEntUpdate(
 				{
 					sequence = 0;
 				}
-				gEngfuncs.pEfxAPI->R_RocketTrail(pTemp->entity.prevstate.origin, pTemp->entity.origin, sequence);
+				client::efx::RocketTrail(pTemp->entity.prevstate.origin, pTemp->entity.origin, sequence);
 			}
 
 			if ((pTemp->flags & FTENT_GRAVITY) != 0)
@@ -558,7 +550,7 @@ void HUD_TempEntUpdate(
 
 finish:
 	// Restore state info
-	gEngfuncs.pEventAPI->EV_PopPMStates();
+	client::event::PopPMStates();
 }
 
 /*
@@ -574,5 +566,5 @@ Indices must start at 1, not zero.
 */
 cl_entity_t* HUD_GetUserEntity(int index)
 {
-	return NULL;
+	return nullptr;
 }

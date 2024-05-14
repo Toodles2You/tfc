@@ -28,7 +28,7 @@ static int gSizes[FIELD_TYPECOUNT] =
 		sizeof(int),	   // FIELD_ENTITY
 		sizeof(int),	   // FIELD_CLASSPTR
 		sizeof(EHANDLE),   // FIELD_EHANDLE
-		sizeof(int),	   // FIELD_entvars_t
+		sizeof(int),	   // FIELD_EVARS
 		sizeof(int),	   // FIELD_EDICT
 		sizeof(float) * 3, // FIELD_VECTOR
 		sizeof(float) * 3, // FIELD_POSITION_VECTOR
@@ -60,28 +60,20 @@ CSaveRestoreBuffer::~CSaveRestoreBuffer() = default;
 
 int CSaveRestoreBuffer::EntityIndex(CBaseEntity* pEntity)
 {
-	if (pEntity == NULL)
+	if (pEntity == nullptr)
 		return -1;
-	return EntityIndex(pEntity->pev);
+	return EntityIndex(&pEntity->v);
 }
 
-
-int CSaveRestoreBuffer::EntityIndex(entvars_t* pevLookup)
-{
-	if (pevLookup == NULL)
-		return -1;
-	return EntityIndex(ENT(pevLookup));
-}
-
-int CSaveRestoreBuffer::EntityIndex(EOFFSET eoLookup)
+int CSaveRestoreBuffer::EntityIndex(EntityOffset eoLookup)
 {
 	return EntityIndex(ENT(eoLookup));
 }
 
 
-int CSaveRestoreBuffer::EntityIndex(edict_t* pentLookup)
+int CSaveRestoreBuffer::EntityIndex(Entity* pentLookup)
 {
-	if (pentLookup == NULL)
+	if (pentLookup == nullptr)
 		return -1;
 
 	int i;
@@ -97,10 +89,10 @@ int CSaveRestoreBuffer::EntityIndex(edict_t* pentLookup)
 }
 
 
-edict_t* CSaveRestoreBuffer::EntityFromIndex(int entityIndex)
+Entity* CSaveRestoreBuffer::EntityFromIndex(int entityIndex)
 {
 	if (entityIndex < 0)
-		return NULL;
+		return nullptr;
 
 	int i;
 	ENTITYTABLE* pTable;
@@ -111,7 +103,7 @@ edict_t* CSaveRestoreBuffer::EntityFromIndex(int entityIndex)
 		if (pTable->id == entityIndex)
 			return pTable->pent;
 	}
-	return NULL;
+	return nullptr;
 }
 
 
@@ -179,7 +171,7 @@ unsigned short CSaveRestoreBuffer::TokenHash(const char* pszToken)
 	if (0 == m_data.tokenCount || nullptr == m_data.pTokens)
 	{
 		//if we're here it means trigger_changelevel is trying to actually save something when it's not supposed to.
-		ALERT(at_error, "No token table array in TokenHash()!\n");
+		engine::AlertMessage(at_error, "No token table array in TokenHash()!\n");
 		return 0;
 	}
 
@@ -192,7 +184,7 @@ unsigned short CSaveRestoreBuffer::TokenHash(const char* pszToken)
 		if (i > 50 && !beentheredonethat)
 		{
 			beentheredonethat = true;
-			ALERT(at_error, "CSaveRestoreBuffer :: TokenHash() is getting too full!\n");
+			engine::AlertMessage(at_error, "CSaveRestoreBuffer :: TokenHash() is getting too full!\n");
 		}
 #endif
 
@@ -209,7 +201,7 @@ unsigned short CSaveRestoreBuffer::TokenHash(const char* pszToken)
 
 	// Token hash table full!!!
 	// [Consider doing overflow table(s) after the main table & limiting linear hash table search]
-	ALERT(at_error, "CSaveRestoreBuffer :: TokenHash() is COMPLETELY FULL!\n");
+	engine::AlertMessage(at_error, "CSaveRestoreBuffer :: TokenHash() is COMPLETELY FULL!\n");
 	return 0;
 }
 
@@ -278,7 +270,7 @@ void CSave::WriteString(const char* pname, const int* stringId, int count)
 #else
 #if 0
 	if ( count != 1 )
-		ALERT( at_error, "No string arrays!\n" );
+		engine::AlertMessage( at_error, "No string arrays!\n" );
 	WriteString( pname, (char *)STRING(*stringId) );
 #endif
 
@@ -345,18 +337,18 @@ void CSave::WriteFunction(const char* pname, void** data, int count)
 {
 	const char* functionName;
 
-	functionName = NAME_FOR_FUNCTION((uint32)*data);
+	functionName = engine::NameForFunction((uint32)*data);
 	if (functionName)
 		BufferField(pname, strlen(functionName) + 1, functionName);
 	else
-		ALERT(at_error, "Invalid function pointer in entity!\n");
+		engine::AlertMessage(at_error, "Invalid function pointer in entity!\n");
 }
 
 
 
-bool CSave::WriteEntVars(const char* pname, entvars_t* pev)
+bool CSave::WriteEntVars(const char* pname, Entity* entity)
 {
-	return WriteFields(pname, pev, CBaseEntity::m_EntvarsDescription, ARRAYSIZE(CBaseEntity::m_EntvarsDescription));
+	return WriteFields(pname, entity, CBaseEntity::m_EntvarsDescription, ARRAYSIZE(CBaseEntity::m_EntvarsDescription));
 }
 
 
@@ -411,22 +403,22 @@ bool CSave::WriteFields(const char* pname, void* pBaseData, TYPEDESCRIPTION* pFi
 		case FIELD_ENTITY:
 		case FIELD_EHANDLE:
 			if (pTest->fieldSize > MAX_ENTITYARRAY)
-				ALERT(at_error, "Can't save more than %d entities in an array!!!\n", MAX_ENTITYARRAY);
+				engine::AlertMessage(at_error, "Can't save more than %d entities in an array!!!\n", MAX_ENTITYARRAY);
 			for (j = 0; j < pTest->fieldSize; j++)
 			{
 				switch (pTest->fieldType)
 				{
 				case FIELD_EVARS:
-					entityArray[j] = EntityIndex(((entvars_t**)pOutputData)[j]);
+					entityArray[j] = EntityIndex(((Entity**)pOutputData)[j]);
 					break;
 				case FIELD_CLASSPTR:
 					entityArray[j] = EntityIndex(((CBaseEntity**)pOutputData)[j]);
 					break;
 				case FIELD_EDICT:
-					entityArray[j] = EntityIndex(((edict_t**)pOutputData)[j]);
+					entityArray[j] = EntityIndex(((Entity**)pOutputData)[j]);
 					break;
 				case FIELD_ENTITY:
-					entityArray[j] = EntityIndex(((EOFFSET*)pOutputData)[j]);
+					entityArray[j] = EntityIndex(((EntityOffset*)pOutputData)[j]);
 					break;
 				case FIELD_EHANDLE:
 					entityArray[j] = EntityIndex((CBaseEntity*)(((EHANDLE*)pOutputData)[j]));
@@ -436,10 +428,10 @@ bool CSave::WriteFields(const char* pname, void* pBaseData, TYPEDESCRIPTION* pFi
 			WriteInt(pTest->fieldName, entityArray, pTest->fieldSize);
 			break;
 		case FIELD_POSITION_VECTOR:
-			WritePositionVector(pTest->fieldName, (float*)pOutputData, pTest->fieldSize);
+			WritePositionVector(pTest->fieldName, pOutputData, pTest->fieldSize);
 			break;
 		case FIELD_VECTOR:
-			WriteVector(pTest->fieldName, (float*)pOutputData, pTest->fieldSize);
+			WriteVector(pTest->fieldName, pOutputData, pTest->fieldSize);
 			break;
 
 		case FIELD_BOOLEAN:
@@ -480,7 +472,7 @@ bool CSave::WriteFields(const char* pname, void* pBaseData, TYPEDESCRIPTION* pFi
 			WriteFunction(pTest->fieldName, (void**)pOutputData, pTest->fieldSize);
 			break;
 		default:
-			ALERT(at_error, "Bad field type\n");
+			engine::AlertMessage(at_error, "Bad field type\n");
 		}
 	}
 
@@ -519,7 +511,7 @@ void CSave::BufferHeader(const char* pname, int size)
 {
 	short hashvalue = TokenHash(pname);
 	if (size > 1 << (sizeof(short) * 8))
-		ALERT(at_error, "CSave :: BufferHeader() size parameter exceeds 'short'!\n");
+		engine::AlertMessage(at_error, "CSave :: BufferHeader() size parameter exceeds 'short'!\n");
 	BufferData((const char*)&size, sizeof(short));
 	BufferData((const char*)&hashvalue, sizeof(short));
 }
@@ -529,7 +521,7 @@ void CSave::BufferData(const char* pdata, int size)
 {
 	if (m_data.size + size > m_data.bufferSize)
 	{
-		ALERT(at_error, "Save/Restore overflow!\n");
+		engine::AlertMessage(at_error, "Save/Restore overflow!\n");
 		m_data.size = m_data.bufferSize;
 		return;
 	}
@@ -553,7 +545,7 @@ int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCoun
 	TYPEDESCRIPTION* pTest;
 	float timeData;
 	Vector position;
-	edict_t* pent;
+	Entity* pent;
 	char* pString;
 
 	position = Vector(0, 0, 0);
@@ -603,16 +595,16 @@ int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCoun
 						{
 							int string;
 
-							string = ALLOC_STRING((char*)pInputData);
+							string = engine::AllocString((char*)pInputData);
 
 							*((int*)pOutputData) = string;
 
 							if (!FStringNull(string) && m_precache)
 							{
 								if (pTest->fieldType == FIELD_MODELNAME)
-									PRECACHE_MODEL((char*)STRING(string));
+									engine::PrecacheModel((char*)STRING(string));
 								else if (pTest->fieldType == FIELD_SOUNDNAME)
-									PRECACHE_SOUND((char*)STRING(string));
+									engine::PrecacheSound((char*)STRING(string));
 							}
 						}
 						break;
@@ -620,22 +612,22 @@ int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCoun
 						entityIndex = *(int*)pInputData;
 						pent = EntityFromIndex(entityIndex);
 						if (pent)
-							*((entvars_t**)pOutputData) = VARS(pent);
+							*((Entity**)pOutputData) = pent;
 						else
-							*((entvars_t**)pOutputData) = NULL;
+							*((Entity**)pOutputData) = nullptr;
 						break;
 					case FIELD_CLASSPTR:
 						entityIndex = *(int*)pInputData;
 						pent = EntityFromIndex(entityIndex);
 						if (pent)
-							*((CBaseEntity**)pOutputData) = CBaseEntity::Instance(pent);
+							*((CBaseEntity**)pOutputData) = pent->Get<CBaseEntity>();
 						else
-							*((CBaseEntity**)pOutputData) = NULL;
+							*((CBaseEntity**)pOutputData) = nullptr;
 						break;
 					case FIELD_EDICT:
 						entityIndex = *(int*)pInputData;
 						pent = EntityFromIndex(entityIndex);
-						*((edict_t**)pOutputData) = pent;
+						*((Entity**)pOutputData) = pent;
 						break;
 					case FIELD_EHANDLE:
 						// Input and Output sizes are different!
@@ -643,17 +635,17 @@ int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCoun
 						entityIndex = *(int*)pInputData;
 						pent = EntityFromIndex(entityIndex);
 						if (pent)
-							*((EHANDLE*)pOutputData) = CBaseEntity::Instance(pent);
+							*((EHANDLE*)pOutputData) = pent->Get<CBaseEntity>();
 						else
-							*((EHANDLE*)pOutputData) = NULL;
+							*((EHANDLE*)pOutputData) = nullptr;
 						break;
 					case FIELD_ENTITY:
 						entityIndex = *(int*)pInputData;
 						pent = EntityFromIndex(entityIndex);
 						if (pent)
-							*((EOFFSET*)pOutputData) = OFFSET(pent);
+							*((EntityOffset*)pOutputData) = OFFSET(pent);
 						else
-							*((EOFFSET*)pOutputData) = 0;
+							*((EntityOffset*)pOutputData) = 0;
 						break;
 					case FIELD_VECTOR:
 						((float*)pOutputData)[0] = ((float*)pInputData)[0];
@@ -699,18 +691,18 @@ int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCoun
 						if (strlen((char*)pInputData) == 0)
 							*((int*)pOutputData) = 0;
 						else
-							*((int*)pOutputData) = FUNCTION_FROM_NAME((char*)pInputData);
+							*((int*)pOutputData) = engine::FunctionFromName((char*)pInputData);
 						break;
 
 					default:
-						ALERT(at_error, "Bad field type\n");
+						engine::AlertMessage(at_error, "Bad field type\n");
 					}
 				}
 			}
 #if 0
 			else
 			{
-				ALERT( at_console, "Skipping global field %s\n", pName );
+				engine::AlertMessage( at_console, "Skipping global field %s\n", pName );
 			}
 #endif
 			return fieldNumber;
@@ -721,9 +713,9 @@ int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCoun
 }
 
 
-bool CRestore::ReadEntVars(const char* pname, entvars_t* pev)
+bool CRestore::ReadEntVars(const char* pname, Entity* entity)
 {
-	return ReadFields(pname, pev, CBaseEntity::m_EntvarsDescription, ARRAYSIZE(CBaseEntity::m_EntvarsDescription));
+	return ReadFields(pname, entity, CBaseEntity::m_EntvarsDescription, ARRAYSIZE(CBaseEntity::m_EntvarsDescription));
 }
 
 
@@ -740,7 +732,7 @@ bool CRestore::ReadFields(const char* pname, void* pBaseData, TYPEDESCRIPTION* p
 	// Check the struct name
 	if (token != TokenHash(pname)) // Field Set marker
 	{
-		//		ALERT( at_error, "Expected %s found %s!\n", pname, BufferPointer() );
+		//		engine::AlertMessage( at_error, "Expected %s found %s!\n", pname, BufferPointer() );
 		BufferRewind(2 * sizeof(short));
 		return false;
 	}
@@ -829,7 +821,7 @@ void CRestore::BufferReadBytes(char* pOutput, int size)
 
 	if ((m_data.size + size) > m_data.bufferSize)
 	{
-		ALERT(at_error, "Restore overflow!\n");
+		engine::AlertMessage(at_error, "Restore overflow!\n");
 		m_data.size = m_data.bufferSize;
 		return;
 	}
@@ -843,7 +835,7 @@ void CRestore::BufferReadBytes(char* pOutput, int size)
 
 void CRestore::BufferSkipBytes(int bytes)
 {
-	BufferReadBytes(NULL, bytes);
+	BufferReadBytes(nullptr, bytes);
 }
 
 int CRestore::BufferSkipZString()

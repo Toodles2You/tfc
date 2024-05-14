@@ -16,11 +16,11 @@
 class CNavNode
 {
 public:
-	CNavNode( const Vector *pos, const Vector *normal, CNavNode *parent = NULL );
+	CNavNode( const Vector *pos, const Vector *normal, CNavNode *parent = nullptr );
 
-	static const CNavNode *GetNode( const Vector *pos );			///< return navigation node at the position, or NULL if none exists
+	static const CNavNode *GetNode( const Vector *pos );			///< return navigation node at the position, or nullptr if none exists
 
-	CNavNode *GetConnectedNode( NavDirType dir ) const;				///< get navigation node connected in given direction, or NULL if cant go that way
+	CNavNode *GetConnectedNode( NavDirType dir ) const;				///< get navigation node connected in given direction, or nullptr if cant go that way
 	const Vector *GetPosition( void ) const;
 	const Vector *GetNormal( void ) const							{ return &m_normal; }
 	unsigned int GetID( void ) const									{ return m_id; }
@@ -51,7 +51,7 @@ private:
 
 	Vector m_pos;																	///< position of this node in the world
 	Vector m_normal;															///< surface normal at this location
-	CNavNode *m_to[ NUM_DIRECTIONS ];							///< links to north, south, east, and west. NULL if no link
+	CNavNode *m_to[ NUM_DIRECTIONS ];							///< links to north, south, east, and west. nullptr if no link
 	unsigned int m_id;														///< unique ID of this node
 	unsigned char m_attributeFlags;								///< set of attribute bit flags (see NavAttributeType)
 

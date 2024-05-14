@@ -44,7 +44,7 @@ void CGrenade::Explode(Vector vecSrc, Vector vecAim)
 	}
 
 	TraceResult tr;
-	util::TraceLine(pev->origin, pev->origin + Vector(0, 0, -32), util::ignore_monsters, this, &tr);
+	util::TraceLine(v.origin, v.origin + Vector(0, 0, -32), util::ignore_monsters, this, &tr);
 
 	Explode(&tr, DMG_BLAST);
 }
@@ -54,20 +54,20 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 	// Pull out of the wall a bit
 	if (pTrace->flFraction != 1.0)
 	{
-		pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
+		v.origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
 	}
 
-	tent::Explosion(pev->origin, -pTrace->vecPlaneNormal, tent::ExplosionType::Normal, pev->dmg);
+	tent::Explosion(v.origin, -pTrace->vecPlaneNormal, tent::ExplosionType::Normal, v.dmg);
 
 	CBaseEntity* owner;
-	if (pev->owner)
-		owner = CBaseEntity::Instance(pev->owner);
+	if (v.owner)
+		owner = v.owner->Get<CBaseEntity>();
 	else
 		owner = this;
 
-	pev->owner = nullptr; // can't traceline attack owner if this is set
+	v.owner = nullptr; // can't traceline attack owner if this is set
 
-	RadiusDamage(pev->origin, this, owner, pev->dmg, pev->dmg_save, pev->dmg_take, DMG_RESIST_SELF | bitsDamageType);
+	RadiusDamage(v.origin, this, owner, v.dmg, v.dmg_save, v.dmg_take, DMG_RESIST_SELF | bitsDamageType);
 
 	Remove();
 }
@@ -84,7 +84,7 @@ void CGrenade::Detonate()
 	TraceResult tr;
 	Vector vecSpot; // trace starts here!
 
-	vecSpot = pev->origin + Vector(0, 0, 8);
+	vecSpot = v.origin + Vector(0, 0, 8);
 	util::TraceLine(vecSpot, vecSpot + Vector(0, 0, -40), util::ignore_monsters, this, &tr);
 
 	Explode(&tr, DMG_BLAST);
@@ -99,10 +99,10 @@ void CGrenade::ExplodeTouch(CBaseEntity* pOther)
 	TraceResult tr;
 	Vector vecSpot; // trace starts here!
 
-	pev->enemy = pOther->edict();
+	v.enemy = &pOther->v;
 
-	vecSpot = pev->origin - pev->velocity.Normalize() * 32;
-	util::TraceLine(vecSpot, vecSpot + pev->velocity.Normalize() * 64, util::ignore_monsters, this, &tr);
+	vecSpot = v.origin - v.velocity.Normalize() * 32;
+	util::TraceLine(vecSpot, vecSpot + v.velocity.Normalize() * 64, util::ignore_monsters, this, &tr);
 
 	Explode(&tr, DMG_BLAST);
 }
@@ -111,46 +111,46 @@ void CGrenade::ExplodeTouch(CBaseEntity* pOther)
 void CGrenade::BounceTouch(CBaseEntity* pOther)
 {
 	// don't hit the guy that launched this grenade
-	if (pOther->edict() == pev->owner)
+	if (&pOther->v == v.owner)
 		return;
 
-	if ((pev->flags & FL_ONGROUND) != 0)
+	if ((v.flags & FL_ONGROUND) != 0)
 	{
 		// add a bit of static friction
-		pev->velocity = pev->velocity * 0.8;
+		v.velocity = v.velocity * 0.8;
 
-		pev->sequence = RANDOM_LONG(1, 1);
+		v.sequence = engine::RandomLong(1, 1);
 		ResetSequenceInfo();
 	}
 	else
 	{
-		if (pev->velocity.z > 0
+		if (v.velocity.z > 0
 		 && util::GetGlobalTrace().vecPlaneNormal.z >= kGroundPlaneMinZ)
 		{
-			pev->velocity = pev->velocity * 0.8;
+			v.velocity = v.velocity * 0.8;
 		}
 
 		// play bounce sound
 		BounceSound();
 	}
-	pev->framerate = pev->velocity.Length() / 200.0;
-	if (pev->framerate > 1.0)
-		pev->framerate = 1;
-	else if (pev->framerate < 0.5)
-		pev->framerate = 0;
+	v.framerate = v.velocity.Length() / 200.0;
+	if (v.framerate > 1.0)
+		v.framerate = 1;
+	else if (v.framerate < 0.5)
+		v.framerate = 0;
 }
 
 
 void CGrenade::BounceSound()
 {
-	if (pev->radsuit_finished > gpGlobals->time)
+	if (v.radsuit_finished > gpGlobals->time)
 	{
 		return;
 	}
 
-	pev->radsuit_finished = gpGlobals->time + (1.0F / 15.0F);
+	v.radsuit_finished = gpGlobals->time + (1.0F / 15.0F);
 
-	switch (RANDOM_LONG(0, 2))
+	switch (engine::RandomLong(0, 2))
 	{
 	case 0: EmitSound("weapons/grenade_hit1.wav", CHAN_VOICE, 0.25F); break;
 	case 1: EmitSound("weapons/grenade_hit2.wav", CHAN_VOICE, 0.25F); break;
@@ -161,37 +161,37 @@ void CGrenade::BounceSound()
 void CGrenade::TumbleThink()
 {
 	StudioFrameAdvance();
-	pev->nextthink = gpGlobals->time + 0.1;
+	v.nextthink = gpGlobals->time + 0.1;
 
-	if (pev->dmgtime <= gpGlobals->time)
+	if (v.dmgtime <= gpGlobals->time)
 	{
 		SetThink(&CGrenade::Detonate);
 	}
-	if (pev->waterlevel > kWaterLevelNone)
+	if (v.waterlevel > kWaterLevelNone)
 	{
-		pev->velocity = pev->velocity * 0.5;
-		pev->framerate = 0.2;
+		v.velocity = v.velocity * 0.5;
+		v.framerate = 0.2;
 	}
 	else
 	{
-		pev->framerate = 1.0;
+		v.framerate = 1.0;
 	}
 }
 
 
 bool CGrenade::Spawn()
 {
-	pev->movetype = MOVETYPE_BOUNCE;
-	pev->classname = MAKE_STRING("grenade");
+	v.movetype = MOVETYPE_BOUNCE;
+	v.classname = MAKE_STRING("grenade");
 
-	pev->solid = SOLID_BBOX;
+	v.solid = SOLID_BBOX;
 
 	SetModel("models/grenade.mdl");
 	SetSize(g_vecZero, g_vecZero);
 
-	pev->dmg = 100;
-	pev->dmg_save = 0;
-	pev->dmg_take = 250;
+	v.dmg = 100;
+	v.dmg_save = 0;
+	v.dmg_take = 250;
 
 	return true;
 }
@@ -199,25 +199,25 @@ bool CGrenade::Spawn()
 
 CGrenade* CGrenade::ShootContact(CBaseEntity* owner, Vector vecStart, Vector vecVelocity)
 {
-	CGrenade* pGrenade = GetClassPtr((CGrenade*)NULL);
+	CGrenade* pGrenade = Entity::Create<CGrenade>();
 	pGrenade->Spawn();
 	// contact grenades arc lower
-	pGrenade->pev->gravity = 0.5; // lower gravity since grenade is aerodynamic and engine doesn't know it.
+	pGrenade->v.gravity = 0.5; // lower gravity since grenade is aerodynamic and engine doesn't know it.
 	pGrenade->SetOrigin(vecStart);
-	pGrenade->pev->velocity = vecVelocity;
-	pGrenade->pev->angles = util::VecToAngles(pGrenade->pev->velocity);
-	pGrenade->pev->owner = owner->edict();
-	pGrenade->pev->team = owner->TeamNumber();
+	pGrenade->v.velocity = vecVelocity;
+	pGrenade->v.angles = util::VecToAngles(pGrenade->v.velocity);
+	pGrenade->v.owner = &owner->v;
+	pGrenade->v.team = owner->TeamNumber();
 
 	// Tumble in air
-	pGrenade->pev->avelocity.x = RANDOM_FLOAT(-100, -500);
+	pGrenade->v.avelocity.x = engine::RandomFloat(-100, -500);
 
 	// Explode on contact
 	pGrenade->SetTouch(&CGrenade::ExplodeTouch);
 
-	pGrenade->pev->dmg = 100;
-	pGrenade->pev->dmg_save = 0;
-	pGrenade->pev->dmg_take = 250;
+	pGrenade->v.dmg = 100;
+	pGrenade->v.dmg_save = 0;
+	pGrenade->v.dmg_take = 250;
 
 	return pGrenade;
 }
@@ -231,10 +231,10 @@ bool CGrenade::ShouldCollide(CBaseEntity* other)
 	}
 
 	/* Don't collide with teammates for the first moments of flight. */
-	return gpGlobals->time - pev->air_finished >= 0.5F
+	return gpGlobals->time - v.air_finished >= 0.5F
 		|| g_pGameRules->FPlayerCanTakeDamage(
-			dynamic_cast<CBasePlayer*>(other),
-			CBaseEntity::Instance(pev->owner),
+			static_cast<CBasePlayer*>(other),
+			v.owner->Get<CBasePlayer>(),
 			this);
 }
 
@@ -243,21 +243,21 @@ bool CGrenade::ShouldCollide(CBaseEntity* other)
 
 bool CPrimeGrenade::Spawn()
 {
-	pev->classname = MAKE_STRING("grenade");
-	pev->movetype = MOVETYPE_NONE;
-	pev->solid = SOLID_NOT;
+	v.classname = MAKE_STRING("grenade");
+	v.movetype = MOVETYPE_NONE;
+	v.solid = SOLID_NOT;
 
 	SetSize(g_vecZero, g_vecZero);
 
-	SetOrigin(pev->owner->v.origin);
+	SetOrigin(v.owner->origin);
 
 	SetThink(&CPrimeGrenade::PrimedThink);
-	pev->nextthink = gpGlobals->time + 0.8;
-	pev->dmgtime = pev->nextthink + 3.0;
+	v.nextthink = gpGlobals->time + 0.8;
+	v.dmgtime = v.nextthink + 3.0;
 
-	pev->dmg = 180;
-	pev->dmg_save = 0;
-	pev->dmg_take = 360;
+	v.dmg = 180;
+	v.dmg_save = 0;
+	v.dmg_take = 360;
 
 	return true;
 }
@@ -265,7 +265,7 @@ bool CPrimeGrenade::Spawn()
 
 void CPrimeGrenade::PrimedThink()
 {
-	auto owner = dynamic_cast<CBasePlayer*>(CBaseEntity::Instance(pev->owner));
+	auto owner = v.owner->Get<CBasePlayer>();
 
 	if (owner == nullptr)
 	{
@@ -273,7 +273,7 @@ void CPrimeGrenade::PrimedThink()
 		return;
 	}
 
-	SetOrigin(owner->pev->origin);
+	SetOrigin(owner->v.origin);
 
 	if (!owner->IsAlive())
 	{
@@ -289,12 +289,12 @@ void CPrimeGrenade::PrimedThink()
 
 	if (!owner->InState(CBasePlayer::State::GrenadeThrowing))
 	{
-		if (pev->dmgtime <= gpGlobals->time)
+		if (v.dmgtime <= gpGlobals->time)
 		{
 			Throw(kOvercook);
 			return;
 		}
-		pev->nextthink = gpGlobals->time + 0.1;
+		v.nextthink = gpGlobals->time + 0.1;
 		return;
 	}
 
@@ -305,7 +305,7 @@ void CPrimeGrenade::PrimedThink()
 /* Toodles TODO: Point contents doesn't catch both "no grenades" and "no build". */
 bool CPrimeGrenade::CanDetonate()
 {
-	const auto contents = g_engfuncs.pfnPointContents(pev->origin);
+	const auto contents = engine::PointContents(v.origin);
 
 	if (contents != CONTENTS_SOLID
 	 && contents != CONTENTS_SKY
@@ -314,9 +314,9 @@ bool CPrimeGrenade::CanDetonate()
 		return true;
 	}
 
-	if (contents == CONTENTS_NO_GRENADES && !FStringNull(pev->model))
+	if (contents == CONTENTS_NO_GRENADES && !FStringNull(v.model))
 	{
-		Vector origin = pev->origin + Vector(0.0F, 0.0F, 4.0F);
+		Vector origin = v.origin + Vector(0.0F, 0.0F, 4.0F);
 
 		MessageBegin(MSG_PVS, SVC_TEMPENTITY, origin);
 		WriteByte(TE_SPRITE);
@@ -338,20 +338,20 @@ void CPrimeGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 	// Pull out of the wall a bit
 	if (pTrace->flFraction != 1.0)
 	{
-		pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
+		v.origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
 	}
 
-	tent::Explosion(pev->origin, -pTrace->vecPlaneNormal, tent::ExplosionType::Normal, pev->dmg);
+	tent::Explosion(v.origin, -pTrace->vecPlaneNormal, tent::ExplosionType::Normal, v.dmg);
 
 	CBaseEntity* owner;
-	if (pev->owner)
-		owner = CBaseEntity::Instance(pev->owner);
+	if (v.owner)
+		owner = v.owner->Get<CBasePlayer>();
 	else
 		owner = this;
 
-	pev->owner = nullptr; // can't traceline attack owner if this is set
+	v.owner = nullptr; // can't traceline attack owner if this is set
 
-	RadiusDamage(pev->origin, this, owner, pev->dmg, pev->dmg_save, pev->dmg_take, bitsDamageType);
+	RadiusDamage(v.origin, this, owner, v.dmg, v.dmg_save, v.dmg_take, bitsDamageType);
 
 	Remove();
 }
@@ -359,51 +359,51 @@ void CPrimeGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 
 void CPrimeGrenade::Throw(throw_e mode)
 {
-	auto owner = dynamic_cast<CBasePlayer*>(CBaseEntity::Instance(pev->owner));
+	auto owner = v.owner->Get<CBasePlayer>();
 
-	pev->movetype = MOVETYPE_BOUNCE;
-	pev->solid = SOLID_BBOX;
+	v.movetype = MOVETYPE_BOUNCE;
+	v.solid = SOLID_BBOX;
 
-	SetOrigin(owner->pev->origin);
-	pev->angles = Vector(0, owner->pev->angles.y, 0);
+	SetOrigin(owner->v.origin);
+	v.angles = Vector(0, owner->v.angles.y, 0);
 
 	if (mode == kOvercook)
 	{
-		pev->velocity = g_vecZero;
+		v.velocity = g_vecZero;
 
 		SetThink(&CPrimeGrenade::Detonate);
-		pev->nextthink = gpGlobals->time;
+		v.nextthink = gpGlobals->time;
 	}
 	else
 	{
-		pev->gravity = 0.81;
-		pev->friction = 0.6;
+		v.gravity = 0.81;
+		v.friction = 0.6;
 
 		SetModel(GetModelName());
 		SetSize(g_vecZero, g_vecZero);
 
 		if (mode == kDrop)
 		{
-			pev->velocity = Vector(0, 0, 30);
+			v.velocity = Vector(0, 0, 30);
 		}
 		else
 		{
-			util::MakeVectors(owner->pev->v_angle);
-			pev->velocity = gpGlobals->v_forward * 600 + gpGlobals->v_up * 200;
+			util::MakeVectors(owner->v.v_angle);
+			v.velocity = gpGlobals->v_forward * 600 + gpGlobals->v_up * 200;
 
 			EmitSound("weapons/grenade.wav", CHAN_BODY, VOL_NORM, ATTN_IDLE);
 		}
 
 		SetTouch(&CPrimeGrenade::BounceTouch);
 		SetThink(&CPrimeGrenade::TumbleThink);
-		pev->nextthink = gpGlobals->time + 0.1;
+		v.nextthink = gpGlobals->time + 0.1;
 
-		pev->sequence = g_engfuncs.pfnRandomLong(3, 6);
-		pev->framerate = 1.0;
+		v.sequence = engine::RandomLong(3, 6);
+		v.framerate = 1.0;
 		ResetSequenceInfo();
 	}
 
-	pev->air_finished = gpGlobals->time;
+	v.air_finished = gpGlobals->time;
 
 	MessageBegin(MSG_ONE, gmsgStatusIcon, owner);
 	WriteByte(0);
@@ -418,10 +418,10 @@ void CPrimeGrenade::Throw(throw_e mode)
 
 CPrimeGrenade* CPrimeGrenade::PrimeGrenade(CBaseEntity* owner)
 {
-	auto grenade = GetClassPtr((CPrimeGrenade*)nullptr);
+	auto grenade = Entity::Create<CPrimeGrenade>();
 
-	grenade->pev->owner = owner->edict();
-	grenade->pev->team = owner->TeamNumber();
+	grenade->v.owner = &owner->v;
+	grenade->v.team = owner->TeamNumber();
 	grenade->Spawn();
 
 	return grenade;
@@ -432,8 +432,8 @@ bool CCaltropCanister::Spawn()
 {
 	if (CPrimeGrenade::Spawn())
 	{
-		pev->nextthink = gpGlobals->time + 0.5;
-		pev->dmgtime = gpGlobals->time + 0.5;
+		v.nextthink = gpGlobals->time + 0.5;
+		v.dmgtime = gpGlobals->time + 0.5;
 		return true;
 	}
 	return false;
@@ -442,10 +442,10 @@ bool CCaltropCanister::Spawn()
 
 CCaltropCanister* CCaltropCanister::CaltropCanister(CBaseEntity* owner)
 {
-	auto grenade = GetClassPtr((CCaltropCanister*)nullptr);
+	auto grenade = Entity::Create<CCaltropCanister>();
 
-	grenade->pev->owner = owner->edict();
-	grenade->pev->team = owner->TeamNumber();
+	grenade->v.owner = &owner->v;
+	grenade->v.team = owner->TeamNumber();
 	grenade->Spawn();
 
 	return grenade;
@@ -454,10 +454,10 @@ CCaltropCanister* CCaltropCanister::CaltropCanister(CBaseEntity* owner)
 
 void CCaltropCanister::Throw(throw_e mode)
 {
-	auto owner = dynamic_cast<CBasePlayer*>(CBaseEntity::Instance(pev->owner));
+	auto owner = v.owner->Get<CBasePlayer>();
 
-	SetOrigin(owner->pev->origin);
-	pev->angles = Vector(0, owner->pev->angles.y, 0);
+	SetOrigin(owner->v.origin);
+	v.angles = Vector(0, owner->v.angles.y, 0);
 
 	if (CanDetonate())
 	{
@@ -465,8 +465,8 @@ void CCaltropCanister::Throw(throw_e mode)
 		{
 			CCaltrop::Caltrop(
 				owner,
-				pev->origin,
-				pev->angles.y + (360 / static_cast<float>(kNumCaltrops)) * i);
+				v.origin,
+				v.angles.y + (360 / static_cast<float>(kNumCaltrops)) * i);
 		}
 	}
 
@@ -485,28 +485,28 @@ void CCaltropCanister::Throw(throw_e mode)
 
 bool CCaltrop::Spawn()
 {
-	pev->classname = MAKE_STRING("caltrop");
-	pev->movetype = MOVETYPE_TOSS;
-	pev->solid = SOLID_TRIGGER;
+	v.classname = MAKE_STRING("caltrop");
+	v.movetype = MOVETYPE_TOSS;
+	v.solid = SOLID_TRIGGER;
 
-	SetOrigin(pev->origin);
-	pev->angles = Vector(0, pev->angles.y, 0);
+	SetOrigin(v.origin);
+	v.angles = Vector(0, v.angles.y, 0);
 
-	pev->gravity = 0.5;
-	pev->friction = 0.5;
+	v.gravity = 0.5;
+	v.friction = 0.5;
 
 	SetModel(GetModelName());
 	SetSize(g_vecZero, g_vecZero);
 
-	util::MakeVectors(pev->angles);
-	pev->velocity = gpGlobals->v_forward * 100 + gpGlobals->v_up * 200;
-	pev->avelocity = Vector(400, 400, 400);
+	util::MakeVectors(v.angles);
+	v.velocity = gpGlobals->v_forward * 100 + gpGlobals->v_up * 200;
+	v.avelocity = Vector(400, 400, 400);
 
-	pev->health = 10;
+	v.health = 10;
 	SetThink(&CCaltrop::CaltropThink);
-	pev->nextthink = gpGlobals->time + 0.2;
+	v.nextthink = gpGlobals->time + 0.2;
 
-	pev->dmg = 10;
+	v.dmg = 10;
 
 	return true;
 }
@@ -514,30 +514,30 @@ bool CCaltrop::Spawn()
 
 void CCaltrop::CaltropThink()
 {
-	if (pev->velocity == g_vecZero || (pev->flags & FL_ONGROUND) != 0)
+	if (v.velocity == g_vecZero || (v.flags & FL_ONGROUND) != 0)
 	{
 		EmitSound("weapons/tink1.wav", CHAN_AUTO, VOL_NORM, ATTN_IDLE);
 
-		pev->angles.x = pev->angles.z = 0;
-		pev->avelocity = g_vecZero;
+		v.angles.x = v.angles.z = 0;
+		v.avelocity = g_vecZero;
 
 		SetTouch(&CCaltrop::CaltropTouch);
 		SetThink(&CBaseEntity::Remove);
-		pev->nextthink = gpGlobals->time + 15;
+		v.nextthink = gpGlobals->time + 15;
 
-		SetOrigin(pev->origin);
+		SetOrigin(v.origin);
 	}
 	else
 	{
-		pev->health--;
+		v.health--;
 
-		if (pev->health < 0)
+		if (v.health < 0)
 		{
 			Remove();
 			return;
 		}
 
-		pev->nextthink = gpGlobals->time + 0.2;
+		v.nextthink = gpGlobals->time + 0.2;
 	}
 }
 
@@ -548,9 +548,9 @@ void CCaltrop::CaltropTouch(CBaseEntity* other)
 		return;
 	}
 
-	if (other->TakeDamage(this, CBaseEntity::Instance(pev->owner), pev->dmg, DMG_CALTROP))
+	if (other->TakeDamage(this, v.owner->Get<CBasePlayer>(), v.dmg, DMG_CALTROP))
 	{
-		CBasePlayer* player = dynamic_cast<CBasePlayer*>(other);
+		auto player = static_cast<CBasePlayer*>(other);
 
 		player->m_nLegDamage = std::min(player->m_nLegDamage + 1, 6);
 		MessageBegin(MSG_ONE, gmsgStatusIcon, player);
@@ -572,19 +572,19 @@ bool CCaltrop::ShouldCollide(CBaseEntity* other)
 
 	return g_pGameRules->FPlayerCanTakeDamage(
 		dynamic_cast<CBasePlayer*>(other),
-		CBaseEntity::Instance(pev->owner),
+		v.owner->Get<CBasePlayer>(),
 		this);
 }
 
 
 CCaltrop* CCaltrop::Caltrop(CBaseEntity* owner, const Vector& origin, const float yaw)
 {
-	auto grenade = GetClassPtr((CCaltrop*)nullptr);
+	auto grenade = Entity::Create<CCaltrop>();
 
-	grenade->pev->owner = owner->edict();
-	grenade->pev->team = owner->TeamNumber();
-	grenade->pev->origin = origin;
-	grenade->pev->angles = Vector(0, yaw, 0);
+	grenade->v.owner = &owner->v;
+	grenade->v.team = owner->TeamNumber();
+	grenade->v.origin = origin;
+	grenade->v.angles = Vector(0, yaw, 0);
 	grenade->Spawn();
 
 	return grenade;
@@ -595,24 +595,24 @@ void CConcussionGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 {
 	if (pTrace->flFraction != 1.0)
 	{
-		pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
+		v.origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
 	}
 
 	CBaseEntity* owner = this;
 	CBaseEntity* predictionOwner = nullptr;
-	if (pev->owner)
+	if (v.owner)
 	{
-		owner = CBaseEntity::Instance(pev->owner);
+		owner = v.owner->Get<CBasePlayer>();
 
-		if (FStringNull(pev->model))
+		if (FStringNull(v.model))
 		{
 			predictionOwner = owner;
 		}
 	}
 
-	pev->owner = nullptr;
+	v.owner = nullptr;
 
-	tent::Explosion(pev->origin, -pTrace->vecPlaneNormal, tent::ExplosionType::Concussion, pev->dmg, true, true, predictionOwner);
+	tent::Explosion(v.origin, -pTrace->vecPlaneNormal, tent::ExplosionType::Concussion, v.dmg, true, true, predictionOwner);
 
 	CBaseEntity* entity = nullptr;
 	TraceResult tr;
@@ -620,7 +620,7 @@ void CConcussionGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 	float length;
 	float ajdusted;
 
-	while ((entity = util::FindEntityInSphere(entity, pev->origin, 280)) != nullptr)
+	while ((entity = util::FindEntityInSphere(entity, v.origin, 280)) != nullptr)
 	{
 		if (!entity->IsPlayer()
 		 || entity == predictionOwner)
@@ -628,29 +628,29 @@ void CConcussionGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 			continue;
 		}
 
-		util::TraceLine(pev->origin, entity->EyePosition(), &tr, owner, util::kTraceBox);
+		util::TraceLine(v.origin, entity->EyePosition(), &tr, owner, util::kTraceBox);
 
-		if (tr.flFraction != 1.0F && tr.pHit != entity->edict())
+		if (tr.flFraction != 1.0F && tr.pHit != &entity->v)
 		{
 			continue;
 		}
 
-		difference = entity->pev->origin - pev->origin;
+		difference = entity->v.origin - v.origin;
 
 		length = difference.Length();
 
 		if (length < 16.0F)
 		{
-			difference = entity->pev->velocity * 0.33F;
+			difference = entity->v.velocity * 0.33F;
 		}
 
-		entity->pev->velocity = difference;
+		entity->v.velocity = difference;
 
 		ajdusted = (240 - length * 0.5F) * 0.03F;
 
-		entity->pev->velocity.x *= ajdusted;
-		entity->pev->velocity.y *= ajdusted;
-		entity->pev->velocity.z *= ajdusted * 1.5F;
+		entity->v.velocity.x *= ajdusted;
+		entity->v.velocity.y *= ajdusted;
+		entity->v.velocity.z *= ajdusted * 1.5F;
 
 		if (entity == owner || g_pGameRules->PlayerRelationship(entity, this) < GR_ALLY)
 		{
@@ -664,10 +664,10 @@ void CConcussionGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 
 CConcussionGrenade* CConcussionGrenade::ConcussionGrenade(CBaseEntity* owner)
 {
-	auto grenade = GetClassPtr((CConcussionGrenade*)nullptr);
+	auto grenade = Entity::Create<CConcussionGrenade>();
 
-	grenade->pev->owner = owner->edict();
-	grenade->pev->team = owner->TeamNumber();
+	grenade->v.owner = &owner->v;
+	grenade->v.team = owner->TeamNumber();
 	grenade->Spawn();
 
 	return grenade;
@@ -680,18 +680,18 @@ void CFlare::StickyTouch(CBaseEntity* pOther)
 
 	if (util::GetGlobalTrace().vecPlaneNormal.z >= kGroundPlaneMinZ)
 	{
-		pev->velocity = g_vecZero;
-		pev->movetype = MOVETYPE_TOSS;
-		SetTouch(nullptr);
+		v.velocity = g_vecZero;
+		v.movetype = MOVETYPE_TOSS;
+		ClearTouch();
 	}
 }
 
 
 void CFlare::Explode(TraceResult* pTrace, int bitsDamageType)
 {
-	pev->effects |= EF_LIGHT;
+	v.effects |= EF_LIGHT;
 	SetThink(&CFlare::Remove);
-	pev->nextthink = gpGlobals->time + 40.0F;
+	v.nextthink = gpGlobals->time + 40.0F;
 }
 
 
@@ -699,8 +699,8 @@ bool CFlare::Spawn()
 {
 	if (CPrimeGrenade::Spawn())
 	{
-		pev->nextthink = gpGlobals->time + 0.5;
-		pev->dmgtime = gpGlobals->time + 0.5;
+		v.nextthink = gpGlobals->time + 0.5;
+		v.dmgtime = gpGlobals->time + 0.5;
 		return true;
 	}
 	return false;
@@ -709,10 +709,10 @@ bool CFlare::Spawn()
 
 CFlare* CFlare::Flare(CBaseEntity* owner)
 {
-	auto grenade = GetClassPtr((CFlare*)nullptr);
+	auto grenade = Entity::Create<CFlare>();
 
-	grenade->pev->owner = owner->edict();
-	grenade->pev->team = owner->TeamNumber();
+	grenade->v.owner = &owner->v;
+	grenade->v.team = owner->TeamNumber();
 	grenade->Spawn();
 
 	return grenade;
@@ -734,14 +734,14 @@ void CFlare::Throw(throw_e mode)
 
 bool CNailGrenade::Spawn()
 {
-	pev->health = kNumBursts;
+	v.health = kNumBursts;
 	return CPrimeGrenade::Spawn();
 }
 
 
 void CNailGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 {
-	if (pev->health <= 0)
+	if (v.health <= 0)
 	{
 		CPrimeGrenade::Explode(pTrace, bitsDamageType);
 	}
@@ -750,44 +750,44 @@ void CNailGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 		SetModel(GetModelName());
 		SetSize(g_vecZero, g_vecZero);
 
-		pev->oldorigin = pev->origin;
-		pev->velocity = Vector(0, 0, 272);
-		pev->avelocity = Vector(0, 500, 0);
+		v.oldorigin = v.origin;
+		v.velocity = Vector(0, 0, 272);
+		v.avelocity = Vector(0, 500, 0);
 
-		if ((pev->flags & FL_ONGROUND) != 0)
+		if ((v.flags & FL_ONGROUND) != 0)
 		{
 			BounceSound();
 		}
 
 		SetThink(&CNailGrenade::GetReadyToNail);
-		pev->nextthink = gpGlobals->time + 0.7F;
+		v.nextthink = gpGlobals->time + 0.7F;
 	}
 }
 
 
 void CNailGrenade::GetReadyToNail()
 {
-	pev->movetype = MOVETYPE_FLY;
-	pev->solid = SOLID_NOT;
+	v.movetype = MOVETYPE_FLY;
+	v.solid = SOLID_NOT;
 
-	SetOrigin(pev->oldorigin + Vector(0, 0, 32));
-	pev->velocity = g_vecZero;
+	SetOrigin(v.oldorigin + Vector(0, 0, 32));
+	v.velocity = g_vecZero;
 
 	SetThink(&CNailGrenade::GetNailedIdiot);
-	pev->nextthink = gpGlobals->time + 0.1F;
+	v.nextthink = gpGlobals->time + 0.1F;
 }
 
 
 void CNailGrenade::GetNailedIdiot()
 {
-	auto owner = CBaseEntity::Instance(pev->owner);
+	auto owner = v.owner->Get<CBasePlayer>();
 
 	for (int i = 0; i < kNumNails; i++)
 	{
 		Vector angles =
 			Vector(
 				0,
-				(360 / static_cast<float>(kNumBursts)) * pev->health
+				(360 / static_cast<float>(kNumBursts)) * v.health
 					+ (360 / static_cast<float>(kNumNails)) * i,
 				0);
 
@@ -795,48 +795,48 @@ void CNailGrenade::GetNailedIdiot()
 		util::MakeVectorsPrivate(angles, dir, nullptr, nullptr);
 
 		CNail::CreateNailGrenadeNail(
-			pev->origin + dir * 12,
+			v.origin + dir * 12,
 			dir,
 			18,
 			owner
 		);
 	}
 
-	g_engfuncs.pfnPlaybackEvent(
+	engine::PlaybackEvent(
 		FEV_GLOBAL | FEV_RELIABLE,
-		owner->edict(),
+		&owner->v,
 		g_usGetNailedIdiot,
 		0.0F,
-		pev->origin,
-		pev->angles,
+		v.origin,
+		v.angles,
 		0.0F,
 		0.0F,
-		pev->health,
+		v.health,
 		0,
 		false,
 		false
 	);
 
-	pev->health--;
+	v.health--;
 
-	if (pev->health <= 0)
+	if (v.health <= 0)
 	{
 		SetThink(&CNailGrenade::Detonate);
 	}
 
-	pev->nextthink = gpGlobals->time + 0.1F;
+	v.nextthink = gpGlobals->time + 0.1F;
 }
 
 
 CNailGrenade* CNailGrenade::NailGrenade(CBaseEntity* owner)
 {
-	auto grenade = GetClassPtr((CNailGrenade*)nullptr);
+	auto grenade = Entity::Create<CNailGrenade>();
 
-	grenade->pev->owner = owner->edict();
-	grenade->pev->team = owner->TeamNumber();
+	grenade->v.owner = &owner->v;
+	grenade->v.team = owner->TeamNumber();
 	grenade->Spawn();
 
-	grenade->pev->classname = MAKE_STRING("nailgrenade");
+	grenade->v.classname = MAKE_STRING("nailgrenade");
 
 	return grenade;
 }
@@ -844,7 +844,7 @@ CNailGrenade* CNailGrenade::NailGrenade(CBaseEntity* owner)
 
 void CMirv::Explode(TraceResult* pTrace, int bitsDamageType)
 {
-	auto owner = CBaseEntity::Instance(pev->owner);
+	auto owner = v.owner->Get<CBasePlayer>();
 
 	CPrimeGrenade::Explode(pTrace, bitsDamageType);
 
@@ -852,21 +852,21 @@ void CMirv::Explode(TraceResult* pTrace, int bitsDamageType)
 	{
 		CBomblet::Bomblet(
 			owner,
-			pev->origin,
-			pev->angles.y + (360 / static_cast<float>(kNumBomblets)) * i);
+			v.origin,
+			v.angles.y + (360 / static_cast<float>(kNumBomblets)) * i);
 	}
 }
 
 
 CMirv* CMirv::Mirv(CBaseEntity* owner)
 {
-	auto grenade = GetClassPtr((CMirv*)nullptr);
+	auto grenade = Entity::Create<CMirv>();
 
-	grenade->pev->owner = owner->edict();
-	grenade->pev->team = owner->TeamNumber();
+	grenade->v.owner = &owner->v;
+	grenade->v.team = owner->TeamNumber();
 	grenade->Spawn();
 
-	grenade->pev->classname = MAKE_STRING("mirvgrenade");
+	grenade->v.classname = MAKE_STRING("mirvgrenade");
 
 	return grenade;
 }
@@ -874,34 +874,34 @@ CMirv* CMirv::Mirv(CBaseEntity* owner)
 
 bool CBomblet::Spawn()
 {
-	pev->movetype = MOVETYPE_BOUNCE;
-	pev->solid = SOLID_TRIGGER;
+	v.movetype = MOVETYPE_BOUNCE;
+	v.solid = SOLID_TRIGGER;
 
-	pev->angles = Vector(0, pev->angles.y, 0);
+	v.angles = Vector(0, v.angles.y, 0);
 
-	util::MakeVectors(pev->angles);
-	SetOrigin(pev->origin + gpGlobals->v_forward * 2 + Vector(0.0F, 0.0F, 2.0F));
+	util::MakeVectors(v.angles);
+	SetOrigin(v.origin + gpGlobals->v_forward * 2 + Vector(0.0F, 0.0F, 2.0F));
 
-	pev->gravity = 0.5;
-	pev->friction = 0.8;
+	v.gravity = 0.5;
+	v.friction = 0.8;
 
 	SetModel(GetModelName());
 	SetSize(g_vecZero, g_vecZero);
 
-	pev->velocity = gpGlobals->v_forward * 75 + gpGlobals->v_up * 200;
+	v.velocity = gpGlobals->v_forward * 75 + gpGlobals->v_up * 200;
 
 	SetTouch(&CPrimeGrenade::BounceTouch);
 	SetThink(&CPrimeGrenade::TumbleThink);
-	pev->nextthink = gpGlobals->time + 0.1;
-	pev->dmgtime = pev->nextthink + 2.5;
+	v.nextthink = gpGlobals->time + 0.1;
+	v.dmgtime = v.nextthink + 2.5;
 
-	pev->sequence = g_engfuncs.pfnRandomLong(3, 6);
-	pev->framerate = 1.0;
+	v.sequence = engine::RandomLong(3, 6);
+	v.framerate = 1.0;
 	ResetSequenceInfo();
 
-	pev->dmg = 180;
-	pev->dmg_save = 0;
-	pev->dmg_take = 360;
+	v.dmg = 180;
+	v.dmg_save = 0;
+	v.dmg_take = 360;
 
 	return true;
 }
@@ -915,23 +915,23 @@ bool CBomblet::ShouldCollide(CBaseEntity* other)
 	}
 
 	return g_pGameRules->FPlayerCanTakeDamage(
-		dynamic_cast<CBasePlayer*>(other),
-		CBaseEntity::Instance(pev->owner),
+		static_cast<CBasePlayer*>(other),
+		v.owner->Get<CBasePlayer>(),
 		this);
 }
 
 
 CBomblet* CBomblet::Bomblet(CBaseEntity* owner, const Vector& origin, const float yaw)
 {
-	auto grenade = GetClassPtr((CBomblet*)nullptr);
+	auto grenade = Entity::Create<CBomblet>();
 
-	grenade->pev->owner = owner->edict();
-	grenade->pev->team = owner->TeamNumber();
-	grenade->pev->origin = origin;
-	grenade->pev->angles = Vector(0, yaw, 0);
+	grenade->v.owner = &owner->v;
+	grenade->v.team = owner->TeamNumber();
+	grenade->v.origin = origin;
+	grenade->v.angles = Vector(0, yaw, 0);
 	grenade->Spawn();
 
-	grenade->pev->classname = MAKE_STRING("mirvgrenade");
+	grenade->v.classname = MAKE_STRING("mirvgrenade");
 
 	return grenade;
 }

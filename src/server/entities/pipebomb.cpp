@@ -22,24 +22,24 @@ CPipeBomb* CPipeBomb::CreatePipeBomb(
 	CBaseEntity* owner,
 	CPipeBombLauncher* launcher)
 {
-	auto pipebomb = GetClassPtr((CPipeBomb*)nullptr);
+	auto pipebomb = Entity::Create<CPipeBomb>();
 
-	pipebomb->pev->origin = origin;
-	pipebomb->pev->angles = dir;
-	pipebomb->pev->dmg = damageMax;
-	pipebomb->pev->dmg_save = damageMin;
-	pipebomb->pev->dmg_take = radius;
+	pipebomb->v.origin = origin;
+	pipebomb->v.angles = dir;
+	pipebomb->v.dmg = damageMax;
+	pipebomb->v.dmg_save = damageMin;
+	pipebomb->v.dmg_take = radius;
     if (launcher != nullptr)
     {
         launcher->AddPipeBomb(pipebomb);
-        pipebomb->pev->skin = 0;
+        pipebomb->v.skin = 0;
     }
     else
     {
-        pipebomb->pev->skin = 1;
+        pipebomb->v.skin = 1;
     }
-	pipebomb->pev->owner = owner->edict();
-	pipebomb->pev->team = owner->TeamNumber();
+	pipebomb->v.owner = &owner->v;
+	pipebomb->v.team = owner->TeamNumber();
 	pipebomb->Spawn();
 
 	return pipebomb;
@@ -48,43 +48,43 @@ CPipeBomb* CPipeBomb::CreatePipeBomb(
 
 bool CPipeBomb::Spawn()
 {
-	pev->movetype = MOVETYPE_BOUNCE;
+	v.movetype = MOVETYPE_BOUNCE;
 
-	if (pev->skin != 0)
+	if (v.skin != 0)
 	{
-		pev->classname = MAKE_STRING("glgrenade");
-		pev->solid = SOLID_TRIGGER;
+		v.classname = MAKE_STRING("glgrenade");
+		v.solid = SOLID_TRIGGER;
 	}
 	else
 	{
-		pev->classname = MAKE_STRING("pipebomb");
-		pev->solid = SOLID_BBOX;
+		v.classname = MAKE_STRING("pipebomb");
+		v.solid = SOLID_BBOX;
 	}
 
 	SetModel("models/pipebomb.mdl");
 
 	SetSize(g_vecZero, g_vecZero);
 
-	SetOrigin(pev->origin);
+	SetOrigin(v.origin);
 
-	pev->velocity = pev->angles * 800;
-	pev->angles = util::VecToAngles(pev->angles);
-    pev->avelocity = Vector(300, 300, 300);
-    pev->friction = 0.5F;
+	v.velocity = v.angles * 800;
+	v.angles = util::VecToAngles(v.angles);
+    v.avelocity = Vector(300, 300, 300);
+    v.friction = 0.5F;
 
 	SetTouch(&CPipeBomb::PipeBombTouch);
 
-    if (pev->skin != 0)
+    if (v.skin != 0)
     {
         SetThink(&CPipeBomb::Detonate);
-        pev->nextthink = gpGlobals->time + 2.5F;
+        v.nextthink = gpGlobals->time + 2.5F;
     }
     else
     {
-        pev->pain_finished = gpGlobals->time + 0.5F;
+        v.pain_finished = gpGlobals->time + 0.5F;
     }
 
-	pev->air_finished = gpGlobals->time;
+	v.air_finished = gpGlobals->time;
 
 	tent::RocketTrail(this, false);
 
@@ -94,13 +94,13 @@ bool CPipeBomb::Spawn()
 
 void CPipeBomb::PipeBombTouch(CBaseEntity* pOther)
 {
-	if (g_engfuncs.pfnPointContents(pev->origin) != CONTENTS_SKY)
+	if (engine::PointContents(v.origin) != CONTENTS_SKY)
 	{
 		CBaseEntity* owner = this;
 
-		if (pev->owner != nullptr)
+		if (v.owner != nullptr)
 		{
-			owner = CBaseEntity::Instance(pev->owner);
+			owner = v.owner->Get<CBaseEntity>();
 
 			if (pOther == owner)
 			{
@@ -108,20 +108,20 @@ void CPipeBomb::PipeBombTouch(CBaseEntity* pOther)
 			}
 		}
 
-        if (pev->skin != 0 && pOther->pev->takedamage != DAMAGE_NO)
+        if (v.skin != 0 && pOther->v.takedamage != DAMAGE_NO)
         {
     		ExplodeTouch(pOther);
         }
         else
 		{
-			if (pev->flags & FL_ONGROUND)
+			if (v.flags & FL_ONGROUND)
 			{
-				pev->velocity = pev->velocity * 0.75F;
-				pev->angles.x = pev->angles.z = 0.0F;
+				v.velocity = v.velocity * 0.75F;
+				v.angles.x = v.angles.z = 0.0F;
 
-				if (pev->velocity.Length() <= 20.0F)
+				if (v.velocity.Length() <= 20.0F)
 				{
-					pev->avelocity = g_vecZero;
+					v.avelocity = g_vecZero;
 				}
 			}
 

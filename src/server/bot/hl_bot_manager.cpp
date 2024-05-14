@@ -72,18 +72,21 @@ void CHLBotManager::AddBot(const char *profileName)
 	}
 	char szRejectReason[128];
 	auto bot = CreateBot<CHLBot>(profile);
-	if (bot && ClientConnect(bot->edict(), STRING(bot->pev->netname), "127.0.0.1", szRejectReason))
+	if (bot != nullptr)
 	{
-		ClientPutInServer(bot->edict());
+		if (ClientConnect(&bot->v, STRING(bot->v.netname), "127.0.0.1", szRejectReason))
+		{
+			ClientPutInServer(&bot->v);
+		}
 	}
 }
 
 
 bool CHLBotManager::ClientCommand(CBasePlayer *pPlayer, const char *pcmd)
 {
-	if (FStrEq(pcmd, "bot"))
+	if (streq(pcmd, "bot"))
 	{
-		AddBot(g_engfuncs.pfnCmd_Argc() > 1 ? g_engfuncs.pfnCmd_Argv(1) : nullptr);
+		AddBot(engine::Cmd_Argc() > 1 ? engine::Cmd_Argv(1) : nullptr);
 		return true;
 	}
 	return false;
@@ -127,7 +130,7 @@ void CHLBotManager::ServerActivate()
 	TheBotProfiles = new BotProfileManager();
 	TheBotProfiles->Init(cv_bot_profile_db.string);
 
-	m_NextQuotaCheckTime = gpGlobals->time;
+	m_NextQuotaCheckTime = gpGlobals->time + 3.0f;
 }
 
 
@@ -146,8 +149,8 @@ void CHLBotManager::ServerDeactivate()
 		{
 			continue;
 		}
-		player->pev->takedamage = DAMAGE_NO;
-		player->pev->solid = SOLID_NOT;
+		player->v.takedamage = DAMAGE_NO;
+		player->v.solid = SOLID_NOT;
 	}
 	delete TheBotProfiles;
 	TheBotProfiles = nullptr;
@@ -189,24 +192,24 @@ void Bot_ServerCommand()
 
 void Bot_RegisterCvars()
 {
-	CVAR_REGISTER(&cv_bot_traceview);
-	CVAR_REGISTER(&cv_bot_stop);
-	CVAR_REGISTER(&cv_bot_show_nav);
-	CVAR_REGISTER(&cv_bot_show_danger);
-	CVAR_REGISTER(&cv_bot_nav_edit);
-	CVAR_REGISTER(&cv_bot_nav_zdraw);
-	CVAR_REGISTER(&cv_bot_walk);
-	CVAR_REGISTER(&cv_bot_difficulty);
-	CVAR_REGISTER(&cv_bot_debug);
-	CVAR_REGISTER(&cv_bot_quicksave);
-	CVAR_REGISTER(&cv_bot_quota);
-	CVAR_REGISTER(&cv_bot_quota_match);
-	CVAR_REGISTER(&cv_bot_prefix);
-	CVAR_REGISTER(&cv_bot_join_team);
-	CVAR_REGISTER(&cv_bot_join_after_player);
-	CVAR_REGISTER(&cv_bot_auto_vacate);
-	CVAR_REGISTER(&cv_bot_zombie);
-	CVAR_REGISTER(&cv_bot_defer_to_human);
-	CVAR_REGISTER(&cv_bot_chatter);
-	CVAR_REGISTER(&cv_bot_profile_db);
+	engine::CVarRegister(&cv_bot_traceview);
+	engine::CVarRegister(&cv_bot_stop);
+	engine::CVarRegister(&cv_bot_show_nav);
+	engine::CVarRegister(&cv_bot_show_danger);
+	engine::CVarRegister(&cv_bot_nav_edit);
+	engine::CVarRegister(&cv_bot_nav_zdraw);
+	engine::CVarRegister(&cv_bot_walk);
+	engine::CVarRegister(&cv_bot_difficulty);
+	engine::CVarRegister(&cv_bot_debug);
+	engine::CVarRegister(&cv_bot_quicksave);
+	engine::CVarRegister(&cv_bot_quota);
+	engine::CVarRegister(&cv_bot_quota_match);
+	engine::CVarRegister(&cv_bot_prefix);
+	engine::CVarRegister(&cv_bot_join_team);
+	engine::CVarRegister(&cv_bot_join_after_player);
+	engine::CVarRegister(&cv_bot_auto_vacate);
+	engine::CVarRegister(&cv_bot_zombie);
+	engine::CVarRegister(&cv_bot_defer_to_human);
+	engine::CVarRegister(&cv_bot_chatter);
+	engine::CVarRegister(&cv_bot_profile_db);
 }

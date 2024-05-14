@@ -357,7 +357,7 @@ void CHudMessage::Draw(const float time)
 			else
 			{
 				// The message is over
-				m_pMessages[i] = NULL;
+				m_pMessages[i] = nullptr;
 			}
 		}
 	}
@@ -423,7 +423,7 @@ void CHudMessage::MessageAdd(const char* pName, float time)
 					{
 						if (fabs(tempMessage->x - m_pMessages[j]->x) < 0.0001)
 						{
-							m_pMessages[j] = NULL;
+							m_pMessages[j] = nullptr;
 						}
 					}
 				}

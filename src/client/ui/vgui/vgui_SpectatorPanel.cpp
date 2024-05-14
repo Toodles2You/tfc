@@ -89,7 +89,7 @@ void SpectatorPanel::ActionSignal(int cmd)
 
 
 	default:
-		gEngfuncs.Con_DPrintf("Unknown SpectatorPanel ActionSingal %i.\n", cmd);
+		client::Con_DPrintf("Unknown SpectatorPanel ActionSingal %i.\n", cmd);
 		break;
 	}
 }
@@ -225,7 +225,7 @@ void SpectatorPanel::Initialize()
 	m_BottomMainLabel->setPaintBackgroundEnabled(false);
 	m_BottomMainLabel->setFgColor(Scheme::sc_primary1);
 	m_BottomMainLabel->setContentAlignment(vgui::Label::a_center);
-	m_BottomMainLabel->setBorder(NULL);
+	m_BottomMainLabel->setBorder(nullptr);
 	m_BottomMainLabel->setVisible(false);
 
 	m_InsetViewButton = new ColorButton("", XRES(2), YRES(2), XRES(240), YRES(180), false, false);
@@ -291,7 +291,7 @@ void SpectatorPanel::ShowMenu(bool isVisible)
 			snprintf(string, sizeof(string) - 1, "%c%s", HUD_PRINTCENTER, CHudTextMessage::BufferedLocaliseTextString("#Spec_Duck"));
 			string[sizeof(string) - 1] = '\0';
 
-			gHUD.m_TextMessage.MsgFunc_TextMsg(NULL, strlen(string) + 1, string);
+			gHUD.m_TextMessage.MsgFunc_TextMsg(nullptr, strlen(string) + 1, string);
 		}
 	}
 
@@ -338,7 +338,7 @@ void SpectatorPanel::EnableInsetView(bool isEnabled)
 		// short black bar to see full inset
 		m_TopBorder->setBounds(XRES(offset), 0, XRES(640 - offset), PANEL_HEIGHT);
 
-		if (0 != gEngfuncs.IsSpectateOnly())
+		if (0 != client::IsSpectateOnly())
 		{
 			m_TopBanner->setVisible(true);
 			m_TopBanner->setPos(XRES(offset), 0);
@@ -354,7 +354,7 @@ void SpectatorPanel::EnableInsetView(bool isEnabled)
 	{
 		// full black bar, no inset border
 		// show banner only in real HLTV mode
-		if (0 != gEngfuncs.IsSpectateOnly())
+		if (0 != client::IsSpectateOnly())
 		{
 			m_TopBanner->setVisible(true);
 			m_TopBanner->setPos(0, 0);

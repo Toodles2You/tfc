@@ -31,7 +31,7 @@ bool CBaseEntity::EntvarsKeyvalue(struct KeyValueData_s*) { return false; }
 bool CBaseEntity::KeyValue(KeyValueData* pkvd) { return false; }
 bool CBaseEntity::GiveHealth(float flHealth, int bitsDamageType, bool bClearEffects) { return true; }
 bool CBaseEntity::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) { return true; }
-CBaseEntity* CBaseEntity::GetNextTarget() { return NULL; }
+CBaseEntity* CBaseEntity::GetNextTarget() { return nullptr; }
 #ifdef HALFLIFE_SAVERESTORE
 bool CBaseEntity::Save(CSave& save) { return true; }
 bool CBaseEntity::Restore(CRestore& restore) { return true; }
@@ -46,7 +46,7 @@ void CBaseEntity::MakeDormant() {}
 bool CBaseEntity::IsDormant() { return false; }
 #endif
 bool CBaseEntity::ShouldToggle(USE_TYPE useType, bool currentState) { return false; }
-CBaseEntity* CBaseEntity::Create(const char* szName, const Vector& vecOrigin, const Vector& vecAngles, edict_t* pentOwner) { return NULL; }
+CBaseEntity* CBaseEntity::Create(const char* szName, const Vector& vecOrigin, const Vector& vecAngles, Entity& owner) { return nullptr; }
 void CBaseEntity::UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value) {}
 void CBaseEntity::Remove() {}
 bool CBaseEntity::FInViewCone(CBaseEntity* pEntity) { return false; }

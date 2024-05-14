@@ -44,7 +44,7 @@ class BotProfile
 public:
 	BotProfile( void )
 	{
-		m_name = NULL;
+		m_name = nullptr;
 		m_aggression = 0.0f;
 		m_skill = 0.0f;
 		m_teamwork = 0.0f;
@@ -175,7 +175,7 @@ public:
 	BotProfileManager( void );
 	~BotProfileManager( void );
 
-	void Init( const char *filename, unsigned int *checksum = NULL );
+	void Init( const char *filename, unsigned int *checksum = nullptr );
 	void Reset( void );
 
 	/// given a name, return a profile
@@ -185,7 +185,7 @@ public:
 			if ( !stricmp( name, (*iter)->GetName() ) && (*iter)->IsValidForTeam( team ) )
 				return *iter;
 
-		return NULL;
+		return nullptr;
 	}
 
 	const BotProfileList *GetProfileList( void ) const		{ return &m_profileList; }		///< return list of all profiles
@@ -195,7 +195,7 @@ public:
 	const char * GetCustomSkin( int index );				///< Returns custom skin name at a particular index
 	const char * GetCustomSkinModelname( int index );		///< Returns custom skin modelname at a particular index
 	const char * GetCustomSkinFname( int index );			///< Returns custom skin filename at a particular index
-	int GetCustomSkinIndex( const char *name, const char *filename = NULL );	///< Looks up a custom skin index by name
+	int GetCustomSkinIndex( const char *name, const char *filename = nullptr );	///< Looks up a custom skin index by name
 
 	typedef std::vector<char *> VoiceBankList;
 	const VoiceBankList* GetVoiceBanks() const { return &m_voiceBanks; }

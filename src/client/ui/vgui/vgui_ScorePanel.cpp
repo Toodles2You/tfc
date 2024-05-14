@@ -179,7 +179,7 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall, int team) : Panel(x, y,
 
 bool HACK_GetPlayerUniqueID(int iPlayer, char playerID[16])
 {
-	return 0 != gEngfuncs.GetPlayerUniqueID(iPlayer, playerID); // TODO remove after testing
+	return 0 != client::GetPlayerUniqueID(iPlayer, playerID); // TODO remove after testing
 }
 
 //-----------------------------------------------------------------------------
@@ -520,7 +520,7 @@ void ScorePanel::MouseOverCell(int row, int col)
 	if (!pl_info->name || '\0' == pl_info->name[0])
 		return;
 
-	if (0 != pl_info->thisplayer && 0 == gEngfuncs.IsSpectateOnly())
+	if (0 != pl_info->thisplayer && 0 == client::IsSpectateOnly())
 		return;
 
 	// setup the new highlight

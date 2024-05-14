@@ -255,7 +255,7 @@ bool CTFVars::KeyValue(KeyValueData* pkvd)
             switch (field->fieldType)
             {
             case FIELD_STRING:
-                (*(int*)((char*)this + field->fieldOffset)) = ALLOC_STRING(pkvd->szValue);
+                (*(int*)((char*)this + field->fieldOffset)) = engine::AllocString(pkvd->szValue);
                 break;
             case FIELD_FLOAT:
                 (*(float*)((char*)this + field->fieldOffset)) = atof(pkvd->szValue);
@@ -264,7 +264,7 @@ bool CTFVars::KeyValue(KeyValueData* pkvd)
                 (*(int*)((char*)this + field->fieldOffset)) = atoi(pkvd->szValue);
                 break;
             case FIELD_VECTOR:
-                util::StringToVector((float*)((char*)this + field->fieldOffset), pkvd->szValue);
+                util::StringToVector(*(Vector*)((char*)this + field->fieldOffset), pkvd->szValue);
                 break;
             }
             return true;
@@ -272,7 +272,7 @@ bool CTFVars::KeyValue(KeyValueData* pkvd)
     }
 
 #if 0
-    ALERT(at_aiconsole, "WARNING! Unhandled TF pair: \'%s\' = \'%s\'\n", pkvd->szKeyName, pkvd->szValue);
+    engine::AlertMessage(at_aiconsole, "WARNING! Unhandled TF pair: \'%s\' = \'%s\'\n", pkvd->szKeyName, pkvd->szValue);
 #endif
     return false;
 }
@@ -297,7 +297,7 @@ bool CTFVars::PlayerMeetsCriteria(CBaseEntity* player)
         {
             goal = util::FindItem(items_allowed);
 
-            if (goal != nullptr && goal->pev->owner != player->edict())
+            if (goal != nullptr && goal->v.owner != &player->v)
             {
                 return false;
             }
@@ -336,7 +336,7 @@ bool CTFVars::PlayerMeetsCriteria(CBaseEntity* player)
 
         if (goal != nullptr
          && !goal->InGoalState(TFGS_ACTIVE)
-         && goal->pev->origin == goal->pev->oldorigin)
+         && goal->v.origin == goal->v.oldorigin)
         {
             return false;
         }
@@ -347,7 +347,7 @@ bool CTFVars::PlayerMeetsCriteria(CBaseEntity* player)
 
         if (goal != nullptr
          && (goal->InGoalState(TFGS_ACTIVE)
-          || goal->pev->origin != goal->pev->oldorigin))
+          || goal->v.origin != goal->v.oldorigin))
         {
             return false;
         }
@@ -361,7 +361,7 @@ bool CTFVars::PlayerMeetsCriteria(CBaseEntity* player)
 
             while ((goal = (CTFGoal*)util::FindEntityByClassname(goal, "item_tfgoal")) && !got_one)
             {
-                if (goal->GetGroup() == has_item_from_group && goal->pev->owner == player->edict())
+                if (goal->GetGroup() == has_item_from_group && goal->v.owner == &player->v)
                 {
                     got_one = true;
                 }
@@ -376,7 +376,7 @@ bool CTFVars::PlayerMeetsCriteria(CBaseEntity* player)
         {
             while ((goal = (CTFGoal*)util::FindEntityByClassname(goal, "item_tfgoal")))
             {
-                if (goal->GetGroup() == hasnt_item_from_group && goal->pev->owner == player->edict())
+                if (goal->GetGroup() == hasnt_item_from_group && goal->v.owner == &player->v)
                 {
                     return false;
                 }
@@ -436,9 +436,9 @@ void CTFVars::DoGoalWork(CBaseEntity* player)
 
         if (goal != nullptr)
         {
-            if (goal->pev->owner != nullptr)
+            if (goal->v.owner != nullptr)
             {
-                CBaseEntity* owner = CBaseEntity::Instance(goal->pev->owner);
+                auto owner = goal->v.owner->Get<CBaseEntity>();
                 goal->RemoveFromPlayer(owner, GI_DROP_REMOVEGOAL);
             }
             goal->StartReturnItem(0.1F);
@@ -473,7 +473,7 @@ void CTFVars::DoGroupWork(CBaseEntity* player)
     {
         if (last_impulse == 0)
         {
-            ALERT(at_console, "Goal %i has an all_active specified but, no last_impulse\n");
+            engine::AlertMessage(at_console, "Goal %i has an all_active specified but, no last_impulse\n");
         }
         else if (util::GroupInState(all_active, TFGS_ACTIVE))
         {
@@ -557,16 +557,16 @@ void CTFVars::DisplayItemStatus(CBaseEntity* player, const int index)
         }
 
         /* Find the carrier. */
-        if (goal->pev->owner != nullptr)
+        if (goal->v.owner != nullptr)
         {
-            auto goalCarrier = CBaseEntity::Instance(goal->pev->owner);
+            auto goalCarrier = goal->v.owner->Get<CBaseEntity>();
             if (goalCarrier != nullptr)
             {
-                carrier = STRING(goalCarrier->pev->netname);
+                carrier = STRING(goalCarrier->v.netname);
             }
         }
     }
-    else if (goal->pev->origin != goal->pev->oldorigin)
+    else if (goal->v.origin != goal->v.oldorigin)
     {
         /* Goal is dropped! */
         if (isGoalOwner)
@@ -612,7 +612,7 @@ void CTFVars::DisplayItemStatus(CBaseEntity* player, const int index)
 LINK_ENTITY_TO_CLASS(info_player_teamspawn, CTFSpawn);
 LINK_ENTITY_TO_CLASS(i_p_t, CTFSpawn);
 
-CTFSpawn::CTFSpawn() : CTFGoal()
+CTFSpawn::CTFSpawn(Entity* containingEntity) : CTFGoal(containingEntity)
 {
 }
 
@@ -620,22 +620,22 @@ bool CTFSpawn::Spawn()
 {
     if (!g_bDeveloperMode)
     {
-        pev->effects |= EF_NODRAW;
+        v.effects |= EF_NODRAW;
     }
     else
     {
-        g_engfuncs.pfnPrecacheModel("models/player/civilian/civilian.mdl");
+        engine::PrecacheModel("models/player/civilian/civilian.mdl");
         SetModel("models/player/civilian/civilian.mdl");
 
-        pev->rendermode = kRenderTransAdd;
-        pev->renderamt = 64;
+        v.rendermode = kRenderTransAdd;
+        v.renderamt = 64;
 
         DebugState();
     }
 
-    pev->solid = SOLID_NOT;
-    pev->movetype = MOVETYPE_NONE;
-    pev->classname = MAKE_STRING("info_player_teamspawn");
+    v.solid = SOLID_NOT;
+    v.movetype = MOVETYPE_NONE;
+    v.classname = MAKE_STRING("info_player_teamspawn");
     SetUse(&CTFGoal::GoalUse);
 
     g_pGameRules->AddPlayerSpawnSpot(this);
@@ -651,11 +651,11 @@ void CTFSpawn::DebugState()
 
     if (InGoalState(TFGS_INACTIVE))
     {
-        pev->effects &= ~EF_NODRAW;
+        v.effects &= ~EF_NODRAW;
     }
     else
     {
-        pev->effects |= EF_NODRAW;
+        v.effects |= EF_NODRAW;
     }
 }
 
@@ -665,7 +665,7 @@ void CTFSpawn::DebugState()
 
 LINK_ENTITY_TO_CLASS(info_tfdetect, CTFDetect);
 
-CTFDetect::CTFDetect() : CBaseEntity()
+CTFDetect::CTFDetect(Entity* containingEntity) : CBaseEntity(containingEntity)
 {
     number_of_teams = 2;
 }
@@ -674,198 +674,198 @@ bool CTFDetect::KeyValue(KeyValueData* pkvd)
 {
     CTeamFortress* pTFGameRules = dynamic_cast<CTeamFortress*>(g_pGameRules);
 
-    if (FStrEq(pkvd->szKeyName, "number_of_teams"))
+    if (streq(pkvd->szKeyName, "number_of_teams"))
     {
         number_of_teams = std::clamp(atoi(pkvd->szValue), 1, (int)TEAM_SPECTATORS - 1);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "impulse"))
+    else if (streq(pkvd->szKeyName, "impulse"))
     {
         pTFGameRules->m_afToggleFlags = atoi(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "broadcast"))
+    else if (streq(pkvd->szKeyName, "broadcast"))
     {
         /* Map version */
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "message"))
+    else if (streq(pkvd->szKeyName, "message"))
     {
         /* LocalCmd string (Client command???) */
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "team1_name"))
+    else if (streq(pkvd->szKeyName, "team1_name"))
     {
         strncpy(pTFGameRules->m_TFTeamInfo[0].m_szTeamName, pkvd->szValue, 15);
         pTFGameRules->m_TFTeamInfo[0].m_szTeamName[15] = '\0';
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "team2_name"))
+    else if (streq(pkvd->szKeyName, "team2_name"))
     {
         strncpy(pTFGameRules->m_TFTeamInfo[1].m_szTeamName, pkvd->szValue, 15);
         pTFGameRules->m_TFTeamInfo[1].m_szTeamName[15] = '\0';
         number_of_teams = std::max(number_of_teams, 2);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "team3_name"))
+    else if (streq(pkvd->szKeyName, "team3_name"))
     {
         strncpy(pTFGameRules->m_TFTeamInfo[2].m_szTeamName, pkvd->szValue, 15);
         pTFGameRules->m_TFTeamInfo[2].m_szTeamName[15] = '\0';
         number_of_teams = std::max(number_of_teams, 3);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "team4_name"))
+    else if (streq(pkvd->szKeyName, "team4_name"))
     {
         strncpy(pTFGameRules->m_TFTeamInfo[3].m_szTeamName, pkvd->szValue, 15);
         pTFGameRules->m_TFTeamInfo[3].m_szTeamName[15] = '\0';
         number_of_teams = std::max(number_of_teams, 4);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "team1_allies"))
+    else if (streq(pkvd->szKeyName, "team1_allies"))
     {
         pTFGameRules->m_TFTeamInfo[0].m_afAlliedTeams = atoi(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "team2_allies"))
+    else if (streq(pkvd->szKeyName, "team2_allies"))
     {
         pTFGameRules->m_TFTeamInfo[1].m_afAlliedTeams = atoi(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "team3_allies"))
+    else if (streq(pkvd->szKeyName, "team3_allies"))
     {
         pTFGameRules->m_TFTeamInfo[2].m_afAlliedTeams = atoi(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "team4_allies"))
+    else if (streq(pkvd->szKeyName, "team4_allies"))
     {
         pTFGameRules->m_TFTeamInfo[3].m_afAlliedTeams = atoi(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "ammo_shells"))
+    else if (streq(pkvd->szKeyName, "ammo_shells"))
     {
         pTFGameRules->m_TFTeamInfo[0].m_iLives = std::max(atoi(pkvd->szValue), 0);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "ammo_nails"))
+    else if (streq(pkvd->szKeyName, "ammo_nails"))
     {
         pTFGameRules->m_TFTeamInfo[1].m_iLives = std::max(atoi(pkvd->szValue), 0);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "ammo_rockets"))
+    else if (streq(pkvd->szKeyName, "ammo_rockets"))
     {
         pTFGameRules->m_TFTeamInfo[2].m_iLives = std::max(atoi(pkvd->szValue), 0);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "ammo_cells"))
+    else if (streq(pkvd->szKeyName, "ammo_cells"))
     {
         pTFGameRules->m_TFTeamInfo[3].m_iLives = std::max(atoi(pkvd->szValue), 0);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "ammo_medikit"))
+    else if (streq(pkvd->szKeyName, "ammo_medikit"))
     {
         pTFGameRules->m_TFTeamInfo[0].m_iMaxPlayers = std::max(atoi(pkvd->szValue), 0);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "ammo_detpack"))
+    else if (streq(pkvd->szKeyName, "ammo_detpack"))
     {
         pTFGameRules->m_TFTeamInfo[1].m_iMaxPlayers = std::max(atoi(pkvd->szValue), 0);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "maxammo_medikit"))
+    else if (streq(pkvd->szKeyName, "maxammo_medikit"))
     {
         pTFGameRules->m_TFTeamInfo[2].m_iMaxPlayers = std::max(atoi(pkvd->szValue), 0);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "maxammo_detpack"))
+    else if (streq(pkvd->szKeyName, "maxammo_detpack"))
     {
         pTFGameRules->m_TFTeamInfo[3].m_iMaxPlayers = std::max(atoi(pkvd->szValue), 0);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "maxammo_shells"))
+    else if (streq(pkvd->szKeyName, "maxammo_shells"))
     {
         pTFGameRules->m_TFTeamInfo[0].m_afInvalidClasses = atoi(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "maxammo_nails"))
+    else if (streq(pkvd->szKeyName, "maxammo_nails"))
     {
         pTFGameRules->m_TFTeamInfo[1].m_afInvalidClasses = atoi(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "maxammo_rockets"))
+    else if (streq(pkvd->szKeyName, "maxammo_rockets"))
     {
         pTFGameRules->m_TFTeamInfo[2].m_afInvalidClasses = atoi(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "maxammo_cells"))
+    else if (streq(pkvd->szKeyName, "maxammo_cells"))
     {
         pTFGameRules->m_TFTeamInfo[3].m_afInvalidClasses = atoi(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "display_item_status1"))
+    else if (streq(pkvd->szKeyName, "display_item_status1"))
     {
         pTFGameRules->display_item_status[0] = atoi(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "display_item_status2"))
+    else if (streq(pkvd->szKeyName, "display_item_status2"))
     {
         pTFGameRules->display_item_status[1] = atoi(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "display_item_status3"))
+    else if (streq(pkvd->szKeyName, "display_item_status3"))
     {
         pTFGameRules->display_item_status[2] = atoi(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "display_item_status4"))
+    else if (streq(pkvd->szKeyName, "display_item_status4"))
     {
         pTFGameRules->display_item_status[3] = atoi(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "team_str_home"))
+    else if (streq(pkvd->szKeyName, "team_str_home"))
     {
-        pTFGameRules->team_str_home = ALLOC_STRING(pkvd->szValue);
+        pTFGameRules->team_str_home = engine::AllocString(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "team_str_moved")
-          || FStrEq(pkvd->szKeyName, "t_s_m"))
+    else if (streq(pkvd->szKeyName, "team_str_moved")
+          || streq(pkvd->szKeyName, "t_s_m"))
     {
-        pTFGameRules->team_str_moved = ALLOC_STRING(pkvd->szValue);
+        pTFGameRules->team_str_moved = engine::AllocString(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "team_str_carried")
-          || FStrEq(pkvd->szKeyName, "t_s_c"))
+    else if (streq(pkvd->szKeyName, "team_str_carried")
+          || streq(pkvd->szKeyName, "t_s_c"))
     {
-        pTFGameRules->team_str_carried = ALLOC_STRING(pkvd->szValue);
+        pTFGameRules->team_str_carried = engine::AllocString(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "non_team_str_home"))
+    else if (streq(pkvd->szKeyName, "non_team_str_home"))
     {
-        pTFGameRules->non_team_str_home = ALLOC_STRING(pkvd->szValue);
+        pTFGameRules->non_team_str_home = engine::AllocString(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "non_team_str_moved"))
+    else if (streq(pkvd->szKeyName, "non_team_str_moved"))
     {
-        pTFGameRules->non_team_str_moved = ALLOC_STRING(pkvd->szValue);
+        pTFGameRules->non_team_str_moved = engine::AllocString(pkvd->szValue);
         return true;
     }
-    else if (FStrEq(pkvd->szKeyName, "non_team_str_carried")
-          || FStrEq(pkvd->szKeyName, "n_s_c"))
+    else if (streq(pkvd->szKeyName, "non_team_str_carried")
+          || streq(pkvd->szKeyName, "n_s_c"))
     {
-        pTFGameRules->non_team_str_carried = ALLOC_STRING(pkvd->szValue);
+        pTFGameRules->non_team_str_carried = engine::AllocString(pkvd->szValue);
         return true;
     }
 
 #if 0
-    ALERT(at_aiconsole, "WARNING! Unhandled TF pair: \'%s\' = \'%s\'\n", pkvd->szKeyName, pkvd->szValue);
+    engine::AlertMessage(at_aiconsole, "WARNING! Unhandled TF pair: \'%s\' = \'%s\'\n", pkvd->szKeyName, pkvd->szValue);
 #endif
     return false;
 }
 
 bool CTFDetect::Spawn()
 {
-    pev->effects |= EF_NODRAW;
-    pev->solid = SOLID_NOT;
-    pev->movetype = MOVETYPE_NONE;
+    v.effects |= EF_NODRAW;
+    v.solid = SOLID_NOT;
+    v.movetype = MOVETYPE_NONE;
 
     CTeamFortress* pTFGameRules = dynamic_cast<CTeamFortress*>(g_pGameRules);
     pTFGameRules->m_numTeams = number_of_teams;
@@ -878,15 +878,15 @@ bool CTFDetect::Spawn()
 // CTFTeamCheck
 //==================================================
 
-CTFTeamCheck::CTFTeamCheck() : CBaseToggle()
+CTFTeamCheck::CTFTeamCheck(Entity* containingEntity) : CBaseToggle(containingEntity)
 {
 }
 
 bool CTFTeamCheck::Spawn()
 {
-    pev->effects |= EF_NODRAW;
-    pev->solid = SOLID_NOT;
-    pev->movetype = MOVETYPE_NONE;
+    v.effects |= EF_NODRAW;
+    v.solid = SOLID_NOT;
+    v.movetype = MOVETYPE_NONE;
     return true;
 }
 
@@ -894,15 +894,15 @@ bool CTFTeamCheck::Spawn()
 // CTFTeamSet
 //==================================================
 
-CTFTeamSet::CTFTeamSet() : CBaseToggle()
+CTFTeamSet::CTFTeamSet(Entity* containingEntity) : CBaseToggle(containingEntity)
 {
 }
 
 bool CTFTeamSet::Spawn()
 {
-    pev->effects |= EF_NODRAW;
-    pev->solid = SOLID_NOT;
-    pev->movetype = MOVETYPE_NONE;
+    v.effects |= EF_NODRAW;
+    v.solid = SOLID_NOT;
+    v.movetype = MOVETYPE_NONE;
     SetUse(&CTFTeamSet::TeamSetUse);
     return true;
 }
@@ -910,7 +910,7 @@ bool CTFTeamSet::Spawn()
 void CTFTeamSet::TeamSetUse(CBaseEntity* activator, CBaseEntity* caller, USE_TYPE use_type, float value)
 {
     CTFTeamCheck* team_check = nullptr;
-    while ((team_check = (CTFTeamCheck*)util::FindEntityByTargetname(team_check, STRING(pev->target))))
+    while ((team_check = (CTFTeamCheck*)util::FindEntityByTargetname(team_check, STRING(v.target))))
     {
         if (tfv.team_no != 0)
         {

@@ -25,7 +25,7 @@
 #include "pm_materials.h"
 #include "pm_movevars.h"
 #include "pm_debug.h"
-#include <stdio.h>	// NULL
+#include <stdio.h>	// nullptr
 #include <string.h> // strcpy
 #include <stdlib.h> // atoi
 #include <ctype.h>	// isspace
@@ -40,8 +40,8 @@
 #ifdef CLIENT_DLL
 // Spectator Mode
 bool iJumpSpectator;
-float vJumpOrigin[3];
-float vJumpAngles[3];
+Vector vJumpOrigin;
+Vector vJumpAngles;
 #endif
 
 #pragma warning(disable : 4305)
@@ -54,7 +54,7 @@ typedef enum
 	mod_studio
 } modtype_t;
 
-playermove_t* pmove = NULL;
+playermove_t* pmove = nullptr;
 
 typedef struct
 {
@@ -158,13 +158,13 @@ static void PM_InitTextureTypes()
 	memset(buffer, 0, 512);
 
 	fileSize = pmove->COM_FileSize("sound/materials.txt");
-	pMemFile = pmove->COM_LoadFile("sound/materials.txt", 5, NULL);
+	pMemFile = pmove->COM_LoadFile("sound/materials.txt", 5, nullptr);
 	if (!pMemFile)
 		return;
 
 	filePos = 0;
 	// for each line in the file...
-	while (pmove->memfgets(pMemFile, fileSize, &filePos, buffer, 511) != NULL && (gcTextures < CTEXTURESMAX))
+	while (pmove->memfgets(pMemFile, fileSize, &filePos, buffer, 511) != nullptr && (gcTextures < CTEXTURESMAX))
 	{
 		// skip whitespace
 		i = 0;
@@ -256,7 +256,7 @@ int PM_GetRandomStuckOffsets(int nIndex, Vector& offset)
 	int idx;
 	idx = rgStuckLast[nIndex]++;
 
-	VectorCopy(rgv3tStuckTable[idx % 54], offset);
+	offset = rgv3tStuckTable[idx % 54];
 
 	return (idx % 54);
 }
@@ -299,7 +299,7 @@ bool PM_TryToUnstuck(Vector base, int (*pfnIgnore)(physent_t *pe))
 
 				if (pmove->PM_TestPlayerPositionEx(test, nullptr, pfnIgnore) == -1)
 				{
-					VectorCopy(test, pmove->origin);
+					pmove->origin = test;
 					return false;
 				}
 			}
@@ -315,7 +315,7 @@ static void PM_CreateStuckTable()
 	float x, y, z;
 	int idx;
 	int i;
-	float zi[3];
+	Vector zi;
 
 	memset(rgv3tStuckTable, 0, 54 * sizeof(Vector));
 

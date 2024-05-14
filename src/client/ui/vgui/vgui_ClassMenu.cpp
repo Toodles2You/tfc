@@ -194,7 +194,7 @@ CClassMenuPanel::CClassMenuPanel(int iTrans, bool iRemoveMe, int x, int y, int w
 		// Open up the Class Briefing File
 		sprintf(sz, "classes/short_%s.txt", sTFClassSelection[i]);
 		char* cText;
-		char* pfile = (char*)gEngfuncs.COM_LoadFile(sz, 5, NULL);
+		char* pfile = (char*)client::COM_LoadFile(sz, 5, nullptr);
 		if (pfile != nullptr)
 		{
 			cText = pfile;
@@ -236,7 +236,7 @@ CClassMenuPanel::CClassMenuPanel(int iTrans, bool iRemoveMe, int x, int y, int w
 
 		m_pClassInfoPanel[i]->setSize(maxX, maxY);
 		if (pfile)
-			gEngfuncs.COM_FreeFile(pfile);
+			client::COM_FreeFile(pfile);
 	}
 
 	// Create the Cancel button
@@ -336,7 +336,7 @@ void CClassMenuPanel::Update()
 		}
 
 		// set the current team image
-		if (m_pClassImages[g_iTeamNumber - 1][i] != NULL)
+		if (m_pClassImages[g_iTeamNumber - 1][i] != nullptr)
 		{
 			m_pClassImages[g_iTeamNumber - 1][i]->setVisible(true);
 		}

@@ -200,17 +200,15 @@ void CHudHealth::CalcDamageDirection(Vector vecFrom)
 		return;
 	}
 
+	vecOrigin = gHUD.m_vecOrigin;
+	vecAngles = gHUD.m_vecAngles;
 
-	memcpy(vecOrigin, gHUD.m_vecOrigin, sizeof(Vector));
-	memcpy(vecAngles, gHUD.m_vecAngles, sizeof(Vector));
-
-
-	VectorSubtract(vecFrom, vecOrigin, vecFrom);
+	vecFrom = vecFrom - vecOrigin;
 
 	float flDistToTarget = vecFrom.Length();
 
 	vecFrom = vecFrom.Normalize();
-	AngleVectors(vecAngles, forward, right, up);
+	AngleVectors(vecAngles, &forward, &right, &up);
 
 	front = DotProduct(vecFrom, right);
 	side = DotProduct(vecFrom, forward);
@@ -261,9 +259,9 @@ bool CHudHealth::DrawPain(float time)
 	{
 		shade = 255 * std::max(m_fAttackFront, 0.5F);
 
-		x = gHUD.GetWidth() / 2 - SPR_Width(m_hSprite, 0) / 2;
-		y = gHUD.GetHeight() / 2 - SPR_Height(m_hSprite, 0) * 3;
-		gHUD.DrawHudSprite(m_hSprite, 0, NULL, x, y, CHud::COLOR_DEFAULT, shade);
+		x = gHUD.GetWidth() / 2 - client::SPR_Width(m_hSprite, 0) / 2;
+		y = gHUD.GetHeight() / 2 - client::SPR_Height(m_hSprite, 0) * 3;
+		gHUD.DrawHudSprite(m_hSprite, 0, nullptr, x, y, CHud::COLOR_DEFAULT, shade);
 		m_fAttackFront = std::max(m_fAttackFront - fFade, 0.0F);
 	}
 	else
@@ -273,9 +271,9 @@ bool CHudHealth::DrawPain(float time)
 	{
 		shade = 255 * std::max(m_fAttackRight, 0.5F);
 
-		x = gHUD.GetWidth() / 2 + SPR_Width(m_hSprite, 1) * 2;
-		y = gHUD.GetHeight() / 2 - SPR_Height(m_hSprite, 1) / 2;
-		gHUD.DrawHudSprite(m_hSprite, 1, NULL, x, y, CHud::COLOR_DEFAULT, shade);
+		x = gHUD.GetWidth() / 2 + client::SPR_Width(m_hSprite, 1) * 2;
+		y = gHUD.GetHeight() / 2 - client::SPR_Height(m_hSprite, 1) / 2;
+		gHUD.DrawHudSprite(m_hSprite, 1, nullptr, x, y, CHud::COLOR_DEFAULT, shade);
 		m_fAttackRight = std::max(m_fAttackRight - fFade, 0.0F);
 	}
 	else
@@ -285,9 +283,9 @@ bool CHudHealth::DrawPain(float time)
 	{
 		shade = 255 * std::max(m_fAttackRear, 0.5F);
 
-		x = gHUD.GetWidth() / 2 - SPR_Width(m_hSprite, 2) / 2;
-		y = gHUD.GetHeight() / 2 + SPR_Height(m_hSprite, 2) * 2;
-		gHUD.DrawHudSprite(m_hSprite, 2, NULL, x, y, CHud::COLOR_DEFAULT, shade);
+		x = gHUD.GetWidth() / 2 - client::SPR_Width(m_hSprite, 2) / 2;
+		y = gHUD.GetHeight() / 2 + client::SPR_Height(m_hSprite, 2) * 2;
+		gHUD.DrawHudSprite(m_hSprite, 2, nullptr, x, y, CHud::COLOR_DEFAULT, shade);
 		m_fAttackRear = std::max(m_fAttackRear - fFade, 0.0F);
 	}
 	else
@@ -297,9 +295,9 @@ bool CHudHealth::DrawPain(float time)
 	{
 		shade = 255 * std::max(m_fAttackLeft, 0.5F);
 
-		x = gHUD.GetWidth() / 2 - SPR_Width(m_hSprite, 3) * 3;
-		y = gHUD.GetHeight() / 2 - SPR_Height(m_hSprite, 3) / 2;
-		gHUD.DrawHudSprite(m_hSprite, 3, NULL, x, y, CHud::COLOR_DEFAULT, shade);
+		x = gHUD.GetWidth() / 2 - client::SPR_Width(m_hSprite, 3) * 3;
+		y = gHUD.GetHeight() / 2 - client::SPR_Height(m_hSprite, 3) / 2;
+		gHUD.DrawHudSprite(m_hSprite, 3, nullptr, x, y, CHud::COLOR_DEFAULT, shade);
 
 		m_fAttackLeft = std::max(m_fAttackLeft - fFade, 0.0F);
 	}

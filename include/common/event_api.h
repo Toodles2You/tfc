@@ -37,10 +37,34 @@ typedef struct event_api_s
 	void (*EV_PlayerTrace)(float* start, float* end, int traceFlags, int ignore_pe, struct pmtrace_s* tr);
 	void (*EV_WeaponAnimation)(int sequence, int body);
 	unsigned short (*EV_PrecacheEvent)(int type, const char* psz);
-	void (*EV_PlaybackEvent)(int flags, const struct edict_s* pInvoker, unsigned short eventindex, float delay, float* origin, float* angles, float fparam1, float fparam2, int iparam1, int iparam2, int bparam1, int bparam2);
+	void (*EV_PlaybackEvent)(int flags, const Entity* pInvoker, unsigned short eventindex, float delay, float* origin, float* angles, float fparam1, float fparam2, int iparam1, int iparam2, int bparam1, int bparam2);
 	const char* (*EV_TraceTexture)(int ground, float* vstart, float* vend);
 	void (*EV_StopAllSounds)(int entnum, int entchannel);
 	void (*EV_KillEvents)(int entnum, const char* eventname);
 } event_api_t;
 
-extern event_api_t eventapi;
+typedef struct physent_s physent_t;
+
+namespace client::event {
+inline void (*PlaySound)(int ent, float* origin, int channel, const char* sample, float volume, float attenuation, int fFlags, int pitch);
+inline void (*StopSound)(int ent, int channel, const char* sample);
+inline int (*FindModelIndex)(const char* pmodel);
+inline int (*IsLocal)(int playernum);
+inline int (*LocalPlayerDucking)(void);
+inline void (*LocalPlayerViewheight)(float*);
+inline void (*LocalPlayerBounds)(int hull, float* mins, float* maxs);
+inline int (*IndexFromTrace)(struct pmtrace_s* pTrace);
+inline physent_t* (*GetPhysent)(int idx);
+inline void (*SetUpPlayerPrediction)(int dopred, int bIncludeLocalClient);
+inline void (*PushPMStates)(void);
+inline void (*PopPMStates)(void);
+inline void (*SetSolidPlayers)(int playernum);
+inline void (*SetTraceHull)(int hull);
+inline void (*PlayerTrace)(float* start, float* end, int traceFlags, int ignore_pe, struct pmtrace_s* tr);
+inline void (*WeaponAnimation)(int sequence, int body);
+inline unsigned short (*PrecacheEvent)(int type, const char* psz);
+inline void (*PlaybackEvent)(int flags, const Entity* pInvoker, unsigned short eventindex, float delay, float* origin, float* angles, float fparam1, float fparam2, int iparam1, int iparam2, int bparam1, int bparam2);
+inline const char* (*TraceTexture)(int ground, float* vstart, float* vend);
+inline void (*StopAllSounds)(int entnum, int entchannel);
+inline void (*KillEvents)(int entnum, const char* eventname);
+} /* namespace client::event */

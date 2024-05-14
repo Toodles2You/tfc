@@ -20,21 +20,21 @@ AngleQuaternion
 
 ====================
 */
-void AngleQuaternion(float* angles, vec4_t quaternion)
+void AngleQuaternion(const Vector& angles, vec4_t quaternion)
 {
 	float angle;
 	float sr, sp, sy, cr, cp, cy;
 
 	// FIXME: rescale the inputs to 1/2 angle
-	angle = angles[2] * 0.5;
-	sy = sin(angle);
-	cy = cos(angle);
-	angle = angles[1] * 0.5;
-	sp = sin(angle);
-	cp = cos(angle);
-	angle = angles[0] * 0.5;
-	sr = sin(angle);
-	cr = cos(angle);
+	angle = angles[ROLL] * 0.5F;
+	sy = sinf(angle);
+	cy = cosf(angle);
+	angle = angles[YAW] * 0.5F;
+	sp = sinf(angle);
+	cp = cosf(angle);
+	angle = angles[PITCH] * 0.5F;
+	sr = sinf(angle);
+	cr = cosf(angle);
 
 	quaternion[0] = sr * cp * cy - cr * sp * sy; // X
 	quaternion[1] = cr * sp * cy + sr * cp * sy; // Y

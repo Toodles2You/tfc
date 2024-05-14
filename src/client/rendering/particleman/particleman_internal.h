@@ -35,7 +35,7 @@ inline Vector g_vViewAngles;
 
 inline bool IsGamePaused()
 {
-	return gEngfuncs.GetClientTime() == g_flOldTime;
+	return client::GetClientTime() == g_flOldTime;
 }
 
 struct ForceMember

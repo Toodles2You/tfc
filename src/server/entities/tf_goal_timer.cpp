@@ -17,7 +17,7 @@
 LINK_ENTITY_TO_CLASS(info_tfgoal_timer, CTFGoalTimer);
 LINK_ENTITY_TO_CLASS(i_t_t, CTFGoalTimer);
 
-CTFGoalTimer::CTFGoalTimer() : CTFGoal()
+CTFGoalTimer::CTFGoalTimer(Entity* containingEntity) : CTFGoal(containingEntity)
 {
 }
 
@@ -25,7 +25,7 @@ bool CTFGoalTimer::Spawn()
 {
     if (search_time <= 0.0F)
     {
-        ALERT(at_console, "Timer goal created with no specified time\n");
+        engine::AlertMessage(at_console, "Timer goal created with no specified time\n");
         return false;
     }
 
@@ -34,14 +34,14 @@ bool CTFGoalTimer::Spawn()
         return false;
     }
 
-    pev->solid = SOLID_NOT;
+    v.solid = SOLID_NOT;
     return true;
 }
 
 void CTFGoalTimer::PlaceTimer()
 {
     SetThink(&CTFGoalTimer::TimerTick);
-    pev->nextthink = gpGlobals->time + search_time;
+    v.nextthink = gpGlobals->time + search_time;
     CTFGoal::PlaceGoal();
 }
 
@@ -49,7 +49,7 @@ void CTFGoalTimer::StartGoal()
 {
     SetUse(&CTFGoal::GoalUse);
     SetThink(&CTFGoalTimer::PlaceTimer);
-    pev->nextthink = gpGlobals->time + 0.2F;
+    v.nextthink = gpGlobals->time + 0.2F;
     if (InGoalState(TFGS_REMOVED))
     {
         RemoveGoal();
@@ -65,7 +65,7 @@ void CTFGoalTimer::SetupRespawn()
     }
     InactivateGoal();
     SetThink(&CTFGoalTimer::TimerTick);
-    pev->nextthink = gpGlobals->time + search_time;
+    v.nextthink = gpGlobals->time + search_time;
 }
 
 void CTFGoalTimer::TimerTick()
@@ -80,6 +80,6 @@ void CTFGoalTimer::TimerTick()
     else
     {
         InactivateGoal();
-        pev->nextthink = gpGlobals->time + search_time;
+        v.nextthink = gpGlobals->time + search_time;
     }
 }

@@ -25,15 +25,14 @@ public:
 	CSaveRestoreBuffer(SAVERESTOREDATA& data);
 	~CSaveRestoreBuffer();
 
-	int EntityIndex(entvars_t* pevLookup);
-	int EntityIndex(edict_t* pentLookup);
-	int EntityIndex(EOFFSET eoLookup);
+	int EntityIndex(Entity* pentLookup);
+	int EntityIndex(EntityOffset eoLookup);
 	int EntityIndex(CBaseEntity* pEntity);
 
 	int EntityFlags(int entityIndex, int flags) { return EntityFlagsSet(entityIndex, 0); }
 	int EntityFlagsSet(int entityIndex, int flags);
 
-	edict_t* EntityFromIndex(int entityIndex);
+	Entity* EntityFromIndex(int entityIndex);
 
 	unsigned short TokenHash(const char* pszToken);
 
@@ -76,7 +75,7 @@ public:
 	void WritePositionVector(const char* pname, const Vector& value);			// Offset for landmark if necessary
 	void WritePositionVector(const char* pname, const float* value, int count); // array of pos vectors
 	void WriteFunction(const char* pname, void** value, int count);				// Save a function pointer
-	bool WriteEntVars(const char* pname, entvars_t* pev);						// Save entvars_t (entvars_t)
+	bool WriteEntVars(const char* pname, Entity* entity);						// Save entvars_t (entvars_t)
 	bool WriteFields(const char* pname, void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCount);
 
 private:
@@ -99,7 +98,7 @@ class CRestore : public CSaveRestoreBuffer
 public:
 	using CSaveRestoreBuffer::CSaveRestoreBuffer;
 
-	bool ReadEntVars(const char* pname, entvars_t* pev); // entvars_t
+	bool ReadEntVars(const char* pname, Entity* entity); // entvars_t
 	bool ReadFields(const char* pname, void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCount);
 	int ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCount, int startField, int size, char* pName, void* pData);
 	int ReadInt();
@@ -180,7 +179,7 @@ public:
 	void EntityUpdate(string_t globalname, string_t mapname);
 	const globalentity_t* EntityFromTable(string_t globalname);
 	GLOBALESTATE EntityGetState(string_t globalname);
-	bool EntityInTable(string_t globalname) { return Find(globalname) != NULL; }
+	bool EntityInTable(string_t globalname) { return Find(globalname) != nullptr; }
 
 #ifdef HALFLIFE_SAVERESTORE
 	bool Save(CSave& save);

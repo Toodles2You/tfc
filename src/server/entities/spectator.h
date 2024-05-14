@@ -19,6 +19,8 @@
 class CBaseSpectator : public CBaseEntity
 {
 public:
+	CBaseSpectator(Entity* containingEntity) : CBaseEntity(containingEntity) {}
+
 	bool Spawn() override;
 	void SpectatorConnect();
 	void SpectatorDisconnect();

@@ -36,7 +36,7 @@
 static float SCROLL_SPEED = 5;
 
 static char g_szLineBuffer[MAX_LINES + 1][MAX_CHARS_PER_LINE];
-static float* g_pflNameColors[MAX_LINES + 1];
+static Vector* g_pflNameColors[MAX_LINES + 1];
 static int g_iNameLengths[MAX_LINES + 1];
 static float flScrollTime = 0; // the time at which the lines next scroll up
 
@@ -46,9 +46,9 @@ bool CHudSayText::Init()
 {
 	HOOK_MESSAGE(SayText);
 
-	m_HUD_saytext = gEngfuncs.pfnRegisterVariable("hud_saytext", "1", 0);
-	m_HUD_saytext_time = gEngfuncs.pfnRegisterVariable("hud_saytext_time", "5", 0);
-	m_con_color = gEngfuncs.pfnGetCvarPointer("con_color");
+	m_HUD_saytext = client::RegisterVariable("hud_saytext", "1", 0);
+	m_HUD_saytext_time = client::RegisterVariable("hud_saytext_time", "5", 0);
+	m_con_color = client::GetCvarPointer("con_color");
 
 	int iLineWidth;
 	gHUD.GetHudStringSize("0", iLineWidth, m_iLineHeight);
@@ -123,7 +123,7 @@ void CHudSayText::Draw(const float time)
 	//The engine resets this color to that value after drawing a single string.
 	if (int r, g, b; sscanf(m_con_color->string, "%i %i %i", &r, &g, &b) == 3)
 	{
-		gEngfuncs.pfnDrawSetTextColor(r / 255.0f, g / 255.0f, b / 255.0f);
+		client::DrawSetTextColor(r / 255.0f, g / 255.0f, b / 255.0f);
 	}
 
 	char line[MAX_CHARS_PER_LINE]{};
@@ -149,7 +149,7 @@ void CHudSayText::Draw(const float time)
 			//Cut off the actual text so we can print player name
 			line[playerNameEndIndex] = '\0';
 
-			gEngfuncs.pfnDrawSetTextColor(g_pflNameColors[i][0], g_pflNameColors[i][1], g_pflNameColors[i][2]);
+			client::DrawSetTextColor(g_pflNameColors[i]->x, g_pflNameColors[i]->y, g_pflNameColors[i]->z);
 			x = gHUD.DrawHudString(line + 1, x, y); // don't draw the control code at the start
 
 			//Reset last character
@@ -253,12 +253,12 @@ void CHudSayText::SayTextPrint(const char* pszBuf, int clientIndex)
 	}
 
 	g_iNameLengths[i] = 0;
-	g_pflNameColors[i] = NULL;
+	g_pflNameColors[i] = nullptr;
 
 	// if it's a say message, search for the players name in the string
 	if (*pszBuf == 2 && clientIndex > 0)
 	{
-		gEngfuncs.pfnGetPlayerInfo(clientIndex, &g_PlayerInfoList[clientIndex]);
+		client::GetPlayerInfo(clientIndex, &g_PlayerInfoList[clientIndex]);
 		const char* pName = g_PlayerInfoList[clientIndex].name;
 
 		if (pName)
@@ -268,7 +268,7 @@ void CHudSayText::SayTextPrint(const char* pszBuf, int clientIndex)
 			if (nameInString)
 			{
 				g_iNameLengths[i] = strlen(pName) + (nameInString - pszBuf);
-				g_pflNameColors[i] = gHUD.GetClientColor(clientIndex);
+				g_pflNameColors[i] = &const_cast<Vector&>(gHUD.GetClientColor(clientIndex));
 			}
 		}
 	}
@@ -290,7 +290,7 @@ void CHudSayText::SayTextPrint(const char* pszBuf, int clientIndex)
 	}
 
 	SetActive(true);
-	PlaySound("misc/talk.wav", 1);
+	client::PlaySoundByName("misc/talk.wav", VOL_NORM);
 }
 
 void CHudSayText::EnsureTextFitsInOneLineAndWrapIfHaveTo(int line)
@@ -303,7 +303,7 @@ void CHudSayText::EnsureTextFitsInOneLineAndWrapIfHaveTo(int line)
 		// scan the string until we find what word is too long,  and wrap the end of the sentence after the word
 		int length = m_iBaseX;
 		int tmp_len = 0;
-		char* last_break = NULL;
+		char* last_break = nullptr;
 		for (char* x = g_szLineBuffer[line]; *x != 0; x++)
 		{
 			// check for a color change, if so skip past it

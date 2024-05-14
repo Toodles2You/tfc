@@ -112,7 +112,7 @@ void CHalfLifeMovement::FinishDucking()
 
     if (player->m_Action != CBasePlayer::Action::Jump || player->m_fSequenceFinished)
     {
-        player->pev->flags |= FL_DUCKING;
+        player->v.flags |= FL_DUCKING;
         player->SetAction(CBasePlayer::Action::Idle, true);
     }
 }
@@ -221,7 +221,7 @@ secondAttempt:
 
     if (player->m_Action != CBasePlayer::Action::Jump || player->m_fSequenceFinished)
     {
-        player->pev->flags &= ~FL_DUCKING;
+        player->v.flags &= ~FL_DUCKING;
         player->SetAction(CBasePlayer::Action::Idle, true);
     }
 

@@ -62,7 +62,7 @@ char * SharedVarArgs(char *format, ...)
 char * BufPrintf(char *buf, int& len, const char *fmt, ...)
 {
 	if (len <= 0)
-		return NULL;
+		return nullptr;
 
 	va_list argptr;
 
@@ -78,7 +78,7 @@ char * BufPrintf(char *buf, int& len, const char *fmt, ...)
 wchar_t * BufWPrintf(wchar_t *buf, int& len, const wchar_t *fmt, ...)
 {
 	if (len <= 0)
-		return NULL;
+		return nullptr;
 
 	va_list argptr;
 
@@ -151,14 +151,14 @@ const char *SharedParse( const char *data )
 	s_shared_token[0] = 0;
 	
 	if (!data)
-		return NULL;
+		return nullptr;
 		
 // skip whitespace
 skipwhite:
 	while ( (c = *data) <= ' ')
 	{
 		if (c == 0)
-			return NULL;                    // end of file;
+			return nullptr;                    // end of file;
 		data++;
 	}
 	

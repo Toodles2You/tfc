@@ -64,15 +64,15 @@ extern "C" DLLEXPORT int GetEntityAPI(DLL_FUNCTIONS* pFunctionTable, int interfa
 extern "C" DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion);
 extern "C" DLLEXPORT int GetNewDLLFunctions(NEW_DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion);
 
-int DispatchSpawn(edict_t* pent);
-void DispatchKeyValue(edict_t* pentKeyvalue, KeyValueData* pkvd);
-void DispatchTouch(edict_t* pentTouched, edict_t* pentOther);
-void DispatchUse(edict_t* pentUsed, edict_t* pentOther);
-void DispatchThink(edict_t* pent);
-void DispatchBlocked(edict_t* pentBlocked, edict_t* pentOther);
-void DispatchSave(edict_t* pent, SAVERESTOREDATA* pSaveData);
-int DispatchRestore(edict_t* pent, SAVERESTOREDATA* pSaveData, int globalEntity);
-void DispatchObjectCollsionBox(edict_t* pent);
+int DispatchSpawn(Entity* pent);
+void DispatchKeyValue(Entity* pentKeyvalue, KeyValueData* pkvd);
+void DispatchTouch(Entity* pentTouched, Entity* pentOther);
+void DispatchUse(Entity* pentUsed, Entity* pentOther);
+void DispatchThink(Entity* pent);
+void DispatchBlocked(Entity* pentBlocked, Entity* pentOther);
+void DispatchSave(Entity* pent, SAVERESTOREDATA* pSaveData);
+int DispatchRestore(Entity* pent, SAVERESTOREDATA* pSaveData, int globalEntity);
+void DispatchObjectCollsionBox(Entity* pent);
 void SaveWriteFields(SAVERESTOREDATA* pSaveData, const char* pname, void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCount);
 void SaveReadFields(SAVERESTOREDATA* pSaveData, const char* pname, void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCount);
 void SaveGlobalState(SAVERESTOREDATA* pSaveData);
@@ -104,12 +104,18 @@ class CBasePlayerWeapon;
 class EHANDLE
 {
 private:
-	edict_t* m_pent;
+	Entity* m_pent;
 	int m_serialnumber;
 
 public:
-	edict_t* Get();
-	edict_t* Set(edict_t* pent);
+	EHANDLE()
+	{
+		m_pent = nullptr;
+		m_serialnumber = 0;
+	}
+
+	Entity* Get();
+	Entity* Set(Entity* pent);
 
 	operator CBaseEntity*();
 
@@ -131,9 +137,34 @@ typedef struct
 class CBaseEntity
 {
 public:
+	enum class Type
+	{
+		World,
+		Point,
+		Door,
+		RotatingDoor,
+		Breakable,
+		Pushable,
+		Button,
+		RotatingButton,
+		MomentaryButton,
+		MultiSource,
+		Laser,
+		TriggerVolume,
+		ChooChooTrain,
+		Track,
+		Tank,
+	};
+
+public:
+	Entity& v; // Don't need to save/restore this pointer, the engine resets it
+
 	// Constructor.  Set engine to use C/C++ callback functions
 	// pointers to engine data
-	entvars_t* pev; // Don't need to save/restore this pointer, the engine resets it
+	CBaseEntity(Entity* containingEntity);
+	virtual ~CBaseEntity();
+
+	virtual bool Is(const Type type) { return false; }
 
 	// path corners
 	CBaseEntity* m_pGoalEnt; // path corner we are heading towards
@@ -143,8 +174,6 @@ public:
 	*	@brief Entity flags sent to the client in ::AddToFullPack
 	*/
 	byte m_EFlags = 0;
-
-	virtual ~CBaseEntity() {}
 
 	// initialization functions
 	virtual bool Spawn() { return false; }
@@ -165,14 +194,15 @@ public:
 	virtual int ObjectCaps() { return FCAP_ACROSS_TRANSITION; }
 	virtual void Activate() {}
 
-	// Setup the object->object collision box (pev->mins / pev->maxs is the object->world collision box)
+	// Setup the object->object collision box (v.mins / v.maxs is the object->world collision box)
 	virtual void SetObjectCollisionBox();
 
 	void SetOrigin(const Vector& org);
 	void SetSize(const Vector& mins, const Vector& maxs);
 	void SetModel(const char* name);
+	void SetModel(string_t name) { SetModel(STRING(name)); }
 
-	virtual void DeathNotice(entvars_t* pevChild) {} // monster maker children use this to tell the monster maker that they have died.
+	virtual void DeathNotice(CBaseEntity* child) {} // monster maker children use this to tell the monster maker that they have died.
 
 	virtual void TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, int hitgroup, int bitsDamageType);
 	virtual bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType);
@@ -182,49 +212,79 @@ public:
 	virtual int GetToggleState() { return TS_AT_TOP; }
 	virtual bool GiveAmmo(int iAmount, int iType) { return false; }
 	virtual float GetDelay() { return 0; }
-	virtual bool IsMoving() { return pev->velocity != g_vecZero; }
+	virtual bool IsMoving() { return v.velocity != g_vecZero; }
 	virtual void OverrideReset() {}
 	// This is ONLY used by the node graph to test movement through a door
 	virtual void SetToggleState(int state) {}
-	virtual bool OnControls(entvars_t* pev) { return false; }
-	virtual bool IsAlive() { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
-	virtual bool IsBSPModel() { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }
-	virtual bool HasTarget(string_t targetname) { return FStrEq(STRING(targetname), STRING(pev->target)); }
+	virtual bool OnControls(CBaseEntity* other) { return false; }
+	virtual bool IsAlive() { return (v.deadflag == DEAD_NO) && v.health > 0; }
+	virtual bool IsBSPModel() { return v.solid == SOLID_BSP || v.movetype == MOVETYPE_PUSHSTEP; }
+	virtual bool HasTarget(string_t targetname) { return streq(targetname, v.target); }
 	virtual bool IsClient() { return false; }
 	virtual bool IsPlayer() { return false; }
 	virtual bool IsBot() { return false; }
 	virtual bool IsNetClient() { return false; }
 	virtual const char* TeamID() { return ""; }
-	virtual int PCNumber() { return pev->playerclass; }
-	virtual int TeamNumber() { return pev->team; }
+	virtual int PCNumber() { return v.playerclass; }
+	virtual int TeamNumber() { return v.team; }
 
 	virtual CBaseEntity* GetNextTarget();
 
 	// fundamental callbacks
-	void (CBaseEntity::*m_pfnThink)();
-	void (CBaseEntity::*m_pfnTouch)(CBaseEntity* pOther);
-	void (CBaseEntity::*m_pfnUse)(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
-	void (CBaseEntity::*m_pfnBlocked)(CBaseEntity* pOther);
+
+	using ThinkCallback = void (CBaseEntity::*)();
+	using TouchCallback = void (CBaseEntity::*)(CBaseEntity*);
+	using UseCallback = void (CBaseEntity::*)(CBaseEntity*, CBaseEntity*, USE_TYPE, float);
+
+	ThinkCallback m_pfnThink;
+	TouchCallback m_pfnTouch;
+	UseCallback m_pfnUse;
+
+	template <class T>
+	void SetThink(void (T::*callback)())
+	{
+		m_pfnThink = static_cast<ThinkCallback>(callback);
+	}
+
+	template <class T>
+	void SetTouch(void (T::*callback)(CBaseEntity*))
+	{
+		m_pfnTouch = static_cast<TouchCallback>(callback);
+	}
+
+	template <class T>
+	void SetUse(void (T::*callback)(CBaseEntity*, CBaseEntity*, USE_TYPE, float))
+	{
+		m_pfnUse = static_cast<UseCallback>(callback);
+	}
+
+	void ClearThink() { m_pfnThink = nullptr; }
+	void ClearTouch() { m_pfnTouch = nullptr; }
+	void ClearUse() { m_pfnUse = nullptr; }
 
 	virtual void Think()
 	{
-		if (m_pfnThink)
+		if (m_pfnThink != nullptr)
+		{
 			(this->*m_pfnThink)();
+		}
 	}
-	virtual void Touch(CBaseEntity* pOther)
+	virtual void Touch(CBaseEntity* other)
 	{
-		if (m_pfnTouch)
-			(this->*m_pfnTouch)(pOther);
+		if (m_pfnTouch != nullptr)
+		{
+			(this->*m_pfnTouch)(other);
+		}
 	}
-	virtual void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+	virtual void Use(CBaseEntity* activator, CBaseEntity* caller, USE_TYPE useType, float value)
 	{
-		if (m_pfnUse)
-			(this->*m_pfnUse)(pActivator, pCaller, useType, value);
+		if (m_pfnUse != nullptr)
+		{
+			(this->*m_pfnUse)(activator, caller, useType, value);
+		}
 	}
-	virtual void Blocked(CBaseEntity* pOther)
+	virtual void Blocked(CBaseEntity* other)
 	{
-		if (m_pfnBlocked)
-			(this->*m_pfnBlocked)(pOther);
 	}
 	virtual bool ShouldCollide(CBaseEntity* other)
 	{
@@ -254,7 +314,7 @@ public:
 	void EXPORT SUB_CallUseToggle() { this->Use(this, this, USE_TOGGLE, 0); }
 	bool ShouldToggle(USE_TYPE useType, bool currentState);
 
-	virtual CBaseEntity* Respawn() { return NULL; }
+	virtual CBaseEntity* Respawn() { return nullptr; }
 
 	virtual void UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value);
 	// Do the bounding boxes of these two intersect?
@@ -267,25 +327,14 @@ public:
 
 	bool IsLockedByMaster() { return false; }
 
-	static CBaseEntity* Instance(edict_t* pent);
-
-	static CBaseEntity* Instance(entvars_t* pev);
-
 	// used by monsters that are created by the MonsterMaker
 	virtual void UpdateOwner() {}
 
-	static CBaseEntity* Create(const char* szName, const Vector& vecOrigin, const Vector& vecAngles, edict_t* pentOwner = NULL);
+	static CBaseEntity* Create(const char* szName, const Vector& vecOrigin, const Vector& vecAngles, Entity& owner);
 
-	edict_t* edict() { return pev->pContainingEntity; }
-#ifdef GAME_DLL
-	int entindex() { return g_engfuncs.pfnIndexOfEdict(pev->pContainingEntity); }
-#else
-	int entindex();
-#endif
-
-	virtual Vector Center() { return (pev->absmax + pev->absmin) * 0.5; } // center point of entity
-	virtual Vector EyePosition() { return pev->origin + pev->view_ofs; }  // position of eyes
-	virtual Vector EarPosition() { return pev->origin + pev->view_ofs; }  // position of ears
+	virtual Vector Center() { return (v.absmax + v.absmin) * 0.5; } // center point of entity
+	virtual Vector EyePosition() { return v.origin + v.view_ofs; }  // position of eyes
+	virtual Vector EarPosition() { return v.origin + v.view_ofs; }  // position of ears
 	virtual Vector BodyTarget() { return Center(); }  // position to shoot at
 
 	virtual int IRelationship(CBaseEntity* pTarget) { return R_NO; }
@@ -340,16 +389,11 @@ protected:
 #endif
 };
 
-inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->edict()); }
-
-#define SetThink(a) m_pfnThink = static_cast<void (CBaseEntity::*)()>(a)
-#define SetTouch(a) m_pfnTouch = static_cast<void (CBaseEntity::*)(CBaseEntity*)>(a)
-#define SetUse(a) m_pfnUse = static_cast<void (CBaseEntity::*)(CBaseEntity * pActivator, CBaseEntity * pCaller, USE_TYPE useType, float value)>(a)
-#define SetBlocked(a) m_pfnBlocked = static_cast<void (CBaseEntity::*)(CBaseEntity*)>(a)
-
 class CBaseAnimating : public CBaseEntity
 {
 public:
+	CBaseAnimating(Entity* containingEntity) : CBaseEntity(containingEntity) {}
+
 	DECLARE_SAVERESTORE()
 
 	// Basic Monster Animation functions
@@ -369,7 +413,7 @@ public:
 	void GetAttachment(int iAttachment, Vector& origin, Vector& angles);
 	void SetBodygroup(int iGroup, int iValue);
 	int GetBodygroup(int iGroup);
-	bool ExtractBbox(int sequence, float* mins, float* maxs);
+	bool ExtractBbox(int sequence, Vector& mins, Vector& maxs);
 	void SetSequenceBox();
 	virtual void HandleSequenceFinished() {}
 
@@ -386,6 +430,10 @@ public:
 class CPointEntity : public CBaseEntity
 {
 public:
+	CPointEntity(Entity* containingEntity) : CBaseEntity(containingEntity) {}
+
+	bool Is(const Type type) override { return type == Type::Point; }
+
 	bool Spawn() override;
 	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 
@@ -421,6 +469,13 @@ void PlayLockSounds(CBaseEntity* entity, locksound_t* pls, bool flocked, bool fb
 class CMultiSource : public CPointEntity
 {
 public:
+	CMultiSource(Entity* containingEntity) : CPointEntity(containingEntity) {}
+
+	bool Is(const Type type) override
+	{
+		return type == Type::MultiSource || CPointEntity::Is(type);
+	}
+
 	DECLARE_SAVERESTORE()
 
 	bool Spawn() override;
@@ -446,6 +501,8 @@ public:
 class CBaseToggle : public CBaseEntity
 {
 public:
+	CBaseToggle(Entity* containingEntity) : CBaseEntity(containingEntity) {}
+
 	DECLARE_SAVERESTORE()
 
 	CTFVars tfv;
@@ -490,7 +547,7 @@ public:
 	bool IsLockedByMaster();
 
 	static float AxisValue(int flags, const Vector& angles);
-	static void AxisDir(entvars_t* pev);
+	static void AxisDir(CBaseEntity* entity); /* OOP with extra steps. */
 	static float AxisDelta(int flags, const Vector& angle1, const Vector& angle2);
 
 	string_t m_sMaster; // If this button has a master switch, this is the targetname.
@@ -530,6 +587,10 @@ const char* ButtonSound(int sound);
 class CBaseButton : public CBaseToggle
 {
 public:
+	CBaseButton(Entity* containingEntity) : CBaseToggle(containingEntity) {}
+
+	bool Is(const Type type) override { return type == Type::Button; }
+
 	DECLARE_SAVERESTORE()
 
 	bool Spawn() override;
@@ -555,7 +616,7 @@ public:
 	BUTTON_CODE ButtonResponseToTouch();
 
 	// Buttons that don't take damage can be IMPULSE used
-	int ObjectCaps() override { return (CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | (pev->takedamage ? 0 : FCAP_IMPULSE_USE); }
+	int ObjectCaps() override { return (CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | (v.takedamage ? 0 : FCAP_IMPULSE_USE); }
 
 	bool m_fStayPushed; // button stays pushed in until touched again?
 	bool m_fRotating;	// a rotating button?  default is a sliding button.
@@ -573,35 +634,6 @@ public:
 	int m_sounds;
 };
 
-//
-// Converts a entvars_t * to a class pointer
-// It will allocate the class and entity if necessary
-//
-template <class T>
-T* GetClassPtr(T* a)
-{
-	entvars_t* pev = (entvars_t*)a;
-
-	// allocate entity if necessary
-	if (pev == NULL)
-		pev = VARS(CREATE_ENTITY());
-
-	// get the private data
-	a = (T*)GET_PRIVATE(ENT(pev));
-
-	if (a == NULL)
-	{
-		// allocate private data
-		a = new T;
-
-		//Replicate the ALLOC_PRIVATE engine function's behavior.
-		pev->pContainingEntity->pvPrivateData = a;
-
-		a->pev = pev;
-	}
-	return a;
-}
-
 #endif /* GAME_DLL */
 
 
@@ -614,8 +646,10 @@ T* GetClassPtr(T* a)
 class CWorld : public CBaseEntity
 {
 public:
-	CWorld();
+	CWorld(Entity* containingEntity);
 	~CWorld();
+
+	bool Is(const Type type) override { return type == Type::World; }
 
 	bool Spawn() override;
 	void Precache() override;
@@ -628,18 +662,3 @@ protected:
 	EXPORT void PostSpawn();
 #endif
 };
-
-inline CBaseEntity* CBaseEntity::Instance(edict_t* pent)
-{
-	if (!pent)
-		return CWorld::World;
-	return (CBaseEntity*)GET_PRIVATE(pent);
-}
-
-inline CBaseEntity* CBaseEntity::Instance(entvars_t* pev)
-{
-	if (!pev)
-		return CWorld::World;
-
-	return Instance(ENT(pev));
-}

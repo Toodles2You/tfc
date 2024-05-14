@@ -23,8 +23,8 @@ void CTFMelee::PrimaryAttack()
 #ifdef GAME_DLL
 	const auto info = GetInfo();
 
-	const auto gun = m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs;
-	const auto aim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
+	const auto gun = m_pPlayer->v.origin + m_pPlayer->v.view_ofs;
+	const auto aim = m_pPlayer->v.v_angle + m_pPlayer->v.punchangle;
 
 	Vector dir;
 	AngleVectors(aim, &dir, nullptr, nullptr);
@@ -32,12 +32,12 @@ void CTFMelee::PrimaryAttack()
 	TraceResult tr;
 	util::TraceLine(gun, gun + dir * 64.0F, &tr, m_pPlayer, util::kTraceBox);
 
-	edict_t* first = tr.pHit;
+	Entity* first = tr.pHit;
 	int result = kResultMiss;
 
 	if (tr.flFraction != 1.0F)
 	{
-		result = HitEntity(CBaseEntity::Instance(tr.pHit), dir, tr);
+		result = HitEntity(tr.pHit->Get<CBaseEntity>(), dir, tr);
 
 		if (info.iProjectileCount != -1)
 		{
@@ -52,24 +52,24 @@ void CTFMelee::PrimaryAttack()
 
 		while ((entity = util::FindEntityInSphere(entity, gun, 64.0F)) != nullptr)
 		{
-			if (first != entity->edict() && entity->pev->takedamage != DAMAGE_NO)
+			if (first != &entity->v && entity->v.takedamage != DAMAGE_NO)
 			{
 				Vector los = entity->Center() - gun;
 
-				los = util::ClampVectorToBox(los, entity->pev->size * 0.5);
+				los = util::ClampVectorToBox(los, entity->v.size * 0.5);
 
 				float dot = DotProduct(los.Make2D(), dir.Make2D());
 
 				if (dot > bestDot)
 				{
-					util::TraceLine(gun, entity->pev->origin + los, &tr, m_pPlayer, util::kTraceBox);
+					util::TraceLine(gun, entity->v.origin + los, &tr, m_pPlayer, util::kTraceBox);
 
-					if (tr.pHit == entity->edict())
+					if (tr.pHit == &entity->v)
 					{
 						closest = entity;
 						bestDot = dot;
 
-						int newResult = HitEntity(CBaseEntity::Instance(tr.pHit), dir, tr);
+						int newResult = HitEntity(tr.pHit->Get<CBaseEntity>(), dir, tr);
 
 						if (result < newResult)
 						{
@@ -88,7 +88,7 @@ void CTFMelee::PrimaryAttack()
 	}
 
 finished:
-	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), m_pPlayer->pev->view_ofs.z, m_pPlayer->m_randomSeed, result, true, false, FEV_RELIABLE);
+	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), m_pPlayer->v.view_ofs.z, m_pPlayer->m_randomSeed, result, true, false, FEV_RELIABLE);
 #endif
 }
 
@@ -105,11 +105,11 @@ void CTFMelee::WeaponPostFrame()
 			m_iWeaponState &= ~kWpnStateReloading;
 			m_iNextPrimaryAttack += info.iAttackTime - info.iReloadTime;
 		}
-		else if ((m_pPlayer->pev->button & IN_ATTACK) != 0)
+		else if ((m_pPlayer->v.button & IN_ATTACK) != 0)
 		{
 			m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
-			m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), m_pPlayer->pev->view_ofs.z, m_pPlayer->m_randomSeed, 0, false, false);
+			m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), m_pPlayer->v.view_ofs.z, m_pPlayer->m_randomSeed, 0, false, false);
 
 			if (info.iReloadTime > 0)
 			{
@@ -137,7 +137,7 @@ int CTFMelee::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& 
 	const auto info = GetInfo();
 	int result = kResultHitWorld;
 
-	if (hit == nullptr || hit->pev->takedamage == DAMAGE_NO)
+	if (hit == nullptr || hit->v.takedamage == DAMAGE_NO)
 	{
 		return result;
 	}
@@ -235,13 +235,13 @@ int CMedikit::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& 
 
 		if (g_pGameRules->PlayerRelationship(dynamic_cast<CBasePlayer*>(hit), m_pPlayer) >= GR_ALLY)
 		{
-			if (hit->pev->health >= hit->pev->max_health)
+			if (hit->v.health >= hit->v.max_health)
 			{
 				hit->GiveHealth(5, DMG_IGNORE_MAXHEALTH);
 			}
 			else
 			{
-				hit->GiveHealth(hit->pev->max_health - hit->pev->health, DMG_IGNORE_MAXHEALTH);
+				hit->GiveHealth(hit->v.max_health - hit->v.health, DMG_IGNORE_MAXHEALTH);
 			}
 		}
 		else

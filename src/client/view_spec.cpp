@@ -37,12 +37,9 @@ enum
 };
 
 int PM_GetPhysEntInfo(int ent);
-void NormalizeAngles(float* angles);
-float Distance(const float* v1, const float* v2);
-void VectorAngles(const float* forward, float* angles);
 
-extern float vJumpOrigin[3];
-extern float vJumpAngles[3];
+extern Vector vJumpOrigin;
+extern Vector vJumpAngles;
 
 extern Vector v_origin;
 extern Vector v_angles;
@@ -60,7 +57,7 @@ int v_cameraMode = CAM_MODE_FOCUS;
 bool v_resetCamera = true;
 
 
-static void V_SmoothInterpolateAngles(float* startAngle, float* endAngle, float* finalAngle, float degreesPerSec)
+static void V_SmoothInterpolateAngles(Vector& startAngle, Vector& endAngle, Vector& finalAngle, float degreesPerSec)
 {
 	float absd, frac, d, threshhold;
 
@@ -118,7 +115,7 @@ static void V_SmoothInterpolateAngles(float* startAngle, float* endAngle, float*
 
 
 // Get the origin of the Observer based around the target's position and angles
-static void V_GetChaseOrigin(float* angles, float* origin, float distance, float* returnvec)
+static void V_GetChaseOrigin(Vector& angles, Vector& origin, float distance, Vector& returnvec)
 {
 	Vector vecEnd;
 	Vector forward;
@@ -128,29 +125,29 @@ static void V_GetChaseOrigin(float* angles, float* origin, float distance, float
 
 	int ignoreent = -1; // first, ignore no entity
 
-	cl_entity_t* ent = NULL;
+	cl_entity_t* ent = nullptr;
 
 	// Trace back from the target using the player's view angles
-	AngleVectors(angles, forward, NULL, NULL);
+	AngleVectors(angles, &forward, nullptr, nullptr);
 
-	VectorScale(forward, -1, forward);
+	forward = -forward;
 
-	VectorCopy(origin, vecStart);
+	vecStart = origin;
 
-	VectorMA(vecStart, distance, forward, vecEnd);
+	vecEnd = vecStart + distance * forward;
 
 	while (maxLoops > 0)
 	{
-		trace = gEngfuncs.PM_TraceLine(vecStart, vecEnd, PM_TRACELINE_PHYSENTSONLY, 2, ignoreent);
+		trace = client::PM_TraceLine(vecStart, vecEnd, PM_TRACELINE_PHYSENTSONLY, 2, ignoreent);
 
 		// WARNING! trace->ent is is the number in physent list not the normal entity number
 
 		if (trace->ent <= 0)
 			break; // we hit the world or nothing, stop trace
 
-		ent = gEngfuncs.GetEntityByIndex(PM_GetPhysEntInfo(trace->ent));
+		ent = client::GetEntityByIndex(PM_GetPhysEntInfo(trace->ent));
 
-		if (ent == NULL)
+		if (ent == nullptr)
 			break;
 
 		// hit non-player solid BSP , stop here
@@ -165,30 +162,30 @@ static void V_GetChaseOrigin(float* angles, float* origin, float distance, float
 		else
 		{
 			ignoreent = trace->ent; // ignore last hit entity
-			VectorCopy(trace->endpos, vecStart);
+			vecStart = trace->endpos;
 		}
 
 		maxLoops--;
 	}
 
-	VectorMA(trace->endpos, 4, trace->plane.normal, returnvec);
+	returnvec = trace->endpos + 4 * trace->plane.normal;
 
 	v_lastDistance = Distance(trace->endpos, origin); // real distance without offset
 }
 
 
-static void V_GetDeathCam(int victim, int killer, float* cl_angles, float* origin, float* angle)
+static void V_GetDeathCam(int victim, int killer, Vector& cl_angles, Vector& origin, Vector& angle)
 {
-	float newAngle[3];
-	float newOrigin[3];
+	Vector newAngle;
+	Vector newOrigin;
 
 	float distance = 168.0f;
 
-	cl_entity_t* victimEnt = gEngfuncs.GetEntityByIndex(victim);
+	cl_entity_t* victimEnt = client::GetEntityByIndex(victim);
 	cl_entity_t* killerEnt = nullptr;
 	if (killer != 0)
 	{
-		killerEnt = gEngfuncs.GetEntityByIndex(killer);
+		killerEnt = client::GetEntityByIndex(killer);
 	}
 
 	v_lastDistance += v_frametime * 96.0f; // move unit per seconds back
@@ -199,7 +196,7 @@ static void V_GetDeathCam(int victim, int killer, float* cl_angles, float* origi
 	if (distance > v_lastDistance)
 		distance = v_lastDistance;
 
-	VectorCopy(victimEnt->origin, newOrigin);
+	newOrigin = victimEnt->origin;
 
 	if (victimEnt->player)
 		newOrigin[2] += 17; // head level of living player
@@ -207,10 +204,10 @@ static void V_GetDeathCam(int victim, int killer, float* cl_angles, float* origi
 	// get new angle towards second target
 	if (killerEnt != nullptr && killerEnt != victimEnt)
 	{
-		VectorSubtract(killerEnt->origin, victimEnt->origin, newAngle);
+		newAngle = killerEnt->origin - victimEnt->origin;
 		VectorAngles(newAngle, newAngle);
 		newAngle[0] = -newAngle[0];
-		VectorCopy(newAngle, cl_angles);
+		cl_angles = newAngle;
 	}
 	else
 	{
@@ -225,14 +222,14 @@ static void V_GetDeathCam(int victim, int killer, float* cl_angles, float* origi
 
 	V_GetChaseOrigin(angle, newOrigin, distance, origin);
 
-	VectorCopy(angle, v_lastAngles);
+	v_lastAngles = angle;
 }
 
 
-static void V_GetSingleTargetCam(cl_entity_t* ent1, float* angle, float* origin)
+static void V_GetSingleTargetCam(cl_entity_t* ent1, Vector& angle, Vector& origin)
 {
-	float newAngle[3];
-	float newOrigin[3];
+	Vector newAngle;
+	Vector newOrigin;
 
 	int flags = gHUD.m_Spectator.m_iObserverFlags;
 
@@ -255,7 +252,7 @@ static void V_GetSingleTargetCam(cl_entity_t* ent1, float* angle, float* origin)
 	if (distance > v_lastDistance)
 		distance = v_lastDistance;
 
-	VectorCopy(ent1->origin, newOrigin);
+	newOrigin = ent1->origin;
 
 	if (0 != ent1->player)
 	{
@@ -269,7 +266,7 @@ static void V_GetSingleTargetCam(cl_entity_t* ent1, float* angle, float* origin)
 
 	// we have no second target, choose view direction based on
 	// show front of primary target
-	VectorCopy(ent1->angles, newAngle);
+	newAngle = ent1->angles;
 
 	// show dead players from front, normal players back
 	if ((flags & DRC_FLAG_FACEPLAYER) != 0)
@@ -295,7 +292,7 @@ static void V_GetSingleTargetCam(cl_entity_t* ent1, float* angle, float* origin)
 }
 
 
-static float MaxAngleBetweenAngles(float* a1, float* a2)
+static float MaxAngleBetweenAngles(Vector& a1, Vector& a2)
 {
 	float d, maxd = 0.0f;
 
@@ -323,11 +320,11 @@ static float MaxAngleBetweenAngles(float* a1, float* a2)
 	return maxd;
 }
 
-void V_GetDoubleTargetsCam(cl_entity_t* ent1, cl_entity_t* ent2, float* angle, float* origin)
+void V_GetDoubleTargetsCam(cl_entity_t* ent1, cl_entity_t* ent2, Vector& angle, Vector& origin)
 {
-	float newAngle[3];
-	float newOrigin[3];
-	float tempVec[3];
+	Vector newAngle;
+	Vector newOrigin;
+	Vector tempVec;
 
 	int flags = gHUD.m_Spectator.m_iObserverFlags;
 
@@ -345,7 +342,7 @@ void V_GetDoubleTargetsCam(cl_entity_t* ent1, cl_entity_t* ent2, float* angle, f
 	if (distance > v_lastDistance)
 		distance = v_lastDistance;
 
-	VectorCopy(ent1->origin, newOrigin);
+	newOrigin = ent1->origin;
 
 	if (0 != ent1->player)
 		newOrigin[2] += 17; // head level of living player
@@ -353,7 +350,7 @@ void V_GetDoubleTargetsCam(cl_entity_t* ent1, cl_entity_t* ent2, float* angle, f
 		newOrigin[2] += 8; // object, tricky, must be above bomb in CS
 
 	// get new angle towards second target
-	VectorSubtract(ent2->origin, ent1->origin, newAngle);
+	newAngle = ent2->origin - ent1->origin;
 
 	VectorAngles(newAngle, newAngle);
 	newAngle[0] = -newAngle[0];
@@ -370,8 +367,8 @@ void V_GetDoubleTargetsCam(cl_entity_t* ent1, cl_entity_t* ent2, float* angle, f
 
 	if ((d < v_cameraFocusAngle) && (v_cameraMode == CAM_MODE_RELAX))
 	{
-		// difference is to small and we are in relax camera mode, keep viewangles
-		VectorCopy(v_lastAngles, newAngle);
+		// difference is too small and we are in relax camera mode, keep viewangles
+		newAngle = v_lastAngles;
 	}
 	else if ((d < v_cameraRelaxAngle) && (v_cameraMode == CAM_MODE_FOCUS))
 	{
@@ -387,7 +384,7 @@ void V_GetDoubleTargetsCam(cl_entity_t* ent1, cl_entity_t* ent2, float* angle, f
 	// and smooth view, if not a scene cut
 	if (v_resetCamera || (v_cameraMode == CAM_MODE_RELAX))
 	{
-		VectorCopy(newAngle, angle);
+		angle = newAngle;
 	}
 	else
 	{
@@ -401,12 +398,12 @@ void V_GetDoubleTargetsCam(cl_entity_t* ent1, cl_entity_t* ent2, float* angle, f
 		origin[2] += 16.0f * (1.0f - (v_lastDistance / 64.0f));
 
 	// calculate angle to second target
-	VectorSubtract(ent2->origin, origin, tempVec);
+	tempVec = ent2->origin - origin;
 	VectorAngles(tempVec, tempVec);
 	tempVec[0] = -tempVec[0];
 }
 
-void V_GetDirectedChasePosition(cl_entity_t* ent1, cl_entity_t* ent2, float* angle, float* origin)
+void V_GetDirectedChasePosition(cl_entity_t* ent1, cl_entity_t* ent2, Vector& angle, Vector& origin)
 {
 
 	if (v_resetCamera)
@@ -430,7 +427,7 @@ void V_GetDirectedChasePosition(cl_entity_t* ent1, cl_entity_t* ent2, float* ang
 		// second target disappeard somehow (dead)
 
 		// keep last good viewangle
-		float newOrigin[3];
+		Vector newOrigin;
 
 		int flags = gHUD.m_Spectator.m_iObserverFlags;
 
@@ -448,7 +445,7 @@ void V_GetDirectedChasePosition(cl_entity_t* ent1, cl_entity_t* ent2, float* ang
 		if (distance > v_lastDistance)
 			distance = v_lastDistance;
 
-		VectorCopy(ent1->origin, newOrigin);
+		newOrigin = ent1->origin;
 
 		if (0 != ent1->player)
 			newOrigin[2] += 17; // head level of living player
@@ -458,23 +455,23 @@ void V_GetDirectedChasePosition(cl_entity_t* ent1, cl_entity_t* ent2, float* ang
 		V_GetChaseOrigin(angle, newOrigin, distance, origin);
 	}
 
-	VectorCopy(angle, v_lastAngles);
+	v_lastAngles = angle;
 }
 
-void V_GetChasePos(int target, float* cl_angles, float* origin, float* angles)
+void V_GetChasePos(int target, float* cl_angles, Vector& origin, Vector& angles)
 {
-	cl_entity_t* ent = NULL;
+	cl_entity_t* ent = nullptr;
 
 	if (0 != target)
 	{
-		ent = gEngfuncs.GetEntityByIndex(target);
+		ent = client::GetEntityByIndex(target);
 	}
 
 	if (!ent)
 	{
 		// just copy a save in-map position
-		VectorCopy(vJumpAngles, angles);
-		VectorCopy(vJumpOrigin, origin);
+		angles = vJumpAngles;
+		origin = vJumpOrigin;
 		return;
 	}
 
@@ -483,7 +480,7 @@ void V_GetChasePos(int target, float* cl_angles, float* origin, float* angles)
 	if (0 != gHUD.m_Spectator.m_autoDirector->value)
 	{
 		if (0 != gHUD.GetObserverTarget2())
-			V_GetDirectedChasePosition(ent, gEngfuncs.GetEntityByIndex(gHUD.GetObserverTarget2()),
+			V_GetDirectedChasePosition(ent, client::GetEntityByIndex(gHUD.GetObserverTarget2()),
 				angles, origin);
 		else
 			V_GetDirectedChasePosition(ent, (cl_entity_t*)0xFFFFFFFF,
@@ -491,18 +488,18 @@ void V_GetChasePos(int target, float* cl_angles, float* origin, float* angles)
 	}
 	else
 	{
-		if (cl_angles == NULL) // no mouse angles given, use entity angles ( locked mode )
+		if (cl_angles == nullptr) // no mouse angles given, use entity angles ( locked mode )
 		{
-			VectorCopy(ent->angles, angles);
+			angles = ent->angles;
 			angles[0] *= -1;
 		}
 		else
-			VectorCopy(cl_angles, angles);
+		{
+			angles = cl_angles;
+		}
 
 
-		VectorCopy(ent->origin, origin);
-
-		VectorAdd(origin, VEC_VIEW, origin); // some offset
+		origin = ent->origin + VEC_VIEW; // some offset
 
 		V_GetChaseOrigin(angles, origin, cl_chasedist->value, origin);
 	}
@@ -516,48 +513,48 @@ void V_ResetChaseCam()
 }
 
 
-void V_GetInEyePos(int target, float* origin, float* angles)
+void V_GetInEyePos(int target, Vector& origin, Vector& angles)
 {
 	if (0 == target)
 	{
 		// just copy a save in-map position
-		VectorCopy(vJumpAngles, angles);
-		VectorCopy(vJumpOrigin, origin);
+		angles = vJumpAngles;
+		origin = vJumpOrigin;
 		return;
 	}
 
 
-	cl_entity_t* ent = gEngfuncs.GetEntityByIndex(target);
+	cl_entity_t* ent = client::GetEntityByIndex(target);
 
 	if (!ent)
 		return;
 
-	VectorCopy(ent->origin, origin);
-	VectorCopy(ent->angles, angles);
+	origin = ent->origin;
+	angles = ent->angles;
 
 	angles[PITCH] *= -3.0f; // see CL_ProcessEntityUpdate()
 
 	if (ent->curstate.solid == SOLID_NOT)
 	{
 		angles[ROLL] = 80; // dead view angle
-		VectorAdd(origin, VEC_DEAD_VIEW, origin);
+		origin = origin + VEC_DEAD_VIEW;
 	}
 	else if (ent->curstate.usehull == 1)
 	{
-		VectorAdd(origin, VEC_DUCK_VIEW, origin);
+		origin = origin + VEC_DUCK_VIEW;
 	}
 	else
 		// exacty eye position can't be caluculated since it depends on
 		// client values like cl_bobcycle, this offset matches the default values
-		VectorAdd(origin, VEC_VIEW, origin);
+		origin = origin + VEC_VIEW;
 }
 
-void V_GetMapFreePosition(float* cl_angles, float* origin, float* angles)
+void V_GetMapFreePosition(Vector& cl_angles, Vector& origin, Vector& angles)
 {
 	Vector forward;
 	Vector zScaledTarget;
 
-	VectorCopy(cl_angles, angles);
+	angles = cl_angles;
 
 	// modify angles since we don't wanna see map's bottom
 	angles[0] = 51.25f + 38.75f * (angles[0] / 90.0f);
@@ -567,34 +564,34 @@ void V_GetMapFreePosition(float* cl_angles, float* origin, float* angles)
 	zScaledTarget[2] = gHUD.m_Spectator.m_mapOrigin[2] * ((90.0f - angles[0]) / 90.0f);
 
 
-	AngleVectors(angles, forward, NULL, NULL);
+	AngleVectors(angles, &forward, nullptr, nullptr);
 
-	VectorNormalize(forward);
+	forward.NormalizeInPlace();
 
-	VectorMA(zScaledTarget, -(4096.0f / gHUD.m_Spectator.m_mapZoom), forward, origin);
+	origin = zScaledTarget + -(4096.0f / gHUD.m_Spectator.m_mapZoom) * forward;
 }
 
-void V_GetMapChasePosition(int target, float* cl_angles, float* origin, float* angles)
+void V_GetMapChasePosition(int target, Vector& cl_angles, Vector& origin, Vector& angles)
 {
 	Vector forward;
 
 	if (0 != target)
 	{
-		cl_entity_t* ent = gEngfuncs.GetEntityByIndex(target);
+		cl_entity_t* ent = client::GetEntityByIndex(target);
 
 		if (0 != gHUD.m_Spectator.m_autoDirector->value)
 		{
 			// this is done to get the angles made by director mode
 			V_GetChasePos(target, cl_angles, origin, angles);
-			VectorCopy(ent->origin, origin);
+			origin = ent->origin;
 
 			// keep fix chase angle horizontal
 			angles[0] = 45.0f;
 		}
 		else
 		{
-			VectorCopy(cl_angles, angles);
-			VectorCopy(ent->origin, origin);
+			angles = cl_angles;
+			origin = ent->origin;
 
 			// modify angles since we don't wanna see map's bottom
 			angles[0] = 51.25f + 38.75f * (angles[0] / 90.0f);
@@ -603,18 +600,18 @@ void V_GetMapChasePosition(int target, float* cl_angles, float* origin, float* a
 	else
 	{
 		// keep out roaming position, but modify angles
-		VectorCopy(cl_angles, angles);
+		angles = cl_angles;
 		angles[0] = 51.25f + 38.75f * (angles[0] / 90.0f);
 	}
 
 	origin[2] *= ((90.0f - angles[0]) / 90.0f);
 	angles[2] = 0.0f; // don't roll angle (if chased player is dead)
 
-	AngleVectors(angles, forward, NULL, NULL);
+	AngleVectors(angles, &forward, nullptr, nullptr);
 
-	VectorNormalize(forward);
+	forward.NormalizeInPlace();
 
-	VectorMA(origin, -1536, forward, origin);
+	origin = origin + -1536 * forward;
 }
 
 
@@ -625,17 +622,17 @@ void V_CalcSpectatorRefdef(ref_params_t* pparams)
 	static int lastWeaponModelIndex = 0;
 	static int lastViewModelIndex = 0;
 
-	cl_entity_t* ent = gEngfuncs.GetEntityByIndex(gHUD.GetObserverTarget());
+	cl_entity_t* ent = client::GetEntityByIndex(gHUD.GetObserverTarget());
 
 	pparams->onlyClientDraw = 0;
 
 	// refresh position
-	VectorCopy(pparams->simorg, v_sim_org);
+	v_sim_org = pparams->simorg;
 
 	// get old values
-	VectorCopy(pparams->cl_viewangles, v_cl_angles);
-	VectorCopy(pparams->viewangles, v_angles);
-	VectorCopy(pparams->vieworg, v_origin);
+	v_cl_angles = pparams->cl_viewangles;
+	v_angles = pparams->viewangles;
+	v_origin = pparams->vieworg;
 
 	v_frametime = pparams->frametime;
 
@@ -650,8 +647,8 @@ void V_CalcSpectatorRefdef(ref_params_t* pparams)
 			break;
 
 		case OBS_ROAMING:
-			VectorCopy(v_cl_angles, v_angles);
-			VectorCopy(v_sim_org, v_origin);
+			v_angles = v_cl_angles;
+			v_origin = v_sim_org;
 
 			// override values if director is active
 			gHUD.m_Spectator.GetDirectorCamera(v_origin, v_angles);
@@ -719,7 +716,7 @@ void V_CalcSpectatorRefdef(ref_params_t* pparams)
 	}
 
 	// write back new values into pparams
-	VectorCopy(v_cl_angles, pparams->cl_viewangles);
-	VectorCopy(v_angles, pparams->viewangles)
-		VectorCopy(v_origin, pparams->vieworg);
+	pparams->cl_viewangles = v_cl_angles;
+	pparams->viewangles = v_angles;
+	pparams->vieworg = v_origin;
 }

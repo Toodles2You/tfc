@@ -15,7 +15,7 @@ class SimpleState
 public:
 	SimpleState( void )
 	{
-		m_parent = NULL;
+		m_parent = nullptr;
 	}
 
 	virtual ~SimpleState() { }
@@ -42,13 +42,13 @@ class SimpleStateMachine
 public:
 	SimpleStateMachine( void )
 	{
-		m_state = NULL;
+		m_state = nullptr;
 	}
 
 	void Reset( T userData )
 	{
 		m_userData = userData;
-		m_state = NULL;
+		m_state = nullptr;
 	}
 
 	/// change behavior state - WARNING: not re-entrant. Do not SetState() from within OnEnter() or OnExit()

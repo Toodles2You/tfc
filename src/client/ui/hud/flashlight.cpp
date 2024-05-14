@@ -77,11 +77,11 @@ void CHudFlashlight::Update_Flashlight(const bool on)
 
 	if (m_fOn)
 	{
-		PlaySound("items/flashlight1.wav", VOL_NORM);
+		client::PlaySoundByName("items/flashlight1.wav", VOL_NORM);
 	}
 	else
 	{
-		PlaySound("items/flashlight2.wav", VOL_NORM);
+		client::PlaySoundByName("items/flashlight2.wav", VOL_NORM);
 	}
 }
 

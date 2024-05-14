@@ -60,7 +60,7 @@ void CDetpack::Deploy()
 
 void CDetpack::WeaponPostFrame()
 {
-	if ((m_pPlayer->pev->button & IN_SPECIAL) != 0)
+	if ((m_pPlayer->v.button & IN_SPECIAL) != 0)
 	{
 		if (!m_pPlayer->InState(CBasePlayer::State::Holstered))
 		{
@@ -97,31 +97,31 @@ void CDetpack::Set()
 	RemoveFromPlayer(false);
 
 #ifdef GAME_DLL
-	pev->owner = player->pev->pContainingEntity;
-	pev->team = player->TeamNumber();
+	v.owner = player->v.pContainingEntity;
+	v.team = player->TeamNumber();
 
-	pev->solid = SOLID_TRIGGER;
-	pev->movetype = MOVETYPE_TOSS;
+	v.solid = SOLID_TRIGGER;
+	v.movetype = MOVETYPE_TOSS;
 
-	SetOrigin(player->pev->origin);
+	SetOrigin(player->v.origin);
 
 	SetModel("models/detpack.mdl");
-	pev->effects &= ~EF_NODRAW;
-	pev->angles.x = pev->angles.z = 0;
+	v.effects &= ~EF_NODRAW;
+	v.angles.x = v.angles.z = 0;
 
 	EmitSound("weapons/mine_activate.wav", CHAN_VOICE);
 
-	pev->pain_finished = std::max(pev->pain_finished, 5.0F);
+	v.pain_finished = std::max(v.pain_finished, 5.0F);
 
-	if (pev->pain_finished <= 6.0F)
+	if (v.pain_finished <= 6.0F)
 	{
 		FireInTheHole();
-        pev->nextthink = gpGlobals->time + pev->pain_finished;
+        v.nextthink = gpGlobals->time + v.pain_finished;
 	}
 	else
 	{
 		SetThink(&CDetpack::FireInTheHole);
-		pev->nextthink = gpGlobals->time + pev->pain_finished - 6.0F;
+		v.nextthink = gpGlobals->time + v.pain_finished - 6.0F;
 	}
 
 	SetUse(&CDetpack::Disarm);
@@ -136,13 +136,13 @@ void CDetpack::FireInTheHole()
 	EmitSound("weapons/mine_charge.wav", CHAN_WEAPON);
 
 	SetThink(&CDetpack::Detonate);
-	pev->nextthink = gpGlobals->time + 6.0F;
+	v.nextthink = gpGlobals->time + 6.0F;
 }
 
 
 void CDetpack::Detonate()
 {
-	const auto sploj = pev->origin + Vector(0.0F, 0.0F, 16.0F);
+	const auto sploj = v.origin + Vector(0.0F, 0.0F, 16.0F);
 
 	tent::Explosion(
 		sploj,
@@ -152,9 +152,9 @@ void CDetpack::Detonate()
 
 	CBaseEntity* activator = CWorld::World;
 
-	if (pev->owner != nullptr)
+	if (v.owner != nullptr)
 	{
-		activator = CBaseEntity::Instance(pev->owner);
+		activator = v.owner->Get<CBaseEntity>();
 	}
 
 	util::GoalDetpackUse(sploj, activator, this);
@@ -196,14 +196,14 @@ void CDetpack::Disarm(CBaseEntity* activator, CBaseEntity* caller, USE_TYPE useT
 	{
 		case USE_CONTINUOUS_BEGIN:
 		{
-			pev->pain_finished = gpGlobals->time + info.iReloadTime / 1000.0F;
+			v.pain_finished = gpGlobals->time + info.iReloadTime / 1000.0F;
 			EmitSound("weapons/mine_disarm.wav", CHAN_ITEM);
 			player->SetWeaponHolstered(true);
 			break;
 		}
 		case USE_CONTINUOUS:
 		{
-			if (pev->pain_finished <= gpGlobals->time)
+			if (v.pain_finished <= gpGlobals->time)
 			{
 	            g_pGameRules->AddPointsToPlayer(player, 1);
 				EmitSound("weapons/mine_disarmed.wav", CHAN_ITEM);

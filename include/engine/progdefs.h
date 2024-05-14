@@ -36,7 +36,7 @@ typedef struct
 	Vector trace_endpos;
 	Vector trace_plane_normal;
 	float trace_plane_dist;
-	edict_t* trace_ent;
+	Entity* trace_ent;
 	float trace_inopen;
 	float trace_inwater;
 	int trace_hitgroup;
@@ -137,12 +137,12 @@ typedef struct entvars_s
 	int button;
 	int impulse;
 
-	edict_t* chain; // Entity pointer when linked into a linked list
-	edict_t* dmg_inflictor;
-	edict_t* enemy;
-	edict_t* aiment; // entity pointer when MOVETYPE_FOLLOW
-	edict_t* owner;
-	edict_t* groundentity;
+	Entity* chain; // Entity pointer when linked into a linked list
+	Entity* dmg_inflictor;
+	Entity* enemy;
+	Entity* aiment; // entity pointer when MOVETYPE_FOLLOW
+	Entity* owner;
+	Entity* groundentity;
 
 	int spawnflags;
 	int flags;
@@ -177,7 +177,7 @@ typedef struct entvars_s
 	float pain_finished;
 	float radsuit_finished;
 
-	edict_t* pContainingEntity;
+	Entity* pContainingEntity;
 
 	int playerclass;
 	float maxspeed;
@@ -213,8 +213,8 @@ typedef struct entvars_s
 	Vector vuser2;
 	Vector vuser3;
 	Vector vuser4;
-	edict_t* euser1;
-	edict_t* euser2;
-	edict_t* euser3;
-	edict_t* euser4;
+	Entity* euser1;
+	Entity* euser2;
+	Entity* euser3;
+	Entity* euser4;
 } entvars_t;

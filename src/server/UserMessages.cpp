@@ -27,45 +27,45 @@ void LinkUserMessages()
 		return;
 	}
 
-	gmsgHealth = REG_USER_MSG("Health", 2);
-	gmsgDamage = REG_USER_MSG("Damage", 12);
-	gmsgBattery = REG_USER_MSG("Battery", 2);
+	gmsgHealth = engine::RegUserMsg("Health", 2);
+	gmsgDamage = engine::RegUserMsg("Damage", 12);
+	gmsgBattery = engine::RegUserMsg("Battery", 2);
 #ifdef HALFLIFE_TRAINCONTROL
-	gmsgTrain = REG_USER_MSG("Train", 1);
+	gmsgTrain = engine::RegUserMsg("Train", 1);
 #endif
-	//gmsgHudText = REG_USER_MSG( "HudTextPro", -1 );
-	gmsgHudText = REG_USER_MSG("HudText", -1); // we don't use the message but 3rd party addons may!
-	gmsgSayText = REG_USER_MSG("SayText", -1);
-	gmsgTextMsg = REG_USER_MSG("TextMsg", -1);
-	gmsgResetHUD = REG_USER_MSG("ResetHUD", 0); // called every respawn
-	gmsgInitHUD = REG_USER_MSG("InitHUD", 0);	// called every time a new player joins the server
-	gmsgDeathMsg = REG_USER_MSG("DeathMsg", -1);
-	gmsgScoreInfo = REG_USER_MSG("ScoreInfo", 5);
-	gmsgExtraInfo = REG_USER_MSG("ExtraInfo", 3);
-	gmsgTeamScore = REG_USER_MSG("TeamScore", 3); // sets the score of a team on the scoreboard
-	gmsgGameMode = REG_USER_MSG("GameMode", 1);
-	gmsgMOTD = REG_USER_MSG("MOTD", -1);
-	gmsgVGUIMenu = REG_USER_MSG("VGUIMenu", 1);
-	gmsgServerName = REG_USER_MSG("ServerName", -1);
-	gmsgAmmoPickup = REG_USER_MSG("AmmoPickup", 2);
-	gmsgWeapPickup = REG_USER_MSG("WeapPickup", 1);
-	gmsgItemPickup = REG_USER_MSG("ItemPickup", -1);
-	gmsgShowMenu = REG_USER_MSG("ShowMenu", -1);
-	gmsgVoteMenu = REG_USER_MSG("VoteMenu", -1);
-	gmsgShake = REG_USER_MSG("ScreenShake", sizeof(ScreenShake));
-	gmsgFade = REG_USER_MSG("ScreenFade", sizeof(ScreenFade));
-	gmsgValClass = REG_USER_MSG("ValClass", 10);
-	gmsgTeamNames = REG_USER_MSG("TeamNames", -1);
-	gmsgAllowSpec = REG_USER_MSG("AllowSpec", 1);
+	//gmsgHudText = engine::RegUserMsg( "HudTextPro", -1 );
+	gmsgHudText = engine::RegUserMsg("HudText", -1); // we don't use the message but 3rd party addons may!
+	gmsgSayText = engine::RegUserMsg("SayText", -1);
+	gmsgTextMsg = engine::RegUserMsg("TextMsg", -1);
+	gmsgResetHUD = engine::RegUserMsg("ResetHUD", 0); // called every respawn
+	gmsgInitHUD = engine::RegUserMsg("InitHUD", 0);	// called every time a new player joins the server
+	gmsgDeathMsg = engine::RegUserMsg("DeathMsg", -1);
+	gmsgScoreInfo = engine::RegUserMsg("ScoreInfo", 5);
+	gmsgExtraInfo = engine::RegUserMsg("ExtraInfo", 3);
+	gmsgTeamScore = engine::RegUserMsg("TeamScore", 3); // sets the score of a team on the scoreboard
+	gmsgGameMode = engine::RegUserMsg("GameMode", 1);
+	gmsgMOTD = engine::RegUserMsg("MOTD", -1);
+	gmsgVGUIMenu = engine::RegUserMsg("VGUIMenu", 1);
+	gmsgServerName = engine::RegUserMsg("ServerName", -1);
+	gmsgAmmoPickup = engine::RegUserMsg("AmmoPickup", 2);
+	gmsgWeapPickup = engine::RegUserMsg("WeapPickup", 1);
+	gmsgItemPickup = engine::RegUserMsg("ItemPickup", -1);
+	gmsgShowMenu = engine::RegUserMsg("ShowMenu", -1);
+	gmsgVoteMenu = engine::RegUserMsg("VoteMenu", -1);
+	gmsgShake = engine::RegUserMsg("ScreenShake", sizeof(ScreenShake));
+	gmsgFade = engine::RegUserMsg("ScreenFade", sizeof(ScreenFade));
+	gmsgValClass = engine::RegUserMsg("ValClass", 10);
+	gmsgTeamNames = engine::RegUserMsg("TeamNames", -1);
+	gmsgAllowSpec = engine::RegUserMsg("AllowSpec", 1);
 
-	gmsgWeapons = REG_USER_MSG("Weapons", 8);
-	gmsgAmmo = REG_USER_MSG("Ammo", AMMO_TYPES);
-	gmsgSecAmmoIcon = REG_USER_MSG("SecAmmoIcon", -1);
+	gmsgWeapons = engine::RegUserMsg("Weapons", 8);
+	gmsgAmmo = engine::RegUserMsg("Ammo", AMMO_TYPES);
+	gmsgSecAmmoIcon = engine::RegUserMsg("SecAmmoIcon", -1);
 
-	gmsgHitFeedback = REG_USER_MSG("HitFeedback", 4);
-	gmsgBlood = REG_USER_MSG("Blood", -1);
-	gmsgLaserDot = REG_USER_MSG("Laser", 1);
-	gmsgPredictedSound = REG_USER_MSG("PredSound", -1);
+	gmsgHitFeedback = engine::RegUserMsg("HitFeedback", 4);
+	gmsgBlood = engine::RegUserMsg("Blood", -1);
+	gmsgLaserDot = engine::RegUserMsg("Laser", 1);
+	gmsgPredictedSound = engine::RegUserMsg("PredSound", -1);
 
-	gmsgStatusIcon = REG_USER_MSG("StatusIcon", -1);
+	gmsgStatusIcon = engine::RegUserMsg("StatusIcon", -1);
 }

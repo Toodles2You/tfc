@@ -37,9 +37,9 @@ struct DeathNoticeItem
 	bool bHeadshot;
 	bool bLocalPlayerInvolved;
 	float flDisplayTime;
-	float* KillerColor;
-	float* AccompliceColor;
-	float* VictimColor;
+	const Vector* KillerColor;
+	const Vector* AccompliceColor;
+	const Vector* VictimColor;
 };
 
 #define MAX_DEATHNOTICES 4
@@ -56,7 +56,7 @@ bool CHudDeathNotice::Init()
 {
 	HOOK_MESSAGE(DeathMsg);
 
-	hud_deathnotice_time = CVAR_CREATE("hud_deathnotice_time", "6", 0);
+	hud_deathnotice_time = client::RegisterVariable("hud_deathnotice_time", "6", 0);
 
 	return CHudBase::Init();
 }
@@ -174,25 +174,25 @@ void CHudDeathNotice::Draw(const float time)
 			// Draw killers name
 			if (item->KillerColor)
 			{
-				gEngfuncs.pfnDrawSetTextColor(
-					item->KillerColor[0],
-					item->KillerColor[1],
-					item->KillerColor[2]);
+				client::DrawSetTextColor(
+					item->KillerColor->x,
+					item->KillerColor->y,
+					item->KillerColor->z);
 			}
 			x = gHUD.DrawHudString(item->szKiller, x, centerY - m_string_height);
 
 			// Draw accomplices name, if any
 			if (item->szAccomplice[0] != '\0')
 			{
-				gEngfuncs.pfnDrawSetTextColor(r / 255.0F, g / 255.0F, b / 255.0F);
+				client::DrawSetTextColor(r / 255.0F, g / 255.0F, b / 255.0F);
 				x = gHUD.DrawHudString(" + ", x, centerY - m_string_height);
 
 				if (item->AccompliceColor)
 				{
-					gEngfuncs.pfnDrawSetTextColor(
-						item->AccompliceColor[0],
-						item->AccompliceColor[1],
-						item->AccompliceColor[2]);
+					client::DrawSetTextColor(
+						item->AccompliceColor->x,
+						item->AccompliceColor->y,
+						item->AccompliceColor->z);
 				}
 				x = gHUD.DrawHudString(item->szAccomplice, x, centerY - m_string_height);
 			}
@@ -218,24 +218,24 @@ void CHudDeathNotice::Draw(const float time)
 		{
 			if (item->AccompliceColor)
 			{
-				gEngfuncs.pfnDrawSetTextColor(
-					item->AccompliceColor[0],
-					item->AccompliceColor[1],
-					item->AccompliceColor[2]);
+				client::DrawSetTextColor(
+					item->AccompliceColor->x,
+					item->AccompliceColor->y,
+					item->AccompliceColor->z);
 			}
 			x = gHUD.DrawHudString(item->szAccomplice, x, centerY - m_string_height);
 
-			gEngfuncs.pfnDrawSetTextColor(r / 255.0F, g / 255.0F, b / 255.0F);
+			client::DrawSetTextColor(r / 255.0F, g / 255.0F, b / 255.0F);
 			x = gHUD.DrawHudString(" finished off ", x, centerY - m_string_height);
 		}
 
 		// Draw victims name
 		if (item->VictimColor)
 		{
-			gEngfuncs.pfnDrawSetTextColor(
-				item->VictimColor[0],
-				item->VictimColor[1],
-				item->VictimColor[2]);
+			client::DrawSetTextColor(
+				item->VictimColor->x,
+				item->VictimColor->y,
+				item->VictimColor->z);
 		}
 		x = gHUD.DrawHudString(item->szVictim, x, centerY - m_string_height);
 
@@ -318,7 +318,7 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 	}
 	else
 	{
-		item->KillerColor = gHUD.GetClientColor(killer);
+		item->KillerColor = &gHUD.GetClientColor(killer);
 		strncpy(item->szKiller, killerName, MAX_PLAYER_NAME_LENGTH - 1);
 		item->szKiller[MAX_PLAYER_NAME_LENGTH - 1] = '\0';
 	}
@@ -332,7 +332,7 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 		}
 		else
 		{
-			item->AccompliceColor = gHUD.GetClientColor(accomplice);
+			item->AccompliceColor = &gHUD.GetClientColor(accomplice);
 			strncpy(item->szAccomplice, accompliceName, MAX_PLAYER_NAME_LENGTH - 1);
 			item->szAccomplice[MAX_PLAYER_NAME_LENGTH - 1] = '\0';
 		}
@@ -350,7 +350,7 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 	}
 	else
 	{
-		item->VictimColor = gHUD.GetClientColor(victim);
+		item->VictimColor = &gHUD.GetClientColor(victim);
 		strncpy(item->szVictim, victimName, MAX_PLAYER_NAME_LENGTH - 1);
 		item->szVictim[MAX_PLAYER_NAME_LENGTH - 1] = '\0';
 	}

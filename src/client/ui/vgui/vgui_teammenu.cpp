@@ -278,7 +278,7 @@ void CTeamMenuPanel::Update()
 	// Set the Map Title
 	if (!m_bUpdatedMapName)
 	{
-		const char* level = gEngfuncs.pfnGetLevelName();
+		const char* level = client::GetLevelName();
 		if (level && '\0' != level[0])
 		{
 			char sz[256];
@@ -301,7 +301,7 @@ void CTeamMenuPanel::Update()
 			ch = strchr(sz, '.');
 			*ch = '\0';
 			strcat(sz, ".txt");
-			char* pfile = (char*)gEngfuncs.COM_LoadFile(sz, 5, NULL);
+			char* pfile = (char*)client::COM_LoadFile(sz, 5, nullptr);
 			if (pfile)
 			{
 				m_pBriefing->setText(pfile);
@@ -310,7 +310,7 @@ void CTeamMenuPanel::Update()
 				int iXSize, iYSize;
 				m_pBriefing->getTextImage()->getTextSize(iXSize, iYSize);
 				m_pBriefing->setSize(iXSize, iYSize);
-				gEngfuncs.COM_FreeFile(pfile);
+				client::COM_FreeFile(pfile);
 			}
 
 			m_bUpdatedMapName = true;

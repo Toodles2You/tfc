@@ -57,3 +57,25 @@ typedef struct triangleapi_s
 	void (*FogParams)(float flDensity, int iFogSkybox); // Used with Fog()...sets fog density and whether the fog should be applied to the skybox
 
 } triangleapi_t;
+
+namespace client::tri {
+inline void (*RenderMode)(int mode);
+inline void (*Begin)(int primitiveCode);
+inline void (*End)();
+inline void (*Color4f)(float r, float g, float b, float a);
+inline void (*Color4ub)(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+inline void (*TexCoord2f)(float u, float v);
+inline void (*Vertex3fv)(const float* worldPnt);
+inline void (*Vertex3f)(float x, float y, float z);
+inline void (*Brightness)(float brightness);
+inline void (*CullFace)(TRICULLSTYLE style);
+inline int (*SpriteTexture)(struct model_s* pSpriteModel, int frame);
+inline int (*WorldToScreen)(float* world, float* screen);
+inline void (*Fog)(float flFogColor[3], float flStart, float flEnd, int bOn);
+inline void (*ScreenToWorld)(float* screen, float* world);
+inline void (*GetMatrix)(const int pname, float* matrix);
+inline int (*BoxInPVS)(float* mins, float* maxs);
+inline void (*LightAtPoint)(float* pos, float* value);
+inline void (*Color4fRendermode)(float r, float g, float b, float a, int rendermode);
+inline void (*FogParams)(float flDensity, int iFogSkybox);
+} /* namespace client::tri */

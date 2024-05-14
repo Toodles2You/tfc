@@ -127,7 +127,7 @@ void CPipeBombLauncher::DetonatePipeBombs(const bool fizzle)
 
 		if (pipebomb != nullptr)
 		{
-			if (pipebomb->pev->pain_finished > gpGlobals->time)
+			if (pipebomb->v.pain_finished > gpGlobals->time)
 			{
 				if (fizzle)
 				{
@@ -137,7 +137,7 @@ void CPipeBombLauncher::DetonatePipeBombs(const bool fizzle)
 			}
 
 			pipebomb->SetThink(&CPipeBomb::Detonate);
-			pipebomb->pev->nextthink = gpGlobals->time;
+			pipebomb->v.nextthink = gpGlobals->time;
 		}
 	}
 }
@@ -158,7 +158,7 @@ void CPipeBombLauncher::AddPipeBomb(CPipeBomb* pipebomb)
 		if (pipebomb != nullptr)
 		{
 			pipebomb->SetThink(&CPipeBomb::Detonate);
-			pipebomb->pev->nextthink = gpGlobals->time;
+			pipebomb->v.nextthink = gpGlobals->time;
 
 			m_pPipeBombs.pop();
 		}

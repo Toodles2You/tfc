@@ -32,7 +32,7 @@ public:
 		const CNavLadder *ladder;								///< if "how" refers to a ladder, this is it
 	};
 
-	const PathSegment * operator[] ( int i )	{ return (i >= 0 && i < m_segmentCount) ? &m_path[i] : NULL; }
+	const PathSegment * operator[] ( int i )	{ return (i >= 0 && i < m_segmentCount) ? &m_path[i] : nullptr; }
 	int GetSegmentCount( void ) const			{ return m_segmentCount; }
 	const Vector &GetEndpoint( void ) const		{ return m_path[ m_segmentCount-1 ].pos; }
 	bool IsAtEnd( const Vector &pos ) const;					///< return true if position is at the end of the path
@@ -61,11 +61,11 @@ public:
 	{
 		Invalidate();
 
-		if (start == NULL || goal == NULL)
+		if (start == nullptr || goal == nullptr)
 			return false;
 
 		CNavArea *startArea = TheNavAreaGrid.GetNearestNavArea( start );
-		if (startArea == NULL)
+		if (startArea == nullptr)
 			return false;
 
 		CNavArea *goalArea = TheNavAreaGrid.GetNavArea( goal );
@@ -135,7 +135,7 @@ public:
 		// append path end position
 		m_path[ m_segmentCount ].area = effectiveGoalArea;
 		m_path[ m_segmentCount ].pos = pathEndPosition;
-		m_path[ m_segmentCount ].ladder = NULL;
+		m_path[ m_segmentCount ].ladder = nullptr;
 		m_path[ m_segmentCount ].how = NUM_TRAVERSE_TYPES;
 		++m_segmentCount;
 

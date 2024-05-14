@@ -31,7 +31,7 @@ float HUD_GetFOV();
 void CHud::Think()
 {
 	m_scrinfo.iSize = sizeof(m_scrinfo);
-	GetScreenInfo(&m_scrinfo);
+	client::GetScreenInfo(&m_scrinfo);
 
 	int newfov;
 	HUDLIST* pList = m_pHudList;
@@ -60,7 +60,7 @@ bool CHud::Redraw(float flTime, bool intermission)
 	if (m_flTimeDelta < 0)
 		m_flTimeDelta = 0;
 
-	gEngfuncs.pTriAPI->CullFace(TRI_FRONT);
+	client::tri::CullFace(TRI_FRONT);
 	
 	bool bWantWidescreen = m_pCvarWidescreen->value != 0.0F;
 
@@ -87,7 +87,7 @@ bool CHud::Redraw(float flTime, bool intermission)
 	}
 	else
 	{
-		auto ulRGB = strtoul(m_pCvarColor->string, NULL, 16);
+		auto ulRGB = strtoul(m_pCvarColor->string, nullptr, 16);
 		m_cColors[CHud::COLOR_PRIMARY].r = (ulRGB & 0xFF0000) >> 16;
 		m_cColors[CHud::COLOR_PRIMARY].g = (ulRGB & 0xFF00) >> 8;
 		m_cColors[CHud::COLOR_PRIMARY].b = (ulRGB & 0xFF);
@@ -113,14 +113,14 @@ bool CHud::Redraw(float flTime, bool intermission)
 			gViewPort->UpdateSpectatorPanel();
 
 			// Take a screenshot if the client's got the cvar set
-			if (CVAR_GET_FLOAT("hud_takesshots") != 0)
+			if (client::GetCvarFloat("hud_takesshots") != 0)
 				m_flShotTime = flTime + 1.0; // Take a screenshot in a second
 		}
 	}
 
 	if (0 != m_flShotTime && m_flShotTime < flTime)
 	{
-		gEngfuncs.pfnClientCmd("snapshot\n");
+		client::ClientCmd("snapshot\n");
 		m_flShotTime = 0;
 	}
 
@@ -142,7 +142,7 @@ bool CHud::Redraw(float flTime, bool intermission)
 		}
 	}
 
-	gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
+	client::tri::RenderMode(kRenderNormal);
 
 	return true;
 }
@@ -157,8 +157,8 @@ void ScaleColors(int& r, int& g, int& b, int a)
 
 void CHud::DrawHudSprite(HSPRITE pic, int frame, Rect *rect, int x, int y, int r, int g, int b, int a, hudalign_e alignment)
 {
-	auto sprw = gEngfuncs.pfnSPR_Width (pic, frame);
-	auto sprh = gEngfuncs.pfnSPR_Height (pic, frame);
+	auto sprw = client::SPR_Width (pic, frame);
+	auto sprh = client::SPR_Height (pic, frame);
 
 	if (!rect)
 	{
@@ -209,12 +209,12 @@ void CHud::DrawHudSprite(HSPRITE pic, int frame, Rect *rect, int x, int y, int r
 		y += m_flOffsetY;
 
 		ScaleColors(r, g, b, a);
-		gEngfuncs.pfnSPR_Set(pic, r, g, b);
-		gEngfuncs.pfnSPR_DrawAdditive(frame, x, y, rect);
+		client::SPR_Set(pic, r, g, b);
+		client::SPR_DrawAdditive(frame, x, y, rect);
 		return;
 	}
 	
-	const auto pSprite = const_cast<model_t *>(gEngfuncs.GetSpritePointer (pic));
+	const auto pSprite = const_cast<model_t *>(client::GetSpritePointer (pic));
 
 	const auto x1 = roundf (m_flOffsetX + xf * m_flScaleX);
 	const auto y1 = roundf (m_flOffsetY + yf * m_flScaleY);
@@ -226,28 +226,28 @@ void CHud::DrawHudSprite(HSPRITE pic, int frame, Rect *rect, int x, int y, int r
 	const auto top = rect->top / (float)sprh;
 	const auto bottom = rect->bottom / (float)sprh;
 	
-	gEngfuncs.pTriAPI->SpriteTexture (pSprite, frame);
+	client::tri::SpriteTexture (pSprite, frame);
 
 	const auto rendermode = kRenderTransAdd;
 
-	gEngfuncs.pTriAPI->Color4fRendermode (r / 255.0F, g / 255.0F, b / 255.0F, a / 255.0F, rendermode);
-	gEngfuncs.pTriAPI->RenderMode (rendermode);
+	client::tri::Color4fRendermode (r / 255.0F, g / 255.0F, b / 255.0F, a / 255.0F, rendermode);
+	client::tri::RenderMode (rendermode);
 
-	gEngfuncs.pTriAPI->Begin (TRI_QUADS);
+	client::tri::Begin (TRI_QUADS);
 
-	gEngfuncs.pTriAPI->TexCoord2f (left, top);
-	gEngfuncs.pTriAPI->Vertex3f (x1, y1, 0);
+	client::tri::TexCoord2f (left, top);
+	client::tri::Vertex3f (x1, y1, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (right, top);
-	gEngfuncs.pTriAPI->Vertex3f (x2, y1, 0);
+	client::tri::TexCoord2f (right, top);
+	client::tri::Vertex3f (x2, y1, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (right, bottom);
-	gEngfuncs.pTriAPI->Vertex3f (x2, y2, 0);
+	client::tri::TexCoord2f (right, bottom);
+	client::tri::Vertex3f (x2, y2, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (left, bottom);
-	gEngfuncs.pTriAPI->Vertex3f (x1, y2, 0);
+	client::tri::TexCoord2f (left, bottom);
+	client::tri::Vertex3f (x1, y2, 0);
 
-	gEngfuncs.pTriAPI->End ();
+	client::tri::End ();
 }
 
 void CHud::DrawHudSprite(HSPRITE pic, int frame, Rect *rect, int x, int y, hudcolor_e color, int a, hudalign_e alignment)
@@ -276,7 +276,7 @@ void CHud::DrawHudFill(int x, int y, int w, int h, int r, int g, int b, int a)
 	w = roundf (w * m_flScaleX);
 	h = roundf (h * m_flScaleY);
 	
-	gEngfuncs.pfnFillRGBA(x, y, w, h, r, g, b, a);
+	client::FillRGBA(x, y, w, h, r, g, b, a);
 }
 
 void CHud::DrawHudFill(int x, int y, int w, int h, hudcolor_e color, int a)
@@ -290,7 +290,7 @@ int CHud::DrawHudString(int xpos, int ypos, int iMaxX, const char* szIt, int r, 
 {
 	auto x1 = roundf (m_flOffsetX + xpos * m_flScaleX);
 	auto y1 = roundf (m_flOffsetY + ypos * m_flScaleY);
-	return (gEngfuncs.pfnDrawString(x1, y1, szIt, r, g, b) - m_flOffsetX) / m_flScaleX;
+	return (client::DrawString(x1, y1, szIt, r, g, b) - m_flOffsetX) / m_flScaleX;
 }
 
 int CHud::DrawHudNumberString(int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b)
@@ -305,7 +305,7 @@ int CHud::DrawHudStringReverse(int xpos, int ypos, int iMinX, const char* szStri
 {
 	auto x1 = roundf (m_flOffsetX + xpos * m_flScaleX);
 	auto y1 = roundf (m_flOffsetY + ypos * m_flScaleY);
-	return (gEngfuncs.pfnDrawStringReverse(x1, y1, szString, r, g, b) - m_flOffsetX) / m_flScaleX;
+	return (client::DrawStringReverse(x1, y1, szString, r, g, b) - m_flOffsetX) / m_flScaleX;
 }
 
 int CHud::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b, int a, hudalign_e alignment)
@@ -324,7 +324,7 @@ int CHud::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 		}
 		else if ((iFlags & DHN_3DIGITS) != 0)
 		{
-			//SPR_DrawAdditive( 0, x, y, &rc );
+			//client::SPR_DrawAdditive( 0, x, y, &rc );
 			x += iWidth;
 		}
 
@@ -337,7 +337,7 @@ int CHud::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 		}
 		else if ((iFlags & (DHN_3DIGITS | DHN_2DIGITS)) != 0)
 		{
-			//SPR_DrawAdditive( 0, x, y, &rc );
+			//client::SPR_DrawAdditive( 0, x, y, &rc );
 			x += iWidth;
 		}
 
@@ -351,13 +351,13 @@ int CHud::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 		// SPR_Draw 100's
 		if ((iFlags & DHN_3DIGITS) != 0)
 		{
-			//SPR_DrawAdditive( 0, x, y, &rc );
+			//client::SPR_DrawAdditive( 0, x, y, &rc );
 			x += iWidth;
 		}
 
 		if ((iFlags & (DHN_3DIGITS | DHN_2DIGITS)) != 0)
 		{
-			//SPR_DrawAdditive( 0, x, y, &rc );
+			//client::SPR_DrawAdditive( 0, x, y, &rc );
 			x += iWidth;
 		}
 
@@ -458,12 +458,12 @@ int CHud::DrawHudString(const char* string, int x, int y)
 {
 	auto x1 = roundf (m_flOffsetX + x * m_flScaleX);
 	auto y1 = roundf (m_flOffsetY + y * m_flScaleY);
-	return (gEngfuncs.pfnDrawConsoleString(x1, y1, (char*)string) - m_flOffsetX) / m_flScaleX;
+	return (client::DrawConsoleString(x1, y1, (char*)string) - m_flOffsetX) / m_flScaleX;
 }
 
 void CHud::GetHudStringSize(const char* string, int& width, int& height)
 {
-	gEngfuncs.pfnDrawConsoleStringLen(string, &width, &height);
+	client::DrawConsoleStringLen(string, &width, &height);
 	width /= m_flScaleX;
 	height /= m_flScaleY;
 }
@@ -488,7 +488,7 @@ void CHud::DrawHudBackground(int left, int top, int right, int bottom, const boo
 		return;
 	}
 
-	const auto pSprite = const_cast<model_t *>(gEngfuncs.GetSpritePointer (m_hBackground));
+	const auto pSprite = const_cast<model_t *>(client::GetSpritePointer (m_hBackground));
 
 	/* Shrink the bounds slightly to compensate for the border. */
 	left += 1;
@@ -506,139 +506,139 @@ void CHud::DrawHudBackground(int left, int top, int right, int bottom, const boo
 	const auto x3 = roundf (m_flOffsetX + (right + 4) * m_flScaleX);
 	const auto y3 = roundf (m_flOffsetY + (bottom + 4) * m_flScaleY);
 
-	gEngfuncs.pTriAPI->SpriteTexture (pSprite, 0);
+	client::tri::SpriteTexture (pSprite, 0);
 
 	const auto value = highlight ? 0.4F : 0.0F;
 
-	gEngfuncs.pTriAPI->Color4fRendermode (value, 0.0F, 0.0F, 1.0F / 2.0F, kRenderTransAlpha);
-	gEngfuncs.pTriAPI->RenderMode (kRenderTransAlpha);
+	client::tri::Color4fRendermode (value, 0.0F, 0.0F, 1.0F / 2.0F, kRenderTransAlpha);
+	client::tri::RenderMode (kRenderTransAlpha);
 
-	gEngfuncs.pTriAPI->Begin (TRI_QUADS);
+	client::tri::Begin (TRI_QUADS);
 
 	/* Left Top */
-	gEngfuncs.pTriAPI->TexCoord2f (0, 0);
-	gEngfuncs.pTriAPI->Vertex3f (x0, y0, 0);
+	client::tri::TexCoord2f (0, 0);
+	client::tri::Vertex3f (x0, y0, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0);
-	gEngfuncs.pTriAPI->Vertex3f (x1, y0, 0);
+	client::tri::TexCoord2f (0.25, 0);
+	client::tri::Vertex3f (x1, y0, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0.25);
-	gEngfuncs.pTriAPI->Vertex3f (x1, y1, 0);
+	client::tri::TexCoord2f (0.25, 0.25);
+	client::tri::Vertex3f (x1, y1, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0, 0.25);
-	gEngfuncs.pTriAPI->Vertex3f (x0, y1, 0);
+	client::tri::TexCoord2f (0, 0.25);
+	client::tri::Vertex3f (x0, y1, 0);
 
 	/* Left Center */
-	gEngfuncs.pTriAPI->TexCoord2f (0, 0.25);
-	gEngfuncs.pTriAPI->Vertex3f (x0, y1, 0);
+	client::tri::TexCoord2f (0, 0.25);
+	client::tri::Vertex3f (x0, y1, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0.25);
-	gEngfuncs.pTriAPI->Vertex3f (x1, y1, 0);
+	client::tri::TexCoord2f (0.25, 0.25);
+	client::tri::Vertex3f (x1, y1, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0.75);
-	gEngfuncs.pTriAPI->Vertex3f (x1, y2, 0);
+	client::tri::TexCoord2f (0.25, 0.75);
+	client::tri::Vertex3f (x1, y2, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0, 0.75);
-	gEngfuncs.pTriAPI->Vertex3f (x0, y2, 0);
+	client::tri::TexCoord2f (0, 0.75);
+	client::tri::Vertex3f (x0, y2, 0);
 
 	/* Left Bottom */
-	gEngfuncs.pTriAPI->TexCoord2f (0, 0.75);
-	gEngfuncs.pTriAPI->Vertex3f (x0, y2, 0);
+	client::tri::TexCoord2f (0, 0.75);
+	client::tri::Vertex3f (x0, y2, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0.75);
-	gEngfuncs.pTriAPI->Vertex3f (x1, y2, 0);
+	client::tri::TexCoord2f (0.25, 0.75);
+	client::tri::Vertex3f (x1, y2, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0.25, 1);
-	gEngfuncs.pTriAPI->Vertex3f (x1, y3, 0);
+	client::tri::TexCoord2f (0.25, 1);
+	client::tri::Vertex3f (x1, y3, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0, 1);
-	gEngfuncs.pTriAPI->Vertex3f (x0, y3, 0);
+	client::tri::TexCoord2f (0, 1);
+	client::tri::Vertex3f (x0, y3, 0);
 
 	/* Center Top */
-	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0);
-	gEngfuncs.pTriAPI->Vertex3f (x1, y0, 0);
+	client::tri::TexCoord2f (0.25, 0);
+	client::tri::Vertex3f (x1, y0, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0);
-	gEngfuncs.pTriAPI->Vertex3f (x2, y0, 0);
+	client::tri::TexCoord2f (0.75, 0);
+	client::tri::Vertex3f (x2, y0, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0.25);
-	gEngfuncs.pTriAPI->Vertex3f (x2, y1, 0);
+	client::tri::TexCoord2f (0.75, 0.25);
+	client::tri::Vertex3f (x2, y1, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0.25);
-	gEngfuncs.pTriAPI->Vertex3f (x1, y1, 0);
+	client::tri::TexCoord2f (0.25, 0.25);
+	client::tri::Vertex3f (x1, y1, 0);
 
 	/* Center Center */
-	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0.25);
-	gEngfuncs.pTriAPI->Vertex3f (x1, y1, 0);
+	client::tri::TexCoord2f (0.25, 0.25);
+	client::tri::Vertex3f (x1, y1, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0.25);
-	gEngfuncs.pTriAPI->Vertex3f (x2, y1, 0);
+	client::tri::TexCoord2f (0.75, 0.25);
+	client::tri::Vertex3f (x2, y1, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0.75);
-	gEngfuncs.pTriAPI->Vertex3f (x2, y2, 0);
+	client::tri::TexCoord2f (0.75, 0.75);
+	client::tri::Vertex3f (x2, y2, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0.75);
-	gEngfuncs.pTriAPI->Vertex3f (x1, y2, 0);
+	client::tri::TexCoord2f (0.25, 0.75);
+	client::tri::Vertex3f (x1, y2, 0);
 
 	/* Center Bottom */
-	gEngfuncs.pTriAPI->TexCoord2f (0.25, 0.75);
-	gEngfuncs.pTriAPI->Vertex3f (x1, y2, 0);
+	client::tri::TexCoord2f (0.25, 0.75);
+	client::tri::Vertex3f (x1, y2, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0.75);
-	gEngfuncs.pTriAPI->Vertex3f (x2, y2, 0);
+	client::tri::TexCoord2f (0.75, 0.75);
+	client::tri::Vertex3f (x2, y2, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0.75, 1);
-	gEngfuncs.pTriAPI->Vertex3f (x2, y3, 0);
+	client::tri::TexCoord2f (0.75, 1);
+	client::tri::Vertex3f (x2, y3, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0.25, 1);
-	gEngfuncs.pTriAPI->Vertex3f (x1, y3, 0);
+	client::tri::TexCoord2f (0.25, 1);
+	client::tri::Vertex3f (x1, y3, 0);
 
 	/* Right Top */
-	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0);
-	gEngfuncs.pTriAPI->Vertex3f (x2, y0, 0);
+	client::tri::TexCoord2f (0.75, 0);
+	client::tri::Vertex3f (x2, y0, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (1, 0);
-	gEngfuncs.pTriAPI->Vertex3f (x3, y0, 0);
+	client::tri::TexCoord2f (1, 0);
+	client::tri::Vertex3f (x3, y0, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (1, 0.25);
-	gEngfuncs.pTriAPI->Vertex3f (x3, y1, 0);
+	client::tri::TexCoord2f (1, 0.25);
+	client::tri::Vertex3f (x3, y1, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0.25);
-	gEngfuncs.pTriAPI->Vertex3f (x2, y1, 0);
+	client::tri::TexCoord2f (0.75, 0.25);
+	client::tri::Vertex3f (x2, y1, 0);
 
 	/* Right Center */
-	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0.25);
-	gEngfuncs.pTriAPI->Vertex3f (x2, y1, 0);
+	client::tri::TexCoord2f (0.75, 0.25);
+	client::tri::Vertex3f (x2, y1, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (1, 0.25);
-	gEngfuncs.pTriAPI->Vertex3f (x3, y1, 0);
+	client::tri::TexCoord2f (1, 0.25);
+	client::tri::Vertex3f (x3, y1, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (1, 0.75);
-	gEngfuncs.pTriAPI->Vertex3f (x3, y2, 0);
+	client::tri::TexCoord2f (1, 0.75);
+	client::tri::Vertex3f (x3, y2, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0.75);
-	gEngfuncs.pTriAPI->Vertex3f (x2, y2, 0);
+	client::tri::TexCoord2f (0.75, 0.75);
+	client::tri::Vertex3f (x2, y2, 0);
 
 	/* Right Bottom */
-	gEngfuncs.pTriAPI->TexCoord2f (0.75, 0.75);
-	gEngfuncs.pTriAPI->Vertex3f (x2, y2, 0);
+	client::tri::TexCoord2f (0.75, 0.75);
+	client::tri::Vertex3f (x2, y2, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (1, 0.75);
-	gEngfuncs.pTriAPI->Vertex3f (x3, y2, 0);
+	client::tri::TexCoord2f (1, 0.75);
+	client::tri::Vertex3f (x3, y2, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (1, 1);
-	gEngfuncs.pTriAPI->Vertex3f (x3, y3, 0);
+	client::tri::TexCoord2f (1, 1);
+	client::tri::Vertex3f (x3, y3, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (0.75, 1);
-	gEngfuncs.pTriAPI->Vertex3f (x2, y3, 0);
+	client::tri::TexCoord2f (0.75, 1);
+	client::tri::Vertex3f (x2, y3, 0);
 
-	gEngfuncs.pTriAPI->End ();
+	client::tri::End ();
 }
 
 void CHud::DrawWorldSprite(HSPRITE pic, int frame, Rect *rect, Vector origin, hudcolor_e color, int a)
 {
 	Vector screen;
-	if (gEngfuncs.pTriAPI->WorldToScreen(origin, screen) != 0)
+	if (client::tri::WorldToScreen(origin, screen) != 0)
 	{
 		return;
 	}
@@ -649,8 +649,8 @@ void CHud::DrawWorldSprite(HSPRITE pic, int frame, Rect *rect, Vector origin, hu
 	int r, g, b;
 	GetColor(r, g, b, color);
 
-	auto sprw = gEngfuncs.pfnSPR_Width (pic, frame);
-	auto sprh = gEngfuncs.pfnSPR_Height (pic, frame);
+	auto sprw = client::SPR_Width (pic, frame);
+	auto sprh = client::SPR_Height (pic, frame);
 
 	if (!rect)
 	{
@@ -670,15 +670,15 @@ void CHud::DrawWorldSprite(HSPRITE pic, int frame, Rect *rect, Vector origin, hu
 	if (!IEngineStudio.IsHardware())
 	{
 		ScaleColors(r, g, b, a);
-		gEngfuncs.pfnSPR_Set(pic, r, g, b);
-		gEngfuncs.pfnSPR_DrawHoles(frame, x, y, rect);
+		client::SPR_Set(pic, r, g, b);
+		client::SPR_DrawHoles(frame, x, y, rect);
 		return;
 	}
 
 	xf -= (width / 2.0F - 0.5F) * m_flScaleX; 
 	yf -= (height / 2.0F - 0.5F) * m_flScaleY; 
 
-	auto pSprite = const_cast<model_t *>(gEngfuncs.GetSpritePointer (pic));
+	auto pSprite = const_cast<model_t *>(client::GetSpritePointer (pic));
 
 	auto x1 = roundf (xf);
 	auto y1 = roundf (yf);
@@ -690,24 +690,24 @@ void CHud::DrawWorldSprite(HSPRITE pic, int frame, Rect *rect, Vector origin, hu
 	auto top = rect->top / (float)sprh;
 	auto bottom = rect->bottom / (float)sprh;
 	
-	gEngfuncs.pTriAPI->SpriteTexture (pSprite, frame);
+	client::tri::SpriteTexture (pSprite, frame);
 
-	gEngfuncs.pTriAPI->Color4fRendermode (r / 255.0F, g / 255.0F, b / 255.0F, a / 255.0F, kRenderTransAlpha);
-	gEngfuncs.pTriAPI->RenderMode (kRenderTransAlpha);
+	client::tri::Color4fRendermode (r / 255.0F, g / 255.0F, b / 255.0F, a / 255.0F, kRenderTransAlpha);
+	client::tri::RenderMode (kRenderTransAlpha);
 
-	gEngfuncs.pTriAPI->Begin (TRI_QUADS);
+	client::tri::Begin (TRI_QUADS);
 
-	gEngfuncs.pTriAPI->TexCoord2f (left, top);
-	gEngfuncs.pTriAPI->Vertex3f (x1, y1, 0);
+	client::tri::TexCoord2f (left, top);
+	client::tri::Vertex3f (x1, y1, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (right, top);
-	gEngfuncs.pTriAPI->Vertex3f (x2, y1, 0);
+	client::tri::TexCoord2f (right, top);
+	client::tri::Vertex3f (x2, y1, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (right, bottom);
-	gEngfuncs.pTriAPI->Vertex3f (x2, y2, 0);
+	client::tri::TexCoord2f (right, bottom);
+	client::tri::Vertex3f (x2, y2, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f (left, bottom);
-	gEngfuncs.pTriAPI->Vertex3f (x1, y2, 0);
+	client::tri::TexCoord2f (left, bottom);
+	client::tri::Vertex3f (x1, y2, 0);
 
-	gEngfuncs.pTriAPI->End ();
+	client::tri::End ();
 }

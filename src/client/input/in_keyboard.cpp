@@ -25,7 +25,6 @@
 
 
 extern int g_weaponselect;
-extern cl_enginefunc_t gEngfuncs;
 
 // Defined in pm_math.c
 float anglemod(float a);
@@ -42,7 +41,6 @@ extern cvar_t* in_joystick;
 #endif
 
 void V_Init();
-void VectorAngles(const float* forward, float* angles);
 int CL_ButtonBits(bool);
 
 bool g_bForceSpecialDown = false;
@@ -110,7 +108,7 @@ typedef struct kblist_s
 	char name[32];
 } kblist_t;
 
-kblist_t* g_kbkeys = NULL;
+kblist_t* g_kbkeys = nullptr;
 
 /*
 ============
@@ -133,7 +131,7 @@ bool KB_ConvertString(char* in, char** ppout)
 	if (!ppout)
 		return false;
 
-	*ppout = NULL;
+	*ppout = nullptr;
 	p = in;
 	pOut = sz;
 	while ('\0' != *p)
@@ -148,11 +146,11 @@ bool KB_ConvertString(char* in, char** ppout)
 
 			*pEnd = '\0';
 
-			pBinding = NULL;
+			pBinding = nullptr;
 			if (strlen(binding + 1) > 0)
 			{
 				// See if there is a binding for binding?
-				pBinding = gEngfuncs.Key_LookupBinding(binding + 1);
+				pBinding = client::Key_LookupBinding(binding + 1);
 			}
 
 			if (pBinding)
@@ -208,7 +206,7 @@ struct kbutton_s* KB_Find(const char* name)
 
 		p = p->next;
 	}
-	return NULL;
+	return nullptr;
 }
 
 /*
@@ -247,7 +245,7 @@ Add kbutton_t definitions that the engine can query if needed
 */
 void KB_Init()
 {
-	g_kbkeys = NULL;
+	g_kbkeys = nullptr;
 
 	KB_Add("in_graph", &in_graph);
 	KB_Add("in_mlook", &in_mlook);
@@ -270,7 +268,7 @@ void KB_Shutdown()
 		free(p);
 		p = n;
 	}
-	g_kbkeys = NULL;
+	g_kbkeys = nullptr;
 }
 
 /*
@@ -283,7 +281,7 @@ void KeyDown(kbutton_t* b)
 	int k;
 	const char* c;
 
-	c = gEngfuncs.Cmd_Argv(1);
+	c = client::Cmd_Argv(1);
 	if ('\0' != c[0])
 		k = atoi(c);
 	else
@@ -298,7 +296,7 @@ void KeyDown(kbutton_t* b)
 		b->down[1] = k;
 	else
 	{
-		gEngfuncs.Con_DPrintf("Three keys down for a button '%c' '%c' '%c'!\n", b->down[0], b->down[1], c);
+		client::Con_DPrintf("Three keys down for a button '%c' '%c' '%c'!\n", b->down[0], b->down[1], c);
 		return;
 	}
 
@@ -318,7 +316,7 @@ void KeyUp(kbutton_t* b)
 	int k;
 	const char* c;
 
-	c = gEngfuncs.Cmd_Argv(1);
+	c = client::Cmd_Argv(1);
 	if ('\0' != c[0])
 		k = atoi(c);
 	else
@@ -479,7 +477,7 @@ void IN_AttackUp()
 
 void IN_Impulse()
 {
-	auto impulse = atoi(gEngfuncs.Cmd_Argv(1));
+	auto impulse = atoi(client::Cmd_Argv(1));
 
 	if (!gHUD.ImpulseCommands(impulse))
 	{
@@ -511,9 +509,9 @@ void IN_Gren1Up() { KeyUp(&in_gren1); }
 void IN_Gren2Down() { KeyDown(&in_gren2); }
 void IN_Gren2Up() { KeyUp(&in_gren2); }
 
-void IN_Det5Down() { KeyDown(&in_det); gEngfuncs.pfnServerCmd("detstart 5"); }
-void IN_Det20Down() { KeyDown(&in_det); gEngfuncs.pfnServerCmd("detstart 20"); }
-void IN_Det50Down() { KeyDown(&in_det); gEngfuncs.pfnServerCmd("detstart 50"); }
+void IN_Det5Down() { KeyDown(&in_det); client::ServerCmd("detstart 5"); }
+void IN_Det20Down() { KeyDown(&in_det); client::ServerCmd("detstart 20"); }
+void IN_Det50Down() { KeyDown(&in_det); client::ServerCmd("detstart 50"); }
 void IN_DetUp() { KeyUp(&in_det); }
 
 void DetStart()
@@ -523,10 +521,10 @@ void DetStart()
 
 	auto fuse = 5;
 
-	if (gEngfuncs.Cmd_Argc() > 1)
+	if (client::Cmd_Argc() > 1)
 	{
 		/* Clamp the user fuse value. */
-		fuse = std::clamp(atoi(gEngfuncs.Cmd_Argv(1)), 5, 50);
+		fuse = std::clamp(atoi(client::Cmd_Argv(1)), 5, 50);
 	}
 
 	/* Forward the command to the server to set the fuse. */
@@ -535,7 +533,7 @@ void DetStart()
 	snprintf(detstart, sizeof(detstart) - 1, "detstart %i", fuse);
 	detstart[sizeof(detstart) - 1] = '\0';
 
-	gEngfuncs.pfnServerCmd(detstart);
+	client::ServerCmd(detstart);
 }
 
 void DetStop()
@@ -575,7 +573,7 @@ CL_AdjustAngles
 Moves the local angle positions
 ================
 */
-void CL_AdjustAngles(float frametime, float* viewangles)
+void CL_AdjustAngles(float frametime, Vector& viewangles)
 {
 	float speed;
 	float up, down;
@@ -618,13 +616,13 @@ void CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 
 	if (0 != active)
 	{
-		gEngfuncs.GetViewAngles((float*)viewangles);
+		client::GetViewAngles(viewangles);
 
 		CL_AdjustAngles(frametime, viewangles);
 
 		memset(cmd, 0, sizeof(*cmd));
 
-		gEngfuncs.SetViewAngles((float*)viewangles);
+		client::SetViewAngles(viewangles);
 
 		Vector move =
 		{
@@ -679,10 +677,8 @@ void CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 	}
 #endif
 
-	gEngfuncs.GetViewAngles((float*)viewangles);
 	// Set current view angles.
-
-	VectorCopy(viewangles, cmd->viewangles);
+	client::GetViewAngles(cmd->viewangles);
 }
 
 /*
@@ -835,74 +831,74 @@ InitInput
 */
 void InitInput()
 {
-	gEngfuncs.pfnAddCommand("+moveup", IN_UpDown);
-	gEngfuncs.pfnAddCommand("-moveup", IN_UpUp);
-	gEngfuncs.pfnAddCommand("+movedown", IN_DownDown);
-	gEngfuncs.pfnAddCommand("-movedown", IN_DownUp);
-	gEngfuncs.pfnAddCommand("+left", IN_LeftDown);
-	gEngfuncs.pfnAddCommand("-left", IN_LeftUp);
-	gEngfuncs.pfnAddCommand("+right", IN_RightDown);
-	gEngfuncs.pfnAddCommand("-right", IN_RightUp);
-	gEngfuncs.pfnAddCommand("+forward", IN_ForwardDown);
-	gEngfuncs.pfnAddCommand("-forward", IN_ForwardUp);
-	gEngfuncs.pfnAddCommand("+back", IN_BackDown);
-	gEngfuncs.pfnAddCommand("-back", IN_BackUp);
-	gEngfuncs.pfnAddCommand("+lookup", IN_LookupDown);
-	gEngfuncs.pfnAddCommand("-lookup", IN_LookupUp);
-	gEngfuncs.pfnAddCommand("+lookdown", IN_LookdownDown);
-	gEngfuncs.pfnAddCommand("-lookdown", IN_LookdownUp);
-	gEngfuncs.pfnAddCommand("+strafe", IN_StrafeDown);
-	gEngfuncs.pfnAddCommand("-strafe", IN_StrafeUp);
-	gEngfuncs.pfnAddCommand("+moveleft", IN_MoveleftDown);
-	gEngfuncs.pfnAddCommand("-moveleft", IN_MoveleftUp);
-	gEngfuncs.pfnAddCommand("+moveright", IN_MoverightDown);
-	gEngfuncs.pfnAddCommand("-moveright", IN_MoverightUp);
-	gEngfuncs.pfnAddCommand("+speed", IN_SpeedDown);
-	gEngfuncs.pfnAddCommand("-speed", IN_SpeedUp);
-	gEngfuncs.pfnAddCommand("+attack", IN_AttackDown);
-	gEngfuncs.pfnAddCommand("-attack", IN_AttackUp);
-	gEngfuncs.pfnAddCommand("+attack2", IN_Attack2Down);
-	gEngfuncs.pfnAddCommand("-attack2", IN_Attack2Up);
-	gEngfuncs.pfnAddCommand("+use", IN_UseDown);
-	gEngfuncs.pfnAddCommand("-use", IN_UseUp);
-	gEngfuncs.pfnAddCommand("+jump", IN_JumpDown);
-	gEngfuncs.pfnAddCommand("-jump", IN_JumpUp);
-	gEngfuncs.pfnAddCommand("impulse", IN_Impulse);
-	gEngfuncs.pfnAddCommand("+klook", IN_KLookDown);
-	gEngfuncs.pfnAddCommand("-klook", IN_KLookUp);
-	gEngfuncs.pfnAddCommand("+mlook", IN_MLookDown);
-	gEngfuncs.pfnAddCommand("-mlook", IN_MLookUp);
-	gEngfuncs.pfnAddCommand("+duck", IN_DuckDown);
-	gEngfuncs.pfnAddCommand("-duck", IN_DuckUp);
-	gEngfuncs.pfnAddCommand("+reload", IN_ReloadDown);
-	gEngfuncs.pfnAddCommand("-reload", IN_ReloadUp);
-	gEngfuncs.pfnAddCommand("+score", IN_ScoreDown);
-	gEngfuncs.pfnAddCommand("-score", IN_ScoreUp);
-	gEngfuncs.pfnAddCommand("+showscores", IN_ScoreDown);
-	gEngfuncs.pfnAddCommand("-showscores", IN_ScoreUp);
-	gEngfuncs.pfnAddCommand("+graph", IN_GraphDown);
-	gEngfuncs.pfnAddCommand("-graph", IN_GraphUp);
-	gEngfuncs.pfnAddCommand("+break", IN_BreakDown);
-	gEngfuncs.pfnAddCommand("-break", IN_BreakUp);
-	gEngfuncs.pfnAddCommand("+gren1", IN_Gren1Down);
-	gEngfuncs.pfnAddCommand("-gren1", IN_Gren1Up);
-	gEngfuncs.pfnAddCommand("+gren2", IN_Gren2Down);
-	gEngfuncs.pfnAddCommand("-gren2", IN_Gren2Up);
-	gEngfuncs.pfnAddCommand("+det5", IN_Det5Down);
-	gEngfuncs.pfnAddCommand("-det5", IN_DetUp);
-	gEngfuncs.pfnAddCommand("+det20", IN_Det20Down);
-	gEngfuncs.pfnAddCommand("-det20", IN_DetUp);
-	gEngfuncs.pfnAddCommand("+det50", IN_Det50Down);
-	gEngfuncs.pfnAddCommand("-det50", IN_DetUp);
+	client::AddCommand("+moveup", IN_UpDown);
+	client::AddCommand("-moveup", IN_UpUp);
+	client::AddCommand("+movedown", IN_DownDown);
+	client::AddCommand("-movedown", IN_DownUp);
+	client::AddCommand("+left", IN_LeftDown);
+	client::AddCommand("-left", IN_LeftUp);
+	client::AddCommand("+right", IN_RightDown);
+	client::AddCommand("-right", IN_RightUp);
+	client::AddCommand("+forward", IN_ForwardDown);
+	client::AddCommand("-forward", IN_ForwardUp);
+	client::AddCommand("+back", IN_BackDown);
+	client::AddCommand("-back", IN_BackUp);
+	client::AddCommand("+lookup", IN_LookupDown);
+	client::AddCommand("-lookup", IN_LookupUp);
+	client::AddCommand("+lookdown", IN_LookdownDown);
+	client::AddCommand("-lookdown", IN_LookdownUp);
+	client::AddCommand("+strafe", IN_StrafeDown);
+	client::AddCommand("-strafe", IN_StrafeUp);
+	client::AddCommand("+moveleft", IN_MoveleftDown);
+	client::AddCommand("-moveleft", IN_MoveleftUp);
+	client::AddCommand("+moveright", IN_MoverightDown);
+	client::AddCommand("-moveright", IN_MoverightUp);
+	client::AddCommand("+speed", IN_SpeedDown);
+	client::AddCommand("-speed", IN_SpeedUp);
+	client::AddCommand("+attack", IN_AttackDown);
+	client::AddCommand("-attack", IN_AttackUp);
+	client::AddCommand("+attack2", IN_Attack2Down);
+	client::AddCommand("-attack2", IN_Attack2Up);
+	client::AddCommand("+use", IN_UseDown);
+	client::AddCommand("-use", IN_UseUp);
+	client::AddCommand("+jump", IN_JumpDown);
+	client::AddCommand("-jump", IN_JumpUp);
+	client::AddCommand("impulse", IN_Impulse);
+	client::AddCommand("+klook", IN_KLookDown);
+	client::AddCommand("-klook", IN_KLookUp);
+	client::AddCommand("+mlook", IN_MLookDown);
+	client::AddCommand("-mlook", IN_MLookUp);
+	client::AddCommand("+duck", IN_DuckDown);
+	client::AddCommand("-duck", IN_DuckUp);
+	client::AddCommand("+reload", IN_ReloadDown);
+	client::AddCommand("-reload", IN_ReloadUp);
+	client::AddCommand("+score", IN_ScoreDown);
+	client::AddCommand("-score", IN_ScoreUp);
+	client::AddCommand("+showscores", IN_ScoreDown);
+	client::AddCommand("-showscores", IN_ScoreUp);
+	client::AddCommand("+graph", IN_GraphDown);
+	client::AddCommand("-graph", IN_GraphUp);
+	client::AddCommand("+break", IN_BreakDown);
+	client::AddCommand("-break", IN_BreakUp);
+	client::AddCommand("+gren1", IN_Gren1Down);
+	client::AddCommand("-gren1", IN_Gren1Up);
+	client::AddCommand("+gren2", IN_Gren2Down);
+	client::AddCommand("-gren2", IN_Gren2Up);
+	client::AddCommand("+det5", IN_Det5Down);
+	client::AddCommand("-det5", IN_DetUp);
+	client::AddCommand("+det20", IN_Det20Down);
+	client::AddCommand("-det20", IN_DetUp);
+	client::AddCommand("+det50", IN_Det50Down);
+	client::AddCommand("-det50", IN_DetUp);
 
-	gEngfuncs.pfnAddCommand("detstart", DetStart);
-	gEngfuncs.pfnAddCommand("detstop", DetStop);
+	client::AddCommand("detstart", DetStart);
+	client::AddCommand("detstop", DetStop);
 
-	cl_anglespeedkey = gEngfuncs.pfnRegisterVariable("cl_anglespeedkey", "0.67", 0);
-	cl_yawspeed = gEngfuncs.pfnRegisterVariable("cl_yawspeed", "210", 0);
-	cl_pitchspeed = gEngfuncs.pfnRegisterVariable("cl_pitchspeed", "225", 0);
-	cl_pitchup = gEngfuncs.pfnRegisterVariable("cl_pitchup", "89", 0);
-	cl_pitchdown = gEngfuncs.pfnRegisterVariable("cl_pitchdown", "89", 0);
+	cl_anglespeedkey = client::RegisterVariable("cl_anglespeedkey", "0.67", 0);
+	cl_yawspeed = client::RegisterVariable("cl_yawspeed", "210", 0);
+	cl_pitchspeed = client::RegisterVariable("cl_pitchspeed", "225", 0);
+	cl_pitchup = client::RegisterVariable("cl_pitchup", "89", 0);
+	cl_pitchdown = client::RegisterVariable("cl_pitchdown", "89", 0);
 
 	// Initialize third person camera controls.
 	CAM_Init();

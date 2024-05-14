@@ -9,13 +9,12 @@
 
 #pragma once
 
-// Some of these are HL/TFC specific?
-void EV_EjectBrass(float* origin, float* velocity, float rotation, int model, int soundtype);
+void EV_EjectBrass(const Vector& origin, const Vector& velocity, float rotation, int model, int soundtype);
 void EV_GetGunPosition(struct event_args_s* args, Vector& pos, const Vector& origin);
-void EV_GetDefaultShellInfo(struct event_args_s* args, float* origin, float* velocity, float* ShellVelocity, float* ShellOrigin, float* forward, float* right, float* up, float forwardScale, float upScale, float rightScale);
+void EV_GetDefaultShellInfo(struct event_args_s* args, const Vector& origin, const Vector& velocity, Vector& ShellVelocity, Vector& ShellOrigin, const Vector& forward, const Vector& right, const Vector& up, float forwardScale, float upScale, float rightScale);
 bool EV_IsLocal(int idx);
 bool EV_IsPlayer(int idx);
-void EV_CreateTracer(float* start, float* end);
+void EV_CreateTracer(const Vector& start, const Vector& end);
 
 struct cl_entity_s* GetEntity(int idx);
 struct cl_entity_s* GetViewEntity();

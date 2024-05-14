@@ -19,126 +19,165 @@
 
 // Must be provided by user of this code
 // Holds engine functionality callbacks
-inline enginefuncs_t g_engfuncs;
-
-// The actual engine callbacks
-#define GETPLAYERUSERID (*g_engfuncs.pfnGetPlayerUserId)
-#define PRECACHE_MODEL (*g_engfuncs.pfnPrecacheModel)
-#define PRECACHE_SOUND (*g_engfuncs.pfnPrecacheSound)
-#define PRECACHE_GENERIC (*g_engfuncs.pfnPrecacheGeneric)
-#define SET_MODEL (*g_engfuncs.pfnSetModel)
-#define MODEL_INDEX (*g_engfuncs.pfnModelIndex)
-#define MODEL_FRAMES (*g_engfuncs.pfnModelFrames)
-#define SET_SIZE (*g_engfuncs.pfnSetSize)
-#define CHANGE_LEVEL (*g_engfuncs.pfnChangeLevel)
-#define GET_SPAWN_PARMS (*g_engfuncs.pfnGetSpawnParms)
-#define SAVE_SPAWN_PARMS (*g_engfuncs.pfnSaveSpawnParms)
-#define VEC_TO_YAW (*g_engfuncs.pfnVecToYaw)
-#define VEC_TO_ANGLES (*g_engfuncs.pfnVecToAngles)
-#define MOVE_TO_ORIGIN (*g_engfuncs.pfnMoveToOrigin)
-#define oldCHANGE_YAW (*g_engfuncs.pfnChangeYaw)
-#define CHANGE_PITCH (*g_engfuncs.pfnChangePitch)
-#define MAKE_VECTORS (*g_engfuncs.pfnMakeVectors)
-#define CREATE_ENTITY (*g_engfuncs.pfnCreateEntity)
-#define REMOVE_ENTITY (*g_engfuncs.pfnRemoveEntity)
-#define CREATE_NAMED_ENTITY (*g_engfuncs.pfnCreateNamedEntity)
-#define MAKE_STATIC (*g_engfuncs.pfnMakeStatic)
-#define ENT_IS_ON_FLOOR (*g_engfuncs.pfnEntIsOnFloor)
-#define DROP_TO_FLOOR (*g_engfuncs.pfnDropToFloor)
-#define WALK_MOVE (*g_engfuncs.pfnWalkMove)
-#define SET_ORIGIN (*g_engfuncs.pfnSetOrigin)
-#define EMIT_SOUND_DYN2 (*g_engfuncs.pfnEmitSound)
-#define BUILD_SOUND_MSG (*g_engfuncs.pfnBuildSoundMsg)
-#define TRACE_LINE (*g_engfuncs.pfnTraceLine)
-#define TRACE_TOSS (*g_engfuncs.pfnTraceToss)
-#define TRACE_MONSTER_HULL (*g_engfuncs.pfnTraceMonsterHull)
-#define TRACE_HULL (*g_engfuncs.pfnTraceHull)
-#define GET_AIM_VECTOR (*g_engfuncs.pfnGetAimVector)
-#define SERVER_COMMAND (*g_engfuncs.pfnServerCommand)
-#define SERVER_EXECUTE (*g_engfuncs.pfnServerExecute)
-#define CLIENT_COMMAND (*g_engfuncs.pfnClientCommand)
-#define PARTICLE_EFFECT (*g_engfuncs.pfnParticleEffect)
-#define LIGHT_STYLE (*g_engfuncs.pfnLightStyle)
-#define DECAL_INDEX (*g_engfuncs.pfnDecalIndex)
-#define POINT_CONTENTS (*g_engfuncs.pfnPointContents)
-#define CRC32_INIT (*g_engfuncs.pfnCRC32_Init)
-#define CRC32_PROCESS_BUFFER (*g_engfuncs.pfnCRC32_ProcessBuffer)
-#define CRC32_PROCESS_BYTE (*g_engfuncs.pfnCRC32_ProcessByte)
-#define CRC32_FINAL (*g_engfuncs.pfnCRC32_Final)
-#define RANDOM_LONG (*g_engfuncs.pfnRandomLong)
-#define RANDOM_FLOAT (*g_engfuncs.pfnRandomFloat)
-#define GETPLAYERAUTHID (*g_engfuncs.pfnGetPlayerAuthId)
-
-#define CVAR_REGISTER (*g_engfuncs.pfnCVarRegister)
-#define CVAR_GET_FLOAT (*g_engfuncs.pfnCVarGetFloat)
-#define CVAR_GET_STRING (*g_engfuncs.pfnCVarGetString)
-#define CVAR_SET_FLOAT (*g_engfuncs.pfnCVarSetFloat)
-#define CVAR_SET_STRING (*g_engfuncs.pfnCVarSetString)
-#define CVAR_GET_POINTER (*g_engfuncs.pfnCVarGetPointer)
-#define ALERT (*g_engfuncs.pfnAlertMessage)
-#define ENGINE_FPRINTF (*g_engfuncs.pfnEngineFprintf)
-#define ALLOC_PRIVATE (*g_engfuncs.pfnPvAllocEntPrivateData)
-inline void* GET_PRIVATE(edict_t* pent)
+namespace engine
 {
-	if (pent)
-		return pent->pvPrivateData;
-	return NULL;
-}
-
-#define FREE_PRIVATE (*g_engfuncs.pfnFreeEntPrivateData)
-//#define STRING			(*g_engfuncs.pfnSzFromIndex)
-#define ALLOC_STRING (*g_engfuncs.pfnAllocString)
-#define FIND_ENTITY_BY_STRING (*g_engfuncs.pfnFindEntityByString)
-#define GETENTITYILLUM (*g_engfuncs.pfnGetEntityIllum)
-#define FIND_ENTITY_IN_SPHERE (*g_engfuncs.pfnFindEntityInSphere)
-#define FIND_CLIENT_IN_PVS (*g_engfuncs.pfnFindClientInPVS)
-#define EMIT_AMBIENT_SOUND (*g_engfuncs.pfnEmitAmbientSound)
-#define GET_MODEL_PTR (*g_engfuncs.pfnGetModelPtr)
-#define REG_USER_MSG (*g_engfuncs.pfnRegUserMsg)
-#define GET_BONE_POSITION (*g_engfuncs.pfnGetBonePosition)
-#define FUNCTION_FROM_NAME (*g_engfuncs.pfnFunctionFromName)
-#define NAME_FOR_FUNCTION (*g_engfuncs.pfnNameForFunction)
-#define TRACE_TEXTURE (*g_engfuncs.pfnTraceTexture)
-#define CLIENT_PRINTF (*g_engfuncs.pfnClientPrintf)
-#define CMD_ARGS (*g_engfuncs.pfnCmd_Args)
-#define CMD_ARGC (*g_engfuncs.pfnCmd_Argc)
-#define CMD_ARGV (*g_engfuncs.pfnCmd_Argv)
-#define GET_ATTACHMENT (*g_engfuncs.pfnGetAttachment)
-#define SET_VIEW (*g_engfuncs.pfnSetView)
-#define SET_CROSSHAIRANGLE (*g_engfuncs.pfnCrosshairAngle)
-#define LOAD_FILE_FOR_ME (*g_engfuncs.pfnLoadFileForMe)
-#define FREE_FILE (*g_engfuncs.pfnFreeFile)
-#define COMPARE_FILE_TIME (*g_engfuncs.pfnCompareFileTime)
-#define GET_GAME_DIR (*g_engfuncs.pfnGetGameDir)
-#define IS_MAP_VALID (*g_engfuncs.pfnIsMapValid)
-#define NUMBER_OF_ENTITIES (*g_engfuncs.pfnNumberOfEntities)
-#define IS_DEDICATED_SERVER (*g_engfuncs.pfnIsDedicatedServer)
-
-#define PRECACHE_EVENT (*g_engfuncs.pfnPrecacheEvent)
-#define PLAYBACK_EVENT_FULL (*g_engfuncs.pfnPlaybackEvent)
-
-#define ENGINE_SET_PVS (*g_engfuncs.pfnSetFatPVS)
-#define ENGINE_SET_PAS (*g_engfuncs.pfnSetFatPAS)
-
-#define ENGINE_CHECK_VISIBILITY (*g_engfuncs.pfnCheckVisibility)
-
-#define DELTA_SET (*g_engfuncs.pfnDeltaSetField)
-#define DELTA_UNSET (*g_engfuncs.pfnDeltaUnsetField)
-#define DELTA_ADDENCODER (*g_engfuncs.pfnDeltaAddEncoder)
-#define ENGINE_CURRENT_PLAYER (*g_engfuncs.pfnGetCurrentPlayer)
-
-#define ENGINE_CANSKIP (*g_engfuncs.pfnCanSkipPlayer)
-
-#define DELTA_FINDFIELD (*g_engfuncs.pfnDeltaFindField)
-#define DELTA_SETBYINDEX (*g_engfuncs.pfnDeltaSetFieldByIndex)
-#define DELTA_UNSETBYINDEX (*g_engfuncs.pfnDeltaUnsetFieldByIndex)
-
-#define ENGINE_GETPHYSINFO (*g_engfuncs.pfnGetPhysicsInfoString)
-
-#define ENGINE_SETGROUPMASK (*g_engfuncs.pfnSetGroupMask)
-
-#define ENGINE_INSTANCE_BASELINE (*g_engfuncs.pfnCreateInstancedBaseline)
-
-#define ENGINE_FORCE_UNMODIFIED (*g_engfuncs.pfnForceUnmodified)
-
-#define PLAYER_CNX_STATS (*g_engfuncs.pfnGetPlayerStats)
+inline int (*PrecacheModel)(const char* s);
+inline int (*PrecacheSound)(const char* s);
+inline void (*SetModel)(Entity* e, const char* m);
+inline int (*ModelIndex)(const char* m);
+inline int (*ModelFrames)(int modelIndex);
+inline void (*SetSize)(Entity* e, const float* rgflMin, const float* rgflMax);
+inline void (*ChangeLevel)(const char* s1, const char* s2);
+inline void (*GetSpawnParms)(Entity* ent);
+inline void (*SaveSpawnParms)(Entity* ent);
+inline float (*VecToYaw)(const float* rgflVector);
+inline void (*VecToAngles)(const float* rgflVectorIn, float* rgflVectorOut);
+inline void (*MoveToOrigin)(Entity* ent, const float* pflGoal, float dist, int iMoveType);
+inline void (*ChangeYaw)(Entity* ent);
+inline void (*ChangePitch)(Entity* ent);
+inline Entity* (*FindEntityByString)(Entity* pEdictStartSearchAfter, const char* pszField, const char* pszValue);
+inline int (*GetEntityIllum)(Entity* pEnt);
+inline Entity* (*FindEntityInSphere)(Entity* pEdictStartSearchAfter, const float* org, float rad);
+inline Entity* (*FindClientInPVS)(Entity* pEdict);
+inline Entity* (*EntitiesInPVS)(Entity* pplayer);
+inline void (*MakeVectors)(const float* rgflVector);
+inline void (*AngleVectors)(const float* rgflVector, float* forward, float* right, float* up);
+inline Entity* (*CreateEntity)();
+inline void (*RemoveEntity)(Entity* e);
+inline Entity* (*CreateNamedEntity)(int className);
+inline void (*MakeStatic)(Entity* ent);
+inline int (*EntIsOnFloor)(Entity* e);
+inline int (*DropToFloor)(Entity* e);
+inline int (*WalkMove)(Entity* ent, float yaw, float dist, int iMode);
+inline void (*SetOrigin)(Entity* e, const float* rgflOrigin);
+inline void (*EmitSound)(Entity* entity, int channel, const char* sample, /*int*/ float volume, float attenuation, int fFlags, int pitch);
+inline void (*EmitAmbientSound)(Entity* entity, float* pos, const char* samp, float vol, float attenuation, int fFlags, int pitch);
+inline void (*TraceLine)(const float* v1, const float* v2, int fNoMonsters, Entity* pentToSkip, TraceResult* ptr);
+inline void (*TraceToss)(Entity* pent, Entity* pentToIgnore, TraceResult* ptr);
+inline int (*TraceMonsterHull)(Entity* pEdict, const float* v1, const float* v2, int fNoMonsters, Entity* pentToSkip, TraceResult* ptr);
+inline void (*TraceHull)(const float* v1, const float* v2, int fNoMonsters, int hullNumber, Entity* pentToSkip, TraceResult* ptr);
+inline void (*TraceModel)(const float* v1, const float* v2, int hullNumber, Entity* pent, TraceResult* ptr);
+inline const char* (*TraceTexture)(Entity* pTextureEntity, const float* v1, const float* v2);
+inline void (*TraceSphere)(const float* v1, const float* v2, int fNoMonsters, float radius, Entity* pentToSkip, TraceResult* ptr);
+inline void (*GetAimVector)(Entity* ent, float speed, float* rgflReturn);
+inline void (*ServerCommand)(const char* str);
+inline void (*ServerExecute)();
+inline void (*ClientCommand)(Entity* pEdict, const char* szFmt, ...);
+inline void (*ParticleEffect)(const float* org, const float* dir, float color, float count);
+inline void (*LightStyle)(int style, const char* val);
+inline int (*DecalIndex)(const char* name);
+inline int (*PointContents)(const float* rgflVector);
+inline void (*MessageBegin)(int msg_dest, int msg_type, const float* pOrigin, Entity* ed);
+inline void (*MessageEnd)();
+inline void (*WriteByte)(int iValue);
+inline void (*WriteChar)(int iValue);
+inline void (*WriteShort)(int iValue);
+inline void (*WriteLong)(int iValue);
+inline void (*WriteAngle)(float flValue);
+inline void (*WriteCoord)(float flValue);
+inline void (*WriteString)(const char* sz);
+inline void (*WriteEntity)(int iValue);
+inline void (*CVarRegister)(cvar_t* pCvar);
+inline float (*CVarGetFloat)(const char* szVarName);
+inline const char* (*CVarGetString)(const char* szVarName);
+inline void (*CVarSetFloat)(const char* szVarName, float flValue);
+inline void (*CVarSetString)(const char* szVarName, const char* szValue);
+inline void (*AlertMessage)(ALERT_TYPE atype, const char* szFmt, ...);
+inline void (*EngineFprintf)(void* pfile, const char* szFmt, ...);
+inline void* (*PvAllocEntPrivateData)(Entity* pEdict, int32 cb);
+inline void* (*PvEntPrivateData)(Entity* pEdict);
+inline void (*FreeEntPrivateData)(Entity* pEdict);
+inline const char* (*SzFromIndex)(int iString);
+inline int (*AllocString)(const char* szValue);
+inline entvars_t* (*GetVarsOfEnt)(Entity* pEdict);
+inline Entity* (*PEntityOfEntOffset)(int iEntOffset);
+inline int (*EntOffsetOfPEntity)(const Entity* pEdict);
+inline int (*IndexOfEdict)(const Entity* pEdict);
+inline Entity* (*PEntityOfEntIndex)(int iEntIndex);
+inline Entity* (*FindEntityByVars)(entvars_t* pvars);
+inline void* (*GetModelPtr)(Entity* pEdict);
+inline int (*RegUserMsg)(const char* pszName, int iSize);
+inline void (*AnimationAutomove)(const Entity* pEdict, float flTime);
+inline void (*GetBonePosition)(const Entity* pEdict, int iBone, float* rgflOrigin, float* rgflAngles);
+inline uint32 (*FunctionFromName)(const char* pName);
+inline const char* (*NameForFunction)(uint32 function);
+inline void (*ClientPrintf)(Entity* pEdict, PRINT_TYPE ptype, const char* szMsg);
+inline void (*ServerPrint)(const char* szMsg);
+inline const char* (*Cmd_Args)();
+inline const char* (*Cmd_Argv)(int argc);
+inline int (*Cmd_Argc)();
+inline void (*GetAttachment)(const Entity* pEdict, int iAttachment, float* rgflOrigin, float* rgflAngles);
+inline void (*CRC32_Init)(CRC32_t* pulCRC);
+inline void (*CRC32_ProcessBuffer)(CRC32_t* pulCRC, void* p, int len);
+inline void (*CRC32_ProcessByte)(CRC32_t* pulCRC, unsigned char ch);
+inline CRC32_t (*CRC32_Final)(CRC32_t pulCRC);
+inline int32 (*RandomLong)(int32 lLow, int32 lHigh);
+inline float (*RandomFloat)(float flLow, float flHigh);
+inline void (*SetView)(const Entity* pClient, const Entity* pViewent);
+inline float (*Time)();
+inline void (*CrosshairAngle)(const Entity* pClient, float pitch, float yaw);
+inline byte* (*LoadFileForMe)(const char* filename, int* pLength);
+inline void (*FreeFile)(void* buffer);
+inline void (*EndSection)(const char* pszSectionName);
+inline int (*CompareFileTime)(const char* filename1, const char* filename2, int* iCompare);
+inline void (*GetGameDir)(char* szGetGameDir);
+inline void (*Cvar_RegisterVariable)(cvar_t* variable);
+inline void (*FadeClientVolume)(const Entity* pEdict, int fadePercent, int fadeOutSeconds, int holdTime, int fadeInSeconds);
+inline void (*SetClientMaxspeed)(const Entity* pEdict, float fNewMaxspeed);
+inline Entity* (*CreateFakeClient)(const char* netname);
+inline void (*RunPlayerMove)(Entity* fakeclient, const float* viewangles, float forwardmove, float sidemove, float upmove, unsigned short buttons, byte impulse, byte msec);
+inline int (*NumberOfEntities)();
+inline char* (*GetInfoKeyBuffer)(Entity* e);
+inline char* (*InfoKeyValue)(char* infobuffer, const char* key);
+inline void (*SetKeyValue)(char* infobuffer, const char* key, const char* value);
+inline void (*SetClientKeyValue)(int clientIndex, char* infobuffer, const char* key, const char* value);
+inline int (*IsMapValid)(const char* filename);
+inline void (*StaticDecal)(const float* origin, int decalIndex, int entityIndex, int modelIndex);
+inline int (*PrecacheGeneric)(const char* s);
+inline int (*GetPlayerUserId)(Entity* e);
+inline void (*BuildSoundMsg)(Entity* entity, int channel, const char* sample, /*int*/ float volume, float attenuation, int fFlags, int pitch, int msg_dest, int msg_type, const float* pOrigin, Entity* ed);
+inline int (*IsDedicatedServer)();
+inline cvar_t* (*CVarGetPointer)(const char* szVarName);
+inline unsigned int (*GetPlayerWONId)(Entity* e);
+inline void (*Info_RemoveKey)(char* s, const char* key);
+inline const char* (*GetPhysicsKeyValue)(const Entity* pClient, const char* key);
+inline void (*SetPhysicsKeyValue)(const Entity* pClient, const char* key, const char* value);
+inline const char* (*GetPhysicsInfoString)(const Entity* pClient);
+inline unsigned short (*PrecacheEvent)(int type, const char* psz);
+inline void (*PlaybackEvent)(int flags, const Entity* pInvoker, unsigned short eventindex, float delay, const float* origin, const float* angles, float fparam1, float fparam2, int iparam1, int iparam2, int bparam1, int bparam2);
+inline unsigned char* (*SetFatPVS)(float* org);
+inline unsigned char* (*SetFatPAS)(float* org);
+inline int (*CheckVisibility)(const Entity* entity, unsigned char* pset);
+inline void (*DeltaSetField)(struct delta_s* pFields, const char* fieldname);
+inline void (*DeltaUnsetField)(struct delta_s* pFields, const char* fieldname);
+inline void (*DeltaAddEncoder)(const char* name, void (*conditionalencode)(struct delta_s* pFields, const unsigned char* from, const unsigned char* to));
+inline int (*GetCurrentPlayer)();
+inline int (*CanSkipPlayer)(const Entity* player);
+inline int (*DeltaFindField)(struct delta_s* pFields, const char* fieldname);
+inline void (*DeltaSetFieldByIndex)(struct delta_s* pFields, int fieldNumber);
+inline void (*DeltaUnsetFieldByIndex)(struct delta_s* pFields, int fieldNumber);
+inline void (*SetGroupMask)(int mask, int op);
+inline int (*CreateInstancedBaseline)(int classname, struct entity_state_s* baseline);
+inline void (*Cvar_DirectSet)(struct cvar_s* var, const char* value);
+inline void (*ForceUnmodified)(FORCE_TYPE type, float* mins, float* maxs, const char* filename);
+inline void (*GetPlayerStats)(const Entity* pClient, int* ping, int* packet_loss);
+inline void (*AddServerCommand)(const char* cmd_name, void (*function)());
+inline qboolean (*Voice_GetClientListening)(int iReceiver, int iSender);
+inline qboolean (*Voice_SetClientListening)(int iReceiver, int iSender, qboolean bListen);
+inline const char* (*GetPlayerAuthId)(Entity* e);
+inline sequenceEntry_s* (*SequenceGet)(const char* fileName, const char* entryName);
+inline sentenceEntry_s* (*SequencePickSentence)(const char* groupName, int pickMethod, int* picked);
+inline int (*GetFileSize)(const char* filename);
+inline unsigned int (*GetApproxWavePlayLen)(const char* filepath);
+inline int (*IsCareerMatch)();
+inline int (*GetLocalizedStringLength)(const char* label);
+inline void (*RegisterTutorMessageShown)(int mid);
+inline int (*GetTimesTutorMessageShown)(int mid);
+inline void (*ProcessTutorMessageDecayBuffer)(int* buffer, int bufferLength);
+inline void (*ConstructTutorMessageDecayBuffer)(int* buffer, int bufferLength);
+inline void (*ResetTutorMessageDecayData)();
+inline void (*QueryClientCvarValue)(const Entity* player, const char* cvarName);
+inline void (*QueryClientCvarValue2)(const Entity* player, const char* cvarName, int requestID);
+inline int (*CheckParm)(const char* pchCmdLineToken, const char** ppnext);
+inline Entity* (*PEntityOfEntIndexAllEntities)(int iEntIndex);
+} /* namespace engine */

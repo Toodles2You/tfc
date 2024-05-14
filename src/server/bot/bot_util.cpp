@@ -30,13 +30,10 @@ bool UTIL_IsNameTaken( const char *name, bool ignoreHumans )
 	{
 		CBaseEntity * player = util::PlayerByIndex( i );
 
-		if (player == NULL)
+		if (player == nullptr)
 			continue;
 
-		if (FNullEnt( player->pev ))
-			continue;
-
-		if (FStrEq( STRING( player->pev->netname ), "" ))
+		if (STRING(player->v.netname)[0] == '\0')
 			continue;
 
 		if (player->IsPlayer() && ((CBasePlayer *)player)->IsBot())
@@ -44,7 +41,7 @@ bool UTIL_IsNameTaken( const char *name, bool ignoreHumans )
 			// bots can have prefixes so we need to check the name
 			// against the profile name instead.
 			CBot *bot = (CBot *)player;
-			if (FStrEq(name, bot->GetProfile()->GetName()))
+			if (streq(name, bot->GetProfile()->GetName()))
 			{
 				return true;
 			}
@@ -53,7 +50,7 @@ bool UTIL_IsNameTaken( const char *name, bool ignoreHumans )
 		{
 			if (!ignoreHumans)
 			{
-				if (FStrEq( name, STRING( player->pev->netname ) ))
+				if (streq( name, STRING( player->v.netname ) ))
 					return true;
 			}
 		}
@@ -72,13 +69,10 @@ int UTIL_ClientsInGame( void )
 	{
 		CBaseEntity * pPlayer = util::PlayerByIndex( iIndex );
 
-		if ( pPlayer == NULL )
+		if ( pPlayer == nullptr )
 			continue;
 
-		if ( FNullEnt( pPlayer->pev ) )
-			continue;
-
-		if ( FStrEq( STRING( pPlayer->pev->netname ), "" ) )
+		if (STRING(pPlayer->v.netname)[0] == '\0')
 			continue;
 
 		iCount++;
@@ -99,13 +93,10 @@ int UTIL_ActivePlayersInGame( void )
 	{
 		CBaseEntity *entity = util::PlayerByIndex( iIndex );
 
-		if ( entity == NULL )
+		if ( entity == nullptr )
 			continue;
 
-		if ( FNullEnt( entity->pev ) )
-			continue;
-
-		if ( FStrEq( STRING( entity->pev->netname ), "" ) )
+		if (STRING(entity->v.netname)[0] == '\0')
 			continue;
 
 		CBasePlayer *player = static_cast<CBasePlayer *>( entity );
@@ -131,13 +122,10 @@ int UTIL_HumansInGame( bool ignoreSpectators )
 	{
 		CBaseEntity *entity = util::PlayerByIndex( iIndex );
 
-		if ( entity == NULL )
+		if ( entity == nullptr )
 			continue;
 
-		if ( FNullEnt( entity->pev ) )
-			continue;
-
-		if ( FStrEq( STRING( entity->pev->netname ), "" ) )
+		if (STRING(entity->v.netname)[0] == '\0')
 			continue;
 
 		CBasePlayer *player = static_cast<CBasePlayer *>( entity );
@@ -152,7 +140,7 @@ int UTIL_HumansInGame( bool ignoreSpectators )
 	}
 
 	/*
-	if ( IS_DEDICATED_SERVER() && !ignoreSpectators )
+	if ( engine::IsDedicatedServer() && !ignoreSpectators )
 	{
 		// If we're counting humans, including spectators, don't count the dedicated server
 		--iCount;
@@ -174,13 +162,10 @@ int UTIL_HumansOnTeam( int teamID, bool isAlive )
 	{
 		CBaseEntity *entity = util::PlayerByIndex( iIndex );
 
-		if ( entity == NULL )
+		if ( entity == nullptr )
 			continue;
 
-		if ( FNullEnt( entity->pev ) )
-			continue;
-
-		if ( FStrEq( STRING( entity->pev->netname ), "" ) )
+		if (STRING(entity->v.netname)[0] == '\0')
 			continue;
 
 		CBasePlayer *player = static_cast<CBasePlayer *>( entity );
@@ -210,13 +195,10 @@ int UTIL_BotsInGame( void )
 	{
 		CBasePlayer *pPlayer = static_cast<CBasePlayer *>(util::PlayerByIndex( iIndex ));
 
-		if ( pPlayer == NULL )
+		if ( pPlayer == nullptr )
 			continue;
 
-		if ( FNullEnt( pPlayer->pev ) )
-			continue;
-
-		if ( FStrEq( STRING( pPlayer->pev->netname ), "" ) )
+		if (STRING(pPlayer->v.netname)[0] == '\0')
 			continue;
 
 		if ( !pPlayer->IsBot() )
@@ -241,14 +223,11 @@ bool UTIL_KickBotFromTeam( int kickTeam )
 	{
 		CBasePlayer *player = static_cast<CBasePlayer *>( util::PlayerByIndex( i ) );
 
-		if (player == NULL)
+		if (player == nullptr)
 			continue;
 
-		if (FNullEnt( player->pev ))
-			continue;
-
-		const char *name = STRING( player->pev->netname );
-		if (FStrEq( name, "" ))
+		const char *name = STRING( player->v.netname );
+		if (streq( name, "" ))
 			continue;
 
 		if (!player->IsBot())
@@ -257,7 +236,7 @@ bool UTIL_KickBotFromTeam( int kickTeam )
 		if (!player->IsAlive() && (kickTeam == -1 || player->TeamNumber() == kickTeam))
 		{
 			// its a bot on the right team - kick it
-			SERVER_COMMAND( util::VarArgs( "kick \"%s\"\n", STRING( player->pev->netname ) ) );
+			engine::ServerCommand( util::VarArgs( "kick \"%s\"\n", STRING( player->v.netname ) ) );
 
 			return true;
 		}
@@ -268,14 +247,11 @@ bool UTIL_KickBotFromTeam( int kickTeam )
 	{
 		CBasePlayer *player = static_cast<CBasePlayer *>( util::PlayerByIndex( i ) );
 
-		if (player == NULL)
+		if (player == nullptr)
 			continue;
 
-		if (FNullEnt( player->pev ))
-			continue;
-
-		const char *name = STRING( player->pev->netname );
-		if (FStrEq( name, "" ))
+		const char *name = STRING( player->v.netname );
+		if (streq( name, "" ))
 			continue;
 
 		if (!player->IsBot())
@@ -284,7 +260,7 @@ bool UTIL_KickBotFromTeam( int kickTeam )
 		if ((kickTeam == -1 || player->TeamNumber() == kickTeam))
 		{
 			// its a bot on the right team - kick it
-			SERVER_COMMAND( util::VarArgs( "kick \"%s\"\n", STRING( player->pev->netname ) ) );
+			engine::ServerCommand( util::VarArgs( "kick \"%s\"\n", STRING( player->v.netname ) ) );
 
 			return true;
 		}
@@ -305,21 +281,18 @@ bool UTIL_IsTeamAllBots( int team )
 	{
 		CBasePlayer *player = static_cast<CBasePlayer *>( util::PlayerByIndex( i ) );
 
-		if (player == NULL)
+		if (player == nullptr)
 			continue;
 
 		// skip players on other teams
 		if (player->TeamNumber() != team)
 			continue;
 
-		if (FNullEnt( player->pev ))
-			continue;
-
-		if (FStrEq( STRING( player->pev->netname ), "" ))
+		if (STRING(player->v.netname)[0] == '\0')
 			continue;
 
 		// if not a bot, fail the test
-		if (!FBitSet( player->pev->flags, FL_FAKECLIENT ))
+		if (!FBitSet( player->v.flags, FL_FAKECLIENT ))
 			return false;
 
 		// is a bot on given team
@@ -333,11 +306,11 @@ bool UTIL_IsTeamAllBots( int team )
 //--------------------------------------------------------------------------------------------------------------
 /**
  * Return the closest active player to the given position.
- * If 'distance' is non-NULL, the distance to the closest player is returned in it.
+ * If 'distance' is non-nullptr, the distance to the closest player is returned in it.
  */
 CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, float *distance, CBasePlayer *ignore )
 {
-	CBasePlayer *closePlayer = NULL;
+	CBasePlayer *closePlayer = nullptr;
 	float closeDistSq = 999999999999.9f;
 
 	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
@@ -353,7 +326,7 @@ CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, float *distance, CBasePla
 		if (!player->IsAlive())
 			continue;
 
-		float distSq = (player->pev->origin - *pos).LengthSquared();
+		float distSq = (player->v.origin - *pos).LengthSquared();
 		if (distSq < closeDistSq)
 		{
 			closeDistSq = distSq;
@@ -370,11 +343,11 @@ CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, float *distance, CBasePla
 //--------------------------------------------------------------------------------------------------------------
 /**
  * Return the closest active player on the given team to the given position.
- * If 'distance' is non-NULL, the distance to the closest player is returned in it.
+ * If 'distance' is non-nullptr, the distance to the closest player is returned in it.
  */
 CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, int team, float *distance, CBasePlayer *ignore )
 {
-	CBasePlayer *closePlayer = NULL;
+	CBasePlayer *closePlayer = nullptr;
 	float closeDistSq = 999999999999.9f;
 
 	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
@@ -393,7 +366,7 @@ CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, int team, float *distance
 		if (player->TeamNumber() != team)
 			continue;
 
-		float distSq = (player->pev->origin - *pos).LengthSquared();
+		float distSq = (player->v.origin - *pos).LengthSquared();
 		if (distSq < closeDistSq)
 		{
 			closeDistSq = distSq;
@@ -409,7 +382,7 @@ CBasePlayer *UTIL_GetClosestPlayer( const Vector *pos, int team, float *distance
 
 CBasePlayer *UTIL_GetClosestEnemyPlayer( CBasePlayer *self, float *distance )
 {
-	CBasePlayer *closePlayer = NULL;
+	CBasePlayer *closePlayer = nullptr;
 	float closeDistSq = 999999999999.9f;
 
 	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
@@ -428,7 +401,7 @@ CBasePlayer *UTIL_GetClosestEnemyPlayer( CBasePlayer *self, float *distance )
 		if (g_pGameRules->PlayerRelationship(self, player) > GR_NOTTEAMMATE)
 			continue;
 
-		float distSq = (player->pev->origin - self->pev->origin).LengthSquared();
+		float distSq = (player->v.origin - self->v.origin).LengthSquared();
 		if (distSq < closeDistSq)
 		{
 			closeDistSq = distSq;
@@ -453,14 +426,14 @@ const char * UTIL_GetBotPrefix()
 // Takes the bot pointer and constructs the net name using the current bot name prefix.
 void UTIL_ConstructBotNetName(char *name, int nameLength, const BotProfile *profile)
 {
-	if (profile == NULL)
+	if (profile == nullptr)
 	{
 		name[0] = 0;
 		return;
 	}
 
 	// if there is no bot prefix just use the profile name.
-	if ((UTIL_GetBotPrefix() == NULL) || (strlen(UTIL_GetBotPrefix()) == 0))
+	if ((UTIL_GetBotPrefix() == nullptr) || (strlen(UTIL_GetBotPrefix()) == 0))
 	{
 		strncpy(name, profile->GetName(), nameLength);
 		return;
@@ -479,13 +452,10 @@ bool UTIL_IsVisibleToTeam( const Vector &spot, int team, float maxRange )
 	{
 		CBasePlayer *player = static_cast<CBasePlayer *>( util::PlayerByIndex( i ) );
 
-		if (player == NULL)
+		if (player == nullptr)
 			continue;
 
-		if (FNullEnt( player->pev ))
-			continue;
-
-		if (FStrEq( STRING( player->pev->netname ), "" ))
+		if (STRING(player->v.netname)[0] == '\0')
 			continue;
 
 		if (!player->IsAlive())
@@ -511,26 +481,18 @@ bool UTIL_IsVisibleToTeam( const Vector &spot, int team, float maxRange )
 //--------------------------------------------------------------------------------------------------------------
 
 
-//------------------------------------------------------------------------------------------------------------
-// Some types of entities have no origin set, so we use this instead.
-Vector UTIL_ComputeOrigin( entvars_t * pevVars )
+Vector UTIL_ComputeOrigin( Entity * pentEdict )
 {
-	if ( ( pevVars->origin.x == 0.0 ) && ( pevVars->origin.y == 0.0 ) && ( pevVars->origin.z == 0.0 ) )
-		return ( pevVars->absmax + pevVars->absmin ) * 0.5;
+	if ( ( pentEdict->origin.x == 0.0 ) && ( pentEdict->origin.y == 0.0 ) && ( pentEdict->origin.z == 0.0 ) )
+		return ( pentEdict->absmax + pentEdict->absmin ) * 0.5;
 	else
-		return pevVars->origin;
+		return pentEdict->origin;
 }
 
 
 Vector UTIL_ComputeOrigin( CBaseEntity * pEntity )
 {
-	return UTIL_ComputeOrigin( pEntity->pev );
-}
-
-
-Vector UTIL_ComputeOrigin( edict_t * pentEdict )
-{
-	return UTIL_ComputeOrigin( VARS( pentEdict ) );
+	return UTIL_ComputeOrigin( &pEntity->v );
 }
 
 
@@ -594,7 +556,7 @@ void CONSOLE_ECHO( char * pszMsg, ... )
 	vsprintf( szStr, pszMsg, argptr );
 	va_end( argptr );
 
-	(*g_engfuncs.pfnServerPrint)( szStr );
+	engine::ServerPrint( szStr );
 }
 
 
@@ -608,7 +570,7 @@ void CONSOLE_ECHO_LOGGED( char * pszMsg, ... )
 	vsprintf( szStr, pszMsg, argptr );
 	va_end( argptr );
 
-	(*g_engfuncs.pfnServerPrint)( szStr );
+	engine::ServerPrint( szStr );
 	util::LogPrintf( szStr );
 }
 
@@ -616,74 +578,74 @@ void CONSOLE_ECHO_LOGGED( char * pszMsg, ... )
 //------------------------------------------------------------------------------------------------------------
 void BotPrecache( void )
 {
-	s_iBeamSprite = PRECACHE_MODEL( "sprites/smoke.spr" );
-	PRECACHE_SOUND( "buttons/bell1.wav" );
-	PRECACHE_SOUND( "buttons/blip1.wav" );
-	PRECACHE_SOUND( "buttons/blip2.wav" );
-	PRECACHE_SOUND( "buttons/button11.wav" );
-	PRECACHE_SOUND( "buttons/latchunlocked2.wav" );
-	PRECACHE_SOUND( "buttons/lightswitch2.wav" );
+	s_iBeamSprite = engine::PrecacheModel( "sprites/smoke.spr" );
+	engine::PrecacheSound( "buttons/bell1.wav" );
+	engine::PrecacheSound( "buttons/blip1.wav" );
+	engine::PrecacheSound( "buttons/blip2.wav" );
+	engine::PrecacheSound( "buttons/button11.wav" );
+	engine::PrecacheSound( "buttons/latchunlocked2.wav" );
+	engine::PrecacheSound( "buttons/lightswitch2.wav" );
 
 #ifdef CSTRIKE
-	PRECACHE_SOUND( "ambience/quail1.wav" );
+	engine::PrecacheSound( "ambience/quail1.wav" );
 
 	/// @todo This is for the Tutor - move it somewhere sane
-	PRECACHE_SOUND( "events/tutor_msg.wav" );
-	PRECACHE_SOUND( "events/enemy_died.wav" );
-	PRECACHE_SOUND( "events/friend_died.wav" );
+	engine::PrecacheSound( "events/tutor_msg.wav" );
+	engine::PrecacheSound( "events/enemy_died.wav" );
+	engine::PrecacheSound( "events/friend_died.wav" );
 
 	/// @todo This is for the Career mode UI - move it somewhere sane
-	PRECACHE_SOUND( "events/task_complete.wav" );
+	engine::PrecacheSound( "events/task_complete.wav" );
 #endif
 
 #ifdef TERRORSTRIKE
 	/// @todo Zombie mode experiment
-	PRECACHE_SOUND( "zombie/attack1.wav" );
-	PRECACHE_SOUND( "zombie/attack2.wav" );
-	PRECACHE_SOUND( "zombie/attack3.wav" );
-	PRECACHE_SOUND( "zombie/attack4.wav" );
-	PRECACHE_SOUND( "zombie/attack5.wav" );
-	PRECACHE_SOUND( "zombie/bark1.wav" );
-	PRECACHE_SOUND( "zombie/bark2.wav" );
-	PRECACHE_SOUND( "zombie/bark3.wav" );
-	PRECACHE_SOUND( "zombie/bark4.wav" );
-	PRECACHE_SOUND( "zombie/bark5.wav" );
-	PRECACHE_SOUND( "zombie/bark6.wav" );
-	PRECACHE_SOUND( "zombie/bark7.wav" );
-	PRECACHE_SOUND( "zombie/breathing1.wav" );
-	PRECACHE_SOUND( "zombie/breathing2.wav" );
-	PRECACHE_SOUND( "zombie/breathing3.wav" );
-	PRECACHE_SOUND( "zombie/breathing4.wav" );
-	PRECACHE_SOUND( "zombie/groan1.wav" );
-	PRECACHE_SOUND( "zombie/groan2.wav" );
-	PRECACHE_SOUND( "zombie/groan3.wav" );
-	PRECACHE_SOUND( "zombie/hiss1.wav" );
-	PRECACHE_SOUND( "zombie/hiss2.wav" );
-	PRECACHE_SOUND( "zombie/hiss3.wav" );
-	PRECACHE_SOUND( "ambience/the_horror2.wav" );
-	PRECACHE_SOUND( "scientist/scream20.wav" );
-	PRECACHE_SOUND( "zombie/human_hurt1.wav" );
-	PRECACHE_SOUND( "zombie/human_hurt2.wav" );
-	PRECACHE_SOUND( "zombie/human_hurt3.wav" );
-	PRECACHE_SOUND( "zombie/human_hurt4.wav" );
-	PRECACHE_SOUND( "zombie/shout_reloading1.wav" );
-	PRECACHE_SOUND( "zombie/shout_reloading2.wav" );
-	PRECACHE_SOUND( "zombie/shout_reloading3.wav" );
-	PRECACHE_SOUND( "zombie/deep_heartbeat.wav" );
-	PRECACHE_SOUND( "zombie/deep_heartbeat_fast.wav" );
-	PRECACHE_SOUND( "zombie/deep_heartbeat_very_fast.wav" );
-	PRECACHE_SOUND( "zombie/deep_heartbeat_stopping.wav" );
-	PRECACHE_SOUND( "zombie/zombie_step1.wav" );
-	PRECACHE_SOUND( "zombie/zombie_step2.wav" );
-	PRECACHE_SOUND( "zombie/zombie_step3.wav" );
-	PRECACHE_SOUND( "zombie/zombie_step4.wav" );
-	PRECACHE_SOUND( "zombie/zombie_step5.wav" );
-	PRECACHE_SOUND( "zombie/zombie_step6.wav" );
-	PRECACHE_SOUND( "zombie/zombie_step7.wav" );
-	PRECACHE_SOUND( "zombie/fear1.wav" );
-	PRECACHE_SOUND( "zombie/fear2.wav" );
-	PRECACHE_SOUND( "zombie/fear3.wav" );
-	PRECACHE_SOUND( "zombie/fear4.wav" );
+	engine::PrecacheSound( "zombie/attack1.wav" );
+	engine::PrecacheSound( "zombie/attack2.wav" );
+	engine::PrecacheSound( "zombie/attack3.wav" );
+	engine::PrecacheSound( "zombie/attack4.wav" );
+	engine::PrecacheSound( "zombie/attack5.wav" );
+	engine::PrecacheSound( "zombie/bark1.wav" );
+	engine::PrecacheSound( "zombie/bark2.wav" );
+	engine::PrecacheSound( "zombie/bark3.wav" );
+	engine::PrecacheSound( "zombie/bark4.wav" );
+	engine::PrecacheSound( "zombie/bark5.wav" );
+	engine::PrecacheSound( "zombie/bark6.wav" );
+	engine::PrecacheSound( "zombie/bark7.wav" );
+	engine::PrecacheSound( "zombie/breathing1.wav" );
+	engine::PrecacheSound( "zombie/breathing2.wav" );
+	engine::PrecacheSound( "zombie/breathing3.wav" );
+	engine::PrecacheSound( "zombie/breathing4.wav" );
+	engine::PrecacheSound( "zombie/groan1.wav" );
+	engine::PrecacheSound( "zombie/groan2.wav" );
+	engine::PrecacheSound( "zombie/groan3.wav" );
+	engine::PrecacheSound( "zombie/hiss1.wav" );
+	engine::PrecacheSound( "zombie/hiss2.wav" );
+	engine::PrecacheSound( "zombie/hiss3.wav" );
+	engine::PrecacheSound( "ambience/the_horror2.wav" );
+	engine::PrecacheSound( "scientist/scream20.wav" );
+	engine::PrecacheSound( "zombie/human_hurt1.wav" );
+	engine::PrecacheSound( "zombie/human_hurt2.wav" );
+	engine::PrecacheSound( "zombie/human_hurt3.wav" );
+	engine::PrecacheSound( "zombie/human_hurt4.wav" );
+	engine::PrecacheSound( "zombie/shout_reloading1.wav" );
+	engine::PrecacheSound( "zombie/shout_reloading2.wav" );
+	engine::PrecacheSound( "zombie/shout_reloading3.wav" );
+	engine::PrecacheSound( "zombie/deep_heartbeat.wav" );
+	engine::PrecacheSound( "zombie/deep_heartbeat_fast.wav" );
+	engine::PrecacheSound( "zombie/deep_heartbeat_very_fast.wav" );
+	engine::PrecacheSound( "zombie/deep_heartbeat_stopping.wav" );
+	engine::PrecacheSound( "zombie/zombie_step1.wav" );
+	engine::PrecacheSound( "zombie/zombie_step2.wav" );
+	engine::PrecacheSound( "zombie/zombie_step3.wav" );
+	engine::PrecacheSound( "zombie/zombie_step4.wav" );
+	engine::PrecacheSound( "zombie/zombie_step5.wav" );
+	engine::PrecacheSound( "zombie/zombie_step6.wav" );
+	engine::PrecacheSound( "zombie/zombie_step7.wav" );
+	engine::PrecacheSound( "zombie/fear1.wav" );
+	engine::PrecacheSound( "zombie/fear2.wav" );
+	engine::PrecacheSound( "zombie/fear3.wav" );
+	engine::PrecacheSound( "zombie/fear4.wav" );
 #endif // TERRORSTRIKE
 }
 
@@ -722,8 +684,8 @@ float BotSIN( float angle )
 bool IsGameEventAudible( GameEventType event, CBaseEntity *entity, CBaseEntity *other, float *range, PriorityType *priority, bool *isHostile )
 {
 	CBasePlayer *player = static_cast<CBasePlayer *>( entity );
-	if (entity == NULL || !player->IsPlayer())
-		player = NULL;
+	if (entity == nullptr || !player->IsPlayer())
+		player = nullptr;
 
 	const float ShortRange = 1000.0f;
 	const float NormalRange = 2000.0f;
@@ -733,7 +695,7 @@ bool IsGameEventAudible( GameEventType event, CBaseEntity *entity, CBaseEntity *
 		/// @todo Use actual volume, account for silencers, etc.
 		case EVENT_WEAPON_FIRED:
 		{
-			if (player->m_pActiveWeapon == NULL)
+			if (player->m_pActiveWeapon == nullptr)
 				return false;
 
 #if 0

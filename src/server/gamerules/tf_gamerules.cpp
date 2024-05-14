@@ -159,17 +159,17 @@ void CTeamFortress::DisplayItemStatus(CBasePlayer* player, const int goalNo)
         }
 
         /* Find the carrier. */
-        if (goal->pev->owner != nullptr)
+        if (goal->v.owner != nullptr)
         {
-            auto goalCarrier = dynamic_cast<CBasePlayer*>(CBaseEntity::Instance(goal->pev->owner));
+            auto goalCarrier = goal->v.owner->Get<CBasePlayer>();
 
             if (goalCarrier != nullptr)
             {
-                carrier = STRING(goalCarrier->pev->netname);
+                carrier = STRING(goalCarrier->v.netname);
             }
         }
     }
-    else if (goal->pev->origin != goal->pev->oldorigin)
+    else if (goal->v.origin != goal->v.oldorigin)
     {
         /* Goal is dropped! */
         if (isGoalOwner)
@@ -211,7 +211,7 @@ void CTeamFortress::DisplayItemStatus(CBasePlayer* player, const int goalNo)
 
 bool CTeamFortress::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 {
-    if (FStrEq(pcmd, "flaginfo"))
+    if (streq(pcmd, "flaginfo"))
     {
         for (int i = 0; i < TEAM_SPECTATORS - 1; i++)
         {
@@ -309,7 +309,7 @@ bool CTeamFortress::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool b
         return false;
     }
 
-    pPlayer->pev->playerclass = PC_UNDEFINED;
+    pPlayer->v.playerclass = PC_UNDEFINED;
 
     if (pPlayer->TeamNumber() != TEAM_SPECTATORS)
     {
@@ -324,27 +324,27 @@ bool CTeamFortress::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool b
 
 void CTeamFortress::UpdatePlayerClass(CBasePlayer* player)
 {
-    const auto index = player->entindex();
+    const auto index = player->v.GetIndex();
     const auto team = player->TeamNumber() - TEAM_DEFAULT;
     const auto playerclass = player->PCNumber();
 
-    char* infobuffer = g_engfuncs.pfnGetInfoKeyBuffer(player->pev->pContainingEntity);
+    char* infobuffer = engine::GetInfoKeyBuffer(player->v.pContainingEntity);
 
     PCInfo& info = sTFClassInfo[playerclass];
 
-    g_engfuncs.pfnSetClientKeyValue(
+    engine::SetClientKeyValue(
         index,
         infobuffer,
         "model",
         info.model);
 
-    g_engfuncs.pfnSetClientKeyValue(
+    engine::SetClientKeyValue(
         index,
         infobuffer,
         "topcolor",
         util::dtos1(info.colormap[team][0]));
 
-    g_engfuncs.pfnSetClientKeyValue(
+    engine::SetClientKeyValue(
         index,
         infobuffer,
         "bottomcolor",
@@ -410,7 +410,7 @@ bool CTeamFortress::ChangePlayerClass(CBasePlayer* pPlayer, int classIndex)
 			DMG_GENERIC);
 	}
 
-    pPlayer->pev->playerclass = classIndex;
+    pPlayer->v.playerclass = classIndex;
 
     UpdatePlayerClass(pPlayer);
 
@@ -420,9 +420,9 @@ bool CTeamFortress::ChangePlayerClass(CBasePlayer* pPlayer, int classIndex)
     }
 
 	util::LogPrintf("\"%s<%i><%s><>\" changed role to \"%s\"\n",
-		STRING(pPlayer->pev->netname),
-		g_engfuncs.pfnGetPlayerUserId(pPlayer->edict()),
-		g_engfuncs.pfnGetPlayerAuthId(pPlayer->edict()),
+		STRING(pPlayer->v.netname),
+		engine::GetPlayerUserId(&pPlayer->v),
+		engine::GetPlayerAuthId(&pPlayer->v),
 		sTFClassSelection[pPlayer->PCNumber()]);
 
     return true;
@@ -523,11 +523,6 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
 
 	if (pPlayer->TeamNumber() == TEAM_UNASSIGNED || pPlayer->PCNumber() == PC_UNDEFINED)
 	{
-	    pPlayer->StartObserver();
-		pPlayer->pev->iuser1 = OBS_FIXED;
-		pPlayer->pev->iuser2 = 0;
-		pPlayer->pev->iuser3 = 0;
-		pPlayer->m_iObserverLastMode = OBS_FIXED;
 		return;
 	}
 
@@ -536,12 +531,12 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
 
     PCInfo& info = sTFClassInfo[pPlayer->PCNumber()];
 
-	pPlayer->pev->health = pPlayer->pev->max_health = info.maxHealth;
+	pPlayer->v.health = pPlayer->v.max_health = info.maxHealth;
 
-    g_engfuncs.pfnSetClientMaxspeed(pPlayer->edict(), info.maxSpeed);
+    engine::SetClientMaxspeed(&pPlayer->v, info.maxSpeed);
 
-    pPlayer->pev->armorvalue = info.initArmor;
-    pPlayer->pev->armortype = info.initArmorType;
+    pPlayer->v.armorvalue = info.initArmor;
+    pPlayer->v.armortype = info.initArmorType;
 	pPlayer->m_flArmorMax = info.maxArmor;
 	pPlayer->m_flArmorTypeMax = info.maxArmorType;
     pPlayer->m_afArmorClass = info.initArmorClasses;
@@ -590,13 +585,13 @@ bool CTeamFortress::FPlayerCanRespawn(CBasePlayer* pPlayer)
 
 void CTeamFortress::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 {
-    if (FStrEq(STRING(pEntity->pev->classname), "info_player_start"))
+    if (streq(STRING(pEntity->v.classname), "info_player_start"))
     {
         CGameRules::AddPlayerSpawnSpot(pEntity);
         return;
     }
 
-    if (!FStrEq(STRING(pEntity->pev->classname), "info_player_teamspawn"))
+    if (!streq(STRING(pEntity->v.classname), "info_player_teamspawn"))
     {
         return;
     }
@@ -604,10 +599,10 @@ void CTeamFortress::AddPlayerSpawnSpot(CBaseEntity *pEntity)
     auto spawn = new CTFSpawnPoint {pEntity};
 
 #if 1
-    ALERT(
+    engine::AlertMessage(
         at_aiconsole,
         "%s %lu for team %i (state %i, goal %i, group %i), at (%g, %g, %g)\n",
-        STRING(pEntity->pev->classname),
+        STRING(pEntity->v.classname),
         m_numSpawnPoints,
         spawn->m_TFSpawn->tfv.GetTeam(),
         spawn->m_TFSpawn->tfv.goal_state,

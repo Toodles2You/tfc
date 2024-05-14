@@ -46,6 +46,8 @@ extern void W_Precache();
 class CDecal : public CBaseEntity
 {
 public:
+	CDecal(Entity* containingEntity) : CBaseEntity(containingEntity) {}
+
 	bool Spawn() override;
 	bool KeyValue(KeyValueData* pkvd) override;
 	void EXPORT StaticDecal();
@@ -57,21 +59,21 @@ LINK_ENTITY_TO_CLASS(infodecal, CDecal);
 // UNDONE:  These won't get sent to joining players in multi-player
 bool CDecal::Spawn()
 {
-	if (pev->skin < 0 || (g_pGameRules->IsDeathmatch() && FBitSet(pev->spawnflags, SF_DECAL_NOTINDEATHMATCH)))
+	if (v.skin < 0 || (g_pGameRules->IsDeathmatch() && FBitSet(v.spawnflags, SF_DECAL_NOTINDEATHMATCH)))
 	{
 		return false;
 	}
 
-	if (FStringNull(pev->targetname))
+	if (FStringNull(v.targetname))
 	{
 		SetThink(&CDecal::StaticDecal);
 		// if there's no targetname, the decal will spray itself on as soon as the world is done spawning.
-		pev->nextthink = gpGlobals->time;
+		v.nextthink = gpGlobals->time;
 	}
 	else
 	{
 		// if there IS a targetname, the decal sprays itself on when it is triggered.
-		SetThink(nullptr);
+		ClearThink();
 		SetUse(&CDecal::TriggerDecal);
 	}
 
@@ -85,18 +87,18 @@ void CDecal::TriggerDecal(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 	TraceResult trace;
 	int entityIndex;
 
-	util::TraceLine(pev->origin - Vector(5, 5, 5), pev->origin + Vector(5, 5, 5), util::ignore_monsters, this, &trace);
+	util::TraceLine(v.origin - Vector(5, 5, 5), v.origin + Vector(5, 5, 5), util::ignore_monsters, this, &trace);
 
 	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
 	WriteByte(TE_BSPDECAL);
-	WriteCoord(pev->origin.x);
-	WriteCoord(pev->origin.y);
-	WriteCoord(pev->origin.z);
-	WriteShort((int)pev->skin);
-	entityIndex = (short)ENTINDEX(trace.pHit);
+	WriteCoord(v.origin.x);
+	WriteCoord(v.origin.y);
+	WriteCoord(v.origin.z);
+	WriteShort((int)v.skin);
+	entityIndex = trace.pHit->GetIndex();
 	WriteShort(entityIndex);
 	if (0 != entityIndex)
-		WriteShort((int)VARS(trace.pHit)->modelindex);
+		WriteShort((int)trace.pHit->modelindex);
 	MessageEnd();
 
 	Remove();
@@ -108,15 +110,15 @@ void CDecal::StaticDecal()
 	TraceResult trace;
 	int entityIndex, modelIndex;
 
-	util::TraceLine(pev->origin - Vector(5, 5, 5), pev->origin + Vector(5, 5, 5), util::ignore_monsters, this, &trace);
+	util::TraceLine(v.origin - Vector(5, 5, 5), v.origin + Vector(5, 5, 5), util::ignore_monsters, this, &trace);
 
-	entityIndex = (short)ENTINDEX(trace.pHit);
+	entityIndex = trace.pHit->GetIndex();
 	if (0 != entityIndex)
-		modelIndex = (int)VARS(trace.pHit)->modelindex;
+		modelIndex = (int)trace.pHit->modelindex;
 	else
 		modelIndex = 0;
 
-	g_engfuncs.pfnStaticDecal(pev->origin, (int)pev->skin, entityIndex, modelIndex);
+	engine::StaticDecal(v.origin, (int)v.skin, entityIndex, modelIndex);
 
 	Remove();
 }
@@ -124,13 +126,13 @@ void CDecal::StaticDecal()
 
 bool CDecal::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "texture"))
+	if (streq(pkvd->szKeyName, "texture"))
 	{
-		pev->skin = DECAL_INDEX(pkvd->szValue);
+		v.skin = engine::DecalIndex(pkvd->szValue);
 
-		if (pev->skin < 0)
+		if (v.skin < 0)
 		{
-			ALERT(at_console, "Can't find decal %s\n", pkvd->szValue);
+			engine::AlertMessage(at_console, "Can't find decal %s\n", pkvd->szValue);
 		}
 
 		return true;
@@ -147,14 +149,14 @@ CGlobalState::CGlobalState()
 
 void CGlobalState::Reset()
 {
-	m_pList = NULL;
+	m_pList = nullptr;
 	m_listCount = 0;
 }
 
 globalentity_t* CGlobalState::Find(string_t globalname)
 {
 	if (FStringNull(globalname))
-		return NULL;
+		return nullptr;
 
 	globalentity_t* pTest;
 	const char* pEntityName = STRING(globalname);
@@ -163,7 +165,7 @@ globalentity_t* CGlobalState::Find(string_t globalname)
 	pTest = m_pList;
 	while (pTest)
 	{
-		if (FStrEq(pEntityName, pTest->name))
+		if (streq(pEntityName, pTest->name))
 			break;
 
 		pTest = pTest->pNext;
@@ -178,11 +180,11 @@ void CGlobalState::DumpGlobals()
 	static const char* estates[] = {"Off", "On", "Dead"};
 	globalentity_t* pTest;
 
-	ALERT(at_console, "-- Globals --\n");
+	engine::AlertMessage(at_console, "-- Globals --\n");
 	pTest = m_pList;
 	while (pTest)
 	{
-		ALERT(at_console, "%s: %s (%s)\n", pTest->name, pTest->levelName, estates[pTest->state]);
+		engine::AlertMessage(at_console, "%s: %s (%s)\n", pTest->name, pTest->levelName, estates[pTest->state]);
 		pTest = pTest->pNext;
 	}
 }
@@ -350,11 +352,11 @@ void ResetGlobalState()
 
 LINK_ENTITY_TO_CLASS(worldspawn, CWorld);
 
-CWorld::CWorld()
+CWorld::CWorld(Entity* containingEntity) : CBaseEntity(containingEntity)
 {
 	if (World)
 	{
-		ALERT(at_error, "Do not create multiple instances of worldspawn\n");
+		engine::AlertMessage(at_error, "Do not create multiple instances of worldspawn\n");
 		return;
 	}
 
@@ -386,7 +388,7 @@ void CWorld::Precache()
 		return;
 	}
 
-	g_bDeveloperMode = g_engfuncs.pfnCVarGetFloat("developer") != 0.0F;
+	g_bDeveloperMode = engine::CVarGetFloat("developer") != 0.0F;
 
 	// Set up game rules
 	delete g_pGameRules;
@@ -411,20 +413,20 @@ void CWorld::Precache()
 	BotPrecache();
 #endif
 
-	LIGHT_STYLE(0, "m");
-	LIGHT_STYLE(1, "mmnmmommommnonmmonqnmmo");
-	LIGHT_STYLE(2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
-	LIGHT_STYLE(3, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg");
-	LIGHT_STYLE(4, "mamamamamama");
-	LIGHT_STYLE(5, "jklmnopqrstuvwxyzyxwvutsrqponmlkj");
-	LIGHT_STYLE(6, "nmonqnmomnmomomno");
-	LIGHT_STYLE(7, "mmmaaaabcdefgmmmmaaaammmaamm");
-	LIGHT_STYLE(8, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa");
-	LIGHT_STYLE(9, "aaaaaaaazzzzzzzz");
-	LIGHT_STYLE(10, "mmamammmmammamamaaamammma");
-	LIGHT_STYLE(11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
-	LIGHT_STYLE(12, "mmnnmmnnnmmnn");
-	LIGHT_STYLE(63, "a");
+	engine::LightStyle(0, "m");
+	engine::LightStyle(1, "mmnmmommommnonmmonqnmmo");
+	engine::LightStyle(2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
+	engine::LightStyle(3, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg");
+	engine::LightStyle(4, "mamamamamama");
+	engine::LightStyle(5, "jklmnopqrstuvwxyzyxwvutsrqponmlkj");
+	engine::LightStyle(6, "nmonqnmomnmomomno");
+	engine::LightStyle(7, "mmmaaaabcdefgmmmmaaaammmaamm");
+	engine::LightStyle(8, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa");
+	engine::LightStyle(9, "aaaaaaaazzzzzzzz");
+	engine::LightStyle(10, "mmamammmmammamamaaamammma");
+	engine::LightStyle(11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
+	engine::LightStyle(12, "mmnnmmnnnmmnn");
+	engine::LightStyle(63, "a");
 
 #ifdef HALFLIFE_NODEGRAPH
 	WorldGraph.InitGraph();
@@ -440,47 +442,47 @@ void CWorld::Precache()
 		{ // Load the node graph for this level
 			if (!WorldGraph.FLoadGraph((char*)STRING(gpGlobals->mapname)))
 			{ // couldn't load, so alloc and prepare to build a graph.
-				ALERT(at_console, "*Error opening .NOD file\n");
+				engine::AlertMessage(at_console, "*Error opening .NOD file\n");
 				WorldGraph.AllocNodes();
 			}
 			else
 			{
-				ALERT(at_console, "\n*Graph Loaded!\n");
+				engine::AlertMessage(at_console, "\n*Graph Loaded!\n");
 			}
 		}
 
 		SetThink(&CWorld::PostSpawn);
-		pev->nextthink = gpGlobals->time + 0.5f;
+		v.nextthink = gpGlobals->time + 0.5f;
 	}
 #endif
 
-	CVAR_SET_FLOAT("sv_zmax", (pev->speed > 0) ? pev->speed : 4096);
+	engine::CVarSetFloat("sv_zmax", (v.speed > 0) ? v.speed : 4096);
 }
 
 
 bool CWorld::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "skyname"))
+	if (streq(pkvd->szKeyName, "skyname"))
 	{
 		// Sent over net now.
-		CVAR_SET_STRING("sv_skyname", pkvd->szValue);
+		engine::CVarSetString("sv_skyname", pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "sounds"))
+	else if (streq(pkvd->szKeyName, "sounds"))
 	{
 		gpGlobals->cdAudioTrack = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "WaveHeight"))
+	else if (streq(pkvd->szKeyName, "WaveHeight"))
 	{
 		// Sent over net now.
-		pev->scale = atof(pkvd->szValue) * (1.0 / 8.0);
-		CVAR_SET_FLOAT("sv_wateramp", pev->scale);
+		v.scale = atof(pkvd->szValue) * (1.0 / 8.0);
+		engine::CVarSetFloat("sv_wateramp", v.scale);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "MaxRange"))
+	else if (streq(pkvd->szKeyName, "MaxRange"))
 	{
-		pev->speed = atof(pkvd->szValue);
+		v.speed = atof(pkvd->szValue);
 		return true;
 	}
 
@@ -497,15 +499,15 @@ void CWorld::PostSpawn()
 		{
 			if (!WorldGraph.FSetGraphPointers())
 			{
-				ALERT(at_console, "**Graph pointers were not set!\n");
+				engine::AlertMessage(at_console, "**Graph pointers were not set!\n");
 				return;
 			}
 			else
 			{
-				ALERT(at_console, "**Graph Pointers Set!\n");
+				engine::AlertMessage(at_console, "**Graph Pointers Set!\n");
 			}
 		}
 	}
-	SetThink(nullptr);
+	ClearThink();
 }
 #endif

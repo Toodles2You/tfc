@@ -30,6 +30,8 @@
 class CLight : public CPointEntity
 {
 public:
+	CLight(Entity* containingEntity) : CPointEntity(containingEntity) {}
+
 	DECLARE_SAVERESTORE()
 
 	bool KeyValue(KeyValueData* pkvd) override;
@@ -54,19 +56,19 @@ END_SAVERESTORE(CLight, CPointEntity)
 //
 bool CLight::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "style"))
+	if (streq(pkvd->szKeyName, "style"))
 	{
 		m_iStyle = atoi(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "pitch"))
+	else if (streq(pkvd->szKeyName, "pitch"))
 	{
-		pev->angles.x = atof(pkvd->szValue);
+		v.angles.x = atof(pkvd->szValue);
 		return true;
 	}
-	else if (FStrEq(pkvd->szKeyName, "pattern"))
+	else if (streq(pkvd->szKeyName, "pattern"))
 	{
-		m_iszPattern = ALLOC_STRING(pkvd->szValue);
+		m_iszPattern = engine::AllocString(pkvd->szValue);
 		return true;
 	}
 
@@ -76,20 +78,19 @@ bool CLight::KeyValue(KeyValueData* pkvd)
 
 bool CLight::Spawn()
 {
-	if (FStringNull(pev->targetname))
+	if (FStringNull(v.targetname))
 	{
 		return false;
 	}
 
 	if (m_iStyle >= 32)
 	{
-		//		CHANGE_METHOD(ENT(pev), em_use, light_use);
-		if (FBitSet(pev->spawnflags, SF_LIGHT_START_OFF))
-			LIGHT_STYLE(m_iStyle, "a");
+		if (FBitSet(v.spawnflags, SF_LIGHT_START_OFF))
+			engine::LightStyle(m_iStyle, "a");
 		else if (!FStringNull(m_iszPattern))
-			LIGHT_STYLE(m_iStyle, (char*)STRING(m_iszPattern));
+			engine::LightStyle(m_iStyle, (char*)STRING(m_iszPattern));
 		else
-			LIGHT_STYLE(m_iStyle, "m");
+			engine::LightStyle(m_iStyle, "m");
 	}
 
 	return true;
@@ -100,21 +101,21 @@ void CLight::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType
 {
 	if (m_iStyle >= 32)
 	{
-		if (!ShouldToggle(useType, !FBitSet(pev->spawnflags, SF_LIGHT_START_OFF)))
+		if (!ShouldToggle(useType, !FBitSet(v.spawnflags, SF_LIGHT_START_OFF)))
 			return;
 
-		if (FBitSet(pev->spawnflags, SF_LIGHT_START_OFF))
+		if (FBitSet(v.spawnflags, SF_LIGHT_START_OFF))
 		{
 			if (!FStringNull(m_iszPattern))
-				LIGHT_STYLE(m_iStyle, (char*)STRING(m_iszPattern));
+				engine::LightStyle(m_iStyle, (char*)STRING(m_iszPattern));
 			else
-				LIGHT_STYLE(m_iStyle, "m");
-			ClearBits(pev->spawnflags, SF_LIGHT_START_OFF);
+				engine::LightStyle(m_iStyle, "m");
+			ClearBits(v.spawnflags, SF_LIGHT_START_OFF);
 		}
 		else
 		{
-			LIGHT_STYLE(m_iStyle, "a");
-			SetBits(pev->spawnflags, SF_LIGHT_START_OFF);
+			engine::LightStyle(m_iStyle, "a");
+			SetBits(v.spawnflags, SF_LIGHT_START_OFF);
 		}
 	}
 }
@@ -128,6 +129,8 @@ LINK_ENTITY_TO_CLASS(light_spot, CLight);
 class CEnvLight : public CLight
 {
 public:
+	CEnvLight(Entity* containingEntity) : CLight(containingEntity) {}
+
 	bool KeyValue(KeyValueData* pkvd) override;
 	bool Spawn() override;
 };
@@ -136,7 +139,7 @@ LINK_ENTITY_TO_CLASS(light_environment, CEnvLight);
 
 bool CEnvLight::KeyValue(KeyValueData* pkvd)
 {
-	if (FStrEq(pkvd->szKeyName, "_light"))
+	if (streq(pkvd->szKeyName, "_light"))
 	{
 		int r = 0, g = 0, b = 0, v = 0;
 		char szColor[64];
@@ -158,11 +161,11 @@ bool CEnvLight::KeyValue(KeyValueData* pkvd)
 		b = pow(b / 114.0, 0.6) * 264;
 
 		sprintf(szColor, "%d", r);
-		CVAR_SET_STRING("sv_skycolor_r", szColor);
+		engine::CVarSetString("sv_skycolor_r", szColor);
 		sprintf(szColor, "%d", g);
-		CVAR_SET_STRING("sv_skycolor_g", szColor);
+		engine::CVarSetString("sv_skycolor_g", szColor);
 		sprintf(szColor, "%d", b);
-		CVAR_SET_STRING("sv_skycolor_b", szColor);
+		engine::CVarSetString("sv_skycolor_b", szColor);
 
 		return true;
 	}
@@ -174,14 +177,14 @@ bool CEnvLight::KeyValue(KeyValueData* pkvd)
 bool CEnvLight::Spawn()
 {
 	char szVector[64];
-	util::MakeAimVectors(pev->angles);
+	util::MakeAimVectors(v.angles);
 
 	sprintf(szVector, "%f", gpGlobals->v_forward.x);
-	CVAR_SET_STRING("sv_skyvec_x", szVector);
+	engine::CVarSetString("sv_skyvec_x", szVector);
 	sprintf(szVector, "%f", gpGlobals->v_forward.y);
-	CVAR_SET_STRING("sv_skyvec_y", szVector);
+	engine::CVarSetString("sv_skyvec_y", szVector);
 	sprintf(szVector, "%f", gpGlobals->v_forward.z);
-	CVAR_SET_STRING("sv_skyvec_z", szVector);
+	engine::CVarSetString("sv_skyvec_z", szVector);
 
 	return CLight::Spawn();
 }

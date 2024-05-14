@@ -29,7 +29,7 @@ private:
 	AMMO rgAmmo[AMMO_TYPES];
 
 	// counts of weapons * ammo
-	WEAPON* rgSlots[MAX_WEAPON_SLOTS + 1][MAX_WEAPON_POSITIONS + 1]; // The slots currently in use by weapons.  The value is a pointer to the weapon;  if it's NULL, no weapon is there
+	WEAPON* rgSlots[MAX_WEAPON_SLOTS + 1][MAX_WEAPON_POSITIONS + 1]; // The slots currently in use by weapons.  The value is a pointer to the weapon;  if it's nullptr, no weapon is there
 
 public:
 	void Init();
@@ -67,7 +67,7 @@ public:
 	{
 		if (wp->iSlot != -1)
 		{
-			rgSlots[wp->iSlot][wp->iSlotPos] = NULL;
+			rgSlots[wp->iSlot][wp->iSlotPos] = nullptr;
 		}
 	}
 
@@ -128,7 +128,7 @@ private:
 public:
 	void Init()
 	{
-		hud_drawhistory_time = gEngfuncs.pfnRegisterVariable("hud_drawhistory_time", "5", 0);
+		hud_drawhistory_time = client::RegisterVariable("hud_drawhistory_time", "5", 0);
 		Reset();
 	}
 

@@ -26,7 +26,7 @@
 
 // During our weapon prediction processing, we'll need to reference some data that is part of
 //  the final state passed into the postthink functionality.  We'll set this pointer and then
-//  reset it to NULL as appropriate
+//  reset it to nullptr as appropriate
 struct local_state_s g_finalstate;
 
 int g_CurrentWeaponId = -1;
@@ -82,7 +82,7 @@ void HUD_SendWeaponAnim(int iAnim, int body, bool force)
 	}
 
 	// Tell animation system new info
-	gEngfuncs.pfnWeaponAnim(iAnim, body);
+	client::WeaponAnim(iAnim, body);
 }
 
 /*
@@ -99,7 +99,7 @@ void HUD_PlaySound(const char* sound, float volume)
 		return;
 	}
 
-	gEngfuncs.pfnPlaySoundByNameAtLocation(sound, volume, (float*)&g_finalstate.playerstate.origin);
+	client::PlaySoundByNameAtLocation(sound, volume, g_finalstate.playerstate.origin);
 }
 
 

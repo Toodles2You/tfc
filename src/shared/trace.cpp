@@ -47,11 +47,11 @@ Trace::Trace(const Vector& start, const Vector& end, int ignore, int traceFlags)
 
 	TraceResult trace;
 
-    g_engfuncs.pfnTraceLine(
-        (float*)&start,
-        (float*)&end,
+    engine::TraceLine(
+        const_cast<Vector&>(start),
+        const_cast<Vector&>(end),
         flags,
-        g_engfuncs.pfnPEntityOfEntIndex(ignore),
+        Entity::FromIndex(ignore),
         &trace);
 
     result = 0;
@@ -65,7 +65,7 @@ Trace::Trace(const Vector& start, const Vector& end, int ignore, int traceFlags)
     normal = trace.vecPlaneNormal;
     if (trace.pHit != nullptr)
     {
-        entity = g_engfuncs.pfnIndexOfEdict(trace.pHit);
+        entity = engine::IndexOfEdict(trace.pHit);
     }
     else
     {
@@ -80,8 +80,11 @@ Trace::Trace(const Vector& start, const Vector& end, int ignore, int traceFlags)
 
 Trace::Trace(const Vector& start, const Vector& end, int ignore, int traceFlags)
 {
-	gEngfuncs.pEventAPI->EV_SetSolidPlayers(ignore - 1);
-	gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
+    /* Toodles FIXME: !!! */
+    ignore = client::GetLocalPlayer()->index;
+
+	client::event::SetSolidPlayers(ignore - 1);
+	client::event::SetTraceHull(kHullPoint);
 
     int flags = PM_NORMAL;
     if ((traceFlags & kIgnoreMonsters) != 0) flags |= PM_STUDIO_IGNORE;
@@ -90,9 +93,9 @@ Trace::Trace(const Vector& start, const Vector& end, int ignore, int traceFlags)
 
     pmtrace_t trace;
 
-    gEngfuncs.pEventAPI->EV_PlayerTrace(
-        (float*)&start,
-        (float*)&end,
+    client::event::PlayerTrace(
+        const_cast<Vector&>(start),
+        const_cast<Vector&>(end),
         flags,
         -1,
         &trace);

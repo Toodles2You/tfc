@@ -35,7 +35,6 @@ enum { kMouseButtonCount = 5 };
 // Set this to 1 to show mouse cursor.  Experimental
 bool g_iVisibleMouse = false;
 
-extern cl_enginefunc_t gEngfuncs;
 extern bool iMouseInUse;
 
 extern cvar_t* cl_pitchdown;
@@ -152,11 +151,11 @@ void Mouse_Reset()
 		Mouse_SetRelative(true);
 	}
 
-	if (!Mouse_UseRawInput() && mouseactive && gEngfuncs.GetWindowCenterX && gEngfuncs.GetWindowCenterY)
+	if (!Mouse_UseRawInput() && mouseactive && client::GetWindowCenterX && client::GetWindowCenterY)
 	{
-		SetCursorPos(gEngfuncs.GetWindowCenterX(), gEngfuncs.GetWindowCenterY());
+		SetCursorPos(client::GetWindowCenterX(), client::GetWindowCenterY());
 
-		const Point center{gEngfuncs.GetWindowCenterX(), gEngfuncs.GetWindowCenterY()};
+		const Point center{client::GetWindowCenterX(), client::GetWindowCenterY()};
 		old_mouse_pos = center;
 	}
 #endif
@@ -212,7 +211,7 @@ void Mouse_Deactivate()
 
 static void Mouse_Startup()
 {
-	if (0 != gEngfuncs.CheckParm("-nomouse", NULL))
+	if (0 != client::CheckParm("-nomouse", nullptr))
 		return;
 
 	g_iVisibleMouse = true;
@@ -222,16 +221,16 @@ static void Mouse_Startup()
 
 	if (mouseparmsvalid)
 	{
-		if (0 != gEngfuncs.CheckParm("-noforcemspd", NULL))
+		if (0 != client::CheckParm("-noforcemspd", nullptr))
 			newmouseparms[2] = originalmouseparms[2];
 
-		if (0 != gEngfuncs.CheckParm("-noforcemaccel", NULL))
+		if (0 != client::CheckParm("-noforcemaccel", nullptr))
 		{
 			newmouseparms[0] = originalmouseparms[0];
 			newmouseparms[1] = originalmouseparms[1];
 		}
 
-		if (0 != gEngfuncs.CheckParm("-noforcemparms", NULL))
+		if (0 != client::CheckParm("-noforcemparms", nullptr))
 		{
 			newmouseparms[0] = originalmouseparms[0];
 			newmouseparms[1] = originalmouseparms[1];
@@ -278,13 +277,13 @@ void Mouse_Event(int mstate)
 		if ((mstate & (1 << i)) != 0 &&
 			(mouse_oldbuttonstate & (1 << i)) == 0)
 		{
-			gEngfuncs.Key_Event(K_MOUSE1 + i, 1);
+			client::Key_Event(K_MOUSE1 + i, 1);
 		}
 
 		if ((mstate & (1 << i)) == 0 &&
 			(mouse_oldbuttonstate & (1 << i)) != 0)
 		{
-			gEngfuncs.Key_Event(K_MOUSE1 + i, 0);
+			client::Key_Event(K_MOUSE1 + i, 0);
 		}
 	}
 
@@ -309,7 +308,7 @@ static void Mouse_MoveInternal(float frametime, usercmd_t* cmd)
 	Point pos;
 	Vector viewangles;
 
-	gEngfuncs.GetViewAngles((float*)viewangles);
+	client::GetViewAngles(viewangles);
 
 	//jjb - this disbles normal mouse control if the user is trying to
 	//      move the camera, or if the mouse cursor is visible or if we're in intermission
@@ -345,8 +344,8 @@ static void Mouse_MoveInternal(float frametime, usercmd_t* cmd)
 
 			if (!m_bMouseThread)
 			{
-				pos.x = pos.x - gEngfuncs.GetWindowCenterX() + mx_accum;
-				pos.y = pos.y - gEngfuncs.GetWindowCenterY() + my_accum;
+				pos.x = pos.x - client::GetWindowCenterX() + mx_accum;
+				pos.y = pos.y - client::GetWindowCenterY() + my_accum;
 			}
 		}
 		else
@@ -388,7 +387,7 @@ static void Mouse_MoveInternal(float frametime, usercmd_t* cmd)
 		}
 	}
 
-	gEngfuncs.SetViewAngles((float*)viewangles);
+	client::SetViewAngles(viewangles);
 
 #ifdef WIN32
 	if ((!Mouse_UseRawInput() && SDL_FALSE != mouseRelative) || g_iVisibleMouse)
@@ -418,8 +417,8 @@ void Mouse_Accumulate()
 					const auto pos = GetMousePosition();
 					current_pos = pos;
 
-					mx_accum += pos.x - gEngfuncs.GetWindowCenterX();
-					my_accum += pos.y - gEngfuncs.GetWindowCenterY();
+					mx_accum += pos.x - client::GetWindowCenterX();
+					my_accum += pos.y - client::GetWindowCenterY();
 				}
 			}
 			else
@@ -472,12 +471,12 @@ void Mouse_Move(float frametime, usercmd_t* cmd)
 				{
 					if ((mouse_oldbuttonstate & (1 << i)) != 0)
 					{
-						gEngfuncs.Key_Event(K_MOUSE1 + i, 0);
+						client::Key_Event(K_MOUSE1 + i, 0);
 					}
 				}
-				gEngfuncs.pfnSetMousePos(
-					gEngfuncs.GetWindowCenterX(),
-					gEngfuncs.GetWindowCenterY());
+				client::SetMousePos(
+					client::GetWindowCenterX(),
+					client::GetWindowCenterY());
 			}
 		}
 		if (!iMouseInUse)
@@ -490,15 +489,15 @@ void Mouse_Move(float frametime, usercmd_t* cmd)
 
 void Mouse_Init()
 {
-	m_filter = gEngfuncs.pfnRegisterVariable("m_filter", "0", FCVAR_ARCHIVE);
-	m_pitch = gEngfuncs.pfnRegisterVariable("m_pitch", "0.022", FCVAR_ARCHIVE);
-	m_yaw = gEngfuncs.pfnRegisterVariable("m_yaw", "0.022", FCVAR_ARCHIVE);
-	sensitivity = gEngfuncs.pfnRegisterVariable("sensitivity", "3", FCVAR_ARCHIVE);
+	m_filter = client::RegisterVariable("m_filter", "0", FCVAR_ARCHIVE);
+	m_pitch = client::RegisterVariable("m_pitch", "0.022", FCVAR_ARCHIVE);
+	m_yaw = client::RegisterVariable("m_yaw", "0.022", FCVAR_ARCHIVE);
+	sensitivity = client::RegisterVariable("sensitivity", "3", FCVAR_ARCHIVE);
 
 #ifdef WIN32
-	m_rawinput = gEngfuncs.pfnGetCvarPointer("m_rawinput");
-	m_bMouseThread = gEngfuncs.CheckParm("-mousethread", NULL) != NULL;
-	m_mousethread_sleep = gEngfuncs.pfnRegisterVariable("m_mousethread_sleep", "10", FCVAR_ARCHIVE);
+	m_rawinput = client::GetCvarPointer("m_rawinput");
+	m_bMouseThread = client::CheckParm("-mousethread", nullptr) != nullptr;
+	m_mousethread_sleep = client::RegisterVariable("m_mousethread_sleep", "10", FCVAR_ARCHIVE);
 
 	if (!Mouse_UseRawInput() && m_bMouseThread && m_mousethread_sleep)
 	{

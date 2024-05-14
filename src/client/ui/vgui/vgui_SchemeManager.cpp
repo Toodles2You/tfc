@@ -28,7 +28,7 @@ cvar_t* g_CV_BitmapFonts;
 
 void Scheme_Init()
 {
-	g_CV_BitmapFonts = gEngfuncs.pfnRegisterVariable("bitmapfonts", "1", 0);
+	g_CV_BitmapFonts = client::RegisterVariable("bitmapfonts", "1", 0);
 }
 
 
@@ -78,7 +78,7 @@ CSchemeManager::CScheme::CScheme()
 	fontName[0] = 0;
 	fontSize = 0;
 	fontWeight = 0;
-	font = NULL;
+	font = nullptr;
 	ownFontPointer = false;
 }
 
@@ -117,24 +117,24 @@ static byte* LoadFileByResolution(const char* filePrefix, int xRes, const char* 
 		resNum--;
 
 		if (resNum < 0)
-			return NULL;
+			return nullptr;
 	}
 
 	// try open the file
-	byte* pFile = NULL;
+	byte* pFile = nullptr;
 	while (true)
 	{
 
 		// try load
 		char fname[256];
 		sprintf(fname, "%s%d%s", filePrefix, g_ResArray[resNum], filePostfix);
-		pFile = gEngfuncs.COM_LoadFile(fname, 5, NULL);
+		pFile = client::COM_LoadFile(fname, 5, nullptr);
 
 		if (pFile)
 			break;
 
 		if (resNum == 0)
-			return NULL;
+			return nullptr;
 
 		resNum--;
 	}
@@ -171,7 +171,7 @@ static void ParseRGBAFromString(byte colorArray[4], const char* colorVector)
 CSchemeManager::CSchemeManager(int xRes, int yRes)
 {
 	// basic setup
-	m_pSchemeList = NULL;
+	m_pSchemeList = nullptr;
 	m_iNumSchemes = 0;
 
 	// find the closest matching scheme file to our resolution
@@ -197,18 +197,18 @@ CSchemeManager::CSchemeManager(int xRes, int yRes)
 	static CScheme tmpSchemes[numTmpSchemes];
 	memset(tmpSchemes, 0, sizeof(tmpSchemes));
 	int currentScheme = -1;
-	CScheme* pScheme = NULL;
+	CScheme* pScheme = nullptr;
 
 	if (!pFile)
 	{
-		gEngfuncs.Con_DPrintf("Unable to find *_textscheme.txt\n");
+		client::Con_DPrintf("Unable to find *_textscheme.txt\n");
 		goto buildDefaultFont;
 	}
 
 	// record what has been entered so we can create defaults from the different values
 	bool hasFgColor, hasBgColor, hasArmedFgColor, hasArmedBgColor, hasMouseDownFgColor, hasMouseDownBgColor;
 
-	pFile = gEngfuncs.COM_ParseFile(pFile, token);
+	pFile = client::COM_ParseFile(pFile, token);
 	while (strlen(token) > 0 && (currentScheme < numTmpSchemes))
 	{
 		// get the paramName name
@@ -219,22 +219,22 @@ CSchemeManager::CSchemeManager(int xRes, int yRes)
 		paramName[tokenSize - 1] = 0; // ensure null termination
 
 		// get the '=' character
-		pFile = gEngfuncs.COM_ParseFile(pFile, token);
+		pFile = client::COM_ParseFile(pFile, token);
 		if (stricmp(token, "="))
 		{
 			if (currentScheme < 0)
 			{
-				gEngfuncs.Con_Printf("error parsing font scheme text file at file start - expected '=', found '%s''\n", token);
+				client::Con_Printf("error parsing font scheme text file at file start - expected '=', found '%s''\n", token);
 			}
 			else
 			{
-				gEngfuncs.Con_Printf("error parsing font scheme text file at scheme '%s' - expected '=', found '%s''\n", tmpSchemes[currentScheme].schemeName, token);
+				client::Con_Printf("error parsing font scheme text file at scheme '%s' - expected '=', found '%s''\n", tmpSchemes[currentScheme].schemeName, token);
 			}
 			break;
 		}
 
 		// get paramValue
-		pFile = gEngfuncs.COM_ParseFile(pFile, token);
+		pFile = client::COM_ParseFile(pFile, token);
 		strncpy(paramValue, token, tokenSize);
 		paramValue[tokenSize - 1] = 0; // ensure null termination
 
@@ -294,7 +294,7 @@ CSchemeManager::CSchemeManager(int xRes, int yRes)
 
 		if (!pScheme)
 		{
-			gEngfuncs.Con_Printf("font scheme text file MUST start with a 'SchemeName'\n");
+			client::Con_Printf("font scheme text file MUST start with a 'SchemeName'\n");
 			break;
 		}
 
@@ -349,11 +349,11 @@ CSchemeManager::CSchemeManager(int xRes, int yRes)
 		}
 
 		// get the new token last, so we now if the loop needs to be continued or not
-		pFile = gEngfuncs.COM_ParseFile(pFile, token);
+		pFile = client::COM_ParseFile(pFile, token);
 	}
 
 	// free the file
-	gEngfuncs.COM_FreeFile(pFileStart);
+	client::COM_FreeFile(pFileStart);
 
 
 buildDefaultFont:
@@ -381,7 +381,7 @@ buildDefaultFont:
 	// create the fonts
 	for (int i = 0; i < m_iNumSchemes; i++)
 	{
-		m_pSchemeList[i].font = NULL;
+		m_pSchemeList[i].font = nullptr;
 
 		// see if the current font values exist in a previously loaded font
 		for (int j = 0; j < i; j++)
@@ -399,7 +399,7 @@ buildDefaultFont:
 		if (!m_pSchemeList[i].font)
 		{
 			fontFileLength = -1;
-			pFontData = NULL;
+			pFontData = nullptr;
 
 			if (g_CV_BitmapFonts && 0 != g_CV_BitmapFonts->value)
 			{
@@ -416,9 +416,9 @@ buildDefaultFont:
 					fontRes = 800;
 
 				sprintf(fontFilename, "gfx\\vgui\\fonts\\%d_%s.tga", fontRes, m_pSchemeList[i].schemeName);
-				pFontData = gEngfuncs.COM_LoadFile(fontFilename, 5, &fontFileLength);
+				pFontData = client::COM_LoadFile(fontFilename, 5, &fontFileLength);
 				if (!pFontData)
-					gEngfuncs.Con_Printf("Missing bitmap font: %s\n", fontFilename);
+					client::Con_Printf("Missing bitmap font: %s\n", fontFilename);
 			}
 
 			m_pSchemeList[i].font = new vgui::Font(

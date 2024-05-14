@@ -15,11 +15,14 @@
 
 #pragma once
 
+enum
+{
 // Event was invoked with stated origin
-#define FEVENT_ORIGIN (1 << 0)
+	FEVENT_ORIGIN = 1 << 0,
 
 // Event was invoked with stated angles
-#define FEVENT_ANGLES (1 << 1)
+	FEVENT_ANGLES = 1 << 1,
+};
 
 typedef struct event_args_s
 {
@@ -28,9 +31,9 @@ typedef struct event_args_s
 	// Transmitted
 	int entindex;
 
-	float origin[3];
-	float angles[3];
-	float velocity[3];
+	Vector origin;
+	Vector angles;
+	Vector velocity;
 
 	int ducking;
 

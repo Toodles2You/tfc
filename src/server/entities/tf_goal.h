@@ -17,7 +17,7 @@ class CTFGoal : public CBaseToggle
 public:
     friend class CBasePlayer;
 
-    CTFGoal();
+    CTFGoal(Entity* containingEntity);
 
     virtual bool KeyValue(KeyValueData* pkvd) override;
     virtual void Precache() override;
@@ -88,7 +88,7 @@ protected:
 class CTFGoalTimer : public CTFGoal
 {
 public:
-    CTFGoalTimer();
+    CTFGoalTimer(Entity* containingEntity);
 
     virtual bool Spawn() override;
     virtual TFGoalClass Classify() override { return CLASS_TFGOAL_TIMER; }
@@ -103,7 +103,7 @@ public:
 class CTFGoalItem : public CTFGoal
 {
 public:
-    CTFGoalItem();
+    CTFGoalItem(Entity* containingEntity);
 
     virtual bool Spawn() override;
     virtual TFGoalClass Classify() override { return CLASS_TFGOAL_ITEM; }
@@ -129,7 +129,7 @@ protected:
 class CTFSpawn : public CTFGoal
 {
 public:
-    CTFSpawn();
+    CTFSpawn(Entity* containingEntity);
 
     virtual bool Spawn() override;
     virtual TFGoalClass Classify() override { return CLASS_TFSPAWN; }
@@ -140,7 +140,7 @@ public:
 class CTFDetect : public CBaseEntity
 {
 public:
-    CTFDetect();
+    CTFDetect(Entity* containingEntity);
 
     virtual bool KeyValue(KeyValueData* pkvd) override;
     virtual bool Spawn() override;
@@ -152,7 +152,7 @@ protected:
 class CTFTeamCheck : public CBaseToggle
 {
 public:
-    CTFTeamCheck();
+    CTFTeamCheck(Entity* containingEntity);
 
     bool Spawn() override;
 };
@@ -160,7 +160,7 @@ public:
 class CTFTeamSet : public CBaseToggle
 {
 public:
-    CTFTeamSet();
+    CTFTeamSet(Entity* containingEntity);
 
     bool Spawn() override;
     void EXPORT TeamSetUse(CBaseEntity* activator, CBaseEntity* caller, USE_TYPE use_type, float value);

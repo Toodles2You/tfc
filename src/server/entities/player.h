@@ -51,6 +51,9 @@ class CTeam;
 class CBasePlayer : public CBaseAnimating
 {
 public:
+	CBasePlayer(Entity* containingEntity);
+	~CBasePlayer();
+
 	enum class State
 	{
 	#ifdef HALFLIFE_GRENADES
@@ -73,7 +76,7 @@ public:
 	EHANDLE m_hObserverTarget;
 	float m_flNextObserverInput;
 	int m_iObserverLastMode; // last used observer mode
-	bool IsObserver() { return pev->iuser1 != OBS_NONE; }
+	bool IsObserver() { return v.iuser1 != OBS_NONE; }
 	bool IsSpectator() { return TeamNumber() == TEAM_SPECTATORS; }
 
 	unsigned int m_randomSeed; // See that is shared between client & server for shared weapons code
@@ -111,7 +114,7 @@ public:
 #endif
 
 #ifdef HALFLIFE_TANKCONTROL
-	EHANDLE m_pTank;		 // the tank which the player is currently controlling,  NULL if no tank
+	EHANDLE m_pTank;		 // the tank which the player is currently controlling,  nullptr if no tank
 #endif
 
 	float m_fDeadTime;		 // the time at which the player died  (used in PlayerDeathFrame())
@@ -150,7 +153,7 @@ public:
 
 	virtual void PreThink();
 	virtual void PostThink();
-	inline Vector GetGunPosition() { return pev->origin + pev->view_ofs; }
+	inline Vector GetGunPosition() { return v.origin + v.view_ofs; }
 	bool GiveHealth(float flHealth, int bitsDamageType, bool bClearEffects = true) override;
 	void TraceAttack(CBaseEntity* attacker, float flDamage, Vector vecDir, int hitgroup, int bitsDamageType) override;
 	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
@@ -162,13 +165,13 @@ protected:
 
 public:
 	void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType) override;
-	Vector BodyTarget() override { return Center() + pev->view_ofs * 0.8; } // position to shoot at
-	bool IsAlive() override { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
+	Vector BodyTarget() override { return Center() + v.view_ofs * 0.8; } // position to shoot at
+	bool IsAlive() override { return (v.deadflag == DEAD_NO) && v.health > 0; }
 
 	bool IsClient() override { return true; }
 
 	// Spectators should return false for this, they aren't "players" as far as game logic is concerned
-	bool IsPlayer() override { return (pev->effects & EF_NODRAW) == 0 && !IsSpectator() && !IsObserver(); }
+	bool IsPlayer() override { return (v.effects & EF_NODRAW) == 0 && !IsSpectator() && !IsObserver(); }
 
 	bool IsNetClient() override { return true; } // Bots should return false for this, they can't receive NET messages
 												 // Spectators should return true for this
@@ -192,7 +195,10 @@ public:
 #endif
 
 	// Player is moved across the transition by other means
-	int ObjectCaps() override { return (CBaseAnimating::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_NET_ALWAYS_SEND; }
+	int ObjectCaps() override
+	{
+		return (CBaseAnimating::ObjectCaps() & ~FCAP_ACROSS_TRANSITION);
+	}
 	void Precache() override;
 
 	void DeathSound(const int damageType);

@@ -73,7 +73,7 @@ char* CHudTextMessage::LocaliseTextString(const char* msg, char* dst_buffer, int
 
 				if (count < nameLength)
 				{
-					gEngfuncs.Con_DPrintf(
+					client::Con_DPrintf(
 						"CHudTextMessage::LocaliseTextString: Token name starting at index %d too long in message \"%s\"\n",
 						static_cast<int>(src - msg), msg);
 				}

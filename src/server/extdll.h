@@ -29,10 +29,11 @@
 // Shared engine/DLL constants
 #include "const.h"
 #include "progdefs.h"
-#include "edict.h"
 
 // Shared header describing protocol between engine and DLLs
 #include "eiface.h"
+
+#include "edict.h"
 
 // Shared header between the client DLL and the game DLLs
 #include "cdll_dll.h"

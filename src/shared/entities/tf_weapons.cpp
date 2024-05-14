@@ -27,21 +27,21 @@ void CTFWeapon::Precache()
 #ifdef GAME_DLL
 	if (info.pszAttackSound != nullptr)
 	{
-		g_engfuncs.pfnPrecacheSound(info.pszAttackSound);
+		engine::PrecacheSound(info.pszAttackSound);
 	}
 	if (info.pszAlternateSound != nullptr)
 	{
-		g_engfuncs.pfnPrecacheSound(info.pszAlternateSound);
+		engine::PrecacheSound(info.pszAlternateSound);
 	}
 	if (info.pszReloadSound != nullptr)
 	{
-		g_engfuncs.pfnPrecacheSound(info.pszReloadSound);
+		engine::PrecacheSound(info.pszReloadSound);
 	}
 #endif
 
 	if (info.pszEvent != nullptr)
 	{
-		m_usPrimaryAttack = g_engfuncs.pfnPrecacheEvent(1, info.pszEvent);
+		m_usPrimaryAttack = engine::PrecacheEvent(1, info.pszEvent);
 	}
 }
 
@@ -142,7 +142,7 @@ void CTFWeapon::PrimaryAttack()
 	{
 		case kProjRocket:
 		{
-			const auto aim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
+			const auto aim = m_pPlayer->v.v_angle + m_pPlayer->v.punchangle;
 			util::MakeVectors(aim);
 
 			int rightOffset = 8;
@@ -153,8 +153,8 @@ void CTFWeapon::PrimaryAttack()
 			}
 
 			const auto gun =
-				m_pPlayer->pev->origin
-					+ m_pPlayer->pev->view_ofs
+				m_pPlayer->v.origin
+					+ m_pPlayer->v.view_ofs
 					+ gpGlobals->v_forward * 16
 					+ gpGlobals->v_right * rightOffset
 					+ gpGlobals->v_up * -8;
@@ -170,7 +170,7 @@ void CTFWeapon::PrimaryAttack()
 		}
 		case kProjNail:
 		{
-			const auto aim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
+			const auto aim = m_pPlayer->v.v_angle + m_pPlayer->v.punchangle;
 			util::MakeVectors(aim);
 
 			int rightOffset = 4;
@@ -181,8 +181,8 @@ void CTFWeapon::PrimaryAttack()
 			}
 
 			const auto gun =
-				m_pPlayer->pev->origin
-					+ m_pPlayer->pev->view_ofs
+				m_pPlayer->v.origin
+					+ m_pPlayer->v.view_ofs
 					+ gpGlobals->v_right * rightOffset
 					+ gpGlobals->v_up * -4;
 
@@ -192,7 +192,7 @@ void CTFWeapon::PrimaryAttack()
 		case kProjPipeBomb:
 		case kProjPipeBombRemote:
 		{
-			const auto aim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
+			const auto aim = m_pPlayer->v.v_angle + m_pPlayer->v.punchangle;
 			util::MakeVectors(aim);
 
 			int rightOffset = 8;
@@ -203,8 +203,8 @@ void CTFWeapon::PrimaryAttack()
 			}
 
 			const auto gun =
-				m_pPlayer->pev->origin
-					+ m_pPlayer->pev->view_ofs
+				m_pPlayer->v.origin
+					+ m_pPlayer->v.view_ofs
 					+ gpGlobals->v_right * rightOffset
 					+ gpGlobals->v_up * -16;
 
@@ -238,7 +238,7 @@ void CTFWeapon::PrimaryAttack()
 	}
 #endif
 
-	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), m_pPlayer->pev->view_ofs.z, m_pPlayer->m_randomSeed, rounds);
+	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), m_pPlayer->v.view_ofs.z, m_pPlayer->m_randomSeed, rounds);
 
 	m_iWeaponState &= ~kWpnStateIdle;
 }
@@ -271,7 +271,7 @@ void CTFWeapon::WeaponPostFrame()
 				m_iClip = std::min(m_iClip + iShots, info.iMaxClip);
 			}
 		}
-		if ((m_pPlayer->pev->button & IN_ATTACK) != 0 && m_iClip >= info.iShots)
+		if ((m_pPlayer->v.button & IN_ATTACK) != 0 && m_iClip >= info.iShots)
 		{
 			m_fInReload = false;
 			m_iNextPrimaryAttack = 0;
@@ -304,7 +304,7 @@ void CTFWeapon::WeaponPostFrame()
 	}
 	else if (m_iNextPrimaryAttack <= 0)
 	{
-		if ((m_pPlayer->pev->button & IN_ATTACK) != 0)
+		if ((m_pPlayer->v.button & IN_ATTACK) != 0)
 		{
 			if (info.iMaxClip > 0)
 			{

@@ -19,6 +19,7 @@ public:
 class CWeaponBox : public CBaseEntity
 {
 public:
+	CWeaponBox(Entity* containingEntity) : CBaseEntity(containingEntity) {}
 	~CWeaponBox() override;
 
 	DECLARE_SAVERESTORE()

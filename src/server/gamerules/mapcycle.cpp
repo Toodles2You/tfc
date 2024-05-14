@@ -60,8 +60,8 @@ static void DestroyMapCycle(mapcycle_t* cycle)
 
 		delete cycle->items;
 	}
-	cycle->items = NULL;
-	cycle->next_item = NULL;
+	cycle->items = nullptr;
+	cycle->next_item = nullptr;
 }
 
 static char com_token[1500];
@@ -82,14 +82,14 @@ static char* COM_Parse(char* data)
 	com_token[0] = 0;
 
 	if (!data)
-		return NULL;
+		return nullptr;
 
 // skip whitespace
 skipwhite:
 	while ((c = *data) <= ' ')
 	{
 		if (c == 0)
-			return NULL; // end of file;
+			return nullptr; // end of file;
 		data++;
 	}
 
@@ -182,9 +182,9 @@ static bool ReloadMapCycleFile(char* filename, mapcycle_t* cycle)
 	char szMap[32];
 	int length;
 	char* pFileList;
-	char* aFileList = pFileList = (char*)LOAD_FILE_FOR_ME(filename, &length);
+	char* aFileList = pFileList = (char*)engine::LoadFileForMe(filename, &length);
 	bool hasbuffer;
-	mapcycle_item_s *item, *newlist = NULL, *next;
+	mapcycle_item_s *item, *newlist = nullptr, *next;
 
 	if (pFileList && 0 != length)
 	{
@@ -212,7 +212,7 @@ static bool ReloadMapCycleFile(char* filename, mapcycle_t* cycle)
 			}
 
 			// Check map
-			if (IS_MAP_VALID(szMap))
+			if (engine::IsMapValid(szMap))
 			{
 				// Create entry
 				char* s;
@@ -228,14 +228,14 @@ static bool ReloadMapCycleFile(char* filename, mapcycle_t* cycle)
 
 				if (hasbuffer)
 				{
-					s = g_engfuncs.pfnInfoKeyValue(szBuffer, "minplayers");
+					s = engine::InfoKeyValue(szBuffer, "minplayers");
 					if (s && '\0' != s[0])
 					{
 						item->minplayers = atoi(s);
 						item->minplayers = std::max(item->minplayers, 0);
 						item->minplayers = std::min(item->minplayers, gpGlobals->maxClients);
 					}
-					s = g_engfuncs.pfnInfoKeyValue(szBuffer, "maxplayers");
+					s = engine::InfoKeyValue(szBuffer, "maxplayers");
 					if (s && '\0' != s[0])
 					{
 						item->maxplayers = atoi(s);
@@ -245,8 +245,8 @@ static bool ReloadMapCycleFile(char* filename, mapcycle_t* cycle)
 
 					// Remove keys
 					//
-					g_engfuncs.pfnInfo_RemoveKey(szBuffer, "minplayers");
-					g_engfuncs.pfnInfo_RemoveKey(szBuffer, "maxplayers");
+					engine::Info_RemoveKey(szBuffer, "minplayers");
+					engine::Info_RemoveKey(szBuffer, "maxplayers");
 
 					strcpy(item->rulebuffer, szBuffer);
 				}
@@ -256,11 +256,11 @@ static bool ReloadMapCycleFile(char* filename, mapcycle_t* cycle)
 			}
 			else
 			{
-				ALERT(at_console, "Skipping %s from mapcycle, not a valid map\n", szMap);
+				engine::AlertMessage(at_console, "Skipping %s from mapcycle, not a valid map\n", szMap);
 			}
 		}
 
-		FREE_FILE(aFileList);
+		engine::FreeFile(aFileList);
 	}
 
 	// Fixup circular list pointer
@@ -375,7 +375,7 @@ static void ExtractCommandString(char* s, char* szCommand)
 
 static bool CheckMapCycle()
 {
-	char* mapcfile = (char*)CVAR_GET_STRING("mapcyclefile");
+	char* mapcfile = (char*)engine::CVarGetString("mapcyclefile");
 
 	// Has the map cycle filename changed?
 	if (stricmp(mapcfile, szPreviousMapCycleFile))
@@ -386,7 +386,7 @@ static bool CheckMapCycle()
 
 		if (!ReloadMapCycleFile(mapcfile, &mapcycle) || (!mapcycle.items))
 		{
-			ALERT(at_console, "Unable to load map cycle file %s\n", mapcfile);
+			engine::AlertMessage(at_console, "Unable to load map cycle file %s\n", mapcfile);
 			return false;
 		}
 	}
@@ -410,13 +410,13 @@ void CHalfLifeMultiplay::ChangeLevel()
 	int minplayers = 0, maxplayers = 0;
 	strcpy(szFirstMapInList, "crossfire"); // the absolute default level is purgatory
 
-	if (nextlevel.length() != 0 && g_engfuncs.pfnIsMapValid(nextlevel.c_str()) != 0)
+	if (nextlevel.length() != 0 && engine::IsMapValid(nextlevel.c_str()) != 0)
 	{
 		EnterState(GR_STATE_GAME_OVER);
 
-		ALERT(at_console, "CHANGE LEVEL: %s\n", nextlevel.c_str());
+		engine::AlertMessage(at_console, "CHANGE LEVEL: %s\n", nextlevel.c_str());
 
-		g_engfuncs.pfnChangeLevel(nextlevel.c_str(), nullptr);
+		engine::ChangeLevel(nextlevel.c_str(), nullptr);
 		nextlevel.clear();
 		return;
 	}
@@ -493,27 +493,27 @@ void CHalfLifeMultiplay::ChangeLevel()
 		strcpy(szRules, item->rulebuffer);
 	}
 
-	if (!IS_MAP_VALID(szNextMap))
+	if (!engine::IsMapValid(szNextMap))
 	{
 		strcpy(szNextMap, szFirstMapInList);
 	}
 
 	EnterState(GR_STATE_GAME_OVER);
 
-	ALERT(at_console, "CHANGE LEVEL: %s\n", szNextMap);
+	engine::AlertMessage(at_console, "CHANGE LEVEL: %s\n", szNextMap);
 	if (0 != minplayers || 0 != maxplayers)
 	{
-		ALERT(at_console, "PLAYER COUNT:  min %i max %i current %i\n", minplayers, maxplayers, curplayers);
+		engine::AlertMessage(at_console, "PLAYER COUNT:  min %i max %i current %i\n", minplayers, maxplayers, curplayers);
 	}
 	if (strlen(szRules) > 0)
 	{
-		ALERT(at_console, "RULES:  %s\n", szRules);
+		engine::AlertMessage(at_console, "RULES:  %s\n", szRules);
 	}
 
-	CHANGE_LEVEL(szNextMap, NULL);
+	engine::ChangeLevel(szNextMap, nullptr);
 	if (strlen(szCommands) > 0)
 	{
-		SERVER_COMMAND(szCommands);
+		engine::ServerCommand(szCommands);
 	}
 }
 

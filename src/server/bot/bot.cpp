@@ -24,10 +24,10 @@ float g_flBotFullThinkInterval	= 1.0 / 10.0;	// full AI only 10 times per second
 
 
 //--------------------------------------------------------------------------------------------------------------
-CBot::CBot( void )
+CBot::CBot( Entity* containingEntity ) : CBasePlayer(containingEntity)
 {
 	// the profile will be attached after this instance is constructed
-	m_profile = NULL;
+	m_profile = nullptr;
 
 	// assign this bot a unique ID
 	static unsigned int nextID = 1;
@@ -62,11 +62,11 @@ bool CBot::Spawn( void )
 	}
 
 	// Make sure everyone knows we are a bot
-	pev->flags |= ( FL_CLIENT | FL_FAKECLIENT );
+	v.flags |= ( FL_CLIENT | FL_FAKECLIENT );
 
 	// Bots use their own thinking mechanism
-	SetThink( NULL );
-	pev->nextthink = -1;
+	ClearThink();
+	v.nextthink = -1;
 
 	m_flNextBotThink		= gpGlobals->time + g_flBotCommandInterval;
 	m_flNextFullBotThink	= gpGlobals->time + g_flBotFullThinkInterval;
@@ -91,7 +91,7 @@ bool CBot::Spawn( void )
 //--------------------------------------------------------------------------------------------------------------
 Vector CBot::GetAimVector( void )
 {
-	util::MakeVectors( pev->v_angle + pev->punchangle );
+	util::MakeVectors( v.v_angle + v.punchangle );
 
 	return gpGlobals->v_forward;
 }
@@ -208,7 +208,7 @@ bool CBot::IsJumping( void )
 		return true;
 
 	// a little after our jump, we're jumping until we hit the ground
-	if (FBitSet( pev->flags, FL_ONGROUND ))
+	if (FBitSet( v.flags, FL_ONGROUND ))
 		return false;
 
 	return true;
@@ -312,7 +312,7 @@ bool CBot::IsActiveWeaponOutOfAmmo( void ) const
 {
 	CBasePlayerWeapon *gun = GetActiveWeapon();
 
-	if (gun == NULL)
+	if (gun == nullptr)
 		return true;
 
 	if (gun->m_iClip < 0)
@@ -347,9 +347,9 @@ void CBot::ExecuteCommand( void )
 	adjustedMSec = ThrottledMsec();
 
 	// player model is "munged"
-	pev->angles = pev->v_angle;
+	v.angles = v.v_angle;
 
-	float pitch = pev->angles.x;
+	float pitch = v.angles.x;
 
 	// Normalize angles
 	if (pitch > 180)
@@ -360,7 +360,7 @@ void CBot::ExecuteCommand( void )
 	// Player pitch is inverted
 	pitch /= -3.0;
 
-	pev->angles.x = pitch;
+	v.angles.x = pitch;
 
 	// save the command time
 	m_flPreviousCommandTime = gpGlobals->time;
@@ -369,7 +369,7 @@ void CBot::ExecuteCommand( void )
 		SetBits( m_buttonFlags, IN_DUCK );
 
 	// Run the command
-	(*g_engfuncs.pfnRunPlayerMove)( edict(), pev->v_angle, m_forwardSpeed, m_strafeSpeed, m_verticalSpeed, 
+	engine::RunPlayerMove( &v, v.v_angle, m_forwardSpeed, m_strafeSpeed, m_verticalSpeed, 
 																	m_buttonFlags, 0, adjustedMSec );
 }
 
@@ -400,7 +400,7 @@ byte CBot::ThrottledMsec( void ) const
 //--------------------------------------------------------------------------------------------------------------
 
 // Nasty Hack.  See client.cpp/ClientCommand()
-const char *BotArgs[4] = { NULL };
+const char *BotArgs[4] = { nullptr };
 bool UseBotArgs = false;
 
 /**
@@ -414,7 +414,7 @@ void CBot::ClientCommand( const char *cmd, const char *arg1, const char *arg2, c
 	BotArgs[3] = arg3;
 
 	UseBotArgs = true;
-	::ClientCommand( ENT( pev ) );
+	::ClientCommand( &v );
 	UseBotArgs = false;
 }
 
@@ -456,13 +456,10 @@ int CBot::GetEnemiesRemaining( void ) const
 	{
 		CBaseEntity *player = util::PlayerByIndex( i );
 
-		if (player == NULL)
+		if (player == nullptr)
 			continue;
 
-		if (FNullEnt( player->pev ))
-			continue;
-
-		if (FStrEq( STRING( player->pev->netname ), "" ))
+		if (STRING(player->v.netname)[0] == '\0')
 			continue;
 
 		if (!IsEnemy( player ))
@@ -489,13 +486,10 @@ int CBot::GetFriendsRemaining( void ) const
 	{
 		CBaseEntity *player = util::PlayerByIndex( i );
 
-		if (player == NULL)
+		if (player == nullptr)
 			continue;
 
-		if (FNullEnt( player->pev ))
-			continue;
-
-		if (FStrEq( STRING( player->pev->netname ), "" ))
+		if (STRING(player->v.netname)[0] == '\0')
 			continue;
 
 		if (IsEnemy( player ))
@@ -520,20 +514,22 @@ int CBot::GetFriendsRemaining( void ) const
 bool CBot::IsLocalPlayerWatchingMe( void ) const
 {
 	// avoid crash during spawn
-	if (pev == NULL)
+#if 0
+	if (&v == nullptr)
 		return false;
+#endif
 
-	int myIndex = const_cast<CBot *>(this)->entindex();
+	int myIndex = const_cast<CBot *>(this)->v.GetIndex();
 
 	CBasePlayer *player = static_cast<CBasePlayer *>(util::GetLocalPlayer());
-	if (player == NULL)
+	if (player == nullptr)
 		return false;
 
 	if (player->IsObserver())
 	{
-		if (player->pev->iuser2 == myIndex)
+		if (player->v.iuser2 == myIndex)
 		{
-			switch( player->pev->iuser1 )
+			switch( player->v.iuser1 )
 			{
 				case OBS_CHASE_FREE:
 					return true;
@@ -554,14 +550,14 @@ void CBot::Print( char *format, ... ) const
 	char buffer[1024];
 
 	// prefix the message with the bot's name
-	sprintf( buffer, "%s: ", STRING(pev->netname) );
-	(*g_engfuncs.pfnServerPrint)( buffer );
+	sprintf( buffer, "%s: ", STRING(v.netname) );
+	engine::ServerPrint( buffer );
 
 	va_start( varg, format );
 	vsprintf( buffer, format, varg );
 	va_end( varg );
 
-	(*g_engfuncs.pfnServerPrint)( buffer );
+	engine::ServerPrint( buffer );
 }
 
 
@@ -580,20 +576,22 @@ void CBot::PrintIfWatched( char *format, ... ) const
 		va_list varg;
 		char buffer[1024];
 
-		// prefix the message with the bot's name (this can be NULL if bot was just added)
+		// prefix the message with the bot's name (this can be nullptr if bot was just added)
 		const char *name;
-		if (pev == NULL)
-			name = "(NULL pev)";
+#if 0
+		if (&v == nullptr)
+			name = "(nullptr &v)";
 		else
-			name = STRING(pev->netname);
+#endif
+			name = STRING(v.netname);
 		sprintf( buffer, "%s: ", (name) ? name : "(NULL netname)" );
-		(*g_engfuncs.pfnServerPrint)( buffer );
+		engine::ServerPrint( buffer );
 
 		va_start( varg, format );
 		vsprintf( buffer, format, varg );
 		va_end( varg );
 
-		(*g_engfuncs.pfnServerPrint)( buffer );
+		engine::ServerPrint( buffer );
 	}
 }
 
@@ -604,7 +602,7 @@ ActiveGrenade::ActiveGrenade( int weaponID, CGrenade *grenadeEntity )
 {
 	m_id = weaponID;
 	m_entity = grenadeEntity;
-	m_detonationPosition = grenadeEntity->pev->origin;
+	m_detonationPosition = grenadeEntity->v.origin;
 	m_dieTimestamp = 0.0f;
 }
 
@@ -619,7 +617,7 @@ void ActiveGrenade::OnEntityGone( void )									///< called when the grenade in
 		m_dieTimestamp = gpGlobals->time + smokeLingerTime;
 	}
 #endif
-	m_entity = NULL;
+	m_entity = nullptr;
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -637,6 +635,6 @@ bool ActiveGrenade::IsValid( void ) const							///< return true if this grenade
 //--------------------------------------------------------------------------------------------------------------
 const Vector *ActiveGrenade::GetPosition( void ) const
 { 
-	return &m_entity->pev->origin; 
+	return &m_entity->v.origin; 
 }
 

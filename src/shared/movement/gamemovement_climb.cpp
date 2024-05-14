@@ -122,7 +122,7 @@ bool CHalfLifeMovement::Climb(physent_t* ladder)
     //					Vector perp = CrossProduct( Vector(0,0,1), trace.vecPlaneNormal );
     //					perp = perp.Normalize();
     tmp = Vector(0.0F, 0.0F, 1.0F);
-    CrossProduct(tmp, trace.plane.normal, perp);
+    perp = CrossProduct(tmp, trace.plane.normal);
     perp.NormalizeInPlace();
 
 
@@ -140,7 +140,7 @@ bool CHalfLifeMovement::Climb(physent_t* ladder)
     // NOTE: It IS possible to face up and move down or face down and move up
     // because the velocity is a sum of the directional velocity and the converted
     // velocity through the face of the ladder -- by design.
-    CrossProduct(trace.plane.normal, perp, tmp);
+    tmp = CrossProduct(trace.plane.normal, perp);
     pmove->velocity = (lateral + tmp * -normal).Normalize();
 
     float speed = std::min(pmove->maxspeed, 200.0F);

@@ -30,6 +30,8 @@
 class CCycler : public CBaseAnimating
 {
 public:
+	CCycler(Entity* containingEntity) : CBaseAnimating(containingEntity) {}
+
 	DECLARE_SAVERESTORE()
 
 	bool GenericCyclerSpawn(const char* szModel, Vector vecMin, Vector vecMax);
@@ -59,7 +61,9 @@ END_SAVERESTORE(CCycler, CBaseAnimating)
 class CGenericCycler : public CCycler
 {
 public:
-	bool Spawn() override { return GenericCyclerSpawn(STRING(pev->model), Vector(-16, -16, 0), Vector(16, 16, 72)); }
+	CGenericCycler(Entity* containingEntity) : CCycler(containingEntity) {}
+
+	bool Spawn() override { return GenericCyclerSpawn(STRING(v.model), Vector(-16, -16, 0), Vector(16, 16, 72)); }
 };
 LINK_ENTITY_TO_CLASS(cycler, CGenericCycler);
 
@@ -70,12 +74,12 @@ bool CCycler::GenericCyclerSpawn(const char* szModel, Vector vecMin, Vector vecM
 {
 	if (!szModel || '\0' == *szModel)
 	{
-		ALERT(at_error, "cycler at %.0f %.0f %0.f missing modelname", pev->origin.x, pev->origin.y, pev->origin.z);
+		engine::AlertMessage(at_error, "cycler at %.0f %.0f %0.f missing modelname", v.origin.x, v.origin.y, v.origin.z);
 		return false;
 	}
 
-	pev->classname = MAKE_STRING("cycler");
-	PRECACHE_MODEL(szModel);
+	v.classname = MAKE_STRING("cycler");
+	engine::PrecacheModel(szModel);
 	SetModel(szModel);
 
 	if (!CCycler::Spawn())
@@ -92,26 +96,26 @@ bool CCycler::GenericCyclerSpawn(const char* szModel, Vector vecMin, Vector vecM
 bool CCycler::Spawn()
 {
 	InitBoneControllers();
-	pev->solid = SOLID_SLIDEBOX;
-	pev->movetype = MOVETYPE_NONE;
-	pev->takedamage = DAMAGE_YES;
-	pev->effects = 0;
-	pev->health = 80000; // no cycler should die
-	pev->yaw_speed = 5;
-	pev->ideal_yaw = pev->angles.y;
+	v.solid = SOLID_SLIDEBOX;
+	v.movetype = MOVETYPE_NONE;
+	v.takedamage = DAMAGE_YES;
+	v.effects = 0;
+	v.health = 80000; // no cycler should die
+	v.yaw_speed = 5;
+	v.ideal_yaw = v.angles.y;
 	// ChangeYaw(360);
 
 	m_flFrameRate = 75;
 	m_flGroundSpeed = 0;
 
-	pev->nextthink += 1.0;
+	v.nextthink += 1.0;
 
 	ResetSequenceInfo();
 
-	if (pev->sequence != 0 || pev->frame != 0)
+	if (v.sequence != 0 || v.frame != 0)
 	{
 		m_animate = false;
-		pev->framerate = 0;
+		v.framerate = 0;
 	}
 	else
 	{
@@ -129,7 +133,7 @@ bool CCycler::Spawn()
 //
 void CCycler::Think()
 {
-	pev->nextthink = gpGlobals->time + 0.1;
+	v.nextthink = gpGlobals->time + 0.1;
 
 	if (m_animate)
 	{
@@ -139,13 +143,13 @@ void CCycler::Think()
 	{
 		// ResetSequenceInfo();
 		// hack to avoid reloading model every frame
-		pev->animtime = gpGlobals->time;
-		pev->framerate = 1.0;
+		v.animtime = gpGlobals->time;
+		v.framerate = 1.0;
 		m_fSequenceFinished = false;
 		m_flLastEventCheck = gpGlobals->time;
-		pev->frame = 0;
+		v.frame = 0;
 		if (!m_animate)
-			pev->framerate = 0.0; // FIX: don't reset framerate
+			v.framerate = 0.0; // FIX: don't reset framerate
 	}
 }
 
@@ -156,9 +160,9 @@ void CCycler::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useTyp
 {
 	m_animate = !m_animate;
 	if (m_animate)
-		pev->framerate = 1.0;
+		v.framerate = 1.0;
 	else
-		pev->framerate = 0.0;
+		v.framerate = 0.0;
 }
 
 //
@@ -168,23 +172,23 @@ bool CCycler::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float fl
 {
 	if (m_animate)
 	{
-		pev->sequence++;
+		v.sequence++;
 
 		ResetSequenceInfo();
 
 		if (m_flFrameRate == 0.0)
 		{
-			pev->sequence = 0;
+			v.sequence = 0;
 			ResetSequenceInfo();
 		}
-		pev->frame = 0;
+		v.frame = 0;
 	}
 	else
 	{
-		pev->framerate = 1.0;
+		v.framerate = 1.0;
 		StudioFrameAdvance(0.1);
-		pev->framerate = 0;
-		ALERT(at_console, "sequence: %d, frame %.0f\n", pev->sequence, pev->frame);
+		v.framerate = 0;
+		engine::AlertMessage(at_console, "sequence: %d, frame %.0f\n", v.sequence, v.frame);
 	}
 
 	return false;
@@ -193,6 +197,8 @@ bool CCycler::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float fl
 class CCyclerSprite : public CBaseEntity
 {
 public:
+	CCyclerSprite(Entity* containingEntity) : CBaseEntity(containingEntity) {}
+
 	DECLARE_SAVERESTORE()
 
 	bool Spawn() override;
@@ -221,20 +227,20 @@ END_SAVERESTORE(CCyclerSprite, CBaseEntity)
 
 bool CCyclerSprite::Spawn()
 {
-	pev->solid = SOLID_SLIDEBOX;
-	pev->movetype = MOVETYPE_NONE;
-	pev->takedamage = DAMAGE_YES;
-	pev->effects = 0;
+	v.solid = SOLID_SLIDEBOX;
+	v.movetype = MOVETYPE_NONE;
+	v.takedamage = DAMAGE_YES;
+	v.effects = 0;
 
-	pev->frame = 0;
-	pev->nextthink = gpGlobals->time + 0.1;
+	v.frame = 0;
+	v.nextthink = gpGlobals->time + 0.1;
 	m_animate = true;
 	m_lastTime = gpGlobals->time;
 
-	PRECACHE_MODEL((char*)STRING(pev->model));
-	SetModel(STRING(pev->model));
+	engine::PrecacheModel((char*)STRING(v.model));
+	SetModel(v.model);
 
-	m_maxFrame = (float)MODEL_FRAMES(pev->modelindex) - 1;
+	m_maxFrame = (float)engine::ModelFrames(v.modelindex) - 1;
 
 	return true;
 }
@@ -243,9 +249,9 @@ bool CCyclerSprite::Spawn()
 void CCyclerSprite::Think()
 {
 	if (ShouldAnimate())
-		Animate(pev->framerate * (gpGlobals->time - m_lastTime));
+		Animate(v.framerate * (gpGlobals->time - m_lastTime));
 
-	pev->nextthink = gpGlobals->time + 0.1;
+	v.nextthink = gpGlobals->time + 0.1;
 	m_lastTime = gpGlobals->time;
 }
 
@@ -253,7 +259,7 @@ void CCyclerSprite::Think()
 void CCyclerSprite::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	m_animate = !m_animate;
-	ALERT(at_console, "Sprite: %s\n", STRING(pev->model));
+	engine::AlertMessage(at_console, "Sprite: %s\n", STRING(v.model));
 }
 
 
@@ -268,7 +274,7 @@ bool CCyclerSprite::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, fl
 
 void CCyclerSprite::Animate(float frames)
 {
-	pev->frame += frames;
+	v.frame += frames;
 	if (m_maxFrame > 0)
-		pev->frame = fmod(pev->frame, m_maxFrame);
+		v.frame = fmod(v.frame, m_maxFrame);
 }

@@ -70,8 +70,8 @@ void CSniperRifle::GetWeaponInfo(WeaponInfo& i)
 void CSniperRifle::Precache()
 {
 	CTFWeapon::Precache();
-	m_usLaserDotOn = g_engfuncs.pfnPrecacheEvent(1, "events/laser_on.sc");
-	m_usLaserDotOff = g_engfuncs.pfnPrecacheEvent(1, "events/laser_off.sc");
+	m_usLaserDotOn = engine::PrecacheEvent(1, "events/laser_on.sc");
+	m_usLaserDotOff = engine::PrecacheEvent(1, "events/laser_off.sc");
 }
 
 
@@ -116,14 +116,14 @@ void CSniperRifle::PrimaryAttack()
 	m_pPlayer->m_rgAmmo[info.iAmmo1] -= shots;
 
 #ifndef NDEBUG
-	ALERT(at_console, "SNIPER RIFLE: %i (%i%%)\n", damage, (int)(damageScale * 100));
+	engine::AlertMessage(at_console, "SNIPER RIFLE: %i (%i%%)\n", damage, (int)(damageScale * 100));
 #endif
 
-	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), m_pPlayer->pev->view_ofs.z, m_pPlayer->m_randomSeed, 1);
+	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), m_pPlayer->v.view_ofs.z, m_pPlayer->m_randomSeed, 1);
 
 #ifdef GAME_DLL
-	const auto gun = m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs;
-	const auto aim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
+	const auto gun = m_pPlayer->v.origin + m_pPlayer->v.view_ofs;
+	const auto aim = m_pPlayer->v.v_angle + m_pPlayer->v.punchangle;
 
 	Vector dir;
 	AngleVectors(aim, &dir, nullptr, nullptr);
@@ -136,16 +136,16 @@ void CSniperRifle::PrimaryAttack()
 		return;
 	}
 
-	const auto hit = CBaseEntity::Instance(tr.pHit);
+	const auto hit = tr.pHit->Get<CBaseEntity>();
 
-	if (hit == nullptr || hit->pev->takedamage == DAMAGE_NO)
+	if (hit == nullptr || hit->v.takedamage == DAMAGE_NO)
 	{
 		return;
 	}
 
 	if (hit->IsClient() && dynamic_cast<CBasePlayer*>(hit)->PCNumber() != PC_SNIPER)
 	{
-		float distance = (hit->pev->origin - m_pPlayer->pev->origin).Length();
+		float distance = (hit->v.origin - m_pPlayer->v.origin).Length();
 
 		/*
 			Don't headshot or legshot players who are very far away.
@@ -156,7 +156,7 @@ void CSniperRifle::PrimaryAttack()
 #ifndef NDEBUG
 			if ((damageType & (DMG_AIMED | DMG_CALTROP)) != 0)
 			{
-				ALERT(at_console, "SNIPER TOO FAR\n");
+				engine::AlertMessage(at_console, "SNIPER TOO FAR\n");
 			}
 #endif
 			damageType &= ~(DMG_AIMED | DMG_CALTROP);
@@ -167,7 +167,7 @@ void CSniperRifle::PrimaryAttack()
 #ifndef NDEBUG
 			if ((damageType & DMG_AIMED) != 0)
 			{
-				ALERT(at_console, "SNIPER TOO CLOSE\n");
+				engine::AlertMessage(at_console, "SNIPER TOO CLOSE\n");
 			}
 #endif
 			damageType &= ~DMG_AIMED;
@@ -209,7 +209,7 @@ void CSniperRifle::WeaponPostFrame()
 {
 	const auto info = GetInfo();
 
-	if ((m_pPlayer->pev->button & IN_ATTACK2) != 0 && m_iScopeTime <= 300)
+	if ((m_pPlayer->v.button & IN_ATTACK2) != 0 && m_iScopeTime <= 300)
 	{
 		if (m_pPlayer->m_iFOV == 0)
 		{
@@ -227,7 +227,7 @@ void CSniperRifle::WeaponPostFrame()
 		m_iScopeTime = 500;
 	}
 
-	if ((m_pPlayer->pev->button & IN_ATTACK) != 0)
+	if ((m_pPlayer->v.button & IN_ATTACK) != 0)
 	{
 		if (!m_pPlayer->InState(CBasePlayer::State::Aiming)
 		 && m_iNextPrimaryAttack <= 0
@@ -289,19 +289,19 @@ void CSniperRifle::CreateLaserEffect()
 #ifdef GAME_DLL
 	DestroyLaserEffect(false);
 
-	m_pLaserDot = CSprite::SpriteCreate("sprites/laserdot.spr", pev->origin, false);
-	m_pLaserDot->pev->scale = 1.0;
-	m_pLaserDot->pev->spawnflags |= SF_SPRITE_TEMPORARY;
-	m_pLaserDot->pev->flags |= FL_SKIPLOCALHOST;
-	m_pLaserDot->pev->owner = m_pPlayer->edict();
+	m_pLaserDot = CSprite::SpriteCreate("sprites/laserdot.spr", v.origin, false);
+	m_pLaserDot->v.scale = 1.0;
+	m_pLaserDot->v.spawnflags |= SF_SPRITE_TEMPORARY;
+	m_pLaserDot->v.flags |= FL_SKIPLOCALHOST;
+	m_pLaserDot->v.owner = &m_pPlayer->v;
 
 	m_pLaserBeam = CBeam::BeamCreate("sprites/laserbeam.spr", 16);
-	m_pLaserBeam->PointEntInit(pev->origin, m_pPlayer->entindex());
+	m_pLaserBeam->PointEntInit(v.origin, m_pPlayer->v.GetIndex());
 	m_pLaserBeam->SetFlags(BEAM_FSHADEOUT);
 	m_pLaserBeam->SetEndAttachment(1);
-	m_pLaserBeam->pev->spawnflags |= SF_BEAM_TEMPORARY;
-	m_pLaserBeam->pev->flags |= FL_SKIPLOCALHOST;
-	m_pLaserBeam->pev->owner = m_pPlayer->edict();
+	m_pLaserBeam->v.spawnflags |= SF_BEAM_TEMPORARY;
+	m_pLaserBeam->v.flags |= FL_SKIPLOCALHOST;
+	m_pLaserBeam->v.owner = &m_pPlayer->v;
 
 	if (m_pPlayer->TeamNumber() == TEAM_BLUE)
 	{
@@ -332,8 +332,8 @@ void CSniperRifle::UpdateLaserEffect()
 	if (m_pLaserDot != nullptr || m_pLaserBeam != nullptr)
 	{
 		const auto info = GetInfo();
-		const auto gun = m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs;
-		const auto aim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
+		const auto gun = m_pPlayer->v.origin + m_pPlayer->v.view_ofs;
+		const auto aim = m_pPlayer->v.v_angle + m_pPlayer->v.punchangle;
 
 		Vector dir;
 		AngleVectors(aim, &dir, nullptr, nullptr);
@@ -343,7 +343,7 @@ void CSniperRifle::UpdateLaserEffect()
 
 		if (m_pLaserDot != nullptr)
 		{
-			m_pLaserDot->pev->effects |= EF_NOINTERP;
+			m_pLaserDot->v.effects |= EF_NOINTERP;
 			m_pLaserDot->SetOrigin(tr.vecEndPos);
 		}
 

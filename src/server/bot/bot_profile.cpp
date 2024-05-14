@@ -14,7 +14,7 @@
 #include "shared_util.h"
 #include "simple_checksum.h"
 
-BotProfileManager *TheBotProfiles = NULL;
+BotProfileManager *TheBotProfiles = nullptr;
 
 //--------------------------------------------------------------------------------------------------------------
 // A little explanation is in order here.  This file is in game_shared.  It is supposed to be able to be compiled
@@ -27,8 +27,6 @@ BotProfileManager *TheBotProfiles = NULL;
 	#include "../cstrike/dlls/weapontype.cpp"	/// @TODO: remove this CStrike peculiarity from a game_shared file!!!
 	void Career_Printf(const char *fmt, ...);
 	#define CONSOLE_ECHO Career_Printf
-	#define LOAD_FILE_FOR_ME(name, len) (engine->COM_LoadFile( (name), 5, (len) ))
-	#define FREE_FILE (engine->COM_FreeFile)
 	#define UTIL_IsGame( x ) 0
 #else
 	#include "extdll.h"
@@ -63,11 +61,11 @@ const char* BotProfile::GetWeaponPreferenceAsString( int i ) const
 {
 #ifdef CSTRIKE
 	if ( i < 0 || i >= m_weaponPreferenceCount )
-		return NULL;
+		return nullptr;
 
 	return WeaponIDToAlias( m_weaponPreference[ i ] );
 #else
-	return NULL;
+	return nullptr;
 #endif
 }
 
@@ -127,9 +125,9 @@ BotProfileManager::BotProfileManager( void )
 	m_nextSkin = 0;
 	for (int i=0; i<NumCustomSkins; ++i)
 	{
-		m_skins[i] = NULL;
-		m_skinFilenames[i] = NULL;
-		m_skinModelnames[i] = NULL;
+		m_skins[i] = nullptr;
+		m_skinFilenames[i] = nullptr;
+		m_skinModelnames[i] = nullptr;
 	}
 }
 
@@ -140,10 +138,10 @@ BotProfileManager::BotProfileManager( void )
 void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 {
 	int dataLength;
-	char *dataPointer = (char *)LOAD_FILE_FOR_ME( const_cast<char *>( filename ), &dataLength );
+	char *dataPointer = (char *)engine::LoadFileForMe( const_cast<char *>( filename ), &dataLength );
 	const char *dataFile = dataPointer;
 
-	if (dataFile == NULL)
+	if (dataFile == nullptr)
 	{
 #ifdef CSTRIKE
 		if ( UTIL_IsGame( "czero" ) )
@@ -190,7 +188,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (!dataFile)
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected skin name\n", filename );
-				FREE_FILE( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 			token = SharedGetToken();
@@ -201,14 +199,14 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (!dataFile)
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected 'Model'\n", filename );
-				FREE_FILE( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 			token = SharedGetToken();
 			if (stricmp( "Model", token ))
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected 'Model'\n", filename );
-				FREE_FILE( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 
@@ -217,14 +215,14 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (!dataFile)
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected '='\n", filename );
-				FREE_FILE( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 			token = SharedGetToken();
 			if (strcmp( "=", token ))
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected '='\n", filename );
-				FREE_FILE( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 
@@ -233,7 +231,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (!dataFile)
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected attribute value\n", filename );
-				FREE_FILE( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 			token = SharedGetToken();
@@ -257,14 +255,14 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (!dataFile)
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected 'End'\n", filename );
-				FREE_FILE( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 			token = SharedGetToken();
 			if (strcmp( "End", token ))
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected 'End'\n", filename );
-				FREE_FILE( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 
@@ -289,7 +287,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 		// do inheritance in order of appearance
 		if (!isTemplate && !isDefault)
 		{
-			const BotProfile *inherit = NULL;
+			const BotProfile *inherit = nullptr;
 
 			// template names are separated by "+"
 			while(true)
@@ -308,17 +306,17 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 					}
 				}
 
-				if (inherit == NULL)
+				if (inherit == nullptr)
 				{
 					CONSOLE_ECHO( "Error parsing '%s' - invalid template reference '%s'\n", filename, token );
-					FREE_FILE( dataPointer );
+					engine::FreeFile( dataPointer );
 					return;
 				}
 
 				// inherit the data
 				profile->Inherit( inherit, &defaultProfile );
 
-				if (c == NULL)
+				if (c == nullptr)
 					break;
 				
 				token = c+1;
@@ -333,7 +331,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (!dataFile)
 			{
 				CONSOLE_ECHO( "Error parsing '%s' - expected name\n", filename );
-				FREE_FILE( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 			profile->m_name = CloneString( SharedGetToken() );
@@ -358,7 +356,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (!dataFile)
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected 'End'\n", filename );
-				FREE_FILE( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 			token = SharedGetToken();
@@ -376,7 +374,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (!dataFile)
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected '='\n", filename );
-				FREE_FILE( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 
@@ -384,7 +382,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (strcmp( "=", token ))
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected '='\n", filename );
-				FREE_FILE( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 
@@ -393,7 +391,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 			if (!dataFile)
 			{
 				CONSOLE_ECHO( "Error parsing %s - expected attribute value\n", filename );
-				FREE_FILE( dataPointer );
+				engine::FreeFile( dataPointer );
 				return;
 			}
 			token = SharedGetToken();
@@ -486,7 +484,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 						if (!stricmp( BotDifficultyName[i], token ))
 							profile->m_difficultyFlags |= (1 << i);
 
-					if (c == NULL)
+					if (c == nullptr)
 						break;
 					
 					token = c+1;
@@ -528,7 +526,7 @@ void BotProfileManager::Init( const char *filename, unsigned int *checksum )
 		}
 	}
 
-	FREE_FILE( dataPointer );
+	engine::FreeFile( dataPointer );
 
 	// free the templates
 	for( BotProfileList::iterator iter = templateList.begin(); iter != templateList.end(); ++iter )
@@ -564,17 +562,17 @@ void BotProfileManager::Reset( void )
 		if ( m_skins[i] )
 		{
 			delete[] m_skins[i];
-			m_skins[i] = NULL;
+			m_skins[i] = nullptr;
 		}
 		if ( m_skinFilenames[i] )
 		{
 			delete[] m_skinFilenames[i];
-			m_skinFilenames[i] = NULL;
+			m_skinFilenames[i] = nullptr;
 		}
 		if ( m_skinModelnames[i] )
 		{
 			delete[] m_skinModelnames[i];
-			m_skinModelnames[i] = NULL;
+			m_skinModelnames[i] = nullptr;
 		}
 	}
 }
@@ -587,7 +585,7 @@ const char * BotProfileManager::GetCustomSkin( int index )
 {
 	if ( index < FirstCustomSkin || index > LastCustomSkin )
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	return m_skins[ index - FirstCustomSkin ];
@@ -601,7 +599,7 @@ const char * BotProfileManager::GetCustomSkinFname( int index )
 {
 	if ( index < FirstCustomSkin || index > LastCustomSkin )
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	return m_skinFilenames[ index - FirstCustomSkin ];
@@ -615,7 +613,7 @@ const char * BotProfileManager::GetCustomSkinModelname( int index )
 {
 	if ( index < FirstCustomSkin || index > LastCustomSkin )
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	return m_skinModelnames[ index - FirstCustomSkin ];
@@ -675,9 +673,6 @@ int BotProfileManager::FindVoiceBankIndex( const char *filename )
  */
 const BotProfile *BotProfileManager::GetRandomProfile( BotDifficultyType difficulty, BotProfileTeamType team ) const
 {
-#ifndef RANDOM_LONG
-	return NULL;	// we don't need random profiles when we're not in the game dll
-#else
 	BotProfileList::const_iterator iter;
 
 	// count up valid profiles
@@ -691,10 +686,10 @@ const BotProfile *BotProfileManager::GetRandomProfile( BotDifficultyType difficu
 	}
 
 	if (validCount == 0)
-		return NULL;
+		return nullptr;
 
 	// select one at random
-	int which = RANDOM_LONG( 0, validCount-1 );
+	int which = engine::RandomLong( 0, validCount-1 );
 	for( iter = m_profileList.begin(); iter != m_profileList.end(); ++iter )
 	{
 		const BotProfile *profile = *iter;
@@ -704,7 +699,6 @@ const BotProfile *BotProfileManager::GetRandomProfile( BotDifficultyType difficu
 				return profile;
 	}
 
-	return NULL;
-#endif;
+	return nullptr;
 }
 

@@ -48,7 +48,7 @@ static bool SV_InitServer()
 
 	if (UTIL_IsValveGameDirectory())
 	{
-		g_engfuncs.pfnServerPrint("This mod has detected that it is being run from a Valve game directory which is not supported\n"
+		engine::ServerPrint("This mod has detected that it is being run from a Valve game directory which is not supported\n"
 			"Run this mod from its intended location\n\nThe game will now shut down\n");
 		return false;
 	}
@@ -60,32 +60,32 @@ static bool SV_InitServer()
 // This gets called one time when the game is initialied
 void GameDLLInit()
 {
-	g_psv_cheats = CVAR_GET_POINTER("sv_cheats");
-	mp_consistency = g_engfuncs.pfnCVarGetPointer("mp_consistency");
+	g_psv_cheats = engine::CVarGetPointer("sv_cheats");
+	mp_consistency = engine::CVarGetPointer("mp_consistency");
 
 	if (!SV_InitServer())
 	{
-		g_engfuncs.pfnServerPrint("Error initializing server\n");
+		engine::ServerPrint("Error initializing server\n");
 		//Shut the game down as soon as possible.
-		SERVER_COMMAND("quit\n");
+		engine::ServerCommand("quit\n");
 		return;
 	}
 
-	CVAR_REGISTER(&allow_spectators);
+	engine::CVarRegister(&allow_spectators);
 
-	CVAR_REGISTER(&teamplay);
-	CVAR_REGISTER(&fraglimit);
-	CVAR_REGISTER(&timelimit);
+	engine::CVarRegister(&teamplay);
+	engine::CVarRegister(&fraglimit);
+	engine::CVarRegister(&timelimit);
 
-	CVAR_REGISTER(&friendlyfire);
-	CVAR_REGISTER(&falldamage);
-	CVAR_REGISTER(&weaponstay);
-	CVAR_REGISTER(&forcerespawn);
-	CVAR_REGISTER(&aimcrosshair);
-	CVAR_REGISTER(&decalfrequency);
-	CVAR_REGISTER(&allowmonsters);
+	engine::CVarRegister(&friendlyfire);
+	engine::CVarRegister(&falldamage);
+	engine::CVarRegister(&weaponstay);
+	engine::CVarRegister(&forcerespawn);
+	engine::CVarRegister(&aimcrosshair);
+	engine::CVarRegister(&decalfrequency);
+	engine::CVarRegister(&allowmonsters);
 
-	CVAR_REGISTER(&mp_chattime);
+	engine::CVarRegister(&mp_chattime);
 
 	CVoteManager::RegisterCvars();
 

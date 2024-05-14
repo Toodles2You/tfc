@@ -39,19 +39,19 @@ static void GetCrosshairTarget(pmtrace_t* tr, float distance)
 	Vector view_ofs;
 
 	// Get our exact viewangles from engine
-	gEngfuncs.GetViewAngles((float*)angles);
+	client::GetViewAngles(angles);
 	angles = angles + g_PunchAngle;
 
 	// Determine our last predicted origin
 	origin = HUD_GetLastOrg();
 
-	AngleVectors(angles, forward, right, up);
+	AngleVectors(angles, &forward, &right, &up);
 
-	VectorCopy(origin, vecSrc);
+	vecSrc = origin;
 
-	VectorMA(vecSrc, distance, forward, vecEnd);
+	vecEnd = vecSrc + distance * forward;
 
-	gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_STUDIO_BOX, -1, tr);
+	client::event::PlayerTrace(vecSrc, vecEnd, PM_STUDIO_BOX, -1, tr);
 
 	if (tr->startsolid || tr->allsolid)
 	{
@@ -108,16 +108,16 @@ Add game specific, client-side objects here
 */
 void Game_AddObjects()
 {
-	const auto time = gEngfuncs.GetClientTime();
+	const auto time = client::GetClientTime();
 	pmtrace_t trShort;
 	pmtrace_t trLong;
 
-	cl_entity_t* pthisplayer = gEngfuncs.GetLocalPlayer();
+	cl_entity_t* pthisplayer = client::GetLocalPlayer();
 	int idx = pthisplayer->index;
-	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
-	gEngfuncs.pEventAPI->EV_PushPMStates();
-	gEngfuncs.pEventAPI->EV_SetSolidPlayers(idx - 1);
-	gEngfuncs.pEventAPI->EV_SetTraceHull(kHullPoint);
+	client::event::SetUpPlayerPrediction(false, true);
+	client::event::PushPMStates();
+	client::event::SetSolidPlayers(idx - 1);
+	client::event::SetTraceHull(kHullPoint);
 
 	GetCrosshairTarget(&trShort, 2048);
 
@@ -141,7 +141,7 @@ void Game_AddObjects()
 	{
 		if (gHUD.IsAlive() && gHUD.m_Flash.IsFlashlightOn())
 		{
-			auto light = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
+			auto light = client::efx::AllocDlight(0);
 
 			if (light)
 			{
@@ -158,15 +158,15 @@ void Game_AddObjects()
 
 		if (gHUD.IsAlive() && trLong.fraction != 1.0f)
 		{
-			auto entIndex = gEngfuncs.pEventAPI->EV_IndexFromTrace(&trLong);
-			if (entIndex >= 1 && entIndex <= gEngfuncs.GetMaxClients())
+			auto entIndex = client::event::IndexFromTrace(&trLong);
+			if (entIndex >= 1 && entIndex <= client::GetMaxClients())
 			{
-				target = gEngfuncs.GetEntityByIndex(entIndex);
+				target = client::GetEntityByIndex(entIndex);
 			}
 		}
 
 		gHUD.m_StatusBar.UpdateStatusBar(target);
 	}
 
-	gEngfuncs.pEventAPI->EV_PopPMStates();
+	client::event::PopPMStates();
 }

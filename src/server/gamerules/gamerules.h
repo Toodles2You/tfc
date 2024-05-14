@@ -131,10 +131,9 @@ public:
 	virtual const char* GetGameDescription() { return HALFLIFE_GAMEDESC; } // this is the game name that gets seen in the server browser
 
 	// Client connection/disconnection
-	virtual bool ClientConnected(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128]) = 0; // a client just connected to the server (player hasn't spawned yet)
-	virtual void ClientPutInServer(CBasePlayer* pPlayer) = 0;
+	virtual bool ClientConnected(Entity* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128]) = 0; // a client just connected to the server (player hasn't spawned yet)
 	virtual void InitHUD(CBasePlayer* pl);																				   // the client dll is ready for updating
-	virtual void ClientDisconnected(edict_t* pClient) = 0;																	   // a client just disconnected from the server
+	virtual void ClientDisconnected(Entity* pClient) = 0;																	   // a client just disconnected from the server
 	virtual void UpdateGameMode(CBasePlayer* pPlayer);																	   // the client needs to be informed of the current game mode
 	virtual gamemode_e GetGameMode() { return kGamemodeSingleplayer; }
 
@@ -246,9 +245,8 @@ public:
 	bool IsCoOp() override { return false; }
 
 	// Client connection/disconnection
-	bool ClientConnected(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128]) override;
-	void ClientPutInServer(CBasePlayer* pPlayer) override;
-	void ClientDisconnected(edict_t* pClient) override;
+	bool ClientConnected(Entity* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128]) override;
+	void ClientDisconnected(Entity* pClient) override;
 
 	// Client damage rules
 	float FlPlayerFallDamage(CBasePlayer* pPlayer) override;
@@ -338,10 +336,9 @@ public:
 	// If ClientConnected returns false, the connection is rejected and the user is provided the reason specified in
 	//  svRejectReason
 	// Only the client's name and remote address are provided to the dll for verification.
-	bool ClientConnected(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128]) override;
-	void ClientPutInServer(CBasePlayer* pPlayer) override;
+	bool ClientConnected(Entity* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128]) override;
 	void InitHUD(CBasePlayer* pl) override; // the client dll is ready for updating
-	void ClientDisconnected(edict_t* pClient) override;
+	void ClientDisconnected(Entity* pClient) override;
 	gamemode_e GetGameMode() override { return IsCoOp() ? kGamemodeCooperative : kGamemodeDeathmatch; }
 
 	// Client damage rules

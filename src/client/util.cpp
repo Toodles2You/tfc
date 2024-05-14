@@ -37,5 +37,5 @@ HSPRITE LoadSprite(const char* pszName)
 
 	sprintf(sz, pszName, i);
 
-	return SPR_Load(sz);
+	return client::SPR_Load(sz);
 }

@@ -27,24 +27,22 @@ class CBaseEntity;
 
 inline globalvars_t* gpGlobals = nullptr;
 
-// Use this instead of ALLOC_STRING on constant strings
+// Use this instead of engine::AllocString on constant strings
 #define STRING(offset) ((const char*)(gpGlobals->pStringBase + (unsigned int)(offset)))
 #define MAKE_STRING(str) ((uint64)(str) - (uint64)(STRING(0)))
 
-inline edict_t* FIND_ENTITY_BY_CLASSNAME(edict_t* entStart, const char* pszName)
-{
-	return FIND_ENTITY_BY_STRING(entStart, "classname", pszName);
-}
+// More explicit than "int"
+using EntityOffset = int;
 
-inline edict_t* FIND_ENTITY_BY_TARGETNAME(edict_t* entStart, const char* pszName)
+inline EntityOffset OFFSET(const Entity* pent)
 {
-	return FIND_ENTITY_BY_STRING(entStart, "targetname", pszName);
-}
-
-// for doing a reverse lookup. Say you have a door, and want to find its button.
-inline edict_t* FIND_ENTITY_BY_TARGET(edict_t* entStart, const char* pszName)
-{
-	return FIND_ENTITY_BY_STRING(entStart, "target", pszName);
+#ifndef NDEBUG
+	if (pent == nullptr)
+	{
+		engine::AlertMessage(at_error, "Bad ent in OFFSET()\n");
+	}
+#endif
+	return engine::EntOffsetOfPEntity(pent);
 }
 
 // Keeps clutter down a bit, when using a float as a bit-vector
@@ -52,69 +50,30 @@ inline edict_t* FIND_ENTITY_BY_TARGET(edict_t* entStart, const char* pszName)
 #define ClearBits(flBitVector, bits) ((flBitVector) = (int)(flBitVector) & ~(bits))
 #define FBitSet(flBitVector, bit) (((int)(flBitVector) & (bit)) != 0)
 
-// More explicit than "int"
-typedef int EOFFSET;
-
 // In case this ever changes
 #define M_PI 3.14159265358979323846
 
+#ifdef GAME_DLL
 // This is the glue that hooks .MAP entity class names to our CPP classes
 // The _declspec forces them to be exported by name so we can do a lookup with GetProcAddress()
 // The function is used to intialize / allocate the object for the entity
-#ifdef GAME_DLL
-#define LINK_ENTITY_TO_CLASS(mapClassName, DLLClassName)    \
-	extern "C" DLLEXPORT void mapClassName(entvars_t* pev); \
-	void mapClassName(entvars_t* pev) { GetClassPtr((DLLClassName*)pev); }
+#define LINK_ENTITY_TO_CLASS(mapClassName, DLLClassName)      \
+    extern "C" {                                              \
+    DLLEXPORT void mapClassName(entvars_t* entvars)           \
+    {                                                         \
+        Entity::FromEntvars(entvars)->GetNew<DLLClassName>(); \
+    }                                                         \
+	}
 #else
 #define LINK_ENTITY_TO_CLASS(mapClassName, DLLClassName)
 #endif
-
-//
-// Conversion among the three types of "entity", including identity-conversions.
-//
-inline edict_t* ENT(const entvars_t* pev)
-{
-	return pev->pContainingEntity;
-}
-inline edict_t* ENT(edict_t* pent)
-{
-	return pent;
-}
-inline edict_t* ENT(EOFFSET eoffset) { return (*g_engfuncs.pfnPEntityOfEntOffset)(eoffset); }
-inline EOFFSET OFFSET(const edict_t* pent)
-{
-#ifndef NDEBUG
-	if (!pent)
-		ALERT(at_error, "Bad ent in OFFSET()\n");
-#endif
-	return (*g_engfuncs.pfnEntOffsetOfPEntity)(pent);
-}
-inline EOFFSET OFFSET(entvars_t* pev)
-{
-#ifndef NDEBUG
-	if (!pev)
-		ALERT(at_error, "Bad pev in OFFSET()\n");
-#endif
-	return OFFSET(ENT(pev));
-}
-
-inline entvars_t* VARS(edict_t* pent)
-{
-	if (!pent)
-		return NULL;
-
-	return &pent->v;
-}
-
-inline int ENTINDEX(edict_t* pEdict) { return (*g_engfuncs.pfnIndexOfEdict)(pEdict); }
-inline edict_t* INDEXENT(int iEdictNum) { return (*g_engfuncs.pfnPEntityOfEntIndex)(iEdictNum); }
 
 inline void MessageBegin(int dest, int type, const Vector& origin, CBaseEntity* entity);
 inline void MessageBegin(int dest, int type, CBaseEntity* entity);
 
 inline void MessageBegin(int dest, int type, const Vector& origin)
 {
-	g_engfuncs.pfnMessageBegin(
+	engine::MessageBegin(
 		dest,
 		type,
 		origin,
@@ -123,66 +82,58 @@ inline void MessageBegin(int dest, int type, const Vector& origin)
 
 inline void MessageBegin(int dest, int type)
 {
-	g_engfuncs.pfnMessageBegin(dest, type, nullptr, nullptr);
+	engine::MessageBegin(dest, type, nullptr, nullptr);
 }
 
 inline void MessageEnd()
 {
-	g_engfuncs.pfnMessageEnd();
+	engine::MessageEnd();
 }
 
 inline void WriteByte(int value)
 {
-	g_engfuncs.pfnWriteByte(value);
+	engine::WriteByte(value);
 }
 
 inline void WriteChar(int value)
 {
-	g_engfuncs.pfnWriteChar(value);
+	engine::WriteChar(value);
 }
 
 inline void WriteShort(int value)
 {
-	g_engfuncs.pfnWriteShort(value);
+	engine::WriteShort(value);
 }
 
 inline void WriteLong(int value)
 {
-	g_engfuncs.pfnWriteLong(value);
+	engine::WriteLong(value);
 }
 
 inline void WriteAngle(float value)
 {
-	g_engfuncs.pfnWriteAngle(value);
+	engine::WriteAngle(value);
 }
 
 inline void WriteCoord(float value)
 {
-	g_engfuncs.pfnWriteCoord(value);
+	engine::WriteCoord(value);
 }
 
 inline void WriteString(const char* value)
 {
-	g_engfuncs.pfnWriteString(value);
+	engine::WriteString(value);
 }
 
 inline void WriteEntity(int value)
 {
-	g_engfuncs.pfnWriteEntity(value);
+	engine::WriteEntity(value);
 }
 
 inline void WriteFloat(float value)
 {
 	WriteLong(*reinterpret_cast<int*>(&value));
 }
-
-// Testing the three types of "entity" for nullity
-inline bool FNullEnt(EOFFSET eoffset)
-{
-	return eoffset == 0;
-}
-inline bool FNullEnt(const edict_t* pent) { return pent == NULL || FNullEnt(OFFSET(pent)); }
-inline bool FNullEnt(entvars_t* pev) { return pev == NULL || FNullEnt(OFFSET(pev)); }
 
 // Testing strings for nullity
 #define iStringNull 0
@@ -229,19 +180,9 @@ typedef enum
 	TS_GOING_DOWN
 } TOGGLE_STATE;
 
-// Misc useful
-inline bool FStrEq(const char* sz1, const char* sz2)
-{
-	return (strcmp(sz1, sz2) == 0);
-}
-inline bool FClassnameIs(edict_t* pent, const char* szClassname)
-{
-	return FStrEq(STRING(VARS(pent)->classname), szClassname);
-}
-inline bool FClassnameIs(entvars_t* pev, const char* szClassname)
-{
-	return FStrEq(STRING(pev->classname), szClassname);
-}
+inline bool streq(const char* s1, const char* s2) { return strcmp(s1, s2) == 0; }
+inline bool streq(string_t s1, const char* s2) { return strcmp(STRING(s1), s2) == 0; }
+inline bool streq(string_t s1, string_t s2) { return strcmp(STRING(s1), STRING(s2)) == 0; }
 
 #define SND_SPAWNING (1 << 8)
 #define SND_STOP (1 << 5)
@@ -279,9 +220,6 @@ int SENTENCEG_PlaySequentialSz(CBaseEntity* entity, const char* szrootname, floa
 int SENTENCEG_GetIndex(const char* szrootname);
 int SENTENCEG_Lookup(const char* sample, char* sentencenum);
 
-#define PLAYBACK_EVENT(flags, who, index) PLAYBACK_EVENT_FULL(flags, who, index, 0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
-#define PLAYBACK_EVENT_DELAY(flags, who, index, delay) PLAYBACK_EVENT_FULL(flags, who, index, delay, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
-
 /**
 *	@brief Helper type to run a function when the helper is destroyed.
 *	Useful for running cleanup on scope exit and function return.
@@ -308,7 +246,7 @@ namespace util
 *	@brief Gets the list of entities.
 *	Will return @c nullptr if there is no map loaded.
 */
-edict_t* GetEntityList();
+Entity* GetEntityList();
 
 /**
 *	@brief Gets the local player in singleplayer, or @c nullptr in multiplayer.
@@ -327,6 +265,32 @@ Vector VecToAngles(const Vector& vec);
 float AngleMod(float a);
 float AngleDiff(float destAngle, float srcAngle);
 
+class EntityIterator
+{
+public:
+	EntityIterator(const char* key, const char* value, CBaseEntity* start = nullptr);
+
+	void operator++();
+
+	operator bool();
+
+	operator CBaseEntity*()
+	{
+		return _current->Get<CBaseEntity>();
+	}
+
+	CBaseEntity* operator->()
+	{
+		return _current->Get<CBaseEntity>();
+	}
+
+private:
+	const char* _key;
+	const char* _value;
+	Entity* _start;
+	Entity* _current;
+};
+
 CBaseEntity* FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius);
 CBaseEntity* FindEntityByString(CBaseEntity* pStartEntity, const char* szKeyword, const char* szValue);
 CBaseEntity* FindEntityByClassname(CBaseEntity* pStartEntity, const char* szName);
@@ -334,13 +298,13 @@ CBaseEntity* FindEntityByTargetname(CBaseEntity* pStartEntity, const char* szNam
 CBaseEntity* FindEntityGeneric(const char* szName, Vector& vecSrc, float flRadius);
 
 // returns a CBaseEntity pointer to a player by index.  Only returns if the player is spawned and connected
-// otherwise returns NULL
+// otherwise returns nullptr
 // Index is 1 based
 CBaseEntity* PlayerByIndex(int playerIndex);
 
-inline edict_t* EntitiesInPVS(edict_t* pent)
+inline Entity* EntitiesInPVS(Entity* pent)
 {
-	return g_engfuncs.pfnEntitiesInPVS(pent);
+	return engine::EntitiesInPVS(pent);
 }
 
 void MakeVectors(const Vector& vecAngles);
@@ -351,7 +315,7 @@ int EntitiesInBox(CBaseEntity** pList, int listMax, const Vector& mins, const Ve
 
 inline void MakeVectorsPrivate(const Vector& vecAngles, float* p_vForward, float* p_vRight, float* p_vUp)
 {
-	g_engfuncs.pfnAngleVectors(vecAngles, p_vForward, p_vRight, p_vUp);
+	engine::AngleVectors(vecAngles, p_vForward, p_vRight, p_vUp);
 }
 
 void MakeAimVectors(const Vector& vecAngles); // like MakeVectors, but assumes pitch isn't inverted
@@ -396,13 +360,13 @@ enum
 	large_hull = 2,
 	head_hull = 3
 };
-void TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t* pentIgnore, TraceResult* ptr);
+void TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, Entity* pentIgnore, TraceResult* ptr);
 TraceResult GetGlobalTrace();
-void TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, edict_t* pentModel, TraceResult* ptr);
-Vector GetAimVector(edict_t* pent, float flSpeed);
+void TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, Entity* pentModel, TraceResult* ptr);
+Vector GetAimVector(Entity* pent, float flSpeed);
 
 bool IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator);
-void StringToVector(float* pVector, const char* pString);
+void StringToVector(Vector& pVector, const char* pString);
 void StringToIntArray(int* pVector, int count, const char* pString);
 Vector ClampVectorToBox(const Vector& input, const Vector& clampSize);
 float Approach(float target, float value, float speed);
@@ -420,14 +384,14 @@ void PrecacheOther(const char* szClassname);
 void PrecacheWeapon(const char* szClassname);
 
 // prints a message to each client
-void ClientPrintAll(int msg_dest, const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL);
-inline void CenterPrintAll(const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL)
+void ClientPrintAll(int msg_dest, const char* msg_name, const char* param1 = nullptr, const char* param2 = nullptr, const char* param3 = nullptr, const char* param4 = nullptr);
+inline void CenterPrintAll(const char* msg_name, const char* param1 = nullptr, const char* param2 = nullptr, const char* param3 = nullptr, const char* param4 = nullptr)
 {
 	ClientPrintAll(HUD_PRINTCENTER, msg_name, param1, param2, param3, param4);
 }
 
 // prints messages through the HUD
-void ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL);
+void ClientPrint(CBaseEntity* entity, int msg_dest, const char* msg_name, const char* param1 = nullptr, const char* param2 = nullptr, const char* param3 = nullptr, const char* param4 = nullptr);
 
 void ClientHearVox(CBaseEntity* client, const char* sentence);
 void ClientHearVoxAll(const char* sentence);

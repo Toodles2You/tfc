@@ -63,7 +63,7 @@ static bool FileSystem_InitializeGameDirectory()
 	const std::size_t BufferSize = MAX_PATH + 1;
 	gameDirectory.resize(BufferSize);
 
-	const DWORD charactersWritten = GetModuleFileNameA(NULL, gameDirectory.data(), BufferSize);
+	const DWORD charactersWritten = GetModuleFileNameA(nullptr, gameDirectory.data(), BufferSize);
 
 	if (charactersWritten == BufferSize)
 	{
@@ -101,9 +101,9 @@ static bool FileSystem_InitializeGameDirectory()
 	g_ModDirectoryName.resize(BufferSize);
 
 #ifdef CLIENT_DLL
-	g_ModDirectoryName = gEngfuncs.pfnGetGameDirectory();
+	g_ModDirectoryName = client::GetGameDirectory();
 #else
-	g_engfuncs.pfnGetGameDir(g_ModDirectoryName.data());
+	engine::GetGameDir(g_ModDirectoryName.data());
 	g_ModDirectoryName.resize(std::strlen(g_ModDirectoryName.c_str()));
 #endif
 
@@ -283,7 +283,7 @@ std::vector<std::byte> FileSystem_LoadFileIntoBuffer(const char* fileName, FileC
 		return buffer;
 	}
 
-	ALERT(at_console, "FileSystem_LoadFileIntoBuffer: couldn't open file \"%s\" for reading\n", fileName);
+	engine::AlertMessage(at_console, "FileSystem_LoadFileIntoBuffer: couldn't open file \"%s\" for reading\n", fileName);
 	return {};
 }
 
@@ -300,7 +300,7 @@ bool FileSystem_WriteTextToFile(const char* fileName, const char* text, const ch
 
 	if (length > static_cast<std::size_t>(std::numeric_limits<int>::max()))
 	{
-		ALERT(at_console, "FileSystem_WriteTextToFile: text too long\n");
+		engine::AlertMessage(at_console, "FileSystem_WriteTextToFile: text too long\n");
 		return false;
 	}
 
@@ -311,7 +311,7 @@ bool FileSystem_WriteTextToFile(const char* fileName, const char* text, const ch
 		return true;
 	}
 
-	ALERT(at_console, "FileSystem_WriteTextToFile: couldn't open file \"%s\" for writing\n", fileName);
+	engine::AlertMessage(at_console, "FileSystem_WriteTextToFile: couldn't open file \"%s\" for writing\n", fileName);
 
 	return false;
 }

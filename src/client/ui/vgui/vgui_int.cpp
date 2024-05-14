@@ -28,12 +28,12 @@ using namespace vgui;
 
 void VGui_ViewportPaintBackground(int extents[4])
 {
-	gEngfuncs.VGui_ViewportPaintBackground(extents);
+	client::VGui_ViewportPaintBackground(extents);
 }
 
 void* VGui_GetPanel()
 {
-	return (Panel*)gEngfuncs.VGui_GetPanel();
+	return (Panel*)client::VGui_GetPanel();
 }
 
 void VGui_Startup()
@@ -47,13 +47,13 @@ void VGui_Startup()
 
 	//root->getSurfaceBase()->setEmulatedCursorVisible(true);
 
-	if (gViewPort != NULL)
+	if (gViewPort != nullptr)
 	{
 		//		root->removeChild(gViewPort);
 
 		// free the memory
 		//		delete gViewPort;
-		//		gViewPort = NULL;
+		//		gViewPort = nullptr;
 
 		gViewPort->Initialize();
 	}
@@ -67,5 +67,5 @@ void VGui_Startup()
 void VGui_Shutdown()
 {
 	delete gViewPort;
-	gViewPort = NULL;
+	gViewPort = nullptr;
 }

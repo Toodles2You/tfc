@@ -18,6 +18,8 @@
 class CItem : public CBaseToggle
 {
 public:
+	CItem(Entity* containingEntity) : CBaseToggle(containingEntity) {}
+
 	bool Spawn() override;
 	CBaseEntity* Respawn() override;
 

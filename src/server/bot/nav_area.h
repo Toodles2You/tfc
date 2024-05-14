@@ -62,12 +62,12 @@ class CNavLadder
 public:
 	CNavLadder( void )
 	{
-		m_topForwardArea = NULL;
-		m_topRightArea = NULL;
-		m_topLeftArea = NULL;
-		m_topBehindArea = NULL;
-		m_bottomArea = NULL;
-		m_entity = NULL;
+		m_topForwardArea = nullptr;
+		m_topRightArea = nullptr;
+		m_topLeftArea = nullptr;
+		m_topBehindArea = nullptr;
+		m_bottomArea = nullptr;
+		m_entity = nullptr;
 	}
 
 	Vector m_top;										///< world coords of the top of the ladder
@@ -88,19 +88,19 @@ public:
 	void OnDestroyNotify( CNavArea *dead )				///< invoked when given area is going away
 	{
 		if (dead == m_topForwardArea)
-			m_topForwardArea = NULL;
+			m_topForwardArea = nullptr;
 
 		if (dead == m_topLeftArea)
-			m_topLeftArea = NULL;
+			m_topLeftArea = nullptr;
 
 		if (dead == m_topRightArea)
-			m_topRightArea = NULL;
+			m_topRightArea = nullptr;
 
 		if (dead == m_topBehindArea)
-			m_topBehindArea = NULL;
+			m_topBehindArea = nullptr;
 
 		if (dead == m_bottomArea)
-			m_bottomArea = NULL;
+			m_bottomArea = nullptr;
 	}
 };
 typedef std::list<CNavLadder *> NavLadderList;
@@ -222,7 +222,7 @@ public:
 	bool IsOverlapping( const CNavArea *area ) const;			///< return true if 'area' overlaps our 2D extents
 	bool IsOverlappingX( const CNavArea *area ) const;			///< return true if 'area' overlaps our X extent
 	bool IsOverlappingY( const CNavArea *area ) const;			///< return true if 'area' overlaps our Y extent
-	int GetPlayerCount( int teamID = 0, CBasePlayer *ignore = NULL ) const;	///< return number of players with given teamID in this area (teamID == 0 means any/all)
+	int GetPlayerCount( int teamID = 0, CBasePlayer *ignore = nullptr ) const;	///< return number of players with given teamID in this area (teamID == 0 means any/all)
 	float GetZ( const Vector *pos ) const;						///< return Z of area at (x,y) of 'pos'
 	float GetZ( float x, float y ) const;						///< return Z of area at (x,y) of 'pos'
 	bool Contains( const Vector *pos ) const;					///< return true if given point is on or above this area, but no others
@@ -314,7 +314,7 @@ public:
 	void Draw( byte red, byte green, byte blue, int duration = 50 );	///< draw area for debugging & editing
 	void DrawConnectedAreas( void );
 	void DrawMarkedCorner( NavCornerType corner, byte red, byte green, byte blue, int duration = 50 );
-	bool SplitEdit( bool splitAlongX, float splitEdge, CNavArea **outAlpha = NULL, CNavArea **outBeta = NULL );	///< split this area into two areas at the given edge
+	bool SplitEdit( bool splitAlongX, float splitEdge, CNavArea **outAlpha = nullptr, CNavArea **outBeta = nullptr );	///< split this area into two areas at the given edge
 	bool MergeEdit( CNavArea *adj );						///< merge this area and given adjacent area 
 	bool SpliceEdit( CNavArea *other );						///< create a new area between this area and given area 
 	void RaiseCorner( NavCornerType corner, int amount );	///< raise/lower a corner (or all corners if corner == NUM_CORNERS)
@@ -429,7 +429,7 @@ inline CNavArea *CNavArea::GetAdjacentArea( NavDirType dir, int i ) const
 		--i;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 inline bool CNavArea::IsOpen( void ) const
@@ -454,7 +454,7 @@ inline CNavArea *CNavArea::PopOpenList( void )
 		return area;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 inline bool CNavArea::IsClosed( void ) const
@@ -559,8 +559,8 @@ extern void BuildLadders( void );
 extern bool TestArea( CNavNode *node, int width, int height );
 extern int BuildArea( CNavNode *node, int width, int height );
 
-extern bool GetGroundHeight( const Vector *pos, float *height, Vector *normal = NULL );
-extern bool GetSimpleGroundHeight( const Vector *pos, float *height, Vector *normal = NULL );
+extern bool GetGroundHeight( const Vector *pos, float *height, Vector *normal = nullptr );
+extern bool GetSimpleGroundHeight( const Vector *pos, float *height, Vector *normal = nullptr );
 
 class CBasePlayer;
 class CBaseEntity; 
@@ -574,7 +574,7 @@ extern const Vector *FindRandomHidingSpot( CBaseEntity *me, Place place, bool is
 extern const Vector *FindNearbyRetreatSpot( CBaseEntity *me, const Vector *start, CNavArea *startArea, float maxRange = 1000.0f, int avoidTeam = 0, bool useCrouchAreas = true );
 
 /// return true if moving from "start" to "finish" will cross a player's line of fire.
-extern bool IsCrossingLineOfFire( const Vector &start, const Vector &finish, CBaseEntity *ignore = NULL, int ignoreTeam = 0 );
+extern bool IsCrossingLineOfFire( const Vector &start, const Vector &finish, CBaseEntity *ignore = nullptr, int ignoreTeam = 0 );
 
 extern void IncreaseDangerNearby( int teamID, float amount, CNavArea *area, const Vector *pos, float maxRadius );
 extern void DrawDanger( void );
@@ -628,7 +628,7 @@ class ShortestPathCost
 public:
 	float operator() ( CNavArea *area, CNavArea *fromArea, const CNavLadder *ladder )
 	{
-		if (fromArea == NULL)
+		if (fromArea == nullptr)
 		{
 			// first area in path, no cost
 			return 0.0f;
@@ -670,35 +670,35 @@ public:
  * If cost functor returns -1 for an area, that area is considered a dead end.
  * This doesn't actually build a path, but the path is defined by following parent
  * pointers back from goalArea to startArea.
- * If 'closestArea' is non-NULL, the closest area to the goal is returned (useful if the path fails).
- * If 'goalArea' is NULL, will compute a path as close as possible to 'goalPos'.
- * If 'goalPos' is NULL, will use the center of 'goalArea' as the goal position.
+ * If 'closestArea' is non-nullptr, the closest area to the goal is returned (useful if the path fails).
+ * If 'goalArea' is nullptr, will compute a path as close as possible to 'goalPos'.
+ * If 'goalPos' is nullptr, will use the center of 'goalArea' as the goal position.
  * Returns true if a path exists.
  */
 template< typename CostFunctor >
-bool NavAreaBuildPath( CNavArea *startArea, CNavArea *goalArea, const Vector *goalPos, CostFunctor &costFunc, CNavArea **closestArea = NULL )
+bool NavAreaBuildPath( CNavArea *startArea, CNavArea *goalArea, const Vector *goalPos, CostFunctor &costFunc, CNavArea **closestArea = nullptr )
 {
 	if (closestArea)
-		*closestArea = NULL;
+		*closestArea = nullptr;
 
-	if (startArea == NULL)
+	if (startArea == nullptr)
 		return false;
 
 	//
-	// If goalArea is NULL, this function will return the closest area to the goal.
+	// If goalArea is nullptr, this function will return the closest area to the goal.
 	// However, if there is also no goal, we can't do anything.
 	// 
-	if (goalArea == NULL && goalPos == NULL)
+	if (goalArea == nullptr && goalPos == nullptr)
 	{
 		return false;
 	}
 
-	startArea->SetParent( NULL );
+	startArea->SetParent( nullptr );
 
 	// if we are already in the goal area, build trivial path
 	if (startArea == goalArea)
 	{
-		goalArea->SetParent( NULL );
+		goalArea->SetParent( nullptr );
 
 		if (closestArea)
 			*closestArea = goalArea;
@@ -716,7 +716,7 @@ bool NavAreaBuildPath( CNavArea *startArea, CNavArea *goalArea, const Vector *go
 	/// @todo Cost might work as "manhattan distance"
 	startArea->SetTotalCost( (*startArea->GetCenter() - actualGoalPos).Length() );
 
-	float initCost = costFunc( startArea, NULL, NULL );	
+	float initCost = costFunc( startArea, nullptr, nullptr );	
 	if (initCost < 0.0f)
 		return false;
 	startArea->SetCostSoFar( initCost );
@@ -750,7 +750,7 @@ bool NavAreaBuildPath( CNavArea *startArea, CNavArea *goalArea, const Vector *go
 		NavConnectList::const_iterator floorIter = floorList->begin();
 
 		bool ladderUp = true;
-		const NavLadderList *ladderList = NULL;
+		const NavLadderList *ladderList = nullptr;
 		NavLadderList::const_iterator ladderIter;
 		enum { AHEAD = 0, LEFT, RIGHT, BEHIND, NUM_TOP_DIRECTIONS };
 		int ladderTopDir;
@@ -759,7 +759,7 @@ bool NavAreaBuildPath( CNavArea *startArea, CNavArea *goalArea, const Vector *go
 		{
 			CNavArea *newArea;
 			NavTraverseType how;
-			const CNavLadder *ladder = NULL;
+			const CNavLadder *ladder = nullptr;
 
 			//
 			// Get next adjacent area - either on floor or via ladder
@@ -848,7 +848,7 @@ bool NavAreaBuildPath( CNavArea *startArea, CNavArea *goalArea, const Vector *go
 					++ladderIter;
 				}
 
-				if (newArea == NULL)
+				if (newArea == nullptr)
 					continue;
 			}
 
@@ -913,17 +913,17 @@ bool NavAreaBuildPath( CNavArea *startArea, CNavArea *goalArea, const Vector *go
 template< typename CostFunctor >
 float NavAreaTravelDistance( CNavArea *startArea, CNavArea *endArea, CostFunctor &costFunc )
 {
-	if (startArea == NULL)
+	if (startArea == nullptr)
 		return -1.0f;
 
-	if (endArea == NULL)
+	if (endArea == nullptr)
 		return -1.0f;
 
 	if (startArea == endArea)
 		return 0.0f;
 
 	// compute path between areas using given cost heuristic
-	if (NavAreaBuildPath( startArea, endArea, NULL, costFunc ) == false)
+	if (NavAreaBuildPath( startArea, endArea, nullptr, costFunc ) == false)
 		return -1.0f;
 
 	// compute distance along path
@@ -943,19 +943,19 @@ float NavAreaTravelDistance( CNavArea *startArea, CNavArea *endArea, CostFunctor
 template< typename CostFunctor >
 float NavAreaTravelDistance( const Vector *startPos, CNavArea *startArea, const Vector *goalPos, CostFunctor &costFunc )
 {
-	if (startArea == NULL || startPos == NULL || goalPos == NULL)
+	if (startArea == nullptr || startPos == nullptr || goalPos == nullptr)
 		return -1.0f;
 
 	// compute path between areas using given cost heuristic
-	CNavArea *goalArea = NULL;
+	CNavArea *goalArea = nullptr;
 	if (NavAreaBuildPath( startArea, TheNavAreaGrid.GetNearestNavArea( goalPos ), goalPos, costFunc, &goalArea ) == false)
 		return -1.0f;
 
-	if (goalArea == NULL)
+	if (goalArea == nullptr)
 		return -1.0f;
 
 	// compute distance along path
-	if (goalArea->GetParent() == NULL)
+	if (goalArea->GetParent() == nullptr)
 	{
 		return (*goalPos - *startPos).Length();
 	}
@@ -989,7 +989,7 @@ float NavAreaTravelDistance( const Vector *startPos, CNavArea *startArea, const 
 // helper function
 inline void AddAreaToOpenList( CNavArea *area, CNavArea *parent, const Vector *startPos, float maxRange )
 {
-	if (area == NULL)
+	if (area == nullptr)
 		return;
 
 	if (!area->IsMarked())
@@ -1027,7 +1027,7 @@ inline void AddAreaToOpenList( CNavArea *area, CNavArea *parent, const Vector *s
 template < typename Functor >
 void SearchSurroundingAreas( CNavArea *startArea, const Vector *startPos, Functor &func, float maxRange = -1.0f )
 {
-	if (startArea == NULL || startPos == NULL)
+	if (startArea == nullptr || startPos == nullptr)
 		return;
 
 	CNavArea::MakeNewMarker();
@@ -1036,7 +1036,7 @@ void SearchSurroundingAreas( CNavArea *startArea, const Vector *startPos, Functo
 	startArea->AddToOpenList();
 	startArea->SetTotalCost( 0.0f );
 	startArea->SetCostSoFar( 0.0f );
-	startArea->SetParent( NULL );
+	startArea->SetParent( nullptr );
 	startArea->Mark();
 
 	while( !CNavArea::IsOpenListEmpty() )
@@ -1184,7 +1184,7 @@ CNavArea *FindMinimumCostArea( CNavArea *startArea, CostFunctor &costFunc )
 			continue;
 
 		// compute cost of this area
-		float cost = costFunc( area, startArea, NULL );
+		float cost = costFunc( area, startArea, nullptr );
 
 		if (cheapAreaSetCount < NUM_CHEAP_AREAS)
 		{
@@ -1210,13 +1210,13 @@ CNavArea *FindMinimumCostArea( CNavArea *startArea, CostFunctor &costFunc )
 	if (cheapAreaSetCount)
 	{
 		// pick one of the areas at random
-		return cheapAreaSet[ RANDOM_LONG( 0, cheapAreaSetCount-1 ) ].area;
+		return cheapAreaSet[ engine::RandomLong( 0, cheapAreaSetCount-1 ) ].area;
 	}
 	else
 	{
 		// degenerate case - no decent sized areas - pick a random area
 		int numAreas = TheNavAreaList.size();
-		int which = RANDOM_LONG( 0, numAreas-1 );
+		int which = engine::RandomLong( 0, numAreas-1 );
 
 		NavAreaList::iterator iter;
 		for( iter = TheNavAreaList.begin(); iter != TheNavAreaList.end(); ++iter )

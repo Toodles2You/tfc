@@ -270,7 +270,7 @@ const char *GameEventName[ NUM_GAME_EVENTS+1 ] =
 
 	"EVENT_HOSTAGE_CALLED_FOR_HELP",
 
-	NULL		// must be NULL-terminated
+	nullptr		// must be nullptr-terminated
 };
 #else
 extern const char *GameEventName[ NUM_GAME_EVENTS ];

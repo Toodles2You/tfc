@@ -746,7 +746,7 @@ typedef struct link_s
 	struct link_s *prev, *next;
 } link_t;
 
-typedef struct edict_s edict_t;
+class Entity;
 
 typedef struct
 {
@@ -762,7 +762,7 @@ typedef struct
 	float fraction; // time completed, 1.0 = didn't hit anything
 	Vector endpos;	// final position
 	plane_t plane;	// surface normal at impact
-	edict_t* ent;	// entity the surface is on
+	Entity* ent;	// entity the surface is on
 	int hitgroup;	// 0 == generic, non zero is specific body part
 } trace_t;
 
@@ -805,7 +805,7 @@ enum
 	PC_LASTCLASS = 12,
 };
 
-// Spectator Movement modes (stored in pev->iuser1, so the physics code can get at them)
+// Spectator Movement modes (stored in v.iuser1, so the physics code can get at them)
 enum
 {
 	OBS_NONE = 0,

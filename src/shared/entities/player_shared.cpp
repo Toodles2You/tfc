@@ -23,6 +23,74 @@ static bool g_bRunConcussionPrediction = false;
 #endif
 
 
+CBaseEntity::CBaseEntity(Entity* containingEntity) : v {*containingEntity}
+{
+	containingEntity->effects |= EF_NOINTERP;
+}
+
+
+CBaseEntity::~CBaseEntity()
+{
+	/* Since the edict doesn't get deleted, fix it so it doesn't interfere. */
+	v.model = 0;
+	v.modelindex = 0;
+	v.effects = EF_NOINTERP | EF_NODRAW;
+	v.solid = SOLID_NOT;
+	v.movetype = MOVETYPE_NONE;
+	v.takedamage = DAMAGE_NO;
+	v.origin = g_vecZero;
+}
+
+
+CBasePlayer::CBasePlayer(Entity* containingEntity) : CBaseAnimating(containingEntity)
+{
+	containingEntity->team = TEAM_UNASSIGNED;
+	containingEntity->playerclass = PC_UNDEFINED;
+	containingEntity->iuser1 = OBS_FIXED;
+
+	m_fDeadTime = gpGlobals->time - 60.0F;
+	SetCustomDecalFrames(-1);
+	m_flNextChatTime = gpGlobals->time + CHAT_INTERVAL;
+
+#ifdef GAME_DLL
+	m_ResetHUD = ResetHUD::Initialize;
+	m_team = nullptr;
+	m_gameMovement = nullptr;
+#endif
+}
+
+
+CBasePlayer::~CBasePlayer()
+{
+	CBaseEntity::~CBaseEntity();
+
+	v.team = TEAM_UNASSIGNED;
+	v.playerclass = PC_UNDEFINED;
+	v.netname = MAKE_STRING("unconnected");
+
+	InstallGameMovement(nullptr);
+
+#ifdef GAME_DLL
+#ifdef HALFLIFE_TANKCONTROL
+		if (m_pTank != nullptr)
+		{
+			m_pTank->Use(this, this, USE_OFF, 0);
+			m_pTank = nullptr;
+		}
+#endif
+
+	SetUseObject(nullptr);
+
+	if (m_team != nullptr)
+	{
+		m_team->RemovePlayer(this);
+	}
+#endif
+
+	RemoveAllWeapons();
+}
+
+
 void
 CBasePlayer::PlaybackEvent(
 	unsigned short event,
@@ -34,13 +102,13 @@ CBasePlayer::PlaybackEvent(
 	qboolean bParam2,
 	unsigned int flags)
 {
-	g_engfuncs.pfnPlaybackEvent(
+	engine::PlaybackEvent(
 		flags,
-		edict(),
+		&v,
 		event,
 		0.0f,
-		pev->origin,
-		pev->angles + pev->punchangle,
+		v.origin,
+		v.angles + v.punchangle,
 		fParam1,
 		fParam2,
 		iParam1,
@@ -74,7 +142,7 @@ void CBasePlayer::WeaponPostFrame()
 				ThrowGrenade();
 			}
 		}
-		else if ((pev->button & (IN_GRENADE | IN_GRENADE2)) == 0)
+		else if ((v.button & (IN_GRENADE | IN_GRENADE2)) == 0)
 		{
 			ThrowGrenade();
 		}
@@ -113,10 +181,10 @@ void CBasePlayer::WeaponPostFrame()
 #ifdef CLIENT_DLL
 void CBasePlayer::PreThink()
 {
-	const auto buttonsChanged = m_afButtonLast ^ pev->button;
+	const auto buttonsChanged = m_afButtonLast ^ v.button;
 
-	m_afButtonPressed = buttonsChanged & pev->button;
-	m_afButtonReleased = buttonsChanged & ~pev->button;
+	m_afButtonPressed = buttonsChanged & v.button;
+	m_afButtonReleased = buttonsChanged & ~v.button;
 }
 #endif
 
@@ -137,16 +205,16 @@ void CBasePlayer::PostThink()
 
 #ifdef HALFLIFE_TANKCONTROL
 #ifdef GAME_DLL
-	if (m_pTank != NULL)
+	if (m_pTank != nullptr)
 	{
-		if (m_pTank->OnControls(pev) && 0 == pev->weaponmodel)
+		if (m_pTank->OnControls(this) && 0 == v.weaponmodel)
 		{
 			m_pTank->Use(this, this, USE_SET, 2); // try fire the gun
 		}
 		else
 		{ // they've moved off the platform
 			m_pTank->Use(this, this, USE_OFF, 0);
-			m_pTank = NULL;
+			m_pTank = nullptr;
 		}
 	}
 #endif
@@ -156,17 +224,13 @@ void CBasePlayer::PostThink()
 
 #ifdef GAME_DLL
 	if (PCNumber() != PC_SCOUT
-	 && (pev->flags & FL_ONGROUND) != 0
+	 && (v.flags & FL_ONGROUND) != 0
 	 && IsAlive()
 	 && m_flFallVelocity >= PLAYER_FALL_PUNCH_THRESHHOLD)
 	{
-		if (pev->watertype == CONTENTS_WATER)
+		if (v.watertype == CONTENTS_WATER)
 		{
 			// Did he hit the world or a non-moving entity?
-			// BUG - this happens all the time in water, especially when
-			// BUG - water has current force
-			// if ( !pev->groundentity || VARS(pev->groundentity)->velocity.z == 0 )
-			// EmitSound("player/pl_wade1.wav", CHAN_VOICE);
 		}
 		else if (m_flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED)
 		{ // after this point, we start doing damage
@@ -177,7 +241,7 @@ void CBasePlayer::PostThink()
 			{
 				TakeDamage(CWorld::World, CWorld::World, flFallDamage, DMG_FALL);
 
-				if (pev->health <= 0)
+				if (v.health <= 0)
 				{
 					EmitSound("common/bodysplat.wav", CHAN_VOICE);
 				}
@@ -185,7 +249,7 @@ void CBasePlayer::PostThink()
 		}
 	}
 
-	if (FBitSet(pev->flags, FL_ONGROUND))
+	if (FBitSet(v.flags, FL_ONGROUND))
 	{
 		m_flFallVelocity = 0;
 	}
@@ -195,44 +259,44 @@ pt_end:
     UpdateMovementAction();
 	StudioFrameAdvance();
 
-	m_afButtonLast = pev->button;
+	m_afButtonLast = v.button;
 }
 
 
 void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 {
 #ifdef GAME_DLL
-	data.flags = pev->flags;
-    data.deadflag = pev->deadflag;
+	data.flags = v.flags;
+    data.deadflag = v.deadflag;
 
 	if (IsSpectator() || IsAlive())
 	{
-		data.health = std::max(pev->health, 1.0F);
+		data.health = std::max(v.health, 1.0F);
 	}
 	else
 	{
 		data.health = 0.0F;
 	}
 	
-	data.vuser4.z = pev->armorvalue;
-	data.vuser4.x = pev->armortype * 10.0F;
+	data.vuser4.z = v.armorvalue;
+	data.vuser4.x = v.armortype * 10.0F;
 
-	data.waterlevel = pev->waterlevel;
-	data.watertype = pev->watertype;
+	data.waterlevel = v.waterlevel;
+	data.watertype = v.watertype;
 
-	data.origin = pev->origin;
-	data.velocity = pev->velocity;
-	data.view_ofs = pev->view_ofs;
+	data.origin = v.origin;
+	data.velocity = v.velocity;
+	data.view_ofs = v.view_ofs;
 
-	data.bInDuck = pev->bInDuck;
-	data.flTimeStepSound = pev->flTimeStepSound;
-	data.flDuckTime = pev->flDuckTime;
-	data.flSwimTime = pev->flSwimTime;
-	data.waterjumptime = pev->teleport_time;
+	data.bInDuck = v.bInDuck;
+	data.flTimeStepSound = v.flTimeStepSound;
+	data.flDuckTime = v.flDuckTime;
+	data.flSwimTime = v.flSwimTime;
+	data.waterjumptime = v.teleport_time;
 
-	data.iuser1 = pev->iuser1;
-	data.iuser2 = pev->iuser2;
-	data.iuser3 = pev->iuser3;
+	data.iuser1 = v.iuser1;
+	data.iuser2 = v.iuser2;
+	data.iuser3 = v.iuser3;
 #endif
 
 	data.tfstate = m_StateBits;
@@ -256,10 +320,10 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 		ammo2[i] = m_rgAmmo[4 + i];
 	}
 
-	data.viewmodel = pev->viewmodel;
-    data.maxspeed = pev->maxspeed;
-	data.weaponanim = pev->weaponanim;
-	data.punchangle = pev->punchangle;
+	data.viewmodel = v.viewmodel;
+    data.maxspeed = v.maxspeed;
+	data.weaponanim = v.weaponanim;
+	data.punchangle = v.punchangle;
 
 	data.fov = m_iFOV;
 
@@ -275,29 +339,29 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 
 void CBasePlayer::SetClientData(const clientdata_t& data)
 {
-	pev->flags = data.flags;
-	pev->health = data.health;
-    pev->deadflag = data.deadflag;
+	v.flags = data.flags;
+	v.health = data.health;
+    v.deadflag = data.deadflag;
 
-	pev->armorvalue = data.vuser4.z;
-	pev->armortype = data.vuser4.x / 10.0F;
+	v.armorvalue = data.vuser4.z;
+	v.armortype = data.vuser4.x / 10.0F;
 
-	pev->waterlevel = data.waterlevel;
-	pev->watertype = data.watertype;
+	v.waterlevel = data.waterlevel;
+	v.watertype = data.watertype;
 
-	pev->origin = data.origin;
-	pev->velocity = data.velocity;
-	pev->view_ofs = data.view_ofs;
+	v.origin = data.origin;
+	v.velocity = data.velocity;
+	v.view_ofs = data.view_ofs;
 
-	pev->bInDuck = data.bInDuck;
-	pev->flTimeStepSound = data.flTimeStepSound;
-	pev->flDuckTime = data.flDuckTime;
-	pev->flSwimTime = data.flSwimTime;
-	pev->teleport_time = data.waterjumptime;
+	v.bInDuck = data.bInDuck;
+	v.flTimeStepSound = data.flTimeStepSound;
+	v.flDuckTime = data.flDuckTime;
+	v.flSwimTime = data.flSwimTime;
+	v.teleport_time = data.waterjumptime;
 
-	pev->iuser1 = data.iuser1;
-	pev->iuser2 = data.iuser2;
-	pev->iuser3 = data.iuser3;
+	v.iuser1 = data.iuser1;
+	v.iuser2 = data.iuser2;
+	v.iuser3 = data.iuser3;
 
 	m_StateBits = data.tfstate;
 	m_nLegDamage = static_cast<byte>(data.vuser4.y);
@@ -328,10 +392,10 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 		m_rgAmmo[4 + i] = ammo2[i];
 	}
 
-	pev->viewmodel = data.viewmodel;
-	pev->maxspeed = data.maxspeed;
-	pev->weaponanim = data.weaponanim;
-	pev->punchangle = data.punchangle;
+	v.viewmodel = data.viewmodel;
+	v.maxspeed = data.maxspeed;
+	v.weaponanim = data.weaponanim;
+	v.punchangle = data.punchangle;
 
 	m_iFOV = data.fov;
 }
@@ -339,12 +403,12 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 
 void CBasePlayer::DecrementTimers(const int msec)
 {
-	float len = VectorNormalize(pev->punchangle);
+	float len = v.punchangle.NormalizeInPlace();
 	if (len != 0.0F)
 	{
 		len -= (10.0F + len * 0.5F) * (msec / 1000.0F);
 		len = std::max(len, 0.0F);
-		pev->punchangle = pev->punchangle * len;
+		v.punchangle = v.punchangle * len;
 	}
 
 	m_iConcussionTime = std::max(m_iConcussionTime - msec, 0);
@@ -354,7 +418,7 @@ void CBasePlayer::DecrementTimers(const int msec)
 		if (PCNumber() == PC_SCOUT || PCNumber() == PC_MEDIC)
 		{
 #ifdef GAME_DLL
-			ConcussionJump(pev->velocity);
+			ConcussionJump(v.velocity);
 #else
 			g_bRunConcussionPrediction = true;
 #endif
@@ -555,15 +619,15 @@ void CBasePlayer::SetAction(const Action action, const bool force)
         return;
     }
 
-    const auto oldSequence = pev->sequence;
+    const auto oldSequence = v.sequence;
     bool restart = false;
-    pev->sequence = GetActionSequence(action, restart);
+    v.sequence = GetActionSequence(action, restart);
 
     m_Action = action;
 
-    if (restart || oldSequence != pev->sequence)
+    if (restart || oldSequence != v.sequence)
     {
-        pev->frame = 0;
+        v.frame = 0;
         ResetSequenceInfo();
     }
 }
@@ -594,13 +658,19 @@ int CBasePlayer::GetDeathSequence()
 	default:
         center = Center();
 
-        AngleVectors(pev->angles, &forward, nullptr, nullptr);
+        AngleVectors(v.angles, &forward, nullptr, nullptr);
 
         dot = DotProduct(gpGlobals->v_forward, g_vecAttackDir * -1);
 
+#ifdef GAME_DLL
+		int ignore = v.GetIndex();
+#else
+		int ignore = -1;
+#endif
+
 		if (dot > 0.3)
 		{
-            Trace trace{center, center + forward * 64, entindex(), Trace::kBox};
+            Trace trace{center, center + forward * 64, ignore, Trace::kBox};
 
             if (trace.fraction == 1)
             {
@@ -609,7 +679,7 @@ int CBasePlayer::GetDeathSequence()
 		}
 		else if (dot <= -0.3)
 		{
-            Trace trace{center, center - forward * 64, entindex(), Trace::kBox};
+            Trace trace{center, center - forward * 64, ignore, Trace::kBox};
 
             if (trace.fraction == 1)
             {
@@ -647,7 +717,7 @@ int CBasePlayer::GetSmallFlinchSequence()
 
 int CBasePlayer::GetActionSequence(const Action action, bool& restart)
 {
-    const auto ducking = (pev->flags & FL_DUCKING) != 0;
+    const auto ducking = (v.flags & FL_DUCKING) != 0;
 
     std::string sequenceName;
 
@@ -691,12 +761,12 @@ int CBasePlayer::GetActionSequence(const Action action, bool& restart)
 
 int CBasePlayer::GetGaitSequence()
 {
-    const auto ducking = (pev->flags & FL_DUCKING) != 0;
-    const auto speed = pev->velocity.Length2D();
+    const auto ducking = (v.flags & FL_DUCKING) != 0;
+    const auto speed = v.velocity.Length2D();
 
-	if (pev->waterlevel >= kWaterLevelWaist)
+	if (v.waterlevel >= kWaterLevelWaist)
 	{
-		if (pev->waterlevel >= kWaterLevelEyes && speed > 220)
+		if (v.waterlevel >= kWaterLevelEyes && speed > 220)
 		{
 			return LookupActivity(ACT_SWIM);
 		}
@@ -732,73 +802,73 @@ void CBasePlayer::UpdateMovementAction()
 {
 	if (m_Action == Action::Jump)
 	{
-		if ((pev->flags & FL_ONGROUND) == 0)
+		if ((v.flags & FL_ONGROUND) == 0)
 		{
-			pev->gaitsequence = 0;
+			v.gaitsequence = 0;
 			return;
 		}
 		SetAction(Action::Idle);
 	}
 
-    pev->gaitsequence = GetGaitSequence();
+    v.gaitsequence = GetGaitSequence();
 }
 
 
 void CBaseEntity::SetEntityState(const entity_state_t& state)
 {
-	pev->animtime = state.animtime;
+	v.animtime = state.animtime;
 
-	pev->origin = state.origin;
-	pev->angles = state.angles;
-	pev->mins = state.mins;
-	pev->maxs = state.maxs;
+	v.origin = state.origin;
+	v.angles = state.angles;
+	v.mins = state.mins;
+	v.maxs = state.maxs;
 
-	pev->startpos = state.startpos;
-	pev->endpos = state.endpos;
+	v.startpos = state.startpos;
+	v.endpos = state.endpos;
 
-	pev->impacttime = state.impacttime;
-	pev->starttime = state.starttime;
+	v.impacttime = state.impacttime;
+	v.starttime = state.starttime;
 
-	pev->modelindex = state.modelindex;
+	v.modelindex = state.modelindex;
 
-	pev->frame = state.frame;
+	v.frame = state.frame;
 
-	pev->skin = state.skin;
-	pev->effects = state.effects;
+	v.skin = state.skin;
+	v.effects = state.effects;
 
 	m_EFlags |= state.eflags;
 
-	pev->scale = state.scale;
-	pev->solid = state.solid;
-	pev->colormap = state.colormap;
+	v.scale = state.scale;
+	v.solid = state.solid;
+	v.colormap = state.colormap;
 
-	pev->movetype = state.movetype;
-	pev->sequence = state.sequence;
-	pev->framerate = state.framerate;
-	pev->body = state.body;
+	v.movetype = state.movetype;
+	v.sequence = state.sequence;
+	v.framerate = state.framerate;
+	v.body = state.body;
 
 	for (int i = 0; i < 4; i++)
 	{
-		pev->controller[i] = state.controller[i];
+		v.controller[i] = state.controller[i];
 	}
 
 	for (int i = 0; i < 2; i++)
 	{
-		pev->blending[i] = state.blending[i];
+		v.blending[i] = state.blending[i];
 	}
 
-	pev->rendermode = state.rendermode;
-	pev->renderamt = state.renderamt;
-	pev->renderfx = state.renderfx;
-	pev->rendercolor.x = state.rendercolor.r;
-	pev->rendercolor.y = state.rendercolor.g;
-	pev->rendercolor.z = state.rendercolor.b;
+	v.rendermode = state.rendermode;
+	v.renderamt = state.renderamt;
+	v.renderfx = state.renderfx;
+	v.rendercolor.x = state.rendercolor.r;
+	v.rendercolor.y = state.rendercolor.g;
+	v.rendercolor.z = state.rendercolor.b;
 
-	// pev->aiment = state.aiment;
+	// v.aiment = state.aiment;
 
-	// pev->owner = state.owner;
+	// v.owner = state.owner;
 
-	pev->playerclass = state.playerclass;
+	v.playerclass = state.playerclass;
 }
 
 
@@ -806,27 +876,27 @@ void CBasePlayer::SetEntityState(const entity_state_t& state)
 {
 	CBaseEntity::SetEntityState(state);
 
-	pev->team = state.team;
-	pev->playerclass = state.playerclass;
+	v.team = state.team;
+	v.playerclass = state.playerclass;
 
-	pev->basevelocity = state.basevelocity;
+	v.basevelocity = state.basevelocity;
 
-	pev->weaponmodel = state.weaponmodel;
-	pev->gaitsequence = state.gaitsequence;
+	v.weaponmodel = state.weaponmodel;
+	v.gaitsequence = state.gaitsequence;
 	if (state.spectator != 0)
 	{
-		pev->flags |= FL_SPECTATOR;
+		v.flags |= FL_SPECTATOR;
 	}
-	pev->friction = state.friction;
+	v.friction = state.friction;
 
-	pev->gravity = state.gravity;
+	v.gravity = state.gravity;
 
 	if (state.usehull == 1)
 	{
-		pev->flags |= FL_DUCKING;
+		v.flags |= FL_DUCKING;
 	}
 
-	pev->health = state.health;
+	v.health = state.health;
 }
 
 

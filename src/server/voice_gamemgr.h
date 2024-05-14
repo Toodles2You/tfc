@@ -46,7 +46,7 @@ public:
 	void				Update(double frametime);
 
 	// Called when a new client connects (unsquelches its entity for everyone).
-	void				ClientConnected(struct edict_s *pEdict);
+	void				ClientConnected(int index);
 
 	// Called on ClientCommand. Checks for the squelch and unsquelch commands.
 	// Returns true if it handled the command.

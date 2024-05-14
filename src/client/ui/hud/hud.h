@@ -459,7 +459,7 @@ public:
 	bool Init() override;
 	static char* LocaliseTextString(const char* msg, char* dst_buffer, int buffer_size);
 	static char* BufferedLocaliseTextString(const char* msg);
-	const char* LookupString(const char* msg_name, int* msg_dest = NULL);
+	const char* LookupString(const char* msg_name, int* msg_dest = nullptr);
 	bool MsgFunc_TextMsg(const char* pszName, int iSize, void* pbuf);
 };
 
@@ -715,7 +715,7 @@ public:
 	bool Redraw(float flTime, bool intermission);
 	bool UpdateClientData(client_data_t* cdata, float time);
 
-	CHud() : m_iSpriteCount(0), m_pHudList(NULL) {}
+	CHud() : m_iSpriteCount(0), m_pHudList(nullptr) {}
 	~CHud(); // destructor, frees allocated memory
 
 	void Update_SetFOV(int iFov);
@@ -746,8 +746,8 @@ public:
 
 	bool ImpulseCommands(int impulse);
 
-	float* GetTeamColor(int teamNumber) const;
-	float* GetClientColor(int clientIndex) const;
+	const Vector& GetTeamColor(int teamNumber) const;
+	const Vector& GetClientColor(int clientIndex) const;
 
 	bool IsAlive();
 	int GetObserverMode();

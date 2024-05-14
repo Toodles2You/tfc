@@ -28,7 +28,7 @@ private:
 
 inline SteamFile::SteamFile( const char *filename )
 {
-	m_fileData = (byte *)LOAD_FILE_FOR_ME( const_cast<char *>( filename ), &m_fileDataLength );
+	m_fileData = (byte *)engine::LoadFileForMe( const_cast<char *>( filename ), &m_fileDataLength );
 	m_cursor = m_fileData;
 	m_bytesLeft = m_fileDataLength;
 }
@@ -36,12 +36,12 @@ inline SteamFile::SteamFile( const char *filename )
 inline SteamFile::~SteamFile()
 {
 	if (m_fileData)
-		FREE_FILE( m_fileData );
+		engine::FreeFile( m_fileData );
 }
 
 inline bool SteamFile::Read( void *data, int length )
 {
-	if (length > m_bytesLeft || m_cursor == NULL || m_bytesLeft <= 0)
+	if (length > m_bytesLeft || m_cursor == nullptr || m_bytesLeft <= 0)
 		return false;
 
 	byte *readCursor = static_cast<byte *>( data );

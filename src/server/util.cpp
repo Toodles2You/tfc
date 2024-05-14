@@ -32,34 +32,34 @@
 
 inline void MessageBegin(int dest, int type, const Vector& origin, CBaseEntity* entity)
 {
-	g_engfuncs.pfnMessageBegin(
+	engine::MessageBegin(
 		dest,
 		type,
 		origin,
-		entity ? entity->pev->pContainingEntity : nullptr);
+		entity ? &entity->v : nullptr);
 }
 
 inline void MessageBegin(int dest, int type, CBaseEntity* entity)
 {
-	g_engfuncs.pfnMessageBegin(
+	engine::MessageBegin(
 		dest,
 		type,
 		nullptr,
-		entity ? entity->pev->pContainingEntity : nullptr);
+		entity ? &entity->v : nullptr);
 }
 
 CBaseEntity* util::FindEntityForward(CBaseEntity* pMe)
 {
 	TraceResult tr;
 
-	util::MakeVectors(pMe->pev->v_angle);
-	util::TraceLine(pMe->pev->origin + pMe->pev->view_ofs, pMe->pev->origin + pMe->pev->view_ofs + gpGlobals->v_forward * 8192, dont_ignore_monsters, pMe, &tr);
-	if (tr.flFraction != 1.0 && !FNullEnt(tr.pHit))
+	util::MakeVectors(pMe->v.v_angle);
+	util::TraceLine(pMe->v.origin + pMe->v.view_ofs, pMe->v.origin + pMe->v.view_ofs + gpGlobals->v_forward * 8192, dont_ignore_monsters, pMe, &tr);
+	if (tr.flFraction != 1.0 && tr.pHit != nullptr)
 	{
-		CBaseEntity* pHit = CBaseEntity::Instance(tr.pHit);
+		CBaseEntity* pHit = tr.pHit->Get<CBaseEntity>();
 		return pHit;
 	}
-	return NULL;
+	return nullptr;
 }
 
 static unsigned int glSeed = 0;
@@ -164,7 +164,7 @@ void util::SetGroupTrace(int groupmask, int op)
 	g_groupmask = groupmask;
 	g_groupop = op;
 
-	ENGINE_SETGROUPMASK(g_groupmask, g_groupop);
+	engine::SetGroupMask(g_groupmask, g_groupop);
 }
 
 void util::UnsetGroupTrace()
@@ -172,7 +172,7 @@ void util::UnsetGroupTrace()
 	g_groupmask = 0;
 	g_groupop = 0;
 
-	ENGINE_SETGROUPMASK(0, 0);
+	engine::SetGroupMask(0, 0);
 }
 
 // Smart version, it'll clean itself up when it pops off stack
@@ -184,7 +184,7 @@ util::GroupTrace::GroupTrace(int groupmask, int op)
 	g_groupmask = groupmask;
 	g_groupop = op;
 
-	ENGINE_SETGROUPMASK(g_groupmask, g_groupop);
+	engine::SetGroupMask(g_groupmask, g_groupop);
 }
 
 util::GroupTrace::~GroupTrace()
@@ -192,12 +192,12 @@ util::GroupTrace::~GroupTrace()
 	g_groupmask = m_oldgroupmask;
 	g_groupop = m_oldgroupop;
 
-	ENGINE_SETGROUPMASK(g_groupmask, g_groupop);
+	engine::SetGroupMask(g_groupmask, g_groupop);
 }
 
-edict_t* util::GetEntityList()
+Entity* util::GetEntityList()
 {
-	return g_engfuncs.pfnPEntityOfEntOffset(0);
+	return engine::PEntityOfEntOffset(0);
 }
 
 CBaseEntity* util::GetLocalPlayer()
@@ -241,14 +241,14 @@ float util::AngleDiff(float destAngle, float srcAngle)
 Vector util::VecToAngles(const Vector& vec)
 {
 	float rgflVecOut[3];
-	VEC_TO_ANGLES(vec, rgflVecOut);
+	engine::VecToAngles(vec, rgflVecOut);
 	return Vector(rgflVecOut);
 }
 
 
 int util::EntitiesInBox(CBaseEntity** pList, int listMax, const Vector& mins, const Vector& maxs, int flagMask, bool checkSolid)
 {
-	edict_t* pEdict = util::GetEntityList();
+	Entity* pEdict = util::GetEntityList();
 	CBaseEntity* pEntity;
 	int count;
 
@@ -262,24 +262,24 @@ int util::EntitiesInBox(CBaseEntity** pList, int listMax, const Vector& mins, co
 
 	for (int i = 1; i < gpGlobals->maxEntities; i++, pEdict++)
 	{
-		if (0 != pEdict->free) // Not in use
+		if (pEdict->IsFree()) // Not in use
 			continue;
 
-		if (0 != flagMask && (pEdict->v.flags & flagMask) == 0) // Does it meet the criteria?
+		if (0 != flagMask && (pEdict->flags & flagMask) == 0) // Does it meet the criteria?
 			continue;
 
-		if (0 != checkSolid && (pEdict->v.solid == SOLID_NOT || pEdict->v.mins.x == pEdict->v.maxs.x))
+		if (0 != checkSolid && (pEdict->solid == SOLID_NOT || pEdict->mins.x == pEdict->maxs.x))
 			continue;
 
-		if (mins.x > pEdict->v.absmax.x ||
-			mins.y > pEdict->v.absmax.y ||
-			mins.z > pEdict->v.absmax.z ||
-			maxs.x < pEdict->v.absmin.x ||
-			maxs.y < pEdict->v.absmin.y ||
-			maxs.z < pEdict->v.absmin.z)
+		if (mins.x > pEdict->absmax.x ||
+			mins.y > pEdict->absmax.y ||
+			mins.z > pEdict->absmax.z ||
+			maxs.x < pEdict->absmin.x ||
+			maxs.y < pEdict->absmin.y ||
+			maxs.z < pEdict->absmin.z)
 			continue;
 
-		pEntity = CBaseEntity::Instance(pEdict);
+		pEntity = pEdict->Get<CBaseEntity>();
 		if (!pEntity)
 			continue;
 
@@ -296,7 +296,7 @@ int util::EntitiesInBox(CBaseEntity** pList, int listMax, const Vector& mins, co
 
 int util::MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& center, float radius)
 {
-	edict_t* pEdict = util::GetEntityList();
+	Entity* pEdict = util::GetEntityList();
 	CBaseEntity* pEntity;
 	int count;
 	float distance, delta;
@@ -312,15 +312,15 @@ int util::MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& cente
 
 	for (int i = 1; i < gpGlobals->maxEntities; i++, pEdict++)
 	{
-		if (0 != pEdict->free) // Not in use
+		if (pEdict->IsFree()) // Not in use
 			continue;
 
-		if ((pEdict->v.flags & (FL_CLIENT | FL_MONSTER)) == 0) // Not a client/monster ?
+		if ((pEdict->flags & (FL_CLIENT | FL_MONSTER)) == 0) // Not a client/monster ?
 			continue;
 
 		// Use origin for X & Y since they are centered for all monsters
 		// Now X
-		delta = center.x - pEdict->v.origin.x; //(pEdict->v.absmin.x + pEdict->v.absmax.x)*0.5;
+		delta = center.x - pEdict->origin.x;
 		delta *= delta;
 
 		if (delta > radiusSquared)
@@ -328,7 +328,7 @@ int util::MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& cente
 		distance = delta;
 
 		// Now Y
-		delta = center.y - pEdict->v.origin.y; //(pEdict->v.absmin.y + pEdict->v.absmax.y)*0.5;
+		delta = center.y - pEdict->origin.y;
 		delta *= delta;
 
 		distance += delta;
@@ -336,14 +336,14 @@ int util::MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& cente
 			continue;
 
 		// Now Z
-		delta = center.z - (pEdict->v.absmin.z + pEdict->v.absmax.z) * 0.5;
+		delta = center.z - (pEdict->absmin.z + pEdict->absmax.z) * 0.5;
 		delta *= delta;
 
 		distance += delta;
 		if (distance > radiusSquared)
 			continue;
 
-		pEntity = CBaseEntity::Instance(pEdict);
+		pEntity = pEdict->Get<CBaseEntity>();
 		if (!pEntity)
 			continue;
 
@@ -359,37 +359,59 @@ int util::MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& cente
 }
 
 
+util::EntityIterator::EntityIterator(const char* key, const char* value, CBaseEntity* start)
+{
+	_key = key;
+	_value = value;
+	_start = (start != nullptr) ? &start->v : &CWorld::World->v;
+	_current = engine::FindEntityByString(_start, _key, _value);
+}
+
+void util::EntityIterator::operator++()
+{
+	_current = engine::FindEntityByString(_current, _key, _value);
+}
+
+util::EntityIterator::operator bool()
+{
+	return _current != &CWorld::World->v && _current != _start;
+}
+
+
 CBaseEntity* util::FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius)
 {
-	edict_t* pentEntity;
+	Entity* pentEntity;
 
 	if (pStartEntity)
-		pentEntity = pStartEntity->edict();
+		pentEntity = &pStartEntity->v;
 	else
-		pentEntity = NULL;
+		pentEntity = nullptr;
 
-	pentEntity = FIND_ENTITY_IN_SPHERE(pentEntity, vecCenter, flRadius);
+	pentEntity = engine::FindEntityInSphere(pentEntity, vecCenter, flRadius);
 
-	if (!FNullEnt(pentEntity))
-		return CBaseEntity::Instance(pentEntity);
-	return NULL;
+	if (pentEntity != nullptr && OFFSET(pentEntity) != 0)
+		return pentEntity->Get<CBaseEntity>();
+	return nullptr;
 }
 
 
 CBaseEntity* util::FindEntityByString(CBaseEntity* pStartEntity, const char* szKeyword, const char* szValue)
 {
-	edict_t* pentEntity;
+	Entity* entity = nullptr;
 
-	if (pStartEntity)
-		pentEntity = pStartEntity->edict();
-	else
-		pentEntity = NULL;
+	if (pStartEntity != nullptr)
+	{
+		entity = &pStartEntity->v;
+	}
 
-	pentEntity = FIND_ENTITY_BY_STRING(pentEntity, szKeyword, szValue);
+	entity = engine::FindEntityByString(entity, szKeyword, szValue);
 
-	if (!FNullEnt(pentEntity))
-		return CBaseEntity::Instance(pentEntity);
-	return NULL;
+	if (entity != nullptr && engine::EntOffsetOfPEntity(entity) != 0)
+	{
+		return entity->Get<CBaseEntity>();
+	}
+
+	return nullptr;
 }
 
 CBaseEntity* util::FindEntityByClassname(CBaseEntity* pStartEntity, const char* szName)
@@ -405,17 +427,17 @@ CBaseEntity* util::FindEntityByTargetname(CBaseEntity* pStartEntity, const char*
 
 CBaseEntity* util::FindEntityGeneric(const char* szWhatever, Vector& vecSrc, float flRadius)
 {
-	CBaseEntity* pEntity = NULL;
+	CBaseEntity* pEntity = nullptr;
 
-	pEntity = util::FindEntityByTargetname(NULL, szWhatever);
+	pEntity = util::FindEntityByTargetname(nullptr, szWhatever);
 	if (pEntity)
 		return pEntity;
 
-	CBaseEntity* pSearch = NULL;
+	CBaseEntity* pSearch = nullptr;
 	float flMaxDist2 = flRadius * flRadius;
-	while ((pSearch = util::FindEntityByClassname(pSearch, szWhatever)) != NULL)
+	while ((pSearch = util::FindEntityByClassname(pSearch, szWhatever)) != nullptr)
 	{
-		float flDist2 = (pSearch->pev->origin - vecSrc).Length();
+		float flDist2 = (pSearch->v.origin - vecSrc).Length();
 		flDist2 = flDist2 * flDist2;
 		if (flMaxDist2 > flDist2)
 		{
@@ -428,28 +450,29 @@ CBaseEntity* util::FindEntityGeneric(const char* szWhatever, Vector& vecSrc, flo
 
 
 // returns a CBaseEntity pointer to a player by index.  Only returns if the player is spawned and connected
-// otherwise returns NULL
+// otherwise returns nullptr
 // Index is 1 based
 CBaseEntity* util::PlayerByIndex(int playerIndex)
 {
-	CBaseEntity* pPlayer = NULL;
+	CBaseEntity* player = nullptr;
 
 	if (playerIndex > 0 && playerIndex <= gpGlobals->maxClients)
 	{
-		edict_t* pPlayerEdict = INDEXENT(playerIndex);
-		if (pPlayerEdict && 0 == pPlayerEdict->free)
+		auto entity = Entity::FromIndex(playerIndex);
+
+		if (entity != nullptr && !entity->IsFree())
 		{
-			pPlayer = CBaseEntity::Instance(pPlayerEdict);
+			player = entity->Get<CBaseEntity>();
 		}
 	}
 
-	return pPlayer;
+	return player;
 }
 
 
 void util::MakeVectors(const Vector& vecAngles)
 {
-	MAKE_VECTORS(vecAngles);
+	engine::MakeVectors(vecAngles);
 }
 
 
@@ -458,12 +481,12 @@ void util::MakeAimVectors(const Vector& vecAngles)
 	float rgflVec[3];
 	vecAngles.CopyToArray(rgflVec);
 	rgflVec[0] = -rgflVec[0];
-	MAKE_VECTORS(rgflVec);
+	engine::MakeVectors(rgflVec);
 }
 
 void util::MakeInvVectors(const Vector& vec, globalvars_t* pgv)
 {
-	MAKE_VECTORS(vec);
+	engine::MakeVectors(vec);
 
 	pgv->v_right = pgv->v_right * -1;
 
@@ -515,7 +538,7 @@ void util::ScreenShake(const Vector& center, float amplitude, float frequency, f
 	{
 		CBaseEntity* pPlayer = util::PlayerByIndex(i);
 
-		if (!pPlayer || (pPlayer->pev->flags & FL_ONGROUND) == 0) // Don't shake if not onground
+		if (!pPlayer || (pPlayer->v.flags & FL_ONGROUND) == 0) // Don't shake if not onground
 			continue;
 
 		localAmplitude = 0;
@@ -524,7 +547,7 @@ void util::ScreenShake(const Vector& center, float amplitude, float frequency, f
 			localAmplitude = amplitude;
 		else
 		{
-			Vector delta = center - pPlayer->pev->origin;
+			Vector delta = center - pPlayer->v.origin;
 			float distance = delta.Length();
 
 			// Had to get rid of this falloff - it didn't work well
@@ -783,13 +806,13 @@ void util::ShowMessageAll(const char* pString)
 void util::TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, CBaseEntity* ignore, TraceResult* ptr)
 {
 	//TODO: define constants
-	TRACE_LINE(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0) | (ignore_glass == ignoreGlass ? 0x100 : 0), ignore ? ignore->edict() : nullptr, ptr);
+	engine::TraceLine(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0) | (ignore_glass == ignoreGlass ? 0x100 : 0), ignore != nullptr ? &ignore->v : nullptr, ptr);
 }
 
 
 void util::TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, CBaseEntity* ignore, TraceResult* ptr)
 {
-	TRACE_LINE(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), ignore ? ignore->edict() : nullptr, ptr);
+	engine::TraceLine(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), ignore != nullptr ? &ignore->v : nullptr, ptr);
 }
 
 
@@ -812,15 +835,15 @@ bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CB
 		gpGlobals->trace_flags |= FTRACE_SIMPLEBOX;
 	}
 
-	edict_t* ignoreEnt = ignore ? ignore->pev->pContainingEntity : nullptr;
+	Entity* ignoreEnt = ignore ? &ignore->v : nullptr;
 
 	if (hull == point_hull)
 	{	
-		g_engfuncs.pfnTraceLine(start, end, traceFlags, ignoreEnt, tr);
+		engine::TraceLine(start, end, traceFlags, ignoreEnt, tr);
 	}
 	else
 	{
-		g_engfuncs.pfnTraceHull(start, end, traceFlags, hull, ignoreEnt, tr);
+		engine::TraceHull(start, end, traceFlags, hull, ignoreEnt, tr);
 	}
 
 	if ((flags & kTraceBoxModel) != 0 && tr->flFraction != 1.0F)
@@ -828,11 +851,11 @@ bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CB
 		TraceResult tr2;
 		if (hull == point_hull)
 		{
-			g_engfuncs.pfnTraceLine(tr->vecEndPos, end, traceFlags, ignoreEnt, &tr2);
+			engine::TraceLine(tr->vecEndPos, end, traceFlags, ignoreEnt, &tr2);
 		}
 		else
 		{
-			g_engfuncs.pfnTraceHull(start, end, traceFlags, hull, ignoreEnt, &tr2);
+			engine::TraceHull(start, end, traceFlags, hull, ignoreEnt, &tr2);
 		}
 		
 		if (tr2.flFraction != 1.0F && tr2.pHit == tr->pHit)
@@ -845,14 +868,14 @@ bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CB
 }
 
 
-void util::TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t* pentIgnore, TraceResult* ptr)
+void util::TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, Entity* pentIgnore, TraceResult* ptr)
 {
-	TRACE_HULL(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), hullNumber, pentIgnore, ptr);
+	engine::TraceHull(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), hullNumber, pentIgnore, ptr);
 }
 
-void util::TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, edict_t* pentModel, TraceResult* ptr)
+void util::TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, Entity* pentModel, TraceResult* ptr)
 {
-	g_engfuncs.pfnTraceModel(vecStart, vecEnd, hullNumber, pentModel, ptr);
+	engine::TraceModel(vecStart, vecEnd, hullNumber, pentModel, ptr);
 }
 
 
@@ -876,13 +899,13 @@ TraceResult util::GetGlobalTrace()
 
 float util::VecToYaw(const Vector& vec)
 {
-	return VEC_TO_YAW(vec);
+	return engine::VecToYaw(vec);
 }
 
 
 void util::ParticleEffect(const Vector& vecOrigin, const Vector& vecDirection, unsigned int ulColor, unsigned int ulCount)
 {
-	PARTICLE_EFFECT(vecOrigin, vecDirection, (float)ulColor, (float)ulCount);
+	engine::ParticleEffect(vecOrigin, vecDirection, (float)ulColor, (float)ulCount);
 }
 
 
@@ -963,10 +986,10 @@ char* util::VarArgs(const char* format, ...)
 	return string;
 }
 
-Vector util::GetAimVector(edict_t* pent, float flSpeed)
+Vector util::GetAimVector(Entity* pent, float flSpeed)
 {
 	Vector tmp;
-	GET_AIM_VECTOR(pent, flSpeed, tmp);
+	engine::GetAimVector(pent, flSpeed, tmp);
 	return tmp;
 }
 
@@ -974,16 +997,14 @@ bool util::IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator)
 {
 	if (!FStringNull(sMaster))
 	{
-		edict_t* pentTarget = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(sMaster));
+		CBaseEntity* pMaster = util::FindEntityByTargetname(nullptr, STRING(sMaster));
 
-		if (!FNullEnt(pentTarget))
+		if (pMaster != nullptr && (pMaster->ObjectCaps() & FCAP_MASTER) != 0)
 		{
-			CBaseEntity* pMaster = CBaseEntity::Instance(pentTarget);
-			if (pMaster && (pMaster->ObjectCaps() & FCAP_MASTER) != 0)
-				return pMaster->IsTriggered(pActivator);
+			return pMaster->IsTriggered(pActivator);
 		}
 
-		ALERT(at_console, "Master was null or not a master!\n");
+		engine::AlertMessage(at_aiconsole, "Master was null or not a master!\n");
 	}
 
 	// if this isn't a master entity, just say yes.
@@ -1008,7 +1029,7 @@ bool util::TeamsMatch(const char* pTeamName1, const char* pTeamName2)
 }
 
 
-void util::StringToVector(float* pVector, const char* pString)
+void util::StringToVector(Vector& pVector, const char* pString)
 {
 	char *pstr, *pfront, tempString[128];
 	int j;
@@ -1030,7 +1051,7 @@ void util::StringToVector(float* pVector, const char* pString)
 	if (j < 2)
 	{
 		/*
-		ALERT( at_error, "Bad field in entity!! %s:%s == \"%s\"\n",
+		engine::AlertMessage( at_error, "Bad field in entity!! %s:%s == \"%s\"\n",
 			pkvd->szClassName, pkvd->szKeyName, pkvd->szValue );
 		*/
 		for (j = j + 1; j < 3; j++)
@@ -1096,19 +1117,19 @@ Vector util::ClampVectorToBox(const Vector& input, const Vector& clampSize)
 
 void util::PrecacheOther(const char* szClassname)
 {
-	edict_t* pent;
+	Entity* pent;
 
-	pent = CREATE_NAMED_ENTITY(MAKE_STRING(szClassname));
-	if (FNullEnt(pent))
+	pent = engine::CreateNamedEntity(MAKE_STRING(szClassname));
+	if (pent == nullptr)
 	{
-		ALERT(at_console, "NULL Ent in util::PrecacheOther\n");
+		engine::AlertMessage(at_console, "NULL Ent in util::PrecacheOther\n");
 		return;
 	}
 
-	CBaseEntity* pEntity = CBaseEntity::Instance(VARS(pent));
+	CBaseEntity* pEntity = pent->Get<CBaseEntity>();
 	if (pEntity)
 		pEntity->Precache();
-	g_engfuncs.pfnRemoveEntity(pent);
+	engine::RemoveEntity(pent);
 }
 
 //=========================================================
@@ -1125,7 +1146,7 @@ void util::LogPrintf(const char* fmt, ...)
 	va_end(argptr);
 
 	// Print to server console
-	ALERT(at_logged, "%s", string);
+	engine::AlertMessage(at_logged, "%s", string);
 }
 
 //=========================================================

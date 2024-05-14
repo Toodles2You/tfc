@@ -10,7 +10,7 @@
 #include "hud.h"
 #include "cl_util.h"
 
-// Triangle rendering apis are in gEngfuncs.pTriAPI
+// Triangle rendering apis are in client::pTriAPI
 
 #include "const.h"
 #include "entity_state.h"
@@ -35,54 +35,54 @@ void CHud::RedrawZoomOverlay(float time)
 		return;
 	}
 
-	auto sprite = const_cast<struct model_s*>(gEngfuncs.GetSpritePointer(m_hSniperScope));
+	auto sprite = const_cast<struct model_s*>(client::GetSpritePointer(m_hSniperScope));
 
 	float scopeLeft = (ScreenWidth - ScreenHeight) / 2.0F;
 	float scopeRight = (ScreenWidth + ScreenHeight) / 2.0F;
 
-	gEngfuncs.pTriAPI->SpriteTexture(sprite, 0);
+	client::tri::SpriteTexture(sprite, 0);
 
-	gEngfuncs.pTriAPI->Color4fRendermode(1.0F, 1.0F, 1.0F, 1.0F, kRenderTransAlpha);
-	gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
+	client::tri::Color4fRendermode(1.0F, 1.0F, 1.0F, 1.0F, kRenderTransAlpha);
+	client::tri::RenderMode(kRenderTransAlpha);
 
-	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-
-
-	gEngfuncs.pTriAPI->TexCoord2f(0, 1);
-	gEngfuncs.pTriAPI->Vertex3f(scopeLeft, 0, 0);
-
-	gEngfuncs.pTriAPI->TexCoord2f(1, 1);
-	gEngfuncs.pTriAPI->Vertex3f(scopeRight, 0, 0);
-
-	gEngfuncs.pTriAPI->TexCoord2f(1, 0);
-	gEngfuncs.pTriAPI->Vertex3f(scopeRight, ScreenHeight, 0);
-
-	gEngfuncs.pTriAPI->TexCoord2f(0, 0);
-	gEngfuncs.pTriAPI->Vertex3f(scopeLeft, ScreenHeight, 0);
+	client::tri::Begin(TRI_QUADS);
 
 
-	gEngfuncs.pTriAPI->TexCoord2f(0, 0);
+	client::tri::TexCoord2f(0, 1);
+	client::tri::Vertex3f(scopeLeft, 0, 0);
 
-	gEngfuncs.pTriAPI->Vertex3f(0, 0, 0);
-	gEngfuncs.pTriAPI->Vertex3f(scopeLeft, 0, 0);
-	gEngfuncs.pTriAPI->Vertex3f(scopeLeft, ScreenHeight, 0);
-	gEngfuncs.pTriAPI->Vertex3f(0, ScreenHeight, 0);
+	client::tri::TexCoord2f(1, 1);
+	client::tri::Vertex3f(scopeRight, 0, 0);
 
+	client::tri::TexCoord2f(1, 0);
+	client::tri::Vertex3f(scopeRight, ScreenHeight, 0);
 
-	gEngfuncs.pTriAPI->TexCoord2f(1, 0);
-	gEngfuncs.pTriAPI->Vertex3f(scopeRight, 0, 0);
-
-	gEngfuncs.pTriAPI->TexCoord2f(1, 0);
-	gEngfuncs.pTriAPI->Vertex3f(ScreenWidth, 0, 0);
-
-	gEngfuncs.pTriAPI->TexCoord2f(1, 0);
-	gEngfuncs.pTriAPI->Vertex3f(ScreenWidth, ScreenHeight, 0);
-
-	gEngfuncs.pTriAPI->TexCoord2f(1, 0);
-	gEngfuncs.pTriAPI->Vertex3f(scopeRight, ScreenHeight, 0);
+	client::tri::TexCoord2f(0, 0);
+	client::tri::Vertex3f(scopeLeft, ScreenHeight, 0);
 
 
-	gEngfuncs.pTriAPI->End();
+	client::tri::TexCoord2f(0, 0);
+
+	client::tri::Vertex3f(0, 0, 0);
+	client::tri::Vertex3f(scopeLeft, 0, 0);
+	client::tri::Vertex3f(scopeLeft, ScreenHeight, 0);
+	client::tri::Vertex3f(0, ScreenHeight, 0);
+
+
+	client::tri::TexCoord2f(1, 0);
+	client::tri::Vertex3f(scopeRight, 0, 0);
+
+	client::tri::TexCoord2f(1, 0);
+	client::tri::Vertex3f(ScreenWidth, 0, 0);
+
+	client::tri::TexCoord2f(1, 0);
+	client::tri::Vertex3f(ScreenWidth, ScreenHeight, 0);
+
+	client::tri::TexCoord2f(1, 0);
+	client::tri::Vertex3f(scopeRight, ScreenHeight, 0);
+
+
+	client::tri::End();
 }
 
 /*

@@ -38,10 +38,10 @@ CSpawnPoint::CSpawnPoint() :
 
 
 CSpawnPoint::CSpawnPoint(CBaseEntity *pEntity) :
-	m_origin{pEntity->pev->origin + Vector(0, 0, 1)},
-	m_angles{pEntity->pev->angles},
-	m_target{pEntity->pev->target},
-	m_master{pEntity->pev->netname},
+	m_origin{pEntity->v.origin + Vector(0, 0, 1)},
+	m_angles{pEntity->v.angles},
+	m_target{pEntity->v.target},
+	m_master{pEntity->v.netname},
 	m_lastSpawnTime{-1000.0F}
 {
 }
@@ -117,7 +117,7 @@ CSpawnPoint *CGameRules::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
 
 void CGameRules::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 {
-	if (!FStrEq(STRING(pEntity->pev->classname), "info_player_start"))
+	if (!streq(pEntity->v.classname, "info_player_start"))
 	{
 		return;
 	}
@@ -133,8 +133,8 @@ bool CGameRules::IsPlayerPrivileged(CBasePlayer* pPlayer)
 
 CGameRules* InstallGameRules()
 {
-	SERVER_COMMAND("exec game.cfg\n");
-	SERVER_EXECUTE();
+	engine::ServerCommand("exec game.cfg\n");
+	engine::ServerExecute();
 
 	gpGlobals->teamplay = teamplay.value;
 

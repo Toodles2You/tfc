@@ -30,31 +30,34 @@ class BotProfile;
 //--------------------------------------------------------------------------------------------------------
 template <class T> T * CreateBot( const BotProfile *profile )
 {
-	edict_t * pentBot;
+	Entity * pentBot;
 
 	if ( UTIL_ClientsInGame() >= gpGlobals->maxClients )
 	{
 		CONSOLE_ECHO( "Unable to create bot: Server is full (%d/%d clients).\n", UTIL_ClientsInGame(), gpGlobals->maxClients );
-		return NULL;
+		return nullptr;
 	}
 
 	char netname[64];
 
 	UTIL_ConstructBotNetName(netname, 64, profile);
 
-	pentBot = CREATE_FAKE_CLIENT( netname );
+	pentBot = engine::CreateFakeClient( netname );
 
-	if ( FNullEnt( pentBot ) )
+	if ( pentBot == nullptr )
 	{
 		CONSOLE_ECHO( "Unable to create bot: pfnCreateFakeClient() returned null.\n" );
-		return NULL;
+		return nullptr;
 	}
 	else
 	{
-		T * pBot = NULL;
+		T * pBot = nullptr;
 
-		FREE_PRIVATE( pentBot );
-		pBot = GetClassPtr( (T *)VARS( pentBot ) );
+		engine::FreeEntPrivateData(pentBot);
+
+		pentBot->flags |= FL_FAKECLIENT;
+
+		pBot = pentBot->GetNew<T>();
 
 		// initialize the bot
 		pBot->Initialize( profile );
@@ -71,7 +74,8 @@ template <class T> T * CreateBot( const BotProfile *profile )
 class CBot : public CBasePlayer 
 {
 public:
-	CBot( void );											///< constructor initializes all values to zero
+	CBot( Entity* containingEntity );											///< constructor initializes all values to zero
+
 	virtual bool Initialize( const BotProfile *profile );	///< (EXTEND) prepare bot for action
 
 	unsigned int GetID( void ) const	{ return m_id; }	///< return bot's unique ID
@@ -143,8 +147,8 @@ public:
 
 	virtual void OnTouchingWeapon( CWeaponBox *box ) { }	///< invoked when in contact with a CWeaponBox
 
-	/// invoked when event occurs in the game (some events have NULL entities)
-	virtual void OnEvent( GameEventType event, CBaseEntity *entity = NULL, CBaseEntity *other = NULL ) { }
+	/// invoked when event occurs in the game (some events have nullptr entities)
+	virtual void OnEvent( GameEventType event, CBaseEntity *entity = nullptr, CBaseEntity *other = nullptr ) { }
 
 	//------------------------------------------------------------------------------------
 	// Vision
@@ -162,7 +166,7 @@ public:
 
 	#define CHECK_FOV true
 	virtual bool IsVisible( const Vector *pos, bool testFOV = false ) = 0;	///< return true if we can see the point
-	virtual bool IsVisible( CBasePlayer *player, bool testFOV = false, unsigned char *visParts = NULL ) = 0;	///< return true if we can see any part of the player
+	virtual bool IsVisible( CBasePlayer *player, bool testFOV = false, unsigned char *visParts = nullptr ) = 0;	///< return true if we can see any part of the player
 
 	virtual bool IsEnemyPartVisible( VisiblePartType part ) = 0;	///< if enemy is visible, return the part we see
 
@@ -202,7 +206,7 @@ public:
 
 protected:
 	// Do a "client command" - useful for invoking menu choices, etc.
-	void ClientCommand( const char *cmd, const char *arg1 = NULL, const char *arg2 = NULL, const char *arg3 = NULL );
+	void ClientCommand( const char *cmd, const char *arg1 = nullptr, const char *arg2 = nullptr, const char *arg3 = nullptr );
 
 	const BotProfile *m_profile;							///< the "personality" profile of this bot
 
@@ -251,17 +255,17 @@ private:
 //--------------------------------------------------------------------------------------------------------------
 inline void CBot::SetModel( const char *modelName )
 {
-	SET_CLIENT_KEY_VALUE( entindex(), GET_USERINFO(edict()), "model", (char *)modelName );
+	engine::SetClientKeyValue( v.GetIndex(), engine::GetInfoKeyBuffer(&v), "model", (char *)modelName );
 }
 
 //-----------------------------------------------------------------------------------------------------------
 inline float CBot::GetMoveSpeed( void )
 {
 	if (m_isRunning || m_isCrouching)
-		return pev->maxspeed;
+		return v.maxspeed;
 
 	// should be 0.52, but when bots strafe, they break the run/walk threshold
-	return 0.4f * pev->maxspeed;
+	return 0.4f * v.maxspeed;
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -286,7 +290,7 @@ inline CBasePlayerWeapon *CBot::GetActiveWeapon( void ) const
 inline bool CBot::IsActiveWeaponReloading( void ) const
 {
 	CBasePlayerWeapon *gun = GetActiveWeapon();
-	if (gun == NULL)
+	if (gun == nullptr)
 		return false;
 
 	return gun->m_fInReload;
@@ -296,7 +300,7 @@ inline bool CBot::IsActiveWeaponReloading( void ) const
 inline bool CBot::IsActiveWeaponRecoilHigh( void ) const
 {
 	CBasePlayerWeapon *gun = GetActiveWeapon();
-	if (gun == NULL)
+	if (gun == nullptr)
 		return false;
 
 	const float highRecoil = 0.4f;
@@ -312,7 +316,9 @@ inline void CBot::PushPostureContext( void )
 {
 	if (m_postureStackIndex == MAX_POSTURE_STACK)
 	{
-		if (pev)
+#if 0
+		if (&v)
+#endif
 			PrintIfWatched( "PushPostureContext() overflow error!\n" );
 		return;
 	}
@@ -327,7 +333,9 @@ inline void CBot::PopPostureContext( void )
 {
 	if (m_postureStackIndex == 0)
 	{
-		if (pev)
+#if 0
+		if (&v)
+#endif
 			PrintIfWatched( "PopPostureContext() underflow error!\n" );
 		m_isRunning = true;
 		m_isCrouching = false;
@@ -342,10 +350,10 @@ inline void CBot::PopPostureContext( void )
 //-----------------------------------------------------------------------------------------------------------
 inline bool CBot::IsPlayerFacingMe( CBasePlayer *other ) const
 {
-	Vector toOther = other->pev->origin - pev->origin;
+	Vector toOther = other->v.origin - v.origin;
 
 	// compute the unit vector along our other player's
-	util::MakeVectors( other->pev->v_angle + other->pev->punchangle );
+	util::MakeVectors( other->v.v_angle + other->v.punchangle );
 	Vector otherDir = gpGlobals->v_forward;
 
 	if (otherDir.x * toOther.x + otherDir.y * toOther.y < 0.0f)
@@ -357,11 +365,11 @@ inline bool CBot::IsPlayerFacingMe( CBasePlayer *other ) const
 //-----------------------------------------------------------------------------------------------------------
 inline bool CBot::IsPlayerLookingAtMe( CBasePlayer *other ) const
 {
-	Vector toOther = other->pev->origin - pev->origin;
+	Vector toOther = other->v.origin - v.origin;
 	toOther.NormalizeInPlace();
 
 	// compute the unit vector along our other player's
-	util::MakeVectors( other->pev->v_angle + other->pev->punchangle );
+	util::MakeVectors( other->v.v_angle + other->v.punchangle );
 	Vector otherDir = gpGlobals->v_forward;
 
 	// other player must be pointing nearly right at us to be "looking at" us
@@ -380,7 +388,7 @@ inline bool CBot::IsPlayerLookingAtMe( CBasePlayer *other ) const
 inline void CBot::CmdStart(const usercmd_t& cmd, unsigned int randomSeed)
 {
 	CBasePlayer::CmdStart(cmd, randomSeed);
-	m_randomSeed = g_engfuncs.pfnRandomLong(0, 255);
+	m_randomSeed = engine::RandomLong(0, 255);
 }
 
 

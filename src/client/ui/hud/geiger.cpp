@@ -36,7 +36,7 @@ bool CHudGeiger::Init()
 
 	m_iGeigerRange = 0;
 
-	srand((unsigned)time(NULL));
+	srand((unsigned)time(nullptr));
 
 	return CHudBase::Init();
 }
@@ -165,7 +165,7 @@ void CHudGeiger::Draw(const float time)
 				j += rand() & 1;
 
 			sprintf(sz, "player/geiger%d.wav", j + 1);
-			PlaySound(sz, flvol);
+			client::PlaySoundByName(sz, flvol);
 		}
 	}
 }

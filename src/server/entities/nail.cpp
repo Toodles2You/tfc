@@ -16,18 +16,18 @@
 
 CNail* CNail::CreateNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner)
 {
-	auto nail = GetClassPtr((CNail*)nullptr);
+	auto nail = Entity::Create<CNail>();
 
-	nail->pev->origin = origin;
-	nail->pev->angles = dir;
-	nail->pev->dmg = damage;
-	nail->pev->owner = owner->edict();
-	nail->pev->team = owner->TeamNumber();
+	nail->v.origin = origin;
+	nail->v.angles = dir;
+	nail->v.dmg = damage;
+	nail->v.owner = &owner->v;
+	nail->v.team = owner->TeamNumber();
 	nail->Spawn();
 
 	if (damage > 9)
 	{
-		nail->pev->classname = MAKE_STRING("supernails");
+		nail->v.classname = MAKE_STRING("supernails");
 	}
 
 	return nail;
@@ -36,16 +36,16 @@ CNail* CNail::CreateNail(const Vector& origin, const Vector& dir, const float da
 
 CNail* CNail::CreateNailGrenadeNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner)
 {
-	auto nail = GetClassPtr((CNail*)nullptr);
+	auto nail = Entity::Create<CNail>();
 
-	nail->pev->origin = origin;
-	nail->pev->angles = dir;
-	nail->pev->dmg = damage;
-	nail->pev->dmg_inflictor = owner->edict();
-	nail->pev->team = owner->TeamNumber();
+	nail->v.origin = origin;
+	nail->v.angles = dir;
+	nail->v.dmg = damage;
+	nail->v.dmg_inflictor = &owner->v;
+	nail->v.team = owner->TeamNumber();
 	nail->Spawn();
 
-	nail->pev->classname = MAKE_STRING("nailgrenade");
+	nail->v.classname = MAKE_STRING("nailgrenade");
 
 	return nail;
 }
@@ -53,29 +53,29 @@ CNail* CNail::CreateNailGrenadeNail(const Vector& origin, const Vector& dir, con
 
 bool CNail::Spawn()
 {
-	pev->classname = MAKE_STRING("nails");
-	pev->movetype = MOVETYPE_FLYMISSILE;
-	pev->solid = SOLID_TRIGGER; /* SOLID_BBOX */
+	v.classname = MAKE_STRING("nails");
+	v.movetype = MOVETYPE_FLYMISSILE;
+	v.solid = SOLID_TRIGGER; /* SOLID_BBOX */
 
-	pev->model = MAKE_STRING("models/nail.mdl");
-	pev->modelindex = g_sModelIndexNail;
-	pev->effects |= EF_NODRAW;
+	v.model = MAKE_STRING("models/nail.mdl");
+	v.modelindex = g_sModelIndexNail;
+	v.effects |= EF_NODRAW;
 
 	SetSize(g_vecZero, g_vecZero);
 
-	SetOrigin(pev->origin);
+	SetOrigin(v.origin);
 
-	pev->velocity = pev->angles * 1000;
-	pev->angles = util::VecToAngles(pev->angles);
+	v.velocity = v.angles * 1000;
+	v.angles = util::VecToAngles(v.angles);
 
 	SetTouch(&CNail::NailTouch);
 
-	pev->radsuit_finished = pev->waterlevel;
-	pev->v_angle = pev->velocity;
+	v.radsuit_finished = v.waterlevel;
+	v.v_angle = v.velocity;
 
 	SetThink(&CNail::PleaseGoInTheRightDirection);
-	pev->nextthink = gpGlobals->time + 1.0F / 30.0F;
-	pev->pain_finished = gpGlobals->time + 5.0F;
+	v.nextthink = gpGlobals->time + 1.0F / 30.0F;
+	v.pain_finished = gpGlobals->time + 5.0F;
 
 	return true;
 }
@@ -83,17 +83,17 @@ bool CNail::Spawn()
 
 void CNail::NailTouch(CBaseEntity* pOther)
 {
-	if (g_engfuncs.pfnPointContents(pev->origin) != CONTENTS_SKY)
+	if (engine::PointContents(v.origin) != CONTENTS_SKY)
 	{
 		CBaseEntity* owner = this;
 
-		if (pev->dmg_inflictor != nullptr)
+		if (v.dmg_inflictor != nullptr)
 		{
-			owner = CBaseEntity::Instance(pev->dmg_inflictor);
+			owner = v.dmg_inflictor->Get<CBaseEntity>();
 		}
-		else if (pev->owner != nullptr)
+		else if (v.owner != nullptr)
 		{
-			owner = CBaseEntity::Instance(pev->owner);
+			owner = v.owner->Get<CBaseEntity>();
 
 			if (pOther == owner)
 			{
@@ -103,8 +103,8 @@ void CNail::NailTouch(CBaseEntity* pOther)
 
         pOther->TraceAttack(
             owner,
-            pev->dmg,
-            pev->velocity.Normalize(),
+            v.dmg,
+            v.velocity.Normalize(),
             gpGlobals->trace_hitgroup,
             DMG_NAIL | DMG_NEVERGIB);
 
@@ -117,16 +117,16 @@ void CNail::NailTouch(CBaseEntity* pOther)
 
 void CNail::PleaseGoInTheRightDirection()
 {
-	if (pev->pain_finished <= gpGlobals->time)
+	if (v.pain_finished <= gpGlobals->time)
 	{
 		Remove();
 		return;
 	}
-	if (pev->waterlevel > pev->radsuit_finished)
+	if (v.waterlevel > v.radsuit_finished)
 	{
-		pev->velocity = pev->v_angle;
-		pev->radsuit_finished = pev->waterlevel;
+		v.velocity = v.v_angle;
+		v.radsuit_finished = v.waterlevel;
 	}
-	pev->nextthink = gpGlobals->time + 1.0F / 30.0F;
+	v.nextthink = gpGlobals->time + 1.0F / 30.0F;
 }
 
