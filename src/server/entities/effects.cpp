@@ -143,7 +143,7 @@ void CBubbling::FizzThink()
 {
 	MessageBegin(MSG_PAS, SVC_TEMPENTITY, Center());
 	WriteByte(TE_FIZZ);
-	WriteShort((short)ENTINDEX(edict()));
+	WriteShort(v.GetIndex());
 	WriteShort((short)m_bubbleModel);
 	WriteByte(m_density);
 	MessageEnd();
@@ -171,21 +171,21 @@ bool CBeam::Spawn()
 void CBeam::Precache()
 {
 	if (v.owner)
-		SetStartEntity(ENTINDEX(v.owner));
+		SetStartEntity(v.owner->GetIndex());
 	if (v.aiment)
-		SetEndEntity(ENTINDEX(v.aiment));
+		SetEndEntity(v.aiment->GetIndex());
 }
 
 void CBeam::SetStartEntity(int entityIndex)
 {
 	v.sequence = (entityIndex & 0x0FFF) | (v.sequence & 0xF000);
-	v.owner = engine::PEntityOfEntIndex(entityIndex);
+	v.owner = Entity::FromIndex(entityIndex);
 }
 
 void CBeam::SetEndEntity(int entityIndex)
 {
 	v.skin = (entityIndex & 0x0FFF) | (v.skin & 0xF000);
-	v.aiment = engine::PEntityOfEntIndex(entityIndex);
+	v.aiment = Entity::FromIndex(entityIndex);
 }
 
 
@@ -194,7 +194,7 @@ const Vector& CBeam::GetStartPos()
 {
 	if (GetType() == BEAM_ENTS)
 	{
-		Entity* pent = engine::PEntityOfEntIndex(GetStartEntity());
+		Entity* pent = Entity::FromIndex(GetStartEntity());
 		return pent->origin;
 	}
 	return v.origin;
@@ -209,7 +209,7 @@ const Vector& CBeam::GetEndPos()
 		return v.angles;
 	}
 
-	Entity* pent = engine::PEntityOfEntIndex(GetEndEntity());
+	Entity* pent = Entity::FromIndex(GetEndEntity());
 	if (pent)
 		return pent->origin;
 	return v.angles;
@@ -670,7 +670,7 @@ void CLightning::StrikeThink()
 			if (!IsPointEntity(pStart)) // One sided
 			{
 				WriteByte(TE_BEAMENTPOINT);
-				WriteShort(pStart->entindex());
+				WriteShort(pStart->v.GetIndex());
 				WriteCoord(pEnd->v.origin.x);
 				WriteCoord(pEnd->v.origin.y);
 				WriteCoord(pEnd->v.origin.z);
@@ -692,8 +692,8 @@ void CLightning::StrikeThink()
 				WriteByte(TE_BEAMRING);
 			else
 				WriteByte(TE_BEAMENTS);
-			WriteShort(pStart->entindex());
-			WriteShort(pEnd->entindex());
+			WriteShort(pStart->v.GetIndex());
+			WriteShort(pEnd->v.GetIndex());
 		}
 
 		WriteShort(m_spriteTexture);
@@ -897,12 +897,12 @@ void CLightning::BeamUpdateVars()
 		if (beamType == BEAM_POINTS || beamType == BEAM_HOSE)
 			SetEndPos(pEnd->v.origin);
 		else
-			SetEndEntity(pEnd->entindex());
+			SetEndEntity(pEnd->v.GetIndex());
 	}
 	else
 	{
-		SetStartEntity(pStart->entindex());
-		SetEndEntity(pEnd->entindex());
+		SetStartEntity(pStart->v.GetIndex());
+		SetEndEntity(pEnd->v.GetIndex());
 	}
 
 	RelinkBeam();

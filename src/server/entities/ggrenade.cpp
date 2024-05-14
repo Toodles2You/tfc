@@ -82,7 +82,7 @@ void CGrenade::ExplodeTouch(CBaseEntity* pOther)
 	TraceResult tr;
 	Vector vecSpot; // trace starts here!
 
-	v.enemy = pOther->edict();
+	v.enemy = &pOther->v;
 
 	vecSpot = v.origin - v.velocity.Normalize() * 32;
 	util::TraceLine(vecSpot, vecSpot + v.velocity.Normalize() * 64, util::ignore_monsters, this, &tr);
@@ -94,7 +94,7 @@ void CGrenade::ExplodeTouch(CBaseEntity* pOther)
 void CGrenade::BounceTouch(CBaseEntity* pOther)
 {
 	// don't hit the guy that launched this grenade
-	if (pOther->edict() == v.owner)
+	if (&pOther->v == v.owner)
 		return;
 
 	if ((v.flags & FL_ONGROUND) != 0)
@@ -180,7 +180,7 @@ CGrenade* CGrenade::ShootContact(CBaseEntity* owner, Vector vecStart, Vector vec
 	pGrenade->SetOrigin(vecStart);
 	pGrenade->v.velocity = vecVelocity;
 	pGrenade->v.angles = util::VecToAngles(pGrenade->v.velocity);
-	pGrenade->v.owner = owner->edict();
+	pGrenade->v.owner = &owner->v;
 
 	// Tumble in air
 	pGrenade->v.avelocity.x = engine::RandomFloat(-100, -500);
@@ -314,7 +314,7 @@ CPrimeGrenade* CPrimeGrenade::PrimeGrenade(CBaseEntity* owner)
 {
 	auto grenade = Entity::Create<CPrimeGrenade>();
 
-	grenade->v.owner = owner->edict();
+	grenade->v.owner = &owner->v;
 	grenade->Spawn();
 
 	return grenade;

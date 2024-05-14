@@ -34,16 +34,16 @@ bool CHLBot::Initialize(const BotProfile* profile)
         return false;
     }
     auto model = TheBotProfiles->GetCustomSkinModelname(profile->GetSkin());
-    auto clientIndex = entindex();
+    auto clientIndex = v.GetIndex();
     if (model)
     {
-        engine::SetClientKeyValue(clientIndex, engine::GetInfoKeyBuffer(edict()), "model", model);
+        engine::SetClientKeyValue(clientIndex, engine::GetInfoKeyBuffer(&v), "model", model);
     }
     auto color = engine::RandomLong(0, 255);
     auto topColor = util::dtos1(color);
     auto bottomColor = util::dtos2((color + 32) % 256);
-    engine::SetClientKeyValue(clientIndex, engine::GetInfoKeyBuffer(edict()), "topcolor", topColor);
-    engine::SetClientKeyValue(clientIndex, engine::GetInfoKeyBuffer(edict()), "bottomcolor", bottomColor);
+    engine::SetClientKeyValue(clientIndex, engine::GetInfoKeyBuffer(&v), "topcolor", topColor);
+    engine::SetClientKeyValue(clientIndex, engine::GetInfoKeyBuffer(&v), "bottomcolor", bottomColor);
     return true;
 }
 
@@ -111,7 +111,7 @@ bool CHLBot::IsVisible(CBasePlayer* player, bool testFOV = false, unsigned char*
     auto start = GetGunPosition();
     auto end = player->BodyTarget();
     util::TraceLine(start, end, util::ignore_monsters, this, &tr);
-    if (tr.flFraction != 1.0f && tr.pHit != player->edict())
+    if (tr.flFraction != 1.0f && tr.pHit != &player->v)
     {
         return false;
     }

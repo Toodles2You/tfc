@@ -175,7 +175,7 @@ void CFuncMortarField::FieldUse(CBaseEntity* pActivator, CBaseEntity* pCaller, U
 
 		Entity* pentOwner = nullptr;
 		if (pActivator)
-			pentOwner = pActivator->edict();
+			pentOwner = &pActivator->v;
 
 		CBaseEntity* pMortar = Create("monster_mortar", tr.vecEndPos, Vector(0, 0, 0), *pentOwner);
 		pMortar->v.nextthink = gpGlobals->time + t;

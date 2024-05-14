@@ -77,7 +77,7 @@ void RadiusDamage(
 
 		util::TraceLine(origin, entity->EyePosition(), &tr, inflictor, util::kTraceBox);
 
-		if (tr.flFraction != 1.0F && tr.pHit != entity->edict())
+		if (tr.flFraction != 1.0F && tr.pHit != &entity->v)
 		{
 			continue;
 		}

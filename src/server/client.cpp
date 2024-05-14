@@ -384,7 +384,7 @@ void Host_Say(Entity* pEntity, bool teamonly)
 		}
 
 		MessageBegin(MSG_ONE, gmsgSayText, client);
-		WriteByte(player->entindex());
+		WriteByte(player->v.GetIndex());
 		WriteByte(teamonly);
 		WriteString(p);
 		MessageEnd();
@@ -392,7 +392,7 @@ void Host_Say(Entity* pEntity, bool teamonly)
 
 	// print to the sending client
 	MessageBegin(MSG_ONE, gmsgSayText, pEntity->Get<CBaseEntity>());
-	WriteByte(player->entindex());
+	WriteByte(player->v.GetIndex());
 	WriteByte(teamonly);
 	WriteString(p);
 	MessageEnd();
@@ -532,7 +532,7 @@ void ClientUserInfoChanged(Entity* pEntity, char* infobuffer)
 		}
 
 		// Set the name
-		engine::SetClientKeyValue(ENTINDEX(pEntity), infobuffer, "name", sName);
+		engine::SetClientKeyValue(pEntity->GetIndex(), infobuffer, "name", sName);
 
 		if (util::IsMultiplayer())
 		{	

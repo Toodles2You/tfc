@@ -1018,7 +1018,7 @@ CBaseEntity* CBaseEntity::Create(const char* szName, const Vector& vecOrigin, co
 	entity->v.origin = vecOrigin;
 	entity->v.angles = vecAngles;
 
-	DispatchSpawn(entity->edict());
+	DispatchSpawn(pent);
 
 	return entity;
 }
@@ -1102,13 +1102,13 @@ void CBaseEntity::GetEntityState(entity_state_t& state)
 	state.aiment = 0;
 	if (v.aiment)
 	{
-		state.aiment = ENTINDEX(v.aiment);
+		state.aiment = v.aiment->GetIndex();
 	}
 
 	state.owner = 0;
 	if (v.owner)
 	{
-		int owner = ENTINDEX(v.owner);
+		int owner = v.owner->GetIndex();
 
 		// Only care if owned by a player
 		if (owner >= 1 && owner <= gpGlobals->maxClients)

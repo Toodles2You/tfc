@@ -95,7 +95,7 @@ void CDecal::TriggerDecal(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 	WriteCoord(v.origin.y);
 	WriteCoord(v.origin.z);
 	WriteShort((int)v.skin);
-	entityIndex = (short)ENTINDEX(trace.pHit);
+	entityIndex = trace.pHit->GetIndex();
 	WriteShort(entityIndex);
 	if (0 != entityIndex)
 		WriteShort((int)trace.pHit->modelindex);
@@ -112,7 +112,7 @@ void CDecal::StaticDecal()
 
 	util::TraceLine(v.origin - Vector(5, 5, 5), v.origin + Vector(5, 5, 5), util::ignore_monsters, this, &trace);
 
-	entityIndex = (short)ENTINDEX(trace.pHit);
+	entityIndex = trace.pHit->GetIndex();
 	if (0 != entityIndex)
 		modelIndex = (int)trace.pHit->modelindex;
 	else

@@ -270,7 +270,7 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 
 	if ((bitsDamageType & DMG_ARMOR_PIERCING) == 0)
 	{
-		v.dmg_inflictor = inflictor->edict();
+		v.dmg_inflictor = &inflictor->v;
 	}
 	else
 	{
@@ -320,7 +320,7 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		}
 
 		MessageBegin(MSG_ONE, gmsgHitFeedback, attacker);
-		WriteByte(entindex());
+		WriteByte(v.GetIndex());
 		WriteByte(flags);
 		WriteShort(flDamage);
 		MessageEnd();
@@ -335,8 +335,8 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	MessageBegin(MSG_SPEC, SVC_DIRECTOR);
 		WriteByte(9);							  // command length in bytes
 		WriteByte(DRC_CMD_EVENT);				  // take damage event
-		WriteShort(entindex());	  // index number of primary entity
-		WriteShort(inflictor->entindex()); // index number of secondary entity
+		WriteShort(v.GetIndex());	  // index number of primary entity
+		WriteShort(inflictor->v.GetIndex()); // index number of secondary entity
 		WriteLong(5);							  // eventflags (priority and flags)
 	MessageEnd();
 
@@ -531,8 +531,8 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 
 	m_iObserverLastMode = OBS_CHASE_FREE;
 	v.iuser1 = OBS_DEATHCAM;
-	v.iuser2 = entindex();
-	v.iuser3 = attacker->entindex();
+	v.iuser2 = v.GetIndex();
+	v.iuser3 = attacker->v.GetIndex();
 
 	v.solid = SOLID_NOT;
 	v.movetype = MOVETYPE_NONE;
@@ -608,7 +608,7 @@ void CBasePlayer::StartObserver()
 	// clear any clientside entities attached to this player
 	MessageBegin(MSG_PAS, SVC_TEMPENTITY, v.origin);
 	WriteByte(TE_KILLPLAYERATTACHMENTS);
-	WriteByte((byte)entindex());
+	WriteByte(v.GetIndex());
 	MessageEnd();
 
 	// Holster weapon immediately, to allow it to cleanup
@@ -1016,7 +1016,7 @@ bool CBasePlayer::Spawn()
 
 	m_StateBits = 0;
 
-	char* infobuffer = engine::GetInfoKeyBuffer(edict());
+	char* infobuffer = engine::GetInfoKeyBuffer(&v);
 	char* value = engine::InfoKeyValue(infobuffer, "cl_righthand");
 
 	if ('\0' != *value)
@@ -1134,7 +1134,7 @@ bool CSprayCan::Spawn(CBaseEntity* owner)
 {
 	v.origin = owner->v.origin + Vector(0, 0, 32);
 	v.angles = owner->v.v_angle;
-	v.owner = owner->edict();
+	v.owner = &owner->v;
 	v.frame = 0;
 
 	v.nextthink = gpGlobals->time + 0.1;
@@ -1157,7 +1157,7 @@ void CSprayCan::Think()
 	else
 		nFrames = -1;
 
-	playernum = ENTINDEX(v.owner);
+	playernum = v.owner->GetIndex();
 
 	// engine::AlertMessage(at_console, "Spray by player %i, %i of %i\n", playernum, (int)(v.frame + 1), nFrames);
 
@@ -1321,7 +1321,7 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 	{
 		TraceResult tr;
 
-		Entity* pWorld = CWorld::World->edict();
+		Entity* pWorld = &CWorld::World->v;
 
 		Vector start = v.origin + v.view_ofs;
 		Vector end = start + gpGlobals->v_forward * 1024;
@@ -1778,7 +1778,7 @@ void CBasePlayer::SendExtraInfo(CBaseEntity* toWhom)
 		MessageBegin(MSG_ALL, gmsgExtraInfo);
 	}
 
-	WriteByte(entindex());
+	WriteByte(v.GetIndex());
 
 	byte role = 0;
 	role |= PCNumber();
@@ -1821,7 +1821,7 @@ void CBasePlayer::EmitSoundHUD(
 	attenuation *= 127;
 
 	MessageBegin(MSG_ONE, gmsgPredictedSound, this);
-	WriteByte(entindex());
+	WriteByte(v.GetIndex());
 	WriteByte(channel);
 	WriteByte(volume);
 	WriteByte(attenuation);

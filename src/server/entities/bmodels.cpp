@@ -977,7 +977,7 @@ void CPendulum::RopeTouch(CBaseEntity* pOther)
 		return;
 	}
 
-	v.enemy = pOther->edict();
+	v.enemy = &pOther->v;
 	pOther->v.velocity = g_vecZero;
 	pOther->v.movetype = MOVETYPE_NONE;
 }

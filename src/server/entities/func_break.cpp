@@ -699,7 +699,7 @@ void CBreakable::Die()
 
 	if (Explodable())
 	{
-		ExplosionCreate(Center(), v.angles, edict(), ExplosionMagnitude(), true);
+		ExplosionCreate(Center(), v.angles, &v, ExplosionMagnitude(), true);
 	}
 
 	Remove();

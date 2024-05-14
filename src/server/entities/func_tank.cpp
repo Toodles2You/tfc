@@ -481,7 +481,7 @@ void CFuncTank::Think()
 void CFuncTank::TrackTarget()
 {
 	TraceResult tr;
-	Entity* pPlayer = engine::FindClientInPVS(edict());
+	Entity* pPlayer = engine::FindClientInPVS(&v);
 	bool updateTime = false, lineOfSight;
 	Vector angles, direction, targetPosition, barrelEnd;
 	Entity* pTarget;
@@ -952,7 +952,7 @@ void CFuncTankMortar::Fire(const Vector& barrelEnd, const Vector& forward, CBase
 
 			TankTrace(barrelEnd, forward, gTankSpread[m_spread], tr);
 
-			ExplosionCreate(tr.vecEndPos, v.angles, edict(), v.impulse, true);
+			ExplosionCreate(tr.vecEndPos, v.angles, &v, v.impulse, true);
 
 			CFuncTank::Fire(barrelEnd, forward, attacker);
 		}

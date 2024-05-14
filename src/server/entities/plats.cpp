@@ -1102,7 +1102,7 @@ void CFuncTrackTrain::StopSound()
 
 		us_encode = us_sound;
 
-		engine::PlaybackEvent(FEV_RELIABLE | FEV_UPDATE, edict(), m_usAdjustPitch, 0.0,
+		engine::PlaybackEvent(FEV_RELIABLE | FEV_UPDATE, &v, m_usAdjustPitch, 0.0,
 			g_vecZero, g_vecZero, 0.0, 0.0, us_encode, 0, 1, 0);
 
 		EmitSound("plats/ttrain_brake1.wav", CHAN_ITEM, m_flVolume);
@@ -1145,7 +1145,7 @@ void CFuncTrackTrain::UpdateSound()
 
 		us_encode = us_sound | us_pitch | us_volume;
 
-		engine::PlaybackEvent(FEV_RELIABLE | FEV_UPDATE, edict(), m_usAdjustPitch, 0.0,
+		engine::PlaybackEvent(FEV_RELIABLE | FEV_UPDATE, &v, m_usAdjustPitch, 0.0,
 			g_vecZero, g_vecZero, 0.0, 0.0, us_encode, 0, 0, 0);
 	}
 }

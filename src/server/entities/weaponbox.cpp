@@ -231,7 +231,7 @@ bool CWeaponBox::PackWeapon(CBasePlayerWeapon* pWeapon)
 	pWeapon->v.movetype = MOVETYPE_NONE;
 	pWeapon->v.solid = SOLID_NOT;
 	pWeapon->v.effects = EF_NODRAW;
-	pWeapon->v.owner = edict();
+	pWeapon->v.owner = &v;
 	pWeapon->ClearThink();
 	pWeapon->ClearTouch();
 

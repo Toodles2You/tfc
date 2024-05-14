@@ -179,12 +179,12 @@ bool CHalfLifeMultiplay::PrivilegedCommand(CBasePlayer* pPlayer, const char* pcm
 		if (pPlayer->v.movetype != MOVETYPE_NOCLIP)
 		{
 			pPlayer->v.movetype = MOVETYPE_NOCLIP;
-			engine::ClientPrintf(pPlayer->edict(), print_console, "noclip ON\n");
+			engine::ClientPrintf(&pPlayer->v, print_console, "noclip ON\n");
 		}
 		else
 		{
 			pPlayer->v.movetype = MOVETYPE_WALK;
-			engine::ClientPrintf(pPlayer->edict(), print_console, "noclip OFF\n");
+			engine::ClientPrintf(&pPlayer->v, print_console, "noclip OFF\n");
 		}
 		return true;
 	}
@@ -193,12 +193,12 @@ bool CHalfLifeMultiplay::PrivilegedCommand(CBasePlayer* pPlayer, const char* pcm
 		if ((pPlayer->v.flags & FL_GODMODE) == 0)
 		{
 			pPlayer->v.flags |= FL_GODMODE;
-			engine::ClientPrintf(pPlayer->edict(), print_console, "godmode ON\n");
+			engine::ClientPrintf(&pPlayer->v, print_console, "godmode ON\n");
 		}
 		else
 		{
 			pPlayer->v.flags &= ~FL_GODMODE;
-			engine::ClientPrintf(pPlayer->edict(), print_console, "godmode OFF\n");
+			engine::ClientPrintf(&pPlayer->v, print_console, "godmode OFF\n");
 		}
 		return true;
 	}
@@ -207,12 +207,12 @@ bool CHalfLifeMultiplay::PrivilegedCommand(CBasePlayer* pPlayer, const char* pcm
 		if ((pPlayer->v.flags & FL_NOTARGET) == 0)
 		{
 			pPlayer->v.flags |= FL_NOTARGET;
-			engine::ClientPrintf(pPlayer->edict(), print_console, "notarget ON\n");
+			engine::ClientPrintf(&pPlayer->v, print_console, "notarget ON\n");
 		}
 		else
 		{
 			pPlayer->v.flags &= ~FL_NOTARGET;
-			engine::ClientPrintf(pPlayer->edict(), print_console, "notarget OFF\n");
+			engine::ClientPrintf(&pPlayer->v, print_console, "notarget OFF\n");
 		}
 		return true;
 	}
@@ -228,7 +228,7 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 		return true;
 	}
 
-	if (g_VoteManager.ClientCommand(pPlayer->entindex(), pcmd))
+	if (g_VoteManager.ClientCommand(pPlayer->v.GetIndex(), pcmd))
 	{
 		return true;
 	}
@@ -294,7 +294,7 @@ bool CHalfLifeMultiplay::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 
 bool CHalfLifeMultiplay::SayCommand(CBasePlayer* player, const int argc, const char** argv)
 {
-	return g_VoteManager.SayCommand(player->entindex(), argc, argv);
+	return g_VoteManager.SayCommand(player->v.GetIndex(), argc, argv);
 }
 
 
@@ -362,8 +362,9 @@ bool CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerWe
 
 bool CHalfLifeMultiplay::ClientConnected(Entity* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128])
 {
-	g_VoiceGameMgr.ClientConnected(ENTINDEX(pEntity));
-	g_VoteManager.ClientConnected(ENTINDEX(pEntity));
+	const auto index = pEntity->GetIndex();
+	g_VoiceGameMgr.ClientConnected(index);
+	g_VoteManager.ClientConnected(index);
 	return true;
 }
 
@@ -382,8 +383,8 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 
 	util::LogPrintf("\"%s<%i><%s><>\" connected\n",
 		name,
-		engine::GetPlayerUserId(pl->edict()),
-		engine::GetPlayerAuthId(pl->edict()));
+		engine::GetPlayerUserId(&pl->v),
+		engine::GetPlayerAuthId(&pl->v));
 
 	CGameRules::InitHUD(pl);
 
@@ -403,7 +404,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 	// sending just one score makes the hud scoreboard active;  otherwise
 	// it is just disabled for single play
 	MessageBegin(MSG_ONE, gmsgScoreInfo, pl);
-	WriteByte(pl->entindex());
+	WriteByte(pl->v.GetIndex());
 	WriteShort(0);
 	WriteShort(0);
 	MessageEnd();
@@ -443,7 +444,7 @@ void CHalfLifeMultiplay::ClientDisconnected(Entity* pClient)
 {
 	if (pClient)
 	{
-		g_VoteManager.ClientDisconnected(ENTINDEX(pClient));
+		g_VoteManager.ClientDisconnected(pClient->GetIndex());
 
 		const char *name = "unconnected";
 		
@@ -462,8 +463,8 @@ void CHalfLifeMultiplay::ClientDisconnected(Entity* pClient)
 
 			util::LogPrintf("\"%s<%i><%s><>\" disconnected\n",
 				STRING(pPlayer->v.netname),
-				engine::GetPlayerUserId(pPlayer->edict()),
-				engine::GetPlayerAuthId(pPlayer->edict()));
+				engine::GetPlayerUserId(&pPlayer->v),
+				engine::GetPlayerAuthId(&pPlayer->v));
 		}
 	}
 }
@@ -605,7 +606,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer,
 	// update the scores
 	// killed scores
 	MessageBegin(MSG_ALL, gmsgScoreInfo);
-	WriteByte(pVictim->entindex());
+	WriteByte(pVictim->v.GetIndex());
 	WriteShort(pVictim->v.frags);
 	WriteShort(pVictim->m_iDeaths);
 	MessageEnd();
@@ -614,7 +615,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, CBaseEntity* killer,
 	if (killer->IsClient())
 	{
 		MessageBegin(MSG_ALL, gmsgScoreInfo);
-		WriteByte(killer->entindex());
+		WriteByte(killer->v.GetIndex());
 		WriteShort(killer->v.frags);
 		WriteShort(((CBasePlayer *)killer)->m_iDeaths);
 		MessageEnd();
@@ -635,7 +636,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 
 	if (killer->IsClient())
 	{
-		killerIndex = killer->entindex();
+		killerIndex = killer->v.GetIndex();
 
 		if (inflictor != nullptr)
 		{
@@ -667,7 +668,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 
 	if (accomplice != nullptr && accomplice->IsClient())
 	{
-		accompliceIndex = accomplice->entindex();
+		accompliceIndex = accomplice->v.GetIndex();
 	}
 
 	int flags = kDamageFlagDead;
@@ -690,7 +691,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 	MessageBegin(MSG_ALL, gmsgDeathMsg);
 	WriteByte(killerIndex);
 	WriteByte(accompliceIndex);
-	WriteByte(pVictim->entindex());
+	WriteByte(pVictim->v.GetIndex());
 	WriteByte(flags);
 	WriteString(killerWeapon);
 	MessageEnd();
@@ -699,35 +700,35 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 	{
 		util::LogPrintf("\"%s<%i><%s><>\" committed suicide with \"%s\"\n",
 			STRING(pVictim->v.netname),
-			engine::GetPlayerUserId(pVictim->edict()),
-			engine::GetPlayerAuthId(pVictim->edict()),
+			engine::GetPlayerUserId(&pVictim->v),
+			engine::GetPlayerAuthId(&pVictim->v),
 			killerWeapon);
 	}
 	else if (killer->IsClient())
 	{
 		util::LogPrintf("\"%s<%i><%s><>\" killed \"%s<%i><%s><>\" with \"%s\"\n",
 			STRING(killer->v.netname),
-			engine::GetPlayerUserId(killer->edict()),
-			engine::GetPlayerAuthId(killer->edict()),
+			engine::GetPlayerUserId(&killer->v),
+			engine::GetPlayerAuthId(&killer->v),
 			STRING(killer->v.netname),
-			engine::GetPlayerUserId(pVictim->edict()),
-			engine::GetPlayerAuthId(pVictim->edict()),
+			engine::GetPlayerUserId(&pVictim->v),
+			engine::GetPlayerAuthId(&pVictim->v),
 			killerWeapon);
 	}
 	else
 	{
 		util::LogPrintf("\"%s<%i><%s><>\" died\n",
 			STRING(pVictim->v.netname),
-			engine::GetPlayerUserId(pVictim->edict()),
-			engine::GetPlayerAuthId(pVictim->edict()),
+			engine::GetPlayerUserId(&pVictim->v),
+			engine::GetPlayerAuthId(&pVictim->v),
 			killerWeapon);
 	}
 
 	MessageBegin(MSG_SPEC, SVC_DIRECTOR);
 	WriteByte(9);							 // command length in bytes
 	WriteByte(DRC_CMD_EVENT);				 // player killed
-	WriteShort(pVictim->entindex()); // index number of primary entity
-	WriteShort(inflictor->entindex()); // index number of secondary entity
+	WriteShort(pVictim->v.GetIndex()); // index number of primary entity
+	WriteShort(inflictor->v.GetIndex()); // index number of secondary entity
 	WriteLong(7 | DRC_FLAG_DRAMATIC);		 // eventflags (priority and flags)
 	MessageEnd();
 }
@@ -752,7 +753,7 @@ void CHalfLifeMultiplay::AddPointsToPlayer(CBasePlayer* player, float score, boo
 	player->v.frags += score;
 
 	MessageBegin(MSG_ALL, gmsgScoreInfo);
-	WriteByte(player->entindex());
+	WriteByte(player->v.GetIndex());
 	WriteShort(player->v.frags);
 	WriteShort(player->m_iDeaths);
 	MessageEnd();
@@ -1207,8 +1208,8 @@ bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, b
 	
 	util::LogPrintf("\"%s<%i><%s><>\" joined team %s\n",
 		STRING(pPlayer->v.netname),
-		engine::GetPlayerUserId(pPlayer->edict()),
-		engine::GetPlayerAuthId(pPlayer->edict()),
+		engine::GetPlayerUserId(&pPlayer->v),
+		engine::GetPlayerAuthId(&pPlayer->v),
 		GetIndexedTeamName(teamIndex));
 
 	return true;

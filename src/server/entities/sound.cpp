@@ -954,7 +954,7 @@ void CEnvSound::Think()
 	{
 		// get pointer to client if visible; engine::FindClientInPVS will
 		// cycle through visible clients on consecutive calls.
-		Entity* pentPlayer = engine::FindClientInPVS(edict());
+		Entity* pentPlayer = engine::FindClientInPVS(&v);
 
 		if (pentPlayer == nullptr)
 			return false; // no player in pvs of sound entity, slow it down
@@ -1520,7 +1520,7 @@ void CBaseEntity::EmitSoundPredicted(
 		}
 
 		MessageBegin(MSG_ONE_UNRELIABLE, gmsgPredictedSound, player);
-		WriteByte(entindex());
+		WriteByte(v.GetIndex());
 		WriteByte(channel);
 		WriteByte(volume);
 		WriteByte(attenuation);

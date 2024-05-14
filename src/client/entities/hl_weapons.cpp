@@ -129,12 +129,6 @@ void CBaseEntity::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 }
 
 
-int CBaseEntity::entindex()
-{
-	return client::GetLocalPlayer()->index;
-}
-
-
 /*
 =====================
 HUD_PlaybackEvent

@@ -68,8 +68,13 @@ void CCrowbar::PrimaryAttack()
 
 	Vector gun = m_pPlayer->GetGunPosition();
 	Vector end = gun + forward * 64;
+#ifdef GAME_DLL
+	int ignore = m_pPlayer->v.GetIndex();
+#else
+	int ignore = -1; 
+#endif
 
-	Trace trace{gun, end, m_pPlayer->entindex(), Trace::kBox};
+	Trace trace{gun, end, ignore, Trace::kBox};
 
 	auto hit = kCrowbarMiss;
 	if (trace.fraction != 1.0F)
@@ -77,7 +82,7 @@ void CCrowbar::PrimaryAttack()
 		hit = kCrowbarHitWorld;
 
 #ifdef GAME_DLL
-		auto other = engine::PEntityOfEntIndex(trace.entity);
+		auto other = Entity::FromIndex(trace.entity);
 
 		if (other->solid != SOLID_BSP && other->movetype != MOVETYPE_PUSHSTEP)
 		{
@@ -107,7 +112,7 @@ void CCrowbar::PrimaryAttack()
 	}
 
 #ifdef GAME_DLL
-	auto other = engine::PEntityOfEntIndex(trace.entity)->Get<CBaseEntity>();
+	auto other = Entity::FromIndex(trace.entity)->Get<CBaseEntity>();
 
 	other->TraceAttack(
 		m_pPlayer,

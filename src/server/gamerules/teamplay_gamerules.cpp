@@ -69,7 +69,7 @@ CHalfLifeTeamplay::CHalfLifeTeamplay()
 int CHalfLifeTeamplay::GetDefaultPlayerTeam(CBasePlayer* pPlayer)
 {
 	// copy out the team name from the model
-	char* mdls = engine::InfoKeyValue(engine::GetInfoKeyBuffer(pPlayer->edict()), "model");
+	char* mdls = engine::InfoKeyValue(engine::GetInfoKeyBuffer(&pPlayer->v), "model");
 
 	int i = GetTeamIndex(mdls);
 
@@ -119,8 +119,8 @@ bool CHalfLifeTeamplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bo
 	if (pPlayer->TeamNumber() != TEAM_SPECTATORS)
 	{
 		engine::SetClientKeyValue(
-			pPlayer->entindex(),
-			engine::GetInfoKeyBuffer(pPlayer->edict()),
+			pPlayer->v.GetIndex(),
+			engine::GetInfoKeyBuffer(&pPlayer->v),
 			"model",
 			pPlayer->TeamID());
 	}
@@ -136,7 +136,7 @@ void CHalfLifeTeamplay::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobu
 	if (pPlayer->TeamNumber() != TEAM_SPECTATORS)
 	{
 		engine::SetClientKeyValue(
-			pPlayer->entindex(),
+			pPlayer->v.GetIndex(),
 			infobuffer,
 			"model",
 			pPlayer->TeamID());

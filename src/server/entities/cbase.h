@@ -332,13 +332,6 @@ public:
 
 	static CBaseEntity* Create(const char* szName, const Vector& vecOrigin, const Vector& vecAngles, Entity& owner);
 
-	Entity* edict() { return &v; }
-#ifdef GAME_DLL
-	int entindex() { return engine::IndexOfEdict(&v); }
-#else
-	int entindex();
-#endif
-
 	virtual Vector Center() { return (v.absmax + v.absmin) * 0.5; } // center point of entity
 	virtual Vector EyePosition() { return v.origin + v.view_ofs; }  // position of eyes
 	virtual Vector EarPosition() { return v.origin + v.view_ofs; }  // position of ears

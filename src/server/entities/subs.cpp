@@ -233,7 +233,7 @@ void CBaseEntity::UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float va
 		// This code is not as ugly as that code
 		if (pActivator && pActivator->IsClient()) // If a player activates, then save it
 		{
-			pTemp->v.owner = pActivator->edict();
+			pTemp->v.owner = &pActivator->v;
 		}
 		else
 		{

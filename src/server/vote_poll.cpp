@@ -94,8 +94,8 @@ void IPoll::ClientVote(unsigned int playerIndex, unsigned int option)
 
 	util::LogPrintf("\"%s<%i><%s><>\" voted for option %i\n",
 		STRING(player->v.netname),
-		engine::GetPlayerUserId(player->edict()),
-		engine::GetPlayerAuthId(player->edict()),
+		engine::GetPlayerUserId(&player->v),
+		engine::GetPlayerAuthId(&player->v),
 		option - 1);
 }
 

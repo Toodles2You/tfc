@@ -673,9 +673,6 @@ int BotProfileManager::FindVoiceBankIndex( const char *filename )
  */
 const BotProfile *BotProfileManager::GetRandomProfile( BotDifficultyType difficulty, BotProfileTeamType team ) const
 {
-#ifndef engine::RandomLong
-	return nullptr;	// we don't need random profiles when we're not in the game dll
-#else
 	BotProfileList::const_iterator iter;
 
 	// count up valid profiles
@@ -703,6 +700,5 @@ const BotProfile *BotProfileManager::GetRandomProfile( BotDifficultyType difficu
 	}
 
 	return nullptr;
-#endif;
 }
 

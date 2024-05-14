@@ -151,8 +151,8 @@ bool CVoiceGameMgr::PlayerHasBlockedPlayer(CBasePlayer* pReceiver, CBasePlayer* 
 	if (!pReceiver || !pSender)
 		return false;
 
-	iReceiverIndex = pReceiver->entindex() - 1;
-	iSenderIndex = pSender->entindex() - 1;
+	iReceiverIndex = pReceiver->v.GetIndex() - 1;
+	iSenderIndex = pSender->v.GetIndex() - 1;
 
 	if (iReceiverIndex < 0 || iReceiverIndex >= m_nMaxPlayers || iSenderIndex < 0 || iSenderIndex >= m_nMaxPlayers)
 		return false;
@@ -162,7 +162,7 @@ bool CVoiceGameMgr::PlayerHasBlockedPlayer(CBasePlayer* pReceiver, CBasePlayer* 
 
 bool CVoiceGameMgr::ClientCommand(CBasePlayer* pPlayer, const char* cmd)
 {
-	int playerClientIndex = pPlayer->entindex() - 1;
+	int playerClientIndex = pPlayer->v.GetIndex() - 1;
 	if (playerClientIndex < 0 || playerClientIndex >= m_nMaxPlayers)
 	{
 		VoiceServerDebug("CVoiceGameMgr::ClientCommand: cmd %s from invalid client (%d)\n", cmd, playerClientIndex);

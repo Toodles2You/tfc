@@ -100,7 +100,7 @@ CBasePlayer::PlaybackEvent(
 {
 	engine::PlaybackEvent(
 		flags,
-		edict(),
+		&v,
 		event,
 		0.0f,
 		v.origin,
@@ -592,9 +592,15 @@ int CBasePlayer::GetDeathSequence()
 
         dot = DotProduct(gpGlobals->v_forward, g_vecAttackDir * -1);
 
+#ifdef GAME_DLL
+		int ignore = v.GetIndex();
+#else
+		int ignore = -1;
+#endif
+
 		if (dot > 0.3)
 		{
-            Trace trace{center, center + forward * 64, entindex(), Trace::kBox};
+            Trace trace{center, center + forward * 64, ignore, Trace::kBox};
 
             if (trace.fraction == 1)
             {
@@ -603,7 +609,7 @@ int CBasePlayer::GetDeathSequence()
 		}
 		else if (dot <= -0.3)
 		{
-            Trace trace{center, center - forward * 64, entindex(), Trace::kBox};
+            Trace trace{center, center - forward * 64, ignore, Trace::kBox};
 
             if (trace.fraction == 1)
             {

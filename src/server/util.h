@@ -68,9 +68,6 @@ inline EntityOffset OFFSET(const Entity* pent)
 #define LINK_ENTITY_TO_CLASS(mapClassName, DLLClassName)
 #endif
 
-inline int ENTINDEX(Entity* pEdict) { return engine::IndexOfEdict(pEdict); }
-inline Entity* INDEXENT(int iEdictNum) { return engine::PEntityOfEntIndex(iEdictNum); }
-
 inline void MessageBegin(int dest, int type, const Vector& origin, CBaseEntity* entity);
 inline void MessageBegin(int dest, int type, CBaseEntity* entity);
 

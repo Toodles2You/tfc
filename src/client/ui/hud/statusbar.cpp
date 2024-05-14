@@ -95,6 +95,13 @@ void CHudStatusBar::UpdateStatusBar(cl_entity_t* entity)
 		return;
 	}
 
+	if (m_targetIndex != entity->index)
+	{
+		client::GetPlayerInfo(
+			entity->index,
+			g_PlayerInfoList + entity->index);
+	}
+
 	m_targetIndex = entity->index;
 	m_targetExpireTime = client::GetClientTime();
 	SetActive(true);

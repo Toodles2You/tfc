@@ -51,7 +51,7 @@ Trace::Trace(const Vector& start, const Vector& end, int ignore, int traceFlags)
         const_cast<Vector&>(start),
         const_cast<Vector&>(end),
         flags,
-        engine::PEntityOfEntIndex(ignore),
+        Entity::FromIndex(ignore),
         &trace);
 
     result = 0;
@@ -80,6 +80,9 @@ Trace::Trace(const Vector& start, const Vector& end, int ignore, int traceFlags)
 
 Trace::Trace(const Vector& start, const Vector& end, int ignore, int traceFlags)
 {
+    /* Toodles FIXME: !!! */
+    ignore = client::GetLocalPlayer()->index;
+
 	client::event::SetSolidPlayers(ignore - 1);
 	client::event::SetTraceHull(kHullPoint);
 

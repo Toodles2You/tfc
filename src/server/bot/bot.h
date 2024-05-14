@@ -255,7 +255,7 @@ private:
 //--------------------------------------------------------------------------------------------------------------
 inline void CBot::SetModel( const char *modelName )
 {
-	SET_CLIENT_KEY_VALUE( entindex(), GET_USERINFO(edict()), "model", (char *)modelName );
+	engine::SetClientKeyValue( v.GetIndex(), engine::GetInfoKeyBuffer(&v), "model", (char *)modelName );
 }
 
 //-----------------------------------------------------------------------------------------------------------

@@ -719,14 +719,14 @@ void PlayCDTrack(int iTrack)
 
 	if (iTrack == -1)
 	{
-		engine::ClientCommand(pClient->edict(), "cd stop\n");
+		engine::ClientCommand(&pClient->v, "cd stop\n");
 	}
 	else
 	{
 		char string[64];
 
 		sprintf(string, "cd play %3d\n", iTrack);
-		engine::ClientCommand(pClient->edict(), string);
+		engine::ClientCommand(&pClient->v, string);
 	}
 }
 
@@ -871,7 +871,7 @@ void CTriggerHurt::RadiationThink()
 	v.origin = (v.absmin + v.absmax) * 0.5;
 	v.view_ofs = v.view_ofs * 0.0;
 
-	pentPlayer = engine::FindClientInPVS(edict());
+	pentPlayer = engine::FindClientInPVS(&v);
 
 	v.origin = origin;
 	v.view_ofs = view_ofs;
@@ -946,7 +946,7 @@ void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 			{ // too early to hurt again, and not same frame with a different entity
 				if (pOther->IsPlayer())
 				{
-					int playerMask = 1 << (pOther->entindex() - 1);
+					int playerMask = 1 << (pOther->v.GetIndex() - 1);
 
 					// If I've already touched this player (this time), then bail out
 					if ((v.impulse & playerMask) != 0)
@@ -968,7 +968,7 @@ void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 			v.impulse = 0;
 			if (pOther->IsPlayer())
 			{
-				int playerMask = 1 << (pOther->entindex() - 1);
+				int playerMask = 1 << (pOther->v.GetIndex() - 1);
 
 				// Mark this player as touched
 				// BUGBUG - There can be only 32 players!
@@ -1416,7 +1416,7 @@ void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 			pFireAndDie->m_flDelay = m_changeTargetDelay;
 			pFireAndDie->v.origin = pPlayer->v.origin;
 			// Call spawn
-			DispatchSpawn(pFireAndDie->edict());
+			DispatchSpawn(&pFireAndDie->v);
 		}
 	}
 	// This object will get removed in the call to engine::ChangeLevel, copy the params into "safe" memory

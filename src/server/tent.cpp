@@ -47,7 +47,7 @@ void tent::TeleportSplash(CBaseEntity* entity)
 {
 	engine::PlaybackEvent(
 		FEV_GLOBAL | FEV_RELIABLE,
-		entity->edict(),
+		&entity->v,
 		g_usTeleport,
 		0.0F,
 		entity->Center(),
@@ -70,7 +70,7 @@ void tent::Explosion(
 {
 	engine::PlaybackEvent(
 		FEV_GLOBAL | FEV_RELIABLE,
-		CWorld::World->edict(),
+		&CWorld::World->v,
 		g_usExplosion,
 		0.0F,
 		origin,
@@ -91,7 +91,7 @@ void tent::SpawnCorpse(CBaseEntity* entity, const int gibMode)
 
 	engine::PlaybackEvent(
 		FEV_GLOBAL | FEV_RELIABLE,
-		entity->edict(),
+		&entity->v,
 		g_usGibbed,
 		0.0F,
 		entity->v.origin,
@@ -124,7 +124,7 @@ void tent::PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber)
 	WriteCoord(pTrace->vecEndPos.x);
 	WriteCoord(pTrace->vecEndPos.y);
 	WriteCoord(pTrace->vecEndPos.z);
-	WriteShort((short)ENTINDEX(pTrace->pHit));
+	WriteShort(pTrace->pHit->GetIndex());
 	WriteByte(decalNumber);
 	MessageEnd();
 }

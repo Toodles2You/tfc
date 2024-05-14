@@ -586,7 +586,7 @@ void CGamePlayerZone::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 				hullNumber = util::head_hull;
 			}
 
-			util::TraceModel(pPlayer->v.origin, pPlayer->v.origin, hullNumber, edict(), &trace);
+			util::TraceModel(pPlayer->v.origin, pPlayer->v.origin, hullNumber, &v, &trace);
 
 			if (0 != trace.fStartSolid)
 			{

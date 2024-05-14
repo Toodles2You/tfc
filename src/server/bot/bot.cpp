@@ -369,7 +369,7 @@ void CBot::ExecuteCommand( void )
 		SetBits( m_buttonFlags, IN_DUCK );
 
 	// Run the command
-	engine::RunPlayerMove( edict(), v.v_angle, m_forwardSpeed, m_strafeSpeed, m_verticalSpeed, 
+	engine::RunPlayerMove( &v, v.v_angle, m_forwardSpeed, m_strafeSpeed, m_verticalSpeed, 
 																	m_buttonFlags, 0, adjustedMSec );
 }
 
@@ -519,7 +519,7 @@ bool CBot::IsLocalPlayerWatchingMe( void ) const
 		return false;
 #endif
 
-	int myIndex = const_cast<CBot *>(this)->entindex();
+	int myIndex = const_cast<CBot *>(this)->v.GetIndex();
 
 	CBasePlayer *player = static_cast<CBasePlayer *>(util::GetLocalPlayer());
 	if (player == nullptr)

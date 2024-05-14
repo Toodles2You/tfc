@@ -149,7 +149,7 @@ bool CBasePlayerWeapon::Spawn()
 	v.movetype = MOVETYPE_TOSS;
 	v.solid = SOLID_TRIGGER;
 
-	engine::DropToFloor(edict());
+	engine::DropToFloor(&v);
 
 	m_iClip = iMaxClip();
 
@@ -265,7 +265,7 @@ CBaseEntity* CBasePlayerWeapon::Respawn()
 		pNewWeapon->ClearTouch();
 		pNewWeapon->SetThink(&CBasePlayerWeapon::AttemptToMaterialize);
 
-		engine::DropToFloor(edict());
+		engine::DropToFloor(&v);
 
 		pNewWeapon->v.nextthink = g_pGameRules->FlWeaponRespawnTime(this);
 	}
@@ -316,7 +316,7 @@ bool CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer)
 
 	m_pPlayer = pPlayer;
 
-	v.owner = v.aiment = pPlayer->edict();
+	v.owner = v.aiment = &pPlayer->v;
 
 	v.movetype = MOVETYPE_FOLLOW;
 	v.solid = SOLID_NOT;
@@ -360,7 +360,7 @@ void CBasePlayerWeapon::SendWeaponAnim(int iAnim)
 
 	m_pPlayer->v.weaponanim = iAnim;
 
-	if (skiplocal && engine::CanSkipPlayer(m_pPlayer->edict()))
+	if (skiplocal && engine::CanSkipPlayer(&m_pPlayer->v))
 		return;
 
 	MessageBegin(MSG_ONE, SVC_WEAPONANIM, m_pPlayer);

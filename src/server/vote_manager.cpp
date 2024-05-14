@@ -130,8 +130,8 @@ void CVoteManager::RequestLevelChange(const unsigned int playerIndex)
 
 	util::LogPrintf("\"%s<%i><%s><>\" rocked the vote\n",
 		STRING(player->v.netname),
-		engine::GetPlayerUserId(player->edict()),
-		engine::GetPlayerAuthId(player->edict()));
+		engine::GetPlayerUserId(&player->v),
+		engine::GetPlayerAuthId(&player->v));
 
 	if (rocked >= players)
 	{
@@ -193,8 +193,8 @@ void CVoteManager::NominateLevel(
 
 		util::LogPrintf("\"%s<%i><%s><>\" changed their nomination to '%s'\n",
 			STRING(player->v.netname),
-			engine::GetPlayerUserId(player->edict()),
-			engine::GetPlayerAuthId(player->edict()),
+			engine::GetPlayerUserId(&player->v),
+			engine::GetPlayerAuthId(&player->v),
 			levelName.c_str());
 
 		util::ClientPrintAll(HUD_PRINTTALK, "#Vote_level_nominate", name, levelName.c_str());
@@ -209,8 +209,8 @@ void CVoteManager::NominateLevel(
 
 		util::LogPrintf("\"%s<%i><%s><>\" nominated '%s'\n",
 			STRING(player->v.netname),
-			engine::GetPlayerUserId(player->edict()),
-			engine::GetPlayerAuthId(player->edict()),
+			engine::GetPlayerUserId(&player->v),
+			engine::GetPlayerAuthId(&player->v),
 			levelName.c_str());
 
 		util::ClientPrintAll(HUD_PRINTTALK, "#Vote_level_nominate", name, levelName.c_str());

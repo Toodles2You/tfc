@@ -60,7 +60,7 @@ public:
 	{
 		if (pEntity)
 		{
-			v.skin = ENTINDEX(pEntity);
+			v.skin = pEntity->GetIndex();
 			v.body = attachment;
 			v.aiment = pEntity;
 			v.movetype = MOVETYPE_FOLLOW;

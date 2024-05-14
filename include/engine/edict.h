@@ -10,6 +10,9 @@
 #define MAX_ENT_LEAFS 48
 
 #include "progdefs.h"
+#ifdef GAME_DLL
+#include "enginecallback.h"
+#endif
 
 class Entity
 {
@@ -206,6 +209,12 @@ public:
 #ifdef GAME_DLL
 	template <class T> [[nodiscard]] static T* Create();
 #endif
+
+#ifdef GAME_DLL
+	[[nodiscard]] int GetIndex() { return engine::IndexOfEdict(this); }
+
+	[[nodiscard]] static Entity* FromIndex(const int index) { return engine::PEntityOfEntIndex(index); }
+#endif
 };
 
 
@@ -242,8 +251,6 @@ void Entity::Free()
 
 
 #ifdef GAME_DLL
-
-#include "enginecallback.h"
 
 template <class T>
 [[nodiscard]]

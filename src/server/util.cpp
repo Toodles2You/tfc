@@ -383,7 +383,7 @@ CBaseEntity* util::FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& v
 	Entity* pentEntity;
 
 	if (pStartEntity)
-		pentEntity = pStartEntity->edict();
+		pentEntity = &pStartEntity->v;
 	else
 		pentEntity = nullptr;
 
@@ -458,7 +458,7 @@ CBaseEntity* util::PlayerByIndex(int playerIndex)
 
 	if (playerIndex > 0 && playerIndex <= gpGlobals->maxClients)
 	{
-		auto entity = engine::PEntityOfEntIndex(playerIndex);
+		auto entity = Entity::FromIndex(playerIndex);
 
 		if (entity != nullptr && !entity->IsFree())
 		{
@@ -806,13 +806,13 @@ void util::ShowMessageAll(const char* pString)
 void util::TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, CBaseEntity* ignore, TraceResult* ptr)
 {
 	//TODO: define constants
-	engine::TraceLine(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0) | (ignore_glass == ignoreGlass ? 0x100 : 0), ignore ? ignore->edict() : nullptr, ptr);
+	engine::TraceLine(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0) | (ignore_glass == ignoreGlass ? 0x100 : 0), ignore != nullptr ? &ignore->v : nullptr, ptr);
 }
 
 
 void util::TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, CBaseEntity* ignore, TraceResult* ptr)
 {
-	engine::TraceLine(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), ignore ? ignore->edict() : nullptr, ptr);
+	engine::TraceLine(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), ignore != nullptr ? &ignore->v : nullptr, ptr);
 }
 
 
