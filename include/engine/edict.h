@@ -204,6 +204,10 @@ public:
 
 	template <class T> [[nodiscard]] constexpr T* Get() { return static_cast<T*>(pvPrivateData); }
 	template <class T> [[nodiscard]] constexpr T* GetNew();
+
+	/* Because the engine won't check before dispatching callbacks, I guess. */
+	static inline bool IsValid(Entity* entity);
+
 	template <class T> [[nodiscard]] constexpr void Free();
 
 #ifdef GAME_DLL
@@ -234,6 +238,15 @@ T* Entity::GetNew()
 	}
 
 	return static_cast<T*>(pvPrivateData);
+}
+
+
+inline bool Entity::IsValid(Entity* entity)
+{
+	return entity != nullptr
+		&& entity->free == 0
+		&& (entity->flags & FL_KILLME) == 0
+		&& entity->pvPrivateData != nullptr;
 }
 
 

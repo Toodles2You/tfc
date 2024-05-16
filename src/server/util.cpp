@@ -29,6 +29,7 @@
 #include "weapons.h"
 #include "gamerules.h"
 #include "UserMessages.h"
+#include "game.h"
 
 inline void MessageBegin(int dest, int type, const Vector& origin, CBaseEntity* entity)
 {
@@ -806,13 +807,19 @@ void util::ShowMessageAll(const char* pString)
 void util::TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, CBaseEntity* ignore, TraceResult* ptr)
 {
 	//TODO: define constants
+	const auto bWasRunningTrace = g_bRunningTrace;
+	g_bRunningTrace = true;
 	engine::TraceLine(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0) | (ignore_glass == ignoreGlass ? 0x100 : 0), ignore != nullptr ? &ignore->v : nullptr, ptr);
+	g_bRunningTrace = bWasRunningTrace;
 }
 
 
 void util::TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, CBaseEntity* ignore, TraceResult* ptr)
 {
+	const auto bWasRunningTrace = g_bRunningTrace;
+	g_bRunningTrace = true;
 	engine::TraceLine(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), ignore != nullptr ? &ignore->v : nullptr, ptr);
+	g_bRunningTrace = bWasRunningTrace;
 }
 
 
@@ -836,6 +843,9 @@ bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CB
 	}
 
 	Entity* ignoreEnt = ignore ? &ignore->v : nullptr;
+
+	const auto bWasRunningTrace = g_bRunningTrace;
+	g_bRunningTrace = true;
 
 	if (hull == point_hull)
 	{	
@@ -863,6 +873,8 @@ bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CB
 			*tr = tr2;
 		}
 	}
+	
+	g_bRunningTrace = bWasRunningTrace;
 
 	return tr->flFraction != 1.0F;
 }
@@ -870,12 +882,18 @@ bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CB
 
 void util::TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, Entity* pentIgnore, TraceResult* ptr)
 {
+	const auto bWasRunningTrace = g_bRunningTrace;
+	g_bRunningTrace = true;
 	engine::TraceHull(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), hullNumber, pentIgnore, ptr);
+	g_bRunningTrace = bWasRunningTrace;
 }
 
 void util::TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, Entity* pentModel, TraceResult* ptr)
 {
+	const auto bWasRunningTrace = g_bRunningTrace;
+	g_bRunningTrace = true;
 	engine::TraceModel(vecStart, vecEnd, hullNumber, pentModel, ptr);
+	g_bRunningTrace = bWasRunningTrace;
 }
 
 
