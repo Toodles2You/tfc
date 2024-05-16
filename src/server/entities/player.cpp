@@ -576,6 +576,7 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 	g_pGameRules->PlayerKilled(this, attacker, inflictor, accomplice, bitsDamageType);
 
 	SetUseObject(nullptr);
+	DropBackpack();
 	RemoveAllWeapons();
 	RemoveGoalItems();
 
@@ -586,8 +587,6 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 
 	v.health = std::min(v.health, 0.0F);
 	v.deadflag = DEAD_DYING;
-
-	DropBackpack();
 
 	m_iFOV = 0;
 
