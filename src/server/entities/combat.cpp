@@ -255,8 +255,8 @@ void CBasePlayer::FireBullets(
 
 		const Vector angles
 		{
-			aim.x + spread.y * 0.5 * spreadScale.x,
-			aim.y + spread.x * 0.5 * spreadScale.y,
+			aim.x + spread.y * spreadScale.x,
+			aim.y + spread.x * spreadScale.y,
 			aim.z,
 		};
 
