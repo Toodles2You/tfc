@@ -133,7 +133,7 @@ void CPipeBombLauncher::DetonatePipeBombs(const bool fizzle)
 				{
 					pipebomb->Remove();
 				}
-				break;
+				continue;
 			}
 
 			pipebomb->SetThink(&CPipeBomb::Detonate);
