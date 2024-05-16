@@ -91,9 +91,7 @@ void CDecal::TriggerDecal(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 
 	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
 	WriteByte(TE_BSPDECAL);
-	WriteCoord(v.origin.x);
-	WriteCoord(v.origin.y);
-	WriteCoord(v.origin.z);
+	WriteCoord(v.origin);
 	WriteShort((int)v.skin);
 	entityIndex = trace.pHit->GetIndex();
 	WriteShort(entityIndex);

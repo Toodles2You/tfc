@@ -195,9 +195,7 @@ void CSniperRifle::PrimaryAttack()
 			WriteFloat(dir.z);
 			WriteByte(0);
 			WriteByte(player->m_LastHitGroup == HITGROUP_HEAD ? 1 : 0);
-			WriteCoord(tr.vecEndPos.x);
-			WriteCoord(tr.vecEndPos.y);
-			WriteCoord(tr.vecEndPos.z);
+			WriteCoord(tr.vecEndPos);
 			MessageEnd();
 		}
 	}

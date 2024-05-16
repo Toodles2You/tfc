@@ -671,19 +671,13 @@ void CLightning::StrikeThink()
 			{
 				WriteByte(TE_BEAMENTPOINT);
 				WriteShort(pStart->v.GetIndex());
-				WriteCoord(pEnd->v.origin.x);
-				WriteCoord(pEnd->v.origin.y);
-				WriteCoord(pEnd->v.origin.z);
+				WriteCoord(pEnd->v.origin);
 			}
 			else
 			{
 				WriteByte(TE_BEAMPOINTS);
-				WriteCoord(pStart->v.origin.x);
-				WriteCoord(pStart->v.origin.y);
-				WriteCoord(pStart->v.origin.z);
-				WriteCoord(pEnd->v.origin.x);
-				WriteCoord(pEnd->v.origin.y);
-				WriteCoord(pEnd->v.origin.z);
+				WriteCoord(pStart->v.origin);
+				WriteCoord(pEnd->v.origin);
 			}
 		}
 		else
@@ -750,12 +744,8 @@ void CLightning::Zap(const Vector& vecSrc, const Vector& vecDest)
 #if 1
 	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
 	WriteByte(TE_BEAMPOINTS);
-	WriteCoord(vecSrc.x);
-	WriteCoord(vecSrc.y);
-	WriteCoord(vecSrc.z);
-	WriteCoord(vecDest.x);
-	WriteCoord(vecDest.y);
-	WriteCoord(vecDest.z);
+	WriteCoord(vecSrc);
+	WriteCoord(vecDest);
 	WriteShort(m_spriteTexture);
 	WriteByte(m_frameStart);			 // framestart
 	WriteByte((int)v.framerate);	 // framerate
@@ -771,12 +761,8 @@ void CLightning::Zap(const Vector& vecSrc, const Vector& vecDest)
 #else
 	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
 	WriteByte(TE_LIGHTNING);
-	WriteCoord(vecSrc.x);
-	WriteCoord(vecSrc.y);
-	WriteCoord(vecSrc.z);
-	WriteCoord(vecDest.x);
-	WriteCoord(vecDest.y);
-	WriteCoord(vecDest.z);
+	WriteCoord(vecSrc);
+	WriteCoord(vecDest);
 	WriteByte(10);
 	WriteByte(50);
 	WriteByte(40);
@@ -1615,9 +1601,7 @@ void CEnvFunnel::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE use
 {
 	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
 	WriteByte(TE_LARGEFUNNEL);
-	WriteCoord(v.origin.x);
-	WriteCoord(v.origin.y);
-	WriteCoord(v.origin.z);
+	WriteCoord(v.origin);
 	WriteShort(m_iSprite);
 
 	if ((v.spawnflags & SF_FUNNEL_REVERSE) != 0) // funnel flows in reverse?

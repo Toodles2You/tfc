@@ -412,22 +412,6 @@ int	CGraph:: FindNearestLink ( const Vector &vecTestPoint, int *piNearestLink, b
 		}
 	}
 
-/*
-	if ( fSuccess )
-	{
-		WriteByte(MSG_BROADCAST, SVC_TEMPENTITY);
-		WriteByte(MSG_BROADCAST, TE_SHOWLINE);
-		
-		WriteCoord(MSG_BROADCAST, m_pNodes[ m_pLinkPool[ iNearestLink ].m_iSrcNode ].m_vecOrigin.x );
-		WriteCoord(MSG_BROADCAST, m_pNodes[ m_pLinkPool[ iNearestLink ].m_iSrcNode ].m_vecOrigin.y );
-		WriteCoord(MSG_BROADCAST, m_pNodes[ m_pLinkPool[ iNearestLink ].m_iSrcNode ].m_vecOrigin.z + NODE_HEIGHT);
-
-		WriteCoord(MSG_BROADCAST, m_pNodes[ m_pLinkPool[ iNearestLink ].m_iDestNode ].m_vecOrigin.x );
-		WriteCoord(MSG_BROADCAST, m_pNodes[ m_pLinkPool[ iNearestLink ].m_iDestNode ].m_vecOrigin.y );
-		WriteCoord(MSG_BROADCAST, m_pNodes[ m_pLinkPool[ iNearestLink ].m_iDestNode ].m_vecOrigin.z + NODE_HEIGHT);
-	}
-*/
-
 	engine::AlertMessage ( at_aiconsole, "%d Checked\n", cChecked );
 	return fSuccess;
 }
@@ -735,43 +719,6 @@ int CGraph::FindShortestPath(int* piPath, int iStart, int iDest, int iHull, int 
 			iCurrentNode = m_pNodes[iCurrentNode].m_iPreviousNode;
 		}
 	}
-
-#if 0
-
-	if (m_fRoutingComplete)
-	{
-		// This will draw the entire path that was generated for the monster.
-
-		for ( int i = 0 ; i < iNumPathNodes - 1 ; i++ )
-		{
-			MessageBegin( MSG_BROADCAST, SVC_TEMPENTITY );
-				WriteByte( TE_SHOWLINE);
-				
-				WriteCoord( m_pNodes[ piPath[ i ] ].m_vecOrigin.x );
-				WriteCoord( m_pNodes[ piPath[ i ] ].m_vecOrigin.y );
-				WriteCoord( m_pNodes[ piPath[ i ] ].m_vecOrigin.z + NODE_HEIGHT );
-
-				WriteCoord( m_pNodes[ piPath[ i + 1 ] ].m_vecOrigin.x );
-				WriteCoord( m_pNodes[ piPath[ i + 1 ] ].m_vecOrigin.y );
-				WriteCoord( m_pNodes[ piPath[ i + 1 ] ].m_vecOrigin.z + NODE_HEIGHT );
-			MessageEnd();
-		}
-	}
-
-#endif
-#if 0 // MAZE map
-	MessageBegin( MSG_BROADCAST, SVC_TEMPENTITY );
-		WriteByte( TE_SHOWLINE);
-		
-		WriteCoord( m_pNodes[ 4 ].m_vecOrigin.x );
-		WriteCoord( m_pNodes[ 4 ].m_vecOrigin.y );
-		WriteCoord( m_pNodes[ 4 ].m_vecOrigin.z + NODE_HEIGHT );
-
-		WriteCoord( m_pNodes[ 9 ].m_vecOrigin.x );
-		WriteCoord( m_pNodes[ 9 ].m_vecOrigin.y );
-		WriteCoord( m_pNodes[ 9 ].m_vecOrigin.z + NODE_HEIGHT );
-	MessageEnd();
-#endif
 
 	return iNumPathNodes;
 }
@@ -1153,13 +1100,15 @@ void CGraph::ShowNodeConnections(int iNode)
 		MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
 		WriteByte(TE_SHOWLINE);
 
-		WriteCoord(m_pNodes[iNode].m_vecOrigin.x);
-		WriteCoord(m_pNodes[iNode].m_vecOrigin.y);
-		WriteCoord(m_pNodes[iNode].m_vecOrigin.z + NODE_HEIGHT);
+		WriteCoord(
+			m_pNodes[iNode].m_vecOrigin.x,
+			m_pNodes[iNode].m_vecOrigin.y,
+			m_pNodes[iNode].m_vecOrigin.z + NODE_HEIGHT);
 
-		WriteCoord(vecSpot.x);
-		WriteCoord(vecSpot.y);
-		WriteCoord(vecSpot.z + NODE_HEIGHT);
+		WriteCoord(
+			vecSpot.x,
+			vecSpot.y,
+			vecSpot.z + NODE_HEIGHT);
 		MessageEnd();
 	}
 }
@@ -2108,13 +2057,15 @@ void CTestHull::PathFind()
 		MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
 		WriteByte(TE_SHOWLINE);
 
-		WriteCoord(pNode->m_vecOrigin.x);
-		WriteCoord(pNode->m_vecOrigin.y);
-		WriteCoord(pNode->m_vecOrigin.z + NODE_HEIGHT);
+		WriteCoord(
+			pNode->m_vecOrigin.x,
+			pNode->m_vecOrigin.y,
+			pNode->m_vecOrigin.z + NODE_HEIGHT);
 
-		WriteCoord(pNextNode->m_vecOrigin.x);
-		WriteCoord(pNextNode->m_vecOrigin.y);
-		WriteCoord(pNextNode->m_vecOrigin.z + NODE_HEIGHT);
+		WriteCoord(
+			pNextNode->m_vecOrigin.x,
+			pNextNode->m_vecOrigin.y,
+			pNextNode->m_vecOrigin.z + NODE_HEIGHT);
 		MessageEnd();
 
 		pNode = pNextNode;
@@ -3622,13 +3573,15 @@ void CNodeViewer::DrawThink()
 		extern short g_sModelIndexLaser;
 		MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
 		WriteByte(TE_BEAMPOINTS);
-		WriteCoord(WorldGraph.m_pNodes[m_aFrom[m_iDraw]].m_vecOrigin.x);
-		WriteCoord(WorldGraph.m_pNodes[m_aFrom[m_iDraw]].m_vecOrigin.y);
-		WriteCoord(WorldGraph.m_pNodes[m_aFrom[m_iDraw]].m_vecOrigin.z + NODE_HEIGHT);
+		WriteCoord(
+			WorldGraph.m_pNodes[m_aFrom[m_iDraw]].m_vecOrigin.x,
+			WorldGraph.m_pNodes[m_aFrom[m_iDraw]].m_vecOrigin.y,
+			WorldGraph.m_pNodes[m_aFrom[m_iDraw]].m_vecOrigin.z + NODE_HEIGHT);
 
-		WriteCoord(WorldGraph.m_pNodes[m_aTo[m_iDraw]].m_vecOrigin.x);
-		WriteCoord(WorldGraph.m_pNodes[m_aTo[m_iDraw]].m_vecOrigin.y);
-		WriteCoord(WorldGraph.m_pNodes[m_aTo[m_iDraw]].m_vecOrigin.z + NODE_HEIGHT);
+		WriteCoord(
+			WorldGraph.m_pNodes[m_aTo[m_iDraw]].m_vecOrigin.x,
+			WorldGraph.m_pNodes[m_aTo[m_iDraw]].m_vecOrigin.y,
+			WorldGraph.m_pNodes[m_aTo[m_iDraw]].m_vecOrigin.z + NODE_HEIGHT);
 		WriteShort(g_sModelIndexLaser);
 		WriteByte(0);			  // framerate
 		WriteByte(0);			  // framerate

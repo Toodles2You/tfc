@@ -320,9 +320,7 @@ bool CPrimeGrenade::CanDetonate()
 
 		MessageBegin(MSG_PVS, SVC_TEMPENTITY, origin);
 		WriteByte(TE_SPRITE);
-		WriteCoord(origin.x);
-		WriteCoord(origin.y);
-		WriteCoord(origin.z);
+		WriteCoord(origin);
 		WriteShort(g_sModelIndexFlare);
 		WriteByte(3);
 		WriteByte(255);

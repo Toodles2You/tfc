@@ -629,19 +629,13 @@ void CBreakable::Die()
 	WriteByte(TE_BREAKMODEL);
 
 	// position
-	WriteCoord(vecSpot.x);
-	WriteCoord(vecSpot.y);
-	WriteCoord(vecSpot.z);
+	WriteCoord(vecSpot);
 
 	// size
-	WriteCoord(v.size.x);
-	WriteCoord(v.size.y);
-	WriteCoord(v.size.z);
+	WriteCoord(v.size);
 
 	// velocity
-	WriteCoord(vecVelocity.x);
-	WriteCoord(vecVelocity.y);
-	WriteCoord(vecVelocity.z);
+	WriteCoord(vecVelocity);
 
 	// randomization
 	WriteByte(10);

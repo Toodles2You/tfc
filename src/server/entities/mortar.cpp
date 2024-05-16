@@ -225,12 +225,8 @@ void CMortar::MortarExplode()
 	// mortar beam
 	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
 	WriteByte(TE_BEAMPOINTS);
-	WriteCoord(v.origin.x);
-	WriteCoord(v.origin.y);
-	WriteCoord(v.origin.z);
-	WriteCoord(v.origin.x);
-	WriteCoord(v.origin.y);
-	WriteCoord(v.origin.z + 1024);
+	WriteCoord(v.origin);
+	WriteCoord(v.origin.x, v.origin.y, v.origin.z + 1024);
 	WriteShort(m_spriteTexture);
 	WriteByte(0);	 // framerate
 	WriteByte(0);	 // framerate

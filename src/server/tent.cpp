@@ -25,9 +25,7 @@ void tent::Sparks(const Vector& position)
 {
 	MessageBegin(MSG_PVS, SVC_TEMPENTITY, position);
 	WriteByte(TE_SPARKS);
-	WriteCoord(position.x);
-	WriteCoord(position.y);
-	WriteCoord(position.z);
+	WriteCoord(position);
 	MessageEnd();
 }
 
@@ -36,9 +34,7 @@ void tent::Ricochet(const Vector& position, float scale)
 {
 	MessageBegin(MSG_PVS, SVC_TEMPENTITY, position);
 	WriteByte(TE_ARMOR_RICOCHET);
-	WriteCoord(position.x);
-	WriteCoord(position.y);
-	WriteCoord(position.z);
+	WriteCoord(position);
 	WriteByte((int)(scale * 10));
 	MessageEnd();
 }
@@ -166,9 +162,7 @@ void tent::PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber)
 	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
 	WriteByte(TE_PLAYERDECAL);
 	WriteByte(playernum);
-	WriteCoord(pTrace->vecEndPos.x);
-	WriteCoord(pTrace->vecEndPos.y);
-	WriteCoord(pTrace->vecEndPos.z);
+	WriteCoord(pTrace->vecEndPos);
 	WriteShort(pTrace->pHit->GetIndex());
 	WriteByte(decalNumber);
 	MessageEnd();

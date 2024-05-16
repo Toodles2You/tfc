@@ -161,9 +161,7 @@ int CTFMelee::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& 
 			WriteFloat(dir.z);
 			WriteByte(0);
 			WriteByte(0);
-			WriteCoord(tr.vecEndPos.x);
-			WriteCoord(tr.vecEndPos.y);
-			WriteCoord(tr.vecEndPos.z);
+			WriteCoord(tr.vecEndPos);
 			MessageEnd();
 		}
 

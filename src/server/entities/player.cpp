@@ -1745,9 +1745,7 @@ void CBasePlayer::UpdateClientData()
 		WriteByte(std::clamp(static_cast<int>(v.dmg_save), 0, 255));
 		WriteByte(std::clamp(static_cast<int>(v.dmg_take), 0, 255));
 		WriteLong(m_bitsDamageType);
-		WriteCoord(damageOrigin.x);
-		WriteCoord(damageOrigin.y);
-		WriteCoord(damageOrigin.z);
+		WriteCoord(damageOrigin);
 		MessageEnd();
 
 		v.dmg_take = 0;
@@ -2137,7 +2135,7 @@ void CBasePlayer::SaveMe()
 			MessageBegin(MSG_ONE, SVC_TEMPENTITY, player);
 			WriteByte(TE_PLAYERATTACHMENT);
 			WriteByte(index);
-			WriteCoord(50);
+			WriteCoordComponent(50);
 			WriteShort(g_sModelIndexSaveMe);
 			WriteShort(40);
 			MessageEnd();
