@@ -482,6 +482,7 @@ void CBasePlayer::RemoveAllWeapons()
 		if (m_rgpPlayerWeapons[i] != nullptr)
 		{
 			m_rgpPlayerWeapons[i]->Remove();
+			m_rgpPlayerWeapons[i] = nullptr;
 		}
 	}
 
