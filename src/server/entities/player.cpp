@@ -1528,9 +1528,7 @@ void CBasePlayer::UpdateClientData()
 		WriteByte(std::clamp(static_cast<int>(v.dmg_save), 0, 255));
 		WriteByte(std::clamp(static_cast<int>(v.dmg_take), 0, 255));
 		WriteLong(m_bitsDamageType);
-		WriteCoord(damageOrigin.x);
-		WriteCoord(damageOrigin.y);
-		WriteCoord(damageOrigin.z);
+		WriteCoord(damageOrigin);
 		MessageEnd();
 
 		v.dmg_take = 0;

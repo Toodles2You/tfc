@@ -90,49 +90,66 @@ inline void MessageEnd()
 	engine::MessageEnd();
 }
 
-inline void WriteByte(int value)
+inline void WriteByte(const int& value)
 {
 	engine::WriteByte(value);
 }
 
-inline void WriteChar(int value)
+inline void WriteChar(const int& value)
 {
 	engine::WriteChar(value);
 }
 
-inline void WriteShort(int value)
+inline void WriteShort(const int& value)
 {
 	engine::WriteShort(value);
 }
 
-inline void WriteLong(int value)
+inline void WriteLong(const int& value)
 {
 	engine::WriteLong(value);
 }
 
-inline void WriteAngle(float value)
+inline void WriteAngle(const float& value)
 {
 	engine::WriteAngle(value);
 }
 
-inline void WriteCoord(float value)
+inline void WriteCoord(const Vector& value)
+{
+	engine::WriteCoord(value.x);
+	engine::WriteCoord(value.y);
+	engine::WriteCoord(value.z);
+}
+
+inline void WriteCoord(
+	const float& x,
+	const float& y,
+	const float& z)
+{
+	engine::WriteCoord(x);
+	engine::WriteCoord(y);
+	engine::WriteCoord(z);
+}
+
+inline void WriteCoordComponent(const float& value)
 {
 	engine::WriteCoord(value);
 }
 
-inline void WriteString(const char* value)
+inline void WriteString(const char* const value)
 {
 	engine::WriteString(value);
 }
 
-inline void WriteEntity(int value)
+inline void WriteEntity(const int& value)
 {
 	engine::WriteEntity(value);
 }
 
-inline void WriteFloat(float value)
+inline void WriteFloat(const float& value)
 {
-	WriteLong(*reinterpret_cast<int*>(&value));
+	WriteLong(*reinterpret_cast<const int*>(&value));
 }
 
 // Testing strings for nullity

@@ -502,9 +502,7 @@ void UTIL_DrawBeamFromEnt( int iIndex, Vector vecEnd, int iLifetime, byte bRed, 
 	MessageBegin( MSG_PVS, SVC_TEMPENTITY, vecEnd );   // vecEnd = origin???
 									WriteByte( TE_BEAMENTPOINT );
 									WriteShort( iIndex );
-									WriteCoord( vecEnd.x );
-									WriteCoord( vecEnd.y );
-									WriteCoord( vecEnd.z );
+									WriteCoord( vecEnd );
 									WriteShort( s_iBeamSprite );
 									WriteByte( 0 );		 // startframe
 									WriteByte( 0 );		 // framerate
@@ -525,12 +523,8 @@ void UTIL_DrawBeamPoints( Vector vecStart, Vector vecEnd, int iLifetime, byte bR
 {
 	MessageBegin( MSG_PVS, SVC_TEMPENTITY, vecStart );
 									WriteByte( TE_BEAMPOINTS );
-									WriteCoord( vecStart.x );
-									WriteCoord( vecStart.y );
-									WriteCoord( vecStart.z );
-									WriteCoord( vecEnd.x );
-									WriteCoord( vecEnd.y );
-									WriteCoord( vecEnd.z );
+									WriteCoord( vecStart );
+									WriteCoord( vecEnd );
 									WriteShort( s_iBeamSprite );
 									WriteByte( 0 );		 // startframe
 									WriteByte( 0 );		 // framerate

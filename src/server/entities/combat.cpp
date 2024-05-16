@@ -310,9 +310,7 @@ void CBasePlayer::FireBullets(
 		WriteByte(traceFlags);
 		for (auto i = 0; i < traceHits; i++)
 		{
-			WriteCoord(traceEndPos[i].x);
-			WriteCoord(traceEndPos[i].y);
-			WriteCoord(traceEndPos[i].z);
+			WriteCoord(traceEndPos[i]);
 		}
 		MessageEnd();
 	}
