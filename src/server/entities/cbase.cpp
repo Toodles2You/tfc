@@ -139,51 +139,52 @@ int GetNewDLLFunctions(NEW_DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion)
 
 int DispatchSpawn(Entity* pent)
 {
-	CBaseEntity* pEntity = pent->Get<CBaseEntity>();
-
-	if (pEntity)
+	if (!Entity::IsValid(pent))
 	{
-		// Initialize these or entities who don't link to the world won't have anything in here
-		pEntity->v.absmin = pEntity->v.origin - Vector(1, 1, 1);
-		pEntity->v.absmax = pEntity->v.origin + Vector(1, 1, 1);
+		return -1;
+	}
 
-		if (!pEntity->Spawn())
+	auto entity = pent->Get<CBaseEntity>();
+
+	// Initialize these or entities who don't link to the world won't have anything in here
+	entity->v.absmin = entity->v.origin - Vector(1, 1, 1);
+	entity->v.absmax = entity->v.origin + Vector(1, 1, 1);
+
+	if (!entity->Spawn())
+	{
+		return -1;
+	}
+
+	if (g_pGameRules != nullptr && !g_pGameRules->IsAllowedToSpawn(entity))
+	{
+		return -1; // return that this entity should be deleted
+	}
+
+	// Handle global stuff here
+	if (!FStringNull(entity->v.globalname))
+	{
+		const globalentity_t* pGlobal = gGlobalState.EntityFromTable(entity->v.globalname);
+
+		if (pGlobal != nullptr)
 		{
-			return -1;
-		}
-
-		// Try to get the pointer again, in case the spawn function deleted the entity.
-		pEntity = pent->Get<CBaseEntity>();
-
-		if (pEntity)
-		{
-			if (g_pGameRules && !g_pGameRules->IsAllowedToSpawn(pEntity))
-				return -1; // return that this entity should be deleted
-			if ((pEntity->v.flags & FL_KILLME) != 0)
+			// Already dead? delete
+			if (pGlobal->state == GLOBAL_DEAD)
+			{
 				return -1;
-		}
+			}
+			// In this level & not dead, continue on as normal
 
-
-		// Handle global stuff here
-		if (pEntity && !FStringNull(pEntity->v.globalname))
-		{
-			const globalentity_t* pGlobal = gGlobalState.EntityFromTable(pEntity->v.globalname);
-			if (pGlobal)
-			{
-				// Already dead? delete
-				if (pGlobal->state == GLOBAL_DEAD)
-					return -1;
 #ifdef HALFLIFE_SAVERESTORE
-				else if (!streq(gpGlobals->mapname, pGlobal->levelName))
-					pEntity->MakeDormant(); // Hasn't been moved to this level yet, wait but stay alive
-											// In this level & not dead, continue on as normal
-#endif
-			}
-			else
+			if (!streq(gpGlobals->mapname, pGlobal->levelName))
 			{
-				// Spawned entities default to 'On'
-				gGlobalState.EntityAdd(pEntity->v.globalname, gpGlobals->mapname, GLOBAL_ON);
+				entity->MakeDormant(); // Hasn't been moved to this level yet, wait but stay alive
 			}
+#endif
+		}
+		else
+		{
+			// Spawned entities default to 'On'
+			gGlobalState.EntityAdd(entity->v.globalname, gpGlobals->mapname, GLOBAL_ON);
 		}
 	}
 
@@ -359,81 +360,98 @@ The only time EntvarsKeyvalue should get called prior to entity creation is for 
 */
 void DispatchKeyValue(Entity* pentKeyvalue, KeyValueData* pkvd)
 {
-	if (pkvd == nullptr || pentKeyvalue == nullptr)
+	if (pentKeyvalue == nullptr || pkvd == nullptr)
 	{
 		return;
 	}
 
-	CBaseEntity* pEntity = pentKeyvalue->Get<CBaseEntity>();
+	auto entity = pentKeyvalue->Get<CBaseEntity>();
 
-	if (pkvd->szClassName == nullptr || pEntity == nullptr)
+	if (pkvd->szClassName == nullptr || entity == nullptr)
 	{
 		EntvarsKeyvalue(pentKeyvalue, pkvd);
 		return;
 	}
 
-	if (pEntity->EntvarsKeyvalue(pkvd))
+	if (entity->EntvarsKeyvalue(pkvd))
 	{
 		return;
 	}
 
-	pkvd->fHandled = static_cast<int32>(pEntity->KeyValue(pkvd));
+	pkvd->fHandled = static_cast<int32>(entity->KeyValue(pkvd));
 }
 
 void DispatchTouch(Entity* pentTouched, Entity* pentOther)
 {
 #ifdef HALFLIFE_NODEGRAPH
 	if (gTouchDisabled)
+	{
 		return;
+	}
 #endif
 
-	CBaseEntity* pEntity = pentTouched->Get<CBaseEntity>();
-	CBaseEntity* pOther = pentOther->Get<CBaseEntity>();
-
-	if (pEntity && pOther && ((pEntity->v.flags | pOther->v.flags) & FL_KILLME) == 0)
+	if (!Entity::IsValid(pentTouched) || !Entity::IsValid(pentOther))
 	{
-		/*
-			Toodles: Trigger entities (such as items) don't call "ShouldCollide" since 
-			they technically don't "collide" with entities, so it must be checked here.
-		*/
-		if (pEntity->v.solid != SOLID_TRIGGER || pEntity->ShouldCollide(pOther))
-		{
-			pEntity->Touch(pOther);
-		}
+		return;
+	}
+
+	auto entity = pentTouched->Get<CBaseEntity>();
+	auto other = pentOther->Get<CBaseEntity>();
+
+	/*
+		Toodles: Trigger entities (such as items) don't call "ShouldCollide" since 
+		they technically don't "collide" with entities, so it must be checked here.
+	*/
+	if (entity->v.solid != SOLID_TRIGGER || entity->ShouldCollide(other))
+	{
+		entity->Touch(other);
 	}
 }
 
 
 void DispatchUse(Entity* pentUsed, Entity* pentOther)
 {
-	CBaseEntity* pEntity = pentUsed->Get<CBaseEntity>();
-	CBaseEntity* pOther = pentOther->Get<CBaseEntity>();
+	if (!Entity::IsValid(pentUsed) || !Entity::IsValid(pentOther))
+	{
+		return;
+	}
 
-	if (pEntity && (pEntity->v.flags & FL_KILLME) == 0)
-		pEntity->Use(pOther, pOther, USE_TOGGLE, 0);
+	auto entity = pentUsed->Get<CBaseEntity>();
+	auto other = pentOther->Get<CBaseEntity>();
+
+	entity->Use(other, other, USE_TOGGLE, 0);
 }
 
 void DispatchThink(Entity* pent)
 {
-	CBaseEntity* pEntity = pent->Get<CBaseEntity>();
-	if (pEntity)
+	if (!Entity::IsValid(pent))
 	{
+		return;
+	}
+
+	auto entity = pent->Get<CBaseEntity>();
+
 #ifdef HALFLIFE_SAVERESTORE
-		if (FBitSet(pEntity->v.flags, FL_DORMANT))
-			engine::AlertMessage(at_error, "Dormant entity %s is thinking!!\n", STRING(pEntity->v.classname));
+	if ((entity->v.flags & FL_DORMANT) != 0)
+	{
+		engine::AlertMessage(at_error, "Dormant entity %s is thinking!!\n", STRING(entity->v.classname));
+	}
 #endif
 
-		pEntity->Think();
-	}
+	entity->Think();
 }
 
 void DispatchBlocked(Entity* pentBlocked, Entity* pentOther)
 {
-	CBaseEntity* pEntity = pentBlocked->Get<CBaseEntity>();
-	CBaseEntity* pOther = pentOther->Get<CBaseEntity>();
+	if (!Entity::IsValid(pentBlocked) || !Entity::IsValid(pentOther))
+	{
+		return;
+	}
 
-	if (pEntity)
-		pEntity->Blocked(pOther);
+	auto entity = pentBlocked->Get<CBaseEntity>();
+	auto other = pentOther->Get<CBaseEntity>();
+
+	entity->Blocked(other);
 }
 
 void DispatchSave(Entity* pent, SAVERESTOREDATA* pSaveData)
@@ -441,9 +459,14 @@ void DispatchSave(Entity* pent, SAVERESTOREDATA* pSaveData)
 	gpGlobals->time = pSaveData->time;
 
 #ifdef HALFLIFE_SAVERESTORE
+	if (!Entity::IsValid(pent))
+	{
+		return;
+	}
+
 	CBaseEntity* pEntity = pent->Get<CBaseEntity>();
 
-	if (pEntity && CSaveRestoreBuffer::IsValidSaveRestoreData(pSaveData))
+	if (CSaveRestoreBuffer::IsValidSaveRestoreData(pSaveData))
 	{
 		ENTITYTABLE* pTable = &pSaveData->pTable[pSaveData->currentIndex];
 
@@ -474,38 +497,45 @@ void DispatchSave(Entity* pent, SAVERESTOREDATA* pSaveData)
 
 void OnFreeEntPrivateData(Entity* pEdict)
 {
-	if (pEdict != nullptr)
-	{
-		/* Since the edict doesn't get deleted, fix it so it doesn't interfere. */
-		pEdict->model = iStringNull;
-		pEdict->modelindex = 0;
-		pEdict->effects = EF_NOINTERP | EF_NODRAW;
-		pEdict->solid = SOLID_NOT;
-		pEdict->movetype = MOVETYPE_NONE;
-		pEdict->takedamage = DAMAGE_NO;
-		pEdict->origin = g_vecZero;
+	/* Since the edict doesn't get deleted, fix it so it doesn't interfere. */
+	pEdict->model = iStringNull;
+	pEdict->modelindex = 0;
+	pEdict->effects = EF_NOINTERP | EF_NODRAW;
+	pEdict->solid = SOLID_NOT;
+	pEdict->movetype = MOVETYPE_NONE;
+	pEdict->takedamage = DAMAGE_NO;
+	pEdict->origin = g_vecZero;
 
-		// Zero this out so the engine doesn't try to free it again.
-		pEdict->Free<CBaseEntity>();
+	if (!Entity::IsValid(pEdict))
+	{
+		return;
 	}
+
+	pEdict->Free<CBaseEntity>();
 }
 
+/*
+	Toodles: Important to note that this will not affect player physics.
+	Define CHalfLifePlayerMovement::ShouldCollide in order to prevent 
+	players from colliding with objects.
+*/
 int ShouldCollide(Entity* pentTouched, Entity* pentOther)
 {
+	if (!Entity::IsValid(pentTouched) || !Entity::IsValid(pentOther))
+	{
+		return 0;
+	}
+
+	/* Don't check collision rules when the game is performing a line or hull trace. */
+	if (g_bRunningTrace)
+	{
+		return 1;
+	}
+
 	auto touched = pentTouched->Get<CBaseEntity>();
 	auto other = pentOther->Get<CBaseEntity>();
 
-	if (touched != nullptr && other != nullptr && ((touched->v.flags | other->v.flags) & FL_KILLME) == 0)
-	{
-		/*
-			Toodles: Important to note that this will not affect player physics.
-			Define CHalfLifePlayerMovement::ShouldCollide in order to prevent 
-			players from colliding with objects.
-		*/
-		return touched->ShouldCollide(other) && other->ShouldCollide(touched);
-	}
-
-	return 1;
+	return static_cast<int>(touched->ShouldCollide(other) && other->ShouldCollide(touched));
 }
 
 // Find the matching global entity.  Spit out an error if the designer made entities of
@@ -533,7 +563,7 @@ int DispatchRestore(Entity* pent, SAVERESTOREDATA* pSaveData, int globalEntity)
 #ifndef HALFLIFE_SAVERESTORE
 	return -1;
 #else
-	CBaseEntity* pEntity = pent->Get<CBaseEntity>();
+	CBaseEntity* pEntity = pent->GetNew<CBaseEntity>();
 
 	if (pEntity && CSaveRestoreBuffer::IsValidSaveRestoreData(pSaveData))
 	{
@@ -596,7 +626,7 @@ int DispatchRestore(Entity* pent, SAVERESTOREDATA* pSaveData, int globalEntity)
 		}
 
 		// Again, could be deleted, get the pointer again.
-		pEntity = pent->Get<CBaseEntity>();
+		pEntity = pent->GetNew<CBaseEntity>();
 
 #if 0
 		if ( pEntity && !FStringNull(pEntity->v.globalname) && 0 != globalEntity ) 
@@ -645,13 +675,21 @@ int DispatchRestore(Entity* pent, SAVERESTOREDATA* pSaveData, int globalEntity)
 
 void DispatchObjectCollsionBox(Entity* pent)
 {
-	CBaseEntity* pEntity = pent->Get<CBaseEntity>();
-	if (pEntity)
+	if (pent == nullptr)
 	{
-		pEntity->SetObjectCollisionBox();
+		return;
+	}
+
+	if (Entity::IsValid(pent))
+	{
+		auto entity = pent->Get<CBaseEntity>();
+
+		entity->SetObjectCollisionBox();
 	}
 	else
+	{
 		SetObjectCollisionBox(pent);
+	}
 }
 
 
