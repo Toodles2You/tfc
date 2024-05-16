@@ -62,8 +62,6 @@ CBasePlayer::CBasePlayer(Entity* containingEntity) : CBaseAnimating(containingEn
 
 CBasePlayer::~CBasePlayer()
 {
-	CBaseEntity::~CBaseEntity();
-
 	v.team = TEAM_UNASSIGNED;
 	v.playerclass = PC_UNDEFINED;
 	v.netname = MAKE_STRING("unconnected");
