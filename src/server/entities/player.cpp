@@ -575,15 +575,8 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 
 	g_pGameRules->PlayerKilled(this, attacker, inflictor, accomplice, bitsDamageType);
 
-#ifdef HALFLIFE_TANKCONTROL
-	if (m_pTank != nullptr)
-	{
-		m_pTank->Use(this, this, USE_OFF, 0);
-		m_pTank = nullptr;
-	}
-#endif
-
 	SetUseObject(nullptr);
+	RemoveAllWeapons();
 	RemoveGoalItems();
 
 	SetAction(Action::Die);
@@ -632,11 +625,6 @@ void CBasePlayer::PlayerDeathFrame()
 {
 	const auto bIsMultiplayer = util::IsMultiplayer();
 
-	if (HasWeapons())
-	{
-		RemoveAllWeapons();
-	}
-
 	// If the player has been dead for 5 seconds,
 	// send the player off to an intermission
 	// camera until they respawn.
@@ -684,26 +672,6 @@ void CBasePlayer::StartObserver()
 	WriteByte(TE_KILLPLAYERATTACHMENTS);
 	WriteByte(v.GetIndex());
 	MessageEnd();
-
-	// Holster weapon immediately, to allow it to cleanup
-	if (m_pActiveWeapon)
-		m_pActiveWeapon->Holster();
-
-#ifdef HALFLIFE_TANKCONTROL
-	if (m_pTank != nullptr)
-	{
-		m_pTank->Use(this, this, USE_OFF, 0);
-		m_pTank = nullptr;
-	}
-#endif
-
-	SetUseObject(nullptr);
-
-	// Remove all the player's stuff
-	if (HasWeapons())
-	{
-		RemoveAllWeapons();
-	}
 
 	// reset FOV
 	m_iFOV = 0;
