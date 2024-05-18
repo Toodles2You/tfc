@@ -21,6 +21,7 @@
 #ifdef HALFLIFE_BOTS
 #include "bot/hl_bot.h"
 #endif
+#include "steam_utils.h"
 #include "vote_manager.h"
 
 // multiplayer server rules
@@ -44,6 +45,11 @@ cvar_t mp_chattime = {"mp_chattime", "10", FCVAR_SERVER};
 
 static bool SV_InitServer()
 {
+	if (!Steam_LoadSteamAPI())
+	{
+		return false;
+	}
+
 	if (!FileSystem_LoadFileSystem())
 	{
 		return false;
@@ -107,4 +113,5 @@ void GameDLLInit()
 void GameDLLShutdown()
 {
 	FileSystem_FreeFileSystem();
+	Steam_FreeSteamAPI();
 }

@@ -37,6 +37,7 @@
 #include "tri.h"
 #include "vgui_TeamFortressViewport.h"
 #include "filesystem_utils.h"
+#include "steam_utils.h"
 
 #include "triangleapi.h"
 #include "r_efx.h"
@@ -103,6 +104,11 @@ char HUD_PlayerMoveTexture(char* name)
 
 static bool CL_InitClient()
 {
+	if (!Steam_LoadSteamAPI())
+	{
+		return false;
+	}
+
 	EV_HookEvents();
 	CL_LoadParticleMan();
 
@@ -542,6 +548,7 @@ Called by engine every frame that client .dll is loaded
 
 void HUD_Frame(double time)
 {
+	Steam_Frame();
 	GetClientVoiceMgr()->Frame(time);
 }
 

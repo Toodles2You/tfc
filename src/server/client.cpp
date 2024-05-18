@@ -47,6 +47,7 @@
 #ifdef HALFLIFE_BOTS
 #include "bot/hl_bot_manager.h"
 #endif
+#include "steam_utils.h"
 
 void LinkUserMessages();
 
@@ -778,6 +779,8 @@ void InitMapLoadingUtils()
 
 void StartFrame()
 {
+	Steam_Frame();
+
 	if (g_pGameRules)
 	{
 		g_pGameRules->Think();
