@@ -47,14 +47,7 @@ DESCRIPTION INFO_OPTIONS
 		{ BOOL }
 		{ "1" }
 	}
-	
-	"mp_decals"
-	{
-		"#Valve_Multiplayer_Decal_Limit"
-		{ NUMBER 0 4096 }
-		{ "300" }
-	}
-	
+
 	"cl_fov"
 	{
 		"#Mod_Field_Of_View"
@@ -80,20 +73,6 @@ DESCRIPTION INFO_OPTIONS
 		{ "0" }
 	}
 
-	"hud_capturemouse"
-	{
-		"#Mod_Activate_Commandmenu_Mouse"
-		{ BOOL }
-		{ "0" }
-	}
-
-	"hud_takesshots"
-	{
-		"#Valve_Automatic_Screenshots"
-		{ BOOL }
-		{ "0" }
-	}
-
 	"cl_autowepswitch"
 	{
 		"#Mod_Weapon_Switching_Title"
@@ -114,6 +93,27 @@ DESCRIPTION INFO_OPTIONS
 			"#Mod_Key_Hold" "0"
 			"#Mod_Key_Tap" "1"
 		}
+		{ "0" }
+	}
+
+	"scoreboard_showavatars"
+	{
+		"#Mod_Player_Avatars"
+		{ BOOL }
+		{ "1" }
+	}
+
+	"hud_capturemouse"
+	{
+		"#Mod_Activate_Commandmenu_Mouse"
+		{ BOOL }
+		{ "0" }
+	}
+
+	"hud_takesshots"
+	{
+		"#Valve_Automatic_Screenshots"
+		{ BOOL }
 		{ "0" }
 	}
 }

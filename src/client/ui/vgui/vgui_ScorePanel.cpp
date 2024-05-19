@@ -36,6 +36,8 @@ extern hud_player_info_t g_PlayerInfoList[MAX_PLAYERS_HUD + 1];	   // player inf
 extern extra_player_info_t g_PlayerExtraInfo[MAX_PLAYERS_HUD + 1]; // additional player info sent directly to the client dll
 team_info_t g_TeamInfo[TEAM_SPECTATORS];
 
+cvar_t *ScoreBoard::_showPlayerAvatars;
+
 // Scoreboard dimensions
 #define SBOARD_TITLE_SIZE_Y YRES(22)
 
@@ -73,7 +75,7 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall, int team) : Panel(x, y,
 	Font* tfont = pSchemes->getFont(hTitleScheme);
 	Font* smallfont = pSchemes->getFont(hSmallScheme);
 
-	_showPlayerAvatars = ScreenWidth >= 960;
+	_showAvatars = ScreenWidth >= 960;
 
 	m_iTeamNumber = team;
 
@@ -771,6 +773,8 @@ void ScoreBoard::Initialize()
 	// Clear out scoreboard data
 	memset(g_PlayerExtraInfo, 0, sizeof g_PlayerExtraInfo);
 	memset(g_TeamInfo, 0, sizeof g_TeamInfo);
+
+	ScoreBoard::_showPlayerAvatars = client::RegisterVariable("scoreboard_showavatars", "1", FCVAR_ARCHIVE);
 }
 
 

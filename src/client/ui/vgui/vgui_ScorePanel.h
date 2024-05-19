@@ -242,7 +242,7 @@ private:
 	CLabelHeader m_PlayerEntries[NUM_COLUMNS][MAX_PLAYERS_HUD];
 	int m_iTeamNumber;
 
-	bool _showPlayerAvatars;
+	bool _showAvatars;
 	CAvatarImagePanel _playerAvatars[MAX_PLAYERS_HUD];
 
 public:
@@ -262,7 +262,8 @@ public:
 
 	void MouseOverCell(int row, int col);
 
-	bool ShowAvatars() { return _showPlayerAvatars; }
+protected:
+	bool ShowAvatars() { return _showAvatars; }
 
 public:
 	void mousePressed(MouseCode code, Panel* panel) override;
@@ -280,11 +281,15 @@ private:
 
 	CommandButton* m_pCloseButton;
 
+	static cvar_t *_showPlayerAvatars;
+
 public:
 	bool m_bHasBeenSorted[MAX_PLAYERS_HUD];
 
 	int m_iHighlightTeam;
 	int m_iHighlightRow;
+
+	static bool ShowPlayerAvatars() { return _showPlayerAvatars->value != 0.0F; }
 
 public:
 	ScoreBoard(int x, int y, int wide, int tall);

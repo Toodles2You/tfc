@@ -11,6 +11,7 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "vgui_TeamFortressViewport.h"
+#include "vgui_ScorePanel.h"
 
 CAvatarImage::CAvatarImage()
 	: m_sPersonaStateChangedCallback(this, &CAvatarImage::OnPersonaStateChanged)
@@ -227,7 +228,7 @@ void CAvatarImagePanel::UpdateAvatar()
 		m_pImage->LoadAvatarImage();
 	}
 
-	if (m_pImage->IsValid())
+	if (ScoreBoard::ShowPlayerAvatars() && m_pImage->IsValid())
 	{
 		setImage(m_pImage);
 	}

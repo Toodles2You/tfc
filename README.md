@@ -20,6 +20,9 @@ Features
     - Weapon events sync up with where you're actually aiming
     - Millisecond integer timers
     - Crosshair compensates for recoil
+- Steam API access
+    - Used to display Steam avatars on the scoreboard
+        - See `scoreboard_showavatars`
 - Left handed weapon option, see `cl_righthand`
 - Bot system with dummy bots
 - Removed Half-Life single-player content
