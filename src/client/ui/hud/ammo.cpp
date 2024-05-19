@@ -343,17 +343,17 @@ void CHudAmmo::Think()
 		}
 	}
 
-	if (!gpActiveSel)
+	if (gpActiveSel == nullptr
+	 || gpActiveSel == (WEAPON*)1
+	 || hud_fastswitch->value != 0.0F)
+	{
 		return;
+	}
 
 	// has the player selected one?
 	if ((gHUD.m_iKeyBits & IN_ATTACK) != 0)
 	{
-		if (gpActiveSel != (WEAPON*)1)
-		{
-			g_weaponselect = gpActiveSel->iId;
-		}
-
+		g_weaponselect = gpActiveSel->iId;
 		gpLastSel = gpActiveSel;
 		gpActiveSel = nullptr;
 		gHUD.m_iKeyBits &= ~IN_ATTACK;
@@ -413,15 +413,8 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 
 	if (!weapon)
 	{
-		if (fastSwitch != 0)
-		{
-			gpActiveSel = nullptr;
-		}
-		else
-		{
-			gpActiveSel = (WEAPON*)1;
-			gHUD.m_Ammo.m_flSelectionTime = client::GetClientTime();
-		}
+		gpActiveSel = (WEAPON*)1;
+		gHUD.m_Ammo.m_flSelectionTime = client::GetClientTime();
 
 		client::PlaySoundByName("common/wpn_denyselect.wav", VOL_NORM);
 	}
@@ -431,8 +424,6 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 		{
 			g_weaponselect = weapon->iId;
 			gpLastSel = weapon;
-			gpActiveSel = nullptr;
-			gHUD.m_iKeyBits &= ~IN_ATTACK;
 		}
 		else
 		{
@@ -508,6 +499,12 @@ void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip)
 		if (m_pWeapon != nullptr)
 		{
 			g_lastselect = m_pWeapon->iId;
+		}
+
+		if (hud_fastswitch->value != 0.0F)
+		{
+			gpActiveSel = pWeapon;
+			m_flSelectionTime = client::GetClientTime();
 		}
 
 		m_pWeapon = pWeapon;
@@ -662,11 +659,16 @@ void CHudAmmo::UserCmd_Slot10()
 
 void CHudAmmo::UserCmd_Close()
 {
-	if (gpActiveSel)
+	if (gpActiveSel != nullptr)
 	{
+		if (hud_fastswitch->value == 0.0F
+		 && gpActiveSel != (WEAPON*)1)
+		{
+			client::PlaySoundByName("common/wpn_hudoff.wav", VOL_NORM);
+		}
+
 		gpLastSel = gpActiveSel;
 		gpActiveSel = nullptr;
-		client::PlaySoundByName("common/wpn_hudoff.wav", VOL_NORM);
 	}
 	else
 	{
@@ -680,19 +682,21 @@ void CHudAmmo::UserCmd_NextWeapon()
 {
 	bool open = false;
 
-	if (!gpActiveSel || gpActiveSel == (WEAPON*)1)
+	auto sel = gpActiveSel;
+
+	if (sel == nullptr || sel == (WEAPON*)1)
 	{
-		gpActiveSel = m_pWeapon;
+		sel = m_pWeapon;
 		m_flSelectionTime = client::GetClientTime();
 		open = true;
 	}
 
 	int pos = 0;
 	int slot = 0;
-	if (gpActiveSel)
+	if (sel != nullptr)
 	{
-		pos = gpActiveSel->iSlotPos + 1;
-		slot = gpActiveSel->iSlot;
+		pos = sel->iSlotPos + 1;
+		slot = sel->iSlot;
 	}
 
 	for (int loop = 0; loop <= 1; loop++)
@@ -709,7 +713,6 @@ void CHudAmmo::UserCmd_NextWeapon()
 					{
 						g_weaponselect = wsp->iId;
 						gpLastSel = wsp;
-						gpActiveSel = nullptr;
 						gHUD.m_iKeyBits &= ~IN_ATTACK;
 						return;
 					}
@@ -726,8 +729,11 @@ void CHudAmmo::UserCmd_NextWeapon()
 		slot = 0; // start looking from the first slot again
 	}
 
-	client::PlaySoundByName("common/wpn_denyselect.wav", VOL_NORM);
-	gpActiveSel = nullptr;
+	if (hud_fastswitch->value == 0.0F)
+	{
+		client::PlaySoundByName("common/wpn_denyselect.wav", VOL_NORM);
+		gpActiveSel = nullptr;
+	}
 }
 
 // Selects the previous item in the menu
@@ -735,19 +741,21 @@ void CHudAmmo::UserCmd_PrevWeapon()
 {
 	bool open = false;
 
-	if (!gpActiveSel || gpActiveSel == (WEAPON*)1)
+	auto sel = gpActiveSel;
+
+	if (sel == nullptr || sel == (WEAPON*)1)
 	{
-		gpActiveSel = m_pWeapon;
+		sel = m_pWeapon;
 		m_flSelectionTime = client::GetClientTime();
 		open = true;
 	}
 
 	int pos = MAX_WEAPON_POSITIONS - 1;
 	int slot = MAX_WEAPON_SLOTS - 1;
-	if (gpActiveSel)
+	if (sel != nullptr)
 	{
-		pos = gpActiveSel->iSlotPos - 1;
-		slot = gpActiveSel->iSlot;
+		pos = sel->iSlotPos - 1;
+		slot = sel->iSlot;
 	}
 
 	for (int loop = 0; loop <= 1; loop++)
@@ -764,7 +772,6 @@ void CHudAmmo::UserCmd_PrevWeapon()
 					{
 						g_weaponselect = wsp->iId;
 						gpLastSel = wsp;
-						gpActiveSel = nullptr;
 						gHUD.m_iKeyBits &= ~IN_ATTACK;
 						return;
 					}
@@ -781,8 +788,11 @@ void CHudAmmo::UserCmd_PrevWeapon()
 		slot = MAX_WEAPON_SLOTS - 1;
 	}
 
-	client::PlaySoundByName("common/wpn_denyselect.wav", VOL_NORM);
-	gpActiveSel = nullptr;
+	if (hud_fastswitch->value == 0.0F)
+	{
+		client::PlaySoundByName("common/wpn_denyselect.wav", VOL_NORM);
+		gpActiveSel = nullptr;
+	}
 }
 
 // Selects the previous item in the menu
