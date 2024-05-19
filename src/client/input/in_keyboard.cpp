@@ -22,6 +22,7 @@
 
 #include "vgui_TeamFortressViewport.h"
 #include "filesystem_utils.h"
+#include "steam_utils.h"
 
 
 extern int g_weaponselect;
@@ -933,7 +934,7 @@ void HUD_Shutdown()
 {
 	ShutdownInput();
 
-
 	FileSystem_FreeFileSystem();
 	CL_UnloadParticleMan();
+	Steam_FreeSteamAPI();
 }

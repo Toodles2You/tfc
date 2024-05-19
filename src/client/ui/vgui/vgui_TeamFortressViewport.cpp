@@ -2107,6 +2107,12 @@ void TeamFortressViewport::GetAllPlayersInfo()
 	for (int i = 1; i < MAX_PLAYERS_HUD; i++)
 	{
 		client::GetPlayerInfo(i, &g_PlayerInfoList[i]);
+
+		const auto steamID = client::PlayerInfo_ValueForKey(i, "*sid");
+		if (steamID != nullptr)
+		{
+			g_PlayerInfoList[i].m_nSteamID = strtoull(steamID, nullptr, 0);
+		}
 	}
 }
 

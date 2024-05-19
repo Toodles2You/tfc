@@ -55,6 +55,7 @@ set(SHARED_SRC
 
     ${SHARED_SRC_DIR}/utils/filesystem_utils.cpp
     ${SHARED_SRC_DIR}/utils/shared_util.cpp
+    ${SHARED_SRC_DIR}/utils/steam_utils.cpp
 )
 
 set(SERVER_SRC
@@ -143,6 +144,7 @@ set(CLIENT_SRC
     ${CLIENT_SRC_DIR}/ui/vgui/vgui_TeamFortressViewport.cpp
     ${CLIENT_SRC_DIR}/ui/vgui/vgui_teammenu.cpp
 
+    ${CLIENT_SRC_DIR}/ui/vgui/utils/vgui_avatarimage.cpp
     ${CLIENT_SRC_DIR}/ui/vgui/utils/vgui_checkbutton2.cpp
     ${CLIENT_SRC_DIR}/ui/vgui/utils/vgui_grid.cpp
     ${CLIENT_SRC_DIR}/ui/vgui/utils/vgui_helpers.cpp
@@ -329,6 +331,7 @@ set(SHARED_INCLUDE_DIRS
     ${HL_INCLUDE_DIR}/common
     ${HL_INCLUDE_DIR}/engine
     ${HL_INCLUDE_DIR}/public
+    ${HL_LIBRARY_DIR}/steam/include
     ${SHARED_SRC_DIR}
     ${SERVER_SRC_DIR}/entities
     ${SHARED_SRC_DIR}/utils
@@ -367,6 +370,46 @@ set(HL_LIBRARIES
 )
 
 #===============================================================
+# Shared
+#===============================================================
+
+if(UNIX)
+
+    # Copy libraries provided by the game to the build directory so we can point the compiler and linker to the files.
+
+    configure_file(
+        ${HL_LIBRARY_DIR}/steam/lib/libsteam_api${CMAKE_SHARED_LIBRARY_SUFFIX}
+        ${CMAKE_CURRENT_BINARY_DIR}/libsteam_api${CMAKE_SHARED_LIBRARY_SUFFIX}
+        COPYONLY
+    )
+
+endif()
+
+#===============================
+# Steam
+#===============================
+
+add_library(steam SHARED IMPORTED)
+
+if(UNIX)
+
+    set_target_properties(steam
+        PROPERTIES
+            IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/libsteam_api${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    )
+
+elseif(WIN32)
+
+    set_target_properties(steam
+        PROPERTIES
+            IMPORTED_IMPLIB "${HL_LIBRARY_DIR}/steam/lib/steam_api.lib"
+    )
+
+endif()
+
+target_include_directories(steam INTERFACE ${HL_LIBRARY_DIR}/steam/include)
+
+#===============================================================
 # Server
 #===============================================================
 
@@ -378,7 +421,7 @@ target_compile_options(server PRIVATE ${HL_COMPILE_OPTIONS})
 target_include_directories(server BEFORE PRIVATE ${SERVER_INCLUDE_DIRS})
 
 target_link_options(server PRIVATE ${HL_LINK_OPTIONS})
-target_link_libraries(server ${HL_LIBRARIES})
+target_link_libraries(server ${HL_LIBRARIES} steam)
 
 install(TARGETS server DESTINATION ${CMAKE_INSTALL_PREFIX}/dlls)
 
@@ -421,7 +464,7 @@ elseif(WIN32)
 
     set_target_properties(vgui
         PROPERTIES
-            IMPORTED_IMPLIB "${HL_LIBRARY_DIR}/SDL2/lib/vgui.lib"
+            IMPORTED_IMPLIB "${HL_LIBRARY_DIR}/vgui/lib/vgui.lib"
     )
 
 endif()
@@ -465,7 +508,7 @@ target_include_directories(client BEFORE PRIVATE ${CLIENT_INCLUDE_DIRS})
 
 target_link_directories(client BEFORE PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_options(client PRIVATE ${HL_LINK_OPTIONS})
-target_link_libraries(client ${HL_LIBRARIES} vgui SDL2)
+target_link_libraries(client ${HL_LIBRARIES} vgui steam SDL2)
 
 set_target_properties(server client
     PROPERTIES

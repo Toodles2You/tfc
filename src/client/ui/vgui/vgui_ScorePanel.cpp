@@ -36,6 +36,8 @@ extern hud_player_info_t g_PlayerInfoList[MAX_PLAYERS_HUD + 1];	   // player inf
 extern extra_player_info_t g_PlayerExtraInfo[MAX_PLAYERS_HUD + 1]; // additional player info sent directly to the client dll
 team_info_t g_TeamInfo[TEAM_SPECTATORS];
 
+cvar_t *ScoreBoard::_showPlayerAvatars;
+
 // Scoreboard dimensions
 #define SBOARD_TITLE_SIZE_Y YRES(22)
 
@@ -53,13 +55,13 @@ public:
 // grid size is marked out for 640x480 screen
 static SBColumnInfo g_ColumnInfo[NUM_COLUMNS] =
 {
-	{nullptr,		24,		Label::a_east},		// tracker column
+	{nullptr,		32,		Label::a_east},		// avatar
 	{nullptr,		140,	Label::a_west},		// name
-	{nullptr,		102,	Label::a_east},		// class
-	{"#SCORE",		40,		Label::a_east},		// score
+	{nullptr,		90,		Label::a_east},		// class
+	{"#SCORE",		46,		Label::a_east},		// score
 	{"#LATENCY",	46,		Label::a_east},		// ping
-	{nullptr,		40,		Label::a_east},		// voice
-	{nullptr,		2,		Label::a_east},		// blank column to take up the slack
+	{nullptr,		38,		Label::a_east},		// voice
+	{nullptr,		2,		Label::a_east},		// blank
 };
 
 //-----------------------------------------------------------------------------
@@ -72,6 +74,8 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall, int team) : Panel(x, y,
 	SchemeHandle_t hSmallScheme = pSchemes->getSchemeHandle("Scoreboard Small Text");
 	Font* tfont = pSchemes->getFont(hTitleScheme);
 	Font* smallfont = pSchemes->getFont(hSmallScheme);
+
+	_showAvatars = ScreenWidth >= 960;
 
 	m_iTeamNumber = team;
 
@@ -89,25 +93,31 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall, int team) : Panel(x, y,
 			m_HeaderLabels[i].setText(g_ColumnInfo[i].m_pTitle);
 
 		int xwide = g_ColumnInfo[i].m_Width;
-		if (m_iTeamNumber != TEAM_UNASSIGNED)
+
+		if (m_iTeamNumber != TEAM_UNASSIGNED
+		 && (i != COLUMN_AVATAR || !ShowAvatars()))
 		{
 			xwide /= 2;
 		}
+
 		if (ScreenWidth >= 640)
 		{
-			xwide = XRES(xwide);
+			if (i != COLUMN_AVATAR)
+			{
+				xwide = XRES(xwide);
+			}
 		}
-		else if (ScreenWidth == 400)
+		else
 		{
 			// hack to make 400x300 resolution scoreboard fit
-			if (i == 1)
+			if (i == COLUMN_NAME)
 			{
-				// reduces size of player name cell
+				// player name
 				xwide -= 28;
 			}
-			else if (i == 0)
+			else if (i == COLUMN_AVATAR)
 			{
-				// tracker icon cell
+				// avatar
 				xwide -= 8;
 			}
 		}
@@ -166,6 +176,11 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall, int team) : Panel(x, y,
 			pGridRow->SetEntry(col, 0, &m_PlayerEntries[col][row]);
 		}
 
+		if (ShowAvatars())
+		{
+			m_PlayerEntries[COLUMN_AVATAR][row].setMinimumSize(32, 32);
+		}
+
 		pGridRow->setBgColor(0, 0, 0, 255);
 		pGridRow->SetSpacing(0, 0);
 		pGridRow->CopyColumnWidths(&m_HeaderGrid);
@@ -207,6 +222,18 @@ void ScorePanel::Update()
 	// Clear out sorts
 	for (i = 0; i < MAX_PLAYERS_HUD; i++)
 	{
+		auto avatar = &_playerAvatars[i];
+
+		if (ShowAvatars()
+		 && g_PlayerInfoList[i].name != nullptr)
+		{
+			avatar->SetPlayer(i);
+			avatar->UpdateAvatar();
+		}
+
+		avatar->setParent(nullptr);
+		avatar->setVisible(false);
+
 		m_iSortedRows[i] = 0;
 	}
 
@@ -274,6 +301,8 @@ void ScorePanel::FillGrid()
 	Font* sfont = pSchemes->getFont(hScheme);
 	Font* tfont = pSchemes->getFont(hTitleScheme);
 	Font* smallfont = pSchemes->getFont(hSmallScheme);
+
+	CAvatarImagePanel *avatar;
 
 	// update highlight position
 	int x, y;
@@ -350,7 +379,7 @@ void ScorePanel::FillGrid()
 			{
 				pLabel->setContentAlignment(vgui::Label::a_west);
 			}
-			else if (col == COLUMN_TRACKER || col == COLUMN_CLASS)
+			else if (col == COLUMN_AVATAR || col == COLUMN_CLASS)
 			{
 				pLabel->setContentAlignment(vgui::Label::a_center);
 			}
@@ -364,7 +393,13 @@ void ScorePanel::FillGrid()
 
 			switch (col)
 			{
-			case COLUMN_TRACKER:
+			case COLUMN_AVATAR:
+				if (ShowAvatars())
+				{
+					avatar = &_playerAvatars[m_iSortedRows[row]];
+					avatar->setParent(&m_PlayerEntries[col][row]);
+					avatar->setVisible(true);
+				}
 				break;
 			case COLUMN_NAME:
 				sprintf(sz, "%s  ", pl_info->name);
@@ -751,6 +786,8 @@ void ScoreBoard::Initialize()
 	// Clear out scoreboard data
 	memset(g_PlayerExtraInfo, 0, sizeof g_PlayerExtraInfo);
 	memset(g_TeamInfo, 0, sizeof g_TeamInfo);
+
+	ScoreBoard::_showPlayerAvatars = client::RegisterVariable("scoreboard_showavatars", "1", FCVAR_ARCHIVE);
 }
 
 

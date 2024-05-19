@@ -85,6 +85,8 @@ void W_Precache()
 	g_sModelIndexBloodSpray = engine::PrecacheModel("sprites/bloodspray.spr");
 	g_sModelIndexBloodDrop = engine::PrecacheModel("sprites/blood.spr");
 	g_sModelIndexSmokeTrail = engine::PrecacheModel("sprites/smoke.spr");
+	g_sModelIndexWallPuff = engine::PrecacheModel("sprites/wall_puff1.spr");
+	g_sModelIndexDebris = engine::PrecacheModel("sprites/debris.spr");
 	g_sModelIndexNail = engine::PrecacheModel("models/nail.mdl");
 	g_sModelIndexSaveMe = engine::PrecacheModel("sprites/saveme.spr");
 	g_sModelIndexFlare = engine::PrecacheModel("sprites/xflare1.spr");
