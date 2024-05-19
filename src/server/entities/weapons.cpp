@@ -86,6 +86,8 @@ void W_Precache()
 	g_sModelIndexBubbles = engine::PrecacheModel("sprites/bubble.spr");
 	g_sModelIndexBloodSpray = engine::PrecacheModel("sprites/bloodspray.spr");
 	g_sModelIndexBloodDrop = engine::PrecacheModel("sprites/blood.spr");
+	g_sModelIndexWallPuff = engine::PrecacheModel("sprites/wall_puff1.spr");
+	g_sModelIndexDebris = engine::PrecacheModel("sprites/debris.spr");
 
 	engine::PrecacheModel("models/grenade.mdl");
 	engine::PrecacheModel("models/w_grenade.mdl");

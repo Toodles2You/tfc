@@ -136,6 +136,8 @@ inline short g_sModelIndexWExplosion;
 inline short g_sModelIndexBubbles;
 inline short g_sModelIndexBloodDrop;
 inline short g_sModelIndexBloodSpray;
+inline short g_sModelIndexWallPuff;
+inline short g_sModelIndexDebris;
 
 class CCrowbar : public CBasePlayerWeapon
 {

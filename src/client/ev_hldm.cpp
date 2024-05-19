@@ -37,6 +37,7 @@
 #include "in_defs.h"
 #include "view.h"
 #include "parsemsg.h"
+#include "com_model.h"
 
 #include <string.h>
 
@@ -49,6 +50,8 @@ extern cvar_t* violence_hblood;
 extern cvar_t* violence_hgibs;
 
 extern int gTempEntCount;
+
+static byte debrisFrameCount;
 
 static float EV_WaterLevel(const Vector& position, float minz, float maxz)
 {
@@ -308,9 +311,88 @@ static inline char* EV_DamageDecal(physent_t* pe)
 	return EV_DecalName("{shot%i", 5);
 }
 
+static void EV_BulletImpact(const Vector& origin, const Vector& dir)
+{
+	const auto underwater =
+		client::PM_PointContents(const_cast<Vector&>(origin), nullptr) == CONTENTS_WATER;
+
+	/* Splash of bright streaks. */
+	auto splashOrigin =
+		origin + Vector(
+			client::RandomFloat(-2.0F, 2.0F),
+			client::RandomFloat(-2.0F, 2.0F),
+			client::RandomFloat(-2.0F, 2.0F));
+
+	auto splashDir = Vector(dir.x, dir.y, 1.0F);
+
+	auto streakCount = underwater ? 4 : 2;
+
+	client::efx::StreakSplash(splashOrigin, splashDir, 5, streakCount, 1, -100, 100);
+
+	/* Spray of debris. */
+	for (auto i = 0; i < 4; i++)
+	{
+		if (gTempEntCount >= 450)
+		{
+			break;
+		}
+
+		auto debrisDir = dir * 40.0F
+			+ Vector(
+				client::RandomFloat(-40.0F, 40.0F),
+				client::RandomFloat(-40.0F, 40.0F),
+				client::RandomFloat(-40.0F, 40.0F));
+
+		auto debris = client::efx::TempSprite(
+			const_cast<Vector&>(origin),
+			debrisDir,
+			0.5F,
+			g_sModelIndexDebris,
+			kRenderTransAlpha,
+			kRenderFxNone,
+			1.0F,
+			1.0F,
+			FTENT_GRAVITY | FTENT_FADEOUT | FTENT_COLLIDEKILL);
+
+		if (debris != nullptr)
+		{
+			debris->entity.baseline.renderamt = 255;
+			debris->entity.curstate.frame = client::RandomLong(0, debrisFrameCount);
+
+			gTempEntCount++;
+		}
+	}
+
+	/* Don't spawn dust puffs underwater. */
+	if (underwater || gTempEntCount >= 450)
+	{
+		return;
+	}
+
+	/* Puff of dust that drifts downwards. */
+	auto puff = client::efx::TempSprite(
+		const_cast<Vector&>(origin),
+		dir * 24.0F,
+		1.0F,
+		g_sModelIndexWallPuff,
+		kRenderTransAdd,
+		kRenderFxNone,
+		0.1F,
+		3.0F,
+		FTENT_SPRANIMATE);
+
+	if (puff != nullptr)
+	{
+		puff->entity.curstate.framerate = 30.0F;
+		puff->entity.baseline.gravity = 80.0F;
+
+		gTempEntCount++;
+	}
+}
+
 static void EV_GunshotDecalTrace(pmtrace_t* pTrace, char* decalName)
 {
-	client::efx::BulletImpactParticles(pTrace->endpos);
+	EV_BulletImpact(pTrace->endpos, pTrace->plane.normal);
 
 	int iRand = client::RandomLong(0, 0x7FFF);
 	if (iRand < (0x7fff / 2)) // not every bullet makes a sound.
@@ -1196,6 +1278,14 @@ void EV_Init()
 	g_sModelIndexBubbles = client::event::FindModelIndex("sprites/bubble.spr");
 	g_sModelIndexBloodSpray = client::event::FindModelIndex("sprites/bloodspray.spr");
 	g_sModelIndexBloodDrop = client::event::FindModelIndex("sprites/blood.spr");
+	g_sModelIndexWallPuff = client::event::FindModelIndex("sprites/wall_puff1.spr");
+	g_sModelIndexDebris = client::event::FindModelIndex("sprites/debris.spr");
+
+	auto model = client::hudGetModelByIndex(g_sModelIndexDebris);
+	if (model != nullptr)
+	{
+		debrisFrameCount = model->numframes - 1;
+	}
 
 	if (pLaserDot != nullptr)
 	{

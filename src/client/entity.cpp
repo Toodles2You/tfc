@@ -519,9 +519,17 @@ void HUD_TempEntUpdate(
 			}
 
 			if ((pTemp->flags & FTENT_GRAVITY) != 0)
+			{
 				pTemp->entity.baseline.origin[2] += gravity;
+			}
 			else if ((pTemp->flags & FTENT_SLOWGRAVITY) != 0)
+			{
 				pTemp->entity.baseline.origin[2] += gravitySlow;
+			}
+			else if (pTemp->entity.baseline.gravity != 0.0F)
+			{
+				pTemp->entity.baseline.origin[2] += -frametime * pTemp->entity.baseline.gravity;
+			}
 
 			if ((pTemp->flags & FTENT_CLIENTCUSTOM) != 0)
 			{
