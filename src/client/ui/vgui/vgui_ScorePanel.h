@@ -14,13 +14,14 @@
 #include <VGUI_Label.h>
 #include <VGUI_TextImage.h>
 #include "vgui_listbox.h"
+#include "vgui_avatarimage.h"
 
 #include <ctype.h>
 
 // Scoreboard cells
 enum
 {
-	COLUMN_TRACKER = 0,
+	COLUMN_AVATAR = 0,
 	COLUMN_NAME,
 	COLUMN_CLASS,
 	COLUMN_SCORE,
@@ -241,6 +242,9 @@ private:
 	CLabelHeader m_PlayerEntries[NUM_COLUMNS][MAX_PLAYERS_HUD];
 	int m_iTeamNumber;
 
+	bool _showPlayerAvatars;
+	CAvatarImagePanel _playerAvatars[MAX_PLAYERS_HUD];
+
 public:
 	int m_iRows;
 	int m_iSortedRows[MAX_PLAYERS_HUD];
@@ -257,6 +261,8 @@ public:
 	void Open();
 
 	void MouseOverCell(int row, int col);
+
+	bool ShowAvatars() { return _showPlayerAvatars; }
 
 public:
 	void mousePressed(MouseCode code, Panel* panel) override;

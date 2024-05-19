@@ -130,6 +130,7 @@ set(CLIENT_SRC
     ${CLIENT_SRC_DIR}/ui/vgui/vgui_TeamFortressViewport.cpp
     ${CLIENT_SRC_DIR}/ui/vgui/vgui_teammenu.cpp
 
+    ${CLIENT_SRC_DIR}/ui/vgui/utils/vgui_avatarimage.cpp
     ${CLIENT_SRC_DIR}/ui/vgui/utils/vgui_checkbutton2.cpp
     ${CLIENT_SRC_DIR}/ui/vgui/utils/vgui_grid.cpp
     ${CLIENT_SRC_DIR}/ui/vgui/utils/vgui_helpers.cpp
