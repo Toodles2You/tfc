@@ -341,7 +341,11 @@ void CTFWeapon::WeaponPostFrame()
 
 			m_iWeaponState &= ~(kWpnStateReloading | kWpnStateEmptySound);
 			m_fInReload = true;
-			m_iNextPrimaryAttack = 100;
+			/*
+				Toodles: Slow the initial reload interval so that firing
+				the last shot effectively halves the weapon's fire-rate.
+			*/
+			m_iNextPrimaryAttack = std::max(info.iAttackTime - info.iReloadTime / (info.iMaxClip / info.iShots), 100);
 		}
 		else
 		{
