@@ -35,6 +35,19 @@ void CDetpack::GetWeaponInfo(WeaponInfo& i)
 }
 
 
+bool CDetpack::AddToPlayer(CBasePlayer* pPlayer)
+{
+	if (!CTFWeapon::AddToPlayer(pPlayer))
+	{
+		Remove();
+
+		return false;
+	}
+
+	return true;
+}
+
+
 void CDetpack::RemoveFromPlayer(bool forceSendAnimations)
 {
 	if (m_pPlayer == nullptr)

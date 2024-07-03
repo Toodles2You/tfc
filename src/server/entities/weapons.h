@@ -420,6 +420,7 @@ public:
 	int GetID() const override { return WEAPON_DETPACK; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 
+	bool AddToPlayer(CBasePlayer* pPlayer) override;
 	void RemoveFromPlayer(bool forceSendAnimations = true) override;
 
 	bool CanDeploy() override { return false; }
