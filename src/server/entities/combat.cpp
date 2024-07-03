@@ -293,7 +293,7 @@ void CBasePlayer::FireBullets(
 			ajdusted,
 			dir,
 			tr.iHitgroup,
-			DMG_BULLET | DMG_NEVERGIB | DMG_AIMED);
+			DMG_BULLET | DMG_NEVERGIB);
 
 		traceEntities[traceCount] = hit;
 		traceCount++;
