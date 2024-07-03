@@ -94,16 +94,17 @@ bool CHudBattery::MsgFunc_Battery(const char* pszName, int iSize, void* pbuf)
 
 void CHudBattery::Draw(const float time)
 {
+	const auto percent = m_iBat / (float)sTFClassInfo[g_iPlayerClass].maxArmor;
 	const auto color = CHud::COLOR_PRIMARY;
 	const auto alpha = GetAlpha();
 
-	const auto x = 117;
+	const auto x = 117 + 8;
 	const auto y = gHUD.GetHeight() - 26;
 
 	gHUD.DrawHudBackground(
 		x,
 		y - 16,
-		x + 92,
+		x + 100,
 		y + 16);
 
 	gHUD.DrawHudSprite(
@@ -117,13 +118,35 @@ void CHudBattery::Draw(const float time)
 		CHud::a_center);
 
 	gHUD.DrawHudNumber(
-		x + 32,
+		x + 40,
 		y,
 		DHN_DRAWZERO | DHN_3DIGITS,
 		m_iBat,
 		color,
 		alpha,
 		CHud::a_west);
+
+	/* Vertical fill bar next to the icon. */
+	const auto barColor = CHud::COLOR_SECONDARY;
+	const auto barHeight = (int)(percent * gHUD.m_iFontHeight);
+
+	/* Unfilled background. */
+	gHUD.DrawHudFill(
+		x + 32,
+		y - gHUD.m_iFontHeight / 2,
+		4,
+		gHUD.m_iFontHeight - barHeight,
+		barColor,
+		alpha / 2);
+
+	/* Filled foreground. */
+	gHUD.DrawHudFill(
+		x + 32,
+		y + gHUD.m_iFontHeight / 2 - barHeight,
+		4,
+		barHeight,
+		barColor,
+		alpha);
 
 #if 0
 	/* Toodles TODO: This looks like poop. */

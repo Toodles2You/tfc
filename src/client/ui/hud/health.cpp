@@ -153,7 +153,8 @@ bool CHudHealth::MsgFunc_Damage(const char* pszName, int iSize, void* pbuf)
 
 void CHudHealth::Draw(const float time)
 {
-	const auto color = (m_iHealth > 25) ? CHud::COLOR_PRIMARY : CHud::COLOR_WARNING;
+	const auto percent = m_iHealth / (float)sTFClassInfo[g_iPlayerClass].maxHealth;
+	const auto color = (percent > 0.25F) ? CHud::COLOR_PRIMARY : CHud::COLOR_WARNING;
 	const auto alpha = GetAlpha();
 
 	const auto x = 10;
@@ -162,7 +163,7 @@ void CHudHealth::Draw(const float time)
 	gHUD.DrawHudBackground(
 		x,
 		y - 16,
-		x + 92,
+		x + 100,
 		y + 16);
 
 	gHUD.DrawHudSprite(
@@ -176,13 +177,35 @@ void CHudHealth::Draw(const float time)
 		CHud::a_center);
 
 	gHUD.DrawHudNumber(
-		x + 32,
+		x + 40,
 		y,
 		DHN_DRAWZERO | DHN_3DIGITS,
 		m_iHealth,
 		color,
 		alpha,
 		CHud::a_west);
+
+	/* Vertical fill bar next to the icon. */
+	const auto barColor = (percent > 0.25F) ? CHud::COLOR_SECONDARY : CHud::COLOR_WARNING;
+	const auto barHeight = (int)(percent * gHUD.m_iFontHeight);
+
+	/* Unfilled background. */
+	gHUD.DrawHudFill(
+		x + 32,
+		y - gHUD.m_iFontHeight / 2,
+		4,
+		gHUD.m_iFontHeight - barHeight,
+		barColor,
+		alpha / 2);
+
+	/* Filled foreground. */
+	gHUD.DrawHudFill(
+		x + 32,
+		y + gHUD.m_iFontHeight / 2 - barHeight,
+		4,
+		barHeight,
+		barColor,
+		alpha);
 
 	DrawDamage(time);
 	DrawPain(time);
