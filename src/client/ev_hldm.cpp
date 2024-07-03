@@ -658,7 +658,7 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 		VOL_NORM,
 		ATTN_NORM,
 		0,
-		client::RandomLong(94, 109));
+		PITCH_NORM);
 
 	switch (info.iProjectileType)
 	{
