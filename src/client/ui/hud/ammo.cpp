@@ -413,8 +413,15 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 
 	if (!weapon)
 	{
-		gpActiveSel = (WEAPON*)1;
-		gHUD.m_Ammo.m_flSelectionTime = client::GetClientTime();
+		if (fastSwitch == 0 || fastSwitch == 2)
+		{
+			gpActiveSel = (WEAPON*)1;
+			gHUD.m_Ammo.m_flSelectionTime = client::GetClientTime();
+		}
+		else
+		{
+			gpActiveSel = nullptr;
+		}
 
 		client::PlaySoundByName("common/wpn_denyselect.wav", VOL_NORM);
 	}
@@ -501,7 +508,7 @@ void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip)
 			g_lastselect = m_pWeapon->iId;
 		}
 
-		if (hud_fastswitch->value != 0.0F)
+		if (hud_fastswitch->value == 2.0F)
 		{
 			gpActiveSel = pWeapon;
 			m_flSelectionTime = client::GetClientTime();
