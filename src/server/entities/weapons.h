@@ -126,7 +126,7 @@ constexpr const char* g_szWeaponNames[WEAPON_TYPES] =
 	// "tf_weapon_flamethrower",
 	"tf_weapon_rpg",
 	// "tf_weapon_ic",
-	// "tf_weapon_ac",
+	"tf_weapon_ac",
 	// nullptr,
 	"tf_weapon_detpack",
 	// "tf_weapon_tranq",
@@ -196,11 +196,15 @@ public:
 
 	int m_iNextPrimaryAttack;
 	int m_iClip;
-	bool m_fInReload;
+	union {
+		bool m_fInReload;
+		bool m_fInAttack;
+	};
 
 	enum
 	{
 		kWpnStateReloading = 1,
+		kWpnStateFiring = kWpnStateReloading,
 		kWpnStateEmptySound = 2,
 		kWpnStateIdle = 4,
 	};
@@ -401,6 +405,21 @@ public:
 
 	int GetID() const override { return WEAPON_ROCKET_LAUNCHER; }
 	void GetWeaponInfo(WeaponInfo& i) override;
+};
+
+class CAssaultCannon : public CTFWeapon
+{
+public:
+	CAssaultCannon(Entity* containingEntity) : CTFWeapon(containingEntity) {}
+
+	int GetID() const override { return WEAPON_ASSAULT_CANNON; }
+	void GetWeaponInfo(WeaponInfo& i) override;
+
+	bool CanHolster() override;
+
+	void WeaponPostFrame() override;
+
+	void Holster() override;
 };
 
 class CDetpack : public CTFWeapon

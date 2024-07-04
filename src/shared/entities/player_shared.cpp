@@ -429,6 +429,11 @@ void CBasePlayer::DecrementTimers(const int msec)
 
 void CBasePlayer::SelectWeapon(int id)
 {
+	if (m_pActiveWeapon != nullptr && !m_pActiveWeapon->CanHolster())
+	{
+		return;
+	}
+
 	if (!HasPlayerWeapon(id))
 	{
 		return;

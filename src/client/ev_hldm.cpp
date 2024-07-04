@@ -694,7 +694,7 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 			Vector shellOrigin, shellVelocity;
 			EV_GetDefaultShellInfo(args, args->origin, args->velocity, shellVelocity, shellOrigin, forward, right, up, 20, -12, 4);
 
-			if (info.iProjectileCount > 1)
+			if (info.iProjectileCount > 5)
 			{
 				EV_EjectBrass(shellOrigin, shellVelocity, args->angles[YAW], g_sModelIndexShotgunShell, TE_BOUNCE_SHOTSHELL);
 

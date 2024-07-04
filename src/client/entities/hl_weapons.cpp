@@ -223,6 +223,7 @@ static void HUD_InitClientWeapons()
 	HUD_SpawnWeapon<CSuperNailgun>(WEAPON_SUPER_NAILGUN);
 	HUD_SpawnWeapon<CGrenadeLauncher>(WEAPON_GRENADE_LAUNCHER);
 	HUD_SpawnWeapon<CRocketLauncher>(WEAPON_ROCKET_LAUNCHER);
+	HUD_SpawnWeapon<CAssaultCannon>(WEAPON_ASSAULT_CANNON);
 	HUD_SpawnWeapon<CDetpack>(WEAPON_DETPACK);
 	HUD_SpawnWeapon<CPipeBombLauncher>(WEAPON_PIPEBOMB_LAUNCHER);
 }
