@@ -1101,6 +1101,8 @@ bool CBasePlayer::Spawn()
 
 	ClearEffects();
 
+	m_flSpeedReduction = 0.0F;
+
 	char* infobuffer = engine::GetInfoKeyBuffer(&v);
 	char* value = engine::InfoKeyValue(infobuffer, "cl_righthand");
 

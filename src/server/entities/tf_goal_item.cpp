@@ -195,18 +195,14 @@ void CTFGoalItem::GiveToPlayer(CBaseEntity* player, CTFGoal* activating_goal)
     }
 #endif
 
-#if 0
     if (speed_reduction != 0.0F)
     {
         dynamic_cast<CBasePlayer*>(player)->m_flSpeedReduction = (speed_reduction / 100.0F);
-        dynamic_cast<CBasePlayer*>(player)->UpdateMaxSpeed();
     }
     else if (IsGoalActivatedBy(TFGI_SLOW))
     {
         dynamic_cast<CBasePlayer*>(player)->m_flSpeedReduction = 0.5f;
-        dynamic_cast<CBasePlayer*>(player)->UpdateMaxSpeed();
     }
-#endif
 
     if (activating_goal != this && HasGoalResults(TFGR_NO_ITEM_RESULTS))
     {
@@ -290,13 +286,12 @@ void CTFGoalItem::RemoveFromPlayer(CBaseEntity* activating_player, int method)
     }
 #endif
 
-#if 0
     if (update_speed)
     {
         dynamic_cast<CBasePlayer*>(activating_player)->m_flSpeedReduction = best_reduction;
-        dynamic_cast<CBasePlayer*>(activating_player)->UpdateMaxSpeed();
     }
 
+#if 0
     if (let_disguise)
         dynamic_cast<CBasePlayer*>(activating_player)->m_bPreventDisguise = false;
 #endif

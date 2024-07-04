@@ -59,6 +59,8 @@ bool CBasePlayer::Spawn()
 
 	ClearEffects();
 
+	m_flSpeedReduction = 0.0F;
+
 	m_bLeftHanded = static_cast<int>(floorf(cl_righthand->value)) == 0;
 
 	return true;

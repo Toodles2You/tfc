@@ -210,6 +210,11 @@ float CHalfLifeMovement::GetSpeedModifier()
 
     float speed = 1.0F;
 
+    if (player->m_flSpeedReduction != 0.0F)
+    {
+        speed = player->m_flSpeedReduction;
+    }
+
     if (player->m_nLegDamage != 0)
     {
         speed *= (10.0F - player->m_nLegDamage) / 10.0F;

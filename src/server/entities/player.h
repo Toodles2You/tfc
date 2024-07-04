@@ -341,6 +341,7 @@ public:
 	float m_flArmorTypeMax;
 	byte m_afArmorClass;
 	byte m_nLegDamage;
+	float m_flSpeedReduction;
 #ifdef GAME_DLL
 protected:
 	EHANDLE m_hInfector;

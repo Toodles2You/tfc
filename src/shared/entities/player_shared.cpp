@@ -300,6 +300,7 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 	data.tfstate = m_StateBits;
 	data.vuser4.y = static_cast<float>(m_nLegDamage);
 #ifdef GAME_DLL
+	data.vuser3.x = m_flSpeedReduction;
 	data.iuser4 = m_iConcussionTime;
 #endif
 	data.ammo_rockets = m_iGrenadeExplodeTime;
@@ -363,6 +364,7 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 
 	m_StateBits = data.tfstate;
 	m_nLegDamage = static_cast<byte>(data.vuser4.y);
+	m_flSpeedReduction = data.vuser3.x;
 	m_iConcussionTime = data.iuser4;
 	m_iGrenadeExplodeTime = data.ammo_rockets;
 
