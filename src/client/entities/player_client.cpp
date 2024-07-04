@@ -81,11 +81,12 @@ void CBasePlayer::UpdateHudData()
 	if (IsAlive() && m_pActiveWeapon != nullptr)
 	{
 		gHUD.m_Ammo.Update_CurWeapon(
-			true, m_pActiveWeapon->GetID(), m_pActiveWeapon->m_iClip);
+			true, m_pActiveWeapon->GetID(), m_pActiveWeapon->m_iClip,
+			m_pActiveWeapon->CanHolster());
 	}
 	else
 	{
-		gHUD.m_Ammo.Update_CurWeapon(0, -1, -1);
+		gHUD.m_Ammo.Update_CurWeapon(0, -1, -1, true);
 	}
 
 	for (int i = 0; i < AMMO_SECONDARY; i++)

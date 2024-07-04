@@ -269,6 +269,8 @@ bool CHudAmmo::Init()
 	hud_selection_fadeout = client::RegisterVariable("hud_selection_fadeout", "0.5", FCVAR_ARCHIVE);
 	hud_selection_timeout = client::RegisterVariable("hud_selection_timeout", "1.5", FCVAR_ARCHIVE);
 
+	m_bWeaponSelectDisabled = false;
+
 	gWR.Init();
 	gHR.Init();
 
@@ -353,12 +355,19 @@ void CHudAmmo::Think()
 	// has the player selected one?
 	if ((gHUD.m_iKeyBits & IN_ATTACK) != 0)
 	{
-		g_weaponselect = gpActiveSel->iId;
+		if (!m_bWeaponSelectDisabled)
+		{
+			g_weaponselect = gpActiveSel->iId;
+			gHUD.m_iKeyBits &= ~IN_ATTACK;
+			client::PlaySoundByName("common/wpn_select.wav", VOL_NORM);
+		}
+		else
+		{
+			client::PlaySoundByName("common/wpn_denyselect.wav", VOL_NORM);
+		}
+
 		gpLastSel = gpActiveSel;
 		gpActiveSel = nullptr;
-		gHUD.m_iKeyBits &= ~IN_ATTACK;
-
-		client::PlaySoundByName("common/wpn_select.wav", VOL_NORM);
 	}
 }
 
@@ -429,7 +438,15 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 	{
 		if (fastSwitch != 0)
 		{
-			g_weaponselect = weapon->iId;
+			if (!gHUD.m_Ammo.m_bWeaponSelectDisabled)
+			{
+				g_weaponselect = weapon->iId;
+			}
+			else
+			{
+				client::PlaySoundByName("common/wpn_denyselect.wav", VOL_NORM);
+			}
+
 			gpLastSel = weapon;
 		}
 		else
@@ -464,7 +481,7 @@ void CHudAmmo::Update_AmmoX(int iIndex, int iCount)
 	gWR.SetAmmo(iIndex, iCount);
 }
 
-void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip)
+void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip, bool bCanHolster)
 {
 	static Rect nullrc;
 	bool fOnTarget = false;
@@ -474,6 +491,8 @@ void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip)
 	{
 		fOnTarget = true;
 	}
+
+	m_bWeaponSelectDisabled = !bCanHolster;
 
 	if (iId == -1)
 	{
@@ -718,9 +737,16 @@ void CHudAmmo::UserCmd_NextWeapon()
 				{
 					if (hud_fastswitch->value != 0)
 					{
-						g_weaponselect = wsp->iId;
+						if (!m_bWeaponSelectDisabled)
+						{
+							g_weaponselect = wsp->iId;
+							gHUD.m_iKeyBits &= ~IN_ATTACK;
+						}
+						else
+						{
+							client::PlaySoundByName("common/wpn_denyselect.wav", VOL_NORM);
+						}
 						gpLastSel = wsp;
-						gHUD.m_iKeyBits &= ~IN_ATTACK;
 						return;
 					}
 					client::PlaySoundByName("common/wpn_moveselect.wav", VOL_NORM);
@@ -777,9 +803,16 @@ void CHudAmmo::UserCmd_PrevWeapon()
 				{
 					if (hud_fastswitch->value != 0)
 					{
-						g_weaponselect = wsp->iId;
+						if (!m_bWeaponSelectDisabled)
+						{
+							g_weaponselect = wsp->iId;
+							gHUD.m_iKeyBits &= ~IN_ATTACK;
+						}
+						else
+						{
+							client::PlaySoundByName("common/wpn_denyselect.wav", VOL_NORM);
+						}
 						gpLastSel = wsp;
-						gHUD.m_iKeyBits &= ~IN_ATTACK;
 						return;
 					}
 					client::PlaySoundByName("common/wpn_moveselect.wav", VOL_NORM);
@@ -812,7 +845,7 @@ void CHudAmmo::UserCmd_LastWeapon()
 
 	auto pWeapon = gWR.GetWeapon(g_lastselect);
 
-	if (pWeapon && gHUD.HasWeapon(g_lastselect))
+	if (!m_bWeaponSelectDisabled && pWeapon && gHUD.HasWeapon(g_lastselect))
 	{
 		g_weaponselect = g_lastselect;
 		gHUD.m_iKeyBits &= ~IN_ATTACK;

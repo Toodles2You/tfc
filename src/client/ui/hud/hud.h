@@ -144,7 +144,7 @@ public:
 	void Reset() override;
 	void DrawWList(const float time);
 	void Update_AmmoX(int iIndex, int iCount);
-	void Update_CurWeapon(int iState, int iId, int iClip);
+	void Update_CurWeapon(int iState, int iId, int iClip, bool bCanHolster);
 	void Update_Detpack(const int setting);
 	bool MsgFunc_AmmoPickup(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_WeapPickup(const char* pszName, int iSize, void* pbuf);
@@ -183,6 +183,7 @@ protected:
 	cvar_t* hud_selection_timeout;
 	float m_flSelectionTime;
 	float m_flHitFeedbackTime;
+	bool m_bWeaponSelectDisabled;
 };
 
 //
