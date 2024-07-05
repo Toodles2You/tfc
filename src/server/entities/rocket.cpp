@@ -23,6 +23,7 @@ CRocket* CRocket::CreateRocket(
 
 	rocket->v.origin = origin;
 	rocket->v.angles = dir;
+	rocket->v.speed = 1000.0F;
 	rocket->v.dmg = damageMax;
 	rocket->v.dmg_save = damageMin;
 	rocket->v.dmg_take = radius;
@@ -46,7 +47,7 @@ bool CRocket::Spawn()
 
 	SetOrigin(v.origin);
 
-	v.velocity = v.angles * 1000;
+	v.velocity = v.angles * v.speed;
 	v.angles = util::VecToAngles(v.angles);
 
 	SetTouch(&CRocket::RocketTouch);

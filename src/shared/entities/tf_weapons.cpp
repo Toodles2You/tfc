@@ -225,6 +225,28 @@ void CTFWeapon::PrimaryAttack()
 				launcher);
 			break;
 		}
+		case kProjFlame:
+		{
+			const auto aim = m_pPlayer->v.v_angle + m_pPlayer->v.punchangle;
+			util::MakeVectors(aim);
+
+			int rightOffset = 8;
+
+			if (m_pPlayer->m_bLeftHanded)
+			{
+				rightOffset = -8;
+			}
+
+			const auto gun =
+				m_pPlayer->v.origin
+					+ m_pPlayer->v.view_ofs
+					+ gpGlobals->v_forward * 16
+					+ gpGlobals->v_right * rightOffset
+					+ gpGlobals->v_up * -8;
+
+			CNail::CreateFlame(gun, gpGlobals->v_forward, info.iProjectileDamage, m_pPlayer);
+			break;
+		}
 		default:
 		{
 			m_pPlayer->FireBullets(
@@ -546,6 +568,56 @@ void CSuperNailgun::GetWeaponInfo(WeaponInfo& i)
 	i.flPunchAngle = -2.0F;
 	i.iSibling = -1;
 	i.bShouldIdle = false;
+}
+
+
+LINK_ENTITY_TO_CLASS(tf_weapon_flamethrower, CFlamethrower);
+
+void CFlamethrower::GetWeaponInfo(WeaponInfo& i)
+{
+	i.pszName = "tf_weapon_flamethrower";
+	i.iAmmo1 = AMMO_CELLS;
+	i.iAmmo2 = -1;
+	i.iMaxClip = -1;
+	i.iSlot = 3;
+	i.iPosition = 3;
+	i.iFlags = 0;
+	i.iWeight = 15;
+
+	i.pszWorld = "models/w_egon.mdl";
+	i.pszView = "models/v_flame.mdl";
+	i.pszPlayer = "models/p_egon.mdl";
+	i.pszAnimExt = "egon";
+
+	i.iAnims[kWeaponAnimIdle] = 0;
+	i.iAnims[kWeaponAnimDeploy] = 9;
+	i.iAnims[kWeaponAnimHolster] = 10;
+	i.iAnims[kWeaponAnimAttack] = 5;
+	i.iAnims[kWeaponAnimReload] = 6;
+	i.iAnims[kWeaponAnimStartReload] = 7;
+	i.iAnims[kWeaponAnimEndReload] = 8;
+
+	i.iShots = 1;
+
+	i.iAttackTime = 150;
+	i.iReloadTime = 1500;
+
+	i.iProjectileType = kProjFlame;
+	/*
+		Toodles: Originally the flamethrower dealt 15 damage upon touch
+		& then 6 from ignition. This results in the same 20 damage.
+	*/
+	i.iProjectileDamage = 22;
+	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
+	i.iProjectileCount = 1;
+
+	i.pszEvent = "events/wpn/tf_flame.sc";
+	i.pszAttackSound = "weapons/flmfire2.wav";
+	i.pszAlternateSound = nullptr;
+	i.pszReloadSound = nullptr;
+	i.flPunchAngle = 0.0F;
+	i.iSibling = -1;
+	i.bShouldIdle = true;
 }
 
 

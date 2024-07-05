@@ -66,6 +66,7 @@ enum
 	kProjPipeBombRemote,
 	kProjKinetic,
 	kProjAdrenaline,
+	kProjFlame,
 };
 
 typedef struct
@@ -123,7 +124,7 @@ constexpr const char* g_szWeaponNames[WEAPON_TYPES] =
 	"tf_weapon_ng",
 	"tf_weapon_superng",
 	"tf_weapon_gl",
-	// "tf_weapon_flamethrower",
+	"tf_weapon_flamethrower",
 	"tf_weapon_rpg",
 	// "tf_weapon_ic",
 	"tf_weapon_ac",
@@ -230,6 +231,7 @@ inline short g_sModelIndexSmokeTrail;
 inline short g_sModelIndexNail;
 inline short g_sModelIndexSaveMe;
 inline short g_sModelIndexFlare;
+inline short g_sModelIndexFlame;
 
 inline unsigned short g_usConcBlast;
 
@@ -395,6 +397,15 @@ public:
 	CGrenadeLauncher(Entity* containingEntity) : CTFWeapon(containingEntity) {}
 
 	int GetID() const override { return WEAPON_GRENADE_LAUNCHER; }
+	void GetWeaponInfo(WeaponInfo& i) override;
+};
+
+class CFlamethrower : public CTFWeapon
+{
+public:
+	CFlamethrower(Entity* containingEntity) : CTFWeapon(containingEntity) {}
+
+	int GetID() const override { return WEAPON_FLAMETHROWER; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 };
 
@@ -686,6 +697,7 @@ public:
 	int ObjectCaps() override { return CBaseEntity::ObjectCaps() | FCAP_DONT_SAVE; }
 
 	static CNail* CreateNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
+	static CNail* CreateFlame(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
 	static CNail* CreateNailGrenadeNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
 	void EXPORT NailTouch(CBaseEntity *pOther);
 	void EXPORT PleaseGoInTheRightDirection();

@@ -390,7 +390,7 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	// Grab the vector of the incoming attack. (Pretend that the inflictor is a little lower than it really is, so the body will tend to fly upward a bit.)
 	if (attacker != CWorld::World
 	 && attacker->v.solid != SOLID_TRIGGER
-	 && (bitsDamageType & DMG_ARMOR_PIERCING) == 0)
+	 && (bitsDamageType & (DMG_ARMOR_PIERCING | DMG_BURN)) == 0)
 	{
 		// Move them around!
 		g_vecAttackDir = (inflictor->Center() - Vector(0, 0, 10) - Center()).Normalize();
@@ -472,6 +472,11 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	}
 
 	m_flNextRegenerationTime = gpGlobals->time + 3.0F;
+
+	if ((bitsDamageType & DMG_IGNITE) != 0)
+	{
+		Ignite(attacker);
+	}
 
 	MessageBegin(MSG_SPEC, SVC_DIRECTOR);
 		WriteByte(9);							  // command length in bytes
@@ -2062,6 +2067,25 @@ void CBasePlayer::BecomeInfected(CBaseEntity* infector)
 	WriteByte(2);
 	WriteString("dmg_poison");
 	MessageEnd();
+}
+
+
+void CBasePlayer::Ignite(CBaseEntity* burner)
+{
+	if ((m_afArmorClass & AT_SAVEFIRE) != 0)
+	{
+		return;
+	}
+
+	if (PCNumber() == PC_PYRO && v.armorvalue > 0.0F)
+	{
+		return;
+	}
+
+	/*
+		Toodles: This used to deal 6 damage. The extra damage
+		was added into to each respective ignition source.
+	*/
 }
 
 

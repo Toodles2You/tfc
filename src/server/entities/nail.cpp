@@ -20,7 +20,9 @@ CNail* CNail::CreateNail(const Vector& origin, const Vector& dir, const float da
 
 	nail->v.origin = origin;
 	nail->v.angles = dir;
+	nail->v.speed = 1000.0F;
 	nail->v.dmg = damage;
+	nail->v.armortype = DMG_NAIL | DMG_NEVERGIB;
 	nail->v.owner = &owner->v;
 	nail->v.team = owner->TeamNumber();
 	nail->Spawn();
@@ -34,13 +36,39 @@ CNail* CNail::CreateNail(const Vector& origin, const Vector& dir, const float da
 }
 
 
+CNail* CNail::CreateFlame(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner)
+{
+	auto nail = Entity::Create<CNail>();
+
+	nail->v.origin = origin;
+	nail->v.angles = dir;
+	nail->v.speed = 600.0F;
+	nail->v.dmg = damage;
+	nail->v.armortype = DMG_BURN | DMG_IGNITE;
+	nail->v.owner = &owner->v;
+	nail->v.team = owner->TeamNumber();
+	nail->Spawn();
+
+	nail->v.classname = MAKE_STRING("flames");
+
+	nail->v.model = MAKE_STRING("sprites/fthrow.spr");
+	nail->v.modelindex = g_sModelIndexFlame;
+
+	nail->v.pain_finished = gpGlobals->time + 1.0F;
+
+	return nail;
+}
+
+
 CNail* CNail::CreateNailGrenadeNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner)
 {
 	auto nail = Entity::Create<CNail>();
 
 	nail->v.origin = origin;
 	nail->v.angles = dir;
+	nail->v.speed = 1000.0F;
 	nail->v.dmg = damage;
+	nail->v.armortype = DMG_NAIL | DMG_NEVERGIB;
 	nail->v.dmg_inflictor = &owner->v;
 	nail->v.team = owner->TeamNumber();
 	nail->Spawn();
@@ -65,7 +93,7 @@ bool CNail::Spawn()
 
 	SetOrigin(v.origin);
 
-	v.velocity = v.angles * 1000;
+	v.velocity = v.angles * v.speed;
 	v.angles = util::VecToAngles(v.angles);
 
 	SetTouch(&CNail::NailTouch);
@@ -106,7 +134,7 @@ void CNail::NailTouch(CBaseEntity* pOther)
             v.dmg,
             v.velocity.Normalize(),
             gpGlobals->trace_hitgroup,
-            DMG_NAIL | DMG_NEVERGIB);
+            v.armortype);
 
         pOther->ApplyMultiDamage(this, owner);
 	}

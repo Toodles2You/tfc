@@ -90,6 +90,7 @@ void W_Precache()
 	g_sModelIndexNail = engine::PrecacheModel("models/nail.mdl");
 	g_sModelIndexSaveMe = engine::PrecacheModel("sprites/saveme.spr");
 	g_sModelIndexFlare = engine::PrecacheModel("sprites/xflare1.spr");
+	g_sModelIndexFlame = engine::PrecacheModel("sprites/fthrow.spr");
 
 	engine::PrecacheModel("models/grenade.mdl");
 	engine::PrecacheModel("models/rpgrocket.mdl");

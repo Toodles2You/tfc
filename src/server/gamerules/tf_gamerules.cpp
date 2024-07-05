@@ -224,7 +224,7 @@ bool CTeamFortress::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
         return true;
     }
 
-    for (int i = PC_SCOUT; i <= PC_HVYWEAP; i++)
+    for (int i = PC_SCOUT; i <= PC_PYRO; i++)
     {
         if (strcmp(pcmd, sTFClassSelection[i]) == 0)
         {
@@ -269,7 +269,7 @@ void CTeamFortress::InitHUD(CBasePlayer* pPlayer)
     for (int i = 0; i < 4; i++)
     {
         /* Toodles TODO: */
-        WriteShort(960 | m_TFTeamInfo[i].m_afInvalidClasses);
+        WriteShort(896 | m_TFTeamInfo[i].m_afInvalidClasses);
     }
     MessageEnd();
 }

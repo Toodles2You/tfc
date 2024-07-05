@@ -689,6 +689,28 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 		{
 			break;
 		}
+		case kProjFlame:
+		{
+			Vector gun;
+
+			EV_GetGunPosition(args, gun, args->origin);
+
+			int rightOffset = 8;
+
+			if (g_PlayerExtraInfo[args->entindex].lefthanded)
+			{
+				rightOffset = -8;
+			}
+
+			gun = gun + forward * 16 + right * rightOffset + up * -8;
+
+			client::efx::Projectile(gun, forward * 600.0F, g_sModelIndexFlame, 1.0F, args->entindex, nullptr);
+			break;
+		}
+		case kProjIncendiaryRocket:
+		{
+			break;
+		}
 		default:
 		{
 			Vector shellOrigin, shellVelocity;
@@ -1527,6 +1549,7 @@ void EV_Init()
 	g_sModelIndexSmokeTrail = client::event::FindModelIndex("sprites/smoke.spr");
 	g_sModelIndexNail = client::event::FindModelIndex("models/nail.mdl");
 	g_sModelIndexFlare = client::event::FindModelIndex("sprites/xflare1.spr");
+	g_sModelIndexFlame = client::event::FindModelIndex("sprites/fthrow.spr");
 
 	auto model = client::hudGetModelByIndex(g_sModelIndexDebris);
 	if (model != nullptr)

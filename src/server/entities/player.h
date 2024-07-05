@@ -350,6 +350,8 @@ protected:
 public:
 	void BecomeInfected(CBaseEntity* infector);
 
+	void Ignite(CBaseEntity* burner);
+
 	float m_flNextSpeakTime;
 
 	void SaveMe();
