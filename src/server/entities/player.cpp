@@ -1009,6 +1009,11 @@ void CBasePlayer::PreThink()
 		else
 		{
 			LeaveState(State::Infected);
+
+			MessageBegin(MSG_ONE, gmsgStatusIcon, this);
+			WriteByte(0);
+			WriteString("dmg_poison");
+			MessageEnd();
 		}
 
 		m_flNextInfectionTime = gpGlobals->time + 3.0F;
