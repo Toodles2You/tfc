@@ -1366,7 +1366,19 @@ static void EV_TrailCallback(TEMPENTITY* ent, float frametime, float currenttime
 
 void EV_Trail(event_args_t* args)
 {
-	client::efx::BeamFollow(args->entindex, g_sModelIndexSmokeTrail, 1, 5, 0.9, 0.9, 1.0, 0.3);
+	switch (args->iparam1)
+	{
+		case TEAM_BLUE:
+			client::efx::BeamFollow(args->entindex, g_sModelIndexSmokeTrail, 1, 5, 0.2, 0.2, 1.0, 0.3);
+			break;
+		default:
+		case TEAM_RED:
+			client::efx::BeamFollow(args->entindex, g_sModelIndexSmokeTrail, 1, 5, 1.0, 0.0, 0.0, 0.3);
+			break;
+		case TEAM_UNASSIGNED:
+			client::efx::BeamFollow(args->entindex, g_sModelIndexSmokeTrail, 1, 5, 0.9, 0.9, 1.0, 0.3);
+			break;
+	}
 
 	TEMPENTITY* trail = client::efx::TempEntAllocNoModel(args->origin);
 	if (trail) {

@@ -416,7 +416,7 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		}
 	}
 
-	if ((bitsDamageType & DMG_ARMOR_PIERCING) == 0)
+	if ((bitsDamageType & (DMG_ARMOR_PIERCING | DMG_BURN)) == 0)
 	{
 		v.dmg_inflictor = &inflictor->v;
 	}

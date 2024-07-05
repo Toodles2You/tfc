@@ -251,9 +251,8 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .armorClasses     = AT_SAVESHOT | AT_SAVENAIL | AT_SAVEELECTRICITY | AT_SAVEFIRE,
         .initArmorClasses = AT_SAVEFIRE,
         .weapons = {
-            // WEAPON_INCENDIARY,
             WEAPON_FLAMETHROWER,
-            -1,
+            WEAPON_INCENDIARY,
             WEAPON_TF_SHOTGUN,
             WEAPON_AXE,
         },

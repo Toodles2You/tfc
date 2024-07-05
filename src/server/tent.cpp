@@ -129,7 +129,7 @@ void tent::SpawnCorpse(CBaseEntity* entity, const int gibMode)
 }
 
 
-void tent::RocketTrail(CBaseEntity* entity, const bool flare)
+void tent::RocketTrail(CBaseEntity* entity, const bool flare, const int team)
 {
 	engine::PlaybackEvent(
 		FEV_GLOBAL,
@@ -140,7 +140,7 @@ void tent::RocketTrail(CBaseEntity* entity, const bool flare)
 		g_vecZero,
 		0.0F,
 		0.0F,
-		0,
+		team,
 		0,
 		flare,
 		false);

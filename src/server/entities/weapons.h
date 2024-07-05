@@ -67,6 +67,7 @@ enum
 	kProjKinetic,
 	kProjAdrenaline,
 	kProjFlame,
+	kProjIncendiaryRocket,
 };
 
 typedef struct
@@ -126,7 +127,7 @@ constexpr const char* g_szWeaponNames[WEAPON_TYPES] =
 	"tf_weapon_gl",
 	"tf_weapon_flamethrower",
 	"tf_weapon_rpg",
-	// "tf_weapon_ic",
+	"tf_weapon_ic",
 	"tf_weapon_ac",
 	// nullptr,
 	"tf_weapon_detpack",
@@ -418,6 +419,15 @@ public:
 	void GetWeaponInfo(WeaponInfo& i) override;
 };
 
+class CIncendiaryCannon : public CTFWeapon
+{
+public:
+	CIncendiaryCannon(Entity* containingEntity) : CTFWeapon(containingEntity) {}
+
+	int GetID() const override { return WEAPON_INCENDIARY; }
+	void GetWeaponInfo(WeaponInfo& i) override;
+};
+
 class CAssaultCannon : public CTFWeapon
 {
 public:
@@ -683,8 +693,23 @@ public:
 		const float damageMin,
 		const float radius,
 		CBaseEntity* owner);
+	static CRocket* CreateIncendiaryRocket(
+		const Vector& origin,
+		const Vector& dir,
+		const float damageMax,
+		const float damageMin,
+		const float radius,
+		CBaseEntity* owner);
 	void EXPORT RocketTouch(CBaseEntity *pOther);
 	void EXPORT PleaseGoInTheRightDirection();
+};
+
+class CIncendiaryRocket : public CRocket
+{
+public:
+	CIncendiaryRocket(Entity* containingEntity) : CRocket(containingEntity) {}
+
+	void Explode(TraceResult* pTrace, int bitsDamageType) override;
 };
 
 class CNail : public CBaseEntity

@@ -499,12 +499,13 @@ enum class ExplosionType
 	Normal = 0,
 	Concussion,
 	Detpack,
+	Incendiary,
 };
 
 void Explosion(const Vector& origin, const Vector& velocity, ExplosionType type = ExplosionType::Normal, float damage = 100.0F, bool smoke = true, bool sparks = true, CBaseEntity* entity = nullptr);
 
 void SpawnCorpse(CBaseEntity* entity, const int gibMode);
-void RocketTrail(CBaseEntity* entity, const bool flare = true);
+void RocketTrail(CBaseEntity* entity, const bool flare = true, const int team = TEAM_UNASSIGNED);
 
 void PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber);
 } // namespace tent

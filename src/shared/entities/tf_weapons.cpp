@@ -247,6 +247,34 @@ void CTFWeapon::PrimaryAttack()
 			CNail::CreateFlame(gun, gpGlobals->v_forward, info.iProjectileDamage, m_pPlayer);
 			break;
 		}
+		case kProjIncendiaryRocket:
+		{
+			const auto aim = m_pPlayer->v.v_angle + m_pPlayer->v.punchangle;
+			util::MakeVectors(aim);
+
+			int rightOffset = 8;
+
+			if (m_pPlayer->m_bLeftHanded)
+			{
+				rightOffset = -8;
+			}
+
+			const auto gun =
+				m_pPlayer->v.origin
+					+ m_pPlayer->v.view_ofs
+					+ gpGlobals->v_forward * 16
+					+ gpGlobals->v_right * rightOffset
+					+ gpGlobals->v_up * -8;
+
+			CRocket::CreateIncendiaryRocket(
+				gun,
+				gpGlobals->v_forward,
+				info.iProjectileDamage,
+				info.iProjectileDamageMin,
+				info.iProjectileRadius,
+				m_pPlayer);
+			break;
+		}
 		default:
 		{
 			m_pPlayer->FireBullets(
@@ -664,6 +692,54 @@ void CRocketLauncher::GetWeaponInfo(WeaponInfo& i)
 	i.pszAlternateSound = nullptr;
 	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -4.0F;
+	i.iSibling = -1;
+	i.bShouldIdle = false;
+}
+
+
+LINK_ENTITY_TO_CLASS(tf_weapon_ic, CIncendiaryCannon);
+
+void CIncendiaryCannon::GetWeaponInfo(WeaponInfo& i)
+{
+	i.pszName = "tf_weapon_ic";
+	i.iAmmo1 = AMMO_ROCKETS;
+	i.iAmmo2 = -1;
+	i.iMaxClip = -1;
+	i.iSlot = 4;
+	i.iPosition = 3;
+	i.iFlags = 0;
+	i.iWeight = 15;
+
+	i.pszWorld = "models/w_rpg.mdl";
+	i.pszView = "models/v_rpg.mdl";
+	i.pszPlayer = "models/p_srpg.mdl";
+	i.pszAnimExt = "rpg";
+
+	i.iAnims[kWeaponAnimIdle] = 0;
+	i.iAnims[kWeaponAnimDeploy] = 4;
+	i.iAnims[kWeaponAnimHolster] = 3;
+	i.iAnims[kWeaponAnimAttack] = 2;
+	i.iAnims[kWeaponAnimReload] = 8;
+	i.iAnims[kWeaponAnimStartReload] = 7;
+	i.iAnims[kWeaponAnimEndReload] = 9;
+
+	i.iShots = 1;
+
+	i.iAttackTime = 1200;
+	i.iReloadTime = 5000;
+
+	i.iProjectileType = kProjIncendiaryRocket;
+	i.iProjectileDamage = 55;
+	i.iProjectileDamageMin = 16;
+	i.iProjectileRadius = 180;
+	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
+	i.iProjectileCount = 1;
+
+	i.pszEvent = "events/wpn/tf_ic.sc";
+	i.pszAttackSound = "weapons/sgun1.wav";
+	i.pszAlternateSound = nullptr;
+	i.pszReloadSound = nullptr;
+	i.flPunchAngle = -3.0F;
 	i.iSibling = -1;
 	i.bShouldIdle = false;
 }
