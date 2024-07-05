@@ -65,6 +65,7 @@ public:
 		Aiming          = 8,
 		Infected        = 16,
 		CannotMove      = 32,
+		Burning			= 64,
 	};
 
 public:
@@ -347,10 +348,16 @@ protected:
 	EHANDLE m_hInfector;
 	float m_flNextInfectionTime;
 
+	EHANDLE m_hBurner;
+	float m_flNextBurnTime;
+	byte m_nBurnCount;
+
 public:
 	void BecomeInfected(CBaseEntity* infector);
 
+	bool CanBurn();
 	void Ignite(CBaseEntity* burner);
+	void Extinguish();
 
 	float m_flNextSpeakTime;
 

@@ -921,6 +921,11 @@ void CBasePlayer::ClearEffects()
 	WriteByte(0);
 	WriteString("dmg_poison");
 	MessageEnd();
+
+	MessageBegin(MSG_ONE, gmsgStatusIcon, this);
+	WriteByte(0);
+	WriteString("dmg_heat");
+	MessageEnd();
 #endif
 }
 

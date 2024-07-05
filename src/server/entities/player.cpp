@@ -203,6 +203,7 @@ bool CBasePlayer::GiveHealth(float flHealth, int bitsDamageType, bool bClearEffe
 	if (bClearEffects)
 	{
 		LeaveState(State::Infected);
+		LeaveState(State::Burning);
 		m_nLegDamage = 0;
 		m_iConcussionTime = 0;
 
@@ -214,6 +215,11 @@ bool CBasePlayer::GiveHealth(float flHealth, int bitsDamageType, bool bClearEffe
 		MessageBegin(MSG_ONE, gmsgStatusIcon, this);
 		WriteByte(0);
 		WriteString("dmg_poison");
+		MessageEnd();
+
+		MessageBegin(MSG_ONE, gmsgStatusIcon, this);
+		WriteByte(0);
+		WriteString("dmg_heat");
 		MessageEnd();
 	}
 
@@ -1006,6 +1012,27 @@ void CBasePlayer::PreThink()
 		}
 
 		m_flNextInfectionTime = gpGlobals->time + 3.0F;
+	}
+
+	if (InState(State::Burning) && m_flNextBurnTime <= gpGlobals->time && m_nBurnCount != 0)
+	{
+		CBaseEntity* burner;
+		burner = m_hBurner;
+		
+		if (burner == nullptr)
+		{
+			burner = CWorld::World;
+		}
+
+		m_nBurnCount--;
+
+		if (!CanBurn() || !TakeDamage(burner, burner, 2, DMG_BURN)
+		 || burner == CWorld::World || m_nBurnCount == 0)
+		{
+			Extinguish();
+		}
+
+		m_flNextBurnTime = gpGlobals->time + 1.0F;
 	}
 
 	if (PCNumber() == PC_MEDIC && m_flNextRegenerationTime <= gpGlobals->time)
@@ -2070,14 +2097,30 @@ void CBasePlayer::BecomeInfected(CBaseEntity* infector)
 }
 
 
-void CBasePlayer::Ignite(CBaseEntity* burner)
+bool CBasePlayer::CanBurn()
 {
 	if ((m_afArmorClass & AT_SAVEFIRE) != 0)
 	{
-		return;
+		return false;
 	}
 
 	if (PCNumber() == PC_PYRO && v.armorvalue > 0.0F)
+	{
+		return false;
+	}
+
+	if (v.waterlevel >= kWaterLevelWaist)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void CBasePlayer::Ignite(CBaseEntity* burner)
+{
+	if (!CanBurn())
 	{
 		return;
 	}
@@ -2086,6 +2129,26 @@ void CBasePlayer::Ignite(CBaseEntity* burner)
 		Toodles: This used to deal 6 damage. The extra damage
 		was added into to each respective ignition source.
 	*/
+
+	EnterState(State::Burning);
+	m_hBurner = burner;
+	m_flNextBurnTime = gpGlobals->time + 1.0F;
+	m_nBurnCount = 4;
+
+	MessageBegin(MSG_ONE, gmsgStatusIcon, this);
+	WriteByte(2);
+	WriteString("dmg_heat");
+	MessageEnd();
+}
+
+void CBasePlayer::Extinguish()
+{
+	LeaveState(State::Burning);
+
+	MessageBegin(MSG_ONE, gmsgStatusIcon, this);
+	WriteByte(0);
+	WriteString("dmg_heat");
+	MessageEnd();
 }
 
 
