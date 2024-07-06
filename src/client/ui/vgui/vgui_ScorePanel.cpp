@@ -774,7 +774,11 @@ void ScoreBoard::Initialize()
 	memset(g_PlayerExtraInfo, 0, sizeof g_PlayerExtraInfo);
 	memset(g_TeamInfo, 0, sizeof g_TeamInfo);
 
-	ScoreBoard::_showPlayerAvatars = client::RegisterVariable("scoreboard_showavatars", "1", FCVAR_ARCHIVE);
+	if (ScoreBoard::_showPlayerAvatars == nullptr)
+	{
+		ScoreBoard::_showPlayerAvatars =
+			client::RegisterVariable("scoreboard_showavatars", "1", FCVAR_ARCHIVE);
+	}
 }
 
 
