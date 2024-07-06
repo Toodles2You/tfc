@@ -192,6 +192,7 @@ enum {
 	kDamageFlagHeadshot = 2,
 	kDamageFlagSelf = 4,
 	kDamageFlagFriendlyFire = 8,
+	kDamageFlagOverTime = 16,
 };
 
 enum
