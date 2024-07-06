@@ -610,6 +610,10 @@ bool CHudAmmo::MsgFunc_HitFeedback(const char* pszName, int iSize, void* pbuf)
 	{
 		sample = "misc/crit.wav";
 	}
+	else if ((flags & kDamageFlagOverTime) != 0)
+	{
+		sample = "misc/dot.wav";
+	}
 	else
 	{
 		pitch = pitch * std::max(1.5F - (damage / 100.0F), 0.5F);
