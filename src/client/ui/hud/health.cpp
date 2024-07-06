@@ -137,7 +137,9 @@ bool CHudHealth::MsgFunc_Damage(const char* pszName, int iSize, void* pbuf)
 		vecFrom[i] = READ_COORD();
 
 	// only send down damage type that have hud art
+#if 0
 	UpdateTiles(gHUD.m_flTime, bitsDamage & DMG_SHOWNHUD);
+#endif
 
 	// Actually took damage?
 	if (damageTaken > 0 || armor > 0)
