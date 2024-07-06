@@ -31,6 +31,7 @@ void CAvatarImage::ClearAvatarSteamID()
 {
 	m_bValid = false;
 	m_bLoadPending = false;
+	m_fNextLoadTime = 0.0f;
 	m_SteamID.Set(0, k_EUniverseInvalid, k_EAccountTypeInvalid);
 	m_sPersonaStateChangedCallback.Unregister();
 }
@@ -45,6 +46,7 @@ bool CAvatarImage::SetAvatarSteamID(CSteamID steamIDUser, EAvatarSize avatarSize
 	m_SteamID = steamIDUser;
 	m_AvatarSize = avatarSize;
 	m_bLoadPending = true;
+	m_fNextLoadTime = 0.0f;
 
 	switch (m_AvatarSize)
 	{
@@ -77,6 +79,7 @@ void CAvatarImage::OnPersonaStateChanged(PersonaStateChange_t* info)
 		// Mark us as invalid.
 		m_bValid = false;
 		m_bLoadPending = true;
+		m_fNextLoadTime = 0.0f;
 
 		// Poll
 		LoadAvatarImage();
