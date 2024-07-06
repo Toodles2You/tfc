@@ -636,6 +636,8 @@ static void EV_FlameThink(TEMPENTITY* ent, float frametime, float currenttime)
 			return;
 		}
 
+		ent->entity.baseline.origin = ent->entity.baseline.origin * 0.9425F;
+
 		ent->entity.curstate.fuser1 = currenttime + 1.0F / 30.0F;
 	}
 }
@@ -728,7 +730,7 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 			{
 				auto flame = client::efx::TempSprite(
 					gun,
-					forward * 600.0F,
+					forward * 1200.0F,
 					1.0F,
 					g_sModelIndexFlame,
 					kRenderTransAlpha,

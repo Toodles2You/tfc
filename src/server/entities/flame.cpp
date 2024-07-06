@@ -20,7 +20,7 @@ CFlame* CFlame::CreateFlame(const Vector& origin, const Vector& dir, const float
 
 	nail->v.origin = origin;
 	nail->v.angles = dir;
-	nail->v.speed = 600.0F;
+	nail->v.speed = 1200.0F;
 	nail->v.dmg = damage;
 	nail->v.armortype = DMG_BURN | DMG_IGNITE;
 	nail->v.owner = &owner->v;
@@ -115,7 +115,8 @@ void CFlame::PleaseDoNotGoInTheWater()
 		return;
 	}
 
-	v.velocity = v.v_angle;
+	v.velocity = v.v_angle * 0.9425F;
+	v.v_angle = v.velocity;
 
 	v.nextthink = gpGlobals->time + 1.0F / 30.0F;
 }
