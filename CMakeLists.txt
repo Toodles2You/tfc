@@ -67,6 +67,7 @@ set(SERVER_SRC
     ${SERVER_SRC_DIR}/entities/doors.cpp
     ${SERVER_SRC_DIR}/entities/effects.cpp
     ${SERVER_SRC_DIR}/entities/explode.cpp
+    ${SERVER_SRC_DIR}/entities/flame.cpp
     ${SERVER_SRC_DIR}/entities/func_break.cpp
     ${SERVER_SRC_DIR}/entities/func_tank.cpp
     ${SERVER_SRC_DIR}/entities/ggrenade.cpp

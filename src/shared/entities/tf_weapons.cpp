@@ -244,7 +244,7 @@ void CTFWeapon::PrimaryAttack()
 					+ gpGlobals->v_right * rightOffset
 					+ gpGlobals->v_up * -8;
 
-			CNail::CreateFlame(gun, gpGlobals->v_forward, info.iProjectileDamage, m_pPlayer);
+			CFlame::CreateFlame(gun, gpGlobals->v_forward, info.iProjectileDamage, m_pPlayer);
 			break;
 		}
 		case kProjIncendiaryRocket:

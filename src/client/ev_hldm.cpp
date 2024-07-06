@@ -115,7 +115,7 @@ static void EV_BubbleTrail(Vector from, Vector to, int count)
 	);
 }
 
-static void EV_Bubbles(const Vector& origin, float radius)
+static void EV_Bubbles(const Vector& origin, float radius, int count = 100)
 {
 	auto mins = origin + Vector(-radius, -radius, -radius);
 	auto maxs = origin + Vector(radius, radius, radius);
@@ -124,7 +124,7 @@ static void EV_Bubbles(const Vector& origin, float radius)
 	auto height = EV_WaterLevel(mid, mid.z, mid.z + 1024);
 	height = height - mins.z;
 	
-	client::efx::Bubbles(mins, maxs, height, g_sModelIndexBubbles, 100, 8);
+	client::efx::Bubbles(mins, maxs, height, g_sModelIndexBubbles, count, 8);
 }
 
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
@@ -625,6 +625,26 @@ static void EV_NailTouch(TEMPENTITY* ent, pmtrace_t* tr)
 	EV_DecalGunshot(tr, ent->entity.curstate.origin - ent->entity.prevstate.origin, true);
 }
 
+static void EV_FlameThink(TEMPENTITY* ent, float frametime, float currenttime)
+{
+	if (ent->entity.curstate.fuser1 <= currenttime)
+	{
+		if (client::PM_PointContents(ent->entity.origin, nullptr) != CONTENTS_EMPTY)
+		{
+			ent->die = currenttime;
+			ent->callback = nullptr;
+			return;
+		}
+
+		ent->entity.curstate.fuser1 = currenttime + 1.0F / 30.0F;
+	}
+}
+
+static void EV_FlameTouch(TEMPENTITY* ent, pmtrace_t* tr)
+{
+	EV_DecalTrace(tr, EV_DecalName("{smscorch%i", 3));
+}
+
 void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 {
 	const auto& info = CBasePlayerWeapon::WeaponInfoArray[(int)args->fparam1];
@@ -704,7 +724,32 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 
 			gun = gun + forward * 16 + right * rightOffset + up * -8;
 
-			client::efx::Projectile(gun, forward * 600.0F, g_sModelIndexFlame, 1.0F, args->entindex, nullptr);
+			if (client::PM_PointContents(gun, nullptr) == CONTENTS_EMPTY)
+			{
+				auto flame = client::efx::TempSprite(
+					gun,
+					forward * 600.0F,
+					1.0F,
+					g_sModelIndexFlame,
+					kRenderTransAlpha,
+					kRenderFxNone,
+					1.0F,
+					1.0F,
+					FTENT_SPRANIMATE | FTENT_COLLIDEALL | FTENT_PERSIST | FTENT_COLLIDEKILL | FTENT_CLIENTCUSTOM);
+
+				if (flame != nullptr)
+				{
+					flame->entity.curstate.framerate = 15.0F;
+					flame->clientIndex = args->entindex;
+					flame->callback = EV_FlameThink;
+					flame->entity.curstate.fuser1 = client::GetClientTime() + 1.0F / 30.0F;
+					flame->hitcallback = EV_FlameTouch;
+				}
+			}
+			else
+			{
+				EV_Bubbles(gun + forward * 8, 8, 3);
+			}
 			break;
 		}
 		case kProjIncendiaryRocket:

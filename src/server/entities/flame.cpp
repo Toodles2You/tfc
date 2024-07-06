@@ -14,55 +14,31 @@
 #include "gamerules.h"
 
 
-CNail* CNail::CreateNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner)
+CFlame* CFlame::CreateFlame(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner)
 {
-	auto nail = Entity::Create<CNail>();
+	auto nail = Entity::Create<CFlame>();
 
 	nail->v.origin = origin;
 	nail->v.angles = dir;
-	nail->v.speed = 1000.0F;
+	nail->v.speed = 600.0F;
 	nail->v.dmg = damage;
-	nail->v.armortype = DMG_NAIL | DMG_NEVERGIB;
+	nail->v.armortype = DMG_BURN | DMG_IGNITE;
 	nail->v.owner = &owner->v;
 	nail->v.team = owner->TeamNumber();
 	nail->Spawn();
 
-	if (damage > 9)
-	{
-		nail->v.classname = MAKE_STRING("supernails");
-	}
-
 	return nail;
 }
 
 
-CNail* CNail::CreateNailGrenadeNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner)
+bool CFlame::Spawn()
 {
-	auto nail = Entity::Create<CNail>();
-
-	nail->v.origin = origin;
-	nail->v.angles = dir;
-	nail->v.speed = 1000.0F;
-	nail->v.dmg = damage;
-	nail->v.armortype = DMG_NAIL | DMG_NEVERGIB;
-	nail->v.dmg_inflictor = &owner->v;
-	nail->v.team = owner->TeamNumber();
-	nail->Spawn();
-
-	nail->v.classname = MAKE_STRING("nailgrenade");
-
-	return nail;
-}
-
-
-bool CNail::Spawn()
-{
-	v.classname = MAKE_STRING("nails");
+	v.classname = MAKE_STRING("flames");
 	v.movetype = MOVETYPE_FLYMISSILE;
 	v.solid = SOLID_TRIGGER; /* SOLID_BBOX */
 
-	v.model = MAKE_STRING("models/nail.mdl");
-	v.modelindex = g_sModelIndexNail;
+	v.model = MAKE_STRING("sprites/fthrow.spr");
+	v.modelindex = g_sModelIndexFlame;
 	v.effects |= EF_NODRAW;
 
 	SetSize(g_vecZero, g_vecZero);
@@ -72,22 +48,23 @@ bool CNail::Spawn()
 	v.velocity = v.angles * v.speed;
 	v.angles = util::VecToAngles(v.angles);
 
-	SetTouch(&CNail::NailTouch);
+	SetTouch(&CFlame::FlameTouch);
 
 	v.radsuit_finished = v.waterlevel;
 	v.v_angle = v.velocity;
 
-	SetThink(&CNail::PleaseGoInTheRightDirection);
+	SetThink(&CFlame::PleaseDoNotGoInTheWater);
 	v.nextthink = gpGlobals->time + 1.0F / 30.0F;
-	v.pain_finished = gpGlobals->time + 5.0F;
+	v.pain_finished = gpGlobals->time + 1.0F;
 
 	return true;
 }
 
 
-void CNail::NailTouch(CBaseEntity* pOther)
+void CFlame::FlameTouch(CBaseEntity* pOther)
 {
-	if (engine::PointContents(v.origin) != CONTENTS_SKY)
+	if (engine::PointContents(v.origin) != CONTENTS_SKY
+     && v.waterlevel == kWaterLevelNone)
 	{
 		CBaseEntity* owner = this;
 
@@ -119,17 +96,13 @@ void CNail::NailTouch(CBaseEntity* pOther)
 }
 
 
-void CNail::PleaseGoInTheRightDirection()
+void CFlame::PleaseDoNotGoInTheWater()
 {
-	if (v.pain_finished <= gpGlobals->time)
+	if (v.pain_finished <= gpGlobals->time
+	 || v.waterlevel != kWaterLevelNone)
 	{
 		Remove();
 		return;
-	}
-	if (v.waterlevel > v.radsuit_finished)
-	{
-		v.velocity = v.v_angle;
-		v.radsuit_finished = v.waterlevel;
 	}
 	v.nextthink = gpGlobals->time + 1.0F / 30.0F;
 }

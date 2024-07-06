@@ -722,10 +722,23 @@ public:
 	int ObjectCaps() override { return CBaseEntity::ObjectCaps() | FCAP_DONT_SAVE; }
 
 	static CNail* CreateNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
-	static CNail* CreateFlame(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
 	static CNail* CreateNailGrenadeNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
 	void EXPORT NailTouch(CBaseEntity *pOther);
 	void EXPORT PleaseGoInTheRightDirection();
+};
+
+class CFlame : public CBaseEntity
+{
+public:
+	CFlame(Entity* containingEntity) : CBaseEntity(containingEntity) {}
+
+	bool Spawn() override;
+
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() | FCAP_DONT_SAVE; }
+
+	static CFlame* CreateFlame(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
+	void EXPORT FlameTouch(CBaseEntity *pOther);
+	void EXPORT PleaseDoNotGoInTheWater();
 };
 
 class CPipeBomb : public CGrenade
