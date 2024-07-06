@@ -635,7 +635,7 @@ void CFlamethrower::GetWeaponInfo(WeaponInfo& i)
 		Toodles: Originally the flamethrower dealt 15 damage upon touch
 		& then 6 from ignition. This results in the same 20 damage.
 	*/
-	i.iProjectileDamage = 22;
+	i.iProjectileDamage = 17;
 	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
 	i.iProjectileCount = 1;
 

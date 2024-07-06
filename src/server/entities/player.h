@@ -348,9 +348,12 @@ protected:
 	EHANDLE m_hInfector;
 	float m_flNextInfectionTime;
 
-	EHANDLE m_hBurner;
+	constexpr static byte kMaxBurnSources = 4;
 	float m_flNextBurnTime;
-	byte m_nBurnCount;
+	EHANDLE m_hBurner;
+	const char *m_pszBurnSource;
+	byte m_nBurnCount[kMaxBurnSources];
+	byte m_nBurnSource;
 
 public:
 	void BecomeInfected(CBaseEntity* infector);

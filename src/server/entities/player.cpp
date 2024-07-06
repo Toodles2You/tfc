@@ -1019,7 +1019,7 @@ void CBasePlayer::PreThink()
 		m_flNextInfectionTime = gpGlobals->time + 3.0F;
 	}
 
-	if (InState(State::Burning) && m_flNextBurnTime <= gpGlobals->time && m_nBurnCount != 0)
+	if (InState(State::Burning) && m_flNextBurnTime <= gpGlobals->time)
 	{
 		CBaseEntity* burner;
 		burner = m_hBurner;
@@ -1029,15 +1029,31 @@ void CBasePlayer::PreThink()
 			burner = CWorld::World;
 		}
 
-		m_nBurnCount--;
+		auto burnDamage = 0;
 
-		if (!CanBurn() || !TakeDamage(burner, burner, 2, DMG_BURN)
-		 || burner == CWorld::World || m_nBurnCount == 0)
+		/* Check each burn source. */
+		for (auto i = 0; i < kMaxBurnSources; i++)
 		{
+			if (m_nBurnCount[i] == 0)
+			{
+				continue;
+			}
+
+			/* Decrement timer. */
+			m_nBurnCount[i]--;
+
+			/* Increment damage. */
+			burnDamage++;
+		}
+
+		if (!CanBurn() || !TakeDamage(burner, burner, burnDamage, DMG_BURN)
+		 || burnDamage == 0)
+		{
+			/* Cannot burn, blocked damage, or all sources have expired. */
 			Extinguish();
 		}
 
-		m_flNextBurnTime = gpGlobals->time + 1.0F;
+		m_flNextBurnTime = gpGlobals->time + 0.3F;
 	}
 
 	if (PCNumber() == PC_MEDIC && m_flNextRegenerationTime <= gpGlobals->time)
@@ -2130,15 +2146,32 @@ void CBasePlayer::Ignite(CBaseEntity* burner)
 		return;
 	}
 
+	if (!InState(State::Burning))
+	{
+		/* Reset all of the burn sources. */
+		for (auto i = 0; i < kMaxBurnSources; i++)
+		{
+			m_nBurnCount[i] = 0;
+		}
+		m_nBurnSource = 0;
+	}
+
 	/*
 		Toodles: This used to deal 6 damage. The extra damage
 		was added into to each respective ignition source.
 	*/
 
 	EnterState(State::Burning);
+
+	m_flNextBurnTime = gpGlobals->time + 0.3F;
+
+	/* Credit goes to the new burner. */
 	m_hBurner = burner;
-	m_flNextBurnTime = gpGlobals->time + 1.0F;
-	m_nBurnCount = 4;
+
+	/* Reset the oldest burn source timer. */
+	m_nBurnCount[m_nBurnSource] = 14;
+	/* Cycle to the next burn source. */
+	m_nBurnSource = (m_nBurnSource + 1) % kMaxBurnSources;
 
 	MessageBegin(MSG_ONE, gmsgStatusIcon, this);
 	WriteByte(2);
