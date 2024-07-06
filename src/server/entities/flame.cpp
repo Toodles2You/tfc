@@ -90,6 +90,16 @@ void CFlame::FlameTouch(CBaseEntity* pOther)
             v.armortype);
 
         pOther->ApplyMultiDamage(this, owner);
+
+        if (pOther->IsPlayer())
+        {
+            /* Don't touch this guy again.*/
+            m_touchedPlayers[pOther->v.GetIndex() - 1] = true;
+
+            /* Fix velocity ASAP. */
+            v.nextthink = gpGlobals->time + 0.001F;
+            return;
+        }
 	}
 
 	Remove();
@@ -104,6 +114,15 @@ void CFlame::PleaseDoNotGoInTheWater()
 		Remove();
 		return;
 	}
+
+	v.velocity = v.v_angle;
+
 	v.nextthink = gpGlobals->time + 1.0F / 30.0F;
+}
+
+
+bool CFlame::ShouldCollide(CBaseEntity* other)
+{
+    return !other->IsPlayer() || !m_touchedPlayers[other->v.GetIndex() - 1];
 }
 

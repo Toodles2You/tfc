@@ -23,6 +23,8 @@
 #ifdef GAME_DLL
 #include "effects.h"
 
+#include "bitvec.h"
+
 #include <queue>
 
 class CPipeBomb;
@@ -739,6 +741,11 @@ public:
 	static CFlame* CreateFlame(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
 	void EXPORT FlameTouch(CBaseEntity *pOther);
 	void EXPORT PleaseDoNotGoInTheWater();
+
+	bool ShouldCollide(CBaseEntity* other) override;
+
+protected:
+	CBitVec<MAX_PLAYERS> m_touchedPlayers;
 };
 
 class CPipeBomb : public CGrenade

@@ -373,12 +373,12 @@ void HUD_TempEntUpdate(
 				pTemp->entity.latched.prevangles = pTemp->entity.angles;
 			}
 
-			if ((pTemp->flags & (FTENT_COLLIDEALL | FTENT_COLLIDEWORLD)) != 0)
+			if ((pTemp->flags & (FTENT_COLLIDEALL | FTENT_COLLIDEWORLD | FTENT_COLLIDENONCLIENTS)) != 0)
 			{
 				Vector traceNormal;
 				float traceFraction = 1;
 
-				if ((pTemp->flags & FTENT_COLLIDEALL) != 0)
+				if ((pTemp->flags & (FTENT_COLLIDEALL | FTENT_COLLIDENONCLIENTS)) != 0)
 				{
 					pmtrace_t pmtrace;
 					physent_t* pe;
@@ -392,7 +392,8 @@ void HUD_TempEntUpdate(
 					{
 						pe = client::event::GetPhysent(pmtrace.ent);
 
-						if (0 == pmtrace.ent || (pe->info != pTemp->clientIndex))
+						if ((0 == pmtrace.ent || ((pe->info != pTemp->clientIndex))
+						 && ((pTemp->flags & FTENT_COLLIDENONCLIENTS) == 0 || pe->info > client::GetMaxClients())))
 						{
 							traceFraction = pmtrace.fraction;
 							traceNormal = pmtrace.plane.normal;
