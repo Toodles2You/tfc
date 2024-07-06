@@ -424,7 +424,7 @@ static void EV_BloodTrace(Vector pos, Vector dir, int damage)
 		traceDir.y += client::RandomFloat(-noise, noise);
 		traceDir.z += client::RandomFloat(-noise, noise);
 
-		client::event::PlayerTrace(pos, pos + traceDir * -172, PM_WORLD_ONLY, -1, &tr);
+		client::event::PlayerTrace(pos, pos + traceDir * -172, PM_STUDIO_IGNORE, -1, &tr);
 
 		if (tr.fraction != 1.0f)
 		{
@@ -1070,7 +1070,7 @@ void EV_Explosion(event_args_t* args)
 	client::event::PlayerTrace(
 		origin,
 		origin + dir * 64,
-		PM_WORLD_ONLY,
+		PM_STUDIO_IGNORE,
 		-1,
 		&tr);
 	
