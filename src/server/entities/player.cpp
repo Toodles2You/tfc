@@ -369,6 +369,11 @@ void CBasePlayer::SendHitFeedback(CBaseEntity* victim, const float flDamage, con
 		flags |= kDamageFlagHeadshot;
 	}
 
+	if (bitsDamageType == DMG_BURN || bitsDamageType == DMG_IGNOREARMOR)
+	{
+		flags |= kDamageFlagOverTime;
+	}
+
 	if (victim == this)
 	{
 		flags |= kDamageFlagSelf;
