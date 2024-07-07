@@ -298,7 +298,10 @@ static void V_DropPunchAngle(float frametime)
 
 void V_PunchAxis(int axis, float punch)
 {
-	ev_punchangle[axis] = punch;
+	if (fabsf(punch) > fabsf(ev_punchangle[axis]))
+	{
+		ev_punchangle[axis] = punch;
+	}
 }
 
 

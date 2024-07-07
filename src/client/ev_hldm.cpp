@@ -669,7 +669,10 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 			client::event::WeaponAnimation(info.iAnims[kWeaponAnimAttack], 0);
 		}
 
-		V_PunchAxis(0, info.flPunchAngle);
+		if (info.flPunchAngle != 0.0F)
+		{
+			V_PunchAxis(0, info.flPunchAngle);
+		}
 	}
 
 	client::event::PlaySound(
@@ -827,7 +830,10 @@ void CTFMelee::EV_MeleeAttack(event_args_t* args)
 				client::event::WeaponAnimation(info.iAnims[kWeaponAnimAttack], 0);
 			}
 
-			V_PunchAxis(0, info.flPunchAngle);
+			if (info.flPunchAngle != 0.0F)
+			{
+				V_PunchAxis(0, info.flPunchAngle);
+			}
 		}
 
 		client::event::StopSound(args->entindex, CHAN_AUTO, info.pszReloadSound);
