@@ -982,6 +982,15 @@ void CNapalmGrenade::NapalmThink()
 		return;
 	}
 
+	const auto contents = engine::PointContents(v.origin);
+
+	/* Toodles TODO: There should probably be some sort of effect here. */
+	if (contents == CONTENTS_WATER)
+	{
+		Remove();
+		return;
+	}
+
 	tent::FireField(v.origin);
 
 	CBaseEntity* entity = nullptr;
