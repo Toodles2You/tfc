@@ -1609,6 +1609,7 @@ void EV_Init()
 	g_sModelIndexNail = client::event::FindModelIndex("models/nail.mdl");
 	g_sModelIndexFlare = client::event::FindModelIndex("sprites/xflare1.spr");
 	g_sModelIndexFlame = client::event::FindModelIndex("sprites/fthrow.spr");
+	g_sModelIndexFire = client::event::FindModelIndex("sprites/playerflame.spr");
 
 	auto model = client::hudGetModelByIndex(g_sModelIndexDebris);
 	if (model != nullptr)

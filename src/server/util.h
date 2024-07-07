@@ -508,4 +508,6 @@ void SpawnCorpse(CBaseEntity* entity, const int gibMode);
 void RocketTrail(CBaseEntity* entity, const bool flare = true, const int team = TEAM_UNASSIGNED);
 
 void PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber);
+
+void FireField(const Vector& origin);
 } // namespace tent

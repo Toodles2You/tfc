@@ -958,7 +958,7 @@ const char* CBasePlayer::GetGrenadeIconName(const int grenadeType)
 		case PC_HVYWEAP:
 			return "d_mirvgrenade";
 		case PC_PYRO:
-			return nullptr;
+			return "d_napalmgrenade";
 		case PC_SPY:
 			return nullptr;
 		case PC_ENGINEER:

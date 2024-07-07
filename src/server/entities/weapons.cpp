@@ -91,6 +91,7 @@ void W_Precache()
 	g_sModelIndexSaveMe = engine::PrecacheModel("sprites/saveme.spr");
 	g_sModelIndexFlare = engine::PrecacheModel("sprites/xflare1.spr");
 	g_sModelIndexFlame = engine::PrecacheModel("sprites/fthrow.spr");
+	g_sModelIndexFire = engine::PrecacheModel("sprites/playerflame.spr");
 
 	engine::PrecacheModel("models/grenade.mdl");
 	engine::PrecacheModel("models/rpgrocket.mdl");
@@ -155,6 +156,10 @@ void W_Precache()
 
 	engine::PrecacheModel("models/mirv_grenade.mdl");
 	engine::PrecacheModel("models/bomblet.mdl");
+
+	engine::PrecacheModel("models/napalm.mdl");
+	engine::PrecacheSound("weapons/flmgrexp.wav");
+	engine::PrecacheSound("ambience/fire1.wav");
 
 	engine::PrecacheModel("models/detpack.mdl");
 	engine::PrecacheSound("weapons/mortarhit.wav");

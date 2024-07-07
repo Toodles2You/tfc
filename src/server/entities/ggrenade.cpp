@@ -934,4 +934,109 @@ CBomblet* CBomblet::Bomblet(CBaseEntity* owner, const Vector& origin, const floa
 	return grenade;
 }
 
+
+bool CNapalmGrenade::Spawn()
+{
+	v.health = kNumBursts;
+
+	if (!CPrimeGrenade::Spawn())
+	{
+		return false;
+	}
+
+	v.dmg = 20;
+	v.dmg_save = 20;
+	v.dmg_take = 180;
+
+	return true;
+}
+
+
+void CNapalmGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
+{
+	if (v.health <= 0)
+	{
+		Remove();
+	}
+	else
+	{
+		v.gravity = 0.81;
+		v.friction = 0.6;
+
+		SetModel(GetModelName());
+		SetSize(g_vecZero, g_vecZero);
+
+		EmitSound("weapons/flmgrexp.wav", CHAN_AUTO, VOL_NORM, 0.2F);
+
+		SetThink(&CNapalmGrenade::NapalmThink);
+		v.nextthink = gpGlobals->time + 0.1F;
+	}
+}
+
+
+void CNapalmGrenade::NapalmThink()
+{
+	if (!CanDetonate())
+	{
+		Remove();
+		return;
+	}
+
+	tent::FireField(v.origin);
+
+	CBaseEntity* entity = nullptr;
+	TraceResult tr;
+
+	while ((entity = util::FindEntityInSphere(entity, v.origin, v.dmg_take)) != nullptr)
+	{
+		if (entity->v.takedamage == DAMAGE_NO)
+		{
+			continue;
+		}
+
+		util::TraceLine(v.origin, entity->EyePosition(), &tr, this, util::kTraceBox);
+
+		if (tr.flFraction != 1.0F && tr.pHit != &entity->v)
+		{
+			continue;
+		}
+
+		entity->TakeDamage(this, v.owner->Get<CBasePlayer>(), v.dmg, DMG_BURN | DMG_IGNITE);
+	}
+
+	v.health--;
+
+	if (v.health <= 0)
+	{
+		Remove();
+		return;
+	}
+
+	/* Toodles TODO: Make this a looping sound. */
+	EmitSound("ambience/fire1.wav", CHAN_WEAPON, VOL_NORM, ATTN_NORM);
+
+	v.nextthink = gpGlobals->time + 1.0F;
+}
+
+
+void CNapalmGrenade::UpdateOnRemove()
+{
+	StopSound("ambience/fire1.wav", CHAN_WEAPON);
+	CPrimeGrenade::UpdateOnRemove();
+}
+
+
+CNapalmGrenade* CNapalmGrenade::NapalmGrenade(CBaseEntity* owner)
+{
+	auto grenade = Entity::Create<CNapalmGrenade>();
+
+	grenade->v.owner = &owner->v;
+	grenade->v.team = owner->TeamNumber();
+	grenade->Spawn();
+
+	grenade->v.classname = MAKE_STRING("napalmgrenade");
+
+	return grenade;
+}
+
 #endif

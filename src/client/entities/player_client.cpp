@@ -229,7 +229,7 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 		case PC_HVYWEAP:
 			break;
 		case PC_PYRO:
-			return;
+			break;
 		case PC_SPY:
 			return;
 		case PC_ENGINEER:

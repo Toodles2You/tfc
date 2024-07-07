@@ -168,3 +168,17 @@ void tent::PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber)
 	MessageEnd();
 }
 
+
+void tent::FireField(const Vector& origin)
+{
+	MessageBegin(MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte(TE_FIREFIELD);
+	WriteCoord(origin + Vector(0.0F, 0.0F, 24.0F));
+	WriteShort(100);
+	WriteShort(g_sModelIndexFire);
+	WriteByte(12);
+	WriteByte(TEFIRE_FLAG_SOMEFLOAT | TEFIRE_FLAG_PLANAR);
+	WriteByte(8);
+	MessageEnd();
+}
+

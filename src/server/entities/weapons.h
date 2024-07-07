@@ -235,6 +235,7 @@ inline short g_sModelIndexNail;
 inline short g_sModelIndexSaveMe;
 inline short g_sModelIndexFlare;
 inline short g_sModelIndexFlame;
+inline short g_sModelIndexFire;
 
 inline unsigned short g_usConcBlast;
 
@@ -677,6 +678,26 @@ public:
 	const char* GetIconName() override { return "d_mirvgrenade"; }
 
 	static CBomblet* Bomblet(CBaseEntity* owner, const Vector& origin, const float yaw);
+};
+
+class CNapalmGrenade : public CPrimeGrenade
+{
+public:
+	CNapalmGrenade(Entity* containingEntity) : CPrimeGrenade(containingEntity) {}
+
+	bool Spawn() override;
+	void Explode(TraceResult* pTrace, int bitsDamageType) override;
+	void EXPORT NapalmThink();
+
+	void UpdateOnRemove() override;
+
+	const char* GetModelName() override { return "models/napalm.mdl"; }
+	const char* GetIconName() override { return "d_napalmgrenade"; }
+
+	static CNapalmGrenade* NapalmGrenade(CBaseEntity* owner);
+
+private:
+	static constexpr int kNumBursts = 8;
 };
 
 class CRocket : public CGrenade

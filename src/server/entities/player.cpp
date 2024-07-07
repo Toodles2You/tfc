@@ -2040,7 +2040,8 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 			m_hGrenade = CMirv::Mirv(this);
 			break;
 		case PC_PYRO:
-			return;
+			m_hGrenade = CNapalmGrenade::NapalmGrenade(this);
+			break;
 		case PC_SPY:
 			return;
 		case PC_ENGINEER:
