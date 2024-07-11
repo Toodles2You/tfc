@@ -31,6 +31,10 @@
 #include "UserMessages.h"
 #include "game.h"
 
+#include <algorithm>
+
+int AllowLagCompensation();
+
 inline void MessageBegin(int dest, int type, const Vector& origin, CBaseEntity* entity)
 {
 	engine::MessageBegin(
@@ -1210,4 +1214,66 @@ bool util::IsMultiplayer()
 bool util::IsDeathmatch()
 {
 	return util::GetGameMode() > kGamemodeCooperative;
+}
+
+void util::LagCompensation(CBaseEntity* entity, const int& ping)
+{
+	if (AllowLagCompensation() == 0 || ping <= 5)
+	{
+		return;
+	}
+
+	/* Convert milliseconds into seconds & clamp. */
+	const auto latency = std::clamp(ping / 1000.0f, 0.0f, sv_maxunlag->value);
+
+	const auto start = entity->v.origin;
+
+	/* Apply gravity, if any. */
+	if (entity->v.movetype != MOVETYPE_FLY && entity->v.gravity != 0.0F)
+	{
+		const auto gravity = sv_gravity->value * entity->v.gravity;
+
+		entity->v.velocity.z =
+			std::clamp(entity->v.velocity.z - gravity * latency, -gravity, gravity);
+	}
+
+	/* Decrement the next think timer. */
+	if (entity->v.nextthink > gpGlobals->time)
+	{
+		entity->v.nextthink =
+			std::max(entity->v.nextthink - latency, gpGlobals->time);
+	}
+
+	/* Simulate movement according to velocity. */
+	const auto end = start + entity->v.velocity * latency;
+
+	/* As usual: don't collide with our owner. */
+	CBaseEntity *owner = nullptr;
+	if (entity->v.owner != nullptr)
+	{
+		owner = entity->v.owner->Get<CBaseEntity>();
+	}
+
+	TraceResult trace;
+	util::TraceLine(start, end, dont_ignore_monsters, owner, &trace);
+
+	if (!trace.fStartSolid && !trace.fAllSolid)
+	{
+		if (trace.flFraction != 1.0F)
+		{
+			/* Hit something! Move to the new position & then back a small bit. */
+			entity->SetOrigin(trace.vecEndPos - entity->v.velocity.Normalize());
+
+			/* Dispatch a touch against whatever was hit. */
+			if (trace.pHit != nullptr)
+			{
+				DispatchTouch(&entity->v, trace.pHit);
+			}
+		}
+		else
+		{
+			/* Didn't hit anything! Move to the new position. */
+			entity->SetOrigin(trace.vecEndPos);
+		}
+	}
 }

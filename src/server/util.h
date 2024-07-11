@@ -486,6 +486,10 @@ constexpr bool IsServer()
 gamemode_e GetGameMode();
 bool IsMultiplayer();
 bool IsDeathmatch();
+
+#ifdef GAME_DLL
+void LagCompensation(CBaseEntity* entity, const int& ping);
+#endif
 } /* namespace util */
 
 namespace tent
