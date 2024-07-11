@@ -103,12 +103,15 @@ void CMP5::SecondaryAttack()
 		rightOffset = -4;
 	}
 
-	CGrenade::ShootContact(m_pPlayer,
-		m_pPlayer->v.origin
-			+ m_pPlayer->v.view_ofs
-			+ gpGlobals->v_right * rightOffset
-			+ gpGlobals->v_forward * 16,
-		gpGlobals->v_forward * 800);
+	auto grenade =
+		CGrenade::ShootContact(m_pPlayer,
+			m_pPlayer->v.origin
+				+ m_pPlayer->v.view_ofs
+				+ gpGlobals->v_right * rightOffset
+				+ gpGlobals->v_forward * 16,
+			gpGlobals->v_forward * 800);
+
+	util::LagCompensation(grenade, m_pPlayer->m_netPing);
 #endif
 
 	m_pPlayer->PlaybackEvent(m_usSecondaryAttack);

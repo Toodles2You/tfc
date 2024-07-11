@@ -321,6 +321,10 @@ public:
 
 	CBasePlayerWeapon* GetNextBestWeapon(CBasePlayerWeapon* current);
 
+#ifdef GAME_DLL
+	int m_netPing;
+#endif
+
 protected:
 	CGameMovement* m_gameMovement = nullptr;
 	EHANDLE m_hLastAttacker[2];

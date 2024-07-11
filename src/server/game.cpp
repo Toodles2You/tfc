@@ -70,6 +70,9 @@ static bool SV_InitServer()
 void GameDLLInit()
 {
 	g_psv_cheats = engine::CVarGetPointer("sv_cheats");
+	sv_unlag = engine::CVarGetPointer("sv_unlag");
+	sv_maxunlag = engine::CVarGetPointer("sv_maxunlag");
+	sv_gravity = engine::CVarGetPointer("sv_gravity");
 	mp_consistency = engine::CVarGetPointer("mp_consistency");
 
 	if (!SV_InitServer())

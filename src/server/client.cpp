@@ -651,6 +651,9 @@ void PlayerPostThink(Entity* pEntity)
 
 	if (pPlayer)
 	{
+		int netLoss;
+		engine::GetPlayerStats(&pPlayer->v, &pPlayer->m_netPing, &netLoss);
+
 		pPlayer->PostThink();
 
 		pPlayer->DecrementTimers(msec);
@@ -1659,7 +1662,7 @@ AllowLagCompensation
 */
 int AllowLagCompensation()
 {
-	return 1;
+	return sv_unlag->value;
 }
 
 /*
