@@ -138,6 +138,8 @@ void CTFWeapon::PrimaryAttack()
 	m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
 #ifdef GAME_DLL
+	CBaseEntity* projectile = nullptr;
+
 	switch (info.iProjectileType)
 	{
 		case kProjRocket:
@@ -159,6 +161,7 @@ void CTFWeapon::PrimaryAttack()
 					+ gpGlobals->v_right * rightOffset
 					+ gpGlobals->v_up * -8;
 
+			projectile =
 			CRocket::CreateRocket(
 				gun,
 				gpGlobals->v_forward,
@@ -186,6 +189,7 @@ void CTFWeapon::PrimaryAttack()
 					+ gpGlobals->v_right * rightOffset
 					+ gpGlobals->v_up * -4;
 
+			projectile =
 			CNail::CreateNail(gun, gpGlobals->v_forward, info.iProjectileDamage, m_pPlayer);
 			break;
 		}
@@ -215,6 +219,7 @@ void CTFWeapon::PrimaryAttack()
 				launcher = dynamic_cast<CPipeBombLauncher*>(this);
 			}
 
+			projectile =
 			CPipeBomb::CreatePipeBomb(
 				gun,
 				gpGlobals->v_forward * 0.75F + gpGlobals->v_up * 0.25F,
@@ -244,6 +249,7 @@ void CTFWeapon::PrimaryAttack()
 					+ gpGlobals->v_right * rightOffset
 					+ gpGlobals->v_up * -8;
 
+			projectile =
 			CFlame::CreateFlame(gun, gpGlobals->v_forward, info.iProjectileDamage, m_pPlayer);
 			break;
 		}
@@ -266,6 +272,7 @@ void CTFWeapon::PrimaryAttack()
 					+ gpGlobals->v_right * rightOffset
 					+ gpGlobals->v_up * -8;
 
+			projectile =
 			CRocket::CreateIncendiaryRocket(
 				gun,
 				gpGlobals->v_forward,
@@ -285,6 +292,11 @@ void CTFWeapon::PrimaryAttack()
 				info.iProjectileRange);
 			break;
 		}
+	}
+
+	if (projectile != nullptr)
+	{
+		util::LagCompensation(projectile, m_pPlayer->m_netPing);
 	}
 #endif
 

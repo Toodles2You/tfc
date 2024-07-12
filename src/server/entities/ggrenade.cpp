@@ -399,6 +399,8 @@ void CPrimeGrenade::Throw(throw_e mode)
 		v.sequence = engine::RandomLong(3, 6);
 		v.framerate = 1.0;
 		ResetSequenceInfo();
+
+		util::LagCompensation(this, owner->m_netPing);
 	}
 
 	v.air_finished = gpGlobals->time;
