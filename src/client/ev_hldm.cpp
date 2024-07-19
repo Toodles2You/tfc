@@ -1616,6 +1616,7 @@ void EV_Init()
 	g_sModelIndexFlare = client::event::FindModelIndex("sprites/xflare1.spr");
 	g_sModelIndexFlame = client::event::FindModelIndex("sprites/fthrow.spr");
 	g_sModelIndexFire = client::event::FindModelIndex("sprites/playerflame.spr");
+	g_sModelIndexFireLoop = client::event::FindModelIndex("sprites/playerflameloop.spr");
 
 	auto model = client::hudGetModelByIndex(g_sModelIndexDebris);
 	if (model != nullptr)

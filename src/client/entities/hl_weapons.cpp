@@ -327,6 +327,7 @@ void HUD_ProcessPlayerState(struct entity_state_s* dst, const struct entity_stat
 	dst->movetype = src->movetype;
 	dst->sequence = src->sequence;
 	dst->animtime = src->animtime;
+	dst->eflags = src->eflags;
 
 	dst->solid = src->solid;
 

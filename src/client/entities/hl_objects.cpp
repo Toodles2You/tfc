@@ -31,6 +31,9 @@ extern TEMPENTITY* pLaserDot;
 
 extern Vector g_PunchAngle;
 
+extern short g_sModelIndexFire;
+extern short g_sModelIndexFireLoop;
+
 Vector g_CrosshairTarget;
 
 static void GetCrosshairTarget(pmtrace_t* tr, float distance)
@@ -99,6 +102,95 @@ static void UpdateLaserDot(const float time, const pmtrace_t *tr)
 	}
 }
 
+static void EV_PlayerFlameThink(TEMPENTITY* ent, float frametime, float currenttime)
+{
+	const auto& playerInfo = g_PlayerExtraInfo[ent->clientIndex];
+
+	/* Player is no longer burning. */
+	if (playerInfo.dead)
+	{
+		ent->die = currenttime;
+		return;
+	}
+
+	auto player = client::GetEntityByIndex(ent->clientIndex);
+
+	/* Player is no longer burning. */
+	if (player == nullptr || (player->curstate.eflags & EFLAG_BURNING) == 0)
+	{
+		ent->die = currenttime;
+		return;
+	}
+
+	/* Add a glowing effect to the player. */
+	if (player->curstate.renderfx != kRenderFxGlowShell)
+	{
+		player->curstate.renderfx = kRenderFxGlowShell;
+
+		/* Toodles TODO: These look a bit too much like power-ups. */
+		if (playerInfo.teamnumber == TEAM_BLUE)
+		{
+			player->curstate.rendercolor.r = 247;
+			player->curstate.rendercolor.g = 159;
+			player->curstate.rendercolor.b = 63;
+		}
+		else
+		{
+			player->curstate.rendercolor.r = 247;
+			player->curstate.rendercolor.g = 127;
+			player->curstate.rendercolor.b = 31;
+		}
+	}
+
+	ent->die = currenttime + 0.1F;
+
+	if (ent->entity.curstate.fuser1 <= currenttime)
+	{
+		/* Spawn a couple of extra flames. */
+		client::efx::FireField(
+			player->origin + Vector(0.0F, 0.0F, client::RandomFloat(-20.0F, 20.0F)),
+			16,
+			g_sModelIndexFire,
+			1,
+			TEFIRE_FLAG_SOMEFLOAT,
+			0.001F);
+
+		ent->entity.curstate.fuser1 = currenttime + 0.1F;
+	}
+}
+
+static void EV_PlayerFlameSpawn(const float time, cl_entity_t *entity)
+{
+	auto fire = client::efx::TempSprite(
+		entity->origin,
+		g_vecZero,
+		1.0F,
+		g_sModelIndexFireLoop,
+		kRenderTransAlpha,
+		kRenderFxNoDissipation,
+		1.0F,
+		0.2F,
+		FTENT_SPRANIMATE | FTENT_PERSIST | FTENT_PLYRATTACHMENT | FTENT_SPRANIMATELOOP | FTENT_CLIENTCUSTOM);
+
+	if (fire != nullptr)
+	{
+		fire->entity.baseline.scale = 4.0F;
+		fire->entity.curstate.fuser1 = time;
+		fire->clientIndex = entity->index;
+		fire->callback = EV_PlayerFlameThink;
+	}
+}
+
+static void UpdateEntityEffects(const float time, cl_entity_t *entity)
+{
+	/* This player has just started burning. Spawn a flame on them. */
+	if ((entity->curstate.eflags & EFLAG_BURNING) != 0
+	 && (entity->prevstate.eflags & EFLAG_BURNING) == 0)
+	{
+		EV_PlayerFlameSpawn(time, entity);
+	}
+}
+
 /*
 =====================
 Game_AddObjects
@@ -109,6 +201,7 @@ Add game specific, client-side objects here
 void Game_AddObjects()
 {
 	const auto time = client::GetClientTime();
+	const auto maxClients = client::GetMaxClients();
 	pmtrace_t trShort;
 	pmtrace_t trLong;
 
@@ -159,7 +252,7 @@ void Game_AddObjects()
 		if (gHUD.IsAlive() && trLong.fraction != 1.0f)
 		{
 			auto entIndex = client::event::IndexFromTrace(&trLong);
-			if (entIndex >= 1 && entIndex <= client::GetMaxClients())
+			if (entIndex >= 1 && entIndex <= maxClients)
 			{
 				target = client::GetEntityByIndex(entIndex);
 			}
@@ -169,4 +262,21 @@ void Game_AddObjects()
 	}
 
 	client::event::PopPMStates();
+
+	for (auto entIndex = 1; entIndex <= maxClients; entIndex++)
+	{
+		if (g_PlayerExtraInfo[entIndex].dead)
+		{
+			continue;
+		}
+
+		auto player = client::GetEntityByIndex(entIndex);
+
+		if (player == nullptr)
+		{
+			continue;
+		}
+
+		UpdateEntityEffects(time, player);
+	}
 }

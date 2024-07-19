@@ -1988,6 +1988,11 @@ void CBasePlayer::GetEntityState(entity_state_t& state)
 	{
 		state.health = 0.0F;
 	}
+
+	if (InState(State::Burning))
+	{
+		state.eflags |= EFLAG_BURNING;
+	}
 }
 
 

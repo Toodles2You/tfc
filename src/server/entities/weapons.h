@@ -236,6 +236,7 @@ inline short g_sModelIndexSaveMe;
 inline short g_sModelIndexFlare;
 inline short g_sModelIndexFlame;
 inline short g_sModelIndexFire;
+inline short g_sModelIndexFireLoop;
 
 inline unsigned short g_usConcBlast;
 
