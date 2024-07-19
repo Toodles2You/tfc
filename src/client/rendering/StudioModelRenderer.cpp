@@ -1534,6 +1534,30 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 
 		m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 
+		/* Burning glow effect. */
+		if ((m_pCurrentEntity->curstate.eflags & EFLAG_BURNING) != 0
+		 && m_pCurrentEntity->curstate.rendermode == kRenderNormal
+		 && m_pCurrentEntity->curstate.renderfx == kRenderFxNone)
+		{
+			const auto& info = g_PlayerExtraInfo[m_pCurrentEntity->index];
+
+			m_pCurrentEntity->curstate.renderfx = kRenderFxGlowShell;
+
+			/* Toodles TODO: These look a bit too much like power-ups. */
+			if (info.teamnumber == TEAM_BLUE)
+			{
+				m_pCurrentEntity->curstate.rendercolor.r = 247;
+				m_pCurrentEntity->curstate.rendercolor.g = 159;
+				m_pCurrentEntity->curstate.rendercolor.b = 63;
+			}
+			else
+			{
+				m_pCurrentEntity->curstate.rendercolor.r = 247;
+				m_pCurrentEntity->curstate.rendercolor.g = 127;
+				m_pCurrentEntity->curstate.rendercolor.b = 31;
+			}
+		}
+
 		// get remap colors
 		m_nTopColor = std::clamp(m_pPlayerInfo->topcolor, 0, 360);
 		m_nBottomColor = std::clamp(m_pPlayerInfo->bottomcolor, 0, 360);

@@ -122,26 +122,6 @@ static void EV_PlayerFlameThink(TEMPENTITY* ent, float frametime, float currentt
 		return;
 	}
 
-	/* Add a glowing effect to the player. */
-	if (player->curstate.renderfx != kRenderFxGlowShell)
-	{
-		player->curstate.renderfx = kRenderFxGlowShell;
-
-		/* Toodles TODO: These look a bit too much like power-ups. */
-		if (playerInfo.teamnumber == TEAM_BLUE)
-		{
-			player->curstate.rendercolor.r = 247;
-			player->curstate.rendercolor.g = 159;
-			player->curstate.rendercolor.b = 63;
-		}
-		else
-		{
-			player->curstate.rendercolor.r = 247;
-			player->curstate.rendercolor.g = 127;
-			player->curstate.rendercolor.b = 31;
-		}
-	}
-
 	ent->die = currenttime + 0.1F;
 
 	if (ent->entity.curstate.fuser1 <= currenttime)
