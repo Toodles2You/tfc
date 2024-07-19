@@ -1458,6 +1458,18 @@ void TeamFortressViewport::InputPlayerSpecial()
 			g_weaponselect = g_lastselect;
 		}
 	}
+	else if (g_iPlayerClass == PC_HVYWEAP)
+	{
+		/* Switch between the Assault Cannon & the previous weapon. */
+		if (g_CurrentWeaponId != WEAPON_ASSAULT_CANNON)
+		{
+			g_weaponselect = WEAPON_ASSAULT_CANNON;
+		}
+		else
+		{
+			g_weaponselect = g_lastselect;
+		}
+	}
 	else if (g_iPlayerClass == PC_PYRO)
 	{
 		/* Switch between the Flamethrower & the previous weapon. */
