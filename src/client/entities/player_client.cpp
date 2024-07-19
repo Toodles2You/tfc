@@ -183,66 +183,48 @@ void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* weapon)
 
 #ifdef HALFLIFE_GRENADES
 
-void CBasePlayer::PrimeGrenade(const int grenadeType)
+void CBasePlayer::PrimeGrenade(const int grenadeSlot)
 {
 	if (InState(State::Grenade))
 	{
 		return;
 	}
 
-	if (m_rgAmmo[AMMO_GRENADES1 + grenadeType] == 0)
+	if (m_rgAmmo[AMMO_GRENADES1 + grenadeSlot] == 0)
 	{
 		EmitSoundPredicted("common/wpn_denyselect.wav", CHAN_ITEM, VOL_NORM, ATTN_IDLE);
 		return;
 	}
 
-	m_rgAmmo[AMMO_GRENADES1 + grenadeType]--;
+	const auto &info = sTFClassInfo[PCNumber()];
+	const auto grenadeType = info.grenades[grenadeSlot];
 
-	m_iGrenadeExplodeTime = 0;
-
-	if (grenadeType == 0)
+	switch (grenadeType)
 	{
-		switch (PCNumber())
-		{
-			case PC_SCOUT:
-				break;
-			default:
-				break;
-		}
-	}
-	else
-	{
-		switch (PCNumber())
-		{
-		case PC_SCOUT:
+		case GRENADE_NORMAL:
+			break;
+		case GRENADE_CALTROP:
+			goto no_icon;
+		case GRENADE_CONCUSSION:
 			m_iGrenadeExplodeTime = 3800;
 			break;
-		case PC_SNIPER:
+		case GRENADE_NAIL:
+			break;
+		case GRENADE_MIRV:
+			break;
+		case GRENADE_NAPALM:
+			break;
+		case GRENADE_GAS:
 			return;
-		case PC_SOLDIER:
-			break;
-		case PC_DEMOMAN:
-			break;
-		case PC_MEDIC:
-			m_iGrenadeExplodeTime = 3800;
-			break;
-		case PC_HVYWEAP:
-			break;
-		case PC_PYRO:
-			break;
-		case PC_SPY:
-			return;
-		case PC_ENGINEER:
+		case GRENADE_EMP:
 			return;
 		default:
-		case PC_CIVILIAN:
 			return;
-		}
 	}
 
 	if (HUD_FirstTimePredicting())
 	{
-		const char* icon = GetGrenadeIconName(grenadeType);
+		auto icon = GetGrenadeIconName(grenadeType);
 
 		if (icon != nullptr)
 		{
@@ -251,6 +233,10 @@ void CBasePlayer::PrimeGrenade(const int grenadeType)
 	}
 
 no_icon:
+	m_rgAmmo[AMMO_GRENADES1 + grenadeSlot]--;
+
+	m_iGrenadeExplodeTime = 0;
+
 	EnterState(State::GrenadePrime);
 	EmitSoundPredicted("weapons/ax1.wav", CHAN_WEAPON);
 }

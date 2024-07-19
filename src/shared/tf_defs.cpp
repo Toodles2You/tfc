@@ -28,6 +28,10 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             WEAPON_AXE,
             -1,
         },
+        .grenades = {
+            GRENADE_CALTROP,
+            GRENADE_CONCUSSION,
+        },
         .maxAmmo = {
             50,
             200,
@@ -65,6 +69,10 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             WEAPON_AUTO_RIFLE,
             WEAPON_NAILGUN,
             WEAPON_AXE,
+        },
+        .grenades = {
+            GRENADE_NORMAL,
+            -1,
         },
         .maxAmmo = {
             75,
@@ -104,6 +112,10 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             WEAPON_TF_SHOTGUN,
             WEAPON_AXE,
         },
+        .grenades = {
+            GRENADE_NORMAL,
+            GRENADE_NAIL,
+        },
         .maxAmmo = {
             100,
             100,
@@ -141,6 +153,10 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             WEAPON_PIPEBOMB_LAUNCHER,
             WEAPON_TF_SHOTGUN,
             WEAPON_AXE,
+        },
+        .grenades = {
+            GRENADE_NORMAL,
+            GRENADE_MIRV,
         },
         .maxAmmo = {
             75,
@@ -180,6 +196,10 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             WEAPON_SUPER_SHOTGUN,
             WEAPON_TF_SHOTGUN,
         },
+        .grenades = {
+            GRENADE_NORMAL,
+            GRENADE_CONCUSSION,
+        },
         .maxAmmo = {
             75,
             150,
@@ -218,6 +238,10 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             WEAPON_TF_SHOTGUN,
             WEAPON_AXE,
         },
+        .grenades = {
+            GRENADE_NORMAL,
+            GRENADE_MIRV,
+        },
         .maxAmmo = {
             200,
             200,
@@ -255,6 +279,10 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             WEAPON_INCENDIARY,
             WEAPON_TF_SHOTGUN,
             WEAPON_AXE,
+        },
+        .grenades = {
+            GRENADE_NORMAL,
+            GRENADE_NAPALM,
         },
         .maxAmmo = {
             40,
@@ -296,6 +324,10 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             // WEAPON_TRANQ,
             -1,
         },
+        .grenades = {
+            GRENADE_NORMAL,
+            GRENADE_GAS,
+        },
         .maxAmmo = {
             40,
             100,
@@ -335,6 +367,10 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             // WEAPON_LASER,
             -1,
         },
+        .grenades = {
+            GRENADE_NORMAL,
+            GRENADE_EMP,
+        },
         .maxAmmo = {
             50,
             50,
@@ -372,6 +408,10 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .weapons = {
             WEAPON_AXE,
             -1,
+            -1,
+            -1,
+        },
+        .grenades = {
             -1,
             -1,
         },

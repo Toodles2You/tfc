@@ -932,39 +932,25 @@ void CBasePlayer::ClearEffects()
 
 const char* CBasePlayer::GetGrenadeIconName(const int grenadeType)
 {
-	if (grenadeType == 0)
+	switch (grenadeType)
 	{
-		switch (PCNumber())
-		{
-			case PC_SCOUT:
-				return "d_caltrop";
-			default:
-				return "grenade";
-		}
-	}
-
-	switch (PCNumber())
-	{
-		case PC_SCOUT:
+		case GRENADE_NORMAL:
+			return "grenade";
+		case GRENADE_CALTROP:
+			return "d_caltrop";
+		case GRENADE_CONCUSSION:
 			return "d_concussiongrenade";
-		case PC_SNIPER:
-			return nullptr;
-		case PC_SOLDIER:
+		case GRENADE_NAIL:
 			return "d_nailgrenade";
-		case PC_DEMOMAN:
+		case GRENADE_MIRV:
 			return "d_mirvgrenade";
-		case PC_MEDIC:
-			return "d_concussiongrenade";
-		case PC_HVYWEAP:
-			return "d_mirvgrenade";
-		case PC_PYRO:
+		case GRENADE_NAPALM:
 			return "d_napalmgrenade";
-		case PC_SPY:
-			return nullptr;
-		case PC_ENGINEER:
-			return nullptr;
+		case GRENADE_GAS:
+			return "d_gasgrenade";
+		case GRENADE_EMP:
+			return "d_empgrenade";
 		default:
-		case PC_CIVILIAN:
 			return nullptr;
 	}
 }

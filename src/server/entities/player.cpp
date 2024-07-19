@@ -1177,9 +1177,14 @@ bool CBasePlayer::Spawn()
 
 	if (IsNetClient())
 	{
+		const auto &info = sTFClassInfo[PCNumber()];
+
 		for (auto i = 0; i < 2; i++)
 		{
-			const char *icon = GetGrenadeIconName(i);
+			const auto grenadeType = info.grenades[i];
+
+			const char *icon = GetGrenadeIconName(grenadeType);
+
 			if (icon == nullptr)
 			{
 				icon = "grenade";
@@ -1988,81 +1993,67 @@ void CBasePlayer::GetEntityState(entity_state_t& state)
 
 #ifdef HALFLIFE_GRENADES
 
-void CBasePlayer::PrimeGrenade(const int grenadeType)
+void CBasePlayer::PrimeGrenade(const int grenadeSlot)
 {
 	if (InState(State::Grenade))
 	{
 		return;
 	}
 
-	if (m_rgAmmo[AMMO_GRENADES1 + grenadeType] == 0)
+	if (m_rgAmmo[AMMO_GRENADES1 + grenadeSlot] == 0)
 	{
 		return;
 	}
 
-	m_rgAmmo[AMMO_GRENADES1 + grenadeType]--;
+	const auto &info = sTFClassInfo[PCNumber()];
+	const auto grenadeType = info.grenades[grenadeSlot];
 
-	m_iGrenadeExplodeTime = 0;
-
-	if (grenadeType == 0)
+	switch (grenadeType)
 	{
-		switch (PCNumber())
-		{
-			case PC_SCOUT:
-				m_hGrenade = CCaltropCanister::CaltropCanister(this);
-				break;
-			default:
-				m_hGrenade = CPrimeGrenade::PrimeGrenade(this);
-				break;
-		}
-	}
-	else
-	{
-		switch (PCNumber())
-		{
-		case PC_SCOUT:
+		case GRENADE_NORMAL:
+			m_hGrenade = CPrimeGrenade::PrimeGrenade(this);
+			break;
+		case GRENADE_CALTROP:
+			m_hGrenade = CCaltropCanister::CaltropCanister(this);
+			goto no_icon;
+		case GRENADE_CONCUSSION:
 			m_hGrenade = CConcussionGrenade::ConcussionGrenade(this);
 			m_iGrenadeExplodeTime = 3800;
 			break;
-		case PC_SNIPER:
-			return;
-		case PC_SOLDIER:
+		case GRENADE_NAIL:
 			m_hGrenade = CNailGrenade::NailGrenade(this);
 			break;
-		case PC_DEMOMAN:
+		case GRENADE_MIRV:
 			m_hGrenade = CMirv::Mirv(this);
 			break;
-		case PC_MEDIC:
-			m_hGrenade = CConcussionGrenade::ConcussionGrenade(this);
-			m_iGrenadeExplodeTime = 3800;
-			break;
-		case PC_HVYWEAP:
-			m_hGrenade = CMirv::Mirv(this);
-			break;
-		case PC_PYRO:
+		case GRENADE_NAPALM:
 			m_hGrenade = CNapalmGrenade::NapalmGrenade(this);
 			break;
-		case PC_SPY:
+		case GRENADE_GAS:
 			return;
-		case PC_ENGINEER:
+		case GRENADE_EMP:
 			return;
 		default:
-		case PC_CIVILIAN:
 			return;
-		}
 	}
 
-	const char* icon = GetGrenadeIconName(grenadeType);
-
-	if (icon != nullptr)
 	{
-		MessageBegin(MSG_ONE, gmsgStatusIcon, this);
-		WriteByte(2);
-		WriteString(icon);
-		MessageEnd();
+		auto icon = GetGrenadeIconName(grenadeType);
+
+		if (icon != nullptr)
+		{
+			MessageBegin(MSG_ONE, gmsgStatusIcon, this);
+			WriteByte(2);
+			WriteString(icon);
+			MessageEnd();
+		}
 	}
 
 no_icon:
+	m_rgAmmo[AMMO_GRENADES1 + grenadeSlot]--;
+
+	m_iGrenadeExplodeTime = 0;
+
 	EnterState(State::GrenadePrime);
 	EmitSoundPredicted("weapons/ax1.wav", CHAN_WEAPON);
 }

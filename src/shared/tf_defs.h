@@ -32,6 +32,7 @@ struct PCInfo
 	int armorClasses;	  // Armor Classes allowed for this class
 	int initArmorClasses; // Armorclass worn when respawned
 	int weapons[4];
+	int grenades[2];
 	int maxAmmo[AMMO_TYPES];
 	int initAmmo[AMMO_TYPES];
 	const char* model;

@@ -401,7 +401,7 @@ protected:
 	EHANDLE m_hLastAttacker[2];
 
 #ifdef HALFLIFE_GRENADES
-	void PrimeGrenade(const int grenadeType);
+	void PrimeGrenade(const int grenadeSlot);
 	void ThrowGrenade();
 	const char* GetGrenadeIconName(const int grenadeType);
 #endif
