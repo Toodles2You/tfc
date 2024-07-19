@@ -415,7 +415,11 @@ void CBasePlayer::DecrementTimers(const int msec)
 
 	if (m_iGrenadeExplodeTime != 0 && m_iGrenadeExplodeTime <= msec)
 	{
-		if (PCNumber() == PC_SCOUT || PCNumber() == PC_MEDIC)
+		const auto &info = sTFClassInfo[PCNumber()];
+		const auto grenadeType = info.grenades[1];
+
+		/* Toodles TODO: This is still a bit of a hack. */
+		if (grenadeType == GRENADE_CONCUSSION)
 		{
 #ifdef GAME_DLL
 			ConcussionJump(v.velocity);

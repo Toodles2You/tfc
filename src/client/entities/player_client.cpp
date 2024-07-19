@@ -196,6 +196,8 @@ void CBasePlayer::PrimeGrenade(const int grenadeSlot)
 		return;
 	}
 
+	m_iGrenadeExplodeTime = 0;
+
 	const auto &info = sTFClassInfo[PCNumber()];
 	const auto grenadeType = info.grenades[grenadeSlot];
 
@@ -234,8 +236,6 @@ void CBasePlayer::PrimeGrenade(const int grenadeSlot)
 
 no_icon:
 	m_rgAmmo[AMMO_GRENADES1 + grenadeSlot]--;
-
-	m_iGrenadeExplodeTime = 0;
 
 	EnterState(State::GrenadePrime);
 	EmitSoundPredicted("weapons/ax1.wav", CHAN_WEAPON);
