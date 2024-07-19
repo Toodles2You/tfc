@@ -8,60 +8,44 @@
 
 //----------------------------------------------------------------------------
 
-Skin barney
-    Model = barney
+Skin scout
+    Model = scout
 End
 
-Skin bbbbarney
-    Model = bbbbarney
+Skin sniper
+    Model = sniper
 End
 
-Skin gina
-    Model = gina
+Skin soldier
+    Model = soldier
 End
 
-Skin gman
-    Model = gman
+Skin demoman
+    Model = demo
 End
 
-Skin gordon
-    Model = gordon
+Skin medic
+    Model = medic
 End
 
-Skin helmet
-    Model = helmet
+Skin hwguy
+    Model = hvyweapon
 End
 
-Skin hgrunt
-    Model = hgrunt
+Skin pyro
+    Model = pyro
 End
 
-Skin ivan
-    Model = ivan
+Skin spy
+    Model = spy
 End
 
-Skin recon
-    Model = recon
+Skin engineer
+    Model = engineer
 End
 
-Skin robo
-    Model = robo
-End
-
-Skin scientist
-    Model = scientist
-End
-
-Skin skeleton
-    Model = skeleton
-End
-
-Skin tmcm
-    Model = tmcm
-End
-
-Skin zombie
-    Model = zombie
+Skin civilian
+    Model = civilian
 End
 
 
@@ -248,59 +232,74 @@ End
 // These are the individual bot profiles, which inherit first from 
 // Default and then the specified Template(s), in order
 //
-
-Normal "Barney Caljoun"
-    Skin = barney
-End
-
-Normal "Freeze!"
-    Skin = bbbbarney
-End
-
-Normal "Gina Cross"
-    Skin = gina
-End
-
-Normal "G-Man"
-    Skin = gman
-End
-
-Normal "Gordon Freeman"
-    Skin = gordon
-End
-
-Normal "Xen Survey Team"
-    Skin = helmet
-End
-
-Normal "Adrian Shephard"
-    Skin = hgrunt
-End
-
-Normal "Ivan The Space Biker"
-    Skin = ivan
-End
-
-Normal "HECU Recon"
-    Skin = recon
-End
-
-Normal "HECU Automaton"
-    Skin = robo
-End
-
-Normal "Walter Bennett"
-    Skin = scientist
-End
-
-Normal "*The Skeleton Appears*"
-    Skin = skeleton
-End
-
-Normal "Too Much Coffee Man"
-    Skin = tmcm
-End
-
-Normal "Headcrab Zombie"
-    Skin = zombie
-End
+Normal "Barney Caljoun" End
+Normal "Freeze!" End
+Normal "Gina Cross" End
+Normal "G-Man" End
+Normal "Gordon Freeman" End
+Normal "Xen Survey Team" End
+Normal "Adrian Shephard" End
+Normal "Ivan The Space Biker" End
+Normal "HECU Recon" End
+Normal "HECU Automaton" End
+Normal "Walter Bennett" End
+Normal "*The Skeleton Appears*" End
+Normal "Too Much Coffee Man" End
+Normal "Headcrab Zombie" End
+Normal "Flagrunner" End
+Normal "Bunnyhopper" End
+Normal "Bloody Camper" End
+Normal "Aimbot" End
+Normal "Rocket Man" End
+Normal "Dwight T. Barnes" End
+Normal "You Got Nothin'" End
+Normal "Demonstration Man" End
+Normal "Kaboom!" End
+Normal "Tavish Finnegan DeGroot" End
+Normal "It's yours, my friend!" End
+Normal "MEDIC!" End
+Normal "Excuse me?" End
+Normal "(No Medical License)" End
+Normal "Angry Mosquito" End
+Normal "Big Gun Man" End
+Normal "Biggs" End
+Normal "Wedge" End
+Normal "Brain Damage" End
+Normal "bot" End
+Normal "Alyx Vance" End
+Normal "Russel" End
+Normal "The Universal Union" End
+Normal "Better sides of beef" End
+Normal "Terrorist" End
+Normal "Counter-Terrorist" End
+Normal "Where's the bomb?" End
+Normal "Bathroom" End
+Normal "Bill" End
+Normal "Francis" End
+Normal "Coach" End
+Normal "TANK!" End
+Normal "Ricochet World Champion" End
+Normal "Rare High Moment" End
+Normal "Worth The Wait" End
+Normal "Foxtrot Uniform" End
+Normal "Rosenberg" End
+Normal "Mitchell Shephard" End
+Normal "Azure Sheep" End
+Normal "Poke646" End
+Normal "Civilian" End
+Normal "Groovy~" End
+Normal "Glorified toaster with legs" End
+Normal "Maxwell" End
+Normal "h00rt" End
+Normal "Bunny" End
+Normal "Robin" End
+Normal "Caughley The Tool" End
+Normal "John" End
+Normal "Free Beer" End
+Normal "Open your mind" End
+Normal "Aperture Science Prototype" End
+Normal "Slipgate Ranger" End
+Normal "QUAD DAMAGE" End
+Normal "Dingus" End
+Normal "Player" End
+Normal "Vox" End
