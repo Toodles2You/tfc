@@ -946,8 +946,8 @@ bool CNapalmGrenade::Spawn()
 		return false;
 	}
 
-	v.dmg = 20;
-	v.dmg_save = 20;
+	v.dmg = 10;
+	v.dmg_save = 10;
 	v.dmg_take = 180;
 
 	return true;
@@ -1026,7 +1026,7 @@ void CNapalmGrenade::NapalmThink()
 	/* Toodles TODO: Make this a looping sound. */
 	EmitSound("ambience/fire1.wav", CHAN_WEAPON, VOL_NORM, ATTN_NORM);
 
-	v.nextthink = gpGlobals->time + 1.0F;
+	v.nextthink = gpGlobals->time + 0.5F;
 }
 
 

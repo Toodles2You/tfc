@@ -176,7 +176,7 @@ void tent::FireField(const Vector& origin)
 	WriteCoord(origin + Vector(0.0F, 0.0F, 24.0F));
 	WriteShort(100);
 	WriteShort(g_sModelIndexFire);
-	WriteByte(12);
+	WriteByte(6);
 	WriteByte(TEFIRE_FLAG_SOMEFLOAT | TEFIRE_FLAG_PLANAR);
 	WriteByte(8);
 	MessageEnd();

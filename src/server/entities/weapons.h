@@ -697,7 +697,7 @@ public:
 	static CNapalmGrenade* NapalmGrenade(CBaseEntity* owner);
 
 private:
-	static constexpr int kNumBursts = 8;
+	static constexpr int kNumBursts = 16;
 };
 
 class CRocket : public CGrenade
