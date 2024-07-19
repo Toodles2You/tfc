@@ -136,7 +136,7 @@ constexpr const char* g_szWeaponNames[WEAPON_TYPES] =
 	// "tf_weapon_tranq",
 	// "tf_weapon_railgun",
 	"tf_weapon_pl",
-	// "tf_weapon_knife",
+	"tf_weapon_knife",
 };
 #endif
 
@@ -501,6 +501,20 @@ private:
 	static constexpr int kMaxPipeBombs = 8;
 
 	std::queue<EHANDLE> m_pPipeBombs;
+#endif
+};
+
+class CKnife : public CTFMelee
+{
+public:
+	CKnife(Entity* containingEntity) : CTFMelee(containingEntity) {}
+
+	int GetID() const override { return WEAPON_KNIFE; }
+	void GetWeaponInfo(WeaponInfo& i) override;
+
+#ifdef GAME_DLL
+protected:
+	int HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& tr) override;
 #endif
 };
 

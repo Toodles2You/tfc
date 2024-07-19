@@ -309,3 +309,124 @@ void CAxe::GetWeaponInfo(WeaponInfo& i)
 	i.bShouldIdle = false;
 }
 
+
+LINK_ENTITY_TO_CLASS(tf_weapon_knife, CKnife);
+
+void CKnife::GetWeaponInfo(WeaponInfo& i)
+{
+	i.pszName = "tf_weapon_knife";
+	i.iAmmo1 = -1;
+	i.iAmmo2 = -1;
+	i.iMaxClip = -1;
+	i.iSlot = 0;
+	i.iPosition = 2;
+	i.iFlags = 0;
+	i.iWeight = 0;
+
+	i.pszWorld = "models/w_crowbar.mdl";
+	i.pszView = "models/v_tfc_knife.mdl";
+	i.pszPlayer = "models/p_knife.mdl";
+	i.pszAnimExt = "knife";
+
+	i.iAnims[kWeaponAnimIdle] = 0;
+	i.iAnims[kWeaponAnimDeploy] = 4;
+	i.iAnims[kWeaponAnimHolster] = 5;
+	i.iAnims[kWeaponAnimAttack] = -1;
+	i.iAnims[kWeaponAnimReload] = 2;
+	i.iAnims[kWeaponAnimStartReload] = -1;
+	i.iAnims[kWeaponAnimEndReload] = -1;
+
+	i.iShots = 1;
+
+	i.iAttackTime = 400;
+	i.iReloadTime = 0;
+
+	i.iProjectileType = kProjKinetic;
+	i.iProjectileDamage = 20;
+	i.iProjectileChargeDamage = 40;
+	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
+	i.iProjectileCount = 1;
+
+	i.pszEvent = "events/wpn/tf_knife.sc";
+	i.pszAttackSound = "weapons/cbar_hitbod1.wav";
+	i.pszAlternateSound = "weapons/cbar_hit1.wav";
+	i.pszReloadSound = "weapons/cbar_miss1.wav";
+	i.flPunchAngle = 0.0F;
+	i.iSibling = -1;
+	i.bShouldIdle = false;
+}
+
+
+#ifdef GAME_DLL
+
+int CKnife::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& tr)
+{
+	const auto info = GetInfo();
+	int result = kResultHitWorld;
+
+	if (hit == nullptr || hit->v.takedamage == DAMAGE_NO)
+	{
+		return result;
+	}
+
+	if (!hit->IsPlayer())
+	{
+		return CTFMelee::HitEntity(hit, dir, tr);
+	}
+
+	auto damage = info.iProjectileChargeDamage;
+	auto damageType = DMG_CLUB;
+
+	if (g_pGameRules->FPlayerCanTakeDamage(dynamic_cast<CBasePlayer*>(hit), m_pPlayer))
+	{
+		const auto playerYaw = Vector(0.0F, m_pPlayer->v.v_angle.y, 0.0F);
+		Vector playerDir;
+		AngleVectors(playerYaw, &playerDir, nullptr, nullptr);
+
+		const auto hitYaw = Vector(0.0F, hit->v.v_angle.y, 0.0F);
+		Vector hitDir;
+		AngleVectors(hitYaw, nullptr, &hitDir, nullptr);
+
+		const auto yawCross = hitDir.x * playerDir.y - playerDir.x * hitDir.y;
+
+		if (yawCross > 0.0F)
+		{
+			damage = hit->v.health * (1.0F + 1.0F / 3.0F); /* Toodles: Was 120. */
+			damageType |= DMG_IGNOREARMOR;
+#ifndef NDEBUG
+			engine::AlertMessage(at_console, "BACKSTAB\n");
+#endif
+		}
+	}
+
+	hit->TraceAttack(
+		m_pPlayer,
+		damage,
+		dir,
+		tr.iHitgroup,
+		damageType);
+
+	hit->ApplyMultiDamage(m_pPlayer, m_pPlayer);
+
+	if (hit->IsClient())
+	{
+		if (g_pGameRules->FPlayerCanTakeDamage(dynamic_cast<CBasePlayer*>(hit), m_pPlayer))
+		{
+			MessageBegin(MSG_PVS, gmsgBlood, tr.vecEndPos);
+			WriteFloat(dir.x);
+			WriteFloat(dir.y);
+			WriteFloat(dir.z);
+			WriteByte(0);
+			WriteByte((damageType & DMG_IGNOREARMOR) != 0 ? 1 : 0);
+			WriteCoord(tr.vecEndPos);
+			MessageEnd();
+		}
+
+		result = kResultHit;
+	}
+
+	return result;
+}
+
+#endif
+
