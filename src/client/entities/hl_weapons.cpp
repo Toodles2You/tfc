@@ -116,7 +116,10 @@ static void HUD_PrepEntity(CBaseEntity* entity, CBasePlayer* owner)
 		owner->m_rgpPlayerWeapons[weapon->GetID()] = weapon;
 		owner->m_lpPlayerWeapons.push_front(weapon);
 
-		client::HookEvent(info.pszEvent, CTFWeapon::EV_PrimaryAttack);
+		if (info.pszEvent != nullptr && info.pszEvent[0] != '\0')
+		{
+			client::HookEvent(info.pszEvent, CTFWeapon::EV_PrimaryAttack);
+		}
 	}
 	else
 	{

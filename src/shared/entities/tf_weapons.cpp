@@ -39,7 +39,7 @@ void CTFWeapon::Precache()
 	}
 #endif
 
-	if (info.pszEvent != nullptr)
+	if (info.pszEvent != nullptr && info.pszEvent[0] != '\0')
 	{
 		m_usPrimaryAttack = engine::PrecacheEvent(1, info.pszEvent);
 	}
