@@ -134,7 +134,7 @@ void CBasePlayer::Pain(const int damageType)
 		return;
 	}
 
-	EmitSound(sample, CHAN_VOICE);
+	EmitSound(sample, CHAN_VOICE, VOL_NORM, ATTN_NORM, GetVoicePitch());
 }
 
 #ifdef HALFLIFE_TRAINCONTROL
@@ -192,7 +192,7 @@ void CBasePlayer::DeathSound(const int damageType)
 		return;
 	}
 
-	EmitSound(sample, CHAN_VOICE);
+	EmitSound(sample, CHAN_VOICE, VOL_NORM, ATTN_NORM, GetVoicePitch());
 }
 
 // override takehealth
@@ -2226,7 +2226,7 @@ void CBasePlayer::SaveMe()
 		sample = "speech/saveme3.wav";
 	}
 
-	EmitSound(sample, CHAN_VOICE);
+	EmitSound(sample, CHAN_VOICE, VOL_NORM, ATTN_NORM, GetVoicePitch());
 
 	int index = v.GetIndex();
 	

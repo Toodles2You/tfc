@@ -339,6 +339,8 @@ public:
 
 	CBasePlayerWeapon* GetNextBestWeapon(CBasePlayerWeapon* current);
 
+	int GetVoicePitch();
+
 #ifdef GAME_DLL
 	int m_netPing;
 #endif

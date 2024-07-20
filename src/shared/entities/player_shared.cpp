@@ -958,3 +958,14 @@ const char* CBasePlayer::GetGrenadeIconName(const int grenadeType)
 			return nullptr;
 	}
 }
+
+
+int CBasePlayer::GetVoicePitch()
+{
+	if (InState(State::Tranquilized))
+	{
+		return PITCH_LOW;
+	}
+
+	return PITCH_NORM;
+}
