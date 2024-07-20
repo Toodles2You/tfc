@@ -53,6 +53,7 @@ inline int gmsgSecAmmoIcon = 0;
 inline int gmsgHitFeedback = 0;
 inline int gmsgBlood = 0;
 inline int gmsgPredictedSound = 0;
+inline int gmsgShooter = 0;
 inline int gmsgLaserDot = 0;
 
 inline int gmsgStatusIcon = 0;

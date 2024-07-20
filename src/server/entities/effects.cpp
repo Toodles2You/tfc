@@ -20,6 +20,7 @@
 #include "weapons.h"
 #include "func_break.h"
 #include "shake.h"
+#include "UserMessages.h"
 
 #define SF_GIBSHOOTER_REPEATABLE 1 // allows a gibshooter to be refired
 
@@ -1302,6 +1303,329 @@ void CSprite::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useTyp
 			TurnOn();
 		}
 	}
+}
+
+
+class CGibShooter : public CBaseEntity
+{
+public:
+	CGibShooter(Entity* containingEntity) : CBaseEntity(containingEntity) {}
+
+	DECLARE_SAVERESTORE()
+
+	void Precache() override;
+	bool Spawn() override;
+	bool KeyValue(KeyValueData* pkvd) override;
+	void EXPORT ShootThink();
+	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
+
+	virtual void WriteGib();
+
+	int m_iGibs;
+	int m_iGibCapacity;
+	Materials m_GibMaterial;
+	int m_iGibModelIndex;
+	float m_flGibVelocity;
+	float m_flVariance;
+	float m_flGibLife;
+};
+
+#ifdef HALFLIFE_SAVERESTORE
+IMPLEMENT_SAVERESTORE(CGibShooter)
+	DEFINE_FIELD(CGibShooter, m_iGibs, FIELD_INTEGER),
+	DEFINE_FIELD(CGibShooter, m_iGibCapacity, FIELD_INTEGER),
+	DEFINE_FIELD(CGibShooter, m_GibMaterial, FIELD_INTEGER),
+	DEFINE_FIELD(CGibShooter, m_iGibModelIndex, FIELD_INTEGER),
+	DEFINE_FIELD(CGibShooter, m_flGibVelocity, FIELD_FLOAT),
+	DEFINE_FIELD(CGibShooter, m_flVariance, FIELD_FLOAT),
+	DEFINE_FIELD(CGibShooter, m_flGibLife, FIELD_FLOAT),
+END_SAVERESTORE(CGibShooter, CBaseEntity)
+#endif
+
+LINK_ENTITY_TO_CLASS(gibshooter, CGibShooter);
+
+
+bool CGibShooter::KeyValue(KeyValueData* pkvd)
+{
+	if (streq(pkvd->szKeyName, "m_iGibs"))
+	{
+		m_iGibs = m_iGibCapacity = atoi(pkvd->szValue);
+		return true;
+	}
+	else if (streq(pkvd->szKeyName, "m_flVelocity"))
+	{
+		m_flGibVelocity = atof(pkvd->szValue);
+		return true;
+	}
+	else if (streq(pkvd->szKeyName, "m_flVariance"))
+	{
+		m_flVariance = atof(pkvd->szValue);
+		return true;
+	}
+	else if (streq(pkvd->szKeyName, "m_flGibLife"))
+	{
+		m_flGibLife = atof(pkvd->szValue);
+		return true;
+	}
+
+	return CBaseEntity::KeyValue(pkvd);
+}
+
+
+void CGibShooter::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+{
+	SetThink(&CGibShooter::ShootThink);
+	v.nextthink = gpGlobals->time;
+}
+
+
+void CGibShooter::Precache()
+{
+	m_iGibModelIndex = engine::PrecacheModel("models/hgibs.mdl");
+}
+
+
+bool CGibShooter::Spawn()
+{
+	Precache();
+
+	v.solid = SOLID_NOT;
+	v.effects = EF_NODRAW;
+
+	if (m_flDelay == 0.0F)
+	{
+		m_flDelay = 0.1F;
+	}
+
+	if (m_flGibLife == 0.0F)
+	{
+		m_flGibLife = 25.0F;
+	}
+
+	v.movedir = util::SetMovedir(v.angles);
+
+	return true;
+}
+
+
+void CGibShooter::WriteGib()
+{
+	WriteShort(0);
+}
+
+
+void CGibShooter::ShootThink()
+{
+	v.nextthink = gpGlobals->time + m_flDelay;
+
+	MessageBegin(MSG_PVS, gmsgShooter, v.origin);
+	WriteCoord(v.origin);
+	WriteFloat(v.movedir.x);
+	WriteFloat(v.movedir.y);
+	WriteFloat(v.movedir.z);
+	WriteFloat(m_flGibVelocity);
+	WriteFloat(m_flVariance);
+	WriteFloat(m_flGibLife);
+	WriteGib();
+	MessageEnd();
+
+	if (--m_iGibs <= 0)
+	{
+		if ((v.spawnflags & SF_GIBSHOOTER_REPEATABLE) != 0)
+		{
+			m_iGibs = m_iGibCapacity;
+			ClearThink();
+		}
+		else
+		{
+			SetThink(&CGibShooter::Remove);
+			v.nextthink = gpGlobals->time;
+		}
+	}
+}
+
+
+class CEnvShooter : public CGibShooter
+{
+public:
+	CEnvShooter(Entity* containingEntity) : CGibShooter(containingEntity) {}
+
+	void Precache() override;
+	bool KeyValue(KeyValueData* pkvd) override;
+
+	void WriteGib() override;
+};
+
+LINK_ENTITY_TO_CLASS(env_shooter, CEnvShooter);
+
+
+bool CEnvShooter::KeyValue(KeyValueData* pkvd)
+{
+	if (streq(pkvd->szKeyName, "shootmodel"))
+	{
+		v.model = engine::AllocString(pkvd->szValue);
+		return true;
+	}
+	else if (streq(pkvd->szKeyName, "shootsounds"))
+	{
+		switch (atoi(pkvd->szValue))
+		{
+		case 0: m_GibMaterial = matGlass; break;
+		case 1: m_GibMaterial = matWood; break;
+		case 2: m_GibMaterial = matMetal; break;
+		case 3: m_GibMaterial = matFlesh; break;
+		case 4: m_GibMaterial = matRocks; break;
+		default:
+		case -1: m_GibMaterial = matNone; break;
+		}
+		return true;
+	}
+
+	return CGibShooter::KeyValue(pkvd);
+}
+
+
+void CEnvShooter::Precache()
+{
+	m_iGibModelIndex = engine::PrecacheModel(STRING(v.model));
+
+	CBreakable::MaterialSoundPrecache(m_GibMaterial);
+}
+
+
+void CEnvShooter::WriteGib()
+{
+	WriteShort(m_iGibModelIndex);
+	WriteByte(m_GibMaterial);
+	WriteByte(v.rendermode);
+	WriteByte(v.renderamt);
+	WriteByte(v.rendercolor.x);
+	WriteByte(v.rendercolor.y);
+	WriteByte(v.rendercolor.z);
+	WriteByte(v.renderfx);
+	WriteByte(v.scale * 255);
+	WriteByte(v.skin);
+}
+
+
+// Blood effects
+class CBlood : public CPointEntity
+{
+public:
+	CBlood(Entity* containingEntity) : CPointEntity(containingEntity) {}
+
+	bool Spawn() override;
+	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
+	bool KeyValue(KeyValueData* pkvd) override;
+
+	inline int Color() { return v.impulse; }
+	inline float BloodAmount() { return v.dmg; }
+
+	inline void SetColor(int color) { v.impulse = color; }
+	inline void SetBloodAmount(float amount) { v.dmg = amount; }
+
+	Vector Direction();
+	Vector BloodPosition(CBaseEntity* pActivator);
+};
+
+LINK_ENTITY_TO_CLASS(env_blood, CBlood);
+
+
+#define SF_BLOOD_RANDOM 0x0001
+#define SF_BLOOD_STREAM 0x0002
+#define SF_BLOOD_PLAYER 0x0004
+#define SF_BLOOD_DECAL 0x0008
+
+bool CBlood::Spawn()
+{
+	v.solid = SOLID_NOT;
+	v.movetype = MOVETYPE_NONE;
+	v.effects = 0;
+	v.frame = 0;
+	v.movedir = util::SetMovedir(v.angles);
+	return true;
+}
+
+
+bool CBlood::KeyValue(KeyValueData* pkvd)
+{
+	if (streq(pkvd->szKeyName, "color"))
+	{
+		switch (atoi(pkvd->szValue))
+		{
+		case 1: SetColor(BLOOD_COLOR_YELLOW); break;
+		default: SetColor(BLOOD_COLOR_RED); break;
+		}
+		return true;
+	}
+	else if (streq(pkvd->szKeyName, "amount"))
+	{
+		SetBloodAmount(atof(pkvd->szValue));
+		return true;
+	}
+
+	return CPointEntity::KeyValue(pkvd);
+}
+
+
+Vector CBlood::Direction()
+{
+	if ((v.spawnflags & SF_BLOOD_RANDOM) != 0)
+	{
+		return Vector(
+			engine::RandomFloat(-1, 1),
+			engine::RandomFloat(-1, 1),
+			engine::RandomFloat(0, 1)
+		);
+	}
+
+	return v.movedir;
+}
+
+
+Vector CBlood::BloodPosition(CBaseEntity* pActivator)
+{
+	if ((v.spawnflags & SF_BLOOD_PLAYER) != 0)
+	{
+		CBaseEntity* player;
+
+		if (pActivator != nullptr && pActivator->IsPlayer())
+		{
+			player = pActivator;
+		}
+		else
+		{
+			player = util::GetLocalPlayer();
+		}
+
+		if (player != nullptr)
+		{
+			return player->v.origin + player->v.view_ofs
+				+ Vector(
+					engine::RandomFloat(-10, 10),
+					engine::RandomFloat(-10, 10),
+					engine::RandomFloat(-10, 10));
+		}
+	}
+
+	return v.origin;
+}
+
+
+void CBlood::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+{
+	/* This is supposed to have amount & color variables. Alas, I do not care! */
+	auto origin = BloodPosition(pActivator);
+	auto dir = Direction();
+
+	MessageBegin(MSG_PVS, gmsgBlood, origin);
+	WriteFloat(dir.x);
+	WriteFloat(dir.y);
+	WriteFloat(dir.z);
+	WriteByte(0);
+	WriteByte((v.spawnflags & SF_BLOOD_STREAM) != 0);
+	WriteCoord(origin);
+	MessageEnd();
 }
 
 
