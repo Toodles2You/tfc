@@ -81,6 +81,10 @@ void CHudStatusBar::Draw(const float time)
 	int x = std::max(0, std::max(2, ((int)gHUD.GetWidth() - textWidth)) >> 1);
 	int y = (gHUD.GetHeight() >> 1) + textHeight * 4;
 
+	int w, h;
+	gHUD.GetHudStringSize(m_szStatusBar, w, h);
+	gHUD.DrawHudBackground(x, y, x + w, y + h);
+
 	gHUD.DrawHudString(m_szStatusBar, x, y);
 }
 
