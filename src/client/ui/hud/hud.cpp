@@ -682,20 +682,20 @@ void CHud::Update_SetFOV(int iFov)
 
 	if (iFov <= 0)
 	{
-		m_iFOV = cl_fov->value;
+		m_iFOV = gHUD.GetDefaultFOV();
 		m_flMouseSensitivity = 0;
 	}
 	else
 	{
-		iFov = cl_fov->value * (iFov / 90.0F);
+		iFov = gHUD.GetDefaultFOV() * (iFov / 90.0F);
 
 		if (m_iFOV != iFov)
 		{
 			m_iFOV = iFov;
 
 			m_flMouseSensitivity =
-				sensitivity->value
-				* ((float)iFov / (float)cl_fov->value)
+				gHUD.GetDefaultSensitivity()
+				* ((float)iFov / (float)gHUD.GetDefaultFOV())
 				* zoom_sensitivity_ratio->value;
 		}
 	}
@@ -729,6 +729,21 @@ void CHud::AddHudElem(CHudBase* phudelem)
 		ptemp = ptemp->pNext;
 
 	ptemp->pNext = pdl;
+}
+
+float CHud::GetDefaultFOV()
+{
+	return cl_fov->value;
+}
+
+float CHud::GetDefaultSensitivity()
+{
+	if (m_bTranquilized)
+	{
+		return m_flOverrideSensitivity;
+	}
+
+	return sensitivity->value;
 }
 
 float CHud::GetSensitivity()
@@ -826,5 +841,5 @@ bool CHud::IsSpectator()
 
 bool CHud::IsViewZoomed()
 {
-	return m_iFOV != cl_fov->value;
+	return m_iFOV != gHUD.GetDefaultFOV();
 }

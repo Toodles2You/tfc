@@ -578,6 +578,8 @@ public:
 	Vector m_vecAngles;
 	int m_iKeyBits;
 	int m_iFOV;
+	bool m_bTranquilized;
+	float m_flOverrideSensitivity;
 	gamemode_e m_gameMode;
 	int m_iRes;
 	HSPRITE m_hBackground;
@@ -721,6 +723,7 @@ public:
 
 	void Update_SetFOV(int iFov);
 	void Update_Concuss(int iConcuss);
+	void Update_Tranquilization(const bool bTranquilized);
 	// user messages
 	bool MsgFunc_GameMode(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_ResetHUD(const char* pszName, int iSize, void* pbuf);
@@ -742,6 +745,9 @@ public:
 
 
 	void AddHudElem(CHudBase* p);
+
+	float GetDefaultFOV();
+	float GetDefaultSensitivity();
 
 	float GetSensitivity();
 

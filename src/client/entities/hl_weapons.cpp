@@ -230,6 +230,7 @@ static void HUD_InitClientWeapons()
 	HUD_SpawnWeapon<CIncendiaryCannon>(WEAPON_INCENDIARY);
 	HUD_SpawnWeapon<CAssaultCannon>(WEAPON_ASSAULT_CANNON);
 	HUD_SpawnWeapon<CDetpack>(WEAPON_DETPACK);
+	HUD_SpawnWeapon<CTranquilizerGun>(WEAPON_TRANQ);
 	HUD_SpawnWeapon<CPipeBombLauncher>(WEAPON_PIPEBOMB_LAUNCHER);
 	HUD_SpawnWeapon<CKnife>(WEAPON_KNIFE);
 }

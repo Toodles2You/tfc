@@ -55,6 +55,26 @@ CNail* CNail::CreateNailGrenadeNail(const Vector& origin, const Vector& dir, con
 }
 
 
+CNail* CNail::CreateTranquilizerDart(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner)
+{
+	auto nail = Entity::Create<CNail>();
+
+	nail->v.origin = origin;
+	nail->v.angles = dir;
+	nail->v.speed = 1500.0F;
+	nail->v.dmg = damage;
+	nail->v.armortype = DMG_NAIL | DMG_NEVERGIB | DMG_TRANQ;
+	nail->v.owner = &owner->v;
+	nail->v.team = owner->TeamNumber();
+	nail->Spawn();
+
+	nail->v.model = MAKE_STRING("models/crossbow_bolt.mdl");
+	nail->v.modelindex = g_sModelIndexDart;
+
+	return nail;
+}
+
+
 bool CNail::Spawn()
 {
 	v.classname = MAKE_STRING("nails");

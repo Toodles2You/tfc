@@ -231,6 +231,11 @@ float CHalfLifeMovement::GetSpeedModifier()
         speed /= 3.0F;
     }
 
+    if (player->InState(CBasePlayer::State::Tranquilized))
+    {
+        speed *= 0.5F;
+    }
+
     return speed;
 }
 

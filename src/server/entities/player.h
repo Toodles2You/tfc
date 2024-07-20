@@ -66,6 +66,7 @@ public:
 		Infected        = 16,
 		CannotMove      = 32,
 		Burning			= 64,
+		Tranquilized	= 128,
 	};
 
 public:
@@ -393,6 +394,19 @@ public:
 			m_iConcussionTime = 15000;
 		}
 	}
+
+#ifdef GAME_DLL
+protected:
+	float m_flTranquilizationTime;
+
+public:
+	void BecomeTranquilized()
+	{
+		EnterState(State::Tranquilized);
+
+		m_flTranquilizationTime = gpGlobals->time + 15.0F;
+	}
+#endif
 
 	void ClearEffects();
 

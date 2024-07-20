@@ -204,6 +204,7 @@ bool CBasePlayer::GiveHealth(float flHealth, int bitsDamageType, bool bClearEffe
 	{
 		LeaveState(State::Infected);
 		LeaveState(State::Burning);
+		LeaveState(State::Tranquilized);
 		m_nLegDamage = 0;
 		m_iConcussionTime = 0;
 
@@ -487,6 +488,11 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	if ((bitsDamageType & DMG_IGNITE) != 0)
 	{
 		Ignite(attacker);
+	}
+
+	if ((bitsDamageType & DMG_TRANQ) != 0)
+	{
+		BecomeTranquilized();
 	}
 
 	MessageBegin(MSG_SPEC, SVC_DIRECTOR);
@@ -1065,6 +1071,11 @@ void CBasePlayer::PreThink()
 	{
 		GiveHealth(2, DMG_GENERIC, false);
 		m_flNextRegenerationTime = gpGlobals->time + 3.0F;
+	}
+
+	if (InState(State::Tranquilized) && m_flTranquilizationTime <= gpGlobals->time)
+	{
+		LeaveState(State::Tranquilized);
 	}
 }
 

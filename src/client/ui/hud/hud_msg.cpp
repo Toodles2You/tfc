@@ -25,6 +25,8 @@
 #include "particleman.h"
 extern IParticleMan* g_pParticleMan;
 
+extern cvar_t* sensitivity;
+
 void EV_Init();
 
 /// USER-DEFINED SERVER MESSAGE HANDLERS
@@ -51,6 +53,9 @@ bool CHud::MsgFunc_ResetHUD(const char* pszName, int iSize, void* pbuf)
 
 	// reset concussion effect
 	m_iConcussionEffect = 0;
+
+	m_bTranquilized = false;
+	m_flOverrideSensitivity = 0.0F;
 
 	return true;
 }
@@ -125,15 +130,39 @@ void CHud::Update_Concuss(int iConcuss)
 	{
 		if (0 != iConcuss)
 		{
-			this->m_StatusIcons.EnableIcon("dmg_concuss");
+			m_StatusIcons.EnableIcon("dmg_concuss");
 		}
 		else
 		{
-			this->m_StatusIcons.DisableIcon("dmg_concuss");
+			m_StatusIcons.DisableIcon("dmg_concuss");
 		}
 	}
 
 	m_iConcussionEffect = iConcuss;
+}
+
+
+void CHud::Update_Tranquilization(const bool bTranquilized)
+{
+	if (m_bTranquilized != bTranquilized)
+	{
+		if (bTranquilized)
+		{
+			m_StatusIcons.EnableIcon("dmg_tranq");
+
+			/*
+				Lock values to prevent players from using key
+				binds to nullify the tranquilization effects.
+			*/
+			m_flOverrideSensitivity = sensitivity->value * 0.5F;
+		}
+		else
+		{
+			m_StatusIcons.DisableIcon("dmg_tranq");
+		}
+	}
+
+	m_bTranquilized = bTranquilized;
 }
 
 

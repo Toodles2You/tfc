@@ -320,8 +320,7 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             WEAPON_KNIFE,
             WEAPON_SUPER_SHOTGUN,
             WEAPON_NAILGUN,
-            // WEAPON_TRANQ,
-            -1,
+            WEAPON_TRANQ,
         },
         .grenades = {
             GRENADE_NORMAL,

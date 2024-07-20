@@ -295,7 +295,7 @@ static void Mouse_Scale(float* x, float* y)
 {
 	// This is the default sensitivity
 	float mouse_senstivity =
-		(gHUD.GetSensitivity() != 0) ? gHUD.GetSensitivity() : sensitivity->value;
+		(gHUD.GetSensitivity() != 0) ? gHUD.GetSensitivity() : gHUD.GetDefaultSensitivity();
 
 	// Just apply the default
 	*x *= mouse_senstivity;

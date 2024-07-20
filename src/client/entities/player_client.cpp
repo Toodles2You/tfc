@@ -114,10 +114,12 @@ void CBasePlayer::UpdateHudData()
 	{
 		gHUD.Update_Concuss(0);
 	}
+
+	gHUD.Update_Tranquilization(InState(State::Tranquilized));
 	
 	if (HasPlayerWeapon(WEAPON_DETPACK))
 	{
-		if (InState(CBasePlayer::State::Holstered))
+		if (InState(State::Holstered))
 		{
 			gHUD.m_Ammo.Update_Detpack(1);
 		}

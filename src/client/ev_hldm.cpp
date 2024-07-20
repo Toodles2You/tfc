@@ -692,6 +692,7 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 			break;
 		}
 		case kProjNail:
+		case kProjTranquilizerDart:
 		{
 			Vector gun;
 
@@ -706,7 +707,16 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 
 			gun = gun + right * rightOffset + up * -4;
 
-			client::efx::Projectile(gun, forward * 1000.0F, g_sModelIndexNail, 5.0F, args->entindex, EV_NailTouch);
+			auto speed = 1000.0F;
+			auto modelIndex = g_sModelIndexNail;
+
+			if (info.iProjectileType == kProjTranquilizerDart)
+			{
+				speed = 1500.0F;
+				modelIndex = g_sModelIndexDart;
+			}
+
+			client::efx::Projectile(gun, forward * speed, modelIndex, 5.0F, args->entindex, EV_NailTouch);
 			break;
 		}
 		case kProjPipeBomb:
@@ -1617,6 +1627,7 @@ void EV_Init()
 	g_sModelIndexFlame = client::event::FindModelIndex("sprites/fthrow.spr");
 	g_sModelIndexFire = client::event::FindModelIndex("sprites/playerflame.spr");
 	g_sModelIndexFireLoop = client::event::FindModelIndex("sprites/playerflameloop.spr");
+	g_sModelIndexDart = client::event::FindModelIndex("models/crossbow_bolt.mdl");
 
 	auto model = client::hudGetModelByIndex(g_sModelIndexDebris);
 	if (model != nullptr)

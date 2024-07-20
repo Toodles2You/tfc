@@ -70,6 +70,7 @@ enum
 	kProjAdrenaline,
 	kProjFlame,
 	kProjIncendiaryRocket,
+	kProjTranquilizerDart,
 };
 
 typedef struct
@@ -133,7 +134,7 @@ constexpr const char* g_szWeaponNames[WEAPON_TYPES] =
 	"tf_weapon_ac",
 	// nullptr,
 	"tf_weapon_detpack",
-	// "tf_weapon_tranq",
+	"tf_weapon_tranq",
 	// "tf_weapon_railgun",
 	"tf_weapon_pl",
 	"tf_weapon_knife",
@@ -237,6 +238,7 @@ inline short g_sModelIndexFlare;
 inline short g_sModelIndexFlame;
 inline short g_sModelIndexFire;
 inline short g_sModelIndexFireLoop;
+inline short g_sModelIndexDart;
 
 inline unsigned short g_usConcBlast;
 
@@ -480,6 +482,15 @@ public:
 	void EXPORT Detonate();
 	void EXPORT Disarm(CBaseEntity* activator, CBaseEntity* caller, USE_TYPE useType, float value);
 #endif
+};
+
+class CTranquilizerGun : public CTFWeapon
+{
+public:
+	CTranquilizerGun(Entity* containingEntity) : CTFWeapon(containingEntity) {}
+
+	int GetID() const override { return WEAPON_TRANQ; }
+	void GetWeaponInfo(WeaponInfo& i) override;
 };
 
 class CPipeBombLauncher : public CTFWeapon
@@ -761,6 +772,7 @@ public:
 
 	static CNail* CreateNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
 	static CNail* CreateNailGrenadeNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
+	static CNail* CreateTranquilizerDart(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
 	void EXPORT NailTouch(CBaseEntity *pOther);
 	void EXPORT PleaseGoInTheRightDirection();
 };

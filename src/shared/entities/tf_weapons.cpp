@@ -172,6 +172,7 @@ void CTFWeapon::PrimaryAttack()
 			break;
 		}
 		case kProjNail:
+		case kProjTranquilizerDart:
 		{
 			const auto aim = m_pPlayer->v.v_angle + m_pPlayer->v.punchangle;
 			util::MakeVectors(aim);
@@ -189,8 +190,16 @@ void CTFWeapon::PrimaryAttack()
 					+ gpGlobals->v_right * rightOffset
 					+ gpGlobals->v_up * -4;
 
-			projectile =
-			CNail::CreateNail(gun, gpGlobals->v_forward, info.iProjectileDamage, m_pPlayer);
+			if (info.iProjectileType == kProjTranquilizerDart)
+			{
+				projectile =
+				CNail::CreateTranquilizerDart(gun, gpGlobals->v_forward, info.iProjectileDamage, m_pPlayer);
+			}
+			else
+			{
+				projectile =
+				CNail::CreateNail(gun, gpGlobals->v_forward, info.iProjectileDamage, m_pPlayer);
+			}
 			break;
 		}
 		case kProjPipeBomb:
@@ -754,5 +763,51 @@ void CIncendiaryCannon::GetWeaponInfo(WeaponInfo& i)
 	i.flPunchAngle = -3.0F;
 	i.iSibling = -1;
 	i.bShouldIdle = false;
+}
+
+
+LINK_ENTITY_TO_CLASS(tf_weapon_tranq, CTranquilizerGun);
+
+void CTranquilizerGun::GetWeaponInfo(WeaponInfo& i)
+{
+	i.pszName = "tf_weapon_tranq";
+	i.iAmmo1 = AMMO_SHELLS;
+	i.iAmmo2 = -1;
+	i.iMaxClip = -1;
+	i.iSlot = 1;
+	i.iPosition = 2;
+	i.iFlags = 0;
+	i.iWeight = 15;
+
+	i.pszWorld = "models/w_9mmhandgun.mdl";
+	i.pszView = "models/v_tfc_pistol.mdl";
+	i.pszPlayer = "models/p_spygun.mdl";
+	i.pszAnimExt = "onehanded";
+
+	i.iAnims[kWeaponAnimIdle] = 0;
+	i.iAnims[kWeaponAnimDeploy] = 7;
+	i.iAnims[kWeaponAnimHolster] = 8;
+	i.iAnims[kWeaponAnimAttack] = 3;
+	i.iAnims[kWeaponAnimReload] = -1;
+	i.iAnims[kWeaponAnimStartReload] = -1;
+	i.iAnims[kWeaponAnimEndReload] = -1;
+
+	i.iShots = 1;
+
+	i.iAttackTime = 3000;
+	i.iReloadTime = 1500;
+
+	i.iProjectileType = kProjTranquilizerDart;
+	i.iProjectileDamage = 20;
+	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
+	i.iProjectileCount = 1;
+
+	i.pszEvent = "events/wpn/tf_tranq.sc";
+	i.pszAttackSound = "weapons/dartgun.wav";
+	i.pszAlternateSound = nullptr;
+	i.pszReloadSound = nullptr;
+	i.flPunchAngle = -2.0F;
+	i.iSibling = -1;
+	i.bShouldIdle = true;
 }
 
