@@ -1229,12 +1229,17 @@ void util::LagCompensation(CBaseEntity* entity, const int& ping)
 	const auto start = entity->v.origin;
 
 	/* Apply gravity, if any. */
+	/* Toodles TODO: This doesn't work right for some reason. */
 	if (entity->v.movetype != MOVETYPE_FLY && entity->v.gravity != 0.0F)
 	{
+#if 1
+		return;
+#else
 		const auto gravity = sv_gravity->value * entity->v.gravity;
 
 		entity->v.velocity.z =
 			std::clamp(entity->v.velocity.z - gravity * latency, -gravity, gravity);
+#endif
 	}
 
 	/* Decrement the next think timer. */
