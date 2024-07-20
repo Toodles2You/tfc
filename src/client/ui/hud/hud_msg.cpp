@@ -55,6 +55,7 @@ bool CHud::MsgFunc_ResetHUD(const char* pszName, int iSize, void* pbuf)
 	m_iConcussionEffect = 0;
 
 	m_bTranquilized = false;
+	m_flOverrideFOV = 0.0F;
 	m_flOverrideSensitivity = 0.0F;
 
 	return true;
@@ -154,6 +155,7 @@ void CHud::Update_Tranquilization(const bool bTranquilized)
 				Lock values to prevent players from using key
 				binds to nullify the tranquilization effects.
 			*/
+			m_flOverrideFOV = cl_fov->value * (70.0F / 90.0F);
 			m_flOverrideSensitivity = sensitivity->value * 0.5F;
 		}
 		else

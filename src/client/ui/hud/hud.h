@@ -579,6 +579,7 @@ public:
 	int m_iKeyBits;
 	int m_iFOV;
 	bool m_bTranquilized;
+	float m_flOverrideFOV;
 	float m_flOverrideSensitivity;
 	gamemode_e m_gameMode;
 	int m_iRes;

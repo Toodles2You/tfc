@@ -733,6 +733,11 @@ void CHud::AddHudElem(CHudBase* phudelem)
 
 float CHud::GetDefaultFOV()
 {
+	if (m_bTranquilized)
+	{
+		return m_flOverrideFOV;
+	}
+
 	return cl_fov->value;
 }
 
