@@ -64,6 +64,7 @@ void LinkUserMessages()
 	gmsgHitFeedback = engine::RegUserMsg("HitFeedback", 4);
 	gmsgBlood = engine::RegUserMsg("Blood", -1);
 	gmsgPredictedSound = engine::RegUserMsg("PredSound", -1);
+	gmsgShooter = engine::RegUserMsg("Shooter", -1);
 
 	gmsgStatusIcon = engine::RegUserMsg("StatusIcon", -1);
 }

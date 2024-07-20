@@ -1241,6 +1241,98 @@ int MSG_PredictedSound(const char* name, int size, void* buf)
 	return true;
 }
 
+int MSG_Shooter(const char* name, int size, void* buf)
+{
+	BEGIN_READ(buf, size);
+
+	Vector origin;
+	origin.x = READ_COORD();
+	origin.y = READ_COORD();
+	origin.z = READ_COORD();
+
+	Vector movedir;
+	movedir.x = READ_FLOAT();
+	movedir.y = READ_FLOAT();
+	movedir.z = READ_FLOAT();
+
+	const auto gibVelocity = READ_FLOAT();
+	const auto gibVariance = READ_FLOAT();
+	const auto gibLife = READ_FLOAT();
+	const auto modelIndex = READ_SHORT();
+
+	if (modelIndex == 0 && violence_hgibs->value == 0.0F)
+	{
+		return true;
+	}
+
+	Vector angles;
+	VectorAngles(movedir, angles);
+
+	Vector forward, right, up;
+	AngleVectors(angles, &forward, &right, &up);
+
+	auto velocity = movedir
+		+ right * client::RandomFloat(-1, 1) * gibVariance
+		+ forward * client::RandomFloat(-1, 1) * gibVariance
+		+ up * client::RandomFloat(-1, 1) * gibVariance;
+
+	velocity = velocity.Normalize() * gibVelocity;
+
+	auto gib = client::efx::TempModel(
+		origin,
+		velocity,
+		angles,
+		gibLife * client::RandomFloat(0.95F, 1.05F),
+		modelIndex != 0 ? modelIndex : g_sModelIndexGibs,
+		TE_BOUNCE_NULL);
+
+	if (gib == nullptr)
+	{
+		return true;
+	}
+
+	gib->flags |= FTENT_COLLIDEWORLD | FTENT_ROTATE | FTENT_FADEOUT;
+
+	gib->entity.baseline.angles = Vector(
+		client::RandomFloat(100, 200),
+		client::RandomFloat(100, 300),
+		0
+	);
+
+	/* Client physics are slightly different, so this is some stupid compensation. */
+	gib->bounceFactor = 1.375F;
+
+	if (modelIndex != 0)
+	{
+		/* Randomize the body. */
+		if (gib->entity.model->type == mod_studio
+		 && gib->entity.model->numsubmodels > 1)
+		{
+			gib->entity.curstate.body =
+				client::RandomLong(0, gib->entity.model->numsubmodels - 1);
+		}
+
+		/* Toodles TODO: Material doesn't actually get used anywhere. */
+		gib->entity.curstate.iuser1 = READ_BYTE();
+		gib->entity.curstate.rendermode = READ_BYTE();
+		gib->entity.curstate.renderamt = READ_BYTE();
+		gib->entity.curstate.rendercolor.r = READ_BYTE();
+		gib->entity.curstate.rendercolor.g = READ_BYTE();
+		gib->entity.curstate.rendercolor.b = READ_BYTE();
+		gib->entity.curstate.renderfx = READ_BYTE();
+		gib->entity.curstate.scale = READ_BYTE() / 255.0F;
+		gib->entity.curstate.skin = READ_BYTE();
+	}
+	else
+	{
+		gib->flags |= FTENT_SMOKETRAIL;
+		gib->entity.curstate.body = client::RandomLong(1, 5);
+		gib->hitcallback = EV_GibTouch;
+	}
+
+	return true;
+}
+
 /*
 ======================
 EV_HookEvents
@@ -1262,6 +1354,7 @@ void EV_HookEvents()
 
 	client::HookUserMsg("Blood", MSG_Blood);
 	client::HookUserMsg("PredSound", MSG_PredictedSound);
+	client::HookUserMsg("Shooter", MSG_Shooter);
 }
 
 void EV_Init()
