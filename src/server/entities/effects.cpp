@@ -1508,6 +1508,127 @@ void CEnvShooter::WriteGib()
 }
 
 
+// Blood effects
+class CBlood : public CPointEntity
+{
+public:
+	CBlood(Entity* containingEntity) : CPointEntity(containingEntity) {}
+
+	bool Spawn() override;
+	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
+	bool KeyValue(KeyValueData* pkvd) override;
+
+	inline int Color() { return v.impulse; }
+	inline float BloodAmount() { return v.dmg; }
+
+	inline void SetColor(int color) { v.impulse = color; }
+	inline void SetBloodAmount(float amount) { v.dmg = amount; }
+
+	Vector Direction();
+	Vector BloodPosition(CBaseEntity* pActivator);
+};
+
+LINK_ENTITY_TO_CLASS(env_blood, CBlood);
+
+
+#define SF_BLOOD_RANDOM 0x0001
+#define SF_BLOOD_STREAM 0x0002
+#define SF_BLOOD_PLAYER 0x0004
+#define SF_BLOOD_DECAL 0x0008
+
+bool CBlood::Spawn()
+{
+	v.solid = SOLID_NOT;
+	v.movetype = MOVETYPE_NONE;
+	v.effects = 0;
+	v.frame = 0;
+	v.movedir = util::SetMovedir(v.angles);
+	return true;
+}
+
+
+bool CBlood::KeyValue(KeyValueData* pkvd)
+{
+	if (streq(pkvd->szKeyName, "color"))
+	{
+		switch (atoi(pkvd->szValue))
+		{
+		case 1: SetColor(BLOOD_COLOR_YELLOW); break;
+		default: SetColor(BLOOD_COLOR_RED); break;
+		}
+		return true;
+	}
+	else if (streq(pkvd->szKeyName, "amount"))
+	{
+		SetBloodAmount(atof(pkvd->szValue));
+		return true;
+	}
+
+	return CPointEntity::KeyValue(pkvd);
+}
+
+
+Vector CBlood::Direction()
+{
+	if ((v.spawnflags & SF_BLOOD_RANDOM) != 0)
+	{
+		return Vector(
+			engine::RandomFloat(-1, 1),
+			engine::RandomFloat(-1, 1),
+			engine::RandomFloat(0, 1)
+		);
+	}
+
+	return v.movedir;
+}
+
+
+Vector CBlood::BloodPosition(CBaseEntity* pActivator)
+{
+	if ((v.spawnflags & SF_BLOOD_PLAYER) != 0)
+	{
+		CBaseEntity* player;
+
+		if (pActivator != nullptr && pActivator->IsPlayer())
+		{
+			player = pActivator;
+		}
+		else
+		{
+			player = util::GetLocalPlayer();
+		}
+
+		if (player != nullptr)
+		{
+			return player->v.origin + player->v.view_ofs
+				+ Vector(
+					engine::RandomFloat(-10, 10),
+					engine::RandomFloat(-10, 10),
+					engine::RandomFloat(-10, 10));
+		}
+	}
+
+	return v.origin;
+}
+
+
+void CBlood::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+{
+	/* This is supposed to have amount & color variables. Alas, I do not care! */
+	auto origin = BloodPosition(pActivator);
+	auto dir = Direction();
+
+	MessageBegin(MSG_PVS, gmsgBlood, origin);
+	WriteFloat(dir.x);
+	WriteFloat(dir.y);
+	WriteFloat(dir.z);
+	WriteByte(0);
+	WriteByte((v.spawnflags & SF_BLOOD_STREAM) != 0);
+	WriteCoord(origin);
+	MessageEnd();
+}
+
+
 // Screen shake
 class CShake : public CPointEntity
 {
