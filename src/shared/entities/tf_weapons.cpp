@@ -794,7 +794,7 @@ void CTranquilizerGun::GetWeaponInfo(WeaponInfo& i)
 
 	i.iShots = 1;
 
-	i.iAttackTime = 3000;
+	i.iAttackTime = 1500;
 	i.iReloadTime = 1500;
 
 	i.iProjectileType = kProjTranquilizerDart;
