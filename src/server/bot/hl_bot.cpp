@@ -107,14 +107,42 @@ bool CHLBot::IsVisible(CBasePlayer* player, bool testFOV = false, unsigned char*
     {
         return false;
     }
+
+    /* Player is in "no target" mode. */
+    if ((player->v.flags & FL_NOTARGET) != 0)
+    {
+        return false;
+    }
+
+    /* Player is invisible. */
+    if ((player->v.effects & EF_NODRAW) != 0
+     || (player->v.rendermode != kRenderNormal && player->v.renderamt <= 15))
+    {
+        return false;
+    }
+
+    util::MakeVectors(v.angles);
+
+	const auto los = (player->BodyTarget() - EyePosition()).Normalize();
+	const auto dot = DotProduct(los, gpGlobals->v_forward);
+
+    /* The player is out of our field of view. */
+	if (dot <= 0.1F)
+	{
+		return false;
+	}
+
     TraceResult tr;
     auto start = GetGunPosition();
     auto end = player->BodyTarget();
+
     util::TraceLine(start, end, util::ignore_monsters, this, &tr);
+
     if (tr.flFraction != 1.0f && tr.pHit != &player->v)
     {
         return false;
     }
+
     return true;
 }
 
