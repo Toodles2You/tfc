@@ -125,6 +125,21 @@ void CNail::NailTouch(CBaseEntity* pOther)
 			}
 		}
 
+		if (owner->IsNetClient() && pOther->IsClient()
+		 && g_pGameRules->FPlayerCanTakeDamage(static_cast<CBasePlayer*>(pOther), owner, this))
+		{
+			const auto dir = v.velocity.Normalize();
+
+			MessageBegin(MSG_ONE_UNRELIABLE, gmsgBlood, owner);
+			WriteFloat(dir.x);
+			WriteFloat(dir.y);
+			WriteFloat(dir.z);
+			WriteByte(0);
+			WriteByte((gpGlobals->trace_hitgroup == HITGROUP_HEAD) ? 1 : 0);
+			WriteCoord(v.origin);
+			MessageEnd();
+		}
+
         pOther->TraceAttack(
             owner,
             v.dmg,
