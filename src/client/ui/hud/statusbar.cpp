@@ -90,7 +90,8 @@ void CHudStatusBar::Draw(const float time)
 
 void CHudStatusBar::UpdateStatusBar(cl_entity_t* entity)
 {
-	if (entity == nullptr)
+	if (entity == nullptr || (entity->curstate.rendermode != kRenderNormal
+	 && entity->curstate.renderamt == 0))
 	{
 		if (hud_expireid->value <= 0.0F)
 		{
