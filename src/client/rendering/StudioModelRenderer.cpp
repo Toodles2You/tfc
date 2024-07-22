@@ -1782,6 +1782,7 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware()
 			}
 
 			IEngineStudio.GL_SetRenderMode(rendermode);
+			IEngineStudio.StudioSetRenderamt(m_pCurrentEntity->curstate.renderamt);
 
 			if (m_fFlipModel)
 			{
