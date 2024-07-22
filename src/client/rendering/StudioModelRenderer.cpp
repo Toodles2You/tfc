@@ -1507,7 +1507,11 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 
 	StudioSetupBones();
 	StudioSaveBones();
-	m_pPlayerInfo->renderframe = m_nFrameCount;
+
+	if (m_pCurrentEntity->curstate.renderfx != kRenderFxDeadPlayer)
+	{
+		m_pPlayerInfo->renderframe = m_nFrameCount;
+	}
 
 	m_pPlayerInfo = nullptr;
 
