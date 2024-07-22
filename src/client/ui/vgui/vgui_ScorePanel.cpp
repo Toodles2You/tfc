@@ -56,10 +56,9 @@ public:
 static SBColumnInfo g_ColumnInfo[NUM_COLUMNS] =
 {
 	{nullptr,		32,		Label::a_east},		// avatar
-	{nullptr,		140,	Label::a_west},		// name
+	{nullptr,		180,	Label::a_west},		// name
 	{nullptr,		90,		Label::a_east},		// class
-	{"#SCORE",		46,		Label::a_east},		// score
-	{"#LATENCY",	46,		Label::a_east},		// ping
+	{nullptr,		46,		Label::a_east},		// ping
 	{nullptr,		38,		Label::a_east},		// voice
 	{nullptr,		2,		Label::a_east},		// blank
 };
@@ -127,13 +126,8 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall, int team) : Panel(x, y,
 
 		m_HeaderLabels[i].setBgColor(0, 0, 0, 255);
 		m_HeaderLabels[i].setFgColor(Scheme::sc_primary1);
-		m_HeaderLabels[i].setFont(smallfont);
+		m_HeaderLabels[i].setFont(tfont);
 		m_HeaderLabels[i].setContentAlignment(g_ColumnInfo[i].m_Alignment);
-
-		if (i == COLUMN_NAME)
-		{
-			m_HeaderLabels[i].setFont(tfont);
-		}
 
 		int yres = 12;
 		if (ScreenHeight >= 480)
@@ -208,8 +202,20 @@ void ScorePanel::Update()
 	{
 		m_HeaderLabels[COLUMN_NAME].setText(gViewPort->GetTeamName(m_iTeamNumber));
 
+		char sz[128];
+		sprintf(sz, "%3i", g_TeamInfo[m_iTeamNumber].score);
+
+		m_HeaderLabels[COLUMN_LATENCY].setText(sz);
+
 		auto color = gHUD.GetTeamColor(m_iTeamNumber);
+
 		m_HeaderLabels[COLUMN_NAME].setFgColor(
+			color[0] * 255,
+			color[1] * 255,
+			color[2] * 255,
+			0);
+
+		m_HeaderLabels[COLUMN_LATENCY].setFgColor(
 			color[0] * 255,
 			color[1] * 255,
 			color[2] * 255,
@@ -252,41 +258,19 @@ void ScorePanel::Update()
 void ScorePanel::SortPlayers()
 {
 	// draw the players in order
-	while (true)
+	for (int i = 1; i < MAX_PLAYERS_HUD; i++)
 	{
-		// Find the top ranking player
-		int highest_score = -99999;
-		int lowest_deaths = 99999;
-		int best_player;
-		best_player = 0;
-
-		for (int i = 1; i < MAX_PLAYERS_HUD; i++)
+		if (!gViewPort->GetScoreBoard()->m_bHasBeenSorted[i]
+		 && g_PlayerInfoList[i].name)
 		{
-			if (!gViewPort->GetScoreBoard()->m_bHasBeenSorted[i]
-			 && g_PlayerInfoList[i].name
-			 && g_PlayerExtraInfo[i].score >= highest_score)
+			if (m_iTeamNumber == TEAM_UNASSIGNED
+			 || m_iTeamNumber == g_PlayerExtraInfo[i].teamnumber)
 			{
-				if (m_iTeamNumber == TEAM_UNASSIGNED
-				 || m_iTeamNumber == g_PlayerExtraInfo[i].teamnumber)
-				{
-					extra_player_info_t* pl_info = &g_PlayerExtraInfo[i];
-					if (pl_info->score > highest_score || pl_info->deaths < lowest_deaths)
-					{
-						best_player = i;
-						lowest_deaths = pl_info->deaths;
-						highest_score = pl_info->score;
-					}
-				}
+				m_iSortedRows[m_iRows] = i;
+				gViewPort->GetScoreBoard()->m_bHasBeenSorted[i] = true;
+				m_iRows++;
 			}
 		}
-
-		if (0 == best_player)
-			break;
-
-		// Put this player in the sorted list
-		m_iSortedRows[m_iRows] = best_player;
-		gViewPort->GetScoreBoard()->m_bHasBeenSorted[best_player] = true;
-		m_iRows++;
 	}
 }
 
@@ -427,9 +411,6 @@ void ScorePanel::FillGrid()
 						}
 					}
 				}
-				break;
-			case COLUMN_SCORE:
-				sprintf(sz, "%d", g_PlayerExtraInfo[m_iSortedRows[row]].score);
 				break;
 			case COLUMN_LATENCY:
 				sz[0] = '\0';
