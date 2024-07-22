@@ -1700,7 +1700,8 @@ void CStudioModelRenderer::StudioRenderModel()
 
 		m_bUseTriAPI = useTriAPI;
 	}
-	else
+	else if (m_pCurrentEntity->curstate.rendermode == kRenderNormal
+		  || m_pCurrentEntity->curstate.renderamt != 5)
 	{
 		StudioRenderFinal();
 	}
@@ -1786,7 +1787,11 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware()
 			}
 
 			IEngineStudio.GL_SetRenderMode(rendermode);
-			IEngineStudio.StudioSetRenderamt(m_pCurrentEntity->curstate.renderamt);
+
+			if (rendermode != kRenderNormal)
+			{
+				IEngineStudio.StudioSetRenderamt(m_pCurrentEntity->curstate.renderamt);
+			}
 
 			if (m_fFlipModel)
 			{
