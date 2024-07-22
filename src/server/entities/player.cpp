@@ -358,14 +358,15 @@ void CBasePlayer::SendHitFeedback(CBaseEntity* victim, const float flDamage, con
 {
 	int flags = 0;
 
-	if (victim->v.health <= 0)
+	if (victim->v.health <= 0
+	 || static_cast<CBasePlayer*>(victim)->InState(State::FeigningDeath))
 	{
 		flags |= kDamageFlagDead;
 	}
 
 	if ((bitsDamageType & DMG_AIMED) != 0
 	 && victim->IsClient()
-	 && dynamic_cast<CBasePlayer *>(victim)->m_LastHitGroup == HITGROUP_HEAD)
+	 && static_cast<CBasePlayer*>(victim)->m_LastHitGroup == HITGROUP_HEAD)
 	{
 		flags |= kDamageFlagHeadshot;
 	}
@@ -467,14 +468,15 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	v.dmg_take += flDamage;
 	v.health -= flDamage;
 
-	if (attacker->IsNetClient())
-	{
-		dynamic_cast<CBasePlayer*>(attacker)->SendHitFeedback(this, flDamage, bitsDamageType);
-	}
-
 	if (v.health <= 0)
 	{
 		Killed(inflictor, attacker, bitsDamageType);
+
+		if (attacker->IsNetClient())
+		{
+			static_cast<CBasePlayer*>(attacker)->SendHitFeedback(this, flDamage, bitsDamageType);
+		}
+
 		return false;
 	}
 
@@ -512,6 +514,11 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 
 			g_pGameRules->PlayerKilled(this, attacker, inflictor, accomplice, bitsDamageType);
 
+			if (attacker->IsNetClient())
+			{
+				static_cast<CBasePlayer*>(attacker)->SendHitFeedback(this, flDamage, bitsDamageType);
+			}
+
 			/* Return now to prevent pain sounds & effects applied by the damage type. */
 			return false;
 		}
@@ -530,6 +537,13 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	if ((bitsDamageType & DMG_TRANQ) != 0)
 	{
 		BecomeTranquilized();
+	}
+
+	if (attacker->IsNetClient()
+	/* Don't send hit feedback if we're feigning death. */
+	 && (!InState(State::FeigningDeath) || m_iFeignTime != 0))
+	{
+		static_cast<CBasePlayer*>(attacker)->SendHitFeedback(this, flDamage, bitsDamageType);
 	}
 
 	return true;
