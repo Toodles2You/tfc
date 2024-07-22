@@ -108,7 +108,7 @@ void tent::Explosion(
 }
 
 
-void tent::SpawnCorpse(CBaseEntity* entity, const int gibMode)
+void tent::SpawnCorpse(CBaseEntity* entity, const int gibMode, const int sequence)
 {
 	Vector attackAngles = util::VecToAngles(g_vecAttackDir);
 
@@ -121,7 +121,7 @@ void tent::SpawnCorpse(CBaseEntity* entity, const int gibMode)
 		attackAngles,
 		0.0F,
 		std::max(entity->v.health, -99.0F),
-		entity->v.sequence,
+		sequence != -1 ? sequence : entity->v.sequence,
 		gibMode,
 		false,
 		false

@@ -952,7 +952,7 @@ void CBasePlayer::UpdateFeigningDeath(const int msec)
 
 		if (m_iFeignTime <= msec)
 		{
-			/* Set the final render info one the state has finished changed. */
+			/* Set the final render info once the state has finished changing. */
 			v.rendermode = isFeigning ? kRenderTransTexture : kRenderNormal;
 			v.renderamt = isFeigning ? 5 : 0;
 		}
@@ -1019,14 +1019,13 @@ bool CBasePlayer::StartFeigningDeath(const bool silent, const int damageType)
 	/* Feign death. */
 
 	m_iFeignTime = 0;
+
 	v.rendermode = kRenderTransTexture;
 	v.renderamt = 5;
 
 #ifdef GAME_DLL
 	DropBackpack();
 	RemoveGoalItems();
-
-	SetAction(Action::Die);
 
 	auto gibMode = GIB_NORMAL;
 	if ((damageType & DMG_ALWAYSGIB) != 0)
@@ -1043,9 +1042,7 @@ bool CBasePlayer::StartFeigningDeath(const bool silent, const int damageType)
 		DeathSound(damageType);
 	}
 
-	tent::SpawnCorpse(this, gibMode);
-
-	SetAction(Action::Idle, true);
+	tent::SpawnCorpse(this, gibMode, GetDeathSequence());
 #endif
 
 	return true;
@@ -1093,7 +1090,6 @@ void CBasePlayer::ClearEffects()
 
 	v.rendermode = kRenderNormal;
 	v.renderamt = 0;
-	v.rendercolor = g_vecZero;
 	v.renderfx = kRenderFxNone;
 
 #ifdef GAME_DLL

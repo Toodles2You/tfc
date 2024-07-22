@@ -508,7 +508,7 @@ enum class ExplosionType
 
 void Explosion(const Vector& origin, const Vector& velocity, ExplosionType type = ExplosionType::Normal, float damage = 100.0F, bool smoke = true, bool sparks = true, CBaseEntity* entity = nullptr);
 
-void SpawnCorpse(CBaseEntity* entity, const int gibMode);
+void SpawnCorpse(CBaseEntity* entity, const int gibMode, const int sequence = -1);
 void RocketTrail(CBaseEntity* entity, const bool flare = true, const int team = TEAM_UNASSIGNED);
 
 void PlayerDecalTrace(TraceResult* pTrace, int playernum, int decalNumber);
