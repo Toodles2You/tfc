@@ -1838,7 +1838,14 @@ bool CStudioModelRenderer::StudioShouldFlipModel()
 {
 	if (client::GetViewModel() == m_pCurrentEntity)
 	{
-		return g_PlayerExtraInfo[client::GetLocalPlayer()->index].lefthanded;
+		auto player = client::GetLocalPlayer();
+
+		if (player == nullptr)
+		{
+			return false;
+		}
+
+		return g_PlayerExtraInfo[player->index].lefthanded;
 	}
 	else if (m_pPlayerInfo != nullptr)
 	{
