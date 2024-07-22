@@ -68,6 +68,16 @@ void CHudStatusBar::Draw(const float time)
 	}
 	else
 	{
+		const auto entity = client::GetEntityByIndex(m_targetIndex);
+
+		/* Entity is invisible. */
+		if (entity == nullptr || (entity->curstate.rendermode != kRenderNormal
+	 	 && entity->curstate.renderamt <= 5))
+		{
+			SetActive(false);
+			return;
+		}
+
 		snprintf(m_szStatusBar, MAX_STATUSTEXT_LENGTH, "%s", info->name);
 	}
 	m_szStatusBar[MAX_STATUSTEXT_LENGTH - 1] = '\0';
@@ -90,8 +100,7 @@ void CHudStatusBar::Draw(const float time)
 
 void CHudStatusBar::UpdateStatusBar(cl_entity_t* entity)
 {
-	if (entity == nullptr || (entity->curstate.rendermode != kRenderNormal
-	 && entity->curstate.renderamt == 0))
+	if (entity == nullptr)
 	{
 		if (hud_expireid->value <= 0.0F)
 		{

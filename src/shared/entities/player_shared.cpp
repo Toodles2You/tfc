@@ -954,7 +954,7 @@ void CBasePlayer::UpdateFeigningDeath(const int msec)
 		{
 			/* Set the final render info one the state has finished changed. */
 			v.rendermode = isFeigning ? kRenderTransTexture : kRenderNormal;
-			v.renderamt = 0;
+			v.renderamt = isFeigning ? 5 : 0;
 		}
 		else
 		{
@@ -963,11 +963,11 @@ void CBasePlayer::UpdateFeigningDeath(const int msec)
 			/* Lerp our render amount to fade in & out of being visible. */
 			if (isFeigning)
 			{
-				v.renderamt = 255 * (m_iFeignTime / (float)kFeignDuration);
+				v.renderamt = 5 + 250 * (m_iFeignTime / (float)kFeignDuration);
 			}
 			else
 			{
-				v.renderamt = 255 * (1.0F - (m_iFeignTime / (float)kUnfeignDuration));
+				v.renderamt = 5 + 250 * (1.0F - (m_iFeignTime / (float)kUnfeignDuration));
 			}
 		}
 	}
@@ -1020,7 +1020,7 @@ bool CBasePlayer::StartFeigningDeath(const bool silent, const int damageType)
 
 	m_iFeignTime = 0;
 	v.rendermode = kRenderTransTexture;
-	v.renderamt = 0;
+	v.renderamt = 5;
 
 #ifdef GAME_DLL
 	DropBackpack();

@@ -121,7 +121,7 @@ bool CHLBot::IsVisible(CBasePlayer* player, bool testFOV = false, unsigned char*
 
     /* Player is invisible. */
     if ((player->v.effects & EF_NODRAW) != 0
-     || (player->v.rendermode != kRenderNormal && player->v.renderamt <= 15))
+     || (player->v.rendermode != kRenderNormal && player->v.renderamt <= 5))
     {
         return false;
     }
