@@ -359,7 +359,8 @@ void CBasePlayer::SendHitFeedback(CBaseEntity* victim, const float flDamage, con
 	int flags = 0;
 
 	if (victim->v.health <= 0
-	 || static_cast<CBasePlayer*>(victim)->InState(State::FeigningDeath))
+	 || (static_cast<CBasePlayer*>(victim)->InState(State::FeigningDeath)
+	  && static_cast<CBasePlayer*>(victim)->m_iFeignTime == 0))
 	{
 		flags |= kDamageFlagDead;
 	}
