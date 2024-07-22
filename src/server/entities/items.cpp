@@ -229,6 +229,18 @@ public:
 		SetModel(v.model);
 	}
 
+	bool IsEmpty()
+	{
+		return v.health == 0
+			&& v.armorvalue == 0
+			&& tfv.ammo_shells == 0
+			&& tfv.ammo_nails == 0
+			&& tfv.ammo_rockets == 0
+			&& tfv.ammo_cells == 0
+			&& tfv.no_grenades_1 == 0
+			&& tfv.no_grenades_2 == 0;
+	}
+
 protected:
 	bool GiveHealth(CBasePlayer* player)
 	{
@@ -307,7 +319,8 @@ protected:
 public:
 	bool MyTouch(CBasePlayer* player) override
 	{
-		if (!GiveHealth(player)
+		if (!IsEmpty()
+		 && !GiveHealth(player)
 		 && !GiveArmor(player)
 		 && !GiveAmmo(player)
 		 && !GiveGrenades(player))
@@ -372,6 +385,11 @@ CItem* CItem::DropBackpack(CBaseEntity* owner, int shells, int nails, int rocket
 		item->v.angles.x = item->v.angles.z = 0.0F;
 
 		item->EmitSound("items/ammopickup1.wav", CHAN_ITEM);
+	}
+
+	if (item->IsEmpty())
+	{
+		item->v.nextthink = gpGlobals->time + 10.0F;
 	}
 }
 

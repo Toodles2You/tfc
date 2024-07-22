@@ -991,12 +991,19 @@ dead_bonuses:
         }
     }
 
-#if 0
-    if (player->PCNumber() == PC_SPY && HasGoalResults(TFGR_REMOVE_DISGUISE))
+    if (HasGoalResults(TFGR_REMOVE_DISGUISE))
     {
-        dynamic_cast<CBasePlayer*>(player)->RemoveDisguise();
-        dynamic_cast<CBasePlayer*>(player)->StopFeigning();
+#if 0
+        static_cast<CBasePlayer*>(player)->RemoveDisguise();
+#endif
+
+        if (static_cast<CBasePlayer*>(player)->InState(CBasePlayer::State::FeigningDeath))
+        {
+            static_cast<CBasePlayer*>(player)->StopFeigningDeath();
+        }
     }
+
+#if 0
     if (player->PCNumber() == PC_ENGINEER && HasGoalResults(TFGR_DESTROY_BUILDINGS))
     {
         dynamic_cast<CBasePlayer*>(player)->RemoveAllBuildings(false);

@@ -275,7 +275,7 @@ void CPrimeGrenade::PrimedThink()
 
 	SetOrigin(owner->v.origin);
 
-	if (!owner->IsAlive())
+	if (!owner->IsAlive() || owner->InState(CBasePlayer::State::FeigningDeath))
 	{
 		Throw(kDrop);
 		return;

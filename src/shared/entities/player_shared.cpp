@@ -155,12 +155,34 @@ void CBasePlayer::WeaponPostFrame()
 	}
 #endif
 
-#ifdef GAME_DLL
-	if ((m_afButtonPressed & IN_ATTACK2) != 0 && m_rgpPlayerWeapons[WEAPON_PIPEBOMB_LAUNCHER] != nullptr)
+	if ((m_afButtonPressed & IN_ATTACK2) != 0)
 	{
-		dynamic_cast<CPipeBombLauncher*>(m_rgpPlayerWeapons[WEAPON_PIPEBOMB_LAUNCHER])->DetonatePipeBombs();
-	}
+		if (HasPlayerWeapon(WEAPON_PIPEBOMB_LAUNCHER))
+		{
+#ifdef GAME_DLL
+			dynamic_cast<CPipeBombLauncher*>(m_rgpPlayerWeapons[WEAPON_PIPEBOMB_LAUNCHER])->DetonatePipeBombs();
 #endif
+		}
+
+		/* Wait until the feign state has completely changed. */
+		if (PCNumber() == PC_SPY && m_iFeignTime == 0)
+		{
+			if (!InState(State::FeigningDeath))
+			{
+				/* Set the timer to indicate how long the player has been holding the feign button. */
+				m_iFeignHoldTime = 400;
+			}
+			else
+			{
+				StopFeigningDeath();
+			}
+		}
+	}
+	/* If the player has quickly pressed & released the feign button, silently feign death. */
+	else if (PCNumber() == PC_SPY && (m_afButtonReleased & IN_ATTACK2) != 0 && m_iFeignHoldTime != 0)
+	{
+		StartFeigningDeath(true);
+	}
 
 	if (HasPlayerWeapon(WEAPON_DETPACK))
 	{
@@ -179,6 +201,12 @@ void CBasePlayer::WeaponPostFrame()
 #ifdef CLIENT_DLL
 void CBasePlayer::PreThink()
 {
+	/* Prevent attacking while feigning death. */
+	if (InState(State::FeigningDeath) || m_iFeignTime != 0)
+	{
+		v.button &= ~IN_ATTACK;
+	}
+
 	const auto buttonsChanged = m_afButtonLast ^ v.button;
 
 	m_afButtonPressed = buttonsChanged & v.button;
@@ -237,9 +265,11 @@ void CBasePlayer::PostThink()
 
 			if (flFallDamage > 0)
 			{
+				const auto wasFeigning = InState(State::FeigningDeath);
+
 				TakeDamage(CWorld::World, CWorld::World, flFallDamage, DMG_FALL);
 
-				if (v.health <= 0)
+				if (v.health <= 0 || (!wasFeigning && InState(State::FeigningDeath)))
 				{
 					EmitSound("common/bodysplat.wav", CHAN_VOICE);
 				}
@@ -304,6 +334,7 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 	data.iuser4 = m_iConcussionTime;
 #endif
 	data.ammo_rockets = m_iGrenadeExplodeTime;
+	data.ammo_cells = m_iFeignTime | (m_iFeignHoldTime << 16);
 
 	data.weapons = m_WeaponBits;
 	data.m_iId = (m_pActiveWeapon != nullptr) ? m_pActiveWeapon->GetID() + 1 : 0;
@@ -367,6 +398,8 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 	m_flSpeedReduction = data.vuser3.x;
 	m_iConcussionTime = data.iuser4;
 	m_iGrenadeExplodeTime = data.ammo_rockets;
+	m_iFeignTime = data.ammo_cells & UINT16_MAX;
+	m_iFeignHoldTime = data.ammo_cells >> 16;
 
 	m_WeaponBits = data.weapons;
 	if (m_pActiveWeapon == nullptr)
@@ -430,6 +463,8 @@ void CBasePlayer::DecrementTimers(const int msec)
 	}
 
 	m_iGrenadeExplodeTime = std::max(m_iGrenadeExplodeTime - msec, 0);
+
+	UpdateFeigningDeath(msec);
 }
 
 
@@ -909,11 +944,157 @@ void CBasePlayer::SetEntityState(const entity_state_t& state)
 }
 
 
+void CBasePlayer::UpdateFeigningDeath(const int msec)
+{
+	if (m_iFeignTime != 0)
+	{
+		const auto isFeigning = InState(State::FeigningDeath);
+
+		if (m_iFeignTime <= msec)
+		{
+			/* Set the final render info one the state has finished changed. */
+			v.rendermode = isFeigning ? kRenderTransTexture : kRenderNormal;
+			v.renderamt = 0;
+		}
+		else
+		{
+			v.rendermode = kRenderTransTexture;
+
+			/* Lerp our render amount to fade in & out of being visible. */
+			if (isFeigning)
+			{
+				v.renderamt = 255 * (m_iFeignTime / (float)kFeignDuration);
+			}
+			else
+			{
+				v.renderamt = 255 * (1.0F - (m_iFeignTime / (float)kUnfeignDuration));
+			}
+		}
+	}
+
+	m_iFeignTime = std::max(m_iFeignTime - msec, 0);
+	m_iFeignHoldTime = std::max(m_iFeignHoldTime - msec, 0);
+}
+
+
+bool CBasePlayer::StartFeigningDeath(const bool silent, const int damageType)
+{
+	/* Wait until the feign state has completely changed. */
+	if (InState(State::FeigningDeath) || m_iFeignTime != 0)
+	{
+		return false;
+	}
+
+	EnterState(State::FeigningDeath);
+
+	m_iFeignHoldTime = 0;
+
+	if (silent)
+	{
+		/* Silently become invisible. */
+
+		if (m_iFeignTime != 0)
+		{
+			const auto feignPercent =
+				1.0F - (m_iFeignTime / (float)kUnfeignDuration);
+
+			m_iFeignTime = kFeignDuration * feignPercent;
+		}
+		else
+		{
+			m_iFeignTime = kFeignDuration;
+		}
+
+#ifdef GAME_DLL
+		RemoveGoalItems();
+#endif
+
+#ifdef CLIENT_DLL
+		EmitSoundPredicted("debris/beamstart1.wav", CHAN_ITEM, 0.2F, ATTN_IDLE);
+#endif
+
+		return true;
+	}
+
+	/* Feign death. */
+
+	m_iFeignTime = 0;
+	v.rendermode = kRenderTransTexture;
+	v.renderamt = 0;
+
+#ifdef GAME_DLL
+	DropBackpack();
+	RemoveGoalItems();
+
+	SetAction(Action::Die);
+
+	auto gibMode = GIB_NORMAL;
+	if ((damageType & DMG_ALWAYSGIB) != 0)
+	{
+		gibMode = GIB_ALWAYS;
+	}
+	else if ((damageType & DMG_NEVERGIB) != 0)
+	{
+		gibMode = GIB_NEVER;
+	}
+
+	if (gibMode == GIB_NEVER || (gibMode != GIB_ALWAYS && v.health >= -40.0f))
+	{
+		DeathSound(damageType);
+	}
+
+	tent::SpawnCorpse(this, gibMode);
+
+	SetAction(Action::Idle, true);
+#endif
+
+	return true;
+}
+
+
+void CBasePlayer::StopFeigningDeath()
+{
+	if (!InState(State::FeigningDeath))
+	{
+		return;
+	}
+
+	LeaveState(State::FeigningDeath);
+
+	/* Fade to visible. */
+
+	m_iFeignHoldTime = 0;
+
+	if (m_iFeignTime != 0)
+	{
+		const auto feignPercent =
+			1.0F - (m_iFeignTime / (float)kFeignDuration);
+
+		m_iFeignTime = kUnfeignDuration * feignPercent;
+	}
+	else
+	{
+		m_iFeignTime = kUnfeignDuration;
+	}
+
+#ifdef CLIENT_DLL
+	EmitSoundPredicted("debris/beamstart2.wav", CHAN_ITEM, 0.2F, ATTN_IDLE);
+#endif
+}
+
+
 void CBasePlayer::ClearEffects()
 {
 	m_StateBits = 0;
 	m_nLegDamage = 0;
 	m_iConcussionTime = 0;
+	m_iFeignTime = 0;
+	m_iFeignHoldTime = 0;
+
+	v.rendermode = kRenderNormal;
+	v.renderamt = 0;
+	v.rendercolor = g_vecZero;
+	v.renderfx = kRenderFxNone;
 
 #ifdef GAME_DLL
 	MessageBegin(MSG_ONE, gmsgStatusIcon, this);

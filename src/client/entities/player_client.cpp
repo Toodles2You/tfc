@@ -192,6 +192,13 @@ void CBasePlayer::PrimeGrenade(const int grenadeSlot)
 		return;
 	}
 
+	/* Prevent grenade priming while feigning death. */
+	if (InState(State::FeigningDeath) || m_iFeignTime != 0)
+	{
+		EmitSoundPredicted("common/wpn_denyselect.wav", CHAN_ITEM, VOL_NORM, ATTN_IDLE);
+		return;
+	}
+
 	if (m_rgAmmo[AMMO_GRENADES1 + grenadeSlot] == 0)
 	{
 		EmitSoundPredicted("common/wpn_denyselect.wav", CHAN_ITEM, VOL_NORM, ATTN_IDLE);

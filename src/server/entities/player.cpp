@@ -478,12 +478,49 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		return false;
 	}
 
+	m_flNextRegenerationTime = gpGlobals->time + 3.0F;
+
+	MessageBegin(MSG_SPEC, SVC_DIRECTOR);
+		WriteByte(9);							  // command length in bytes
+		WriteByte(DRC_CMD_EVENT);				  // take damage event
+		WriteShort(v.GetIndex());	  // index number of primary entity
+		WriteShort(inflictor->v.GetIndex()); // index number of secondary entity
+		WriteLong(5);							  // eventflags (priority and flags)
+	MessageEnd();
+
+	/* If the player survived the damage & is holding the feign button, attempt to feign death. */
+	if (PCNumber() == PC_SPY && (v.button & IN_ATTACK2) != 0)
+	{
+		if (StartFeigningDeath(false, bitsDamageType))
+		{
+			/* Toodles: Send a faux death notice. */
+			/* Toodles TODO: Only send this to enemies. */
+
+			CBaseEntity* accomplice = m_hLastAttacker[1];
+
+			if (accomplice == nullptr && m_hLastAttacker[0] != attacker)
+			{
+				/* No accomplice, yet, the last attacking player is not the killer. */
+				accomplice = m_hLastAttacker[0];
+			}
+
+			if (accomplice == this)
+			{
+				/* Don't account for us assisting in our own death. */
+				accomplice = nullptr;
+			}
+
+			g_pGameRules->PlayerKilled(this, attacker, inflictor, accomplice, bitsDamageType);
+
+			/* Return now to prevent pain sounds & effects applied by the damage type. */
+			return false;
+		}
+	}
+
 	if (flDamage >= 1.0F)
 	{
 		Pain(bitsDamageType);
 	}
-
-	m_flNextRegenerationTime = gpGlobals->time + 3.0F;
 
 	if ((bitsDamageType & DMG_IGNITE) != 0)
 	{
@@ -494,14 +531,6 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	{
 		BecomeTranquilized();
 	}
-
-	MessageBegin(MSG_SPEC, SVC_DIRECTOR);
-		WriteByte(9);							  // command length in bytes
-		WriteByte(DRC_CMD_EVENT);				  // take damage event
-		WriteShort(v.GetIndex());	  // index number of primary entity
-		WriteShort(inflictor->v.GetIndex()); // index number of secondary entity
-		WriteLong(5);							  // eventflags (priority and flags)
-	MessageEnd();
 
 	return true;
 }
@@ -890,6 +919,12 @@ void CBasePlayer::SetUseObject(CBaseEntity* object)
 
 void CBasePlayer::PreThink()
 {
+	/* Prevent attacking while feigning death. */
+	if (InState(State::FeigningDeath) || m_iFeignTime != 0)
+	{
+		v.button &= ~IN_ATTACK;
+	}
+
 	int buttonsChanged = (m_afButtonLast ^ v.button); // These buttons have changed this frame
 
 	// Debounced button codes for pressed/released
@@ -1647,18 +1682,25 @@ void CBasePlayer::DropBackpack()
 {
 	if (g_pGameRules->DeadPlayerAmmo(this) != GR_PLR_DROP_AMMO_NO)
 	{
-		CItem::DropBackpack(
-			this,
-			m_rgAmmo[AMMO_SHELLS],
-			m_rgAmmo[AMMO_NAILS],
-			m_rgAmmo[AMMO_ROCKETS],
-			m_rgAmmo[AMMO_CELLS],
-			true);
+		if (!IsAlive())
+		{
+			CItem::DropBackpack(
+				this,
+				m_rgAmmo[AMMO_SHELLS],
+				m_rgAmmo[AMMO_NAILS],
+				m_rgAmmo[AMMO_ROCKETS],
+				m_rgAmmo[AMMO_CELLS],
+				true);
 
-		m_rgAmmo[AMMO_SHELLS] = 0;
-		m_rgAmmo[AMMO_NAILS] = 0;
-		m_rgAmmo[AMMO_ROCKETS] = 0;
-		m_rgAmmo[AMMO_CELLS] = 0;
+			m_rgAmmo[AMMO_SHELLS] = 0;
+			m_rgAmmo[AMMO_NAILS] = 0;
+			m_rgAmmo[AMMO_ROCKETS] = 0;
+			m_rgAmmo[AMMO_CELLS] = 0;
+		}
+		else
+		{
+			CItem::DropBackpack(this, 0, 0, 0, 0, true);
+		}
 	}
 }
 
@@ -2012,6 +2054,12 @@ void CBasePlayer::GetEntityState(entity_state_t& state)
 void CBasePlayer::PrimeGrenade(const int grenadeSlot)
 {
 	if (InState(State::Grenade))
+	{
+		return;
+	}
+
+	/* Prevent grenade priming while feigning death. */
+	if (InState(State::FeigningDeath) || m_iFeignTime != 0)
 	{
 		return;
 	}

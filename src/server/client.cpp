@@ -988,6 +988,9 @@ void ClientPrecache()
 	engine::PrecacheSound("items/ammopickup1.wav");
 	engine::PrecacheSound("items/ammopickup2.wav");
 
+	engine::PrecacheSound("debris/beamstart1.wav");
+	engine::PrecacheSound("debris/beamstart2.wav");
+
 	g_usGibbed = engine::PrecacheEvent(1, "events/gibs.sc");
 	g_usTeleport = engine::PrecacheEvent(1, "events/teleport.sc");
 	g_usExplosion = engine::PrecacheEvent(1, "events/explosion.sc");

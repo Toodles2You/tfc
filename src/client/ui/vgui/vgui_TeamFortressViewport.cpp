@@ -1437,6 +1437,7 @@ void TeamFortressViewport::InputPlayerSpecial()
 	{
 		client::ServerCmd("flaginfo");
 	}
+#if 0
 	else if (g_iPlayerClass == PC_ENGINEER || g_iPlayerClass == PC_SPY)
 	{
 		ShowCommandMenu(gViewPort->m_StandardMenu);
@@ -1446,6 +1447,7 @@ void TeamFortressViewport::InputPlayerSpecial()
 			m_pCurrentCommandMenu->KeyInput('7');
 		}
 	}
+#endif
 	else if (g_iPlayerClass == PC_MEDIC)
 	{
 		/* Switch between the Medikit & the previous weapon. */

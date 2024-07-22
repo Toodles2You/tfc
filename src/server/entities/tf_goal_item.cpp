@@ -210,14 +210,19 @@ void CTFGoalItem::GiveToPlayer(CBaseEntity* player, CTFGoal* activating_goal)
         return;
     }
 
-#if 0
-    if (player->PCNumber() == PC_SPY && HasGoalResults(TFGR_REMOVE_DISGUISE))
+    if (HasGoalResults(TFGR_REMOVE_DISGUISE))
     {
+        /* Toodles: Just in case, I guess. */
+        if (static_cast<CBasePlayer*>(player)->InState(CBasePlayer::State::FeigningDeath))
+        {
+            static_cast<CBasePlayer*>(player)->StopFeigningDeath();
+        }
+
+#if 0
         dynamic_cast<CBasePlayer*>(player)->RemoveDisguise();
-        dynamic_cast<CBasePlayer*>(player)->StopFeigning(); // Toodles: Just in case, I guess.
         dynamic_cast<CBasePlayer*>(player)->m_bPreventDisguise = true;
-    }
 #endif
+    }
 
     DoResults(player, true);
     DoItemGroupWork(player);
@@ -418,17 +423,19 @@ void CTFGoalItem::ItemTouch(CBaseEntity* other)
     {
         return;
     }
+
     /* Replacement for clan battle prematch. */
     if (g_pGameRules->GetState() != GR_STATE_RND_RUNNING)
     {
         return;
     }
-#if 0
-    if (dynamic_cast<CBasePlayer*>(other)->m_bFeigning)
+
+    if (static_cast<CBasePlayer*>(other)->InState(CBasePlayer::State::FeigningDeath)
+     || static_cast<CBasePlayer*>(other)->m_iFeignTime != 0)
     {
         return;
     }
-#endif
+
     if (&other->v == v.owner)
     {
         return;

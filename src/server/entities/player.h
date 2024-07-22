@@ -67,6 +67,7 @@ public:
 		CannotMove      = 32,
 		Burning			= 64,
 		Tranquilized	= 128,
+		FeigningDeath	= 256,
 	};
 
 public:
@@ -409,6 +410,22 @@ public:
 		m_flTranquilizationTime = gpGlobals->time + 15.0F;
 	}
 #endif
+
+protected:
+	static constexpr int kFeignDuration = 1000;
+	static constexpr int kUnfeignDuration = 2000;
+
+public:
+	int m_iFeignTime;
+
+protected:
+	int m_iFeignHoldTime;
+
+	void UpdateFeigningDeath(const int msec);
+
+public:
+	bool StartFeigningDeath(const bool silent, const int damageType = DMG_GENERIC);
+	void StopFeigningDeath();
 
 	void ClearEffects();
 
