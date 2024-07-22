@@ -182,6 +182,13 @@ void CBaseEntity::GetEntityState(entity_state_t& state)
 
 	state.sequence = v.sequence;
 	state.framerate = v.framerate;
+
+	state.rendermode = v.rendermode;
+	state.renderamt = v.renderamt;
+	state.renderfx = v.renderfx;
+	state.rendercolor.r = v.rendercolor.x;
+	state.rendercolor.g = v.rendercolor.y;
+	state.rendercolor.b = v.rendercolor.z;
 }
 
 
