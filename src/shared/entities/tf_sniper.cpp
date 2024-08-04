@@ -410,14 +410,14 @@ void CAutoRifle::GetWeaponInfo(WeaponInfo& i)
 
 	i.iShots = 1;
 
-	i.iAttackTime = 100;
+	i.iAttackTime = 90;
 	i.iReloadTime = 1500;
 
 	i.iProjectileType = kProjBullet;
-	i.iProjectileDamage = 8;
-	i.vecProjectileSpread = Vector2D(2.3F, 2.3F);
+	i.iProjectileDamage = 5;
+	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
 	i.iProjectileCount = 1;
-	i.iProjectileDamageMin = 8;
+	i.iProjectileDamageMin = 5;
 	i.iProjectileRange = 1920;
 
 	i.pszEvent = "events/wpn/tf_ar.sc";
