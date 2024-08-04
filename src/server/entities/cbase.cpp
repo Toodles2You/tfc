@@ -1106,6 +1106,11 @@ void CBaseEntity::GetEntityState(entity_state_t& state)
 		state.eflags &= ~EFLAG_SLERP;
 	}
 
+	if ((v.flags & FL_CLIENT) != 0)
+	{
+		state.eflags |= EFLAG_RIMLIGHT;
+	}
+
 	state.eflags |= m_EFlags;
 
 	state.scale = v.scale;

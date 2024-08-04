@@ -210,6 +210,7 @@ protected:
 
 	alight_t m_lighting;
 	Vector m_vLight[MAXSTUDIOBONES + 1];
+	Vector m_vLightRim[MAXSTUDIOBONES + 1];
 	Vector m_vLightValues[MAXSTUDIOVERTS];
 
 	Vector m_vChromeUp[MAXSTUDIOBONES];

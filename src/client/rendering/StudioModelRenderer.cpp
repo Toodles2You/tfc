@@ -1988,9 +1988,22 @@ void CStudioModelRenderer::StudioSetupLighting(alight_t* lighting)
 
 	m_vLight[MAXSTUDIOBONES] = lighting->plightvec;
 
+	const bool rimlight = (m_pCurrentEntity->curstate.eflags & EFLAG_RIMLIGHT) != 0;
+
+	if (rimlight)
+	{
+		m_vLightRim[MAXSTUDIOBONES] = (m_pCurrentEntity->origin - m_vRenderOrigin).Normalize ();
+	}
+
 	for (int i = 0; i < m_pStudioHeader->numbones; i++)
 	{
 		VectorIRotate(lighting->plightvec, (*m_pbonetransform)[i], m_vLight[i]);
+
+		if (rimlight)
+		{
+			VectorIRotate(m_vLightRim[MAXSTUDIOBONES], (*m_pbonetransform)[i], m_vLightRim[i]);
+		}
+
 		StudioSetupChrome(i);
 	}
 }
@@ -2038,6 +2051,32 @@ void CStudioModelRenderer::CalculateLighting(float* dest, int bone, int flags, V
 	}
 
 	float illum = m_lighting.ambientlight;
+
+	const bool rimlight = (m_pCurrentEntity->curstate.eflags & EFLAG_RIMLIGHT) != 0;
+
+	if (rimlight)
+	{
+		illum = std::max (illum, 31.0F);
+
+		float rimlightcos;
+		if (bone == -1)
+		{
+			rimlightcos = DotProduct(normal, m_vLightRim[MAXSTUDIOBONES]);
+		}
+		else
+		{
+			/* -1 colinear, 1 opposite */
+			rimlightcos = DotProduct(normal, m_vLightRim[bone]);
+		}
+
+		/* Do modified hemispherical lighting */
+		rimlightcos = (std::min(rimlightcos, 1.0F) + (1.4F - 1.0F)) / 1.4F;
+
+		if (rimlightcos > 0.0F)
+		{
+			illum += 96.0F * rimlightcos;
+		}
+	}
 
 	if ((flags & STUDIO_NF_FLATSHADE) != 0)
 	{
