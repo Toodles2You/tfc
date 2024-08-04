@@ -812,7 +812,7 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 					info.iProjectileCount * args->iparam2,
 					info.iProjectileRange,
 					false,
-					0);
+					2);
 			}
 			break;
 		}
