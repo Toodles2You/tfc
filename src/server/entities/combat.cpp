@@ -284,7 +284,7 @@ void CBasePlayer::FireBullets(
 		}
 		else
 		{
-			ajdusted = (v.origin - hit->BodyTarget()).Length() / 1024.0F;
+			ajdusted = std::max((v.origin - hit->BodyTarget()).Length() - 512.0F, 0.0F) / 512.0F;
 			ajdusted = damageMax + damageFalloff * Bezier(ajdusted);
 		}
 

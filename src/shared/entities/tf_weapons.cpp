@@ -464,10 +464,18 @@ void CShotgun::GetWeaponInfo(WeaponInfo& i)
 	i.iReloadTime = 2000;
 
 	i.iProjectileType = kProjBullet;
+	/* Toodles TODO: This probably isn't a good method for faking extra shotgun pellets. */
+#ifdef GAME_DLL
+	i.iProjectileDamage = 24;
+	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
+	i.iProjectileCount = 1;
+	i.iProjectileDamageMin = 12;
+#else
 	i.iProjectileDamage = 4;
 	i.vecProjectileSpread = Vector2D(2.3F, 2.3F);
 	i.iProjectileCount = 6;
 	i.iProjectileDamageMin = 4;
+#endif
 	i.iProjectileRange = 2432;
 
 	i.pszEvent = "events/wpn/tf_sg.sc";
