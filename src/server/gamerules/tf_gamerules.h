@@ -72,7 +72,6 @@ public:
 	float FlPlayerFallDamage(CBasePlayer* player) override;
 
 protected:
-	void UpdatePlayerClass(CBasePlayer* player);
 	bool ChangePlayerClass(CBasePlayer* pPlayer, int classIndex);
 	void DisplayItemStatus(CBasePlayer* player, const int goalNo);
 

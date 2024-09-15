@@ -36,6 +36,7 @@ struct PCInfo
 	int maxAmmo[AMMO_TYPES];
 	int initAmmo[AMMO_TYPES];
 	const char* model;
+	const char* modelPath;
 	byte colormap[2][2];
 };
 

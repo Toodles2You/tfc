@@ -322,36 +322,6 @@ bool CTeamFortress::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool b
 }
 
 
-void CTeamFortress::UpdatePlayerClass(CBasePlayer* player)
-{
-    const auto index = player->v.GetIndex();
-    const auto team = player->TeamNumber() - TEAM_DEFAULT;
-    const auto playerclass = player->PCNumber();
-
-    char* infobuffer = engine::GetInfoKeyBuffer(player->v.pContainingEntity);
-
-    PCInfo& info = sTFClassInfo[playerclass];
-
-    engine::SetClientKeyValue(
-        index,
-        infobuffer,
-        "model",
-        info.model);
-
-    engine::SetClientKeyValue(
-        index,
-        infobuffer,
-        "topcolor",
-        util::dtos1(info.colormap[team][0]));
-
-    engine::SetClientKeyValue(
-        index,
-        infobuffer,
-        "bottomcolor",
-        util::dtos2(info.colormap[team][1]));
-}
-
-
 bool CTeamFortress::ChangePlayerClass(CBasePlayer* pPlayer, int classIndex)
 {
     if (pPlayer->TeamNumber() <= TEAM_UNASSIGNED || pPlayer->TeamNumber() > m_numTeams)
@@ -412,8 +382,6 @@ bool CTeamFortress::ChangePlayerClass(CBasePlayer* pPlayer, int classIndex)
 
     pPlayer->v.playerclass = classIndex;
 
-    UpdatePlayerClass(pPlayer);
-
     if (!bKill && g_pGameRules->FPlayerCanRespawn(pPlayer))
     {
         pPlayer->Spawn();
@@ -432,13 +400,6 @@ bool CTeamFortress::ChangePlayerClass(CBasePlayer* pPlayer, int classIndex)
 void CTeamFortress::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer)
 {
     CHalfLifeMultiplay::ClientUserInfoChanged(pPlayer, infobuffer);
-
-    if (pPlayer->TeamNumber() != TEAM_UNASSIGNED
-     && pPlayer->TeamNumber() != TEAM_SPECTATORS
-     && pPlayer->PCNumber() != PC_UNDEFINED)
-    {
-        UpdatePlayerClass(pPlayer);
-    }
 }
 
 

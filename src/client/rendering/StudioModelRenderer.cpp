@@ -11,6 +11,7 @@
 #include "com_weapons.h"
 #include "dlight.h"
 #include "triangleapi.h"
+#include "tf_defs.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -1446,8 +1447,19 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 	if (m_nPlayerIndex < 0 || m_nPlayerIndex >= client::GetMaxClients())
 		return false;
 
+	const auto& info = g_PlayerExtraInfo[m_nPlayerIndex + 1];
+	const auto& classInfo = sTFClassInfo[info.playerclass];
 
-	m_pRenderModel = IEngineStudio.SetupPlayerModel(m_nPlayerIndex);
+	if (info.playerclass != PC_UNDEFINED)
+	{
+		/* Toodles TODO: Prevent having to do this string lookup every frame. */
+		m_pRenderModel = IEngineStudio.Mod_ForName (
+			classInfo.modelPath, false);
+	}
+	else
+	{
+		m_pRenderModel = IEngineStudio.SetupPlayerModel(m_nPlayerIndex);
+	}
 
 
 	if (m_pRenderModel == nullptr)
@@ -1575,8 +1587,6 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		 && m_pCurrentEntity->curstate.rendermode == kRenderNormal
 		 && m_pCurrentEntity->curstate.renderfx == kRenderFxNone)
 		{
-			const auto& info = g_PlayerExtraInfo[m_pCurrentEntity->index];
-
 			m_pCurrentEntity->curstate.renderfx = kRenderFxGlowShell;
 
 			/* Toodles TODO: These look a bit too much like power-ups. */
@@ -1595,8 +1605,16 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		}
 
 		// get remap colors
-		m_nTopColor = std::clamp(m_pPlayerInfo->topcolor, 0, 360);
-		m_nBottomColor = std::clamp(m_pPlayerInfo->bottomcolor, 0, 360);
+		if (info.playerclass != PC_UNDEFINED && (info.teamnumber == TEAM_BLUE || info.teamnumber == TEAM_RED))
+		{
+			m_nTopColor = classInfo.colormap[info.teamnumber - 1][0];
+			m_nBottomColor = classInfo.colormap[info.teamnumber - 1][1];
+		}
+		else
+		{
+			m_nTopColor = std::clamp(m_pPlayerInfo->topcolor, 0, 360);
+			m_nBottomColor = std::clamp(m_pPlayerInfo->bottomcolor, 0, 360);
+		}
 
 		/* Toodles: Hack to render player corpses with the correct remap colors. */
 		if (m_pCurrentEntity->curstate.renderfx == kRenderFxDeadPlayer)

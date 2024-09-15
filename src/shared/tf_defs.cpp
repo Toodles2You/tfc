@@ -49,6 +49,7 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             3,
         },
         .model = "scout",
+        .modelPath = "models/player/scout/scout.mdl",
         .colormap = {
             {153, 139},
             {255,  10},
@@ -91,6 +92,7 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             0,
         },
         .model = "sniper",
+        .modelPath = "models/player/sniper/sniper.mdl",
         .colormap = {
             {153, 145},
             {255,  10},
@@ -133,6 +135,7 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             1,
         },
         .model = "soldier",
+        .modelPath = "models/player/soldier/soldier.mdl",
         .colormap = {
             {153, 130},
             {250,  28},
@@ -175,6 +178,7 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             2,
         },
         .model = "demo",
+        .modelPath = "models/player/demo/demo.mdl",
         .colormap = {
             {153, 145},
             {255,  20},
@@ -217,6 +221,7 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             2,
         },
         .model = "medic",
+        .modelPath = "models/player/medic/medic.mdl",
         .colormap = {
             {153, 140},
             {255, 250},
@@ -259,6 +264,7 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             1,
         },
         .model = "hvyweapon",
+        .modelPath = "models/player/hvyweapon/hvyweapon.mdl",
         .colormap = {
             {148, 138},
             {255,  25},
@@ -301,6 +307,7 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             4,
         },
         .model = "pyro",
+        .modelPath = "models/player/pyro/pyro.mdl",
         .colormap = {
             {140, 145},
             {250,  25},
@@ -343,6 +350,7 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             2,
         },
         .model = "spy",
+        .modelPath = "models/player/spy/spy.mdl",
         .colormap = {
             {150, 145},
             {250, 240},
@@ -386,6 +394,7 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             2,
         },
         .model = "engineer",
+        .modelPath = "models/player/engineer/engineer.mdl",
         .colormap = {
             {140, 148},
             {  5, 250},
@@ -430,6 +439,7 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             0,
         },
         .model = "civilian",
+        .modelPath = "models/player/civilian/civilian.mdl",
         .colormap = {
             {150, 140},
             {250, 240},
