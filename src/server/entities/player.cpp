@@ -497,7 +497,6 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		if (StartFeigningDeath(false, bitsDamageType))
 		{
 			/* Toodles: Send a faux death notice. */
-			/* Toodles TODO: Only send this to enemies. */
 
 			CBaseEntity* accomplice = m_hLastAttacker[1];
 
@@ -513,9 +512,9 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 				accomplice = nullptr;
 			}
 
-			g_pGameRules->PlayerKilled(this, attacker, inflictor, accomplice, bitsDamageType);
+			g_pGameRules->DeathNotice(this, attacker, inflictor, accomplice, bitsDamageType);
 
-			if (util::DoDamageResponse(this, attacker))
+			if (!g_pGameRules->CanSeeThroughDisguise(this, attacker))
 			{
 				static_cast<CBasePlayer*>(attacker)->SendHitFeedback(this, flDamage, bitsDamageType);
 			}

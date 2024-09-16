@@ -1033,6 +1033,8 @@ bool CBasePlayer::StartFeigningDeath(const bool silent, const int damageType)
 		return true;
 	}
 
+	Undisguise();
+
 	/* Feign death. */
 
 	m_iFeignTime = 0;

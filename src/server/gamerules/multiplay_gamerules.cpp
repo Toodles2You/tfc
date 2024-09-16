@@ -693,13 +693,43 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 		flags |= kDamageFlagFriendlyFire;
 	}
 
-	MessageBegin(MSG_ALL, gmsgDeathMsg);
-	WriteByte(killerIndex);
-	WriteByte(accompliceIndex);
-	WriteByte(pVictim->v.GetIndex());
-	WriteByte(flags);
-	WriteString(killerWeapon);
-	MessageEnd();
+	if (pVictim->IsAlive())
+	{
+		/* Toodles: Send a faux death notice. */
+
+		for (int i = 0; i <= gpGlobals->maxClients; i++)
+		{
+			auto player = static_cast<CBasePlayer*>(util::PlayerByIndex(i));
+
+			if (player == nullptr)
+			{
+				continue;
+			}
+
+			if (player != pVictim && CanSeeThroughDisguise(player, pVictim))
+			{
+				continue;
+			}
+
+			MessageBegin(MSG_ONE, gmsgDeathMsg, player);
+			WriteByte(killerIndex);
+			WriteByte(accompliceIndex);
+			WriteByte(pVictim->v.GetIndex());
+			WriteByte(flags);
+			WriteString(killerWeapon);
+			MessageEnd();
+		}
+	}
+	else
+	{
+		MessageBegin(MSG_ALL, gmsgDeathMsg);
+		WriteByte(killerIndex);
+		WriteByte(accompliceIndex);
+		WriteByte(pVictim->v.GetIndex());
+		WriteByte(flags);
+		WriteString(killerWeapon);
+		MessageEnd();
+	}
 
 	if (pVictim == killer)
 	{

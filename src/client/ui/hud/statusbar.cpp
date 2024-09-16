@@ -83,6 +83,14 @@ void CHudStatusBar::Draw(const float time)
 		return;
 	}
 
+	/* Entity is invisible. */
+	if (extra->teamnumber != g_iTeamNumber && (entity == nullptr
+	 || (entity->curstate.rendermode != kRenderNormal && entity->curstate.renderamt <= 5)))
+	{
+		SetActive(false);
+		return;
+	}
+
 	if (gHUD.m_gameMode == kGamemodeCooperative
 	 || (gHUD.m_gameMode >= kGamemodeTeamplay && teamNumber == g_iTeamNumber)
 	 || gHUD.IsSpectator())
@@ -92,14 +100,6 @@ void CHudStatusBar::Draw(const float time)
 	}
 	else
 	{
-		/* Entity is invisible. */
-		if (entity == nullptr || (entity->curstate.rendermode != kRenderNormal
-	 	 && entity->curstate.renderamt <= 5))
-		{
-			SetActive(false);
-			return;
-		}
-
 		snprintf(m_szStatusBar, MAX_STATUSTEXT_LENGTH, "%s", name);
 	}
 	m_szStatusBar[MAX_STATUSTEXT_LENGTH - 1] = '\0';
