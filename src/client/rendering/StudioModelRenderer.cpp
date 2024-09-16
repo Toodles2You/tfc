@@ -1584,18 +1584,6 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 
 		m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 
-		if (m_pCurrentEntity->curstate.rendermode != kRenderNormal)
-		{
-			const auto& info = g_PlayerExtraInfo[m_nPlayerIndex + 1];
-
-			/* Keep invisible allies slightly visible. */
-			if (gHUD.m_gameMode == kGamemodeCooperative || (gHUD.m_gameMode >= kGamemodeTeamplay
-			 && info.teamnumber == g_iTeamNumber) || gHUD.IsSpectator())
-			{
-				m_pCurrentEntity->curstate.renderamt = std::max(m_pCurrentEntity->curstate.renderamt, 31);
-			}
-		}
-
 		/* Burning glow effect. */
 		if ((m_pCurrentEntity->curstate.eflags & EFLAG_BURNING) != 0
 		 && m_pCurrentEntity->curstate.rendermode == kRenderNormal

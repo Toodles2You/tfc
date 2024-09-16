@@ -2061,6 +2061,14 @@ void CBasePlayer::GetEntityState(entity_state_t& state, CBasePlayer* player)
 		state.eflags |= EFLAG_BURNING;
 	}
 
+	/* Keep allies slightly visible. */
+
+	if (v.rendermode != kRenderNormal && v.renderamt < 31
+	 && g_pGameRules->CanSeeThroughDisguise(player, this))
+	{
+		state.renderamt = std::max (v.rendermode, 31);
+	}
+
 	/* Check for spy disguise. */
 
 	state.aiment = 0;
