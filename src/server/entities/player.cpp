@@ -514,7 +514,7 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 
 			g_pGameRules->DeathNotice(this, attacker, inflictor, accomplice, bitsDamageType);
 
-			if (!g_pGameRules->CanSeeThroughDisguise(this, attacker))
+			if (attacker->IsNetClient() && !g_pGameRules->CanSeeThroughDisguise(this, attacker))
 			{
 				static_cast<CBasePlayer*>(attacker)->SendHitFeedback(this, flDamage, bitsDamageType);
 			}
