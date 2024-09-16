@@ -1235,22 +1235,25 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 			if (player != nullptr)
 			{
 				m_nPlayerIndex = player->index - 1;
-				m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
+				m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex + 1);
 
-				if (m_pCurrentEntity->curstate.rendermode != kRenderNormal)
+				const auto &info = g_PlayerExtraInfo[m_nPlayerIndex + 1];
+
+				auto teamNumber = info.teamnumber;
+				auto playerClass = info.playerclass;
+
+				const auto& classInfo = sTFClassInfo[playerClass];
+
+				if (playerClass != PC_UNDEFINED && (teamNumber == TEAM_BLUE || teamNumber == TEAM_RED))
 				{
-					const auto& info = g_PlayerExtraInfo[m_nPlayerIndex + 1];
-
-					/* Keep invisible allies slightly visible. */
-					if (gHUD.m_gameMode == kGamemodeCooperative || (gHUD.m_gameMode >= kGamemodeTeamplay
-					 && info.teamnumber == g_iTeamNumber) || gHUD.IsSpectator())
-					{
-						m_pCurrentEntity->curstate.renderamt = std::max(m_pCurrentEntity->curstate.renderamt, 31);
-					}
+					m_nTopColor = classInfo.colormap[teamNumber - 1][0];
+					m_nBottomColor = classInfo.colormap[teamNumber - 1][1];
 				}
-
-				m_nTopColor = std::clamp(m_pPlayerInfo->topcolor, 0, 360);
-				m_nBottomColor = std::clamp(m_pPlayerInfo->bottomcolor, 0, 360);
+				else
+				{
+					m_nTopColor = std::clamp(m_pPlayerInfo->topcolor, 0, 360);
+					m_nBottomColor = std::clamp(m_pPlayerInfo->bottomcolor, 0, 360);
+				}
 			}
 		}
 
