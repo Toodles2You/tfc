@@ -993,9 +993,7 @@ dead_bonuses:
 
     if (HasGoalResults(TFGR_REMOVE_DISGUISE))
     {
-#if 0
-        static_cast<CBasePlayer*>(player)->RemoveDisguise();
-#endif
+        static_cast<CBasePlayer*>(player)->Undisguise();
 
         if (static_cast<CBasePlayer*>(player)->InState(CBasePlayer::State::FeigningDeath))
         {

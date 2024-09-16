@@ -218,10 +218,8 @@ void CTFGoalItem::GiveToPlayer(CBaseEntity* player, CTFGoal* activating_goal)
             static_cast<CBasePlayer*>(player)->StopFeigningDeath();
         }
 
-#if 0
-        dynamic_cast<CBasePlayer*>(player)->RemoveDisguise();
-        dynamic_cast<CBasePlayer*>(player)->m_bPreventDisguise = true;
-#endif
+        static_cast<CBasePlayer*>(player)->Undisguise();
+        static_cast<CBasePlayer*>(player)->EnterState(CBasePlayer::State::CannotDisguise);
     }
 
     DoResults(player, true);
@@ -296,10 +294,10 @@ void CTFGoalItem::RemoveFromPlayer(CBaseEntity* activating_player, int method)
         dynamic_cast<CBasePlayer*>(activating_player)->m_flSpeedReduction = best_reduction;
     }
 
-#if 0
     if (let_disguise)
-        dynamic_cast<CBasePlayer*>(activating_player)->m_bPreventDisguise = false;
-#endif
+    {
+        static_cast<CBasePlayer*>(activating_player)->LeaveState(CBasePlayer::State::CannotDisguise);
+    }
 
     dynamic_cast<CBasePlayer*>(activating_player)->m_TFItems &= ~remove_items;
 

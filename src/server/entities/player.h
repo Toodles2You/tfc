@@ -69,6 +69,7 @@ public:
 		Tranquilized	= 128,
 		FeigningDeath	= 256,
 		Disguised		= 512,
+		CannotDisguise  = 1024,
 	};
 
 public:
@@ -432,10 +433,10 @@ public:
 	byte m_iDisguisePlayerClass;
 	byte m_iDisguiseIndex;
 	float m_flDisguiseHealth;
-	int m_iDisguiseTime;
-	int m_iDisguiseWeaponModel;
+	int16 m_iDisguiseTime;
+	int16 m_iDisguiseWeaponModel;
 	char m_szDisguiseAnimExtention[32];
-	int m_iDisguiseSequence;
+	int16 m_iDisguiseSequence;
 
 	void StartDisguising(const int playerClass, const bool ally = false);
 	void FinishDisguising();

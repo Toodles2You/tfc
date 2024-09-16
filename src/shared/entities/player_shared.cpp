@@ -1104,6 +1104,15 @@ void CBasePlayer::StartDisguising(const int playerClass, const bool ally = false
 		return;
 	}
 
+	if (InState(State::CannotDisguise))
+	{
+		/*
+			Toodles TODO: Try to drop the goal preventing
+			us from disguising before returning.
+		*/
+		return;
+	}
+
 	/* Toodles TODO: Check map team classes. */
 	if (playerClass < PC_SCOUT || playerClass > PC_ENGINEER)
 	{
