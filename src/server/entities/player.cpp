@@ -2064,10 +2064,17 @@ void CBasePlayer::GetEntityState(entity_state_t& state, CBasePlayer* player)
 		state.eflags |= EFLAG_BURNING;
 	}
 
-	/* Spy disguise. */
+	/* Check for spy disguise. */
+
+	state.aiment = 0;
 
 	if (InState(State::Disguised) && !g_pGameRules->CanSeeThroughDisguise(player, this))
 	{
+		if (m_iDisguiseIndex != 0)
+		{
+			state.aiment = m_iDisguiseIndex;
+		}
+
 		if (m_iDisguiseTeam != TEAM_UNASSIGNED)
 		{
 			state.team = m_iDisguiseTeam;

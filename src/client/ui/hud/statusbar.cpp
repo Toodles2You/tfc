@@ -51,14 +51,9 @@ void CHudStatusBar::Draw(const float time)
 
 	auto info = &g_PlayerInfoList[m_targetIndex];
 
-	if (info->name[0] == '\0')
-	{
-		SetActive(false);
-		return;
-	}
-
 	auto extra = &g_PlayerExtraInfo[m_targetIndex];
 
+	auto name = info->name;
 	auto teamNumber = extra->teamnumber;
 	auto health = (int)extra->health;
 
@@ -66,8 +61,26 @@ void CHudStatusBar::Draw(const float time)
 
 	if (entity != nullptr)
 	{
+		/* Check for spy disguise. */
+
+		if (entity->curstate.aiment != 0)
+		{
+			/* Toodles FIXME: Don't perform this every frame. */
+			client::GetPlayerInfo(
+				entity->curstate.aiment,
+				g_PlayerInfoList + entity->curstate.aiment);
+
+			name = g_PlayerInfoList[entity->curstate.aiment].name;
+		}
+
 		teamNumber = entity->curstate.team;
 		health = entity->curstate.health;
+	}
+
+	if (name[0] == '\0')
+	{
+		SetActive(false);
+		return;
 	}
 
 	if (gHUD.m_gameMode == kGamemodeCooperative
@@ -75,7 +88,7 @@ void CHudStatusBar::Draw(const float time)
 	 || gHUD.IsSpectator())
 	{
 		snprintf(m_szStatusBar, MAX_STATUSTEXT_LENGTH, "%s | %i",
-			info->name, health);
+			name, health);
 	}
 	else
 	{
@@ -87,7 +100,7 @@ void CHudStatusBar::Draw(const float time)
 			return;
 		}
 
-		snprintf(m_szStatusBar, MAX_STATUSTEXT_LENGTH, "%s", info->name);
+		snprintf(m_szStatusBar, MAX_STATUSTEXT_LENGTH, "%s", name);
 	}
 	m_szStatusBar[MAX_STATUSTEXT_LENGTH - 1] = '\0';
 

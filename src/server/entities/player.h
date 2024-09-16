@@ -434,7 +434,8 @@ public:
 	float m_flDisguiseHealth;
 	int m_iDisguiseTime;
 
-	void Disguise(const int playerClass, const bool ally = false);
+	void StartDisguising(const int playerClass, const bool ally = false);
+	void FinishDisguising();
 	void Undisguise();
 
 	void ClearEffects();

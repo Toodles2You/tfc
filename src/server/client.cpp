@@ -538,7 +538,7 @@ void ClientCommand(Entity* pEntity)
 			{
 				auto playerClass = atoi(engine::Cmd_Argv(1));
 
-				player->Disguise(playerClass, false);
+				player->StartDisguising(playerClass, false);
 			}
 		}
 	}
@@ -550,7 +550,7 @@ void ClientCommand(Entity* pEntity)
 			{
 				auto playerClass = atoi(engine::Cmd_Argv(1));
 
-				player->Disguise(playerClass, true);
+				player->StartDisguising(playerClass, true);
 			}
 		}
 	}

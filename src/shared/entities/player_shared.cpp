@@ -468,17 +468,7 @@ void CBasePlayer::DecrementTimers(const int msec)
 
 	if (m_iDisguiseTime != 0 && m_iDisguiseTime <= msec)
 	{
-#ifdef GAME_DLL
-		auto disguise = static_cast<CBasePlayer*>(util::PlayerByIndex (m_iDisguiseIndex));
-
-		if (disguise != nullptr)
-		{
-			util::ClientPrint(this, HUD_PRINTCENTER, "#Disguise_player",
-				STRING(disguise->v.netname));
-		}
-#endif
-
-		EnterState(State::Disguised);
+		FinishDisguising();
 	}
 
 	m_iDisguiseTime = std::max(m_iDisguiseTime - msec, 0);
@@ -1097,9 +1087,35 @@ void CBasePlayer::StopFeigningDeath()
 }
 
 
-void CBasePlayer::Disguise(const int playerClass, const bool ally = false)
+void CBasePlayer::StartDisguising(const int playerClass, const bool ally = false)
 {
 	if (!IsPlayer() || !IsAlive())
+	{
+		return;
+	}
+
+	/* Toodles TODO: Check map team classes. */
+	if (playerClass < PC_SCOUT || playerClass > PC_ENGINEER)
+	{
+		return;
+	}
+
+#ifdef GAME_DLL
+	util::ClientPrint(this, HUD_PRINTCENTER, "#Disguise_start");
+#endif
+
+	/* Toodles TODO: Four team. */
+	m_iDisguiseTeam = (TeamNumber () == TEAM_BLUE) != ally ? TEAM_RED : TEAM_BLUE;
+
+	m_iDisguisePlayerClass = playerClass;
+
+	m_iDisguiseTime = 2000;
+}
+
+
+void CBasePlayer::FinishDisguising()
+{
+	if (m_iDisguiseTeam == TEAM_UNASSIGNED || m_iDisguisePlayerClass == PC_UNDEFINED)
 	{
 		return;
 	}
@@ -1127,7 +1143,8 @@ void CBasePlayer::Disguise(const int playerClass, const bool ally = false)
 			continue;
 		}
 
-		if ((g_pGameRules->PlayerRelationship(this, other) >= GR_ALLY) != ally)
+		if ((g_pGameRules->PlayerRelationship(this, other) >= GR_ALLY)
+		 != (m_iDisguiseTeam == TeamNumber())) /* Toodles FIXME: */
 		{
 			if (state > kDisguiseAnyTeam)
 			{
@@ -1140,7 +1157,7 @@ void CBasePlayer::Disguise(const int playerClass, const bool ally = false)
 			numCandidates = 0;
 		}
 
-		if (other->PCNumber () != playerClass)
+		if (other->PCNumber () != m_iDisguisePlayerClass)
 		{
 			if (state > kDisguiseAnyClass)
 			{
@@ -1163,28 +1180,30 @@ void CBasePlayer::Disguise(const int playerClass, const bool ally = false)
 		return;
 	}
 
-	/* Toodles TODO: Four team. */
-	m_iDisguiseTeam = (TeamNumber () == TEAM_BLUE) != ally ? TEAM_RED : TEAM_BLUE;
-	m_iDisguisePlayerClass = playerClass;
-
 	m_iDisguiseIndex = candidates[engine::RandomLong (1, numCandidates) - 1];
 
 	auto disguise = static_cast<CBasePlayer*>(util::PlayerByIndex (m_iDisguiseIndex));
 
-	m_flDisguiseHealth = disguise->v.health;
+	if (disguise != nullptr)
+	{
+		m_flDisguiseHealth = disguise->v.health;
+
+		util::ClientPrint(this, HUD_PRINTCENTER, "#Disguise_player",
+			STRING(disguise->v.netname));
+	}
+	else
+	{
+		m_flDisguiseHealth = 0.0F;
+	}
 
 	if (m_flDisguiseHealth <= 0.0F)
 	{
-		const auto &info = sTFClassInfo[PCNumber()];
-
-		m_flDisguiseHealth = info.maxHealth * engine::RandomFloat (0.5F, 1.0F);
+		m_flDisguiseHealth = sTFClassInfo[m_iDisguisePlayerClass].maxHealth
+			* engine::RandomFloat (0.5F, 1.0F);
 	}
-
-	util::ClientPrint(this, HUD_PRINTCENTER, "#Disguise_start",
-		STRING(disguise->v.netname));
 #endif
 
-	m_iDisguiseTime = 2000;
+	EnterState(State::Disguised);
 }
 
 

@@ -1456,6 +1456,8 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 
 	if (player != nullptr && m_pCurrentEntity->curstate.renderfx != kRenderFxDeadPlayer)
 	{
+		/* Check for spy disguise. */
+
 		teamNumber = player->curstate.team;
 		playerClass = player->curstate.playerclass;
 	}
@@ -2197,7 +2199,14 @@ void CStudioModelRenderer::StudioDrawPoints()
 				m_vChromeValues[k].y = (DotProduct(pStudioNorms[k], m_vChromeUp[pNormBone[k]]) + 1.0F) * 32.0F;
 			}
 
-			m_vLightValues[k] = m_lighting.color * illum;
+			if ((flags & STUDIO_NF_FULLBRIGHT) != 0)
+			{
+				m_vLightValues[k] = Vector (1.0F, 1.0F, 1.0F);
+			}
+			else
+			{
+				m_vLightValues[k] = m_lighting.color * illum;
+			}
 		}
 	}
 
