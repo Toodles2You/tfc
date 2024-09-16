@@ -125,8 +125,7 @@ void CNail::NailTouch(CBaseEntity* pOther)
 			}
 		}
 
-		if (owner->IsNetClient() && pOther->IsClient()
-		 && g_pGameRules->FPlayerCanTakeDamage(static_cast<CBasePlayer*>(pOther), owner, this))
+		if (util::DoDamageResponse(pOther, owner))
 		{
 			const auto dir = v.velocity.Normalize();
 

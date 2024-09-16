@@ -187,9 +187,9 @@ void CSniperRifle::PrimaryAttack()
 	
 	if (hit->IsClient())
 	{
-		auto player = dynamic_cast<CBasePlayer*>(hit);
+		auto player = static_cast<CBasePlayer*>(hit);
 
-		if (g_pGameRules->FPlayerCanTakeDamage(player, m_pPlayer))
+		if (util::DoDamageResponse(player, m_pPlayer))
 		{
 			MessageBegin(MSG_PVS, gmsgBlood, tr.vecEndPos);
 			WriteFloat(dir.x);

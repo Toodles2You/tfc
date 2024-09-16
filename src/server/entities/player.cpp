@@ -473,7 +473,7 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	{
 		Killed(inflictor, attacker, bitsDamageType);
 
-		if (attacker->IsNetClient())
+		if (util::DoDamageResponse(this, attacker))
 		{
 			static_cast<CBasePlayer*>(attacker)->SendHitFeedback(this, flDamage, bitsDamageType);
 		}
@@ -515,7 +515,7 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 
 			g_pGameRules->PlayerKilled(this, attacker, inflictor, accomplice, bitsDamageType);
 
-			if (attacker->IsNetClient())
+			if (util::DoDamageResponse(this, attacker))
 			{
 				static_cast<CBasePlayer*>(attacker)->SendHitFeedback(this, flDamage, bitsDamageType);
 			}
@@ -525,7 +525,9 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		}
 	}
 
-	if (flDamage >= 1.0F)
+	const auto doDamageResponse = util::DoDamageResponse(this, attacker);
+
+	if (flDamage >= 1.0F && doDamageResponse)
 	{
 		Pain(bitsDamageType);
 	}
@@ -540,11 +542,7 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		BecomeTranquilized();
 	}
 
-	if (attacker->IsNetClient()
-	/* Don't send hit feedback if we're feigning death. */
-	 && (!InState(State::FeigningDeath) || m_iFeignTime != 0)
-	/* Don't send hit feedback if we're disguised. */
-	 && (!InState(State::Disguised) || g_pGameRules->CanSeeThroughDisguise(static_cast<CBasePlayer*>(attacker), this)))
+	if (doDamageResponse)
 	{
 		static_cast<CBasePlayer*>(attacker)->SendHitFeedback(this, flDamage, bitsDamageType);
 	}

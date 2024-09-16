@@ -155,7 +155,9 @@ int CTFMelee::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& 
 
 	if (hit->IsClient())
 	{
-		if (g_pGameRules->FPlayerCanTakeDamage(dynamic_cast<CBasePlayer*>(hit), m_pPlayer))
+		result = kResultHit;
+
+		if (util::DoDamageResponse(hit, m_pPlayer))
 		{
 			MessageBegin(MSG_PVS, gmsgBlood, tr.vecEndPos);
 			WriteFloat(dir.x);
@@ -166,8 +168,6 @@ int CTFMelee::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& 
 			WriteCoord(tr.vecEndPos);
 			MessageEnd();
 		}
-
-		result = kResultHit;
 	}
 
 	return result;
@@ -412,7 +412,9 @@ int CKnife::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& tr
 
 	if (hit->IsClient())
 	{
-		if (g_pGameRules->FPlayerCanTakeDamage(dynamic_cast<CBasePlayer*>(hit), m_pPlayer))
+		result = kResultHit;
+
+		if (util::DoDamageResponse(hit, m_pPlayer))
 		{
 			MessageBegin(MSG_PVS, gmsgBlood, tr.vecEndPos);
 			WriteFloat(dir.x);
@@ -423,8 +425,6 @@ int CKnife::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& tr
 			WriteCoord(tr.vecEndPos);
 			MessageEnd();
 		}
-
-		result = kResultHit;
 	}
 
 	return result;

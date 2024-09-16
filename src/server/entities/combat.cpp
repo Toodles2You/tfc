@@ -297,15 +297,10 @@ void CBasePlayer::FireBullets(
 
 		traceEntities[traceCount] = hit;
 		traceCount++;
-		
-		if (!hit->IsClient())
-		{
-			continue;
-		}
 
 		auto player = dynamic_cast<CBasePlayer*>(hit);
 
-		if (!g_pGameRules->FPlayerCanTakeDamage(player, this))
+		if (!util::DoDamageResponse(player, this))
 		{
 			continue;
 		}

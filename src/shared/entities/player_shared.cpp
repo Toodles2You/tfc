@@ -1100,6 +1100,11 @@ void CBasePlayer::StartDisguising(const int playerClass, const bool ally = false
 		return;
 	}
 
+	if (playerClass == PCNumber() && ally)
+	{
+		return;
+	}
+
 #ifdef GAME_DLL
 	util::ClientPrint(this, HUD_PRINTCENTER, "#Disguise_start");
 #endif

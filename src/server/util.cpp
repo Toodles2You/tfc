@@ -1282,3 +1282,33 @@ void util::LagCompensation(CBaseEntity* entity, const int& ping)
 		}
 	}
 }
+
+bool util::DoDamageResponse(CBaseEntity* entity, CBaseEntity* attacker)
+{
+	if (!attacker->IsClient() || !entity->IsClient())
+	{
+		return false;
+	}
+
+	auto player = static_cast<CBasePlayer*>(entity);
+
+	if (!g_pGameRules->FPlayerCanTakeDamage(player, attacker))
+	{
+		return false;
+	}
+
+	if (player->InState(CBasePlayer::State::FeigningDeath))
+	{
+		return false;
+	}
+
+	if (player->InState(CBasePlayer::State::Disguised)
+	 && !g_pGameRules->CanSeeThroughDisguise(static_cast<CBasePlayer*>(attacker), player))
+	{
+		/* Toodles TODO: Compare the disguise team number with enemy & ally teams. */
+
+		return false;
+	}
+
+	return true;
+}
