@@ -79,6 +79,8 @@ void CSniperRifle::PrimaryAttack()
 {
 	const auto info = GetInfo();
 
+	m_pPlayer->Undisguise();
+
 	m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
 	float damageScale = std::clamp(1.0F - (float)m_iNextPrimaryAttack / info.iReloadTime, 0.0F, 1.0F);

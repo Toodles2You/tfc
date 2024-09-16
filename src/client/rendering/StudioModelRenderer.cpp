@@ -1448,9 +1448,21 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		return false;
 
 	const auto& info = g_PlayerExtraInfo[m_nPlayerIndex + 1];
-	const auto& classInfo = sTFClassInfo[info.playerclass];
+	
+	auto teamNumber = info.teamnumber;
+	auto playerClass = info.playerclass;
 
-	if (info.playerclass != PC_UNDEFINED)
+	const auto player = client::GetEntityByIndex (m_nPlayerIndex + 1);
+
+	if (player != nullptr && m_pCurrentEntity->curstate.renderfx != kRenderFxDeadPlayer)
+	{
+		teamNumber = player->curstate.team;
+		playerClass = player->curstate.playerclass;
+	}
+	
+	const auto& classInfo = sTFClassInfo[playerClass];
+
+	if (playerClass != PC_UNDEFINED)
 	{
 		/* Toodles TODO: Prevent having to do this string lookup every frame. */
 		m_pRenderModel = IEngineStudio.Mod_ForName (
@@ -1605,10 +1617,10 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		}
 
 		// get remap colors
-		if (info.playerclass != PC_UNDEFINED && (info.teamnumber == TEAM_BLUE || info.teamnumber == TEAM_RED))
+		if (playerClass != PC_UNDEFINED && (teamNumber == TEAM_BLUE || teamNumber == TEAM_RED))
 		{
-			m_nTopColor = classInfo.colormap[info.teamnumber - 1][0];
-			m_nBottomColor = classInfo.colormap[info.teamnumber - 1][1];
+			m_nTopColor = classInfo.colormap[teamNumber - 1][0];
+			m_nBottomColor = classInfo.colormap[teamNumber - 1][1];
 		}
 		else
 		{

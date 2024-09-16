@@ -1017,6 +1017,17 @@ int CHalfLifeMultiplay::PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pT
 }
 
 
+bool CHalfLifeMultiplay::CanSeeThroughDisguise(CBasePlayer* player, CBaseEntity* target)
+{
+	if (player == nullptr)
+	{
+		return false;
+	}
+
+    return player->IsSpectator() || PlayerRelationship (player, target) >= GR_ALLY;
+}
+
+
 int CHalfLifeMultiplay::GetTeamIndex(const char* pTeamName)
 {
 	auto i = 0;

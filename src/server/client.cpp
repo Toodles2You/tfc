@@ -530,6 +530,30 @@ void ClientCommand(Entity* pEntity)
 			detpack->v.pain_finished = fuse;
 		}
 	}
+	else if (streq(pcmd, "disguise_enemy"))
+	{
+		if (player->PCNumber() == PC_SPY)
+		{
+			if (engine::Cmd_Argc() > 1)
+			{
+				auto playerClass = atoi(engine::Cmd_Argv(1));
+
+				player->Disguise(playerClass, false);
+			}
+		}
+	}
+	else if (streq(pcmd, "disguise_friendly"))
+	{
+		if (player->PCNumber() == PC_SPY)
+		{
+			if (engine::Cmd_Argc() > 1)
+			{
+				auto playerClass = atoi(engine::Cmd_Argv(1));
+
+				player->Disguise(playerClass, true);
+			}
+		}
+	}
 	else if (g_pGameRules->ClientCommand(player, pcmd))
 	{
 	}
@@ -1183,8 +1207,9 @@ int AddToFullPack(struct entity_state_s* state, int e, Entity* ent, Entity* host
 	}
 
 	auto entity = ent->Get<CBaseEntity>();
+	auto other = host->Get<CBasePlayer>();
 
-	if (entity == nullptr)
+	if (entity == nullptr || other == nullptr)
 	{
 		return 0;
 	}
@@ -1256,7 +1281,7 @@ int AddToFullPack(struct entity_state_s* state, int e, Entity* ent, Entity* host
 	// delta from it.
 	state->number = e;
 
-	entity->GetEntityState(*state);
+	entity->GetEntityState(*state, other);
 
 	return 1;
 }

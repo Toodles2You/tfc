@@ -68,6 +68,7 @@ public:
 		Burning			= 64,
 		Tranquilized	= 128,
 		FeigningDeath	= 256,
+		Disguised		= 512,
 	};
 
 public:
@@ -314,7 +315,7 @@ public:
 	virtual void UpdateHudData();
 #endif
 
-	virtual void GetEntityState(entity_state_t& state) override;
+	virtual void GetEntityState(entity_state_t& state, CBasePlayer* player = nullptr) override;
 	virtual void SetEntityState(const entity_state_t& state) override;
 
 #ifdef GAME_DLL
@@ -426,6 +427,15 @@ protected:
 public:
 	bool StartFeigningDeath(const bool silent, const int damageType = DMG_GENERIC);
 	void StopFeigningDeath();
+
+	byte m_iDisguiseTeam;
+	byte m_iDisguisePlayerClass;
+	byte m_iDisguiseIndex;
+	float m_flDisguiseHealth;
+	int m_iDisguiseTime;
+
+	void Disguise(const int playerClass, const bool ally = false);
+	void Undisguise();
 
 	void ClearEffects();
 

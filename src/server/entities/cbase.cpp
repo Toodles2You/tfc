@@ -1059,7 +1059,7 @@ CBaseEntity* CBaseEntity::Create(const char* szName, const Vector& vecOrigin, co
 }
 
 
-void CBaseEntity::GetEntityState(entity_state_t& state)
+void CBaseEntity::GetEntityState(entity_state_t& state, CBasePlayer* player)
 {
 	state.entityType = ENTITY_NORMAL;
 

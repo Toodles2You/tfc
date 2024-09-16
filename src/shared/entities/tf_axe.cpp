@@ -107,6 +107,8 @@ void CTFMelee::WeaponPostFrame()
 		}
 		else if ((m_pPlayer->v.button & IN_ATTACK) != 0)
 		{
+			m_pPlayer->Undisguise();
+
 			m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
 			m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), m_pPlayer->v.view_ofs.z, m_pPlayer->m_randomSeed, 0, false, false);

@@ -196,6 +196,7 @@ public:
 
 	// Teamplay stuff
 	virtual int PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget) = 0; // What is the player's relationship with this entity?
+	virtual bool CanSeeThroughDisguise(CBasePlayer* player, CBaseEntity* target) = 0;
 	virtual int GetTeamIndex(const char* pTeamName) { return -1; }
 	virtual const char* GetIndexedTeamName(int teamIndex) { return ""; }
 	virtual bool IsValidTeam(const char* pTeamName) { return true; }
@@ -290,6 +291,7 @@ public:
 
 	// Teamplay stuff
 	int PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget) override;
+	bool CanSeeThroughDisguise(CBasePlayer* player, CBaseEntity* target) override;
 };
 
 class CTeam
@@ -390,6 +392,7 @@ public:
 
 	// Teamplay stuff
 	int PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget) override;
+	bool CanSeeThroughDisguise(CBasePlayer* player, CBaseEntity* target) override;
 	int GetTeamIndex(const char* pTeamName) override;
 	const char* GetIndexedTeamName(int teamIndex) override;
 	bool IsValidTeam(const char* pTeamName) override;

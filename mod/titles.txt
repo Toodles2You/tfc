@@ -384,6 +384,26 @@ Game_heavy_armor
 Heavy Armor
 }
 
+Disguise_start
+{
+Disguising...
+}
+
+Disguise_stop
+{
+Stopped disguising
+}
+
+Disguise_player
+{
+Now disguised as %s
+}
+
+Disguise_lost
+{
+You are no longer disguised
+}
+
 // All centered for now
 $position -1 0.7
 $effect 2

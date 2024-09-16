@@ -135,6 +135,8 @@ void CTFWeapon::PrimaryAttack()
 		m_pPlayer->m_rgAmmo[info.iAmmo1] -= info.iShots * rounds;
 	}
 
+	m_pPlayer->Undisguise();
+
 	m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
 #ifdef GAME_DLL

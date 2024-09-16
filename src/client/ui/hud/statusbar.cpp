@@ -59,17 +59,26 @@ void CHudStatusBar::Draw(const float time)
 
 	auto extra = &g_PlayerExtraInfo[m_targetIndex];
 
+	auto teamNumber = extra->teamnumber;
+	auto health = (int)extra->health;
+
+	const auto entity = client::GetEntityByIndex(m_targetIndex);
+
+	if (entity != nullptr)
+	{
+		teamNumber = entity->curstate.team;
+		health = entity->curstate.health;
+	}
+
 	if (gHUD.m_gameMode == kGamemodeCooperative
-	 || (gHUD.m_gameMode >= kGamemodeTeamplay
-	 && extra->teamnumber == g_iTeamNumber)
+	 || (gHUD.m_gameMode >= kGamemodeTeamplay && teamNumber == g_iTeamNumber)
 	 || gHUD.IsSpectator())
 	{
-		snprintf(m_szStatusBar, MAX_STATUSTEXT_LENGTH, "%s | %i", info->name, extra->health);
+		snprintf(m_szStatusBar, MAX_STATUSTEXT_LENGTH, "%s | %i",
+			info->name, health);
 	}
 	else
 	{
-		const auto entity = client::GetEntityByIndex(m_targetIndex);
-
 		/* Entity is invisible. */
 		if (entity == nullptr || (entity->curstate.rendermode != kRenderNormal
 	 	 && entity->curstate.renderamt <= 5))
@@ -85,7 +94,7 @@ void CHudStatusBar::Draw(const float time)
 	int textWidth, textHeight;
 	gHUD.GetHudStringSize(m_szStatusBar, textWidth, textHeight);
 
-	auto color = gHUD.GetClientColor(m_targetIndex);
+	auto color = gHUD.GetTeamColor(teamNumber);
 	client::DrawSetTextColor(color[0], color[1], color[2]);
 
 	int x = std::max(0, std::max(2, ((int)gHUD.GetWidth() - textWidth)) >> 1);

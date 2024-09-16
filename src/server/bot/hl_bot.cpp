@@ -126,6 +126,11 @@ bool CHLBot::IsVisible(CBasePlayer* player, bool testFOV = false, unsigned char*
         return false;
     }
 
+    if (player->InState(State::Disguised) && !g_pGameRules->CanSeeThroughDisguise(this, player))
+    {
+        return false;
+    }
+
     util::MakeVectors(v.angles);
 
 	const auto los = (player->BodyTarget() - EyePosition()).Normalize();

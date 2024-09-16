@@ -93,6 +93,7 @@ enum
 };
 
 class CBaseEntity;
+class CBasePlayer;
 class CBasePlayerWeapon;
 
 
@@ -370,7 +371,7 @@ public:
 
 	void StopSound(const char* sample, int channel = CHAN_AUTO);
 
-	virtual void GetEntityState(entity_state_t& state);
+	virtual void GetEntityState(entity_state_t& state, CBasePlayer* player = nullptr);
 	virtual void SetEntityState(const entity_state_t& state);
 
 #ifdef GAME_DLL

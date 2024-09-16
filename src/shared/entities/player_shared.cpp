@@ -465,6 +465,23 @@ void CBasePlayer::DecrementTimers(const int msec)
 	m_iGrenadeExplodeTime = std::max(m_iGrenadeExplodeTime - msec, 0);
 
 	UpdateFeigningDeath(msec);
+
+	if (m_iDisguiseTime != 0 && m_iDisguiseTime <= msec)
+	{
+#ifdef GAME_DLL
+		auto disguise = static_cast<CBasePlayer*>(util::PlayerByIndex (m_iDisguiseIndex));
+
+		if (disguise != nullptr)
+		{
+			util::ClientPrint(this, HUD_PRINTCENTER, "#Disguise_player",
+				STRING(disguise->v.netname));
+		}
+#endif
+
+		EnterState(State::Disguised);
+	}
+
+	m_iDisguiseTime = std::max(m_iDisguiseTime - msec, 0);
 }
 
 
@@ -1080,6 +1097,121 @@ void CBasePlayer::StopFeigningDeath()
 }
 
 
+void CBasePlayer::Disguise(const int playerClass, const bool ally = false)
+{
+	if (!IsPlayer() || !IsAlive())
+	{
+		return;
+	}
+
+#ifdef GAME_DLL
+	enum
+	{
+		kDisguiseAnyPlayer,
+		kDisguiseAnyTeam,
+		kDisguiseAnyClass,
+		kDisguiseAsRequested,
+	};
+
+	int state = kDisguiseAnyPlayer;
+
+	byte candidates[MAX_PLAYERS];
+	int numCandidates = 0;
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		auto other = static_cast<CBasePlayer*>(util::PlayerByIndex(i));
+
+		if (other == nullptr)
+		{
+			continue;
+		}
+
+		if ((g_pGameRules->PlayerRelationship(this, other) >= GR_ALLY) != ally)
+		{
+			if (state > kDisguiseAnyTeam)
+			{
+				continue;
+			}
+		}
+		else if (state <= kDisguiseAnyTeam)
+		{
+			state = kDisguiseAnyTeam + 1;
+			numCandidates = 0;
+		}
+
+		if (other->PCNumber () != playerClass)
+		{
+			if (state > kDisguiseAnyClass)
+			{
+				continue;
+			}
+		}
+		else if (state <= kDisguiseAnyClass)
+		{
+			state = kDisguiseAnyClass + 1;
+			numCandidates = 0;
+		}
+
+		candidates[numCandidates] = i;
+		numCandidates++;
+	}
+
+	/* This shouldn't happen but, I don't trust this game engine. */
+	if (numCandidates == 0)
+	{
+		return;
+	}
+
+	/* Toodles TODO: Four team. */
+	m_iDisguiseTeam = (TeamNumber () == TEAM_BLUE) != ally ? TEAM_RED : TEAM_BLUE;
+	m_iDisguisePlayerClass = playerClass;
+
+	m_iDisguiseIndex = candidates[engine::RandomLong (1, numCandidates) - 1];
+
+	auto disguise = static_cast<CBasePlayer*>(util::PlayerByIndex (m_iDisguiseIndex));
+
+	m_flDisguiseHealth = disguise->v.health;
+
+	if (m_flDisguiseHealth <= 0.0F)
+	{
+		const auto &info = sTFClassInfo[PCNumber()];
+
+		m_flDisguiseHealth = info.maxHealth * engine::RandomFloat (0.5F, 1.0F);
+	}
+
+	util::ClientPrint(this, HUD_PRINTCENTER, "#Disguise_start",
+		STRING(disguise->v.netname));
+#endif
+
+	m_iDisguiseTime = 2000;
+}
+
+
+void CBasePlayer::Undisguise()
+{
+	if (InState(State::Disguised))
+	{
+#ifdef GAME_DLL
+		util::ClientPrint(this, HUD_PRINTCENTER, "#Disguise_lost");
+#endif
+		LeaveState(State::Disguised);
+	}
+	else if (m_iDisguiseTime != 0)
+	{
+#ifdef GAME_DLL
+		util::ClientPrint(this, HUD_PRINTCENTER, "#Disguise_stop");
+#endif
+	}
+
+	m_iDisguiseTeam = TEAM_UNASSIGNED;
+	m_iDisguisePlayerClass = PC_UNDEFINED;
+	m_iDisguiseIndex = 0;
+	m_flDisguiseHealth = 0.0F;
+	m_iDisguiseTime = 0;
+}
+
+
 void CBasePlayer::ClearEffects()
 {
 	m_StateBits = 0;
@@ -1087,6 +1219,11 @@ void CBasePlayer::ClearEffects()
 	m_iConcussionTime = 0;
 	m_iFeignTime = 0;
 	m_iFeignHoldTime = 0;
+	m_iDisguiseTeam = TEAM_UNASSIGNED;
+	m_iDisguisePlayerClass = PC_UNDEFINED;
+	m_iDisguiseIndex = 0;
+	m_flDisguiseHealth = 0.0F;
+	m_iDisguiseTime = 0;
 
 	v.rendermode = kRenderNormal;
 	v.renderamt = 0;

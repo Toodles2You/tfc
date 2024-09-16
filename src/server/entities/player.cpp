@@ -542,7 +542,9 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 
 	if (attacker->IsNetClient()
 	/* Don't send hit feedback if we're feigning death. */
-	 && (!InState(State::FeigningDeath) || m_iFeignTime != 0))
+	 && (!InState(State::FeigningDeath) || m_iFeignTime != 0)
+	/* Don't send hit feedback if we're disguised. */
+	 && (!InState(State::Disguised) || g_pGameRules->CanSeeThroughDisguise(static_cast<CBasePlayer*>(attacker), this)))
 	{
 		static_cast<CBasePlayer*>(attacker)->SendHitFeedback(this, flDamage, bitsDamageType);
 	}
@@ -2030,9 +2032,9 @@ void CBasePlayer::SetPrefsFromUserinfo(char* infobuffer)
 	}
 }
 
-void CBasePlayer::GetEntityState(entity_state_t& state)
+void CBasePlayer::GetEntityState(entity_state_t& state, CBasePlayer* player)
 {
-	CBaseEntity::GetEntityState(state);
+	CBaseEntity::GetEntityState(state, player);
 
 	state.team = v.team;
 	state.playerclass = v.playerclass;
@@ -2060,6 +2062,26 @@ void CBasePlayer::GetEntityState(entity_state_t& state)
 	if (InState(State::Burning))
 	{
 		state.eflags |= EFLAG_BURNING;
+	}
+
+	/* Spy disguise. */
+
+	if (InState(State::Disguised) && !g_pGameRules->CanSeeThroughDisguise(player, this))
+	{
+		if (m_iDisguiseTeam != TEAM_UNASSIGNED)
+		{
+			state.team = m_iDisguiseTeam;
+		}
+
+		if (m_iDisguisePlayerClass != PC_UNDEFINED)
+		{
+			state.playerclass = m_iDisguisePlayerClass;
+		}
+
+		if (m_flDisguiseHealth > 0.0F)
+		{
+			state.health = std::max(m_flDisguiseHealth, 1.0F);
+		}
 	}
 }
 

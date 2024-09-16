@@ -293,7 +293,7 @@ void CBasePlayer::ConcussionJump(Vector& velocity)
 }
 
 
-void CBaseEntity::GetEntityState(entity_state_t& state)
+void CBaseEntity::GetEntityState(entity_state_t& state, CBasePlayer* player)
 {
 	state.animtime = (int)(1000.0 * v.animtime) / 1000.0;
 
@@ -311,9 +311,9 @@ void CBaseEntity::GetEntityState(entity_state_t& state)
 }
 
 
-void CBasePlayer::GetEntityState(entity_state_t& state)
+void CBasePlayer::GetEntityState(entity_state_t& state, CBasePlayer* player)
 {
-	CBaseEntity::GetEntityState(state);
+	CBaseEntity::GetEntityState(state, player);
 
 	state.gaitsequence = v.gaitsequence;
 }
