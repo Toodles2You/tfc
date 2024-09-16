@@ -697,7 +697,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, CBaseEntity* killer, 
 	{
 		/* Toodles: Send a faux death notice. */
 
-		for (int i = 0; i <= gpGlobals->maxClients; i++)
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
 		{
 			auto player = static_cast<CBasePlayer*>(util::PlayerByIndex(i));
 
