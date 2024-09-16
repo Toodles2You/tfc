@@ -318,3 +318,16 @@ void CBasePlayer::GetEntityState(entity_state_t& state, CBasePlayer* player)
 	state.gaitsequence = v.gaitsequence;
 }
 
+
+void CBasePlayer::FinishDisguising()
+{
+	if (m_iDisguiseTeam == TEAM_UNASSIGNED || m_iDisguisePlayerClass == PC_UNDEFINED)
+	{
+		return;
+	}
+
+	EnterState(State::Disguised);
+
+	SetAction(Action::Idle, true);
+}
+

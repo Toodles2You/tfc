@@ -2087,6 +2087,16 @@ void CBasePlayer::GetEntityState(entity_state_t& state, CBasePlayer* player)
 		{
 			state.health = std::max(m_flDisguiseHealth, 1.0F);
 		}
+
+		if (m_iDisguiseWeaponModel != 0)
+		{
+			state.weaponmodel = m_iDisguiseWeaponModel;
+		}
+
+		if (m_iDisguiseSequence != 0)
+		{
+			state.sequence = m_iDisguiseSequence;
+		}
 	}
 }
 
@@ -2456,6 +2466,174 @@ void CBasePlayer::EmitSoundHUD(
 	WriteByte(pitch);
 	WriteString(sample);
 	MessageEnd();
+}
+
+
+void CBasePlayer::FinishDisguising()
+{
+	if (m_iDisguiseTeam == TEAM_UNASSIGNED || m_iDisguisePlayerClass == PC_UNDEFINED)
+	{
+		return;
+	}
+
+	enum
+	{
+		kDisguiseAnyPlayer,
+		kDisguiseAnyTeam,
+		kDisguiseAnyClass,
+		kDisguiseAsRequested,
+	};
+
+	int state = kDisguiseAnyPlayer;
+
+	byte candidates[MAX_PLAYERS];
+	int numCandidates = 0;
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		auto other = static_cast<CBasePlayer*>(util::PlayerByIndex(i));
+
+		if (other == nullptr)
+		{
+			continue;
+		}
+
+		if ((g_pGameRules->PlayerRelationship(this, other) >= GR_ALLY)
+		 != (m_iDisguiseTeam == TeamNumber())) /* Toodles FIXME: */
+		{
+			if (state > kDisguiseAnyTeam)
+			{
+				continue;
+			}
+		}
+		else if (state <= kDisguiseAnyTeam)
+		{
+			state = kDisguiseAnyTeam + 1;
+			numCandidates = 0;
+		}
+
+		if (other->PCNumber () != m_iDisguisePlayerClass)
+		{
+			if (state > kDisguiseAnyClass)
+			{
+				continue;
+			}
+		}
+		else if (state <= kDisguiseAnyClass)
+		{
+			state = kDisguiseAnyClass + 1;
+			numCandidates = 0;
+		}
+
+		candidates[numCandidates] = i;
+		numCandidates++;
+	}
+
+	/* This shouldn't happen but, I don't trust this game engine. */
+	if (numCandidates == 0)
+	{
+		return;
+	}
+
+	m_iDisguiseIndex = candidates[engine::RandomLong (1, numCandidates) - 1];
+
+	auto disguise = static_cast<CBasePlayer*>(util::PlayerByIndex (m_iDisguiseIndex));
+
+	if (disguise != nullptr)
+	{
+		m_flDisguiseHealth = disguise->v.health;
+
+		util::ClientPrint(this, HUD_PRINTCENTER, "#Disguise_player",
+			STRING(disguise->v.netname));
+	}
+	else
+	{
+		m_flDisguiseHealth = 0.0F;
+	}
+
+	if (m_flDisguiseHealth <= 0.0F)
+	{
+		m_flDisguiseHealth = sTFClassInfo[m_iDisguisePlayerClass].maxHealth
+			* engine::RandomFloat (0.5F, 1.0F);
+	}
+
+	/*
+		Toodles FIXME: Get disguise weapons from player class info.
+		Toodles TODO: Allow spies to choose their disguise's held weapon.
+	*/
+
+	switch (m_iDisguisePlayerClass)
+	{
+		case PC_SCOUT:
+		{
+			m_iDisguiseWeaponModel = engine::ModelIndex ("models/p_nailgun.mdl");
+			strcpy (m_szDisguiseAnimExtention, "mp5");
+			break;
+		}
+		case PC_SNIPER:
+		{
+			m_iDisguiseWeaponModel = engine::ModelIndex ("models/p_sniper.mdl");
+			strcpy (m_szDisguiseAnimExtention, "sniper");
+			break;
+		}
+		case PC_SOLDIER:
+		{
+			m_iDisguiseWeaponModel = engine::ModelIndex ("models/p_rpg.mdl");
+			strcpy (m_szDisguiseAnimExtention, "rpg");
+			break;
+		}
+		case PC_DEMOMAN:
+		{
+			m_iDisguiseWeaponModel = engine::ModelIndex ("models/p_glauncher.mdl");
+			strcpy (m_szDisguiseAnimExtention, "shotgun");
+			break;
+		}
+		case PC_MEDIC:
+		{
+			m_iDisguiseWeaponModel = engine::ModelIndex ("models/p_medkit.mdl");
+			strcpy (m_szDisguiseAnimExtention, "medkit");
+			break;
+		}
+		case PC_HVYWEAP:
+		{
+			m_iDisguiseWeaponModel = engine::ModelIndex ("models/p_mini.mdl");
+			strcpy (m_szDisguiseAnimExtention, "AC");
+			break;
+		}
+		case PC_PYRO:
+		{
+			m_iDisguiseWeaponModel = engine::ModelIndex ("models/p_egon.mdl");
+			strcpy (m_szDisguiseAnimExtention, "egon");
+			break;
+		}
+		case PC_SPY:
+		{
+			m_iDisguiseWeaponModel = engine::ModelIndex ("models/p_shotgun.mdl");
+			strcpy (m_szDisguiseAnimExtention, "shotgun");
+			break;
+		}
+		case PC_ENGINEER:
+		{
+#if 0
+			m_iDisguiseWeaponModel = engine::ModelIndex ("models/p_spanner.mdl");
+			strcpy (m_szDisguiseAnimExtention, "crowbar");
+#else
+			m_iDisguiseWeaponModel = engine::ModelIndex ("models/p_shotgun.mdl");
+			strcpy (m_szDisguiseAnimExtention, "shotgun");
+#endif
+			break;
+		}
+		default:
+		{
+			m_iDisguiseWeaponModel = 0;
+			m_szDisguiseAnimExtention[0] = '\0';
+			break;
+		}
+	}
+
+	EnterState(State::Disguised);
+
+	SetAction(Action::Idle, true);
 }
 
 

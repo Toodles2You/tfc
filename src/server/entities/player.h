@@ -433,6 +433,9 @@ public:
 	byte m_iDisguiseIndex;
 	float m_flDisguiseHealth;
 	int m_iDisguiseTime;
+	int m_iDisguiseWeaponModel;
+	char m_szDisguiseAnimExtention[32];
+	int m_iDisguiseSequence;
 
 	void StartDisguising(const int playerClass, const bool ally = false);
 	void FinishDisguising();

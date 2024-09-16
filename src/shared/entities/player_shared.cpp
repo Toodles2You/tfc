@@ -774,6 +774,8 @@ int CBasePlayer::GetActionSequence(const Action action, bool& restart)
 
     restart = false;
 
+	m_iDisguiseSequence = 0;
+
     switch (action)
     {
     case Action::Idle:
@@ -793,6 +795,14 @@ int CBasePlayer::GetActionSequence(const Action action, bool& restart)
 			case Action::Attack: sequenceName += "shoot_"; restart = true; break;
     		case Action::Reload: sequenceName += "aim_"; restart = true; break;
 			case Action::Arm: sequenceName += "aim_"; restart = true; break;
+		}
+
+		if (InState(State::Disguised))
+		{
+			std::string disguiseSequenceName = sequenceName
+				+ m_szDisguiseAnimExtention;
+
+			m_iDisguiseSequence = LookupSequence(disguiseSequenceName.c_str());
 		}
 
 		sequenceName += m_szAnimExtention;
@@ -1118,100 +1128,6 @@ void CBasePlayer::StartDisguising(const int playerClass, const bool ally = false
 }
 
 
-void CBasePlayer::FinishDisguising()
-{
-	if (m_iDisguiseTeam == TEAM_UNASSIGNED || m_iDisguisePlayerClass == PC_UNDEFINED)
-	{
-		return;
-	}
-
-#ifdef GAME_DLL
-	enum
-	{
-		kDisguiseAnyPlayer,
-		kDisguiseAnyTeam,
-		kDisguiseAnyClass,
-		kDisguiseAsRequested,
-	};
-
-	int state = kDisguiseAnyPlayer;
-
-	byte candidates[MAX_PLAYERS];
-	int numCandidates = 0;
-
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
-	{
-		auto other = static_cast<CBasePlayer*>(util::PlayerByIndex(i));
-
-		if (other == nullptr)
-		{
-			continue;
-		}
-
-		if ((g_pGameRules->PlayerRelationship(this, other) >= GR_ALLY)
-		 != (m_iDisguiseTeam == TeamNumber())) /* Toodles FIXME: */
-		{
-			if (state > kDisguiseAnyTeam)
-			{
-				continue;
-			}
-		}
-		else if (state <= kDisguiseAnyTeam)
-		{
-			state = kDisguiseAnyTeam + 1;
-			numCandidates = 0;
-		}
-
-		if (other->PCNumber () != m_iDisguisePlayerClass)
-		{
-			if (state > kDisguiseAnyClass)
-			{
-				continue;
-			}
-		}
-		else if (state <= kDisguiseAnyClass)
-		{
-			state = kDisguiseAnyClass + 1;
-			numCandidates = 0;
-		}
-
-		candidates[numCandidates] = i;
-		numCandidates++;
-	}
-
-	/* This shouldn't happen but, I don't trust this game engine. */
-	if (numCandidates == 0)
-	{
-		return;
-	}
-
-	m_iDisguiseIndex = candidates[engine::RandomLong (1, numCandidates) - 1];
-
-	auto disguise = static_cast<CBasePlayer*>(util::PlayerByIndex (m_iDisguiseIndex));
-
-	if (disguise != nullptr)
-	{
-		m_flDisguiseHealth = disguise->v.health;
-
-		util::ClientPrint(this, HUD_PRINTCENTER, "#Disguise_player",
-			STRING(disguise->v.netname));
-	}
-	else
-	{
-		m_flDisguiseHealth = 0.0F;
-	}
-
-	if (m_flDisguiseHealth <= 0.0F)
-	{
-		m_flDisguiseHealth = sTFClassInfo[m_iDisguisePlayerClass].maxHealth
-			* engine::RandomFloat (0.5F, 1.0F);
-	}
-#endif
-
-	EnterState(State::Disguised);
-}
-
-
 void CBasePlayer::Undisguise()
 {
 	if (InState(State::Disguised))
@@ -1233,6 +1149,9 @@ void CBasePlayer::Undisguise()
 	m_iDisguiseIndex = 0;
 	m_flDisguiseHealth = 0.0F;
 	m_iDisguiseTime = 0;
+	m_iDisguiseWeaponModel = 0;
+	m_szDisguiseAnimExtention[0] = '\0';
+	m_iDisguiseSequence = 0;
 }
 
 
@@ -1248,6 +1167,9 @@ void CBasePlayer::ClearEffects()
 	m_iDisguiseIndex = 0;
 	m_flDisguiseHealth = 0.0F;
 	m_iDisguiseTime = 0;
+	m_iDisguiseWeaponModel = 0;
+	m_szDisguiseAnimExtention[0] = '\0';
+	m_iDisguiseSequence = 0;
 
 	v.rendermode = kRenderNormal;
 	v.renderamt = 0;
