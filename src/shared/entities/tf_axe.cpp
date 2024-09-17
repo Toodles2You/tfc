@@ -266,6 +266,52 @@ int CMedikit::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& 
 #endif
 
 
+LINK_ENTITY_TO_CLASS(tf_weapon_spanner, CSpanner);
+
+void CSpanner::GetWeaponInfo(WeaponInfo& i)
+{
+	i.pszName = "tf_weapon_spanner";
+	i.iAmmo1 = -1;
+	i.iAmmo2 = -1;
+	i.iMaxClip = -1;
+	i.iSlot = 0;
+	i.iPosition = 3;
+	i.iFlags = 0;
+	i.iWeight = 0;
+
+	i.pszWorld = "models/w_crowbar.mdl";
+	i.pszView = "models/v_tfc_spanner.mdl";
+	i.pszPlayer = "models/p_spanner.mdl";
+	i.pszAnimExt = "crowbar";
+
+	i.iAnims[kWeaponAnimIdle] = 0;
+	i.iAnims[kWeaponAnimDeploy] = 4;
+	i.iAnims[kWeaponAnimHolster] = 5;
+	i.iAnims[kWeaponAnimAttack] = -1;
+	i.iAnims[kWeaponAnimReload] = 1;
+	i.iAnims[kWeaponAnimStartReload] = -1;
+	i.iAnims[kWeaponAnimEndReload] = -1;
+
+	i.iShots = 1;
+
+	i.iAttackTime = 400;
+	i.iReloadTime = 0;
+
+	i.iProjectileType = kProjKinetic;
+	i.iProjectileDamage = 20;
+	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
+	i.iProjectileCount = -1;
+
+	i.pszEvent = "events/wpn/tf_medsteam.sc"; /* Toodles FIXME: */
+	i.pszAttackSound = "weapons/cbar_hitbod1.wav";
+	i.pszAlternateSound = "weapons/cbar_hit1.wav";
+	i.pszReloadSound = "weapons/cbar_miss1.wav";
+	i.flPunchAngle = 0.0F;
+	i.iSibling = -1;
+	i.bShouldIdle = false;
+}
+
+
 LINK_ENTITY_TO_CLASS(tf_weapon_axe, CAxe);
 
 void CAxe::GetWeaponInfo(WeaponInfo& i)

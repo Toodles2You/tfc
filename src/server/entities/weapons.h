@@ -71,6 +71,7 @@ enum
 	kProjFlame,
 	kProjIncendiaryRocket,
 	kProjTranquilizerDart,
+	kProjLaser,
 };
 
 typedef struct
@@ -119,7 +120,7 @@ constexpr const char* g_szWeaponNames[WEAPON_TYPES] =
 	// nullptr,
 	// nullptr,
 	"tf_weapon_medikit",
-	// "tf_weapon_spanner",
+	"tf_weapon_spanner",
 	"tf_weapon_axe",
 	"tf_weapon_sniperrifle",
 	"tf_weapon_autorifle",
@@ -135,7 +136,7 @@ constexpr const char* g_szWeaponNames[WEAPON_TYPES] =
 	// nullptr,
 	"tf_weapon_detpack",
 	"tf_weapon_tranq",
-	// "tf_weapon_railgun",
+	"tf_weapon_railgun",
 	"tf_weapon_pl",
 	"tf_weapon_knife",
 };
@@ -307,6 +308,15 @@ public:
 protected:
 	int HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& tr) override;
 #endif
+};
+
+class CSpanner : public CTFMelee
+{
+public:
+	CSpanner(Entity* containingEntity) : CTFMelee(containingEntity) {}
+
+	int GetID() const override { return WEAPON_SPANNER; }
+	void GetWeaponInfo(WeaponInfo& i) override;
 };
 
 class CAxe : public CTFMelee
@@ -491,6 +501,15 @@ public:
 	CTranquilizerGun(Entity* containingEntity) : CTFWeapon(containingEntity) {}
 
 	int GetID() const override { return WEAPON_TRANQ; }
+	void GetWeaponInfo(WeaponInfo& i) override;
+};
+
+class CRailgun : public CTFWeapon
+{
+public:
+	CRailgun(Entity* containingEntity) : CTFWeapon(containingEntity) {}
+
+	int GetID() const override { return WEAPON_LASER; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 };
 
@@ -788,8 +807,14 @@ public:
 	static CNail* CreateNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
 	static CNail* CreateNailGrenadeNail(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
 	static CNail* CreateTranquilizerDart(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
+	static CNail* CreateLaser(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner);
 	void EXPORT NailTouch(CBaseEntity *pOther);
 	void EXPORT PleaseGoInTheRightDirection();
+
+	bool ShouldCollide(CBaseEntity* other) override;
+
+protected:
+	CBitVec<MAX_PLAYERS> m_touchedPlayers;
 };
 
 class CFlame : public CBaseEntity

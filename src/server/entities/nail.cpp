@@ -75,6 +75,25 @@ CNail* CNail::CreateTranquilizerDart(const Vector& origin, const Vector& dir, co
 }
 
 
+CNail* CNail::CreateLaser(const Vector& origin, const Vector& dir, const float damage, CBaseEntity* owner)
+{
+	auto nail = Entity::Create<CNail>();
+
+	nail->v.origin = origin;
+	nail->v.angles = dir;
+	nail->v.speed = 1500.0F;
+	nail->v.dmg = damage;
+	nail->v.armortype = DMG_CLUB | DMG_NEVERGIB;
+	nail->v.owner = &owner->v;
+	nail->v.team = owner->TeamNumber();
+	nail->Spawn();
+
+	nail->v.classname = MAKE_STRING("railgun");
+
+	return nail;
+}
+
+
 bool CNail::Spawn()
 {
 	v.classname = MAKE_STRING("nails");
@@ -147,6 +166,18 @@ void CNail::NailTouch(CBaseEntity* pOther)
             v.armortype);
 
         pOther->ApplyMultiDamage(this, owner);
+
+		/* Toodles: Have rail gun laser pass through players. */
+
+        if (v.armortype == DMG_CLUB && pOther->IsPlayer())
+        {
+            /* Don't touch this guy again.*/
+            m_touchedPlayers[pOther->v.GetIndex() - 1] = true;
+
+            /* Fix velocity ASAP. */
+            v.nextthink = gpGlobals->time + 0.001F;
+            return;
+        }
 	}
 
 	Remove();
@@ -160,11 +191,20 @@ void CNail::PleaseGoInTheRightDirection()
 		Remove();
 		return;
 	}
-	if (v.waterlevel > v.radsuit_finished)
-	{
-		v.velocity = v.v_angle;
-		v.radsuit_finished = v.waterlevel;
-	}
+
+	v.velocity = v.v_angle;
+
 	v.nextthink = gpGlobals->time + 1.0F / 30.0F;
+}
+
+
+bool CNail::ShouldCollide(CBaseEntity* other)
+{
+	if (v.armortype == DMG_CLUB)
+	{
+    	return !other->IsPlayer() || !m_touchedPlayers[other->v.GetIndex() - 1];
+	}
+
+	return true;
 }
 

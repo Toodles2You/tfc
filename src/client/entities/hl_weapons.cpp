@@ -217,6 +217,7 @@ static void HUD_InitClientWeapons()
 
 	// Allocate slots for each weapon that we are going to be predicting
 	HUD_SpawnWeapon<CMedikit>(WEAPON_MEDIKIT);
+	HUD_SpawnWeapon<CSpanner>(WEAPON_SPANNER);
 	HUD_SpawnWeapon<CAxe>(WEAPON_AXE);
 	HUD_SpawnWeapon<CSniperRifle>(WEAPON_SNIPER_RIFLE);
 	HUD_SpawnWeapon<CAutoRifle>(WEAPON_AUTO_RIFLE);
@@ -231,6 +232,7 @@ static void HUD_InitClientWeapons()
 	HUD_SpawnWeapon<CAssaultCannon>(WEAPON_ASSAULT_CANNON);
 	HUD_SpawnWeapon<CDetpack>(WEAPON_DETPACK);
 	HUD_SpawnWeapon<CTranquilizerGun>(WEAPON_TRANQ);
+	HUD_SpawnWeapon<CRailgun>(WEAPON_LASER);
 	HUD_SpawnWeapon<CPipeBombLauncher>(WEAPON_PIPEBOMB_LAUNCHER);
 	HUD_SpawnWeapon<CKnife>(WEAPON_KNIFE);
 }

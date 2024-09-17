@@ -175,6 +175,7 @@ void CTFWeapon::PrimaryAttack()
 		}
 		case kProjNail:
 		case kProjTranquilizerDart:
+		case kProjLaser:
 		{
 			const auto aim = m_pPlayer->v.v_angle + m_pPlayer->v.punchangle;
 			util::MakeVectors(aim);
@@ -196,6 +197,11 @@ void CTFWeapon::PrimaryAttack()
 			{
 				projectile =
 				CNail::CreateTranquilizerDart(gun, gpGlobals->v_forward, info.iProjectileDamage, m_pPlayer);
+			}
+			else if (info.iProjectileType == kProjLaser)
+			{
+				projectile =
+				CNail::CreateLaser(gun, gpGlobals->v_forward, info.iProjectileDamage, m_pPlayer);
 			}
 			else
 			{
@@ -814,6 +820,52 @@ void CTranquilizerGun::GetWeaponInfo(WeaponInfo& i)
 
 	i.pszEvent = "events/wpn/tf_tranq.sc";
 	i.pszAttackSound = "weapons/dartgun.wav";
+	i.pszAlternateSound = nullptr;
+	i.pszReloadSound = nullptr;
+	i.flPunchAngle = -2.0F;
+	i.iSibling = -1;
+	i.bShouldIdle = true;
+}
+
+
+LINK_ENTITY_TO_CLASS(tf_weapon_railgun, CRailgun);
+
+void CRailgun::GetWeaponInfo(WeaponInfo& i)
+{
+	i.pszName = "tf_weapon_railgun";
+	i.iAmmo1 = AMMO_NAILS;
+	i.iAmmo2 = -1;
+	i.iMaxClip = -1;
+	i.iSlot = 1;
+	i.iPosition = 3;
+	i.iFlags = 0;
+	i.iWeight = 15;
+
+	i.pszWorld = "models/w_9mmhandgun.mdl";
+	i.pszView = "models/v_tfc_railgun.mdl";
+	i.pszPlayer = "models/p_9mmhandgun.mdl";
+	i.pszAnimExt = "onehanded";
+
+	i.iAnims[kWeaponAnimIdle] = 0;
+	i.iAnims[kWeaponAnimDeploy] = 2;
+	i.iAnims[kWeaponAnimHolster] = 3;
+	i.iAnims[kWeaponAnimAttack] = 1;
+	i.iAnims[kWeaponAnimReload] = -1;
+	i.iAnims[kWeaponAnimStartReload] = -1;
+	i.iAnims[kWeaponAnimEndReload] = -1;
+
+	i.iShots = 1;
+
+	i.iAttackTime = 400;
+	i.iReloadTime = 1500;
+
+	i.iProjectileType = kProjLaser;
+	i.iProjectileDamage = 25;
+	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
+	i.iProjectileCount = 1;
+
+	i.pszEvent = "events/wpn/tf_rail.sc";
+	i.pszAttackSound = "weapons/railgun.wav";
 	i.pszAlternateSound = nullptr;
 	i.pszReloadSound = nullptr;
 	i.flPunchAngle = -2.0F;

@@ -404,7 +404,8 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	// Grab the vector of the incoming attack. (Pretend that the inflictor is a little lower than it really is, so the body will tend to fly upward a bit.)
 	if (attacker != CWorld::World
 	 && attacker->v.solid != SOLID_TRIGGER
-	 && (bitsDamageType & (DMG_ARMOR_PIERCING | DMG_BURN)) == 0)
+	 && (bitsDamageType & (DMG_ARMOR_PIERCING | DMG_BURN)) == 0
+	 && ((bitsDamageType & DMG_CLUB) == 0 || attacker == inflictor))
 	{
 		// Move them around!
 		g_vecAttackDir = (inflictor->Center() - Vector(0, 0, 10) - Center()).Normalize();
@@ -2633,13 +2634,8 @@ void CBasePlayer::FinishDisguising()
 		}
 		case PC_ENGINEER:
 		{
-#if 0
 			m_iDisguiseWeaponModel = engine::ModelIndex ("models/p_spanner.mdl");
 			strcpy (m_szDisguiseAnimExtention, "crowbar");
-#else
-			m_iDisguiseWeaponModel = engine::ModelIndex ("models/p_shotgun.mdl");
-			strcpy (m_szDisguiseAnimExtention, "shotgun");
-#endif
 			break;
 		}
 		default:

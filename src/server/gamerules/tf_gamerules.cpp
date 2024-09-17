@@ -269,7 +269,7 @@ void CTeamFortress::InitHUD(CBasePlayer* pPlayer)
     for (auto i = 0; i < 4; i++)
     {
         /* Toodles TODO: */
-        WriteShort(640 | m_TFTeamInfo[i].m_afInvalidClasses);
+        WriteShort(128 | m_TFTeamInfo[i].m_afInvalidClasses);
     }
     MessageEnd();
 }
