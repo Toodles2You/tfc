@@ -1134,7 +1134,9 @@ void CBasePlayer::StartDisguising(const int playerClass, const bool ally = false
 
 	m_iNextDisguisePlayerClass = playerClass;
 
-	m_iDisguiseTime = 2000;
+	/* Toodles: Half the time if already disguised. */
+
+	m_iDisguiseTime = InState(State::Disguised) ? 1000 : 2000;
 }
 
 
