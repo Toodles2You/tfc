@@ -1130,10 +1130,9 @@ void CBasePlayer::StartDisguising(const int playerClass, const bool ally = false
 	util::ClientPrint(this, HUD_PRINTCENTER, "#Disguise_start");
 #endif
 
-	/* Toodles TODO: Four team. */
-	m_iDisguiseTeam = (TeamNumber () == TEAM_BLUE) != ally ? TEAM_RED : TEAM_BLUE;
+	m_bNextDisguiseAlly = ally;
 
-	m_iDisguisePlayerClass = playerClass;
+	m_iNextDisguisePlayerClass = playerClass;
 
 	m_iDisguiseTime = 2000;
 }

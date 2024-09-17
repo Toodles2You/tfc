@@ -332,10 +332,10 @@ void CBasePlayer::GetEntityState(entity_state_t& state, CBasePlayer* player)
 
 void CBasePlayer::FinishDisguising()
 {
-	if (m_iDisguiseTeam == TEAM_UNASSIGNED || m_iDisguisePlayerClass == PC_UNDEFINED)
-	{
-		return;
-	}
+	/* Toodles TODO: Four team. */
+	m_iDisguiseTeam = (TeamNumber () == TEAM_BLUE) != m_bNextDisguiseAlly ? TEAM_RED : TEAM_BLUE;
+
+	m_iDisguisePlayerClass = m_iNextDisguisePlayerClass;
 
 	EnterState(State::Disguised);
 

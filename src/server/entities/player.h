@@ -430,6 +430,8 @@ public:
 	bool StartFeigningDeath(const bool silent, const int damageType = DMG_GENERIC);
 	void StopFeigningDeath();
 
+	bool m_bNextDisguiseAlly;
+	byte m_iNextDisguisePlayerClass;
 	byte m_iDisguiseTeam;
 	byte m_iDisguisePlayerClass;
 	byte m_iDisguiseIndex;
