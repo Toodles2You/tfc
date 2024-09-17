@@ -1399,6 +1399,21 @@ void EV_GetNailedIdiot(event_args_t* args)
 		PITCH_NORM);
 }
 
+void EV_Flash(event_args_t* args)
+{
+	client::event::PlaySound(
+		-1,
+		args->origin,
+		CHAN_STATIC,
+		"weapons/flashbang.wav",
+		VOL_NORM,
+		0.4F,
+		0,
+		PITCH_NORM);
+
+	client::efx::ParticleBurst(args->origin, 240, 195, 2.0F);
+}
+
 static void EV_TrailCallback(TEMPENTITY* ent, float frametime, float currenttime)
 {
 	if (ent->entity.baseline.fuser1 <= currenttime && ent->entity.origin == ent->entity.attachment[0])
@@ -1688,6 +1703,7 @@ void EV_HookEvents()
 	client::HookEvent("events/explosion.sc", EV_Explosion);
 	client::HookEvent("events/explode/tf_concuss.sc", EV_ConcBlast);
 	client::HookEvent("events/explode/tf_nailgren.sc", EV_GetNailedIdiot);
+	client::HookEvent("events/explode/tf_gas.sc", EV_Flash);
 	client::HookEvent("events/trail.sc", EV_Trail);
 	client::HookEvent("events/train.sc", EV_TrainPitchAdjust);
 
@@ -1729,6 +1745,7 @@ void EV_Init()
 	}
 
 	g_usConcBlast = client::PrecacheEvent(1, "events/explode/tf_concuss.sc");
+	g_usFlash = client::PrecacheEvent(1, "events/explode/tf_gas.sc");
 
 	if (pLaserDot != nullptr)
 	{

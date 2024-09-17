@@ -210,11 +210,14 @@ void CBasePlayer::PrimeGrenade(const int grenadeSlot)
 	const auto &info = sTFClassInfo[PCNumber()];
 	const auto grenadeType = info.grenades[grenadeSlot];
 
+	auto throwGrenade = false;
+
 	switch (grenadeType)
 	{
 		case GRENADE_NORMAL:
 			break;
 		case GRENADE_CALTROP:
+			throwGrenade = true;
 			goto no_icon;
 		case GRENADE_CONCUSSION:
 			m_iGrenadeExplodeTime = 3800;
@@ -229,6 +232,9 @@ void CBasePlayer::PrimeGrenade(const int grenadeSlot)
 			return;
 		case GRENADE_EMP:
 			return;
+		case GRENADE_FLASH:
+			throwGrenade = true;
+			goto no_icon;
 		default:
 			return;
 	}
@@ -248,6 +254,11 @@ no_icon:
 
 	EnterState(State::GrenadePrime);
 	EmitSoundPredicted("weapons/ax1.wav", CHAN_WEAPON);
+
+	if (throwGrenade)
+	{
+		ThrowGrenade();
+	}
 }
 
 

@@ -331,7 +331,7 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         },
         .grenades = {
             GRENADE_NORMAL,
-            GRENADE_GAS,
+            GRENADE_FLASH,
         },
         .maxAmmo = {
             40,

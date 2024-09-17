@@ -58,4 +58,6 @@ inline int gmsgLaserDot = 0;
 
 inline int gmsgStatusIcon = 0;
 
+inline int gmsgFlash = 0;
+
 void LinkUserMessages();

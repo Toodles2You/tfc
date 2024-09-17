@@ -163,6 +163,9 @@ void W_Precache()
 	engine::PrecacheSound("weapons/flmgrexp.wav");
 	engine::PrecacheSound("ambience/fire1.wav");
 
+	engine::PrecacheModel("models/spy_grenade.mdl");
+	engine::PrecacheSound("weapons/flashbang.wav");
+
 	engine::PrecacheModel("models/detpack.mdl");
 	engine::PrecacheSound("weapons/mortarhit.wav");
 	engine::PrecacheSound("weapons/mine_activate.wav");

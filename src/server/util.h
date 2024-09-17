@@ -506,6 +506,7 @@ enum class ExplosionType
 	Concussion,
 	Detpack,
 	Incendiary,
+	Flash,
 };
 
 void Explosion(const Vector& origin, const Vector& velocity, ExplosionType type = ExplosionType::Normal, float damage = 100.0F, bool smoke = true, bool sparks = true, CBaseEntity* entity = nullptr);

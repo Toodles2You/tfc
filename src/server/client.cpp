@@ -1019,6 +1019,7 @@ void ClientPrecache()
 	g_usTeleport = engine::PrecacheEvent(1, "events/teleport.sc");
 	g_usExplosion = engine::PrecacheEvent(1, "events/explosion.sc");
 	g_usConcBlast = engine::PrecacheEvent(1, "events/explode/tf_concuss.sc");
+	g_usFlash = engine::PrecacheEvent(1, "events/explode/tf_gas.sc");
 	g_usGetNailedIdiot = engine::PrecacheEvent(1, "events/explode/tf_nailgren.sc");
 	g_usTrail = engine::PrecacheEvent(1, "events/trail.sc");
 }

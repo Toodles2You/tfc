@@ -2133,6 +2133,8 @@ void CBasePlayer::PrimeGrenade(const int grenadeSlot)
 	const auto &info = sTFClassInfo[PCNumber()];
 	const auto grenadeType = info.grenades[grenadeSlot];
 
+	auto throwGrenade = false;
+
 	switch (grenadeType)
 	{
 		case GRENADE_NORMAL:
@@ -2140,6 +2142,7 @@ void CBasePlayer::PrimeGrenade(const int grenadeSlot)
 			break;
 		case GRENADE_CALTROP:
 			m_hGrenade = CCaltropCanister::CaltropCanister(this);
+			throwGrenade = true;
 			goto no_icon;
 		case GRENADE_CONCUSSION:
 			m_hGrenade = CConcussionGrenade::ConcussionGrenade(this);
@@ -2158,6 +2161,10 @@ void CBasePlayer::PrimeGrenade(const int grenadeSlot)
 			return;
 		case GRENADE_EMP:
 			return;
+		case GRENADE_FLASH:
+			m_hGrenade = CFlashGrenade::FlashGrenade(this);
+			throwGrenade = true;
+			goto no_icon;
 		default:
 			return;
 	}
@@ -2179,6 +2186,11 @@ no_icon:
 
 	EnterState(State::GrenadePrime);
 	EmitSoundPredicted("weapons/ax1.wav", CHAN_WEAPON);
+
+	if (throwGrenade)
+	{
+		ThrowGrenade();
+	}
 }
 
 
@@ -2641,6 +2653,55 @@ void CBasePlayer::FinishDisguising()
 	EnterState(State::Disguised);
 
 	SetAction(Action::Idle, true);
+}
+
+
+void CBasePlayer::BecomeFlashed(CBaseEntity* attacker, CBaseEntity* inflictor)
+{
+	const auto delta = inflictor->v.origin - EyePosition();
+	const auto distance = delta.Length();
+
+	/* Too far away. */
+
+	if (distance >= kFlashMaxDistance)
+	{
+		return;
+	}
+
+	/* Don't scale at all if we're right on top of it. */
+
+	auto full = distance <= kFlashMinDistance && attacker != this;
+
+	/* Scale with distance. */
+
+	auto time = 1.0F - std::max(distance - kFlashMinDistance, 0.0F)
+		/ (kFlashMaxDistance - kFlashMinDistance);
+
+	if (!full)
+	{
+		util::MakeVectors(v.v_angle);
+
+		/* Scale with view angle difference, as well. */
+
+		const auto dot = DotProduct(delta / distance, gpGlobals->v_forward);
+
+		/* Outside of the normal player view frustum. */
+
+		if (dot <= 0.5F)
+		{
+			return;
+		}
+
+		if (dot < 0.9F)
+		{
+			time *= 1.0F + (dot - 0.9F) * 2.5F;
+		}
+	}
+
+	MessageBegin(MSG_ONE, gmsgFlash, this);
+	WriteByte(full);
+	WriteByte(255 * time);
+	MessageEnd();
 }
 
 

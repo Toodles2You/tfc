@@ -260,6 +260,7 @@ public:
 	void DropBackpack();
 	void DiscardAmmo();
 #endif
+	int GetUnloadedAmmo(const int ammoType);
 
 	void PlaybackEvent(
 		unsigned short event,
@@ -441,6 +442,15 @@ public:
 	void StartDisguising(const int playerClass, const bool ally = false);
 	void FinishDisguising();
 	void Undisguise();
+
+#ifdef GAME_DLL
+protected:
+	static constexpr float kFlashMaxDistance = 1600.0F;
+	static constexpr float kFlashMinDistance = 240.0F;
+
+public:
+	void BecomeFlashed(CBaseEntity* attacker, CBaseEntity* inflictor);
+#endif
 
 	void ClearEffects();
 

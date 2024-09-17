@@ -69,4 +69,6 @@ void LinkUserMessages()
 	gmsgShooter = engine::RegUserMsg("Shooter", -1);
 
 	gmsgStatusIcon = engine::RegUserMsg("StatusIcon", -1);
+
+	gmsgFlash = engine::RegUserMsg("Flash", 2);
 }

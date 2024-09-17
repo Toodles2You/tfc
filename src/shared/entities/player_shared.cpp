@@ -1201,6 +1201,11 @@ void CBasePlayer::ClearEffects()
 	WriteByte(0);
 	WriteString("dmg_heat");
 	MessageEnd();
+
+	MessageBegin(MSG_ONE, gmsgFlash, this);
+	WriteByte(0);
+	WriteByte(0);
+	MessageEnd();
 #endif
 }
 
@@ -1225,6 +1230,8 @@ const char* CBasePlayer::GetGrenadeIconName(const int grenadeType)
 			return "d_gasgrenade";
 		case GRENADE_EMP:
 			return "d_empgrenade";
+		case GRENADE_FLASH:
+			return "d_gasgrenade";
 		default:
 			return nullptr;
 	}

@@ -241,6 +241,7 @@ inline short g_sModelIndexFireLoop;
 inline short g_sModelIndexDart;
 
 inline unsigned short g_usConcBlast;
+inline unsigned short g_usFlash;
 
 class CTFWeapon : public CBasePlayerWeapon
 {
@@ -724,6 +725,20 @@ public:
 
 private:
 	static constexpr int kNumBursts = 16;
+};
+
+class CFlashGrenade : public CPrimeGrenade
+{
+public:
+	CFlashGrenade(Entity* containingEntity) : CPrimeGrenade(containingEntity) {}
+
+	bool Spawn() override;
+	void Explode(TraceResult* pTrace, int bitsDamageType) override;
+
+	const char* GetModelName() override { return "models/spy_grenade.mdl"; }
+	const char* GetIconName() override { return "d_gasgrenade"; }
+
+	static CFlashGrenade* FlashGrenade(CBaseEntity* owner);
 };
 
 class CRocket : public CGrenade

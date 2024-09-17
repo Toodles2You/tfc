@@ -1050,4 +1050,75 @@ CNapalmGrenade* CNapalmGrenade::NapalmGrenade(CBaseEntity* owner)
 	return grenade;
 }
 
+
+bool CFlashGrenade::Spawn()
+{
+	if (CPrimeGrenade::Spawn())
+	{
+		v.nextthink = gpGlobals->time + 0.5;
+		v.dmgtime = gpGlobals->time + 0.9;
+		return true;
+	}
+	return false;
+}
+
+
+void CFlashGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
+{
+	if (pTrace->flFraction != 1.0)
+	{
+		v.origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
+	}
+
+	CBaseEntity* owner = this;
+	if (v.owner)
+	{
+		owner = v.owner->Get<CBasePlayer>();
+	}
+
+	v.owner = nullptr;
+
+	tent::Explosion(v.origin, -pTrace->vecPlaneNormal, tent::ExplosionType::Flash);
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		auto player = static_cast<CBasePlayer*>(util::PlayerByIndex(i));
+
+		if (player == nullptr || !player->IsPlayer())
+		{
+			continue;
+		}
+
+		/* Toodles TODO: Probably just trace against the brush models. */
+		TraceResult tr;
+		util::TraceLine(v.origin, player->EyePosition(), &tr, this, util::kTraceBox);
+
+		if (tr.flFraction != 1.0F && tr.pHit != &player->v)
+		{
+			continue;
+		}
+
+		if (player == owner || g_pGameRules->PlayerRelationship(player, this) < GR_ALLY)
+		{
+			player->BecomeFlashed(owner, this);
+		}
+	}
+
+	Remove();
+}
+
+
+CFlashGrenade* CFlashGrenade::FlashGrenade(CBaseEntity* owner)
+{
+	auto grenade = Entity::Create<CFlashGrenade>();
+
+	grenade->v.owner = &owner->v;
+	grenade->v.team = owner->TeamNumber();
+	grenade->Spawn();
+
+	grenade->v.classname = MAKE_STRING("gasgrenade");
+
+	return grenade;
+}
+
 #endif

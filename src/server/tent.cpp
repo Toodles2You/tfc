@@ -78,6 +78,9 @@ void tent::Explosion(
 		case ExplosionType::Concussion:
 			eventIndex = g_usConcBlast;
 			break;
+		case ExplosionType::Flash:
+			eventIndex = g_usFlash;
+			break;
 	}
 
 	auto flags = FEV_GLOBAL | FEV_RELIABLE;

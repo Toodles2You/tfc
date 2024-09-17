@@ -569,6 +569,7 @@ private:
 	float m_flOffsetY;
 	byte m_bIsWidescreen;
 	HSPRITE m_hSniperScope;
+	float m_flFlashTime;
 
 public:
 	float m_flTime;		  // the current client time
@@ -731,6 +732,7 @@ public:
 	void MsgFunc_InitHUD(const char* pszName, int iSize, void* pbuf);
 	void MsgFunc_ViewMode(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_Concuss(const char* pszName, int iSize, void* pbuf);
+	bool MsgFunc_Flash(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_Weapons(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_Ammo(const char* pszName, int iSize, void* pbuf);
 

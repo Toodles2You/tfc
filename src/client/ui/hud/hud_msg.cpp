@@ -21,6 +21,8 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "r_efx.h"
+#include "screenfade.h"
+#include "shake.h"
 
 #include "particleman.h"
 extern IParticleMan* g_pParticleMan;
@@ -53,6 +55,7 @@ bool CHud::MsgFunc_ResetHUD(const char* pszName, int iSize, void* pbuf)
 
 	// reset concussion effect
 	m_iConcussionEffect = 0;
+	m_flFlashTime = 0.0F;
 
 	m_bTranquilized = false;
 	m_flOverrideFOV = 0.0F;
@@ -172,6 +175,75 @@ bool CHud::MsgFunc_Concuss(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
 	Update_Concuss(READ_BYTE());
+	return true;
+}
+
+
+bool CHud::MsgFunc_Flash(const char* pszName, int iSize, void* pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	const auto full = READ_BYTE() != 0;
+	const auto time = READ_BYTE() / 255.0F;
+
+	screenfade_t sf;
+	client::GetScreenFade(&sf);
+
+	if (time == 0.0F)
+	{
+		sf.fadeEnd = client::GetClientTime();
+
+		client::SetScreenFade(&sf);
+
+		m_StatusIcons.DisableIcon("dmg_haluc");
+		m_flFlashTime = sf.fadeEnd;
+
+		return;
+	}
+
+	/* Prevent this from overriding previous flashes. */
+
+	const auto prevFadeEnd = sf.fadeEnd;
+	const auto prevFadeReset = sf.fadeReset;
+
+	sf.fader = 0;
+	sf.fadeg = 0;
+	sf.fadeb = 0;
+	sf.fadealpha = 255;
+
+	if (full)
+	{
+		sf.fadeEnd = 9.0F;
+		sf.fadeReset = 2.0F;
+	}
+	else
+	{
+		/* Make sure the flash is never too abrupt. */
+
+		sf.fadeEnd = std::max(3.0F * time, 1.0F);
+		sf.fadeReset = time;
+	}
+
+	sf.fadeSpeed = 0.0F;
+
+	sf.fadeFlags = FFADE_IN;
+
+	if (sf.fadeEnd != 0.0F)
+	{
+		sf.fadeSpeed = (float)sf.fadealpha / sf.fadeEnd;
+	}
+
+	sf.fadeReset += client::GetClientTime();
+	sf.fadeEnd += sf.fadeReset;
+
+	sf.fadeEnd = std::max(sf.fadeEnd, prevFadeEnd);
+	sf.fadeReset = std::max(sf.fadeReset, prevFadeReset);
+
+	client::SetScreenFade(&sf);
+
+	m_StatusIcons.EnableIcon("dmg_haluc");
+	m_flFlashTime = sf.fadeEnd;
+
 	return true;
 }
 

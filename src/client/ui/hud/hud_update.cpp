@@ -47,6 +47,12 @@ bool CHud::UpdateClientData(client_data_t* cdata, float time)
 
 	CL_ResetButtonBits(m_iKeyBits);
 
+	if (m_flFlashTime != 0.0F && m_flFlashTime <= time)
+	{
+		m_StatusIcons.DisableIcon("dmg_haluc");
+		m_flFlashTime = 0.0F;
+	}
+
 	// return 1 if in anything in the client_data struct has been changed, 0 otherwise
 	return true;
 }
