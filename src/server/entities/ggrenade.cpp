@@ -1056,7 +1056,7 @@ bool CFlashGrenade::Spawn()
 	if (CPrimeGrenade::Spawn())
 	{
 		v.nextthink = gpGlobals->time + 0.5;
-		v.dmgtime = gpGlobals->time + 0.9;
+		v.dmgtime = gpGlobals->time + 1.5;
 		return true;
 	}
 	return false;
