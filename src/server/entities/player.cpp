@@ -2435,11 +2435,6 @@ bool CBasePlayer::GiveArmor(float type, float amount)
 			return false;
 		}
 
-		if (v.armortype * v.armorvalue >= type * amount)
-		{
-			return false;
-		}
-
 		v.armorvalue = std::clamp(v.armorvalue + amount, 0.0F, m_flArmorMax);
 	}
 	else
