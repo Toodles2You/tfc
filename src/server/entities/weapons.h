@@ -317,6 +317,11 @@ public:
 
 	int GetID() const override { return WEAPON_SPANNER; }
 	void GetWeaponInfo(WeaponInfo& i) override;
+
+#ifdef GAME_DLL
+protected:
+	int HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& tr) override;
+#endif
 };
 
 class CAxe : public CTFMelee

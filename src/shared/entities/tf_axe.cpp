@@ -271,7 +271,7 @@ LINK_ENTITY_TO_CLASS(tf_weapon_spanner, CSpanner);
 void CSpanner::GetWeaponInfo(WeaponInfo& i)
 {
 	i.pszName = "tf_weapon_spanner";
-	i.iAmmo1 = -1;
+	i.iAmmo1 = AMMO_CELLS;
 	i.iAmmo2 = -1;
 	i.iMaxClip = -1;
 	i.iSlot = 0;
@@ -310,6 +310,23 @@ void CSpanner::GetWeaponInfo(WeaponInfo& i)
 	i.iSibling = -1;
 	i.bShouldIdle = false;
 }
+
+
+#ifdef GAME_DLL
+
+int CSpanner::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& tr)
+{
+	int result = kResultHitWorld;
+
+	if (hit == nullptr || hit->SpannerHit(m_pPlayer))
+	{
+		return result;
+	}
+
+	return CTFMelee::HitEntity(hit, dir, tr);
+}
+
+#endif
 
 
 LINK_ENTITY_TO_CLASS(tf_weapon_axe, CAxe);

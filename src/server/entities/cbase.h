@@ -291,6 +291,10 @@ public:
 	{
 		return true;
 	}
+	virtual bool SpannerHit(CBaseEntity* other)
+	{
+		return false;
+	}
 
 	void* operator new(size_t stAllocateBlock)
 	{

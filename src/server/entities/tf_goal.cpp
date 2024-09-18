@@ -1139,16 +1139,14 @@ void CTFGoal::DoRespawn()
     }
 }
 
-#if 0
-bool CTFGoal::OnSpannerHit(CBaseEntity* player)
+bool CTFGoal::SpannerHit(CBaseEntity* other)
 {
-    if (!IsGoalActivatedBy(TFGA_SPANNER))
+    if (IsGoalActivatedBy(TFGA_SPANNER))
     {
-        return false;
+        return AttemptToActivate(other, &tfv);
     }
-    return AttemptToActivate(player, &tfv);
+    return false;
 }
-#endif
 
 void CTFGoal::SetVisible(bool visible)
 {

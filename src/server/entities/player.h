@@ -472,6 +472,8 @@ public:
 
 	void RemoveGoalItems(bool force = true);
 	bool GiveArmor(float type, float amount);
+
+	bool SpannerHit(CBaseEntity* other) override;
 #endif
 };
 

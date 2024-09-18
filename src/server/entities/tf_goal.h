@@ -39,9 +39,7 @@ public:
     void EXPORT DelayedResults();
     void EXPORT DoRespawn();
 
-#if 0
-    virtual bool OnSpannerHit(CBaseEntity* player) override;
-#endif
+    virtual bool SpannerHit(CBaseEntity* other) override;
 
     void SetVisible(bool visible);
 

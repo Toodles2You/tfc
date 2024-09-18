@@ -172,6 +172,8 @@ void W_Precache()
 	engine::PrecacheSound("weapons/mine_charge.wav");
 	engine::PrecacheSound("weapons/mine_disarm.wav");
 	engine::PrecacheSound("weapons/mine_disarmed.wav");
+
+	engine::PrecacheSound("items/damage2.wav");
 }
 
 

@@ -2701,6 +2701,41 @@ void CBasePlayer::BecomeFlashed(CBaseEntity* attacker, CBaseEntity* inflictor)
 }
 
 
+bool CBasePlayer::SpannerHit(CBaseEntity* other)
+{
+	if (g_pGameRules->PlayerRelationship(this, other) < GR_ALLY)
+	{
+		return false;
+	}
+
+	/* Convert 1 cell into 4 points of armor. */
+
+	const auto player = static_cast<CBasePlayer*>(other);
+
+	auto armor = std::min(
+		(int)m_flArmorMax - (int)v.armorvalue,
+		player->m_rgAmmo[AMMO_CELLS] * 4);
+
+	if (armor <= 0)
+	{
+		return false;
+	}
+
+	armor = std::min(armor, 40);
+
+	if (GiveArmor(v.armortype, armor))
+	{
+		EmitSound("items/damage2.wav", CHAN_ITEM);
+
+		player->m_rgAmmo[AMMO_CELLS] -= (int)std::ceil(armor / 4.0F);
+
+		return true;
+	}
+
+	return false;
+}
+
+
 class CStripWeapons : public CPointEntity
 {
 public:
