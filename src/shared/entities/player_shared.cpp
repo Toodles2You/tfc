@@ -1248,3 +1248,58 @@ int CBasePlayer::GetVoicePitch()
 
 	return PITCH_NORM;
 }
+
+
+int CBasePlayer::GetUnloadedAmmo(const int ammoType)
+{
+	int ammo = 0;
+	std::uint64_t accounted = 0ULL;
+
+	/* Update the active weapon's sibling, as it may be checked first. */
+
+	if (m_pActiveWeapon != nullptr && m_pActiveWeapon->iAmmo1() == ammoType)
+	{
+		auto from = static_cast<CTFWeapon*>(m_pActiveWeapon);
+		auto to = from->GetSibling();
+
+		if (to != nullptr)
+		{
+			to->m_iClip = from->m_iClip;
+		}
+	}
+
+	/* Iterate through all of the weapons. */
+
+	for (auto weapon : m_lpPlayerWeapons)
+	{
+		const auto &info = weapon->GetInfo();
+
+		/* Ensure the ammo type matches what we're looking for. */
+
+		if (info.iAmmo1 != ammoType)
+		{
+			continue;
+		}
+
+		/* Check if the sibling has already been accounted for. */
+
+		if (info.iSibling != -1)
+		{
+			if ((accounted & (1ULL << info.iSibling)) != 0)
+			{
+				continue;
+			}
+
+			accounted |= 1ULL << weapon->GetID();
+		}
+
+		/* Add in any unloaded ammo from the clip. */
+
+		if (weapon->m_iClip != weapon->iMaxClip())
+		{
+			ammo += weapon->iMaxClip() - weapon->m_iClip;
+		}
+	}
+
+	return ammo;
+}

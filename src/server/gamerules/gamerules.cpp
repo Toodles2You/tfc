@@ -99,7 +99,17 @@ void CGameRules::InitHUD(CBasePlayer* pl)
 
 int CGameRules::GetMaxAmmo(CBasePlayer* pPlayer, int iAmmoType)
 {
-	return 0;
+	auto iMaxAmmo = 0;
+
+	switch (iAmmoType)
+	{
+		case AMMO_SHELLS:  iMaxAmmo = 100;
+		case AMMO_NAILS:   iMaxAmmo = 200;
+		case AMMO_ROCKETS: iMaxAmmo = 100;
+		case AMMO_CELLS:   iMaxAmmo = 100;
+	}
+
+	return iMaxAmmo + pPlayer->GetUnloadedAmmo(iAmmoType);
 }
 
 

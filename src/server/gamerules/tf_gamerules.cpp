@@ -584,7 +584,8 @@ void CTeamFortress::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 int CTeamFortress::GetMaxAmmo(CBasePlayer* pPlayer, int iAmmoType)
 {
     PCInfo& info = sTFClassInfo[pPlayer->PCNumber()];
-    return info.maxAmmo[iAmmoType];
+
+    return info.maxAmmo[iAmmoType] + pPlayer->GetUnloadedAmmo(iAmmoType);
 }
 
 
