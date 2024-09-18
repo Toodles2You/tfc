@@ -2057,6 +2057,8 @@ void CBasePlayer::GetEntityState(entity_state_t& state, CBasePlayer* player)
 		state.health = 0.0F;
 	}
 
+	state.fuser1 = v.armorvalue;
+
 	if (InState(State::Burning))
 	{
 		state.eflags |= EFLAG_BURNING;

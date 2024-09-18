@@ -282,6 +282,7 @@ struct extra_player_info_t
 	short deaths;
 	short playerclass;
 	short health;
+	short armorvalue;
 	bool dead;
 	short teamnumber;
 	char teamname[MAX_TEAM_NAME];

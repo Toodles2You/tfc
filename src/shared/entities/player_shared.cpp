@@ -958,6 +958,7 @@ void CBasePlayer::SetEntityState(const entity_state_t& state)
 	}
 
 	v.health = state.health;
+	v.armorvalue = state.fuser1;
 }
 
 

@@ -362,8 +362,10 @@ void HUD_ProcessPlayerState(struct entity_state_s* dst, const struct entity_stat
 	dst->team = src->team;
 	dst->colormap = src->colormap;
 	dst->health = src->health;
+	dst->fuser1 = src->fuser1;
 
 	g_PlayerExtraInfo[dst->number].health = dst->health;
+	g_PlayerExtraInfo[dst->number].armorvalue = dst->fuser1;
 	g_PlayerExtraInfo[dst->number].dead = dst->health <= 0;
 
 	// Save off some data so other areas of the Client DLL can get to it

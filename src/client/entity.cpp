@@ -46,6 +46,7 @@ void HUD_TxferLocalOverrides(struct entity_state_s* state, const struct clientda
 	state->iuser4 = client->iuser4;
 
 	state->health = static_cast<int>(client->health);
+	state->fuser1 = static_cast<int>(client->vuser4.z);
 }
 
 /*

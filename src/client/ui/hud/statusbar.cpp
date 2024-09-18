@@ -56,6 +56,7 @@ void CHudStatusBar::Draw(const float time)
 	auto name = info->name;
 	auto teamNumber = extra->teamnumber;
 	auto health = (int)extra->health;
+	auto armorValue = (int)extra->armorvalue;
 
 	const auto entity = client::GetEntityByIndex(m_targetIndex);
 
@@ -75,6 +76,7 @@ void CHudStatusBar::Draw(const float time)
 
 		teamNumber = entity->curstate.team;
 		health = entity->curstate.health;
+		armorValue = entity->curstate.fuser1;
 	}
 
 	if (name[0] == '\0')
@@ -95,8 +97,10 @@ void CHudStatusBar::Draw(const float time)
 	 || (gHUD.m_gameMode >= kGamemodeTeamplay && teamNumber == g_iTeamNumber)
 	 || gHUD.IsSpectator())
 	{
-		snprintf(m_szStatusBar, MAX_STATUSTEXT_LENGTH, "%s | %i",
-			name, health);
+		/* Toodles TODO: Use actual icon sprites for stats. */
+
+		snprintf(m_szStatusBar, MAX_STATUSTEXT_LENGTH, "%s  +%3i  \u03bb%3i",
+			name, health, armorValue);
 	}
 	else
 	{
