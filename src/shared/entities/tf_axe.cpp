@@ -149,7 +149,7 @@ int CTFMelee::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& 
 		info.iProjectileDamage,
 		dir,
 		tr.iHitgroup,
-		DMG_CLUB);
+		DMG_CLUB | DMG_NO_KNOCKBACK);
 
 	hit->ApplyMultiDamage(m_pPlayer, m_pPlayer);
 
@@ -440,7 +440,7 @@ int CKnife::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& tr
 	}
 
 	auto damage = info.iProjectileChargeDamage;
-	auto damageType = DMG_CLUB;
+	auto damageType = DMG_CLUB | DMG_NO_KNOCKBACK;
 
 	if (g_pGameRules->FPlayerCanTakeDamage(dynamic_cast<CBasePlayer*>(hit), m_pPlayer))
 	{

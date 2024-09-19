@@ -148,6 +148,7 @@ enum
 #define DMG_NAIL DMG_SLASH
 #define DMG_NOT_SELF DMG_FREEZE
 #define DMG_RESIST_SELF DMG_RADIUS_QUAKE /* Damage resistance for blast jumping. Used by rockets & pipebombs. */
+#define DMG_NO_KNOCKBACK DMG_DROWNRECOVER
 
 
 #define DMG_TRANQ DMG_MORTAR

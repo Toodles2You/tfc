@@ -1012,7 +1012,7 @@ void CNapalmGrenade::NapalmThink()
 			continue;
 		}
 
-		entity->TakeDamage(this, v.owner->Get<CBasePlayer>(), v.dmg, DMG_BURN | DMG_IGNITE);
+		entity->TakeDamage(this, v.owner->Get<CBasePlayer>(), v.dmg, DMG_BURN | DMG_IGNITE | DMG_NO_KNOCKBACK);
 	}
 
 	v.health--;

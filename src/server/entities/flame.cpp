@@ -22,7 +22,7 @@ CFlame* CFlame::CreateFlame(const Vector& origin, const Vector& dir, const float
 	nail->v.angles = dir;
 	nail->v.speed = 1200.0F;
 	nail->v.dmg = damage;
-	nail->v.armortype = DMG_BURN | DMG_IGNITE;
+	nail->v.armortype = DMG_BURN | DMG_IGNITE | DMG_NO_KNOCKBACK;
 	nail->v.owner = &owner->v;
 	nail->v.team = owner->TeamNumber();
 	nail->Spawn();

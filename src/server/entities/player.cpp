@@ -402,10 +402,8 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	}
 
 	// Grab the vector of the incoming attack. (Pretend that the inflictor is a little lower than it really is, so the body will tend to fly upward a bit.)
-	if (attacker != CWorld::World
-	 && attacker->v.solid != SOLID_TRIGGER
-	 && (bitsDamageType & (DMG_ARMOR_PIERCING | DMG_BURN)) == 0
-	 && ((bitsDamageType & DMG_CLUB) == 0 || attacker == inflictor))
+	if (attacker != CWorld::World && attacker->v.solid != SOLID_TRIGGER
+	 && (bitsDamageType & DMG_NO_KNOCKBACK) == 0)
 	{
 		// Move them around!
 		g_vecAttackDir = (inflictor->Center() - Vector(0, 0, 10) - Center()).Normalize();
@@ -1107,7 +1105,7 @@ void CBasePlayer::PreThink()
 			burnDamage++;
 		}
 
-		if (!CanBurn() || !TakeDamage(burner, burner, burnDamage, DMG_BURN)
+		if (!CanBurn() || !TakeDamage(burner, burner, burnDamage, DMG_BURN | DMG_NO_KNOCKBACK)
 		 || burnDamage == 0)
 		{
 			/* Cannot burn, blocked damage, or all sources have expired. */
@@ -2853,7 +2851,7 @@ bool CBasePlayer::ElectromagneticPulse(CBaseEntity* attacker, CBaseEntity* infli
 	/* Toodles TODO: Have us take the damage directly. */
 
 	RadiusDamage(v.origin, inflictor, attacker,
-		damage, damage * 0.5F, damage * 2.0F, DMG_BLAST);
+		damage, damage * 0.5F, damage * 2.0F, DMG_BLAST | DMG_NO_KNOCKBACK);
 
 	return true;
 }

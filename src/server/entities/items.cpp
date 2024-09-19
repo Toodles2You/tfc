@@ -359,7 +359,7 @@ public:
 			tent::ExplosionType::Normal, damage);
 
 		RadiusDamage(v.origin, inflictor, attacker,
-			damage, damage * 0.5F, damage * 2.0F, DMG_BLAST);
+			damage, damage * 0.5F, damage * 2.0F, DMG_BLAST | DMG_NO_KNOCKBACK);
 
 		/* Act as though it was picked up. */
 

@@ -156,7 +156,7 @@ void CIncendiaryRocket::Explode(TraceResult* pTrace, int bitsDamageType)
 	if (other != nullptr && other->v.takedamage != DAMAGE_NO)
 	{
 		/* Direct hit. Deal the maximum damage. */
-		other->TakeDamage(this, owner, v.dmg, DMG_BURN | DMG_IGNITE);
+		other->TakeDamage(this, owner, v.dmg, DMG_BURN | DMG_IGNITE | DMG_NO_KNOCKBACK);
 	}
 
 	// Pull out of the wall a bit
@@ -187,7 +187,7 @@ void CIncendiaryRocket::Explode(TraceResult* pTrace, int bitsDamageType)
 		}
 
 		/* Deal the minimum damage. */
-		entity->TakeDamage(this, owner,  v.dmg_save, DMG_BURN | DMG_IGNITE | DMG_RESIST_SELF);
+		entity->TakeDamage(this, owner,  v.dmg_save, DMG_BURN | DMG_IGNITE | DMG_RESIST_SELF | DMG_NO_KNOCKBACK);
 	}
 
 	Remove();
