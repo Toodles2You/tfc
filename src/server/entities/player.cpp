@@ -2233,10 +2233,9 @@ void CBasePlayer::PrimeGrenade(const int grenadeSlot)
 		case GRENADE_NAPALM:
 			m_hGrenade = CNapalmGrenade::NapalmGrenade(this);
 			break;
-		case GRENADE_GAS:
-			return;
 		case GRENADE_EMP:
-			return;
+			m_hGrenade = CEMP::EMP(this);
+			break;
 		case GRENADE_FLASH:
 			m_hGrenade = CFlashGrenade::FlashGrenade(this);
 			throwGrenade = true;
@@ -2803,6 +2802,60 @@ bool CBasePlayer::SpannerHit(CBaseEntity* other)
 	}
 
 	return false;
+}
+
+
+bool CBasePlayer::ElectromagneticPulse(CBaseEntity* attacker, CBaseEntity* inflictor)
+{
+	if (!g_pGameRules->FPlayerCanTakeDamage(this, attacker, inflictor))
+	{
+		return false;
+	}
+
+	float detonateAmmo[AMMO_SECONDARY];
+
+	auto damage = 0.0F;
+
+	for (int i = 0; i < AMMO_CELLS; i++)
+	{
+		detonateAmmo[i] = m_rgAmmo[i] * kAmmoEMPStrength[i];
+
+		damage += detonateAmmo[i];
+	}
+
+	/* Engineers are immune to cell destruction, I guess. */
+
+	if (PCNumber() != PC_ENGINEER)
+	{
+		detonateAmmo[AMMO_CELLS] = m_rgAmmo[AMMO_CELLS]
+			* kAmmoEMPStrength[AMMO_CELLS];
+
+		damage += detonateAmmo[AMMO_CELLS];
+	}
+	else
+	{
+		detonateAmmo[AMMO_CELLS] = 0.0F;
+	}
+
+	if (damage < 1.0F)
+	{
+		return false;
+	}
+
+	for (int i = 0; i < AMMO_SECONDARY; i++)
+	{
+		m_rgAmmo[i] -= (int)detonateAmmo[i];
+	}
+
+	tent::Explosion(v.origin, Vector(0.0F, 0.0F, -1.0F),
+		tent::ExplosionType::Normal, damage);
+
+	/* Toodles TODO: Have us take the damage directly. */
+
+	RadiusDamage(v.origin, inflictor, attacker,
+		damage, damage * 0.5F, damage * 2.0F, DMG_BLAST);
+
+	return true;
 }
 
 

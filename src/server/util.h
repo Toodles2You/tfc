@@ -506,6 +506,7 @@ enum class ExplosionType
 	Concussion,
 	Detpack,
 	Incendiary,
+	EMP,
 	Flash,
 };
 

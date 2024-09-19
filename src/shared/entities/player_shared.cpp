@@ -1228,8 +1228,6 @@ const char* CBasePlayer::GetGrenadeIconName(const int grenadeType)
 			return "d_mirvgrenade";
 		case GRENADE_NAPALM:
 			return "d_napalmgrenade";
-		case GRENADE_GAS:
-			return "d_gasgrenade";
 		case GRENADE_EMP:
 			return "d_empgrenade";
 		case GRENADE_FLASH:

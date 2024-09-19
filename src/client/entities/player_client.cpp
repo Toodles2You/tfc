@@ -228,10 +228,8 @@ void CBasePlayer::PrimeGrenade(const int grenadeSlot)
 			break;
 		case GRENADE_NAPALM:
 			break;
-		case GRENADE_GAS:
-			return;
 		case GRENADE_EMP:
-			return;
+			break;
 		case GRENADE_FLASH:
 			throwGrenade = true;
 			goto no_icon;

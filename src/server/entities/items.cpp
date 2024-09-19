@@ -339,6 +339,44 @@ public:
 
 		return true;
 	}
+
+	bool ElectromagneticPulse(CBaseEntity* attacker, CBaseEntity* inflictor) override
+	{
+		const auto damage = tfv.ammo_shells * 0.75F
+			+ tfv.ammo_rockets * 1.5F + tfv.ammo_cells * 0.75F;
+		
+		/*
+			Toodles TODO: Quake ammo items originally had
+			an explosion delay & different damage values.
+		*/
+
+		if (damage < 1.0F)
+		{
+			return false;
+		}
+
+		tent::Explosion(v.origin, Vector(0.0F, 0.0F, -1.0F),
+			tent::ExplosionType::Normal, damage);
+
+		RadiusDamage(v.origin, inflictor, attacker,
+			damage, damage * 0.5F, damage * 2.0F, DMG_BLAST);
+
+		/* Act as though it was picked up. */
+
+		UseTargets(attacker, USE_TOGGLE, 0);
+		ClearTouch();
+
+		if (g_pGameRules->ItemShouldRespawn(this) == GR_ITEM_RESPAWN_YES)
+		{
+			Respawn();
+		}
+		else
+		{
+			Remove();
+		}
+
+		return true;
+	}
 };
 
 LINK_ENTITY_TO_CLASS(item_healthkit, CItemBackpack);

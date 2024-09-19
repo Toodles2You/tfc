@@ -485,6 +485,13 @@ public:
 	bool GiveArmor(float type, float amount);
 
 	bool SpannerHit(CBaseEntity* other) override;
+
+protected:
+	static constexpr float kAmmoEMPStrength[AMMO_SECONDARY] =
+		{0.75F, 0.0F, 1.5F, 0.75F};
+
+public:
+	bool ElectromagneticPulse(CBaseEntity* attacker, CBaseEntity* inflictor) override;
 #endif
 };
 

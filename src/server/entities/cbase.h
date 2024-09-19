@@ -295,6 +295,10 @@ public:
 	{
 		return false;
 	}
+	virtual bool ElectromagneticPulse(CBaseEntity* attacker, CBaseEntity* inflictor)
+	{
+		return false;
+	}
 
 	void* operator new(size_t stAllocateBlock)
 	{

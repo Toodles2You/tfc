@@ -90,6 +90,7 @@ void W_Precache()
 	g_sModelIndexNail = engine::PrecacheModel("models/nail.mdl");
 	g_sModelIndexSaveMe = engine::PrecacheModel("sprites/saveme.spr");
 	g_sModelIndexFlare = engine::PrecacheModel("sprites/xflare1.spr");
+	g_sModelIndexShockWave = engine::PrecacheModel("sprites/shockwave.spr");
 	g_sModelIndexFlame = engine::PrecacheModel("sprites/fthrow.spr");
 	g_sModelIndexFire = engine::PrecacheModel("sprites/playerflame.spr");
 	g_sModelIndexFireLoop = engine::PrecacheModel("sprites/playerflameloop.spr");
@@ -146,7 +147,6 @@ void W_Precache()
 	engine::PrecacheSound("weapons/tink1.wav");
 
 	engine::PrecacheModel("models/conc_grenade.mdl");
-	engine::PrecacheModel("sprites/shockwave.spr");
 	engine::PrecacheSound("weapons/concgren_blast1.wav");
 	engine::PrecacheSound("weapons/concgren_blast2.wav");
 	engine::PrecacheSound("weapons/concgren_blast3.wav");
@@ -162,6 +162,9 @@ void W_Precache()
 	engine::PrecacheModel("models/napalm.mdl");
 	engine::PrecacheSound("weapons/flmgrexp.wav");
 	engine::PrecacheSound("ambience/fire1.wav");
+
+	engine::PrecacheModel("models/emp_grenade.mdl");
+	engine::PrecacheSound("weapons/emp_1.wav");
 
 	engine::PrecacheModel("models/spy_grenade.mdl");
 	engine::PrecacheSound("weapons/flashbang.wav");

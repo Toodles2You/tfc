@@ -236,12 +236,14 @@ inline short g_sModelIndexSmokeTrail;
 inline short g_sModelIndexNail;
 inline short g_sModelIndexSaveMe;
 inline short g_sModelIndexFlare;
+inline short g_sModelIndexShockWave;
 inline short g_sModelIndexFlame;
 inline short g_sModelIndexFire;
 inline short g_sModelIndexFireLoop;
 inline short g_sModelIndexDart;
 
 inline unsigned short g_usConcBlast;
+inline unsigned short g_usEMP;
 inline unsigned short g_usFlash;
 
 class CTFWeapon : public CBasePlayerWeapon
@@ -497,6 +499,8 @@ public:
 	void EXPORT FireInTheHole();
 	void EXPORT Detonate();
 	void EXPORT Disarm(CBaseEntity* activator, CBaseEntity* caller, USE_TYPE useType, float value);
+
+	bool ElectromagneticPulse(CBaseEntity* attacker, CBaseEntity* inflictor) override;
 #endif
 };
 
@@ -751,6 +755,19 @@ private:
 	static constexpr int kNumBursts = 16;
 };
 
+class CEMP : public CPrimeGrenade
+{
+public:
+	CEMP(Entity* containingEntity) : CPrimeGrenade(containingEntity) {}
+
+	void Explode(TraceResult* pTrace, int bitsDamageType) override;
+
+	const char* GetModelName() override { return "models/emp_grenade.mdl"; }
+	const char* GetIconName() override { return "d_empgrenade"; }
+
+	static CEMP* EMP(CBaseEntity* owner);
+};
+
 class CFlashGrenade : public CPrimeGrenade
 {
 public:
@@ -857,6 +874,8 @@ public:
 		CBaseEntity* owner,
 		CPipeBombLauncher* launcher);
 	void EXPORT PipeBombTouch(CBaseEntity *pOther);
+
+	bool ElectromagneticPulse(CBaseEntity* attacker, CBaseEntity* inflictor) override;
 };
 
 #endif

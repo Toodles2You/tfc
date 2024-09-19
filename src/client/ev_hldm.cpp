@@ -1412,7 +1412,7 @@ void EV_ConcBlast(event_args_t* args)
 		TE_BEAMCYLINDER,
 		args->origin,
 		Vector(0, 0, 600) + args->origin,
-		client::event::FindModelIndex("sprites/shockwave.spr"),
+		g_sModelIndexShockWave,
 		0.2F,
 		70,
 		0,
@@ -1457,6 +1457,39 @@ void EV_GetNailedIdiot(event_args_t* args)
 		ATTN_NORM,
 		0,
 		PITCH_NORM);
+}
+
+void EV_EMP(event_args_t* args)
+{
+	const auto type = static_cast<tent::ExplosionType>(args->iparam2);
+
+	client::event::PlaySound(
+		-1,
+		args->origin,
+		CHAN_STATIC,
+		"weapons/emp_1.wav",
+		VOL_NORM,
+		ATTN_NORM,
+		0,
+		PITCH_NORM);
+	
+	client::efx::SparkEffect(args->origin, 8, -100, 100);
+
+	client::efx::BeamCirclePoints(
+		TE_BEAMCYLINDER,
+		args->origin,
+		Vector(0, 0, 600) + args->origin,
+		g_sModelIndexShockWave,
+		0.2F,
+		70,
+		0,
+		1,
+		0,
+		0,
+		0,
+		1,
+		1,
+		0);
 }
 
 void EV_Flash(event_args_t* args)
@@ -1763,6 +1796,7 @@ void EV_HookEvents()
 	client::HookEvent("events/explosion.sc", EV_Explosion);
 	client::HookEvent("events/explode/tf_concuss.sc", EV_ConcBlast);
 	client::HookEvent("events/explode/tf_nailgren.sc", EV_GetNailedIdiot);
+	client::HookEvent("events/explode/tf_emp.sc", EV_EMP);
 	client::HookEvent("events/explode/tf_gas.sc", EV_Flash);
 	client::HookEvent("events/trail.sc", EV_Trail);
 	client::HookEvent("events/train.sc", EV_TrainPitchAdjust);
@@ -1793,6 +1827,7 @@ void EV_Init()
 	g_sModelIndexSmokeTrail = client::event::FindModelIndex("sprites/smoke.spr");
 	g_sModelIndexNail = client::event::FindModelIndex("models/nail.mdl");
 	g_sModelIndexFlare = client::event::FindModelIndex("sprites/xflare1.spr");
+	g_sModelIndexShockWave = client::event::FindModelIndex("sprites/shockwave.spr");
 	g_sModelIndexFlame = client::event::FindModelIndex("sprites/fthrow.spr");
 	g_sModelIndexFire = client::event::FindModelIndex("sprites/playerflame.spr");
 	g_sModelIndexFireLoop = client::event::FindModelIndex("sprites/playerflameloop.spr");
@@ -1805,6 +1840,7 @@ void EV_Init()
 	}
 
 	g_usConcBlast = client::PrecacheEvent(1, "events/explode/tf_concuss.sc");
+	g_usEMP = client::PrecacheEvent(1, "events/explode/tf_emp.sc");
 	g_usFlash = client::PrecacheEvent(1, "events/explode/tf_gas.sc");
 
 	if (pLaserDot != nullptr)

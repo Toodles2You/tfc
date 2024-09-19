@@ -234,5 +234,26 @@ void CDetpack::Disarm(CBaseEntity* activator, CBaseEntity* caller, USE_TYPE useT
 }
 
 
+bool CDetpack::ElectromagneticPulse(CBaseEntity* attacker, CBaseEntity* inflictor)
+{
+	if (m_pPlayer != nullptr)
+	{
+		return false;
+	}
+
+	if (g_pGameRules->PlayerRelationship(attacker, this) >= GR_ALLY)
+	{
+		return false;
+	}
+
+	/* Toodles: Remove the detpack instead of detonating it. */
+
+	g_pGameRules->AddPointsToPlayer(static_cast<CBasePlayer*>(attacker), 1);
+	Remove();
+
+	return true;
+}
+
+
 #endif /* GAME_DLL */
 

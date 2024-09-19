@@ -1051,6 +1051,65 @@ CNapalmGrenade* CNapalmGrenade::NapalmGrenade(CBaseEntity* owner)
 }
 
 
+void CEMP::Explode(TraceResult* pTrace, int bitsDamageType)
+{
+	if (pTrace->flFraction != 1.0)
+	{
+		v.origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
+	}
+
+	CBaseEntity* owner = this;
+	if (v.owner)
+	{
+		owner = v.owner->Get<CBasePlayer>();
+	}
+
+	v.owner = nullptr;
+
+	tent::Explosion(v.origin, -pTrace->vecPlaneNormal, tent::ExplosionType::EMP, v.dmg);
+
+	CBaseEntity* entity = nullptr;
+
+	/* Detonate items. */
+
+	while ((entity = util::FindEntityInSphere(entity, v.origin, 240)) != nullptr)
+	{
+		if (!entity->IsPlayer())
+		{
+			entity->ElectromagneticPulse(owner, this);
+		}
+	}
+
+	entity = nullptr;
+
+	/* Detonate players, so that the backpacks they drop upon death aren't detonated, too. */
+
+	while ((entity = util::FindEntityInSphere(entity, v.origin, 240)) != nullptr)
+	{
+		if (entity->IsPlayer())
+		{
+			entity->ElectromagneticPulse(owner, this);
+		}
+	}
+
+	Remove();
+}
+
+
+CEMP* CEMP::EMP(CBaseEntity* owner)
+{
+	auto grenade = Entity::Create<CEMP>();
+
+	grenade->v.owner = &owner->v;
+	grenade->v.team = owner->TeamNumber();
+	grenade->Spawn();
+
+	grenade->v.classname = MAKE_STRING("empgrenade");
+
+	return grenade;
+}
+
+
 bool CFlashGrenade::Spawn()
 {
 	if (CPrimeGrenade::Spawn())

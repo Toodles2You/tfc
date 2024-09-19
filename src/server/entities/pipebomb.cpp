@@ -133,3 +133,13 @@ void CPipeBomb::PipeBombTouch(CBaseEntity* pOther)
     	Remove();        
     }
 }
+
+
+bool CPipeBomb::ElectromagneticPulse(CBaseEntity* attacker, CBaseEntity* inflictor)
+{
+	/*
+		Toodles FIXME: Detonating pipebombs out of order
+		messes with the queue that the pipebomb launcher uses.
+	*/
+	return false;
+}
