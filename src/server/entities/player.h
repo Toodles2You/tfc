@@ -259,6 +259,17 @@ public:
 #ifdef GAME_DLL
 	void DropBackpack();
 	void DiscardAmmo();
+
+protected:
+	static constexpr int kAmmoCellCost[AMMO_SECONDARY] = {2, 1, 2, 2};
+
+	static constexpr int kAmmoCellMax[AMMO_SECONDARY] = {20, 20, 10, 10};
+
+	static constexpr int kAmmoCellPriority[AMMO_SECONDARY] =
+		{AMMO_SHELLS, AMMO_CELLS, AMMO_NAILS, AMMO_ROCKETS};
+
+public:
+	bool ConvertCells(byte discardAmmo[]);
 #endif
 	int GetUnloadedAmmo(const int ammoType);
 

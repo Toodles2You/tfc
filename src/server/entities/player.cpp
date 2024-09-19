@@ -1719,8 +1719,66 @@ void CBasePlayer::DropBackpack()
 	}
 }
 
+bool CBasePlayer::ConvertCells(byte discardAmmo[])
+{
+	auto discarded = false;
 
-/* Toodles TODO: Engineers convert cells into other ammo types. */
+	auto totalCells = 0;
+
+	/* Tally up all of the cells we need. */
+
+	for (int i = 0; i < AMMO_SECONDARY; i++)
+	{
+		if (discardAmmo[i] >= kAmmoCellMax[i])
+		{
+			continue;
+		}
+
+		totalCells += (kAmmoCellMax[i] - discardAmmo[i])
+			* kAmmoCellCost[i];
+	}
+
+	/* Scale the total by how many cells we actually have. */
+
+	const auto discardScale = m_rgAmmo[AMMO_CELLS] / (float)totalCells;
+
+	for (int j = 0; j < AMMO_SECONDARY; j++)
+	{
+		/* Sort by priority. */
+
+		const auto i = kAmmoCellPriority[j];
+
+		if (discardAmmo[i] >= kAmmoCellMax[i])
+		{
+			continue;
+		}
+
+		/* How many cells to spend. */
+
+		const int cells = (kAmmoCellMax[i] - discardAmmo[i])
+			* kAmmoCellCost[i] * discardScale;
+
+		/* How many rounds it will make. */
+
+		const auto convertAmmo = cells / kAmmoCellCost[i];
+
+		if (convertAmmo <= 0)
+		{
+			continue;
+		}
+
+		/* Spend the cells & convert the rounds! */
+
+		m_rgAmmo[AMMO_CELLS] -= cells;
+
+		discardAmmo[i] += convertAmmo;
+
+		discarded = true;
+	}
+
+	return discarded;
+}
+
 void CBasePlayer::DiscardAmmo()
 {
 	if (!IsPlayer() || !IsAlive())
@@ -1751,23 +1809,37 @@ void CBasePlayer::DiscardAmmo()
 		}
 	}
 
-	int numDiscarded = 0;
+	auto discarded = false;
+
 	for (int i = 0; i < AMMO_SECONDARY; i++)
 	{
 		if (!shouldDiscard[i])
 		{
 			continue;
 		}
+
 		if (discardAmmo[i] == 0)
 		{
 			shouldDiscard[i] = false;
 			continue;
 		}
+
 		m_rgAmmo[i] = 0;
-		numDiscarded++;
+
+		discarded = true;
 	}
 
-	if (numDiscarded == 0)
+	if (PCNumber() == PC_ENGINEER)
+	{
+		/* Engineers convert cells into other ammo types. */
+
+		if (ConvertCells(discardAmmo))
+		{
+			discarded = true;
+		}
+	}
+
+	if (!discarded)
 	{
 		return;
 	}
