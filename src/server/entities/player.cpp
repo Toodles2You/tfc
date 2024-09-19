@@ -1740,7 +1740,8 @@ bool CBasePlayer::ConvertCells(byte discardAmmo[])
 
 	/* Scale the total by how many cells we actually have. */
 
-	const auto discardScale = m_rgAmmo[AMMO_CELLS] / (float)totalCells;
+	const auto discardScale = std::min(
+		m_rgAmmo[AMMO_CELLS] / (float)totalCells, 1.0F);
 
 	for (int j = 0; j < AMMO_SECONDARY; j++)
 	{
