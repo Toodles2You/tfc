@@ -230,12 +230,13 @@ bool CGrenade::ShouldCollide(CBaseEntity* other)
 		return CBaseAnimating::ShouldCollide(other);
 	}
 
-	/* Don't collide with teammates for the first moments of flight. */
-	return gpGlobals->time - v.air_finished >= 0.5F
-		|| g_pGameRules->FPlayerCanTakeDamage(
-			static_cast<CBasePlayer*>(other),
-			v.owner->Get<CBasePlayer>(),
-			this);
+	/* Don't collide with teammates. */
+	if (g_pGameRules->PlayerRelationship(other, this) >= GR_ALLY)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 

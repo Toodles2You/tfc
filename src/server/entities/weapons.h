@@ -875,6 +875,8 @@ public:
 		CPipeBombLauncher* launcher);
 	void EXPORT PipeBombTouch(CBaseEntity *pOther);
 
+	bool ShouldCollide(CBaseEntity* other) override;
+
 	bool ElectromagneticPulse(CBaseEntity* attacker, CBaseEntity* inflictor) override;
 };
 

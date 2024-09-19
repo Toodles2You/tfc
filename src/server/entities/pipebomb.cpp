@@ -36,7 +36,7 @@ CPipeBomb* CPipeBomb::CreatePipeBomb(
     }
     else
     {
-        pipebomb->v.skin = 1;
+        pipebomb->v.skin = owner->TeamNumber();
     }
 	pipebomb->v.owner = &owner->v;
 	pipebomb->v.team = owner->TeamNumber();
@@ -132,6 +132,29 @@ void CPipeBomb::PipeBombTouch(CBaseEntity* pOther)
     {
     	Remove();        
     }
+}
+
+
+bool CPipeBomb::ShouldCollide(CBaseEntity* other)
+{
+	/* Remote pipebombs behave like grenades. */
+	if (v.skin == 0 || !other->IsPlayer())
+	{
+		return CGrenade::ShouldCollide(other);
+	}
+
+	/* Pipebombs. */
+
+	/* Don't collide with teammates for the first few moments of flight. */
+	if (g_pGameRules->PlayerRelationship(other, this) >= GR_ALLY)
+	{
+		if (gpGlobals->time - v.air_finished < 0.5F)
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 
