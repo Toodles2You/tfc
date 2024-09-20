@@ -595,6 +595,7 @@ protected:
 public:
 	void StartBuilding(const int buildingType);
 	void StopBuilding();
+	bool SpawnBuilding(const int buildingType);
 	void FinishBuilding();
 	int GetBuildState();
 };

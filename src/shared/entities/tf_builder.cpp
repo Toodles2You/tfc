@@ -79,7 +79,7 @@ void CBuilder::Deploy()
 	m_iNextPrimaryAttack = 1000 * kBuildTime[m_iWeaponState];
 
 #ifdef GAME_DLL
-	v.aiment = nullptr;
+	v.aiment = v.owner = nullptr;
 	v.team = m_pPlayer->TeamNumber();
 
 	v.solid = SOLID_BBOX;
@@ -91,7 +91,7 @@ void CBuilder::Deploy()
 
 	SetModel("models/tool_box.mdl");
 
-    SetSize(Vector(-16, -16, 0), Vector(16, 16, 48));
+    SetSize(Vector(-16.0F, -16.0F, 0.0F), Vector(16.0F, 16.0F, 48.0F));
 
 	v.effects &= ~EF_NODRAW;
 	v.angles.x = v.angles.z = 0;
@@ -130,7 +130,7 @@ void CBuilder::Holster()
 	m_pPlayer->LeaveState(CBasePlayer::State::CannotMove);
 	m_iNextPrimaryAttack = 0;
 
-	v.aiment = &m_pPlayer->v;
+	v.aiment = v.owner = &m_pPlayer->v;
 
 	v.movetype = MOVETYPE_FOLLOW;
 	v.solid = SOLID_NOT;
@@ -254,14 +254,60 @@ void CBuilder::FinishBuilding()
 {
 	const auto &info = GetInfo();
 
-	Holster();
+	const auto buildingType = m_iWeaponState;
 
-	m_pPlayer->m_rgAmmo[info.iAmmo1] -= kBuildCost[m_iWeaponState];
+	Holster();
 
 	m_iWeaponState = BUILD_NONE;
 
+	if (m_pPlayer->m_rgAmmo[info.iAmmo1] < kBuildCost[buildingType])
+	{
+		return;
+	}
+
+	if (!SpawnBuilding(buildingType))
+	{
+		return;
+	}
+
+	m_pPlayer->m_rgAmmo[info.iAmmo1] -= kBuildCost[buildingType];
+
 	m_pPlayer->EmitSoundPredicted("weapons/turrset.wav", CHAN_WEAPON);
 }
+
+
+#ifdef CLIENT_DLL
+
+bool CBuilder::SpawnBuilding(const int buildingType)
+{
+	switch (buildingType)
+	{
+		default:
+		{
+			return false;
+		}
+
+		case BUILD_DISPENSER:
+		{
+			break;
+		}
+
+		case BUILD_SENTRYGUN:
+		{
+			break;
+		}
+
+		case BUILD_ENTRY_TELEPORTER:
+		case BUILD_EXIT_TELEPORTER:
+		{
+			break;
+		}
+	}
+
+	return true;
+}
+
+#endif /* CLIENT_DLL */
 
 
 int CBuilder::GetBuildState()
