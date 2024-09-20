@@ -131,6 +131,8 @@ bool CBuilder::SpawnBuilding(const int buildingType)
 		return false;
 	}
 
+	m_pPlayer->m_hBuildings[buildingType - 1] = building;
+
 	return true;
 }
 

@@ -14,6 +14,19 @@
 
 LINK_ENTITY_TO_CLASS(tf_weapon_builder, CBuilder);
 
+bool CBuilder::Spawn()
+{
+	if (!CTFWeapon::Spawn())
+	{
+		return false;
+	}
+
+	m_iClip = 0;
+
+	return true;
+}
+
+
 void CBuilder::GetWeaponInfo(WeaponInfo& i)
 {
 	i.pszName = "tf_weapon_builder";
@@ -37,6 +50,22 @@ bool CBuilder::AddToPlayer(CBasePlayer* pPlayer)
 
 		return false;
 	}
+
+	m_iClip = 0;
+
+#ifdef GAME_DLL
+
+	for (int i = BUILD_DISPENSER; i <= BUILD_EXIT_TELEPORTER; i++)
+	{
+		CBaseEntity* building = m_pPlayer->m_hBuildings[i - 1];
+
+		if (building != nullptr)
+		{
+			m_iClip |= 1 << i;
+		}
+	}
+
+#endif /* GAME_DLL */
 
 	return true;
 }
@@ -211,6 +240,18 @@ bool CBuilder::CheckArea(const Vector& origin)
 
 void CBuilder::StartBuilding(const int buildingType)
 {
+	if (buildingType > 10)
+	{
+		DestroyBuilding(buildingType - 10, true);
+		return;
+	}
+
+	if (buildingType > 5)
+	{
+		DestroyBuilding(buildingType - 5, false);
+		return;
+	}
+
 	if (buildingType == BUILD_NONE)
 	{
 		StopBuilding();
@@ -219,13 +260,19 @@ void CBuilder::StartBuilding(const int buildingType)
 
 	const auto &info = GetInfo();
 
-	m_iWeaponState = buildingType;
-
-	if (m_pPlayer->m_rgAmmo[info.iAmmo1] < kBuildCost[m_iWeaponState])
+	if ((m_iClip & (1 << buildingType)) != 0)
 	{
 		StopBuilding();
 		return;
 	}
+
+	if (m_pPlayer->m_rgAmmo[info.iAmmo1] < kBuildCost[buildingType])
+	{
+		StopBuilding();
+		return;
+	}
+
+	m_iWeaponState = buildingType;
 
 	Deploy();
 }
@@ -272,6 +319,8 @@ void CBuilder::FinishBuilding()
 
 	m_pPlayer->m_rgAmmo[info.iAmmo1] -= kBuildCost[buildingType];
 
+	m_iClip |= 1 << buildingType;
+
 	m_pPlayer->EmitSoundPredicted("weapons/turrset.wav", CHAN_WEAPON);
 }
 
@@ -314,33 +363,51 @@ int CBuilder::GetBuildState()
 {
 	const auto &info = GetInfo();
 
-	auto buildState = 0;
-
-	if (m_pPlayer->m_rgAmmo[info.iAmmo1] >= kBuildCost[BUILD_DISPENSER])
-	{
-		buildState |= BS_CAN_DISPENSER;
-	}
-
-	if (m_pPlayer->m_rgAmmo[info.iAmmo1] >= kBuildCost[BUILD_SENTRYGUN])
-	{
-		buildState |= BS_CAN_SENTRYGUN;
-	}
-
-	if (m_pPlayer->m_rgAmmo[info.iAmmo1] >= kBuildCost[BUILD_ENTRY_TELEPORTER])
-	{
-		buildState |= BS_CAN_ENTRY_TELEPORTER;
-	}
-
-	if (m_pPlayer->m_rgAmmo[info.iAmmo1] >= kBuildCost[BUILD_EXIT_TELEPORTER])
-	{
-		buildState |= BS_CAN_EXIT_TELEPORTER;
-	}
+	auto buildState = m_iClip;
 
 	if (m_iWeaponState != BUILD_NONE)
 	{
 		buildState |= BS_BUILDING;
 	}
 
+	for (int i = BUILD_DISPENSER; i <= BUILD_EXIT_TELEPORTER; i++)
+	{
+		if ((buildState & (1 << i)) == 0
+		 && m_pPlayer->m_rgAmmo[info.iAmmo1] >= kBuildCost[i])
+		{
+			buildState |= 32 << i;
+		}
+	}
+
 	return buildState;
+}
+
+
+void CBuilder::DestroyBuilding(const int buildingType, const bool detonate)
+{
+	if (buildingType == BUILD_NONE)
+	{
+		return;
+	}
+
+	if ((m_iClip & (1 << buildingType)) == 0)
+	{
+		return;
+	}
+
+#ifdef GAME_DLL
+
+	CBaseEntity* building = m_pPlayer->m_hBuildings[buildingType - 1];
+
+	if (building != nullptr)
+	{
+		building->Killed(this, m_pPlayer, DMG_GENERIC);
+	}
+
+	m_pPlayer->m_hBuildings[buildingType - 1] = nullptr;
+
+#endif /* GAME_DLL */
+
+	m_iClip &= ~(1 << buildingType);
 }
 

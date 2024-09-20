@@ -578,7 +578,7 @@ void CBasePlayer::CmdStart(const usercmd_t& cmd, unsigned int randomSeed)
 		((usercmd_t*)&cmd)->weaponselect = 0;
 	}
 
-	if (cmd.impulse >= WEAPON_BUILDER && cmd.impulse <= WEAPON_BUILDER + 4)
+	if (cmd.impulse >= WEAPON_BUILDER && cmd.impulse <= WEAPON_BUILDER + 15)
 	{
 		StartBuilding(cmd.impulse - WEAPON_BUILDER);
 		((usercmd_t*)&cmd)->impulse = 0;

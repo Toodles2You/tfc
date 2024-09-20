@@ -564,6 +564,8 @@ class CBuilder : public CTFWeapon
 public:
 	CBuilder(Entity* containingEntity) : CTFWeapon(containingEntity) {}
 
+	virtual bool Spawn() override;
+
 	int ObjectCaps() override
 	{
 		if (m_pPlayer != nullptr)
@@ -587,8 +589,8 @@ public:
 	void Holster() override;
 
 protected:
-	static constexpr byte kBuildCost[] = {0, 100, 130, 150, 150};
-	static constexpr byte kBuildTime[] = {0, 2, 5, 4, 4};
+	static constexpr byte kBuildCost[] = {0, 100, 130, 255, 125, 125};
+	static constexpr byte kBuildTime[] = {0, 2, 5, 5, 4, 4};
 
 	bool CheckArea(const Vector& origin);
 
@@ -597,6 +599,7 @@ public:
 	void StopBuilding();
 	bool SpawnBuilding(const int buildingType);
 	void FinishBuilding();
+	void DestroyBuilding(const int buildingType, const bool detonate);
 	int GetBuildState();
 };
 

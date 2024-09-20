@@ -494,6 +494,10 @@ public:
 	bool ElectromagneticPulse(CBaseEntity* attacker, CBaseEntity* inflictor) override;
 #endif
 
+#ifdef GAME_DLL
+	EHANDLE m_hBuildings[5];
+#endif
+
 	void StartBuilding(const int buildingType);
 };
 

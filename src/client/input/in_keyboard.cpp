@@ -547,13 +547,27 @@ void Build()
 {
 	if (client::Cmd_Argc() > 1)
 	{
-		/* Clamp the user building value. */
-		in_impulse = WEAPON_BUILDER + std::clamp(atoi(client::Cmd_Argv(1)), 1, 4);
+		in_impulse = WEAPON_BUILDER + std::clamp(atoi(client::Cmd_Argv(1)),
+			(int)BUILD_DISPENSER, (int)BUILD_EXIT_TELEPORTER);
 	}
 	else
 	{
 		in_impulse = WEAPON_BUILDER;
 	}
+}
+
+void Dismantle()
+{
+	if (client::Cmd_Argc() > 1)
+	{
+		in_impulse = WEAPON_BUILDER + 5 + std::clamp(atoi(client::Cmd_Argv(1)),
+			(int)BUILD_DISPENSER, (int)BUILD_EXIT_TELEPORTER);
+	}
+}
+
+void Detonate(const int buildingType)
+{
+	in_impulse = WEAPON_BUILDER + 10 + buildingType;
 }
 
 /*
@@ -909,6 +923,11 @@ void InitInput()
 	client::AddCommand("detstop", DetStop);
 
 	client::AddCommand("build", Build);
+	client::AddCommand("dismantle", Dismantle);
+	client::AddCommand("detdispenser", []() {Detonate(1);});
+	client::AddCommand("detsentry", []() {Detonate(2);});
+	client::AddCommand("detentryteleporter", []() {Detonate(4);});
+	client::AddCommand("detexitteleporter", []() {Detonate(5);});
 
 	cl_anglespeedkey = client::RegisterVariable("cl_anglespeedkey", "0.67", 0);
 	cl_yawspeed = client::RegisterVariable("cl_yawspeed", "210", 0);
