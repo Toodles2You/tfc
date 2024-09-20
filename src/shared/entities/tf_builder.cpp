@@ -87,9 +87,13 @@ void CBuilder::RemoveFromPlayer(bool forceSendAnimations)
 
 void CBuilder::Deploy()
 {
-	/* Build 64 in front of us. */
+	/* Build 64 units in front of us. */
 
-	const auto gun = m_pPlayer->v.origin;
+	/* Account for hull sizes. */
+
+	auto gun = m_pPlayer->v.origin;
+	gun.z += m_pPlayer->v.mins.z - VEC_HULL_MIN.z;
+
 	const auto aim = Vector(0.0F, m_pPlayer->v.v_angle.y, 0.0F);
 
 	Vector dir;
