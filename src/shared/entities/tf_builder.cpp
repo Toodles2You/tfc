@@ -404,8 +404,6 @@ void CBuilder::DestroyBuilding(const int buildingType, const bool detonate)
 		building->Killed(this, m_pPlayer, DMG_GENERIC);
 	}
 
-	m_pPlayer->m_hBuildings[buildingType - 1] = nullptr;
-
 #endif /* GAME_DLL */
 
 	m_iClip &= ~(1 << buildingType);

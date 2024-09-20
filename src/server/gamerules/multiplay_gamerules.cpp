@@ -469,6 +469,7 @@ void CHalfLifeMultiplay::ClientDisconnected(Entity* pClient)
             pPlayer->RemoveGoalItems();
 			pPlayer->DropBackpack();
 			pPlayer->RemoveAllWeapons(); // destroy all of the players weapons and items
+			pPlayer->RemoveAllBuildings(false);
 			pPlayer->RemoveAllObjects();
 		}
 	}

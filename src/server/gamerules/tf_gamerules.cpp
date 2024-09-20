@@ -311,6 +311,8 @@ bool CTeamFortress::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, bool b
 
     pPlayer->v.playerclass = PC_UNDEFINED;
 
+	pPlayer->RemoveAllBuildings(bKill);
+
     if (pPlayer->TeamNumber() != TEAM_SPECTATORS)
     {
         MessageBegin(MSG_ONE, gmsgVGUIMenu, pPlayer);
@@ -506,9 +508,14 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
     {
         pPlayer->GiveNamedItem(g_szWeaponNames[WEAPON_DETPACK]);
     }
-    else if (pPlayer->PCNumber() == PC_ENGINEER)
+
+    if (pPlayer->PCNumber() == PC_ENGINEER)
     {
         pPlayer->GiveNamedItem(g_szWeaponNames[WEAPON_BUILDER]);
+    }
+    else
+    {
+        pPlayer->RemoveAllBuildings(false);
     }
 
     for (int i = 0; i < 4; i++)

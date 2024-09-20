@@ -499,6 +499,9 @@ public:
 #endif
 
 	void StartBuilding(const int buildingType);
+#ifdef GAME_DLL
+	void RemoveAllBuildings(const bool detonate);
+#endif
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

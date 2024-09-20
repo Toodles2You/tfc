@@ -20,6 +20,7 @@ public:
 	CBuilding(Entity* containingEntity) : CBaseAnimating(containingEntity) {}
 
 	bool Spawn() override;
+	void UpdateOnRemove() override;
 
 	virtual const char* GetModelName() { return "models/dispenser.mdl"; }
 	virtual const char* GetClassName() { return "building_dispenser"; }
@@ -32,6 +33,10 @@ protected:
 
 bool CBuilding::Spawn()
 {
+	/* Set up the player's building handle. */
+
+	m_pPlayer->m_hBuildings[PCNumber() - 1] = this;
+
 	v.classname = MAKE_STRING(GetClassName());
 	v.team = m_pPlayer->TeamNumber();
 
@@ -50,6 +55,28 @@ bool CBuilding::Spawn()
 	v.effects |= EF_NOINTERP;
 
 	return true;
+}
+
+
+void CBuilding::UpdateOnRemove()
+{
+	if (m_pPlayer != nullptr)
+	{
+		/* Clear the player's building handle. */
+
+		m_pPlayer->m_hBuildings[PCNumber() - 1] = nullptr;
+
+		/* Tell the player's builder that we're being removed. */
+
+		if (m_pPlayer->HasPlayerWeapon(WEAPON_BUILDER))
+		{
+			auto builder = static_cast<CBuilder*>(m_pPlayer->m_rgpPlayerWeapons[WEAPON_BUILDER]);
+
+			builder->m_iClip &= ~(1 << PCNumber());
+		}
+	}
+
+	CBaseAnimating::UpdateOnRemove();
 }
 
 
@@ -122,6 +149,7 @@ bool CBuilder::SpawnBuilding(const int buildingType)
 
 	building->v.origin = v.origin;
 	building->v.angles = v.angles;
+	building->v.playerclass = buildingType;
 	building->m_pPlayer = m_pPlayer;
 
 	if (!building->Spawn())
@@ -130,8 +158,6 @@ bool CBuilder::SpawnBuilding(const int buildingType)
 
 		return false;
 	}
-
-	m_pPlayer->m_hBuildings[buildingType - 1] = building;
 
 	return true;
 }

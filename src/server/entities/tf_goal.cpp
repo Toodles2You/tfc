@@ -1001,12 +1001,10 @@ dead_bonuses:
         }
     }
 
-#if 0
-    if (player->PCNumber() == PC_ENGINEER && HasGoalResults(TFGR_DESTROY_BUILDINGS))
+    if (HasGoalResults(TFGR_DESTROY_BUILDINGS))
     {
-        dynamic_cast<CBasePlayer*>(player)->RemoveAllBuildings(false);
+        static_cast<CBasePlayer*>(player)->RemoveAllBuildings(false);
     }
-#endif
 
     CTFGoalItem* goal = nullptr;
 

@@ -2857,6 +2857,41 @@ bool CBasePlayer::ElectromagneticPulse(CBaseEntity* attacker, CBaseEntity* infli
 }
 
 
+void CBasePlayer::RemoveAllBuildings(const bool detonate)
+{
+	/* Toodles TODO: Detonate mode. */
+
+#ifndef NDEBUG
+	auto count = 0;
+#endif
+
+	for (int i = BUILD_DISPENSER; i <= BUILD_EXIT_TELEPORTER; i++)
+	{
+		CBaseEntity* building = m_hBuildings[i - 1];
+
+		if (building != nullptr)
+		{
+			building->Remove();
+
+#ifndef NDEBUG
+			count++;
+#endif
+		}
+	}
+
+#ifndef NDEBUG
+	if (count != 0)
+	{
+		engine::AlertMessage(
+			at_aiconsole,
+			"Removed %i buildings owned by '%s'\n",
+			count,
+			STRING(v.netname));
+	}
+#endif
+}
+
+
 class CStripWeapons : public CPointEntity
 {
 public:
