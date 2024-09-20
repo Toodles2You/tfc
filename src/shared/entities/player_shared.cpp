@@ -1284,6 +1284,11 @@ int CBasePlayer::GetUnloadedAmmo(const int ammoType)
 	{
 		const auto &info = weapon->GetInfo();
 
+		if (info.iMaxClip == -1)
+		{
+			continue;
+		}
+
 		/* Ensure the ammo type matches what we're looking for. */
 
 		if (info.iAmmo1 != ammoType)
@@ -1305,7 +1310,7 @@ int CBasePlayer::GetUnloadedAmmo(const int ammoType)
 
 		/* Add in any unloaded ammo from the clip. */
 
-		if (weapon->m_iClip != weapon->iMaxClip())
+		if (weapon->m_iClip < weapon->iMaxClip())
 		{
 			ammo += weapon->iMaxClip() - weapon->m_iClip;
 		}
