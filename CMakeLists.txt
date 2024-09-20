@@ -34,6 +34,7 @@ set(SHARED_SRC
     ${SHARED_SRC_DIR}/entities/player_shared.cpp
     ${SHARED_SRC_DIR}/entities/tf_assault.cpp
     ${SHARED_SRC_DIR}/entities/tf_axe.cpp
+    ${SHARED_SRC_DIR}/entities/tf_builder.cpp
     ${SHARED_SRC_DIR}/entities/tf_detpack.cpp
     ${SHARED_SRC_DIR}/entities/tf_pipebomb.cpp
     ${SHARED_SRC_DIR}/entities/tf_sniper.cpp

@@ -235,6 +235,7 @@ static void HUD_InitClientWeapons()
 	HUD_SpawnWeapon<CRailgun>(WEAPON_LASER);
 	HUD_SpawnWeapon<CPipeBombLauncher>(WEAPON_PIPEBOMB_LAUNCHER);
 	HUD_SpawnWeapon<CKnife>(WEAPON_KNIFE);
+	HUD_SpawnWeapon<CBuilder>(WEAPON_BUILDER);
 }
 
 
@@ -440,6 +441,7 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 
 	client::GetViewAngles(player->v.v_angle);
 	player->v.button = cmd->buttons;
+	player->v.impulse = cmd->impulse;
 	player->m_afButtonLast = from->playerstate.oldbuttons;
 
 	player->SetEntityState(from->playerstate);

@@ -132,6 +132,17 @@ void CBasePlayer::UpdateHudData()
 	{
 		gHUD.m_Ammo.Update_Detpack(0);
 	}
+
+	if (HasPlayerWeapon(WEAPON_BUILDER))
+	{
+		auto builder = static_cast<CBuilder*>(m_rgpPlayerWeapons[WEAPON_BUILDER]);
+
+		gHUD.m_Ammo.Update_BuildSt(builder->GetBuildState());
+	}
+	else
+	{
+		gHUD.m_Ammo.Update_BuildSt(0);
+	}
 }
 
 

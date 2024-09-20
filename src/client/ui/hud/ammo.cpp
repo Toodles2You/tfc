@@ -544,6 +544,12 @@ void CHudAmmo::Update_Detpack(const int setting)
 	gViewPort->Update_Detpack(setting);
 }
 
+void CHudAmmo::Update_BuildSt(const int setting)
+{
+	/* Toodles FIXME: Stupid wrapper because spaghetti header files are killing me. */
+	gViewPort->Update_BuildSt(setting);
+}
+
 bool CHudAmmo::MsgFunc_AmmoPickup(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);

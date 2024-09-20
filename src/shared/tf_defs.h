@@ -41,3 +41,16 @@ struct PCInfo
 };
 
 extern PCInfo sTFClassInfo[PC_LASTCLASS];
+
+enum
+{
+	BS_BUILDING				= 1 << 0,
+	BS_HAS_DISPENSER		= 1 << 1,
+	BS_HAS_SENTRYGUN		= 1 << 2,
+	BS_CAN_DISPENSER		= 1 << 3,
+	BS_CAN_SENTRYGUN		= 1 << 4,
+	BS_HAS_ENTRY_TELEPORTER	= 1 << 5,
+	BS_HAS_EXIT_TELEPORTER	= 1 << 6,
+	BS_CAN_ENTRY_TELEPORTER	= 1 << 7,
+	BS_CAN_EXIT_TELEPORTER	= 1 << 8,
+};

@@ -506,6 +506,10 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
     {
         pPlayer->GiveNamedItem(g_szWeaponNames[WEAPON_DETPACK]);
     }
+    else if (pPlayer->PCNumber() == PC_ENGINEER)
+    {
+        pPlayer->GiveNamedItem(g_szWeaponNames[WEAPON_BUILDER]);
+    }
 
     for (int i = 0; i < 4; i++)
     {

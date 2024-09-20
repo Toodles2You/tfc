@@ -24,6 +24,8 @@
 // custom scheme handling
 #include "vgui_SchemeManager.h"
 
+#include "tf_defs.h"
+
 using namespace vgui;
 
 class Cursor;
@@ -572,6 +574,7 @@ public:
 	bool GetAllowSpectators() { return m_iAllowSpectators; };
 
 	void Update_Detpack(const int setting);
+	void Update_BuildSt(const int setting);
 
 	// Message Handlers
 	bool MsgFunc_ValClass(const char *pszName, int iSize, void *pbuf );
@@ -1100,7 +1103,6 @@ public:
 	}
 };
 
-extern int iBuildingCosts[];
 #define BUILDSTATE_HASBUILDING		(1<<0)		// Data is building ID (1 = Dispenser, 2 = Sentry, 3 = Entry Teleporter, 4 = Exit Teleporter)
 #define BUILDSTATE_BUILDING			(1<<1)
 #define BUILDSTATE_BASE				(1<<2)
@@ -1129,10 +1131,6 @@ public:
 
 	virtual bool IsNotValid()
 	{
-		/* Toodles FIXME: */
-#if 1
-		return true;
-#else
 		// Only visible for engineers
 		if (g_iPlayerClass != PC_ENGINEER)
 			return true;
@@ -1154,7 +1152,7 @@ public:
 		if (m_iBuildState & BUILDSTATE_BASE)
 		{
 			// Only appear if we've got enough metal to build something, or something already built
-			if (gViewPort->GetBuildState() & (BS_HAS_SENTRYGUN | BS_HAS_DISPENSER | BS_CANB_SENTRYGUN | BS_CANB_DISPENSER | BS_HAS_ENTRY_TELEPORTER | BS_HAS_EXIT_TELEPORTER | BS_CANB_ENTRY_TELEPORTER | BS_CANB_EXIT_TELEPORTER))
+			if (gViewPort->GetBuildState() & (BS_HAS_SENTRYGUN | BS_HAS_DISPENSER | BS_CAN_SENTRYGUN | BS_CAN_DISPENSER | BS_HAS_ENTRY_TELEPORTER | BS_HAS_EXIT_TELEPORTER | BS_CAN_ENTRY_TELEPORTER | BS_CAN_EXIT_TELEPORTER))
 				return false;
 
 			return true;
@@ -1177,18 +1175,18 @@ public:
 		if (m_iBuildState & BUILDSTATE_CANBUILD)
 		{
 			// Make sure they've got the ammo and don't have one already
-			if (m_iBuildData == BuildButton::DISPENSER && (gViewPort->GetBuildState() & BS_CANB_DISPENSER))
+			if (m_iBuildData == BuildButton::DISPENSER && (gViewPort->GetBuildState() & BS_CAN_DISPENSER))
 				return false;
-			if (m_iBuildData == BuildButton::SENTRYGUN && (gViewPort->GetBuildState() & BS_CANB_SENTRYGUN))
+			if (m_iBuildData == BuildButton::SENTRYGUN && (gViewPort->GetBuildState() & BS_CAN_SENTRYGUN))
 				return false;
-			if (m_iBuildData == BuildButton::ENTRY_TELEPORTER && (gViewPort->GetBuildState() & BS_CANB_ENTRY_TELEPORTER))
+			if (m_iBuildData == BuildButton::ENTRY_TELEPORTER && (gViewPort->GetBuildState() & BS_CAN_ENTRY_TELEPORTER))
 				return false;
-			if (m_iBuildData == BuildButton::EXIT_TELEPORTER && (gViewPort->GetBuildState() & BS_CANB_EXIT_TELEPORTER))
+			if (m_iBuildData == BuildButton::EXIT_TELEPORTER && (gViewPort->GetBuildState() & BS_CAN_EXIT_TELEPORTER))
 				return false;
 
 			return true;
 		}
-#endif
+
 		return false;
 	}
 };

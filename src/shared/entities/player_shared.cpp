@@ -189,6 +189,11 @@ void CBasePlayer::WeaponPostFrame()
 		dynamic_cast<CDetpack*>(m_rgpPlayerWeapons[WEAPON_DETPACK])->WeaponPostFrame();
 	}
 
+	if (HasPlayerWeapon(WEAPON_BUILDER))
+	{
+		static_cast<CBuilder*>(m_rgpPlayerWeapons[WEAPON_BUILDER])->WeaponPostFrame();
+	}
+
 	if (m_pActiveWeapon == nullptr || InState(State::Holstered))
 	{
 		return;
@@ -571,6 +576,12 @@ void CBasePlayer::CmdStart(const usercmd_t& cmd, unsigned int randomSeed)
 	{
         SelectWeapon(cmd.weaponselect - 1);
 		((usercmd_t*)&cmd)->weaponselect = 0;
+	}
+
+	if (cmd.impulse >= WEAPON_BUILDER && cmd.impulse <= WEAPON_BUILDER + 4)
+	{
+		StartBuilding(cmd.impulse - WEAPON_BUILDER);
+		((usercmd_t*)&cmd)->impulse = 0;
 	}
 
 	m_randomSeed = randomSeed;
@@ -1301,4 +1312,24 @@ int CBasePlayer::GetUnloadedAmmo(const int ammoType)
 	}
 
 	return ammo;
+}
+
+
+void CBasePlayer::StartBuilding(const int buildingType)
+{
+	if (!HasPlayerWeapon(WEAPON_BUILDER))
+	{
+		return;
+	}
+
+	auto build = static_cast<CBuilder*>(m_rgpPlayerWeapons[WEAPON_BUILDER]);
+
+	if (buildingType != 0)
+	{
+		build->StartBuilding(buildingType);
+	}
+	else
+	{
+		build->StopBuilding();
+	}
 }

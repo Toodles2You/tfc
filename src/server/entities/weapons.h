@@ -139,6 +139,7 @@ constexpr const char* g_szWeaponNames[WEAPON_TYPES] =
 	"tf_weapon_railgun",
 	"tf_weapon_pl",
 	"tf_weapon_knife",
+	"tf_weapon_builder",
 };
 #endif
 
@@ -556,6 +557,44 @@ public:
 protected:
 	int HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& tr) override;
 #endif
+};
+
+class CBuilder : public CTFWeapon
+{
+public:
+	CBuilder(Entity* containingEntity) : CTFWeapon(containingEntity) {}
+
+	int ObjectCaps() override
+	{
+		if (m_pPlayer != nullptr)
+		{
+			return CTFWeapon::ObjectCaps();
+		}
+		return CTFWeapon::ObjectCaps() | FCAP_DONT_SAVE | FCAP_CONTINUOUS_USE;
+	}
+
+	int GetID() const override { return WEAPON_BUILDER; }
+	void GetWeaponInfo(WeaponInfo& i) override;
+
+	bool AddToPlayer(CBasePlayer* pPlayer) override;
+	void RemoveFromPlayer(bool forceSendAnimations = true) override;
+
+	bool CanDeploy() override { return false; }
+	void Deploy() override;
+
+	void WeaponPostFrame() override;
+
+	void Holster() override;
+
+protected:
+	static constexpr int kBuildingCost[] = {100, 130, 150, 150};
+	static constexpr int kBuildingTime[] = {2, 5, 5, 5};
+
+public:
+	void StartBuilding(const int buildingType);
+	void StopBuilding();
+	void FinishBuilding();
+	int GetBuildState();
 };
 
 #ifdef GAME_DLL

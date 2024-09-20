@@ -146,6 +146,7 @@ public:
 	void Update_AmmoX(int iIndex, int iCount);
 	void Update_CurWeapon(int iState, int iId, int iClip, bool bCanHolster);
 	void Update_Detpack(const int setting);
+	void Update_BuildSt(const int setting);
 	bool MsgFunc_AmmoPickup(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_WeapPickup(const char* pszName, int iSize, void* pbuf);
 	bool MsgFunc_ItemPickup(const char* pszName, int iSize, void* pbuf);

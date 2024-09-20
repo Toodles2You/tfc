@@ -493,6 +493,8 @@ protected:
 public:
 	bool ElectromagneticPulse(CBaseEntity* attacker, CBaseEntity* inflictor) override;
 #endif
+
+	void StartBuilding(const int buildingType);
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

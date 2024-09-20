@@ -1437,17 +1437,22 @@ void TeamFortressViewport::InputPlayerSpecial()
 	{
 		client::ServerCmd("flaginfo");
 	}
-#if 0
 	else if (g_iPlayerClass == PC_ENGINEER || g_iPlayerClass == PC_SPY)
 	{
-		ShowCommandMenu(gViewPort->m_StandardMenu);
-
 		if (m_pCurrentCommandMenu != nullptr)
 		{
-			m_pCurrentCommandMenu->KeyInput('7');
+			HideCommandMenu();
+		}
+		else
+		{
+			ShowCommandMenu(gViewPort->m_StandardMenu);
+
+			if (m_pCurrentCommandMenu != nullptr)
+			{
+				m_pCurrentCommandMenu->KeyInput('7');
+			}
 		}
 	}
-#endif
 	else if (g_iPlayerClass == PC_MEDIC)
 	{
 		/* Switch between the Medikit & the previous weapon. */
@@ -2356,6 +2361,17 @@ void TeamFortressViewport::Update_Detpack(const int setting)
 	}
 }
 
+void TeamFortressViewport::Update_BuildSt(const int setting)
+{
+	if (GetBuildState() != setting)
+	{
+		m_iBuildState = setting;
+
+		// Force the menu to update
+		UpdateCommandMenu(m_StandardMenu);
+	}
+}
+
 //================================================================
 // Message Handlers
 bool TeamFortressViewport::MsgFunc_ValClass(const char* pszName, int iSize, void* pbuf)
@@ -2482,10 +2498,7 @@ bool TeamFortressViewport::MsgFunc_BuildSt(const char* pszName, int iSize, void*
 {
 	BEGIN_READ(pbuf, iSize);
 
-	m_iBuildState = READ_SHORT();
-
-	// Force the menu to update
-	UpdateCommandMenu(m_StandardMenu);
+	Update_BuildSt(READ_SHORT());
 
 	return true;
 }
