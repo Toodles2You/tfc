@@ -647,29 +647,6 @@ static void EV_FlameTouch(TEMPENTITY* ent, pmtrace_t* tr)
 	EV_DecalTrace(tr, EV_DecalName("{smscorch%i", 3));
 }
 
-static void EV_LaserDie(particle_t* particle)
-{
-	if (particle == nullptr)
-	{
-		return;
-	}
-
-	client::event::PushPMStates();
-	client::event::SetTraceHull(kHullPoint);
-
-	const auto forward = particle->vel.Normalize();
-
-	auto start = particle->org - forward * 128.0F;
-	auto end = particle->org + forward * 128.0F;
-
-	pmtrace_t tr;
-	client::event::PlayerTrace(start, end, PM_STUDIO_IGNORE, -1, &tr);
-
-	EV_DecalGunshot(&tr, forward, false);
-
-	client::event::PopPMStates();
-}
-
 void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 {
 	const auto& info = CBasePlayerWeapon::WeaponInfoArray[(int)args->fparam1];
@@ -757,14 +734,20 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 
 			gun = gun + right * rightOffset + up * -4;
 
+			/* Toodles FIXME: I don't like this. */
+
+			client::event::SetUpPlayerPrediction(true, true);
 			client::event::PushPMStates();
+			client::event::SetSolidPlayers(args->entindex - 1);
 			client::event::SetTraceHull(kHullPoint);
 
 			Vector forward, right, up;
 			AngleVectors(args->angles, &forward, &right, &up);
 
 			pmtrace_t tr;
-			client::event::PlayerTrace(gun, gun + forward * (1500.0F * 5.0F), PM_STUDIO_IGNORE, -1, &tr);
+			client::event::PlayerTrace(
+				gun, gun + forward * (1500.0F * 5.0F),
+				PM_WORLD_ONLY, -1, &tr);
 
 			client::event::PopPMStates();
 
@@ -775,7 +758,7 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 				2,
 				3.0F, /* 1.0F */
 				args->entindex,
-				EV_LaserDie);
+				nullptr);
 
 			break;
 		}
