@@ -17,7 +17,7 @@ LINK_ENTITY_TO_CLASS(tf_weapon_builder, CBuilder);
 void CBuilder::GetWeaponInfo(WeaponInfo& i)
 {
 	i.pszName = "tf_weapon_builder";
-	i.iAmmo1 = -1;
+	i.iAmmo1 = AMMO_CELLS;
 	i.iAmmo2 = -1;
 	i.iMaxClip = -1;
 	i.iSlot = -1;
@@ -52,32 +52,40 @@ void CBuilder::RemoveFromPlayer(bool forceSendAnimations)
 	m_pPlayer->SetWeaponHolstered(false, false);
 	m_pPlayer->LeaveState(CBasePlayer::State::CannotMove);
 	CTFWeapon::RemoveFromPlayer(forceSendAnimations);
-	m_iWeaponState = 0;
+	m_iWeaponState = BUILD_NONE;
 }
 
 
 void CBuilder::Deploy()
 {
-	const auto info = GetInfo();
+	/* Build 64 in front of us. */
 
-	m_pPlayer->SetWeaponHolstered(true, false);
-	m_pPlayer->EnterState(CBasePlayer::State::CannotMove);
-	m_iNextPrimaryAttack = 1000 * kBuildingTime[m_iWeaponState - 1];
-
-#ifdef GAME_DLL
 	const auto gun = m_pPlayer->v.origin;
 	const auto aim = Vector(0.0F, m_pPlayer->v.v_angle.y, 0.0F);
 
 	Vector dir;
 	AngleVectors(aim, &dir, nullptr, nullptr);
 
+	v.origin = gun + dir * 64.0F;
+
+	if (!CheckArea(v.origin))
+	{
+		StopBuilding();
+		return;
+	}
+
+	m_pPlayer->SetWeaponHolstered(true, false);
+	m_pPlayer->EnterState(CBasePlayer::State::CannotMove);
+	m_iNextPrimaryAttack = 1000 * kBuildTime[m_iWeaponState];
+
+#ifdef GAME_DLL
 	v.aiment = nullptr;
 	v.team = m_pPlayer->TeamNumber();
 
 	v.solid = SOLID_BBOX;
 	v.movetype = MOVETYPE_TOSS;
 
-    SetOrigin(gun + dir * 64.0F);
+    SetOrigin(v.origin);
 
 	v.flags &= ~FL_ONGROUND;
 
@@ -89,18 +97,21 @@ void CBuilder::Deploy()
 	v.angles.x = v.angles.z = 0;
 #endif
 
-	m_pPlayer->EmitSoundPredicted("weapons/building.wav", CHAN_WEAPON, VOL_NORM, ATTN_NORM, PITCH_HIGH);
+	m_pPlayer->EmitSoundPredicted("weapons/building.wav", CHAN_WEAPON,
+		0.98F, ATTN_NORM, 125);
 }
 
 
 void CBuilder::WeaponPostFrame()
 {
-	if (m_iWeaponState == 0)
+	if (m_iWeaponState == BUILD_NONE)
 	{
 		return;
 	}
 
-	if (m_pPlayer->m_rgAmmo[AMMO_CELLS] < kBuildingCost[m_iWeaponState - 1])
+	const auto &info = GetInfo();
+
+	if (m_pPlayer->m_rgAmmo[info.iAmmo1] < kBuildCost[m_iWeaponState])
 	{
 		StopBuilding();
 		return;
@@ -127,11 +138,90 @@ void CBuilder::Holster()
 }
 
 
+bool CBuilder::CheckArea(const Vector& origin)
+{
+#ifdef GAME_DLL
+
+	const auto contents = engine::PointContents(origin);
+
+	/* Must be in the open. */
+
+	/*
+		Toodles FIXME: This needs to account for
+		the new "no build" & "no grenade" contents.
+	*/
+
+	if (contents != CONTENTS_EMPTY && contents != CONTENTS_WATER)
+	{
+		return false;
+	}
+
+	TraceResult trace;
+
+	/* Make sure we can see the build origin. */
+
+	util::TraceLine(m_pPlayer->v.origin, origin,
+		util::dont_ignore_monsters, m_pPlayer, &trace);
+	
+	if (trace.flFraction != 1.0F || trace.fAllSolid != 0)
+	{
+		return false;
+	}
+
+	/* Make sure the build origin is clear. */
+
+	util::TraceHull(origin, origin,
+		util::dont_ignore_monsters, 2, &m_pPlayer->v, &trace);
+	
+	if (trace.flFraction != 1.0F || trace.fAllSolid != 0)
+	{
+		return false;
+	}
+
+	/* Another slightly larger entity check, just to be safe. */
+
+	CBaseEntity *entity = nullptr;
+
+	while ((entity = util::FindEntityInSphere(entity, origin, 48.0F)) != nullptr)
+	{
+		if (entity == this || entity == m_pPlayer
+		 || entity->v.solid == SOLID_NOT || entity->v.solid == SOLID_TRIGGER)
+		{
+			continue;
+		}
+
+		return false;
+	}
+
+	/* Find a place to rest on the ground. */
+
+	util::TraceLine(origin, origin + Vector(0.0F, 0.0F, -64.0F),
+		util::dont_ignore_monsters, this, &trace);
+
+	if (trace.flFraction == 1.0F)
+	{
+		return false;
+	}
+
+#endif /* GAME_DLL */
+
+	return true;
+}
+
+
 void CBuilder::StartBuilding(const int buildingType)
 {
+	if (buildingType == BUILD_NONE)
+	{
+		StopBuilding();
+		return;
+	}
+
+	const auto &info = GetInfo();
+
 	m_iWeaponState = buildingType;
 
-	if (m_pPlayer->m_rgAmmo[AMMO_CELLS] < kBuildingCost[m_iWeaponState - 1])
+	if (m_pPlayer->m_rgAmmo[info.iAmmo1] < kBuildCost[m_iWeaponState])
 	{
 		StopBuilding();
 		return;
@@ -143,22 +233,32 @@ void CBuilder::StartBuilding(const int buildingType)
 
 void CBuilder::StopBuilding()
 {
-	if (m_iWeaponState != 0)
+	if (m_iWeaponState != BUILD_NONE)
 	{
 		Holster();
 
-		m_iWeaponState = 0;
+#ifdef GAME_DLL
+		m_pPlayer->EmitSoundHUD("common/null.wav", CHAN_WEAPON);
+		m_pPlayer->EmitSoundHUD("common/wpn_denyselect.wav", CHAN_ITEM);
+#else
+		m_pPlayer->EmitSoundPredicted("common/null.wav", CHAN_WEAPON);
+		m_pPlayer->EmitSoundPredicted("common/wpn_denyselect.wav", CHAN_ITEM);
+#endif
+
+		m_iWeaponState = BUILD_NONE;
 	}
 }
 
 
 void CBuilder::FinishBuilding()
 {
+	const auto &info = GetInfo();
+
 	Holster();
 
-	m_pPlayer->m_rgAmmo[AMMO_CELLS] -= kBuildingCost[m_iWeaponState - 1];
+	m_pPlayer->m_rgAmmo[info.iAmmo1] -= kBuildCost[m_iWeaponState];
 
-	m_iWeaponState = 0;
+	m_iWeaponState = BUILD_NONE;
 
 	m_pPlayer->EmitSoundPredicted("weapons/turrset.wav", CHAN_WEAPON);
 }
@@ -166,29 +266,31 @@ void CBuilder::FinishBuilding()
 
 int CBuilder::GetBuildState()
 {
+	const auto &info = GetInfo();
+
 	auto buildState = 0;
 
-	if (m_pPlayer->m_rgAmmo[AMMO_CELLS] >= kBuildingCost[0])
+	if (m_pPlayer->m_rgAmmo[info.iAmmo1] >= kBuildCost[BUILD_DISPENSER])
 	{
 		buildState |= BS_CAN_DISPENSER;
 	}
 
-	if (m_pPlayer->m_rgAmmo[AMMO_CELLS] >= kBuildingCost[1])
+	if (m_pPlayer->m_rgAmmo[info.iAmmo1] >= kBuildCost[BUILD_SENTRYGUN])
 	{
 		buildState |= BS_CAN_SENTRYGUN;
 	}
 
-	if (m_pPlayer->m_rgAmmo[AMMO_CELLS] >= kBuildingCost[2])
+	if (m_pPlayer->m_rgAmmo[info.iAmmo1] >= kBuildCost[BUILD_ENTRY_TELEPORTER])
 	{
 		buildState |= BS_CAN_ENTRY_TELEPORTER;
 	}
 
-	if (m_pPlayer->m_rgAmmo[AMMO_CELLS] >= kBuildingCost[3])
+	if (m_pPlayer->m_rgAmmo[info.iAmmo1] >= kBuildCost[BUILD_EXIT_TELEPORTER])
 	{
 		buildState |= BS_CAN_EXIT_TELEPORTER;
 	}
 
-	if (m_iWeaponState != 0)
+	if (m_iWeaponState != BUILD_NONE)
 	{
 		buildState |= BS_BUILDING;
 	}

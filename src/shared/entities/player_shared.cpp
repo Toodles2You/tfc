@@ -1324,12 +1324,5 @@ void CBasePlayer::StartBuilding(const int buildingType)
 
 	auto build = static_cast<CBuilder*>(m_rgpPlayerWeapons[WEAPON_BUILDER]);
 
-	if (buildingType != 0)
-	{
-		build->StartBuilding(buildingType);
-	}
-	else
-	{
-		build->StopBuilding();
-	}
+	build->StartBuilding(buildingType);
 }

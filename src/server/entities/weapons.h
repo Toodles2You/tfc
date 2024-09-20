@@ -587,8 +587,10 @@ public:
 	void Holster() override;
 
 protected:
-	static constexpr int kBuildingCost[] = {100, 130, 150, 150};
-	static constexpr int kBuildingTime[] = {2, 5, 5, 5};
+	static constexpr byte kBuildCost[] = {0, 100, 130, 150, 150};
+	static constexpr byte kBuildTime[] = {0, 2, 5, 4, 4};
+
+	bool CheckArea(const Vector& origin);
 
 public:
 	void StartBuilding(const int buildingType);
