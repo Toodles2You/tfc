@@ -275,22 +275,22 @@ protected:
 		bool result = false;
 
 		if (tfv.ammo_shells != 0
-		 && player->GiveAmmo(tfv.ammo_shells, AMMO_SHELLS))
+		 && player->GiveAmmo(tfv.ammo_shells, AMMO_SHELLS) != 0)
 		{
 			result = true;
 		}
 		if (tfv.ammo_nails != 0
-		 && player->GiveAmmo(tfv.ammo_nails, AMMO_NAILS))
+		 && player->GiveAmmo(tfv.ammo_nails, AMMO_NAILS) != 0)
 		{
 			result = true;
 		}
 		if (tfv.ammo_rockets != 0
-		 && player->GiveAmmo(tfv.ammo_rockets, AMMO_ROCKETS))
+		 && player->GiveAmmo(tfv.ammo_rockets, AMMO_ROCKETS) != 0)
 		{
 			result = true;
 		}
 		if (tfv.ammo_cells != 0
-		 && player->GiveAmmo(tfv.ammo_cells, AMMO_CELLS))
+		 && player->GiveAmmo(tfv.ammo_cells, AMMO_CELLS) != 0)
 		{
 			result = true;
 		}

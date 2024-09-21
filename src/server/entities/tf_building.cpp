@@ -105,12 +105,25 @@ public:
 	CDispenser(Entity* containingEntity) : CBuilding(containingEntity) {}
 
 	bool Spawn() override;
+	void Think() override;
 	void Touch(CBaseEntity* other) override;
 
 protected:
 	static constexpr byte kDispenseInterval = 2;
-	static constexpr byte kDispenseAmmo[] = {20, 20, 10, 75};
-	static constexpr byte kDispenseArmor = 20;
+
+	static constexpr byte kGenerateInterval = 14;
+
+	static constexpr int kDispenseAmmo[] = {20, 20, 10, 75};
+	static constexpr int kDispenseArmor = 20;
+
+	static constexpr int kGenerateAmmo[] = {20, 30, 15, 20};
+	static constexpr int kGenerateArmor = 25;
+
+	static constexpr int kMaxAmmo[] = {400, 600, 300, 400};
+	static constexpr int kMaxArmor = 500;
+
+	uint16 m_rgAmmo[AMMO_SECONDARY];
+	uint16 m_rgArmor;
 };
 
 
@@ -150,9 +163,28 @@ bool CDispenser::Spawn()
 		return false;
 	}
 
-	v.dmgtime = gpGlobals->time + kDispenseInterval + 1.0F;
+	v.nextthink = gpGlobals->time + kGenerateInterval + 2.0F;
 
 	return true;
+}
+
+
+void CDispenser::Think()
+{
+	/* Generate some ammo & armor. */
+
+	for (int i = 0; i < AMMO_SECONDARY; i++)
+	{
+		m_rgAmmo[i] = std::min(
+			m_rgAmmo[i] + kGenerateAmmo[i], kMaxAmmo[i]);
+	}
+
+	m_rgArmor = std::min(m_rgArmor + kGenerateArmor, kMaxArmor);
+
+	engine::EmitAmbientSound(&v, Center(), "items/suitchargeok1.wav",
+		0.5F, ATTN_IDLE, 0, PITCH_NORM);
+
+	v.nextthink = gpGlobals->time + kGenerateInterval;
 }
 
 
@@ -183,17 +215,65 @@ void CDispenser::Touch(CBaseEntity* other)
 
 	/* Dispense some ammo. */
 
-	for (int i = 0; i < AMMO_SECONDARY; i++)
+#if 1
+
+	/* Toodles: Regular ammo types are infinite. */
+
+	for (int i = 0; i < AMMO_CELLS; i++)
 	{
-		if (player->GiveAmmo(kDispenseAmmo[i], i))
+		if (player->GiveAmmo(kDispenseAmmo[i], i) != 0)
 		{
 			result = true;
 		}
 	}
 
+	/* Toodles: Cells are limited & are only dispensed to engineers. */
+
+	if (player->PCNumber() == PC_ENGINEER)
+	{
+		const auto i = AMMO_CELLS;
+
+		const auto ammo = std::min((int)m_rgAmmo[i], kDispenseAmmo[i]);
+
+		const auto dispensed = player->GiveAmmo(ammo, i);
+
+		m_rgAmmo[i] -= dispensed;
+
+		if (dispensed != 0)
+		{
+			result = true;
+		}
+	}
+
+#else
+
+	for (int i = 0; i < AMMO_SECONDARY; i++)
+	{
+		const auto ammo = std::min((int)m_rgAmmo[i], kDispenseAmmo[i]);
+
+		const auto dispensed = player->GiveAmmo(ammo, i);
+
+		m_rgAmmo[i] -= dispensed;
+
+		if (dispensed != 0)
+		{
+			result = true;
+		}
+	}
+
+#endif
+
 	/* Dispense some armor. */
 
-	if (player->GiveArmor(player->v.armortype, kDispenseArmor))
+	const auto armor = std::min((int)m_rgArmor, kDispenseArmor);
+
+	const auto add = std::min((float)armor,
+		player->m_flArmorMax - player->v.armorvalue);
+
+	player->v.armorvalue += add;
+	m_rgArmor -= add;
+
+	if (add != 0.0F)
 	{
 		result = true;
 	}

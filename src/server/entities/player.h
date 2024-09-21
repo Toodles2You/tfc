@@ -255,7 +255,7 @@ public:
 	void EnableControl(bool fControl);
 	bool SetWeaponHolstered(const bool holstered, const bool forceSendAnimations = true);
 
-	bool GiveAmmo(int iAmount, int iType) override;
+	int GiveAmmo(int iAmount, int iType) override;
 #ifdef GAME_DLL
 	void DropBackpack();
 	void DiscardAmmo();

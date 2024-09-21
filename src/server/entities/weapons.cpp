@@ -185,6 +185,7 @@ void W_Precache()
 	engine::PrecacheModel("models/teleporter.mdl");
 	engine::PrecacheSound("weapons/building.wav");
 	engine::PrecacheSound("weapons/turrset.wav");
+	engine::PrecacheSound("items/suitchargeok1.wav");
 
 	engine::PrecacheSound("items/damage2.wav");
 }

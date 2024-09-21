@@ -1661,19 +1661,19 @@ void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* weapon)
 }
 
 
-bool CBasePlayer::GiveAmmo(int iCount, int iType)
+int CBasePlayer::GiveAmmo(int iCount, int iType)
 {
 	if (!g_pGameRules->CanHaveAmmo(this, iType))
 	{
 		// game rules say I can't have any more of this ammo type.
-		return false;
+		return 0;
 	}
 
 	int iAdd = std::min(iCount, g_pGameRules->GetMaxAmmo(this, iType) - m_rgAmmo[iType]);
 
 	if (iAdd < 1)
 	{
-		return true;
+		return 0;
 	}
 
 	m_rgAmmo[iType] += iAdd;
@@ -1687,7 +1687,7 @@ bool CBasePlayer::GiveAmmo(int iCount, int iType)
 		MessageEnd();
 	}
 
-	return true;
+	return iAdd;
 }
 
 

@@ -211,7 +211,7 @@ public:
 	virtual void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType);
 	virtual bool IsTriggered(CBaseEntity* pActivator) { return true; }
 	virtual int GetToggleState() { return TS_AT_TOP; }
-	virtual bool GiveAmmo(int iAmount, int iType) { return false; }
+	virtual int GiveAmmo(int iAmount, int iType) { return 0; }
 	virtual float GetDelay() { return 0; }
 	virtual bool IsMoving() { return v.velocity != g_vecZero; }
 	virtual void OverrideReset() {}
