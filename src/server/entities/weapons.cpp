@@ -177,15 +177,21 @@ void W_Precache()
 	engine::PrecacheSound("weapons/mine_disarmed.wav");
 
 	engine::PrecacheModel("models/tool_box.mdl");
+	engine::PrecacheSound("weapons/building.wav");
+	engine::PrecacheSound("weapons/turrset.wav");
+
 	engine::PrecacheModel("models/dispenser.mdl");
+	engine::PrecacheSound("items/suitchargeok1.wav");
+
 	engine::PrecacheModel("models/base.mdl");
 	engine::PrecacheModel("models/sentry1.mdl");
 	engine::PrecacheModel("models/sentry2.mdl");
 	engine::PrecacheModel("models/sentry3.mdl");
+
 	engine::PrecacheModel("models/teleporter.mdl");
-	engine::PrecacheSound("weapons/building.wav");
-	engine::PrecacheSound("weapons/turrset.wav");
-	engine::PrecacheSound("items/suitchargeok1.wav");
+	engine::PrecacheSound("misc/teleport_out.wav");
+	engine::PrecacheSound("misc/teleport_in.wav");
+	engine::PrecacheSound("misc/teleport_ready.wav");
 
 	engine::PrecacheSound("items/damage2.wav");
 }

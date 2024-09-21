@@ -100,6 +100,8 @@ void ClientDisconnect(Entity* pEntity)
 #endif
 
 		player->SetUseObject(nullptr);
+
+		player->m_hTeleporter = nullptr;
 	}
 
 	g_pGameRules->ClientDisconnected(pEntity);

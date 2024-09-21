@@ -496,6 +496,7 @@ public:
 
 #ifdef GAME_DLL
 	EHANDLE m_hBuildings[5];
+	EHANDLE m_hTeleporter;
 #endif
 
 	void StartBuilding(const int buildingType);

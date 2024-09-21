@@ -127,7 +127,9 @@ void CBuilder::Deploy()
     SetSize(Vector(-16.0F, -16.0F, 0.0F), Vector(16.0F, 16.0F, 48.0F));
 
 	v.effects &= ~EF_NODRAW;
-	v.angles.x = v.angles.z = 0;
+
+	v.angles.y = util::AngleMod(m_pPlayer->v.angles.y + 180.0F);
+	v.angles.x = v.angles.z = 0.0F;
 #endif
 
 	m_pPlayer->EmitSoundPredicted("weapons/building.wav", CHAN_WEAPON,
@@ -145,6 +147,14 @@ void CBuilder::WeaponPostFrame()
 	const auto &info = GetInfo();
 
 	if (m_pPlayer->m_rgAmmo[info.iAmmo1] < kBuildCost[m_iWeaponState])
+	{
+		StopBuilding();
+		return;
+	}
+
+	/* See if we've moved too far away. */
+
+	if (static_cast<int>((m_pPlayer->v.origin - v.origin).LengthSquared()) >= 112 * 112)
 	{
 		StopBuilding();
 		return;

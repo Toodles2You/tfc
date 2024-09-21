@@ -11,8 +11,10 @@
 #include "player.h"
 #include "weapons.h"
 #include "gamerules.h"
+#include "shake.h"
 
 #define attachment euser1
+#define sibling euser2
 
 
 class CBuilding : public CBaseAnimating
@@ -425,7 +427,278 @@ public:
 	const char* GetModelName() override { return "models/teleporter.mdl"; }
 	const char* GetClassName() override { return "building_teleporter"; }
 	float GetHeight() override { return 12.0F; }
+
+	bool Spawn() override;
+	void UpdateOnRemove() override;
+
+protected:
+	CTeleporter* GetMatchingTeleporter();
+	bool CanTeleport(CBaseEntity* other);
+
+	void SetReady();
+	void ClearReady();
+	void SelectForTeleport(CBaseEntity* other);
+	void Recharge(const float duration = 0.0F);
+
+	void EXPORT EntryTouch(CBaseEntity* other);
+
+	void EXPORT Teleport();
+	void EXPORT Ready();
+
+protected:
+	static constexpr byte kTeleportInterval = 10;
+
+	EHANDLE m_hTeleportee;
 };
+
+
+bool CTeleporter::Spawn()
+{
+	if (!CBuilding::Spawn())
+	{
+		return false;
+	}
+
+	const auto entry = PCNumber() == BUILD_ENTRY_TELEPORTER;
+
+	/* Link the player's teleporters together. */
+
+	CBaseEntity* match = m_pPlayer->m_hBuildings[
+		(entry ? BUILD_EXIT_TELEPORTER : BUILD_ENTRY_TELEPORTER) - 1];
+
+	if (match != nullptr)
+	{
+		v.sibling = &match->v;
+
+		match->v.sibling = &v;
+
+		Recharge();
+	}
+
+	return true;
+}
+
+
+void CTeleporter::UpdateOnRemove()
+{
+	ClearReady();
+
+	const auto match = GetMatchingTeleporter();
+
+	if (match != nullptr)
+	{
+		v.sibling = nullptr;
+
+		match->v.sibling = nullptr;
+
+		match->ClearReady();
+	}
+
+	CBaseEntity* const other = m_hTeleportee;
+
+	if (other != nullptr)
+	{
+		CBaseEntity* const otherTeleporter =
+			static_cast<CBasePlayer*>(other)->m_hTeleporter;
+
+		if (otherTeleporter == this)
+		{
+			static_cast<CBasePlayer*>(other)->m_hTeleporter = nullptr;
+		}
+
+		m_hTeleportee = nullptr;
+	}
+
+	CBuilding::UpdateOnRemove();
+}
+
+
+CTeleporter* CTeleporter::GetMatchingTeleporter()
+{
+	if (v.sibling == nullptr)
+	{
+		return nullptr;
+	}
+
+	return v.sibling->Get<CTeleporter>();
+}
+
+
+bool CTeleporter::CanTeleport(CBaseEntity* other)
+{
+	/* Toodles TODO: Allow disguised spies to use enemy teleporters. */
+
+	if (g_pGameRules->PlayerRelationship(other, this) < GR_ALLY)
+	{
+		return false;
+	}
+
+	/* Already queued for another teleporter. */
+
+	CBaseEntity* const otherTeleporter =
+		static_cast<CBasePlayer*>(other)->m_hTeleporter;
+
+	if (otherTeleporter != nullptr)
+	{
+		return false;
+	}
+
+	/* Make sure they're standing still on top of us. */
+
+	if (other->v.groundentity != &v || (other->v.flags & FL_ONGROUND) == 0)
+	{
+		return false;
+	}
+
+	if ((other->v.button & (IN_FORWARD | IN_BACK | IN_MOVERIGHT | IN_MOVELEFT)) != 0)
+	{
+		return false;
+	}
+
+	if (static_cast<int>(other->v.velocity.LengthSquared()) != 0)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void CTeleporter::SetReady()
+{
+	ClearThink();
+
+	if (PCNumber() == BUILD_ENTRY_TELEPORTER)
+	{
+		SetTouch(&CTeleporter::EntryTouch);
+	}
+	else
+	{
+		ClearTouch();
+	}
+}
+
+
+void CTeleporter::ClearReady()
+{
+	ClearThink();
+	ClearTouch();
+}
+
+
+void CTeleporter::SelectForTeleport(CBaseEntity* other)
+{
+	m_hTeleportee = other;
+
+	static_cast<CBasePlayer*>(other)->m_hTeleporter = this;
+
+	SetThink(&CTeleporter::Teleport);
+
+	v.nextthink = gpGlobals->time + 0.5F;
+}
+
+
+void CTeleporter::Recharge(const float duration)
+{
+	const auto match = GetMatchingTeleporter();
+
+	if (duration == 0.0F)
+	{
+		Ready();
+		match->Ready();
+		return;
+	}
+
+	SetThink(&CTeleporter::Ready);
+	match->SetThink(&CTeleporter::Ready);
+
+	v.nextthink = match->v.nextthink = gpGlobals->time + duration;
+}
+
+
+void CTeleporter::EntryTouch(CBaseEntity* other)
+{
+	if (!other->IsPlayer() || !other->IsAlive())
+	{
+		return;
+	}
+
+	if (!CanTeleport(other))
+	{
+		return;
+	}
+
+    engine::EmitAmbientSound(&v, Center(), "misc/teleport_out.wav",
+		VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+
+	util::ScreenFade(other, Vector(0.0F, 255.0F, 0.0F),
+		0.5F, 0.1F, 255.0F, FFADE_OUT);
+
+	const auto match = GetMatchingTeleporter();
+
+	ClearReady();
+	match->ClearReady();
+
+	match->SelectForTeleport(other);
+}
+
+
+void CTeleporter::Teleport()
+{
+	CBaseEntity* const other = m_hTeleportee;
+
+	if (other == nullptr)
+	{
+		Recharge();
+		return;
+	}
+
+	CBaseEntity* const otherTeleporter =
+		static_cast<CBasePlayer*>(other)->m_hTeleporter;
+
+	m_hTeleportee = nullptr;
+
+	static_cast<CBasePlayer*>(other)->m_hTeleporter = nullptr;
+
+	/* Make sure the player never died. */
+
+	if (!other->IsPlayer() || !other->IsAlive() || otherTeleporter != this)
+	{
+		Recharge();
+		return;
+	}
+
+	/* Teleport them to us! */
+
+	other->v.flags &= ~FL_ONGROUND;
+
+	auto origin = v.origin;
+	origin.z += v.maxs.z - other->v.mins.z + 1.0F;
+
+	other->SetOrigin(origin);
+
+	other->v.angles = other->v.v_angle = v.angles;
+	other->v.fixangle = 1;
+
+	other->v.velocity = other->v.basevelocity = g_vecZero;
+
+	engine::EmitAmbientSound(&v, Center(), "misc/teleport_in.wav",
+		VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+
+	util::ScreenFade(other, Vector(0.0F, 255.0F, 0.0F),
+		0.5F, 0.0F, 255.0F, FFADE_IN);
+
+	Recharge(kTeleportInterval);
+}
+
+
+void CTeleporter::Ready()
+{
+	SetReady();
+
+	engine::EmitAmbientSound(&v, Center(), "misc/teleport_ready.wav",
+		VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+}
 
 
 bool CBuilder::SpawnBuilding(const int buildingType)

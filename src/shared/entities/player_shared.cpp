@@ -1219,6 +1219,8 @@ void CBasePlayer::ClearEffects()
 	WriteByte(0);
 	WriteByte(0);
 	MessageEnd();
+
+	m_hTeleporter = nullptr;
 #endif
 }
 
