@@ -405,7 +405,14 @@ void CBuilder::DestroyBuilding(const int buildingType, const bool detonate)
 
 	if (building != nullptr)
 	{
-		building->Killed(this, m_pPlayer, DMG_GENERIC);
+		if (detonate)
+		{
+			building->Killed(m_pPlayer, m_pPlayer, DMG_GENERIC);
+		}
+		else
+		{
+			building->Remove();
+		}
 	}
 
 #endif /* GAME_DLL */

@@ -60,6 +60,9 @@ bool CBuilding::Spawn()
 
 	v.effects |= EF_NOINTERP;
 
+	v.takedamage = DAMAGE_AIM;
+	v.health = v.max_health = 150.0F;
+
 	return true;
 }
 
@@ -96,6 +99,80 @@ void CBuilding::UpdateOnRemove()
 	}
 
 	CBaseAnimating::UpdateOnRemove();
+}
+
+
+bool CBuilding::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType)
+{
+	if (v.takedamage == DAMAGE_NO)
+	{
+		return false;
+	}
+
+	if (g_pGameRules->PlayerRelationship(attacker, this) >= GR_ALLY)
+	{
+		return false;
+	}
+
+	v.health -= flDamage;
+
+	if (v.health <= 0.0F)
+	{
+		Killed(inflictor, attacker, bitsDamageType);
+
+		return false;
+	}
+
+	return true;
+}
+
+
+void CBuilding::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType)
+{
+	v.takedamage = DAMAGE_NO;
+	v.deadflag = DEAD_DEAD;
+	v.health = std::min(v.health, 0.0F);
+
+	tent::Explosion(Center(), Vector(0.0F, 0.0f, -1.0F), tent::ExplosionType::Normal);
+
+	if (attacker != m_pPlayer)
+	{
+		char* str = nullptr;
+
+		switch (PCNumber())
+		{
+			case BUILD_DISPENSER:
+			{
+				str = "#Dispenser_destroyed";
+				break;
+			}
+
+			case BUILD_SENTRYGUN:
+			{
+				str = "#Sentry_destroyed";
+				break;
+			}
+
+			case BUILD_ENTRY_TELEPORTER:
+			{
+				str = "#Teleporter_Entrance_Destroyed";
+				break;
+			}
+
+			case BUILD_EXIT_TELEPORTER:
+			{
+				str = "#Teleporter_Exit_Destroyed";
+				break;
+			}
+		}
+
+		if (str != nullptr)
+		{
+			util::ClientPrint(m_pPlayer, HUD_PRINTCENTER, str);
+		}
+	}
+
+	Remove();
 }
 
 
