@@ -15,6 +15,9 @@
 
 #define attachment euser1
 #define sibling euser2
+#define left_yaw vuser1.x
+#define right_yaw vuser1.y
+#define sentry_state vuser1.z
 
 
 class CBuilding : public CBaseAnimating
@@ -409,14 +412,493 @@ void CDispenserTrigger::Touch(CBaseEntity* other)
 }
 
 
-class CSentryGun : public CBuilding
+class CSentryBase : public CBuilding
 {
 public:
-	CSentryGun(Entity* containingEntity) : CBuilding(containingEntity) {}
+	friend class CSentryGun;
+
+	CSentryBase(Entity* containingEntity) : CBuilding(containingEntity) {}
 
 	const char* GetModelName() override { return "models/base.mdl"; }
 	const char* GetClassName() override { return "building_sentrygun"; }
+
+	bool Spawn() override;
 };
+
+
+class CSentryGun : public CBaseAnimating
+{
+protected:
+	static constexpr float kSentryYawRange = 50.0F;
+	static constexpr float kSentryYawSpeed = 30.0F; /* 10.0F */
+	static constexpr float kSentryRange = 1000.0F;
+	static constexpr float kSentryDamage = 16.0F;
+
+	enum
+	{
+		kRotateLeft,
+		kRotateRight,
+		kHunting,
+		kLockedOn,
+	};
+
+	enum
+	{
+		kSequenceOff,
+		kSequenceFire,
+		kSequenceIdle,
+	};
+
+public:
+	CSentryGun(Entity* containingEntity) : CBaseAnimating(containingEntity) {}
+
+	bool Spawn() override;
+	void Think() override;
+
+protected:
+	void FindTarget();
+	float HuntTarget(CBaseEntity* other);
+	void SetYaw(const float yaw);
+	bool UpdateAngles(const float scale = 1.0F);
+	void Fire();
+	void Rotate();
+};
+
+
+bool CSentryBase::Spawn()
+{
+	if (!CBuilding::Spawn())
+	{
+		return false;
+	}
+
+	auto head = Entity::Create<CSentryGun>();
+
+	if (head == nullptr)
+	{
+		return false;
+	}
+
+	v.attachment = &head->v;
+
+	head->v.attachment = &v;
+
+	head->v.origin = v.origin + Vector(0.0F, 0.0F, 21.0F);
+	head->v.v_angle = v.angles;
+	head->v.team = v.team;
+
+	if (!head->Spawn())
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+bool CSentryGun::Spawn()
+{
+	v.solid = SOLID_NOT;
+	v.movetype = MOVETYPE_STEP;
+	v.gravity = 0.0F;
+
+    SetOrigin(v.origin);
+
+	SetModel("models/sentry1.mdl");
+
+	InitBoneControllers();
+
+	SetBoneController(0, v.v_angle.y);
+	SetBoneController(1, -v.v_angle.x);
+
+	v.sequence = kSequenceIdle;
+	ResetSequenceInfo();
+
+	v.effects |= EF_NOINTERP;
+
+	/* Toodles: This was originally 42 units from the base. */
+	v.view_ofs.z = 21.0F;
+
+	v.yaw_speed = kSentryYawSpeed;
+	v.pitch_speed = kSentryYawSpeed;
+
+	SetYaw(v.v_angle.y);
+
+	v.nextthink = gpGlobals->time + 0.5F;
+
+	v.radsuit_finished = v.nextthink;
+
+	return true;
+}
+
+
+void CSentryGun::Think()
+{
+	StudioFrameAdvance();
+
+	FindTarget();
+
+	Rotate();
+
+	auto thinkInterval = 0.1F;
+
+	if (v.enemy != nullptr)
+	{
+		thinkInterval = 0.05F;
+	}
+
+	v.nextthink = gpGlobals->time + thinkInterval;
+}
+
+
+void CSentryGun::FindTarget()
+{
+	auto bestDistance = kSentryRange;
+	CBaseEntity* bestEnemy = nullptr;
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		const auto player = static_cast<CBasePlayer*>(util::PlayerByIndex(i));
+
+		if (player == nullptr)
+		{
+			continue;
+		}
+
+		const auto distance = HuntTarget(player);
+
+		if (distance < 0.0F || distance >= bestDistance)
+		{
+			continue;
+		}
+
+		bestDistance = distance;
+		bestEnemy = player;
+	}
+
+	if (bestEnemy != nullptr)
+	{
+		/* Check if this is a new enemy. */
+
+		if (v.enemy != &bestEnemy->v)
+		{
+			v.enemy = &bestEnemy->v;
+
+			v.sentry_state = kHunting;
+
+			v.sequence = kSequenceIdle;
+			ResetSequenceInfo();
+
+			EmitSound("weapons/turrspot.wav", CHAN_VOICE);
+		}
+	}
+	else
+	{
+		/* Check if we've lost sight of any enemies. */
+
+		if (v.enemy != nullptr)
+		{
+			v.enemy = nullptr;
+
+			v.sentry_state = kRotateLeft;
+
+			v.sequence = kSequenceIdle;
+			ResetSequenceInfo();
+		}
+	}
+}
+
+
+float CSentryGun::HuntTarget(CBaseEntity* other)
+{
+	if (!other->IsPlayer() || !other->IsAlive())
+	{
+		return -1.0F;
+	}
+
+	if (v.enemy == nullptr || other != v.enemy->Get<CBaseEntity>())
+	{
+		/* Toodles TODO: Ignore disguised spies. */
+
+		if (g_pGameRules->PlayerRelationship(other, this) >= GR_ALLY)
+		{
+			return -1.0F;
+		}
+	}
+	
+	/*
+		Toodles: Removed a check for whether or not the
+		enemy was in front of the sentry after 500 units.
+	*/
+
+	const auto distance = (other->Center() - EyePosition()).LengthSquared();
+
+	if (distance > kSentryRange * kSentryRange)
+	{
+		return -1.0F;
+	}
+
+	CSentryBase* base = nullptr;
+
+	if (v.attachment != nullptr)
+	{
+		base = v.attachment->Get<CSentryBase>();
+	}
+
+	TraceResult trace;
+
+	util::TraceLine(EyePosition(), other->EyePosition(),
+		util::ignore_monsters, base, &trace);
+
+	if (trace.flFraction != 1.0F && trace.pHit != &other->v)
+	{
+		return -1.0F;
+	}
+
+	return sqrtf (distance);
+}
+
+
+void CSentryGun::SetYaw(const float yaw)
+{
+	v.v_angle.z = util::AngleMod(yaw);
+
+	v.left_yaw = util::AngleMod(v.v_angle.z - kSentryYawRange);
+	v.right_yaw = util::AngleMod(v.v_angle.z + kSentryYawRange);
+
+	if (v.left_yaw > v.right_yaw)
+	{
+		const auto temp = v.left_yaw;
+
+		v.left_yaw = v.right_yaw;
+
+		v.right_yaw = temp;
+	}
+
+	v.sentry_state = kRotateLeft;
+
+	v.ideal_yaw = v.left_yaw;
+}
+
+
+bool CSentryGun::UpdateAngles(const float scale)
+{
+    const auto delta = std::min(gpGlobals->time - v.radsuit_finished, 0.2F);
+
+    v.radsuit_finished = gpGlobals->time;
+
+	/* Update yaw. */
+
+	const auto currentYaw = util::AngleMod(v.v_angle.y);
+
+	const auto done = (currentYaw == v.ideal_yaw);
+
+	if (!done)
+	{
+		const auto speed = v.yaw_speed * scale * 2.0F * delta;
+
+		auto move = v.ideal_yaw - currentYaw;
+
+		if (v.ideal_yaw > currentYaw)
+		{
+			if (move >= 180.0F)
+			{
+				move -= 360.0F;
+			}
+		}
+		else
+		{
+			if (move <= -180.0F)
+			{
+				move += 360.0F;
+			}
+		}
+
+		if (move > 0.0F)
+		{
+			if (move > speed)
+			{	
+				move = speed;
+			}
+		}
+		else
+		{
+			if (move < -speed)
+			{
+				move = -speed;
+			}
+		}
+
+		v.v_angle.y = util::AngleMod(currentYaw + move);
+	}
+
+	/* Update pitch. */
+
+	const auto currentPitch = util::AngleMod(v.v_angle.x);
+
+	if (currentPitch != v.idealpitch)
+    {
+		const auto speed = v.pitch_speed * scale * 2.0F * delta;
+
+		auto move = v.idealpitch - currentPitch;
+
+		if (v.idealpitch > currentPitch)
+		{
+			if (move >= 180.0F)
+			{
+				move -= 360.0F;
+			}
+		}
+		else
+		{
+			if (move <= -180.0F)
+			{
+				move += 360.0F;
+			}
+		}
+
+		if (move > 0.0F)
+		{
+			if (move > speed)
+			{
+				move = speed;
+			}
+		}
+		else
+		{
+			if (move < -speed)
+			{
+				move = -speed;
+			}
+		}
+
+		v.v_angle.x = util::AngleMod(currentPitch + move);
+    }
+
+	return done;
+}
+
+
+void CSentryGun::Fire()
+{
+	v.pain_finished--;
+
+	if (v.pain_finished > 0)
+	{
+		return;
+	}
+
+	v.pain_finished = 4;
+
+	v.sequence = kSequenceFire;
+	v.frame = 0.0F;
+	ResetSequenceInfo();
+
+	v.effects |= EF_NOINTERP;
+
+	EmitSound("weapons/pl_gun3.wav", CHAN_WEAPON);
+
+	util::MakeAimVectors(v.v_angle);
+
+	CSentryBase* base = nullptr;
+
+	if (v.attachment != nullptr)
+	{
+		base = v.attachment->Get<CSentryBase>();
+	}
+
+	const auto start = EyePosition();
+	const auto end = start + gpGlobals->v_forward * 8192.0F;
+
+	TraceResult trace;
+
+	if (util::TraceLine(start, end, &trace, base, util::kTraceBoxModel))
+	{
+		const auto other = trace.pHit->Get<CBaseEntity>();
+
+		if (other != nullptr)
+		{
+			other->TakeDamage(base, base->m_pPlayer,
+				kSentryDamage, DMG_BULLET);
+		}
+	}
+
+	/* Toodles TODO: Sentry event. */
+
+	MessageBegin(MSG_PVS, SVC_TEMPENTITY, trace.vecEndPos);
+	WriteByte(TE_TRACER);
+	WriteCoord(start);
+	WriteCoord(trace.vecEndPos);
+	MessageEnd();
+}
+
+
+void CSentryGun::Rotate()
+{	
+	/* Hunting an enemy. */
+
+	if (v.sentry_state == kHunting || v.sentry_state == kLockedOn)
+	{
+		const auto enemy = v.enemy->Get<CBaseEntity>();
+
+		if (enemy != nullptr)
+		{
+			const auto dir = (enemy->Center() - EyePosition()).Normalize();
+			const auto angles = util::VecToAngles(dir);
+
+			v.ideal_yaw = angles.y;
+			v.idealpitch = angles.x;
+
+			UpdateAngles(2.0F);
+
+			SetBoneController(0, v.v_angle.y);
+			SetBoneController(1, -v.v_angle.x);
+
+			if (v.sentry_state == kLockedOn
+			 || (fabsf(v.v_angle.y - v.ideal_yaw) <= 10.0F
+			  && fabsf(v.v_angle.x - v.idealpitch) <= 10.0F))
+			{
+				v.sentry_state = kLockedOn;
+
+				Fire();
+			}
+
+			return;
+		}
+
+		v.sentry_state = kRotateLeft;
+
+		v.sequence = kSequenceIdle;
+		ResetSequenceInfo();
+	}
+
+	/* Rotating. */
+
+	if (!UpdateAngles())
+	{
+		SetBoneController(0, v.v_angle.y);
+		SetBoneController(1, -v.v_angle.x);
+		return;
+	}
+
+	if (v.sentry_state == kRotateLeft)
+	{
+		v.sentry_state = kRotateRight;
+
+		v.ideal_yaw = v.right_yaw;
+
+		if (engine::RandomLong(0, 9) == 0)
+		{
+			EmitSound("weapons/turridle.wav", CHAN_VOICE);
+		}
+	}
+	else
+	{
+		v.sentry_state = kRotateLeft;
+
+		v.ideal_yaw = v.left_yaw;
+	}
+}
 
 
 class CTeleporter : public CBuilding
@@ -721,7 +1203,7 @@ bool CBuilder::SpawnBuilding(const int buildingType)
 
 		case BUILD_SENTRYGUN:
 		{
-			building = Entity::Create<CSentryGun>();
+			building = Entity::Create<CSentryBase>();
 
 			break;
 		}

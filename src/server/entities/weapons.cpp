@@ -187,6 +187,9 @@ void W_Precache()
 	engine::PrecacheModel("models/sentry1.mdl");
 	engine::PrecacheModel("models/sentry2.mdl");
 	engine::PrecacheModel("models/sentry3.mdl");
+	engine::PrecacheSound("weapons/turridle.wav");
+	engine::PrecacheSound("weapons/turrspot.wav");
+	engine::PrecacheSound("weapons/pl_gun3.wav");
 
 	engine::PrecacheModel("models/teleporter.mdl");
 	engine::PrecacheSound("misc/teleport_out.wav");
