@@ -111,7 +111,7 @@ void CBuilder::Deploy()
 
 	v.origin = gun + dir * 64.0F;
 
-	if (!CheckArea(v.origin, v.startpos))
+	if (!CheckArea(v.origin))
 	{
 		StopBuilding();
 		return;
@@ -135,7 +135,7 @@ void CBuilder::Deploy()
 
 	SetModel("models/tool_box.mdl");
 
-    SetSize(Vector(-16.0F, -16.0F, 0.0F), Vector(16.0F, 16.0F, 48.0F));
+    SetSize(Vector(-16.0F, -16.0F, 0.0F), Vector(16.0F, 16.0F, 64.0F));
 
 	v.effects &= ~EF_NODRAW;
 
@@ -193,10 +193,8 @@ void CBuilder::Holster()
 }
 
 
-bool CBuilder::CheckArea(const Vector& origin, Vector& outStartPos)
+bool CBuilder::CheckArea(const Vector& origin)
 {
-	outStartPos = origin;
-
 #ifdef GAME_DLL
 	/* Check for "no build" areas. */
 
@@ -275,8 +273,6 @@ bool CBuilder::CheckArea(const Vector& origin, Vector& outStartPos)
 	{
 		return false;
 	}
-
-	outStartPos = trace.vecEndPos;
 
 #endif /* GAME_DLL */
 

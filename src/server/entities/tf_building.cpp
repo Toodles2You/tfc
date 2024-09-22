@@ -38,7 +38,8 @@ public:
 
 	virtual const char* GetModelName() { return "models/dispenser.mdl"; }
 	virtual const char* GetClassName() { return "building_dispenser"; }
-	virtual float GetHeight() { return 48.0F; }
+	virtual float GetHeight() { return 48.0F; } /* 24.0F */
+	virtual float GetMaxHealth() { return 150.0F; }
 	virtual int GetMaxLevel() { return 0; }
 	virtual int GetUpgradeCost() { return 130; }
 
@@ -60,8 +61,12 @@ bool CBuilding::Spawn()
 
 	v.solid = SOLID_BBOX;
 	v.movetype = MOVETYPE_TOSS;
+	v.flags |= FL_MONSTER;
 
     SetOrigin(v.origin);
+
+	v.flags &= ~FL_ONGROUND;
+	v.velocity.z = 8.0F;
 
 	SetModel(GetModelName());
 
@@ -73,7 +78,7 @@ bool CBuilding::Spawn()
 	v.effects |= EF_NOINTERP;
 
 	v.takedamage = DAMAGE_AIM;
-	v.health = v.max_health = 150.0F;
+	v.health = v.max_health = GetMaxHealth();
 
 	return true;
 }
@@ -488,6 +493,7 @@ public:
 
 	const char* GetModelName() override { return "models/base.mdl"; }
 	const char* GetClassName() override { return "building_sentrygun"; }
+	float GetHeight() override { return 64.0F; }
 	int GetMaxLevel() override { return 2; }
 
 	bool Spawn() override;
@@ -528,6 +534,9 @@ public:
 	bool Spawn() override;
 	void Think() override;
 
+	bool ShouldCollide(CBaseEntity* other) override { return false; }
+	bool ShouldBlockTrace() override { return false; }
+
 protected:
 	void FindTarget();
 	float HuntTarget(CBaseEntity* other);
@@ -556,7 +565,7 @@ bool CSentryBase::Spawn()
 
 	head->v.attachment = &v;
 
-	head->v.origin = v.origin + Vector(0.0F, 0.0F, 21.0F);
+	head->v.origin = v.origin + Vector(0.0F, 0.0F, 21.2F);
 	head->v.v_angle = v.angles;
 	head->v.team = v.team;
 
@@ -621,7 +630,7 @@ bool CSentryGun::Spawn()
 {
 	v.solid = SOLID_NOT;
 	v.movetype = MOVETYPE_STEP;
-	v.gravity = 0.0F;
+	v.flags |= FL_FLY;
 
     SetOrigin(v.origin);
 
@@ -638,7 +647,7 @@ bool CSentryGun::Spawn()
 	v.effects |= EF_NOINTERP;
 
 	/* Toodles: This was originally 42 units from the base. */
-	v.view_ofs.z = 21.0F;
+	v.view_ofs.z = 22.0F;
 
 	v.yaw_speed = kSentryYawSpeed;
 	v.pitch_speed = kSentryYawSpeed;
@@ -923,8 +932,6 @@ void CSentryGun::Fire()
 	v.frame = 0.0F;
 	ResetSequenceInfo();
 
-	v.effects |= EF_NOINTERP;
-
 	EmitSound("weapons/pl_gun3.wav", CHAN_WEAPON);
 
 	util::MakeAimVectors(v.v_angle);
@@ -1027,6 +1034,11 @@ void CSentryGun::Rotate()
 
 		v.ideal_yaw = v.left_yaw;
 	}
+
+	if (engine::RandomLong(0, 8) < 3)
+	{
+		v.idealpitch = engine::RandomFloat(-10.0F, 10.0F);
+	}
 }
 
 
@@ -1038,6 +1050,7 @@ public:
 	const char* GetModelName() override { return "models/teleporter.mdl"; }
 	const char* GetClassName() override { return "building_teleporter"; }
 	float GetHeight() override { return 12.0F; }
+	float GetMaxHealth() override { return 125.0F; }
 
 	bool Spawn() override;
 	void UpdateOnRemove() override;
@@ -1354,7 +1367,7 @@ bool CBuilder::SpawnBuilding(const int buildingType)
 		return false;
 	}
 
-	building->v.origin = v.startpos;
+	building->v.origin = v.origin;
 	building->v.angles = v.angles;
 	building->v.playerclass = buildingType;
 	building->m_pPlayer = m_pPlayer;

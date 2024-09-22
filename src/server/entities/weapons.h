@@ -595,7 +595,7 @@ protected:
 	static constexpr byte kBuildCost[] = {0, 100, 130, 255, 125, 125};
 	static constexpr byte kBuildTime[] = {0, 2, 5, 5, 4, 4};
 
-	bool CheckArea(const Vector& origin, Vector& outStartPos);
+	bool CheckArea(const Vector& origin);
 
 public:
 	void StartBuilding(const int buildingType);
