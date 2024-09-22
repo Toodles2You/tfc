@@ -515,7 +515,7 @@ void IN_Det20Down() { KeyDown(&in_det); client::ServerCmd("detstart 20"); }
 void IN_Det50Down() { KeyDown(&in_det); client::ServerCmd("detstart 50"); }
 void IN_DetUp() { KeyUp(&in_det); }
 
-void DetStart()
+static void DetStart()
 {
 	/* Force the special key down. */
 	g_bForceSpecialDown = true;
@@ -537,13 +537,13 @@ void DetStart()
 	client::ServerCmd(detstart);
 }
 
-void DetStop()
+static void DetStop()
 {
 	/* Release the special key. */
 	g_bForceSpecialDown = false;
 }
 
-void Build()
+static void Build()
 {
 	if (client::Cmd_Argc() > 1)
 	{
@@ -556,7 +556,7 @@ void Build()
 	}
 }
 
-void Dismantle()
+static void Dismantle()
 {
 	if (client::Cmd_Argc() > 1)
 	{
@@ -565,9 +565,18 @@ void Dismantle()
 	}
 }
 
-void Detonate(const int buildingType)
+static void DetonateBuilding(const int buildingType)
 {
 	in_impulse = WEAPON_BUILDER + 10 + buildingType;
+}
+
+static void Detonate()
+{
+	if (client::Cmd_Argc() > 1)
+	{
+		DetonateBuilding(std::clamp(atoi(client::Cmd_Argv(1)),
+			(int)BUILD_DISPENSER, (int)BUILD_EXIT_TELEPORTER));
+	}
 }
 
 /*
@@ -924,10 +933,11 @@ void InitInput()
 
 	client::AddCommand("build", Build);
 	client::AddCommand("dismantle", Dismantle);
-	client::AddCommand("detdispenser", []() {Detonate(1);});
-	client::AddCommand("detsentry", []() {Detonate(2);});
-	client::AddCommand("detentryteleporter", []() {Detonate(4);});
-	client::AddCommand("detexitteleporter", []() {Detonate(5);});
+	client::AddCommand("detdispenser", []() {DetonateBuilding(1);});
+	client::AddCommand("detsentry", []() {DetonateBuilding(2);});
+	client::AddCommand("detentryteleporter", []() {DetonateBuilding(4);});
+	client::AddCommand("detexitteleporter", []() {DetonateBuilding(5);});
+	client::AddCommand("detonate", Detonate);
 
 	cl_anglespeedkey = client::RegisterVariable("cl_anglespeedkey", "0.67", 0);
 	cl_yawspeed = client::RegisterVariable("cl_yawspeed", "210", 0);
