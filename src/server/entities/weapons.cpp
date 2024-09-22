@@ -190,6 +190,7 @@ void W_Precache()
 	engine::PrecacheSound("weapons/turridle.wav");
 	engine::PrecacheSound("weapons/turrspot.wav");
 	engine::PrecacheSound("weapons/pl_gun3.wav");
+	engine::PrecacheSound("weapons/rocketfire1.wav");
 
 	engine::PrecacheModel("models/teleporter.mdl");
 	engine::PrecacheSound("misc/teleport_out.wav");

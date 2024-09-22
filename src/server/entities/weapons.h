@@ -592,7 +592,7 @@ protected:
 	static constexpr byte kBuildCost[] = {0, 100, 130, 255, 125, 125};
 	static constexpr byte kBuildTime[] = {0, 2, 5, 5, 4, 4};
 
-	bool CheckArea(const Vector& origin);
+	bool CheckArea(const Vector& origin, Vector& outStartPos);
 
 public:
 	void StartBuilding(const int buildingType);
@@ -844,6 +844,13 @@ public:
 		const float radius,
 		CBaseEntity* owner);
 	static CRocket* CreateIncendiaryRocket(
+		const Vector& origin,
+		const Vector& dir,
+		const float damageMax,
+		const float damageMin,
+		const float radius,
+		CBaseEntity* owner);
+	static CRocket* CreateSentryRocket(
 		const Vector& origin,
 		const Vector& dir,
 		const float damageMax,

@@ -63,6 +63,34 @@ CRocket* CRocket::CreateIncendiaryRocket(
 }
 
 
+CRocket* CRocket::CreateSentryRocket(
+	const Vector& origin,
+	const Vector& dir,
+	const float damageMax,
+	const float damageMin,
+	const float radius,
+	CBaseEntity* owner)
+{
+	auto rocket = Entity::Create<CRocket>();
+
+	rocket->v.origin = origin;
+	rocket->v.angles = dir;
+	rocket->v.speed = 800.0F;
+	rocket->v.dmg = damageMax;
+	rocket->v.dmg_save = damageMin;
+	rocket->v.dmg_take = radius;
+	rocket->v.owner = &owner->v;
+	rocket->v.team = owner->TeamNumber();
+	rocket->Spawn();
+
+	rocket->v.classname = MAKE_STRING("building_sentrygun");
+
+	tent::RocketTrail(rocket);
+
+	return rocket;
+}
+
+
 bool CRocket::Spawn()
 {
 	v.classname = MAKE_STRING("rocket");

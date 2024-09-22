@@ -101,7 +101,7 @@ void CBuilder::Deploy()
 
 	v.origin = gun + dir * 64.0F;
 
-	if (!CheckArea(v.origin))
+	if (!CheckArea(v.origin, v.startpos))
 	{
 		StopBuilding();
 		return;
@@ -181,8 +181,10 @@ void CBuilder::Holster()
 }
 
 
-bool CBuilder::CheckArea(const Vector& origin)
+bool CBuilder::CheckArea(const Vector& origin, Vector& outStartPos)
 {
+	outStartPos = origin;
+
 #ifdef GAME_DLL
 
 	const auto contents = engine::PointContents(origin);
@@ -245,6 +247,8 @@ bool CBuilder::CheckArea(const Vector& origin)
 	{
 		return false;
 	}
+
+	outStartPos = trace.vecEndPos;
 
 #endif /* GAME_DLL */
 

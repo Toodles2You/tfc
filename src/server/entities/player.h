@@ -166,6 +166,8 @@ public:
 protected:
 	float ArmorBonus(float damage, const int bitsDamageType);
 	float DamageForce(CBaseEntity* attacker, const float damage);
+
+public:
 	void SendHitFeedback(CBaseEntity* victim, const float flDamage, const int bitsDamageType);
 
 public:

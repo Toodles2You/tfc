@@ -12,6 +12,7 @@
 #include "weapons.h"
 #include "gamerules.h"
 #include "shake.h"
+#include <algorithm>
 
 #define attachment euser1
 #define sibling euser2
@@ -30,12 +31,18 @@ public:
 	bool Spawn() override;
 	void UpdateOnRemove() override;
 
+	bool SpannerHit(CBaseEntity* other) override;
+
 	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
 	void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType) override;
 
 	virtual const char* GetModelName() { return "models/dispenser.mdl"; }
 	virtual const char* GetClassName() { return "building_dispenser"; }
 	virtual float GetHeight() { return 48.0F; }
+	virtual int GetMaxLevel() { return 0; }
+	virtual int GetUpgradeCost() { return 130; }
+
+	virtual void Upgrade(CBasePlayer* player);
 
 protected:
     CBasePlayer* m_pPlayer;
@@ -107,6 +114,29 @@ void CBuilding::UpdateOnRemove()
 }
 
 
+bool CBuilding::SpannerHit(CBaseEntity* other)
+{
+	if (g_pGameRules->PlayerRelationship(other, this) < GR_ALLY)
+	{
+		return false;
+	}
+
+	auto result = false;
+
+	const auto player = static_cast<CBasePlayer*>(other);
+
+	if (v.weapons < GetMaxLevel()
+	 && player->m_rgAmmo[AMMO_CELLS] >= GetUpgradeCost())
+	{
+		Upgrade(player);
+
+		result = true;
+	}
+
+	return result;
+}
+
+
 bool CBuilding::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType)
 {
 	if (v.takedamage == DAMAGE_NO)
@@ -120,6 +150,12 @@ bool CBuilding::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float 
 	}
 
 	v.health -= flDamage;
+
+	if (util::DoDamageResponse(this, attacker))
+	{
+		static_cast<CBasePlayer*>(attacker)->SendHitFeedback(
+			this, flDamage, bitsDamageType);
+	}
 
 	if (v.health <= 0.0F)
 	{
@@ -178,6 +214,19 @@ void CBuilding::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDa
 	}
 
 	Remove();
+}
+
+
+void CBuilding::Upgrade(CBasePlayer* player)
+{
+	player->m_rgAmmo[AMMO_CELLS] -= GetUpgradeCost();
+
+	v.weapons++;
+
+	v.max_health = ceilf(v.max_health * 1.2F);
+	v.health = v.max_health;
+
+	EmitSound("weapons/turrset.wav", CHAN_WEAPON);
 }
 
 
@@ -421,8 +470,11 @@ public:
 
 	const char* GetModelName() override { return "models/base.mdl"; }
 	const char* GetClassName() override { return "building_sentrygun"; }
+	int GetMaxLevel() override { return 2; }
 
 	bool Spawn() override;
+
+	void Upgrade(CBasePlayer* player) override;
 };
 
 
@@ -451,6 +503,9 @@ protected:
 
 public:
 	CSentryGun(Entity* containingEntity) : CBaseAnimating(containingEntity) {}
+
+	const char* GetModelName();
+	int GetFireInterval();
 
 	bool Spawn() override;
 	void Think() override;
@@ -493,6 +548,54 @@ bool CSentryBase::Spawn()
 	}
 
 	return true;
+}
+
+
+void CSentryBase::Upgrade(CBasePlayer* player)
+{
+	CBuilding::Upgrade(player);
+
+	CSentryGun* head = nullptr;
+
+	if (v.attachment != nullptr)
+	{
+		head = v.attachment->Get<CSentryGun>();
+	}
+
+	if (head != nullptr)
+	{
+		head->v.weapons = v.weapons;
+		
+		head->SetModel(head->GetModelName());
+		head->ResetSequenceInfo();
+	}
+}
+
+
+const char* CSentryGun::GetModelName()
+{
+	if (v.weapons == 0)
+	{
+		return "models/sentry1.mdl";
+	}
+
+	if (v.weapons == 1)
+	{
+		return "models/sentry2.mdl";
+	}
+
+	return "models/sentry3.mdl";
+}
+
+
+int CSentryGun::GetFireInterval()
+{
+	if (v.weapons == 0)
+	{
+		return 4;
+	}
+
+	return 2;
 }
 
 
@@ -588,6 +691,11 @@ void CSentryGun::FindTarget()
 
 			v.sequence = kSequenceIdle;
 			ResetSequenceInfo();
+
+			if (v.fuser1 <= 0)
+			{
+				v.fuser1 = 10;
+			}
 
 			EmitSound("weapons/turrspot.wav", CHAN_VOICE);
 		}
@@ -714,20 +822,7 @@ bool CSentryGun::UpdateAngles(const float scale)
 			}
 		}
 
-		if (move > 0.0F)
-		{
-			if (move > speed)
-			{	
-				move = speed;
-			}
-		}
-		else
-		{
-			if (move < -speed)
-			{
-				move = -speed;
-			}
-		}
+		move = std::clamp(move, -speed, speed);
 
 		v.v_angle.y = util::AngleMod(currentYaw + move);
 	}
@@ -757,20 +852,7 @@ bool CSentryGun::UpdateAngles(const float scale)
 			}
 		}
 
-		if (move > 0.0F)
-		{
-			if (move > speed)
-			{
-				move = speed;
-			}
-		}
-		else
-		{
-			if (move < -speed)
-			{
-				move = -speed;
-			}
-		}
+		move = std::clamp(move, -speed, speed);
 
 		v.v_angle.x = util::AngleMod(currentPitch + move);
     }
@@ -781,6 +863,35 @@ bool CSentryGun::UpdateAngles(const float scale)
 
 void CSentryGun::Fire()
 {
+	if (v.weapons >= 2)
+	{
+		v.fuser1--;
+
+		if (v.fuser1 <= 0)
+		{
+			v.fuser1 = 60;
+
+			EmitSound("weapons/rocketfire1.wav", CHAN_BODY, VOL_NORM, ATTN_NORM, 0, PITCH_HIGH);
+
+			util::MakeAimVectors(v.v_angle);
+
+			CSentryBase* base = nullptr;
+
+			if (v.attachment != nullptr)
+			{
+				base = v.attachment->Get<CSentryBase>();
+			}
+
+			CRocket::CreateSentryRocket(
+				EyePosition() + Vector(0.0F, 0.0F, 16.0F),
+				gpGlobals->v_forward,
+				150,
+				75,
+				150,
+				base->m_pPlayer);
+		}
+	}
+
 	v.pain_finished--;
 
 	if (v.pain_finished > 0)
@@ -788,7 +899,7 @@ void CSentryGun::Fire()
 		return;
 	}
 
-	v.pain_finished = 4;
+	v.pain_finished = GetFireInterval();
 
 	v.sequence = kSequenceFire;
 	v.frame = 0.0F;
@@ -1178,8 +1289,11 @@ void CTeleporter::Ready()
 {
 	SetReady();
 
-	engine::EmitAmbientSound(&v, Center(), "misc/teleport_ready.wav",
-		VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+	if (PCNumber() == BUILD_ENTRY_TELEPORTER)
+	{
+		engine::EmitAmbientSound(&v, Center(), "misc/teleport_ready.wav",
+			VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+	}
 }
 
 
@@ -1222,7 +1336,7 @@ bool CBuilder::SpawnBuilding(const int buildingType)
 		return false;
 	}
 
-	building->v.origin = v.origin;
+	building->v.origin = v.startpos;
 	building->v.angles = v.angles;
 	building->v.playerclass = buildingType;
 	building->m_pPlayer = m_pPlayer;
