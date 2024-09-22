@@ -39,6 +39,8 @@
 
 CGlobalState gGlobalState;
 
+std::vector<EHANDLE> gNoBuildAreas;
+
 extern void W_Precache();
 
 #define SF_DECAL_NOTINDEATHMATCH 2048
@@ -359,6 +361,7 @@ CWorld::CWorld(Entity* containingEntity) : CBaseEntity(containingEntity)
 	}
 
 	World = this;
+	gNoBuildAreas.clear();
 }
 
 CWorld::~CWorld()

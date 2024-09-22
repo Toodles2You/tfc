@@ -303,7 +303,6 @@ void CPrimeGrenade::PrimedThink()
 }
 
 
-/* Toodles TODO: Point contents doesn't catch both "no grenades" and "no build". */
 bool CPrimeGrenade::CanDetonate()
 {
 	const auto contents = engine::PointContents(v.origin);

@@ -29,6 +29,8 @@
 #include "gamerules.h"
 #include "game.h"
 
+extern std::vector<EHANDLE> gNoBuildAreas;
+
 #define SF_TRIGGER_ALLOWMONSTERS 1 // monsters allowed to fire this trigger
 #define SF_TRIGGER_NOCLIENTS 2	   // players not allowed to fire this trigger
 #define SF_TRIGGER_PUSHABLES 4	   // only pushables can fire this trigger
@@ -2098,9 +2100,7 @@ public:
 
 LINK_ENTITY_TO_CLASS(func_ladder, CFuncArea);
 LINK_ENTITY_TO_CLASS(func_nogrenades, CFuncArea);
-#if 0
 LINK_ENTITY_TO_CLASS(func_nobuild, CFuncArea);
-#endif
 
 
 bool CFuncArea::Spawn()
@@ -2115,12 +2115,16 @@ bool CFuncArea::Spawn()
 	{
 		v.skin = CONTENTS_NO_GRENADES;
 	}
-#if 0
 	else if (streq("func_nobuild", classname))
 	{
-		v.skin = CONTENTS_NO_BUILD;
+		v.skin = 0;
+
+		EHANDLE handle;
+
+		handle = this;
+
+		gNoBuildAreas.push_back(handle);
 	}
-#endif
 	else
 	{
 		v.skin = CONTENTS_EMPTY;

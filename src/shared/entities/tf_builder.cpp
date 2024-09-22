@@ -11,6 +11,10 @@
 #include "player.h"
 #include "weapons.h"
 
+#ifdef GAME_DLL
+extern std::vector<EHANDLE> gNoBuildAreas;
+#endif
+
 
 LINK_ENTITY_TO_CLASS(tf_weapon_builder, CBuilder);
 
@@ -194,17 +198,33 @@ bool CBuilder::CheckArea(const Vector& origin, Vector& outStartPos)
 	outStartPos = origin;
 
 #ifdef GAME_DLL
+	/* Check for "no build" areas. */
+
+	for (auto it = gNoBuildAreas.begin(); it != gNoBuildAreas.end(); it++)
+	{
+		CBaseEntity* noBuild = *it;
+
+		if (noBuild == nullptr)
+		{
+			continue;
+		}
+
+		TraceResult trace;
+
+		engine::TraceModel(origin, origin, 0, &noBuild->v, &trace);
+
+		if (trace.flFraction != 1.0F || trace.fAllSolid != 0)
+		{
+			return false;
+		}
+	}
 
 	const auto contents = engine::PointContents(origin);
 
 	/* Must be in the open. */
 
-	/*
-		Toodles FIXME: This needs to account for
-		the new "no build" & "no grenade" contents.
-	*/
-
-	if (contents != CONTENTS_EMPTY && contents != CONTENTS_WATER)
+	if (contents != CONTENTS_EMPTY && contents != CONTENTS_WATER
+	 && contents != CONTENTS_NO_GRENADES)
 	{
 		return false;
 	}

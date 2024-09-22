@@ -618,7 +618,6 @@ enum {
 #define CONTENTS_FOG -19
 
 #define CONTENTS_NO_GRENADES -20
-#define CONTENTS_NO_BUILD -21
 
 enum
 {
