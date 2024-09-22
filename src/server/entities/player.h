@@ -449,6 +449,7 @@ public:
 	byte m_iDisguisePlayerClass;
 	byte m_iDisguiseIndex;
 	float m_flDisguiseHealth;
+	float m_flDisguiseArmor;
 	int16 m_iDisguiseTime;
 	int16 m_iDisguiseWeaponModel;
 	char m_szDisguiseAnimExtention[32];

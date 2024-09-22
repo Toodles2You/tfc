@@ -2165,6 +2165,11 @@ void CBasePlayer::GetEntityState(entity_state_t& state, CBasePlayer* player)
 			state.health = std::max(m_flDisguiseHealth, 1.0F);
 		}
 
+		if (m_flDisguiseArmor > 0.0F)
+		{
+			state.fuser1 = m_flDisguiseArmor;
+		}
+
 		if (m_iDisguiseWeaponModel != 0)
 		{
 			state.weaponmodel = m_iDisguiseWeaponModel;
@@ -2625,6 +2630,7 @@ void CBasePlayer::FinishDisguising()
 	if (disguise != nullptr)
 	{
 		m_flDisguiseHealth = disguise->v.health;
+		m_flDisguiseArmor = disguise->v.armorvalue;
 
 		util::ClientPrint(this, HUD_PRINTCENTER, "#Disguise_player",
 			STRING(disguise->v.netname));
@@ -2632,11 +2638,18 @@ void CBasePlayer::FinishDisguising()
 	else
 	{
 		m_flDisguiseHealth = 0.0F;
+		m_flDisguiseArmor = 0.0F;
 	}
 
 	if (m_flDisguiseHealth <= 0.0F)
 	{
 		m_flDisguiseHealth = sTFClassInfo[m_iDisguisePlayerClass].maxHealth
+			* engine::RandomFloat (0.5F, 1.0F);
+	}
+
+	if (m_flDisguiseArmor <= 0.0F)
+	{
+		m_flDisguiseArmor = sTFClassInfo[m_iDisguisePlayerClass].initArmor
 			* engine::RandomFloat (0.5F, 1.0F);
 	}
 

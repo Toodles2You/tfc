@@ -1172,6 +1172,7 @@ void CBasePlayer::Undisguise()
 	m_iDisguisePlayerClass = PC_UNDEFINED;
 	m_iDisguiseIndex = 0;
 	m_flDisguiseHealth = 0.0F;
+	m_flDisguiseArmor = 0.0F;
 	m_iDisguiseTime = 0;
 	m_iDisguiseWeaponModel = 0;
 	m_szDisguiseAnimExtention[0] = '\0';
@@ -1190,6 +1191,7 @@ void CBasePlayer::ClearEffects()
 	m_iDisguisePlayerClass = PC_UNDEFINED;
 	m_iDisguiseIndex = 0;
 	m_flDisguiseHealth = 0.0F;
+	m_flDisguiseArmor = 0.0F;
 	m_iDisguiseTime = 0;
 	m_iDisguiseWeaponModel = 0;
 	m_szDisguiseAnimExtention[0] = '\0';
