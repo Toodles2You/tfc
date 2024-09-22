@@ -1256,6 +1256,18 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 				}
 			}
 		}
+		else
+		{
+			const auto teamNumber = m_pCurrentEntity->curstate.team;
+
+			if (teamNumber == TEAM_BLUE || teamNumber == TEAM_RED)
+			{
+				const auto& classInfo = sTFClassInfo[PC_ENGINEER];
+
+				m_nTopColor = classInfo.colormap[teamNumber - 1][0];
+				m_nBottomColor = classInfo.colormap[teamNumber - 1][1];
+			}
+		}
 
 
 		IEngineStudio.StudioSetRemapColors(m_nTopColor, m_nBottomColor);
