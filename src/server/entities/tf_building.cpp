@@ -241,7 +241,7 @@ void CBuilding::Upgrade(CBasePlayer* player)
 
 	v.weapons++;
 
-	v.max_health = ceilf(v.max_health * 1.2F);
+	v.max_health = roundf(v.max_health * 1.2F);
 	v.health = v.max_health;
 
 	EmitSound("weapons/turrset.wav", CHAN_WEAPON);
