@@ -114,6 +114,7 @@ void CBuilder::Deploy()
 #ifdef GAME_DLL
 	v.aiment = v.owner = nullptr;
 	v.team = m_pPlayer->TeamNumber();
+	v.iuser4 = m_pPlayer->v.GetIndex();
 
 	v.solid = SOLID_BBOX;
 	v.movetype = MOVETYPE_TOSS;
@@ -174,6 +175,7 @@ void CBuilder::Holster()
 	m_iNextPrimaryAttack = 0;
 
 	v.aiment = v.owner = &m_pPlayer->v;
+	v.iuser4 = 0;
 
 	v.movetype = MOVETYPE_FOLLOW;
 	v.solid = SOLID_NOT;
