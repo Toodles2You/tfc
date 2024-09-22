@@ -587,7 +587,9 @@ void CBasePlayer::RemoveAllObjects()
 		Toodles TODO: This doesn't remove client-side nails, obviously.
 		That's not a huge deal but, it'd be a nice feature to have.
 	*/
+#ifndef NDEBUG
 	auto count = 0;
+#endif
 
 	for (auto i = 1; i < gpGlobals->maxEntities; i++, e++)
 	{
@@ -608,7 +610,9 @@ void CBasePlayer::RemoveAllObjects()
 		}
 
 		entity->Remove();
+#ifndef NDEBUG
 		count++;
+#endif
 	}
 
 #ifndef NDEBUG
