@@ -271,7 +271,8 @@ protected:
 		MAX_STATUSTEXT_LENGTH = 128,
 	};
 
-	char m_szStatusBar[MAX_STATUSTEXT_LENGTH];	 // the constructed bar that is drawn
+	char m_szStatusFormat[MAX_STATUSTEXT_LENGTH];
+	char m_szStatusBar[MAX_STATUSTEXT_LENGTH];
 	int m_targetIndex;
 	float m_targetExpireTime;
 	cvar_t *hud_expireid;

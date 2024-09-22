@@ -1157,6 +1157,8 @@ void CBaseEntity::GetEntityState(entity_state_t& state, CBasePlayer* player)
 		}
 	}
 
+	state.health = std::max(v.health, 0.0F);
+
 	state.team = v.team;
 
 	// Class is overridden for non-players to signify a breakable glass object ( sort of a class? )

@@ -22,6 +22,7 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "tf_defs.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -49,73 +50,116 @@ void CHudStatusBar::Draw(const float time)
 		return;
 	}
 
-	auto info = &g_PlayerInfoList[m_targetIndex];
+	auto playerIndex = m_targetIndex;
+	auto entity = client::GetEntityByIndex(playerIndex);
 
-	auto extra = &g_PlayerExtraInfo[m_targetIndex];
-
-	auto name = info->name;
-	auto teamNumber = extra->teamnumber;
-	auto health = (int)extra->health;
-	auto armorValue = (int)extra->armorvalue;
-
-	const auto entity = client::GetEntityByIndex(m_targetIndex);
-
-	if (entity != nullptr)
+	if (entity == nullptr)
 	{
-		/* Check for spy disguise. */
+		return;
+	}
 
-		if (entity->curstate.aiment != 0)
+	/* Check if the entity is invisible. */
+
+	if (entity->curstate.rendermode != kRenderNormal
+	 && entity->curstate.renderamt <= 5)
+	{
+		return;
+	}
+
+	auto entityType = 0;
+	auto isPlayer = true;
+
+	/* If the target isn't an entity, assume it's owned by one. */
+
+	if (playerIndex < 1 || playerIndex > client::GetMaxClients())
+	{
+		playerIndex = entity->curstate.iuser4;
+
+		if (playerIndex < 1 || playerIndex > client::GetMaxClients())
 		{
-			/* Toodles FIXME: Don't perform this every frame. */
-			client::GetPlayerInfo(
-				entity->curstate.aiment,
-				g_PlayerInfoList + entity->curstate.aiment);
-
-			name = g_PlayerInfoList[entity->curstate.aiment].name;
+			return;
 		}
 
-		teamNumber = entity->curstate.team;
-		health = entity->curstate.health;
-		armorValue = entity->curstate.fuser1;
+		entityType = entity->curstate.playerclass;
+		isPlayer = false;
 	}
 
-	if (name[0] == '\0')
-	{
-		SetActive(false);
-		return;
-	}
+	char* fmt = "%s";
 
-	/* Entity is invisible. */
-	if (extra->teamnumber != g_iTeamNumber && (entity == nullptr
-	 || (entity->curstate.rendermode != kRenderNormal && entity->curstate.renderamt <= 5)))
+	if (isPlayer)
 	{
-		SetActive(false);
-		return;
-	}
+		/* Check for a disguise. */
 
-	if (gHUD.m_gameMode == kGamemodeCooperative
-	 || (gHUD.m_gameMode >= kGamemodeTeamplay && teamNumber == g_iTeamNumber)
-	 || gHUD.IsSpectator())
-	{
-		/* Toodles TODO: Use actual icon sprites for stats. */
+		const auto disguiseIndex = entity->curstate.aiment;
 
-		snprintf(m_szStatusBar, MAX_STATUSTEXT_LENGTH, "%s  +%3i  \u03bb%3i",
-			name, health, armorValue);
+		if (disguiseIndex >= 1 && disguiseIndex <= client::GetMaxClients())
+		{
+			/* Steal their name. Everything else is set up by the server. */
+
+			playerIndex = disguiseIndex;
+		}
 	}
 	else
 	{
-		snprintf(m_szStatusBar, MAX_STATUSTEXT_LENGTH, "%s", name);
+		/* Check for a building type. */
+		/* Toodles TODO: Localize these. */
+
+		switch (entityType)
+		{
+			case BUILD_DISPENSER:        fmt = "Dispenser (%s)";           break;
+			case BUILD_SENTRYGUN:        fmt = "Sentry Gun (%s)";          break;
+			case BUILD_ENTRY_TELEPORTER: fmt = "Teleporter Entrance (%s)"; break;
+			case BUILD_EXIT_TELEPORTER:  fmt = "Teleporter Exit (%s)";     break;
+		}
 	}
+
+	hud_player_info_t info;
+	client::GetPlayerInfo(playerIndex, &info);
+
+	if (info.name[0] == '\0')
+	{
+		info.name = "Player";
+	}
+
+	strncpy (m_szStatusFormat, fmt, MAX_STATUSTEXT_LENGTH);
+
+	/* Show extra information for allies. */
+
+	if (gHUD.m_gameMode != kGamemodeDeathmatch && g_iTeamNumber == entity->curstate.team)
+	{
+		strncat (m_szStatusFormat, "  +%3i", MAX_STATUSTEXT_LENGTH);
+
+		if (isPlayer)
+		{
+			strncat (m_szStatusFormat, "  \u03bb%3i", MAX_STATUSTEXT_LENGTH);
+		}
+	}
+
+	/* Print the formatted text. */
+
+	snprintf (m_szStatusBar, MAX_STATUSTEXT_LENGTH,
+		m_szStatusFormat, info.name,
+		entity->curstate.health, static_cast<int>(entity->curstate.fuser1));
+
 	m_szStatusBar[MAX_STATUSTEXT_LENGTH - 1] = '\0';
+
+	/* Get the text size. */
 
 	int textWidth, textHeight;
 	gHUD.GetHudStringSize(m_szStatusBar, textWidth, textHeight);
 
-	auto color = gHUD.GetTeamColor(teamNumber);
+	/* Get the text color. */
+
+	const auto color = gHUD.GetTeamColor(entity->curstate.team);
+
 	client::DrawSetTextColor(color[0], color[1], color[2]);
 
-	int x = std::max(0, std::max(2, ((int)gHUD.GetWidth() - textWidth)) >> 1);
-	int y = (gHUD.GetHeight() >> 1) + textHeight * 4;
+	/* Center the text. */
+
+	const auto x = std::max(0, std::max(2, ((int)gHUD.GetWidth() - textWidth)) >> 1);
+	const auto y = (gHUD.GetHeight() >> 1) + textHeight * 4;
+
+	/* Draw the status bar! */
 
 	int w, h;
 	gHUD.GetHudStringSize(m_szStatusBar, w, h);
@@ -135,14 +179,8 @@ void CHudStatusBar::UpdateStatusBar(cl_entity_t* entity)
 		return;
 	}
 
-	if (m_targetIndex != entity->index)
-	{
-		client::GetPlayerInfo(
-			entity->index,
-			g_PlayerInfoList + entity->index);
-	}
-
 	m_targetIndex = entity->index;
 	m_targetExpireTime = client::GetClientTime();
+
 	SetActive(true);
 }
