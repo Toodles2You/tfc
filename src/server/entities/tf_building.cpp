@@ -133,6 +133,24 @@ bool CBuilding::SpannerHit(CBaseEntity* other)
 		result = true;
 	}
 
+	if (v.health < v.max_health)
+	{
+		const auto health = std::min(
+			(int)v.max_health - (int)v.health,
+			player->m_rgAmmo[AMMO_CELLS] * 5);
+
+		if (health > 0)
+		{
+			util::ClientPrint(player, HUD_PRINTCENTER, "#Sentry_repair");
+
+			v.health = std::min(v.health + health, v.max_health);
+
+			player->m_rgAmmo[AMMO_CELLS] -= (int)std::ceil(health / 5.0F);
+
+			result = true;
+		}
+	}
+
 	return result;
 }
 
