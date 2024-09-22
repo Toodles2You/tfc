@@ -141,6 +141,42 @@ bool CHalfLifeMovement::ShouldCollide(physent_t* other)
         return m_shouldCollide[other->info - 1];
     }
 
+    /* Toodles: Don't collide with allied entities that we didn't create. */
+
+    if (other->iuser4 != 0 && other->iuser4 != pmove->player_index + 1)
+    {
+        /*
+            Toodles: For some reason the team & class fields
+            of physents aren't set on the server but, are set
+            on the client. I love this engine so much.
+        */
+
+#ifdef GAME_DLL
+        const auto otherEntity = Entity::FromIndex(other->info);
+
+        if (otherEntity == nullptr)
+        {
+            return true;
+        }
+
+        const auto otherTeam = otherEntity->team;
+        const auto otherClass = otherEntity->playerclass;
+#else
+        const auto otherTeam = other->team;
+        const auto otherClass = other->classnumber;
+#endif
+
+        /* Toodles: Collide with teleporters, so we can stand on them. */
+
+        if (otherClass == BUILD_ENTRY_TELEPORTER
+         || otherClass == BUILD_EXIT_TELEPORTER)
+        {
+            return true;
+        }
+
+        return otherTeam == TEAM_UNASSIGNED || otherTeam != player->TeamNumber();
+    }
+
     return true;
 }
 

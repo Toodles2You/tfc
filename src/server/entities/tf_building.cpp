@@ -1358,6 +1358,7 @@ bool CBuilder::SpawnBuilding(const int buildingType)
 	building->v.angles = v.angles;
 	building->v.playerclass = buildingType;
 	building->m_pPlayer = m_pPlayer;
+	building->v.iuser4 = m_pPlayer->v.GetIndex();
 
 	if (!building->Spawn())
 	{

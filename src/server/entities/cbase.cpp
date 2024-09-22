@@ -1157,7 +1157,17 @@ void CBaseEntity::GetEntityState(entity_state_t& state, CBasePlayer* player)
 		}
 	}
 
+	state.team = v.team;
+
 	// Class is overridden for non-players to signify a breakable glass object ( sort of a class? )
 	state.playerclass = v.playerclass;
+
+	state.iuser4 = 0;
+
+	// Only care if owned by a player
+	if (v.iuser4 >= 1 && v.iuser4 <= gpGlobals->maxClients)
+	{
+		state.iuser4 = v.iuser4;
+	}
 }
 
