@@ -274,8 +274,6 @@ protected:
 	char m_szStatusFormat[MAX_STATUSTEXT_LENGTH];
 	char m_szStatusBar[MAX_STATUSTEXT_LENGTH];
 	int m_targetIndex;
-	float m_targetExpireTime;
-	cvar_t *hud_expireid;
 };
 
 struct extra_player_info_t

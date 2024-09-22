@@ -29,27 +29,17 @@
 
 bool CHudStatusBar::Init()
 {
-	hud_expireid = client::RegisterVariable("hud_expireid", "0.2", FCVAR_ARCHIVE);
-
 	return CHudBase::Init();
 }
 
 void CHudStatusBar::Reset()
 {
 	m_targetIndex = 0;
-	m_targetExpireTime = -1000.0F;
 	m_szStatusBar[0] = '\0';
 }
 
 void CHudStatusBar::Draw(const float time)
 {
-	if (hud_expireid->value > 0.0F
-	 && time - m_targetExpireTime >= hud_expireid->value)
-	{
-		SetActive(false);
-		return;
-	}
-
 	auto playerIndex = m_targetIndex;
 	auto entity = client::GetEntityByIndex(playerIndex);
 
@@ -110,6 +100,7 @@ void CHudStatusBar::Draw(const float time)
 			case BUILD_SENTRYGUN:        fmt = "Sentry Gun (%s)";          break;
 			case BUILD_ENTRY_TELEPORTER: fmt = "Teleporter Entrance (%s)"; break;
 			case BUILD_EXIT_TELEPORTER:  fmt = "Teleporter Exit (%s)";     break;
+			default: return;
 		}
 	}
 
@@ -172,15 +163,12 @@ void CHudStatusBar::UpdateStatusBar(cl_entity_t* entity)
 {
 	if (entity == nullptr)
 	{
-		if (hud_expireid->value <= 0.0F)
-		{
-			SetActive(false);
-		}
+		SetActive(false);
+
 		return;
 	}
 
 	m_targetIndex = entity->index;
-	m_targetExpireTime = client::GetClientTime();
 
 	SetActive(true);
 }
