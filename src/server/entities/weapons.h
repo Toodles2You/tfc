@@ -566,6 +566,9 @@ public:
 
 	virtual bool Spawn() override;
 
+	bool ShouldCollide(CBaseEntity* other) override;
+	bool ShouldBlockTrace() override { return false; }
+
 	int ObjectCaps() override
 	{
 		if (m_pPlayer != nullptr)

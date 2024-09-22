@@ -517,13 +517,14 @@ int ShouldCollide(Entity* pentTouched, Entity* pentOther)
 		return 0;
 	}
 
+	auto touched = pentTouched->Get<CBaseEntity>();
+
 	/* Don't check collision rules when the game is performing a line or hull trace. */
 	if (g_bRunningTrace)
 	{
-		return 1;
+		return static_cast<int>(touched->ShouldBlockTrace());
 	}
 
-	auto touched = pentTouched->Get<CBaseEntity>();
 	auto other = pentOther->Get<CBaseEntity>();
 
 	return static_cast<int>(touched->ShouldCollide(other) && other->ShouldCollide(touched));

@@ -291,6 +291,10 @@ public:
 	{
 		return true;
 	}
+	virtual bool ShouldBlockTrace()
+	{
+		return true;
+	}
 	virtual bool SpannerHit(CBaseEntity* other)
 	{
 		return false;

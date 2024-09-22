@@ -27,6 +27,12 @@ bool CBuilder::Spawn()
 }
 
 
+bool CBuilder::ShouldCollide(CBaseEntity* other)
+{
+	return other->IsPlayer() || other->IsBSPModel();
+}
+
+
 void CBuilder::GetWeaponInfo(WeaponInfo& i)
 {
 	i.pszName = "tf_weapon_builder";
