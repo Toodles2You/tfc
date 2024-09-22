@@ -178,21 +178,28 @@ bool CHalfLifeMovement::BeginWaterJump()
 	if (trace.fraction != 1.0F && fabsf(trace.plane.normal.z) < 0.1F)
 	{
 		vecStart.z += pmove->player_maxs[savehull].z - kWaterJumpHeight;
-        vecEnd = vecStart + m_flatForward * 24.0F;
 
-        pmove->movedir = trace.plane.normal * -50.0F;
+        const auto contents = pmove->PM_PointContents(vecStart, nullptr);
 
-		trace = pmove->PM_PlayerTraceEx(
-            vecStart,
-            vecEnd,
-            PM_STUDIO_BOX,
-            CHalfLifeMovement::g_ShouldIgnore);
+        /* Exit point is not within any liquid. */
+        if (contents > CONTENTS_WATER || contents < CONTENTS_SKY)
+        {
+            vecEnd = vecStart + m_flatForward * 24.0F;
 
-		if (trace.fraction == 1.0F)
-		{
-			pmove->waterjumptime = 2000;
-			pmove->velocity.z = 225;
-		}
+            pmove->movedir = trace.plane.normal * -50.0F;
+
+            trace = pmove->PM_PlayerTraceEx(
+                vecStart,
+                vecEnd,
+                PM_STUDIO_BOX,
+                CHalfLifeMovement::g_ShouldIgnore);
+
+            if (trace.fraction == 1.0F)
+            {
+                pmove->waterjumptime = 2000;
+                pmove->velocity.z = 225;
+            }
+        }
 	}
 
 	/* Reset the collision hull. */
