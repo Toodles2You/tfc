@@ -698,13 +698,9 @@ void CBasePlayer::PlayerDeathFrame()
 		StartObserver();
 	}
 
-	if (v.deadflag != DEAD_RESPAWNABLE)
+	if (!g_pGameRules->FPlayerCanRespawn(this))
 	{
-		if (!g_pGameRules->FPlayerCanRespawn(this))
-		{
-			return;
-		}
-		v.deadflag = DEAD_RESPAWNABLE;
+		return;
 	}
 
 	if (bIsMultiplayer)

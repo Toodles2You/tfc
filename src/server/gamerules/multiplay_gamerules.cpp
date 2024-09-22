@@ -1217,6 +1217,7 @@ bool CHalfLifeMultiplay::ChangePlayerTeam(CBasePlayer* pPlayer, int teamIndex, b
 	}
 
 	pPlayer->v.team = teamIndex;
+	pPlayer->v.playerclass = PC_UNDEFINED;
 
 	if (teamIndex != TEAM_SPECTATORS)
 	{
