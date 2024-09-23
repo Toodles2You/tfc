@@ -392,6 +392,9 @@ public:
 
 protected:
 	float m_flNextRegenerationTime;
+
+public:
+	float m_flNextRotTime;
 #endif
 
 protected:

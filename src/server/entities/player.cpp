@@ -224,6 +224,8 @@ bool CBasePlayer::GiveHealth(float flHealth, int bitsDamageType, bool bClearEffe
 		MessageEnd();
 	}
 
+	m_flNextRotTime = gpGlobals->time + 5.0F;
+
 	if (v.takedamage == DAMAGE_NO)
 	{
 		return false;
@@ -481,6 +483,7 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	}
 
 	m_flNextRegenerationTime = gpGlobals->time + 3.0F;
+	m_flNextRotTime = gpGlobals->time;
 
 	MessageBegin(MSG_SPEC, SVC_DIRECTOR);
 		WriteByte(9);							  // command length in bytes
@@ -1121,6 +1124,13 @@ void CBasePlayer::PreThink()
 		m_flNextRegenerationTime = gpGlobals->time + 3.0F;
 	}
 
+	if (v.health > v.max_health && m_flNextRotTime <= gpGlobals->time)
+	{
+		v.health = std::max(v.health - 1.0F, v.max_health);
+
+		m_flNextRotTime = gpGlobals->time + 1.0F;
+	}
+
 	if (InState(State::Tranquilized) && m_flTranquilizationTime <= gpGlobals->time)
 	{
 		LeaveState(State::Tranquilized);
@@ -1173,6 +1183,9 @@ bool CBasePlayer::Spawn()
 
 	m_iFOV = 0;
 	m_ClientSndRoomtype = -1;
+
+	m_flNextRegenerationTime = gpGlobals->time;
+	m_flNextRotTime = gpGlobals->time;
 
 	m_flNextDecalTime = -decalfrequency.value; // let this player decal as soon as they spawn
 
