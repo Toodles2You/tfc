@@ -701,7 +701,7 @@ void CRocketLauncher::GetWeaponInfo(WeaponInfo& i)
 
 	i.pszWorld = "models/w_rpg.mdl";
 	i.pszView = "models/v_tfc_rpg.mdl";
-	i.pszPlayer = "models/p_rpg.mdl";
+	i.pszPlayer = "models/p_srpg.mdl";
 	i.pszAnimExt = "rpg";
 
 	i.iAnims[kWeaponAnimIdle] = 0;
@@ -749,16 +749,16 @@ void CIncendiaryCannon::GetWeaponInfo(WeaponInfo& i)
 
 	i.pszWorld = "models/w_rpg.mdl";
 	i.pszView = "models/v_rpg.mdl";
-	i.pszPlayer = "models/p_srpg.mdl";
+	i.pszPlayer = "models/p_rpg.mdl";
 	i.pszAnimExt = "rpg";
 
 	i.iAnims[kWeaponAnimIdle] = 0;
 	i.iAnims[kWeaponAnimDeploy] = 4;
 	i.iAnims[kWeaponAnimHolster] = 3;
-	i.iAnims[kWeaponAnimAttack] = 2;
-	i.iAnims[kWeaponAnimReload] = 8;
-	i.iAnims[kWeaponAnimStartReload] = 7;
-	i.iAnims[kWeaponAnimEndReload] = 9;
+	i.iAnims[kWeaponAnimAttack] = 3;
+	i.iAnims[kWeaponAnimReload] = 2;
+	i.iAnims[kWeaponAnimStartReload] = -1;
+	i.iAnims[kWeaponAnimEndReload] = -1;
 
 	i.iShots = 1;
 
