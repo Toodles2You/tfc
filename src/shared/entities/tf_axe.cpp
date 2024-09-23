@@ -300,7 +300,7 @@ void CSpanner::GetWeaponInfo(WeaponInfo& i)
 	i.iProjectileType = kProjKinetic;
 	i.iProjectileDamage = 20;
 	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
-	i.iProjectileCount = -1;
+	i.iProjectileCount = 1;
 
 	i.pszEvent = "events/wpn/tf_medsteam.sc"; /* Toodles FIXME: */
 	i.pszAttackSound = "weapons/cbar_hitbod1.wav";
@@ -363,7 +363,7 @@ void CAxe::GetWeaponInfo(WeaponInfo& i)
 	i.iProjectileType = kProjKinetic;
 	i.iProjectileDamage = 20;
 	i.vecProjectileSpread = Vector2D(0.0F, 0.0F);
-	i.iProjectileCount = -1;
+	i.iProjectileCount = 1;
 
 	i.pszEvent = "events/wpn/tf_axe.sc";
 	i.pszAttackSound = "weapons/cbar_hitbod1.wav";
