@@ -197,7 +197,9 @@ void W_Precache()
 	engine::PrecacheSound("misc/teleport_in.wav");
 	engine::PrecacheSound("misc/teleport_ready.wav");
 
-	engine::PrecacheSound("items/damage2.wav");
+#if 0
+	engine::PrecacheSound("items/empathy2.wav");
+#endif
 }
 
 

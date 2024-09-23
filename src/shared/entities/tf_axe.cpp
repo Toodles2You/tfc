@@ -233,16 +233,23 @@ int CMedikit::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& 
 	{
 		result = kResultHit;
 
-		if (g_pGameRules->PlayerRelationship(dynamic_cast<CBasePlayer*>(hit), m_pPlayer) >= GR_ALLY)
+		const auto player = static_cast<CBasePlayer*>(hit);
+
+		if (g_pGameRules->PlayerRelationship(player, m_pPlayer) >= GR_ALLY)
 		{
-			if (hit->v.health >= hit->v.max_health)
+			/* Toodles: Prevent damage tanking during combat. */
+
+			const auto megaHealth =
+				player->m_flMegaHealthTime <= gpGlobals->time;
+
+			auto health = 5.0F;
+
+			if (megaHealth)
 			{
-				hit->GiveHealth(5, DMG_IGNORE_MAXHEALTH);
+				health *= 5.0F;
 			}
-			else
-			{
-				hit->GiveHealth(hit->v.max_health - hit->v.health, DMG_IGNORE_MAXHEALTH);
-			}
+
+			player->GiveHealth(health, DMG_IGNORE_MAXHEALTH);
 		}
 		else
 		{

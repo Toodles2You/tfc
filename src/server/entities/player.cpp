@@ -482,7 +482,10 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 		return false;
 	}
 
+	/* Toodles: Prevent damage tanking during combat. */
+
 	m_flNextRegenerationTime = gpGlobals->time + 3.0F;
+	m_flMegaHealthTime = gpGlobals->time + 10.0F;
 	m_flNextRotTime = gpGlobals->time;
 
 	MessageBegin(MSG_SPEC, SVC_DIRECTOR);
@@ -1185,6 +1188,7 @@ bool CBasePlayer::Spawn()
 	m_ClientSndRoomtype = -1;
 
 	m_flNextRegenerationTime = gpGlobals->time;
+	m_flMegaHealthTime = gpGlobals->time;
 	m_flNextRotTime = gpGlobals->time;
 
 	m_flNextDecalTime = -decalfrequency.value; // let this player decal as soon as they spawn
@@ -2814,11 +2818,25 @@ bool CBasePlayer::SpannerHit(CBaseEntity* other)
 		return false;
 	}
 
-	armor = std::min(armor, 40);
+	/* Toodles: Prevent damage tanking during combat. */
+
+	const auto megaHealth =
+		m_flMegaHealthTime <= gpGlobals->time;
+
+	auto health = 4;
+
+	if (megaHealth)
+	{
+		health *= 10;
+	}
+
+	armor = std::min(armor, health);
 
 	if (GiveArmor(v.armortype, armor))
 	{
-		EmitSound("items/damage2.wav", CHAN_ITEM);
+#if 0
+		EmitSound("items/empathy2.wav", CHAN_ITEM);
+#endif
 
 		player->m_rgAmmo[AMMO_CELLS] -= (int)std::ceil(armor / 4.0F);
 

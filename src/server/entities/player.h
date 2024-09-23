@@ -394,6 +394,7 @@ protected:
 	float m_flNextRegenerationTime;
 
 public:
+	float m_flMegaHealthTime;
 	float m_flNextRotTime;
 #endif
 
