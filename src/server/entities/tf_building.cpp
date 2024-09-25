@@ -841,11 +841,39 @@ float CSentryGun::HuntTarget(CBaseEntity* other)
 
 	if (v.enemy == nullptr || other != v.enemy->Get<CBaseEntity>())
 	{
-		/* Toodles TODO: Ignore disguised spies. */
-
 		if (g_pGameRules->PlayerRelationship(other, this) >= GR_ALLY)
 		{
 			return -1.0F;
+		}
+
+		/* Toodles: Ignore disguised spies. */
+
+		const auto player = static_cast<CBasePlayer*>(other);
+
+		if (player->InState(CBasePlayer::State::FeigningDeath)
+		 && player->m_iFeignTime == 0)
+		{
+			return -1.0F;
+		}
+
+		if (player->InState(CBasePlayer::State::Disguised))
+		{
+			CSentryBase* base = nullptr;
+
+			if (v.attachment != nullptr)
+			{
+				base = v.attachment->Get<CSentryBase>();
+			}
+
+			if (base == nullptr)
+			{
+				return -1.0F;
+			}
+
+			if (!g_pGameRules->CanSeeThroughDisguise(base->m_pPlayer, other))
+			{
+				return -1.0F;
+			}
 		}
 	}
 	
