@@ -1276,7 +1276,7 @@ void EV_Explosion(event_args_t* args)
 	}
 
 	auto sprite = g_sModelIndexFireball;
-	auto flags = TE_EXPLFLAG_NONE;
+	auto flags = TE_EXPLFLAG_NOADDITIVE;
 
 	if (type == tent::ExplosionType::Detpack)
 	{
@@ -1296,10 +1296,6 @@ void EV_Explosion(event_args_t* args)
 	if (simple)
 	{
 		flags |= TE_EXPLFLAG_NOPARTICLES;
-	}
-	else
-	{
-		flags |= TE_EXPLFLAG_NOADDITIVE;
 	}
 
 	if (underwater)
