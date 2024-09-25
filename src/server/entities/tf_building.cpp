@@ -498,12 +498,17 @@ public:
 
 	bool Spawn() override;
 
+	bool SpannerHit(CBaseEntity* other) override;
+
 	void Upgrade(CBasePlayer* player) override;
 };
 
 
 class CSentryGun : public CBaseAnimating
 {
+public:
+	friend class CSentryBase;
+
 protected:
 	static constexpr float kSentryYawRange = 50.0F;
 	static constexpr float kSentryYawSpeed = 30.0F; /* 10.0F */
@@ -543,7 +548,13 @@ protected:
 	void SetYaw(const float yaw);
 	bool UpdateAngles(const float scale = 1.0F);
 	void Fire();
+	void FireRocket();
 	void Rotate();
+
+protected:
+	int GetMaxAmmo(const int type);
+
+	byte m_rgAmmo[2];
 };
 
 
@@ -578,6 +589,75 @@ bool CSentryBase::Spawn()
 }
 
 
+bool CSentryBase::SpannerHit(CBaseEntity* other)
+{
+	auto result = CBuilding::SpannerHit(other);
+
+	CSentryGun* head = nullptr;
+
+	if (v.attachment != nullptr)
+	{
+		head = v.attachment->Get<CSentryGun>();
+	}
+
+	if (head != nullptr)
+	{
+		const auto player = static_cast<CBasePlayer*>(other);
+
+		const auto maxShells = head->GetMaxAmmo(0);
+
+		if (head->m_rgAmmo[0] < maxShells
+		 && player->m_rgAmmo[AMMO_SHELLS] != 0)
+		{
+			auto shells = std::min(
+				(int)player->m_rgAmmo[AMMO_SHELLS], 40);
+
+			shells = std::min(
+				shells, maxShells - head->m_rgAmmo[0]);
+
+			if (shells != 0)
+			{
+				head->m_rgAmmo[0] += shells;
+				player->m_rgAmmo[AMMO_SHELLS] -= shells;
+
+				util::ClientPrint(player,
+					HUD_PRINTCENTER, "#Sentry_inshells");
+
+				result = true;
+			}
+		}
+
+		if (v.weapons >= 2)
+		{
+			const auto maxRockets = head->GetMaxAmmo(1);
+
+			if (head->m_rgAmmo[1] < maxRockets
+		     && player->m_rgAmmo[AMMO_ROCKETS] != 0)
+			{
+				auto rockets = std::min(
+					(int)player->m_rgAmmo[AMMO_ROCKETS], 20);
+
+				rockets = std::min(
+					rockets, maxRockets - head->m_rgAmmo[1]);
+
+				if (rockets != 0)
+				{
+					head->m_rgAmmo[1] += rockets;
+					player->m_rgAmmo[AMMO_ROCKETS] -= rockets;
+
+					util::ClientPrint(player,
+						HUD_PRINTCENTER, "#Sentry_inrockets");
+
+					result = true;
+				}
+			}
+		}
+	}
+
+	return result;
+}
+
+
 void CSentryBase::Upgrade(CBasePlayer* player)
 {
 	CBuilding::Upgrade(player);
@@ -591,6 +671,11 @@ void CSentryBase::Upgrade(CBasePlayer* player)
 
 	if (head != nullptr)
 	{
+		for (int i = 0; i < 2; i++)
+		{
+			head->m_rgAmmo[i] = roundf(head->m_rgAmmo[i] * 1.2F);
+		}
+
 		head->v.weapons = v.weapons;
 		
 		head->SetModel(head->GetModelName());
@@ -657,6 +742,9 @@ bool CSentryGun::Spawn()
 	v.nextthink = gpGlobals->time + 0.5F;
 
 	v.radsuit_finished = v.nextthink;
+
+	m_rgAmmo[0] = 25;
+	m_rgAmmo[1] = 0;
 
 	return true;
 }
@@ -898,24 +986,7 @@ void CSentryGun::Fire()
 		{
 			v.fuser1 = 60;
 
-			EmitSound("weapons/rocketfire1.wav", CHAN_BODY, VOL_NORM, ATTN_NORM, 0, PITCH_HIGH);
-
-			util::MakeAimVectors(v.v_angle);
-
-			CSentryBase* base = nullptr;
-
-			if (v.attachment != nullptr)
-			{
-				base = v.attachment->Get<CSentryBase>();
-			}
-
-			CRocket::CreateSentryRocket(
-				EyePosition() + Vector(0.0F, 0.0F, 16.0F),
-				gpGlobals->v_forward,
-				150,
-				75,
-				150,
-				base->m_pPlayer);
+			FireRocket();
 		}
 	}
 
@@ -927,6 +998,23 @@ void CSentryGun::Fire()
 	}
 
 	v.pain_finished = GetFireInterval();
+
+	if (m_rgAmmo[0] == 0)
+	{
+		EmitSound("weapons/357_cock1.wav",
+			CHAN_WEAPON, VOL_NORM, ATTN_IDLE);
+
+		if (v.sequence == kSequenceFire)
+		{
+			v.sequence = kSequenceIdle;
+			v.frame = 0.0F;
+			ResetSequenceInfo();
+		}
+
+		return;
+	}
+
+	m_rgAmmo[0]--;
 
 	v.sequence = kSequenceFire;
 	v.frame = 0.0F;
@@ -966,6 +1054,59 @@ void CSentryGun::Fire()
 	WriteCoord(start);
 	WriteCoord(trace.vecEndPos);
 	MessageEnd();
+
+	if (m_rgAmmo[0] == 20)
+	{
+		util::ClientPrint(base->m_pPlayer,
+			HUD_PRINTCENTER, "#Sentry_shellslow");
+	}
+	else if (m_rgAmmo[0] == 0)
+	{
+		util::ClientPrint(base->m_pPlayer,
+			HUD_PRINTCENTER, "#Sentry_shellsout");
+	}
+}
+
+
+void CSentryGun::FireRocket()
+{
+	if (m_rgAmmo[1] == 0)
+	{
+		return;
+	}
+
+	m_rgAmmo[1]--;
+
+	EmitSound("weapons/rocketfire1.wav",
+		CHAN_BODY, VOL_NORM, ATTN_NORM, 0, PITCH_HIGH);
+
+	util::MakeAimVectors(v.v_angle);
+
+	CSentryBase* base = nullptr;
+
+	if (v.attachment != nullptr)
+	{
+		base = v.attachment->Get<CSentryBase>();
+	}
+
+	CRocket::CreateSentryRocket(
+		EyePosition() + Vector(0.0F, 0.0F, 16.0F),
+		gpGlobals->v_forward,
+		150,
+		75,
+		150,
+		base->m_pPlayer);
+
+	if (m_rgAmmo[1] == 10)
+	{
+		util::ClientPrint(base->m_pPlayer,
+			HUD_PRINTCENTER, "#Sentry_rocketslow");
+	}
+	else if (m_rgAmmo[1] == 0)
+	{
+		util::ClientPrint(base->m_pPlayer,
+			HUD_PRINTCENTER, "#Sentry_rocketsout");
+	}
 }
 
 
@@ -1039,6 +1180,24 @@ void CSentryGun::Rotate()
 	{
 		v.idealpitch = engine::RandomFloat(-10.0F, 10.0F);
 	}
+}
+
+
+int CSentryGun::GetMaxAmmo(const int type)
+{
+	auto ammo = 100;
+
+	if (type != 0)
+	{
+		ammo = 14;
+	}
+
+	for (int i = 0; i < v.weapons; i++)
+	{
+		ammo = roundf(ammo * 1.2F);
+	}
+
+	return ammo;
 }
 
 
