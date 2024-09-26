@@ -532,9 +532,12 @@ void CBaseDoor::DoorTouch(CBaseEntity* pOther)
 void CBaseDoor::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	m_hActivator = pActivator;
+
 	// if not ready to be used, ignore "use" command.
-	if (m_toggle_state == TS_AT_BOTTOM || FBitSet(v.spawnflags, SF_DOOR_NO_AUTO_RETURN) && m_toggle_state == TS_AT_TOP)
+	if (!FBitSet(v.spawnflags, SF_DOOR_NO_AUTO_RETURN) || m_toggle_state == TS_AT_TOP)
+	{
 		DoorActivate();
+	}
 }
 
 //
@@ -543,14 +546,35 @@ void CBaseDoor::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 bool CBaseDoor::DoorActivate()
 {
 	if (!util::IsMasterTriggered(m_sMaster, m_hActivator))
+	{
 		return false;
-
-	if (FBitSet(v.spawnflags, SF_DOOR_NO_AUTO_RETURN) && m_toggle_state == TS_AT_TOP)
-	{ // door should close
-		DoorGoDown();
 	}
-	else
-	{ // door should open
+
+	if (m_toggle_state == TS_AT_TOP)
+	{
+		if (FBitSet(v.spawnflags, SF_DOOR_NO_AUTO_RETURN))
+		{
+			/* Door should close. */
+
+			DoorGoDown();
+		}
+		else
+		{
+			/* Door should remain open. */
+
+			if (m_flWait == -1)
+			{
+				v.nextthink = -1;
+			}
+			else
+			{
+				v.nextthink = v.ltime + m_flWait;
+			}
+		}
+	}
+	else if (m_toggle_state != TS_GOING_UP)
+	{
+		/* Door should open. */
 
 		if (m_bHealthValue > 0 && m_hActivator != nullptr && m_hActivator->IsPlayer())
 		{ // give health if player opened the door (medikit)
@@ -582,6 +606,8 @@ void CBaseDoor::DoorGoUp()
 	}
 
 	m_toggle_state = TS_GOING_UP;
+
+	v.air_finished = v.ltime;
 
 	SetMoveDone(&CBaseDoor::DoorHitTop);
 	if (Is(Type::RotatingDoor)) // !!! BUGBUG Triggered doors don't work with this yet
@@ -621,7 +647,11 @@ void CBaseDoor::DoorHitTop()
 	if (!FBitSet(v.spawnflags, SF_DOOR_SILENT))
 	{
 		StopSound(STRING(v.noiseMoving), CHAN_STATIC);
-		EmitSound(STRING(v.noiseArrived), CHAN_STATIC);
+
+		if ((v.ltime - v.air_finished) >= 0.05F)
+		{
+			EmitSound(STRING(v.noiseArrived), CHAN_STATIC);
+		}
 	}
 
 	m_toggle_state = TS_AT_TOP;
@@ -666,6 +696,8 @@ void CBaseDoor::DoorGoDown()
 
 	m_toggle_state = TS_GOING_DOWN;
 
+	v.air_finished = v.ltime;
+
 	SetMoveDone(&CBaseDoor::DoorHitBottom);
 	if (Is(Type::RotatingDoor)) //rotating door
 		AngularMove(m_vecAngle1, v.speed);
@@ -681,7 +713,11 @@ void CBaseDoor::DoorHitBottom()
 	if (!FBitSet(v.spawnflags, SF_DOOR_SILENT))
 	{
 		StopSound(STRING(v.noiseMoving), CHAN_STATIC);
-		EmitSound(STRING(v.noiseArrived), CHAN_STATIC);
+
+		if ((v.ltime - v.air_finished) >= 0.05F)
+		{
+			EmitSound(STRING(v.noiseArrived), CHAN_STATIC);
+		}
 	}
 
 	m_toggle_state = TS_AT_BOTTOM;
