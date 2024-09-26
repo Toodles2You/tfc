@@ -604,6 +604,7 @@ public:
 	void FinishBuilding();
 	void DestroyBuilding(const int buildingType, const bool detonate);
 	int GetBuildState();
+	void RotateBuilding(const int buildingType, const float angle);
 };
 
 #ifdef GAME_DLL

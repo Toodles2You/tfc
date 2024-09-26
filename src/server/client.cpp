@@ -556,6 +556,24 @@ void ClientCommand(Entity* pEntity)
 			}
 		}
 	}
+	else if (streq(pcmd, "rotatesentry180"))
+	{
+		if (player->HasPlayerWeapon(WEAPON_BUILDER))
+		{
+			auto build = static_cast<CBuilder*>(player->m_rgpPlayerWeapons[WEAPON_BUILDER]);
+
+			build->RotateBuilding(BUILD_SENTRYGUN, 180.0F);
+		}
+	}
+	else if (streq(pcmd, "rotatesentry"))
+	{
+		if (player->HasPlayerWeapon(WEAPON_BUILDER))
+		{
+			auto build = static_cast<CBuilder*>(player->m_rgpPlayerWeapons[WEAPON_BUILDER]);
+
+			build->RotateBuilding(BUILD_SENTRYGUN, 45.0F);
+		}
+	}
 	else if (g_pGameRules->ClientCommand(player, pcmd))
 	{
 	}

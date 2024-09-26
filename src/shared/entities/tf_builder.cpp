@@ -424,6 +424,15 @@ int CBuilder::GetBuildState()
 	return buildState;
 }
 
+#ifdef CLIENT_DLL
+
+void CBuilder::RotateBuilding(const int buildingType, const float angle)
+{
+
+}
+
+#endif
+
 
 void CBuilder::DestroyBuilding(const int buildingType, const bool detonate)
 {

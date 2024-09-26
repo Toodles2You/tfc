@@ -1570,3 +1570,29 @@ bool CBuilder::SpawnBuilding(const int buildingType)
 	return true;
 }
 
+
+void CBuilder::RotateBuilding(const int buildingType, const float angle)
+{
+	if ((m_iClip & (1 << buildingType)) == 0)
+	{
+		return;
+	}
+
+	CBaseEntity* building = m_pPlayer->m_hBuildings[buildingType - 1];
+
+	if (building == nullptr)
+	{
+		return;
+	}
+
+	auto head = building->v.attachment->Get<CSentryGun>();
+
+	if (head == nullptr)
+	{
+		return;
+	}
+
+	head->v.left_yaw = util::AngleMod(head->v.left_yaw + angle);
+	head->v.right_yaw = util::AngleMod(head->v.right_yaw + angle);
+}
+
