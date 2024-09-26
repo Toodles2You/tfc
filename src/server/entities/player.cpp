@@ -200,8 +200,19 @@ void CBasePlayer::DeathSound(const int damageType)
 
 bool CBasePlayer::GiveHealth(float flHealth, int bitsDamageType, bool bClearEffects)
 {
+	auto result = CBaseAnimating::GiveHealth(flHealth, bitsDamageType, bClearEffects);
+
 	if (bClearEffects)
 	{
+		if (InState(State::Infected)
+		 || InState(State::Burning)
+		 || InState(State::Tranquilized)
+		 || m_nLegDamage != 0
+		 || m_iConcussionTime != 0)
+		{
+			result = true;
+		}
+
 		LeaveState(State::Infected);
 		LeaveState(State::Burning);
 		LeaveState(State::Tranquilized);
@@ -224,14 +235,12 @@ bool CBasePlayer::GiveHealth(float flHealth, int bitsDamageType, bool bClearEffe
 		MessageEnd();
 	}
 
-	m_flNextRotTime = gpGlobals->time + 5.0F;
-
-	if (v.takedamage == DAMAGE_NO)
+	if ((bitsDamageType & DMG_IGNORE_MAXHEALTH) != 0)
 	{
-		return false;
+		m_flNextRotTime = gpGlobals->time + 5.0F;
 	}
 
-	return CBaseAnimating::GiveHealth(flHealth, bitsDamageType, bClearEffects);
+	return result;
 }
 
 //=========================================================
