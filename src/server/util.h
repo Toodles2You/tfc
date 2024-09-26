@@ -488,7 +488,7 @@ bool IsMultiplayer();
 bool IsDeathmatch();
 
 #ifdef GAME_DLL
-void LagCompensation(CBaseEntity* entity, const int& ping);
+void LagCompensation(CBaseEntity* entity, const int ping);
 #endif
 
 bool DoDamageResponse(CBaseEntity* entity, CBaseEntity* attacker);
