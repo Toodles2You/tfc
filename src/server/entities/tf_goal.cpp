@@ -545,22 +545,24 @@ bool CTFGoal::IsPlayerAffected(CBaseEntity* player, CBaseEntity* activating_play
         return false;
     }
 
-    /* Toodles: This was originally an early return if true. */
     if (tfv.t_length != 0)
     {
-        if ((v.origin - player->v.origin).LengthSquared() > tfv.t_length * tfv.t_length)
+        if ((v.origin - player->v.origin).LengthSquared() <= tfv.t_length * tfv.t_length)
         {
-            return false;
-        }
-
-        if (HasGoalEffects(TFGE_WALL))
-        {
-            TraceResult trace;
-            util::TraceLine(v.origin, player->v.origin, util::IGNORE_MONSTERS::ignore_monsters, this, &trace);
-
-            if (trace.flFraction != 1.0F)
+            if (HasGoalEffects(TFGE_WALL))
             {
-                return false;
+                TraceResult trace;
+                util::TraceLine(v.origin, player->v.origin,
+                    util::ignore_monsters, this, &trace);
+
+                if (trace.flFraction == 1.0F)
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                return true;
             }
         }
     }
