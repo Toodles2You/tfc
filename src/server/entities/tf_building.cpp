@@ -296,6 +296,7 @@ protected:
 
 	static constexpr int kDispenseAmmo[] = {20, 20, 10, 75};
 	static constexpr int kDispenseArmor = 20;
+	static constexpr int kDispenseHealth = 5;
 
 	static constexpr int kGenerateAmmo[] = {20, 30, 15, 20};
 	static constexpr int kGenerateArmor = 25;
@@ -461,6 +462,11 @@ void CDispenser::Touch(CBaseEntity* other)
 	m_rgArmor -= add;
 
 	if (add != 0.0F)
+	{
+		result = true;
+	}
+
+	if (player->GiveHealth(kDispenseHealth, DMG_GENERIC, false))
 	{
 		result = true;
 	}
