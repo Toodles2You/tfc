@@ -407,6 +407,11 @@ void CTeamFortress::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer
 
 bool CTeamFortress::FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* pAttacker, CBaseEntity* inflictor)
 {
+    if (pAttacker == nullptr || !pAttacker->IsClient())
+    {
+        return true;
+    }
+
     CBaseEntity* check = (inflictor != nullptr) ? inflictor : pAttacker;
 
     if (check != nullptr && PlayerRelationship(pPlayer, check) >= GR_ALLY)
