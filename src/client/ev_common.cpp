@@ -91,6 +91,30 @@ bool EV_IsLocal(int idx)
 
 /*
 =================
+EV_HasSuperDamage
+
+Toodles FIXME: Predict this & set as an event parameter.
+=================
+*/
+bool EV_HasSuperDamage(int idx)
+{
+	if (!EV_IsPlayer(idx))
+	{
+		return false;
+	}
+
+	const auto player = client::GetEntityByIndex(idx);
+
+	if (player == nullptr)
+	{
+		return false;
+	}
+
+	return (player->curstate.eflags & EFLAG_SUPER_DAMAGE) != 0;
+}
+
+/*
+=================
 EV_GetGunPosition
 
 Figure out the height of the gun

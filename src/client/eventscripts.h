@@ -14,6 +14,7 @@ void EV_GetGunPosition(struct event_args_s* args, Vector& pos, const Vector& ori
 void EV_GetDefaultShellInfo(struct event_args_s* args, const Vector& origin, const Vector& velocity, Vector& ShellVelocity, Vector& ShellOrigin, const Vector& forward, const Vector& right, const Vector& up, float forwardScale, float upScale, float rightScale);
 bool EV_IsLocal(int idx);
 bool EV_IsPlayer(int idx);
+bool EV_HasSuperDamage(int idx);
 void EV_CreateTracer(const Vector& start, const Vector& end);
 
 struct cl_entity_s* GetEntity(int idx);

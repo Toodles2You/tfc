@@ -410,6 +410,13 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 	if (attacker->IsClient())
 	{
 		flDamage *= 0.9F;
+
+		if (static_cast<CBasePlayer*>(attacker)->HasPowerUp(kSuperDamage))
+		{
+			flDamage *= 4.0F;
+
+			bitsDamageType &= ~DMG_NEVERGIB;
+		}
 	}
 
 	// Grab the vector of the incoming attack. (Pretend that the inflictor is a little lower than it really is, so the body will tend to fly upward a bit.)
@@ -450,6 +457,13 @@ bool CBasePlayer::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, floa
 
 	m_bitsDamageType |= bitsDamageType;
 	m_bitsHUDDamage = -1;
+
+	if (HasPowerUp(kProtection))
+	{
+		EmitSound(kPowerUpEffectSounds[kProtection], CHAN_ITEM);
+
+		return false;
+	}
 
 	// Check for godmode or invincibility.
 	if ((v.flags & FL_GODMODE) != 0)
@@ -945,6 +959,82 @@ void CBasePlayer::SetUseObject(CBaseEntity* object)
 }
 
 
+void CBasePlayer::PowerUpThink()
+{
+	for (int i = 0; i < kPowerUps; i++)
+	{
+		if ((m_afPowerUpActive & (1 << i)) == 0)
+		{
+			continue;
+		}
+
+		const auto timeLeft =
+			m_flPowerUpFinished[i] - gpGlobals->time;
+
+		/* Notify the player that their power-up is going to expire. */
+
+		if ((m_afPowerUpActive & (kPowerUpExpireShift << i)) == 0
+		 && timeLeft <= 3.0F)
+		{
+			EmitSoundHUD(kPowerUpExpireSounds[i], CHAN_STATIC);
+
+			util::ClientPrint(this, HUD_PRINTCENTER,
+				kPowerUpExpireMessages[i]);
+
+			m_afPowerUpActive |= kPowerUpExpireShift << i;
+		}
+
+		if (timeLeft <= 0.0F)
+		{
+			RemovePowerUp(i);
+		}
+	}
+}
+
+
+bool CBasePlayer::GivePowerUp(const int powerUpID, const float duration)
+{
+	if (HasPowerUp(powerUpID))
+	{
+		/* Toodles: Make sure it extends the timer. */
+
+		if (m_flPowerUpFinished[powerUpID] >= gpGlobals->time + duration)
+		{
+			return false;
+		}
+	}
+	else
+	{
+		EmitSound(kPowerUpSounds[powerUpID], CHAN_STATIC);
+	}
+
+	m_flPowerUpFinished[powerUpID] = gpGlobals->time + duration;
+
+	m_afPowerUpActive |= 1 << powerUpID;
+
+	m_afPowerUpActive &= ~(kPowerUpExpireShift << powerUpID);
+
+	return true;
+}
+
+
+void CBasePlayer::RemovePowerUp(const int powerUpID)
+{
+	if (HasPowerUp(powerUpID))
+	{
+		EmitSoundHUD("items/powerdown.wav", CHAN_STATIC);
+	}
+
+	m_afPowerUpActive &= ~(1 << powerUpID);
+}
+
+
+bool CBasePlayer::HasPowerUp(const int powerUpID)
+{
+	return (m_afPowerUpActive & (1 << powerUpID)) != 0;
+}
+
+
 void CBasePlayer::PreThink()
 {
 	/* Prevent attacking while feigning death. */
@@ -983,6 +1073,9 @@ void CBasePlayer::PreThink()
 			return;
 		}
 	}
+
+	//Run Powerup think (removes powerups over time, etc)
+	PowerUpThink();
 
 	if (!IsAlive())
 	{
@@ -2159,6 +2252,16 @@ void CBasePlayer::GetEntityState(entity_state_t& state, CBasePlayer* player)
 	if (InState(State::Burning))
 	{
 		state.eflags |= EFLAG_BURNING;
+	}
+
+	/* Power-up effect flags. */
+
+	for (int i = 0; i < kBioSuit; i++)
+	{
+		if ((m_afPowerUpActive & (1 << i)) != 0)
+		{
+			state.eflags |= EFLAG_SUPER_DAMAGE << i;
+		}
 	}
 
 	/* Keep allies slightly visible. */

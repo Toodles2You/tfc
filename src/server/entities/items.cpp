@@ -431,3 +431,60 @@ CItem* CItem::DropBackpack(CBaseEntity* owner, int shells, int nails, int rocket
 	}
 }
 
+
+class CItemArtifact : public CItem
+{
+public:
+	CItemArtifact(Entity* containingEntity) : CItem(containingEntity) {}
+
+	void Precache() override
+	{
+		const auto classname = STRING(v.classname);
+
+		/* Toodles TODO: Use TF vars? */
+
+		if (streq("item_artifact_super_damage", classname))
+		{
+			v.model = MAKE_STRING("models/quad.mdl");
+			v.weapons = CBasePlayer::kSuperDamage;
+			v.radsuit_finished = 30.0F;
+			v.pain_finished = 60.0F;
+		}
+		else if (streq("item_artifact_invulnerability", classname))
+		{
+			v.model = MAKE_STRING("models/pent.mdl");
+			v.weapons = CBasePlayer::kProtection;
+			v.radsuit_finished = 30.0F;
+			v.pain_finished = 60.0F;
+		}
+		else if (streq("item_artifact_invisibility", classname))
+		{
+			v.model = MAKE_STRING("models/invis.mdl");
+			v.weapons = CBasePlayer::kInvisibility;
+			v.radsuit_finished = 30.0F;
+			v.pain_finished = 300.0F;
+		}
+		else if (streq("item_artifact_envirosuit", classname))
+		{
+			v.model = MAKE_STRING("models/w_suit.mdl");
+			v.weapons = CBasePlayer::kBioSuit;
+			v.radsuit_finished = 30.0F;
+			v.pain_finished = 60.0F;
+		}
+
+		engine::PrecacheModel(STRING(v.model));
+
+		SetModel(v.model);
+	}
+
+public:
+	bool MyTouch(CBasePlayer* player) override
+	{
+		return player->GivePowerUp(v.weapons, v.radsuit_finished);
+	}
+};
+
+LINK_ENTITY_TO_CLASS(item_artifact_super_damage, CItemArtifact);
+LINK_ENTITY_TO_CLASS(item_artifact_invulnerability, CItemArtifact);
+LINK_ENTITY_TO_CLASS(item_artifact_invisibility, CItemArtifact);
+LINK_ENTITY_TO_CLASS(item_artifact_envirosuit, CItemArtifact);

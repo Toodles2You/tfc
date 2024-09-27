@@ -651,6 +651,19 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 {
 	const auto& info = CBasePlayerWeapon::WeaponInfoArray[(int)args->fparam1];
 
+	if (EV_HasSuperDamage(args->entindex))
+	{
+		client::event::PlaySound(
+			args->entindex,
+			args->origin,
+			CHAN_ITEM,
+			"items/damage2.wav",
+			VOL_NORM,
+			ATTN_NORM,
+			0,
+			PITCH_NORM);
+	}
+
 	if (info.iProjectileType == kProjKinetic || info.iProjectileType == kProjAdrenaline)
 	{
 		CTFMelee::EV_MeleeAttack(args);

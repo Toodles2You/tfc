@@ -1032,6 +1032,19 @@ void ClientPrecache()
 	engine::PrecacheSound("items/ammopickup1.wav");
 	engine::PrecacheSound("items/ammopickup2.wav");
 
+	engine::PrecacheSound("items/damage.wav");
+	engine::PrecacheSound("items/damage2.wav");
+	engine::PrecacheSound("items/damage3.wav");
+	engine::PrecacheSound("items/protect.wav");
+	engine::PrecacheSound("items/protect2.wav");
+	engine::PrecacheSound("items/protect3.wav");
+	engine::PrecacheSound("items/inv1.wav");
+	engine::PrecacheSound("items/inv2.wav");
+	engine::PrecacheSound("items/inv3.wav");
+	engine::PrecacheSound("items/suit.wav");
+	engine::PrecacheSound("items/suit2.wav");
+	engine::PrecacheSound("items/powerdown.wav");
+
 	engine::PrecacheSound("debris/beamstart1.wav");
 	engine::PrecacheSound("debris/beamstart2.wav");
 

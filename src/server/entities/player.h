@@ -362,6 +362,74 @@ public:
 	int m_netPing;
 #endif
 
+public:
+	enum
+	{
+		kSuperDamage,
+		kProtection,
+		kInvisibility,
+		kBioSuit,
+		kPowerUps,
+		kPowerUpExpireShift = 1 << kPowerUps,
+	};
+
+#ifdef GAME_DLL
+
+protected:
+	static constexpr char *
+	kPowerUpSounds[] =
+	{
+		"items/damage.wav",
+		"items/protect.wav",
+		"items/inv1.wav",
+		"items/suit.wav",
+	};
+
+	static constexpr char *
+	kPowerUpEffectSounds[] =
+	{
+		"items/damage2.wav",
+		"items/protect3.wav",
+		"items/inv3.wav",
+		"items/inv3.wav",
+	};
+
+	static constexpr char *
+	kPowerUpExpireSounds[] =
+	{
+		"items/damage3.wav",
+		"items/protect2.wav",
+		"items/inv2.wav",
+		"items/suit2.wav",
+	};
+
+	static constexpr char *
+	kPowerUpExpireMessages[] =
+	{
+		"#Quad_Damage_Off",
+		"#Protection_Off",
+		"#Ring_Shadows_Off",
+		"#BioSuit_Off",
+	};
+
+	float m_flPowerUpFinished[kPowerUps];
+	/*
+		Low bits are active flags. High bits are for the 'expiring' cue.
+		Note that if you add any more powerups, you will have to increase
+		the size of this variable.
+	*/
+	byte m_afPowerUpActive;
+
+	void PowerUpThink(); // Checks powerup timers and handles their effects
+
+public:
+	bool GivePowerUp(const int powerUpID, const float duration);
+	void RemovePowerUp(const int powerUpID);
+	bool HasPowerUp(const int powerUpID);
+
+#endif
+
+public:
 	float m_flArmorMax;
 	float m_flArmorTypeMax;
 	byte m_afArmorClass;

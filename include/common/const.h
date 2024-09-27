@@ -126,9 +126,15 @@ enum {
 
 
 // entity flags
-#define EFLAG_SLERP 1 // do studio interpolation of this entity
-#define EFLAG_RIMLIGHT 2
-#define EFLAG_BURNING 4
+enum
+{
+	EFLAG_SLERP			= 1, // do studio interpolation of this entity
+	EFLAG_RIMLIGHT		= 2,
+	EFLAG_BURNING		= 4,
+	EFLAG_SUPER_DAMAGE	= 8,
+	EFLAG_PROTECTION	= 16,
+	EFLAG_INVISIBILITY	= 32,
+};
 
 //
 // temp entity events

@@ -1183,6 +1183,9 @@ void CBasePlayer::Undisguise()
 void CBasePlayer::ClearEffects()
 {
 	m_StateBits = 0;
+#ifdef GAME_DLL
+	m_afPowerUpActive = 0;
+#endif
 	m_nLegDamage = 0;
 	m_iConcussionTime = 0;
 	m_iFeignTime = 0;

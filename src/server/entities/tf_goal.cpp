@@ -900,7 +900,20 @@ void CTFGoal::RemoveResults(CBaseEntity* player)
     pl->GiveAmmo(-tfv.no_grenades_1, AMMO_GRENADES1);
     pl->GiveAmmo(-tfv.no_grenades_2, AMMO_GRENADES2);
 
-    /* Toodles FIXME: Check power-ups */
+    if (tfv.super_damage_finished > 0.0F)
+    {
+        pl->RemovePowerUp(CBasePlayer::kSuperDamage);
+    }
+
+    if (tfv.invincible_finished > 0.0F)
+    {
+        pl->RemovePowerUp(CBasePlayer::kProtection);
+    }
+
+    if (tfv.invisible_finished > 0.0F)
+    {
+        pl->RemovePowerUp(CBasePlayer::kInvisibility);
+    }
 
     /* Toodles FIXME: Lives */
 
@@ -980,7 +993,20 @@ void CTFGoal::ApplyResults(CBaseEntity* player, CBaseEntity* activating_player, 
         pl->GiveAmmo(tfv.no_grenades_1, AMMO_GRENADES1);
         pl->GiveAmmo(tfv.no_grenades_2, AMMO_GRENADES2);
 
-        /* Toodles FIXME: Check power-ups */
+        if (tfv.super_damage_finished > 0.0F)
+        {
+            pl->GivePowerUp(CBasePlayer::kSuperDamage, tfv.super_damage_finished);
+        }
+
+        if (tfv.invincible_finished > 0.0F)
+        {
+            pl->GivePowerUp(CBasePlayer::kProtection, tfv.invincible_finished);
+        }
+
+        if (tfv.invisible_finished > 0.0F)
+        {
+            pl->GivePowerUp(CBasePlayer::kInvisibility, tfv.invisible_finished);
+        }
 
 dead_bonuses:
         /* Toodles FIXME: Lives */

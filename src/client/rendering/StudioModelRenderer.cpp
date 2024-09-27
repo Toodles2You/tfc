@@ -1597,29 +1597,17 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		// model and frame independant
 		StudioSetupLighting(&lighting);
 
-		m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
+		const auto eflags = m_pCurrentEntity->curstate.eflags;
 
-		/* Burning glow effect. */
-		if ((m_pCurrentEntity->curstate.eflags & EFLAG_BURNING) != 0
-		 && m_pCurrentEntity->curstate.rendermode == kRenderNormal
-		 && m_pCurrentEntity->curstate.renderfx == kRenderFxNone)
+		if ((m_pCurrentEntity->curstate.eflags & EFLAG_INVISIBILITY) != 0
+		 && (m_pCurrentEntity->curstate.eflags & EFLAG_PROTECTION) == 0)
 		{
-			m_pCurrentEntity->curstate.renderfx = kRenderFxGlowShell;
-
-			/* Toodles TODO: These look a bit too much like power-ups. */
-			if (info.teamnumber == TEAM_BLUE)
-			{
-				m_pCurrentEntity->curstate.rendercolor.r = 247;
-				m_pCurrentEntity->curstate.rendercolor.g = 159;
-				m_pCurrentEntity->curstate.rendercolor.b = 63;
-			}
-			else
-			{
-				m_pCurrentEntity->curstate.rendercolor.r = 247;
-				m_pCurrentEntity->curstate.rendercolor.g = 127;
-				m_pCurrentEntity->curstate.rendercolor.b = 31;
-			}
+			goto theInvisibleMan;
 		}
+
+		m_pCurrentEntity->curstate.eflags &= ~EFLAG_SUPER_DAMAGE;
+
+		m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 
 		// get remap colors
 		if (playerClass != PC_UNDEFINED && (teamNumber == TEAM_BLUE || teamNumber == TEAM_RED))
@@ -1664,10 +1652,14 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 			StudioRenderModel();
 		}
 
+theInvisibleMan:
+
 		m_pPlayerInfo = nullptr;
 
 		if (0 != pplayer->weaponmodel)
 		{
+			m_pCurrentEntity->curstate.eflags = eflags & ~(EFLAG_BURNING | EFLAG_PROTECTION | EFLAG_INVISIBILITY);
+
 			cl_entity_t saveent = *m_pCurrentEntity;
 
 			model_t* pweaponmodel = IEngineStudio.GetModelByIndex(pplayer->weaponmodel);
@@ -1687,6 +1679,8 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 
 			*m_pCurrentEntity = saveent;
 		}
+
+		m_pCurrentEntity->curstate.eflags = eflags;
 	}
 
 	return true;
@@ -1725,68 +1719,132 @@ StudioRenderModel
 */
 void CStudioModelRenderer::StudioRenderModel()
 {
+	if (m_pCurrentEntity->curstate.rendermode != kRenderNormal
+	 && m_pCurrentEntity->curstate.renderamt == 5)
+	{
+		return;
+	}
+
 	IEngineStudio.SetChromeOrigin();
 	IEngineStudio.SetForceFaceFlags(0);
 
-	if (m_pCurrentEntity->curstate.renderfx == kRenderFxGlowShell)
+	const auto isViewModel =
+		m_pCurrentEntity == IEngineStudio.GetViewEntity();
+
+	auto eflags = m_pCurrentEntity->curstate.eflags;
+	
+	if (isViewModel)
 	{
-		bool invisible = true;
+		eflags = client::GetLocalPlayer()->curstate.eflags;
+	}
 
-		if (m_pCurrentEntity == IEngineStudio.GetViewEntity())
-		{
-			if (m_pCurrentEntity->curstate.renderamt != 5)
-			{
-				m_pCurrentEntity->curstate.renderfx = kRenderFxNone;
-				StudioRenderFinal();
-				invisible = false;
-			}
-		}
-		else
-		{
-			if (m_pCurrentEntity->curstate.renderamt != 5
-			 && m_pCurrentEntity->curstate.rendermode != kRenderTransColor)
-			{
-				m_pCurrentEntity->curstate.renderfx = kRenderFxNone;
-				StudioRenderFinal();
-				invisible = false;
-			}
-		}
+	eflags &= (EFLAG_SUPER_DAMAGE | EFLAG_PROTECTION | EFLAG_INVISIBILITY);
 
-		if (0 == IEngineStudio.IsHardware())
-		{
-			client::tri::RenderMode(kRenderTransAdd);
-		}
+	const auto doChromeEffects = eflags != 0
+		|| m_pCurrentEntity->curstate.renderfx == kRenderFxGlowShell;
 
+	if ((eflags & EFLAG_INVISIBILITY) == 0)
+	{
+		StudioRenderFinal();
+	}
+
+	if (doChromeEffects)
+	{
 		IEngineStudio.SetForceFaceFlags(STUDIO_NF_CHROME);
 
 		const auto useTriAPI = StudioUseTriAPI();
 		m_bUseTriAPI = false;
 
 		client::tri::SpriteTexture(m_pChromeSprite, 0);
+
+		const auto rendermode = m_pCurrentEntity->curstate.rendermode;
+		const auto renderfx = m_pCurrentEntity->curstate.renderfx;
+		const auto renderamt = m_pCurrentEntity->curstate.renderamt;
+		const auto rendercolor = m_pCurrentEntity->curstate.rendercolor;
+
+		m_pCurrentEntity->curstate.rendermode = kRenderNormal;
 		m_pCurrentEntity->curstate.renderfx = kRenderFxGlowShell;
 
-		if (invisible)
+		auto alpha = 1.0F;
+
+		if (rendermode != kRenderNormal)
 		{
-			m_pCurrentEntity->curstate.renderamt = 0;
+			alpha *= renderamt / 255.0F;
 		}
 
-		StudioRenderFinal();
+		if ((eflags & EFLAG_SUPER_DAMAGE) != 0)
+		{
+			m_pCurrentEntity->curstate.renderamt = isViewModel ? 10 : 100;
+			m_pCurrentEntity->curstate.rendercolor.r = alpha * 127;
+			m_pCurrentEntity->curstate.rendercolor.g = alpha * 127;
+			m_pCurrentEntity->curstate.rendercolor.b = alpha * 255;
+
+			StudioRenderFinal();
+		}
+
+		if ((eflags & EFLAG_PROTECTION) != 0)
+		{
+			m_pCurrentEntity->curstate.renderamt = 0;
+			m_pCurrentEntity->curstate.rendercolor.r = alpha * 255;
+			m_pCurrentEntity->curstate.rendercolor.g = alpha * 127;
+			m_pCurrentEntity->curstate.rendercolor.b = alpha * 0;
+
+			StudioRenderFinal();
+		}
+
+		/* Toodles TODO: These look a bit too much like power-ups. */
+#if 0
+		if ((eflags & EFLAG_BURNING) != 0)
+		{
+			m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex + 1);
+
+			const auto &info = g_PlayerExtraInfo[m_nPlayerIndex + 1];
+
+			m_pCurrentEntity->curstate.renderamt = 0;
+
+			if (info.teamnumber == TEAM_BLUE)
+			{
+				m_pCurrentEntity->curstate.rendercolor.r = 247;
+				m_pCurrentEntity->curstate.rendercolor.g = 159;
+				m_pCurrentEntity->curstate.rendercolor.b = 63;
+			}
+			else
+			{
+				m_pCurrentEntity->curstate.rendercolor.r = 247;
+				m_pCurrentEntity->curstate.rendercolor.g = 127;
+				m_pCurrentEntity->curstate.rendercolor.b = 31;
+			}
+
+			StudioRenderFinal();
+		}
+#endif
+
+		if (eflags == EFLAG_INVISIBILITY)
+		{
+			m_pCurrentEntity->curstate.renderamt = 0;
+			m_pCurrentEntity->curstate.rendercolor.r = alpha * 255;
+			m_pCurrentEntity->curstate.rendercolor.g = alpha * 255;
+			m_pCurrentEntity->curstate.rendercolor.b = alpha * 255;
+
+			StudioRenderFinal();
+		}
+
+		m_pCurrentEntity->curstate.rendermode = rendermode;
+		m_pCurrentEntity->curstate.renderfx = renderfx;
+		m_pCurrentEntity->curstate.renderamt = renderamt;
+		m_pCurrentEntity->curstate.rendercolor = rendercolor;
+
+		if (m_pCurrentEntity->curstate.renderfx == kRenderFxGlowShell)
+		{
+			StudioRenderFinal();
+		}
+
 		if (0 == IEngineStudio.IsHardware())
 		{
 			client::tri::RenderMode(kRenderNormal);
 		}
 
-		if (invisible)
-		{
-			m_pCurrentEntity->curstate.renderamt = 5;
-		}
-
 		m_bUseTriAPI = useTriAPI;
-	}
-	else if (m_pCurrentEntity->curstate.rendermode == kRenderNormal
-		  || m_pCurrentEntity->curstate.renderamt != 5)
-	{
-		StudioRenderFinal();
 	}
 }
 

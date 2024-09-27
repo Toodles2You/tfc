@@ -897,6 +897,11 @@ int CHalfLifeMultiplay::ItemShouldRespawn(CItem* pItem)
 
 float CHalfLifeMultiplay::FlItemRespawnTime(CItem* pItem)
 {
+	if (pItem->v.pain_finished != 0.0F)
+	{
+		return gpGlobals->time + pItem->v.pain_finished;
+	}
+
 	return gpGlobals->time + ITEM_RESPAWN_TIME;
 }
 
