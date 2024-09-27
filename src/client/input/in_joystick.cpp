@@ -389,7 +389,7 @@ void Joy_Move(float frametime, usercmd_t* cmd)
 
 	viewangles.x = std::clamp(viewangles.x, -cl_pitchup->value, cl_pitchdown->value);
 
-	client::SetViewAngles(viewangles);
+	V_SetViewAngles(viewangles);
 }
 
 

@@ -7,6 +7,7 @@
 
 #pragma once
 
+void V_SetViewAngles(const Vector& viewangles);
 void V_PunchAxis(int axis, float punch);
 void V_ResetPunchAngle();
 void V_ResetChaseCam();

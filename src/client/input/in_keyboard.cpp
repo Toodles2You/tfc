@@ -579,7 +579,7 @@ void CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 
 		memset(cmd, 0, sizeof(*cmd));
 
-		client::SetViewAngles(viewangles);
+		V_SetViewAngles(viewangles);
 
 		Vector move =
 		{

@@ -387,7 +387,7 @@ static void Mouse_MoveInternal(float frametime, usercmd_t* cmd)
 		}
 	}
 
-	client::SetViewAngles(viewangles);
+	V_SetViewAngles(viewangles);
 
 #ifdef WIN32
 	if ((!Mouse_UseRawInput() && SDL_FALSE != mouseRelative) || g_iVisibleMouse)

@@ -49,12 +49,16 @@ static Vector ev_punchangleVel;
 
 static cvar_t* v_oldpunch;
 
-cvar_t* cl_bobcycle;
-cvar_t* cl_bob;
-cvar_t* cl_bobup;
-cvar_t* cl_waterdist;
+static cvar_t* cl_bobcycle;
+static cvar_t* cl_bob;
+static cvar_t* cl_bobup;
+static cvar_t* cl_waterdist;
 cvar_t* cl_chasedist;
-cvar_t* cl_bobview;
+static cvar_t* cl_bobview;
+static cvar_t* cl_wpn_sway_decay;
+static cvar_t* cl_wpn_sway_linear;
+static cvar_t* cl_wpn_sway;
+static cvar_t* cl_wpn_sway_side;
 
 // These cvars are not registered (so users can't cheat), so set the ->value field directly
 // Register these cvars in V_Init() if needed for easy tweaking
@@ -146,6 +150,58 @@ static float V_CalcRoll(Vector angles, Vector velocity, float rollangle, float r
 }
 
 
+static void V_CalcGunSway(ref_params_t* pparams)
+{
+	const auto view = client::GetViewModel();
+
+	if (view == nullptr)
+	{
+		return;
+	}
+
+    auto& offset = view->latched.prevangles;
+
+    if (!pparams->paused)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+			const auto signage = std::signbit (offset[i]);
+
+			offset[i] -= (cl_wpn_sway_decay->value * offset[i]
+				+ cl_wpn_sway_linear->value * (signage ? -1.0F : 1.0F))
+				* pparams->frametime;
+
+            if (signage != std::signbit (offset[i]))
+            {
+                offset[i] = 0.0F;
+            }
+        }
+    }
+
+	const auto sway = cl_wpn_sway->value;
+
+	if (sway == 0.0F)
+	{
+		return;
+	}
+
+    view->angles[YAW] -= offset[YAW] * sway;
+    view->angles[PITCH] += offset[PITCH] * sway;
+
+	NormalizeAngles(view->angles);
+
+	const auto side = cl_wpn_sway_side->value;
+
+	if (side == 0.0F)
+	{
+		return;
+	}
+
+    view->origin = view->origin
+        - pparams->right * offset[YAW] * fabsf(sway) * side
+        - pparams->up * offset[PITCH] * fabsf(sway) * side;
+}
+
 /*
 ==================
 V_CalcGunAngle
@@ -166,9 +222,6 @@ void V_CalcGunAngle(ref_params_t* pparams)
 	// don't apply all of the v_ipitch to prevent normally unseen parts of viewmodel from coming into view.
 	viewent->angles[PITCH] += v_idlescale * sin(pparams->time * v_ipitch_cycle.value) * v_ipitch_level.value;
 	viewent->angles[YAW] -= v_idlescale * sin(pparams->time * v_iyaw_cycle.value) * v_iyaw_level.value;
-
-	viewent->curstate.angles = viewent->angles;
-	viewent->latched.prevangles = viewent->angles;
 }
 
 
@@ -293,6 +346,27 @@ static void V_DropPunchAngle(float frametime)
 		ev_punchangle = g_vecZero;
 		ev_punchangleVel = g_vecZero;
 	}
+}
+
+
+void V_SetViewAngles(const Vector& viewangles)
+{
+	const auto view = client::GetViewModel();
+
+	if (view != nullptr && cl_wpn_sway_decay->value != 0.0F)
+	{
+		Vector a;
+		client::GetViewAngles(a);
+		Vector b = viewangles;
+
+		NormalizeAngles(b);
+
+		view->latched.prevangles = view->latched.prevangles - (b - a);
+
+		NormalizeAngles(view->latched.prevangles);
+	}
+
+	client::SetViewAngles((float*)&viewangles);
 }
 
 
@@ -480,8 +554,6 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 			view->angles[YAW] -= bob * 0.5;
 			view->angles[ROLL] -= bob * 1;
 			view->angles[PITCH] -= bob * 0.3;
-
-			view->curstate.angles = view->angles;
 		}
 	}
 	else
@@ -491,6 +563,10 @@ static void V_CalcNormalRefdef(ref_params_t* pparams)
 			view->origin[i] += -pparams->up[i];
 		}
 	}
+
+	V_CalcGunSway(pparams);
+
+	view->curstate.angles = view->angles;
 
 	// Add in the punchangle, if any
 	// Include client side punch, too
@@ -575,5 +651,9 @@ void V_Init()
 	cl_waterdist = client::RegisterVariable("cl_waterdist", "4", 0);
 	cl_chasedist = client::RegisterVariable("cl_chasedist", "112", 0);
 	cl_bobview = client::RegisterVariable("cl_bobview", "0", 0);
+	cl_wpn_sway_decay = client::RegisterVariable("cl_wpn_sway_decay", "15", 0);
+	cl_wpn_sway_linear = client::RegisterVariable("cl_wpn_sway_linear", "1", 0);
+	cl_wpn_sway = client::RegisterVariable("cl_wpn_sway", "0.01", 0);
+	cl_wpn_sway_side = client::RegisterVariable("cl_wpn_sway_side", "1.5", 0);
 }
 
