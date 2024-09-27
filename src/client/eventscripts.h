@@ -19,3 +19,10 @@ void EV_CreateTracer(const Vector& start, const Vector& end);
 struct cl_entity_s* GetEntity(int idx);
 struct cl_entity_s* GetViewEntity();
 void EV_MuzzleFlash();
+
+void EV_TracePush(const int ignoreEntity, const int hullNumber = kHullPoint, const bool doPrediction = false);
+
+void EV_TracePop();
+
+void EV_TraceLine(float* const start, float* const end, const int traceFlags, const int ignoreEntity, pmtrace_t& outTrace);
+

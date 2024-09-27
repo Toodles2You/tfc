@@ -424,7 +424,7 @@ static void EV_BloodTrace(Vector pos, Vector dir, int damage)
 		traceDir.y += client::RandomFloat(-noise, noise);
 		traceDir.z += client::RandomFloat(-noise, noise);
 
-		client::event::PlayerTrace(pos, pos + traceDir * -172, PM_STUDIO_IGNORE, -1, &tr);
+		EV_TraceLine(pos, pos + traceDir * -172, PM_STUDIO_IGNORE, -1, tr);
 
 		if (tr.fraction != 1.0f)
 		{
@@ -507,10 +507,7 @@ static void EV_FireBullets(
 
 	EV_GetGunPosition(args, gun, args->origin);
 	
-	client::event::SetUpPlayerPrediction(true, true);
-	client::event::PushPMStates();
-	client::event::SetSolidPlayers(args->entindex - 1);
-	client::event::SetTraceHull(kHullPoint);
+	EV_TracePush(args->entindex);
 
 	for (auto i = 0; i < count; i++)
 	{
@@ -533,7 +530,7 @@ static void EV_FireBullets(
 		AngleVectors(angles, &forward, &right, &up);
 
 		pmtrace_t tr;
-		client::event::PlayerTrace(gun, gun + forward * distance, PM_NORMAL, -1, &tr);
+		EV_TraceLine(gun, gun + forward * distance, PM_NORMAL, -1, tr);
 
 		EV_CheckTracer(
 			args->entindex,
@@ -554,7 +551,7 @@ static void EV_FireBullets(
 		}
 	}
 
-	client::event::PopPMStates();
+	EV_TracePop();
 }
 
 void CMP5::EV_PrimaryAttack(event_args_t* args)
@@ -637,14 +634,12 @@ void CCrowbar::EV_PrimaryAttack(event_args_t* args)
 
 	if (!reliable)
 	{
-		client::event::PushPMStates();
-		client::event::SetSolidPlayers(args->entindex - 1);
-		client::event::SetTraceHull(kHullPoint);
+		EV_TracePush(args->entindex);
 
 		Vector forward, right, up;
 		AngleVectors(args->angles, &forward, &right, &up);
 
-		client::event::PlayerTrace(gun, gun + forward * 64, PM_NORMAL, -1, &tr);
+		EV_TraceLine(gun, gun + forward * 64, PM_NORMAL, -1, tr);
 
 		if (EV_IsLocal(args->entindex))
 		{
@@ -738,7 +733,7 @@ void CCrowbar::EV_PrimaryAttack(event_args_t* args)
 	
 	if (!reliable)
 	{
-		client::event::PopPMStates();
+		EV_TracePop();
 	}
 }
 
@@ -1050,10 +1045,7 @@ void EV_Explosion(event_args_t* args)
 	const auto underwater =
 		client::PM_PointContents(args->origin, nullptr) == CONTENTS_WATER;
 
-	client::event::SetUpPlayerPrediction(false, true);
-	client::event::PushPMStates();
-	client::event::SetSolidPlayers(-1);
-	client::event::SetTraceHull(kHullPoint);
+	EV_TracePush(-1);
 
 	Vector dir = args->angles;
 	if (dir == g_vecZero)
@@ -1067,12 +1059,7 @@ void EV_Explosion(event_args_t* args)
 	Vector origin = args->origin;
 
 	pmtrace_t tr;
-	client::event::PlayerTrace(
-		origin,
-		origin + dir * 64,
-		PM_STUDIO_IGNORE,
-		-1,
-		&tr);
+	EV_TraceLine(origin, origin + dir * 64, PM_STUDIO_BOX, -1, tr);
 	
 	const auto scale = (args->iparam1 - 50) * 0.06F;
 
@@ -1096,7 +1083,7 @@ void EV_Explosion(event_args_t* args)
 
 	EV_DecalTrace(&tr, EV_DecalName("{scorch%i", 3));
 
-	client::event::PopPMStates();
+	EV_TracePop();
 
 	const char* sample;
 
@@ -1145,10 +1132,7 @@ int MSG_Blood(const char* name, int size, void* buf)
 {
 	BEGIN_READ(buf, size);
 
-	client::event::SetUpPlayerPrediction(false, true);
-	client::event::PushPMStates();
-	client::event::SetSolidPlayers(-1);
-	client::event::SetTraceHull(kHullPoint);
+	EV_TracePush(-1);
 
 	Vector traceDir;
 	traceDir.x = READ_FLOAT();
@@ -1198,7 +1182,7 @@ int MSG_Blood(const char* name, int size, void* buf)
 		EV_BloodTrace(traceEndPos, traceDir, 4);
 	}
 
-	client::event::PopPMStates();
+	EV_TracePop();
 
 	return true;
 }

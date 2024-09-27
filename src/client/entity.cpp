@@ -13,6 +13,7 @@
 #include "pm_shared.h"
 #include "Exports.h"
 #include "view.h"
+#include "eventscripts.h"
 
 #include "particleman.h"
 extern IParticleMan* g_pParticleMan;
@@ -190,13 +191,8 @@ void HUD_TempEntUpdate(
 	// that the client has the player list. We run this code once when we detect any COLLIDEALL
 	// tent, then set this bool to true so the code doesn't get run again if there's more than
 	// one COLLIDEALL ent for this update. (often are).
-	client::event::SetUpPlayerPrediction(false, true);
 
-	// Store off the old count
-	client::event::PushPMStates();
-
-	// Now add in all of the players.
-	client::event::SetSolidPlayers(-1);
+	EV_TracePush(-1);
 
 	// !!!BUGBUG	-- This needs to be time based
 	gTempEntFrame = (gTempEntFrame + 1) & 31;
@@ -373,34 +369,29 @@ void HUD_TempEntUpdate(
 				pTemp->entity.latched.prevangles = pTemp->entity.angles;
 			}
 
-			if ((pTemp->flags & (FTENT_COLLIDEALL | FTENT_COLLIDEWORLD)) != 0)
+			if ((pTemp->flags & (FTENT_COLLIDEALL | FTENT_COLLIDEWORLD | FTENT_COLLIDENONCLIENTS)) != 0)
 			{
 				Vector traceNormal;
 				float traceFraction = 1;
 
-				if ((pTemp->flags & FTENT_COLLIDEALL) != 0)
+				if ((pTemp->flags & (FTENT_COLLIDEALL | FTENT_COLLIDENONCLIENTS)) != 0)
 				{
 					pmtrace_t pmtrace;
 					physent_t* pe;
 
 					client::event::SetTraceHull(hull);
 
-					client::event::PlayerTrace(pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX, -1, &pmtrace);
-
+					EV_TraceLine(pTemp->entity.prevstate.origin, pTemp->entity.origin,
+						((pTemp->flags & FTENT_COLLIDENONCLIENTS) != 0) ? PM_STUDIO_IGNORE : PM_NORMAL, pTemp->clientIndex, pmtrace);
 
 					if (pmtrace.fraction != 1)
 					{
-						pe = client::event::GetPhysent(pmtrace.ent);
+						traceFraction = pmtrace.fraction;
+						traceNormal = pmtrace.plane.normal;
 
-						if (0 == pmtrace.ent || (pe->info != pTemp->clientIndex))
+						if (pTemp->hitcallback)
 						{
-							traceFraction = pmtrace.fraction;
-							traceNormal = pmtrace.plane.normal;
-
-							if (pTemp->hitcallback)
-							{
-								(*pTemp->hitcallback)(pTemp, &pmtrace);
-							}
+							(*pTemp->hitcallback)(pTemp, &pmtrace);
 						}
 					}
 				}
@@ -410,7 +401,8 @@ void HUD_TempEntUpdate(
 
 					client::event::SetTraceHull(hull);
 
-					client::event::PlayerTrace(pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX | PM_WORLD_ONLY, -1, &pmtrace);
+					EV_TraceLine(pTemp->entity.prevstate.origin, pTemp->entity.origin,
+						PM_WORLD_ONLY, pTemp->clientIndex, pmtrace);
 
 					if (pmtrace.fraction != 1)
 					{
@@ -558,7 +550,7 @@ void HUD_TempEntUpdate(
 
 finish:
 	// Restore state info
-	client::event::PopPMStates();
+	EV_TracePop();
 }
 
 /*

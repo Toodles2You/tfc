@@ -24,6 +24,9 @@
 #include "eventscripts.h"
 #include "event_api.h"
 #include "pm_shared.h"
+#include "pm_defs.h"
+
+#include "com_model.h"
 
 /*
 =================
@@ -211,4 +214,106 @@ void EV_MuzzleFlash()
 
 	// Or in the muzzle flash
 	ent->curstate.effects |= EF_MUZZLEFLASH;
+}
+
+static int traceIgnoreEntity;
+
+void EV_TracePush(const int ignoreEntity,
+	const int hullNumber, const bool doPrediction)
+{
+	client::event::SetUpPlayerPrediction(false, doPrediction);
+	client::event::PushPMStates();
+
+	if (ignoreEntity >= 1 && ignoreEntity <= client::GetMaxClients())
+	{
+		client::event::SetSolidPlayers(ignoreEntity - 1);
+	}
+	else
+	{
+		client::event::SetSolidPlayers(-1);
+	}
+
+	client::event::SetTraceHull(hullNumber);
+
+	traceIgnoreEntity = ignoreEntity;
+}
+
+void EV_TracePop()
+{
+	client::event::PopPMStates();
+}
+
+static void EV_TraceCheck(pmtrace_t& outTrace, float* const start)
+{
+	if (outTrace.startsolid != 0 || outTrace.allsolid != 0)
+	{
+		outTrace.fraction = 0.0F;
+		outTrace.endpos = (float*)start;
+	}
+
+	if (outTrace.fraction != 1.0F)
+	{
+		if (outTrace.ent == -1)
+		{
+			outTrace.ent = 0;
+		}
+	}
+	else
+	{
+		outTrace.ent = -1;
+	}
+}
+
+static inline int EV_TraceNormal(physent_t* other)
+{
+	return other->info == traceIgnoreEntity;
+}
+
+static inline int EV_TraceStudioIgnore(physent_t* other)
+{
+	if (EV_TraceNormal(other))
+	{
+		return 1;
+	}
+
+	return other->model == nullptr || other->model->type == mod_studio;
+}
+
+static inline int EV_TraceWorldOnly(physent_t* other)
+{
+	if (EV_TraceNormal(other))
+	{
+		return 1;
+	}
+
+	return other->info != 0;
+}
+
+void EV_TraceLine(float* const start, float* const end,
+	const int traceFlags, const int ignoreEntity, pmtrace_t& outTrace)
+{
+	if (pmove == nullptr || pmove->PM_PlayerTraceEx == nullptr)
+	{
+		client::event::PlayerTrace(start, end, traceFlags, ignoreEntity, &outTrace);
+	}
+	else if ((traceFlags & PM_STUDIO_IGNORE) != 0)
+	{
+		traceIgnoreEntity = ignoreEntity;
+
+		outTrace = pmove->PM_PlayerTraceEx(start, end, traceFlags, EV_TraceStudioIgnore);
+	}
+	else if ((traceFlags & PM_WORLD_ONLY) != 0)
+	{
+		traceIgnoreEntity = ignoreEntity;
+
+		outTrace = pmove->PM_PlayerTraceEx(start, end, traceFlags, EV_TraceWorldOnly);
+	}
+	else
+	{
+		traceIgnoreEntity = ignoreEntity;
+
+		outTrace = pmove->PM_PlayerTraceEx(start, end, traceFlags, EV_TraceNormal);
+	}
+
+	EV_TraceCheck(outTrace, start);
 }
