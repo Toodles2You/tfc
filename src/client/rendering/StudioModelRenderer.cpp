@@ -1172,7 +1172,7 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
 
-	StudioSetUpTextureHeader();
+	StudioSetUpTextureHeader(m_pRenderModel);
 
 	StudioSetUpTransform(false);
 
@@ -1503,7 +1503,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
 
-	StudioSetUpTextureHeader();
+	StudioSetUpTextureHeader(m_pRenderModel);
 
 	if (0 != pplayer->gaitsequence)
 	{
@@ -1667,7 +1667,7 @@ theInvisibleMan:
 			m_pStudioHeader = (studiohdr_t*)IEngineStudio.Mod_Extradata(pweaponmodel);
 			IEngineStudio.StudioSetHeader(m_pStudioHeader);
 
-			StudioSetUpTextureHeader();
+			StudioSetUpTextureHeader(pweaponmodel);
 
 			StudioMergeBones(pweaponmodel);
 
@@ -2013,26 +2013,44 @@ StudioSetUpTextureHeader
 
 ====================
 */
-void CStudioModelRenderer::StudioSetUpTextureHeader()
+void CStudioModelRenderer::StudioSetUpTextureHeader(model_t* model)
 {
 	if (!StudioUseTriAPI())
 	{
 		return;
 	}
 
-	m_pTextureHeader = m_pStudioHeader;
-
-	if (m_pStudioHeader->numtextures == 0)
+	if (m_pStudioHeader->numtextures != 0)
 	{
-		char texturename[64];
-		strcpy(texturename, m_pStudioHeader->name);
-		strcpy(&texturename[strlen(texturename) - 4], "T.mdl");
-
-		studiohdr_t* pTextureHeader = (studiohdr_t*)IEngineStudio.Mod_Extradata(IEngineStudio.Mod_ForName(texturename, false));
-
-		if (pTextureHeader != nullptr)
+		m_pTextureHeader = m_pStudioHeader;
+	}
+	else
+	{
+		if (model->textures != nullptr)
 		{
-			m_pTextureHeader = pTextureHeader;
+			m_pTextureHeader = (studiohdr_t*)
+				IEngineStudio.Mod_Extradata ((model_t*)model->textures);
+		}
+		else
+		{
+			char name[64];
+
+			const size_t len = strlen (model->name);
+
+			memcpy (name, model->name, len);
+			memcpy (name + len - 4, "T.mdl", 6);
+
+			client::Con_DPrintf ("loading %s\n", name);
+
+			const auto textures = IEngineStudio.Mod_ForName (name, true);
+
+			if (textures != nullptr)
+			{
+				model->textures = (texture_t**)textures;
+
+				m_pTextureHeader = (studiohdr_t*)
+					IEngineStudio.Mod_Extradata ((model_t*)model->textures);
+			}
 		}
 	}
 }

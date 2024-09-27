@@ -98,7 +98,7 @@ public:
 
 	bool StudioUseTriAPI() { return m_bUseTriAPI; }
 
-	virtual void StudioSetUpTextureHeader();
+	virtual void StudioSetUpTextureHeader(model_t* model);
 
 	virtual void StudioSetupChrome(int bone);
 
