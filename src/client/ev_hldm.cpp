@@ -352,7 +352,7 @@ static void EV_BulletImpact(const Vector& origin, const Vector& dir)
 			kRenderFxNone,
 			1.0F,
 			1.0F,
-			FTENT_GRAVITY | FTENT_FADEOUT | FTENT_COLLIDEKILL);
+			FTENT_GRAVITY | FTENT_COLLIDEWORLD | FTENT_FADEOUT | FTENT_COLLIDEKILL);
 
 		if (debris != nullptr)
 		{
