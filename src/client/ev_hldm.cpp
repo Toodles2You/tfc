@@ -1807,6 +1807,7 @@ void EV_Init()
 	g_sModelIndexFire = client::event::FindModelIndex("sprites/playerflame.spr");
 	g_sModelIndexFireLoop = client::event::FindModelIndex("sprites/playerflameloop.spr");
 	g_sModelIndexDart = client::event::FindModelIndex("models/crossbow_bolt.mdl");
+	g_sModelIndexComputerGibs = client::event::FindModelIndex("models/computergibs.mdl");
 
 	auto model = client::hudGetModelByIndex(g_sModelIndexDebris);
 	if (model != nullptr)

@@ -42,6 +42,7 @@ public:
 	virtual float GetMaxHealth() { return 150.0F; }
 	virtual int GetMaxLevel() { return 0; }
 	virtual int GetUpgradeCost() { return 130; }
+	virtual float GetExplosionMagnitude() { return 25.0F; }
 
 	virtual void Upgrade(CBasePlayer* player);
 
@@ -197,8 +198,6 @@ void CBuilding::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDa
 	v.deadflag = DEAD_DEAD;
 	v.health = std::min(v.health, 0.0F);
 
-	tent::Explosion(Center(), Vector(0.0F, 0.0f, -1.0F), tent::ExplosionType::Normal);
-
 	if (attacker != m_pPlayer)
 	{
 		char* str = nullptr;
@@ -236,7 +235,32 @@ void CBuilding::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDa
 		}
 	}
 
+	const auto damage = GetExplosionMagnitude();
+
+	const auto center = Center();
+
+	/* Throw some gibs! */
+
+	MessageBegin(MSG_PVS, SVC_TEMPENTITY, center);
+	WriteByte(TE_EXPLODEMODEL);
+	WriteCoord(center);
+	WriteCoordComponent(400.0F);
+	WriteShort(g_sModelIndexComputerGibs);
+	WriteShort(10);
+	WriteByte(25);
+	MessageEnd();
+
 	Remove();
+
+	/* Explode! */
+
+	if (damage != 0.0F)
+	{
+		tent::Explosion(center, Vector(0.0F, 0.0f, -1.0F), tent::ExplosionType::Normal);
+
+		RadiusDamage(center, attacker, m_pPlayer,
+			damage, 0.0F, 2.0F * damage, DMG_BLAST);
+	}
 }
 
 
@@ -257,6 +281,8 @@ class CDispenser : public CBuilding
 {
 public:
 	CDispenser(Entity* containingEntity) : CBuilding(containingEntity) {}
+
+	float GetExplosionMagnitude() override;
 
 	bool Spawn() override;
 	void Think() override;
@@ -291,6 +317,12 @@ public:
 
 	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() | FCAP_DONT_SAVE) & ~FCAP_ACROSS_TRANSITION; }
 };
+
+
+float CDispenser::GetExplosionMagnitude()
+{
+	return std::min (25.0F + m_rgAmmo[AMMO_ROCKETS] * 1.5F + m_rgAmmo[AMMO_CELLS], 250.0F);
+}
 
 
 bool CDispenser::Spawn()
@@ -495,6 +527,7 @@ public:
 	const char* GetClassName() override { return "building_sentrygun"; }
 	float GetHeight() override { return 64.0F; }
 	int GetMaxLevel() override { return 2; }
+	float GetExplosionMagnitude() override;
 
 	bool Spawn() override;
 
@@ -556,6 +589,24 @@ protected:
 
 	byte m_rgAmmo[2];
 };
+
+
+float CSentryBase::GetExplosionMagnitude()
+{
+	CSentryGun* head = nullptr;
+
+	if (v.attachment != nullptr)
+	{
+		head = v.attachment->Get<CSentryGun>();
+	}
+
+	if (head != nullptr)
+	{
+		return std::min(75.0F + head->m_rgAmmo[1] * 8.0F, 250.0F);
+	}
+
+	return 75.0F;
+}
 
 
 bool CSentryBase::Spawn()

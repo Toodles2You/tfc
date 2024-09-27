@@ -95,6 +95,7 @@ void W_Precache()
 	g_sModelIndexFire = engine::PrecacheModel("sprites/playerflame.spr");
 	g_sModelIndexFireLoop = engine::PrecacheModel("sprites/playerflameloop.spr");
 	g_sModelIndexDart = engine::PrecacheModel("models/crossbow_bolt.mdl");
+	g_sModelIndexComputerGibs = engine::PrecacheModel("models/computergibs.mdl");
 
 	engine::PrecacheModel("models/grenade.mdl");
 	engine::PrecacheModel("models/rpgrocket.mdl");

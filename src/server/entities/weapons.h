@@ -242,6 +242,7 @@ inline short g_sModelIndexFlame;
 inline short g_sModelIndexFire;
 inline short g_sModelIndexFireLoop;
 inline short g_sModelIndexDart;
+inline short g_sModelIndexComputerGibs;
 
 inline unsigned short g_usConcBlast;
 inline unsigned short g_usEMP;
