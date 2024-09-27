@@ -26,6 +26,7 @@
 #include "event_api.h"
 #include "entity_types.h"
 #include "r_efx.h"
+#include "eventscripts.h"
 
 extern TEMPENTITY* pLaserDot;
 
@@ -36,7 +37,7 @@ extern short g_sModelIndexFireLoop;
 
 Vector g_CrosshairTarget;
 
-static void GetCrosshairTarget(pmtrace_t* tr, float distance)
+static void GetCrosshairTarget(pmtrace_t* tr, float distance, const int ignoreEntity)
 {
 	Vector forward, vecSrc, vecEnd, origin, angles, right, up;
 	Vector view_ofs;
@@ -54,12 +55,12 @@ static void GetCrosshairTarget(pmtrace_t* tr, float distance)
 
 	vecEnd = vecSrc + distance * forward;
 
-	client::event::PlayerTrace(vecSrc, vecEnd, PM_STUDIO_BOX, -1, tr);
+	EV_TraceLine(vecSrc, vecEnd, PM_STUDIO_BOX, ignoreEntity, *tr);
 
 	if (tr->startsolid || tr->allsolid)
 	{
-		tr->fraction = 1.0f / distance;
-		tr->endpos = vecSrc + forward;
+		tr->fraction = 8.0f / distance;
+		tr->endpos = vecSrc + 8.0f * forward;
 	}
 }
 
@@ -185,18 +186,15 @@ void Game_AddObjects()
 	pmtrace_t trShort;
 	pmtrace_t trLong;
 
-	cl_entity_t* pthisplayer = client::GetLocalPlayer();
-	int idx = pthisplayer->index;
-	client::event::SetUpPlayerPrediction(false, true);
-	client::event::PushPMStates();
-	client::event::SetSolidPlayers(idx - 1);
-	client::event::SetTraceHull(kHullPoint);
+	const auto ignoreEntity = client::GetLocalPlayer()->index;
 
-	GetCrosshairTarget(&trShort, 2048);
+	EV_TracePush(ignoreEntity);
+
+	GetCrosshairTarget(&trShort, 2048, ignoreEntity);
 
 	if (trShort.fraction == 1.0f)
 	{
-		GetCrosshairTarget(&trLong, 8192);
+		GetCrosshairTarget(&trLong, 8192, ignoreEntity);
 	}
 	else
 	{
@@ -224,7 +222,7 @@ void Game_AddObjects()
 
 	gHUD.m_StatusBar.UpdateStatusBar(target);
 
-	client::event::PopPMStates();
+	EV_TracePop();
 
 	for (auto entIndex = 1; entIndex <= maxClients; entIndex++)
 	{
