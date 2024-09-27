@@ -807,23 +807,62 @@ void util::ShowMessageAll(const char* pString)
 	}
 }
 
+static void TraceCheck(TraceResult *ptr, const float *v1)
+{
+	if (ptr->fStartSolid != 0 || ptr->fAllSolid != 0)
+	{
+		ptr->flFraction = 0.0F;
+		ptr->vecEndPos = (float*)v1;
+	}
+
+	if (ptr->flFraction != 1.0F)
+	{
+		if (ptr->pHit == nullptr)
+		{
+			ptr->pHit = &CWorld::World->v;
+		}
+	}
+	else
+	{
+		ptr->pHit = nullptr;
+	}
+}
+
+static void _TraceLine(const float *v1, const float *v2, int fNoMonsters, Entity *pentToSkip, TraceResult *ptr)
+{
+	const auto bWasRunningTrace = g_bRunningTrace;
+	g_bRunningTrace = true;
+
+	engine::TraceLine(v1, v2, fNoMonsters, pentToSkip, ptr);
+
+	g_bRunningTrace = bWasRunningTrace;
+
+	TraceCheck(ptr, v1);
+}
+
+static void _TraceHull(const float *v1, const float *v2, int fNoMonsters, int hullNumber, Entity *pentToSkip, TraceResult *ptr)
+{
+	const auto bWasRunningTrace = g_bRunningTrace;
+	g_bRunningTrace = true;
+
+	engine::TraceHull(v1, v2, fNoMonsters, hullNumber, pentToSkip, ptr);
+
+	g_bRunningTrace = bWasRunningTrace;
+
+	TraceCheck(ptr, v1);
+}
+
 // Overloaded to add IGNORE_GLASS
 void util::TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, CBaseEntity* ignore, TraceResult* ptr)
 {
 	//TODO: define constants
-	const auto bWasRunningTrace = g_bRunningTrace;
-	g_bRunningTrace = true;
-	engine::TraceLine(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0) | (ignore_glass == ignoreGlass ? 0x100 : 0), ignore != nullptr ? &ignore->v : nullptr, ptr);
-	g_bRunningTrace = bWasRunningTrace;
+	_TraceLine(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0) | (ignore_glass == ignoreGlass ? 0x100 : 0), ignore != nullptr ? &ignore->v : nullptr, ptr);
 }
 
 
 void util::TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, CBaseEntity* ignore, TraceResult* ptr)
 {
-	const auto bWasRunningTrace = g_bRunningTrace;
-	g_bRunningTrace = true;
-	engine::TraceLine(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), ignore != nullptr ? &ignore->v : nullptr, ptr);
-	g_bRunningTrace = bWasRunningTrace;
+	_TraceLine(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), ignore != nullptr ? &ignore->v : nullptr, ptr);
 }
 
 
@@ -848,37 +887,32 @@ bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CB
 
 	Entity* ignoreEnt = ignore ? &ignore->v : nullptr;
 
-	const auto bWasRunningTrace = g_bRunningTrace;
-	g_bRunningTrace = true;
-
 	if (hull == point_hull)
 	{	
-		engine::TraceLine(start, end, traceFlags, ignoreEnt, tr);
+		_TraceLine(start, end, traceFlags, ignoreEnt, tr);
 	}
 	else
 	{
-		engine::TraceHull(start, end, traceFlags, hull, ignoreEnt, tr);
+		_TraceHull(start, end, traceFlags, hull, ignoreEnt, tr);
 	}
 
 	if ((flags & kTraceBoxModel) != 0 && tr->flFraction != 1.0F)
 	{
-		TraceResult tr2;
+		TraceResult trModel;
 		if (hull == point_hull)
 		{
-			engine::TraceLine(tr->vecEndPos, end, traceFlags, ignoreEnt, &tr2);
+			_TraceLine(tr->vecEndPos, end, traceFlags, ignoreEnt, &trModel);
 		}
 		else
 		{
-			engine::TraceHull(start, end, traceFlags, hull, ignoreEnt, &tr2);
+			_TraceHull(start, end, traceFlags, hull, ignoreEnt, &trModel);
 		}
 		
-		if (tr2.flFraction != 1.0F && tr2.pHit == tr->pHit)
+		if (trModel.pHit == tr->pHit)
 		{
-			*tr = tr2;
+			*tr = trModel;
 		}
 	}
-	
-	g_bRunningTrace = bWasRunningTrace;
 
 	return tr->flFraction != 1.0F;
 }
@@ -886,18 +920,19 @@ bool util::TraceLine(const Vector& start, const Vector& end, TraceResult* tr, CB
 
 void util::TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, Entity* pentIgnore, TraceResult* ptr)
 {
-	const auto bWasRunningTrace = g_bRunningTrace;
-	g_bRunningTrace = true;
-	engine::TraceHull(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), hullNumber, pentIgnore, ptr);
-	g_bRunningTrace = bWasRunningTrace;
+	_TraceHull(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), hullNumber, pentIgnore, ptr);
 }
 
 void util::TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, Entity* pentModel, TraceResult* ptr)
 {
 	const auto bWasRunningTrace = g_bRunningTrace;
 	g_bRunningTrace = true;
+
 	engine::TraceModel(vecStart, vecEnd, hullNumber, pentModel, ptr);
+
 	g_bRunningTrace = bWasRunningTrace;
+
+	TraceCheck(ptr, vecStart);
 }
 
 
@@ -915,6 +950,11 @@ TraceResult util::GetGlobalTrace()
 	tr.vecEndPos = gpGlobals->trace_endpos;
 	tr.vecPlaneNormal = gpGlobals->trace_plane_normal;
 	tr.iHitgroup = gpGlobals->trace_hitgroup;
+
+	/* Toodles FIXME: */
+
+	TraceCheck(&tr, gpGlobals->trace_endpos);
+	
 	return tr;
 }
 
