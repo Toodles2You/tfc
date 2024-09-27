@@ -414,7 +414,6 @@ void CHud::Init()
 	m_Train.Init();
 #endif
 	m_Battery.Init();
-	m_Flash.Init();
 	m_Message.Init();
 	m_StatusBar.Init();
 	m_DeathNotice.Init();
@@ -574,7 +573,6 @@ void CHud::VidInit()
 	m_Train.VidInit();
 #endif
 	m_Battery.VidInit();
-	m_Flash.VidInit();
 	m_Message.VidInit();
 	m_StatusBar.VidInit();
 	m_DeathNotice.VidInit();
@@ -764,16 +762,6 @@ float CHud::GetSensitivity()
 
 bool CHud::ImpulseCommands(int impulse)
 {
-	switch (impulse)
-	{
-	case 100:
-		if (IsAlive())
-		{
-			m_Flash.Update_Flashlight(!m_Flash.IsFlashlightOn());
-		}
-		return true;
-	}
-
 	return false;
 }
 

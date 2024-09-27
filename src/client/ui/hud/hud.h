@@ -401,35 +401,6 @@ private:
 	char m_szString[32];
 };
 
-
-//
-//-----------------------------------------------------
-//
-class CHudFlashlight : public CHudStatus
-{
-public:
-	bool Init() override;
-	void VidInit() override;
-	void Draw(const float time) override;
-	void Reset() override;
-	void Update_Flashlight(const bool on);
-	bool IsFlashlightOn() { return m_fOn; }
-
-private:
-	bool m_fOn;
-#ifdef HALFLIFE_HUD_FLASHLIGHT
-	HSPRITE m_hSprite1;
-	HSPRITE m_hSprite2;
-	HSPRITE m_hBeam;
-	Rect* m_prc1;
-	Rect* m_prc2;
-	Rect* m_prcBeam;
-	float m_flBat;
-	int m_iBat;
-	int m_iWidth; // width of the battery innards
-#endif
-};
-
 //
 //-----------------------------------------------------
 //
@@ -705,7 +676,6 @@ public:
 #ifdef HALFLIFE_TRAINCONTROL
 	CHudTrain m_Train;
 #endif
-	CHudFlashlight m_Flash;
 	CHudMessage m_Message;
 	CHudStatusBar m_StatusBar;
 	CHudDeathNotice m_DeathNotice;

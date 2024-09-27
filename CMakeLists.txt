@@ -123,7 +123,6 @@ set(CLIENT_SRC
     ${CLIENT_SRC_DIR}/ui/hud/ammohistory.cpp
     ${CLIENT_SRC_DIR}/ui/hud/battery.cpp
     ${CLIENT_SRC_DIR}/ui/hud/death.cpp
-    ${CLIENT_SRC_DIR}/ui/hud/flashlight.cpp
     ${CLIENT_SRC_DIR}/ui/hud/geiger.cpp
     ${CLIENT_SRC_DIR}/ui/hud/health.cpp
     ${CLIENT_SRC_DIR}/ui/hud/hud_msg.cpp

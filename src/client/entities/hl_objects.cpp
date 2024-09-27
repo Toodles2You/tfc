@@ -209,24 +209,6 @@ void Game_AddObjects()
 	{
 		UpdateLaserDot(time, &trLong);
 	}
-	
-	if (!gHUD.IsObserver())
-	{
-		if (gHUD.IsAlive() && gHUD.m_Flash.IsFlashlightOn())
-		{
-			auto light = client::efx::AllocDlight(0);
-
-			if (light)
-			{
-				light->origin = trShort.endpos;
-				light->color.r = 255;
-				light->color.g = 255;
-				light->color.b = 255;
-				light->die = time + 0.001;
-				light->radius = 96 * (1.0f - trShort.fraction);
-			}
-		}
-	}
 
 	cl_entity_t* target = nullptr;
 
