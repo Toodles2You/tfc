@@ -157,6 +157,29 @@ public:
 			v.noise = MAKE_STRING("items/smallmedkit1.wav");
 			v.netname = v.classname;
 		}
+		else if (streq("item_health", classname))
+		{
+			if ((v.spawnflags & 1) != 0)
+			{
+				v.health = 15.0F;
+				v.model = MAKE_STRING("models/w_medkits.mdl");
+				v.noise = MAKE_STRING("items/smallmedkit1.wav");
+			}
+			else if ((v.spawnflags & 2) != 0)
+			{
+				v.health = 100.0F;
+				v.model = MAKE_STRING("models/w_medkitl.mdl");
+				v.noise = MAKE_STRING("items/r_item1.wav");
+			}
+			else
+			{
+				v.health = 25.0F;
+				v.model = MAKE_STRING("models/w_medkit.mdl");
+				v.noise = MAKE_STRING("items/health1.wav");
+			}
+
+			v.netname = v.classname;
+		}
 		else if (streq("item_battery", classname))
 		{
 			v.armorvalue = 15.0F;
@@ -244,7 +267,15 @@ public:
 protected:
 	bool GiveHealth(CBasePlayer* player)
 	{
-		return v.health != 0.0F && player->GiveHealth(v.health, DMG_GENERIC);
+		if (v.health == 0.0F)
+		{
+			return false;
+		}
+
+		const auto healType = (v.health >= 100.0F)
+			? DMG_IGNORE_MAXHEALTH : DMG_GENERIC;
+
+		return player->GiveHealth(v.health, healType);
 	}
 
 	bool GiveArmor(CBasePlayer* player)
@@ -380,6 +411,7 @@ public:
 };
 
 LINK_ENTITY_TO_CLASS(item_healthkit, CItemBackpack);
+LINK_ENTITY_TO_CLASS(item_health, CItemBackpack);
 LINK_ENTITY_TO_CLASS(item_battery, CItemBackpack);
 LINK_ENTITY_TO_CLASS(item_armor1, CItemBackpack);
 LINK_ENTITY_TO_CLASS(item_armor2, CItemBackpack);
