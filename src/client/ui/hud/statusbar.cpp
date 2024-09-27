@@ -28,58 +28,86 @@
 
 bool CHudStatusBar::Init()
 {
-	hud_expireid = client::RegisterVariable("hud_expireid", "0.2", FCVAR_ARCHIVE);
-
 	return CHudBase::Init();
 }
 
 void CHudStatusBar::Reset()
 {
 	m_targetIndex = 0;
-	m_targetExpireTime = -1000.0F;
 	m_szStatusBar[0] = '\0';
 }
 
 void CHudStatusBar::Draw(const float time)
 {
-	if (hud_expireid->value > 0.0F
-	 && time - m_targetExpireTime >= hud_expireid->value)
+	auto playerIndex = m_targetIndex;
+	auto entity = client::GetEntityByIndex(playerIndex);
+
+	if (entity == nullptr)
 	{
-		SetActive(false);
 		return;
 	}
 
-	auto info = &g_PlayerInfoList[m_targetIndex];
+	/* Check if the entity is invisible. */
 
-	if (info->name[0] == '\0')
+	if (entity->curstate.rendermode != kRenderNormal
+	 && entity->curstate.renderamt <= 5)
 	{
-		SetActive(false);
 		return;
 	}
 
-	auto extra = &g_PlayerExtraInfo[m_targetIndex];
+	if (playerIndex < 1 || playerIndex > client::GetMaxClients())
+	{
+		return;
+	}
 
-	if (gHUD.m_gameMode == kGamemodeCooperative
-	 || (gHUD.m_gameMode >= kGamemodeTeamplay
-	 && extra->teamnumber == g_iTeamNumber)
-	 || gHUD.IsSpectator())
+	char* fmt = "%s";
+
+	hud_player_info_t info;
+	client::GetPlayerInfo(playerIndex, &info);
+
+	if (info.name[0] == '\0')
 	{
-		snprintf(m_szStatusBar, MAX_STATUSTEXT_LENGTH, "%s | %i", info->name, extra->health);
+		info.name = "Player";
 	}
-	else
+
+	strncpy (m_szStatusFormat, fmt, MAX_STATUSTEXT_LENGTH);
+
+	/* Show extra information for allies. */
+
+	if (gHUD.m_gameMode != kGamemodeDeathmatch && g_iTeamNumber == entity->curstate.team)
 	{
-		snprintf(m_szStatusBar, MAX_STATUSTEXT_LENGTH, "%s", info->name);
+		strncat (m_szStatusFormat, "  +%3i", MAX_STATUSTEXT_LENGTH);
 	}
+
+	/* Print the formatted text. */
+
+	snprintf (m_szStatusBar, MAX_STATUSTEXT_LENGTH,
+		m_szStatusFormat, info.name,
+		entity->curstate.health);
+
 	m_szStatusBar[MAX_STATUSTEXT_LENGTH - 1] = '\0';
+
+	/* Get the text size. */
 
 	int textWidth, textHeight;
 	gHUD.GetHudStringSize(m_szStatusBar, textWidth, textHeight);
 
-	auto color = gHUD.GetClientColor(m_targetIndex);
+	/* Get the text color. */
+
+	const auto color = gHUD.GetTeamColor(entity->curstate.team);
+
 	client::DrawSetTextColor(color[0], color[1], color[2]);
 
-	int x = std::max(0, std::max(2, ((int)gHUD.GetWidth() - textWidth)) >> 1);
-	int y = (gHUD.GetHeight() >> 1) + textHeight * 4;
+	/* Center the text. */
+
+	const auto x = std::max(0, std::max(2, ((int)gHUD.GetWidth() - textWidth)) >> 1);
+	const auto y = (gHUD.GetHeight() >> 1) + textHeight * 4;
+
+	/* Draw the status bar! */
+
+	int w, h;
+	gHUD.GetHudStringSize(m_szStatusBar, w, h);
+	gHUD.DrawHudBackground(x, y, x + w, y + h);
 
 	gHUD.DrawHudString(m_szStatusBar, x, y);
 }
@@ -88,21 +116,12 @@ void CHudStatusBar::UpdateStatusBar(cl_entity_t* entity)
 {
 	if (entity == nullptr)
 	{
-		if (hud_expireid->value <= 0.0F)
-		{
-			SetActive(false);
-		}
+		SetActive(false);
+
 		return;
 	}
 
-	if (m_targetIndex != entity->index)
-	{
-		client::GetPlayerInfo(
-			entity->index,
-			g_PlayerInfoList + entity->index);
-	}
-
 	m_targetIndex = entity->index;
-	m_targetExpireTime = client::GetClientTime();
+
 	SetActive(true);
 }

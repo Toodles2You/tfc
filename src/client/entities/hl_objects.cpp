@@ -140,20 +140,21 @@ void Game_AddObjects()
 				light->radius = 96 * (1.0f - trShort.fraction);
 			}
 		}
-
-		cl_entity_t* target = nullptr;
-
-		if (gHUD.IsAlive() && trLong.fraction != 1.0f)
-		{
-			auto entIndex = client::event::IndexFromTrace(&trLong);
-			if (entIndex >= 1 && entIndex <= client::GetMaxClients())
-			{
-				target = client::GetEntityByIndex(entIndex);
-			}
-		}
-
-		gHUD.m_StatusBar.UpdateStatusBar(target);
 	}
+
+	cl_entity_t* target = nullptr;
+
+	if (gHUD.IsAlive())
+	{
+		const auto entIndex = client::event::IndexFromTrace(&trLong);
+
+		if (entIndex > 0)
+		{
+			target = client::GetEntityByIndex(entIndex);
+		}
+	}
+
+	gHUD.m_StatusBar.UpdateStatusBar(target);
 
 	client::event::PopPMStates();
 }
