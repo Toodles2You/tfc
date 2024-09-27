@@ -371,7 +371,7 @@ void CHud::Init()
 	m_pCvarDraw = client::RegisterVariable("hud_draw", "1", FCVAR_ARCHIVE);
 	m_pCvarWidescreen = client::RegisterVariable("hud_widescreen", "1", FCVAR_ARCHIVE);
 	m_pCvarColor = client::RegisterVariable("hud_color", "FFA000", FCVAR_ARCHIVE);
-	m_pCvarTeamColor = client::RegisterVariable("hud_teamcolor", "1", FCVAR_ARCHIVE);
+	m_pCvarTeamColor = client::RegisterVariable("hud_teamcolor", "0", FCVAR_ARCHIVE);
 	cl_rollangle = client::RegisterVariable("cl_rollangle", "0.0", FCVAR_ARCHIVE);
 	cl_rollspeed = client::RegisterVariable("cl_rollspeed", "200", FCVAR_ARCHIVE);
 	cl_bobtilt = client::RegisterVariable("cl_bobtilt", "0", FCVAR_ARCHIVE);
