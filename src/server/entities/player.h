@@ -423,8 +423,8 @@ protected:
 	void PowerUpThink(); // Checks powerup timers and handles their effects
 
 public:
-	bool GivePowerUp(const int powerUpID, const float duration);
-	void RemovePowerUp(const int powerUpID);
+	bool GivePowerUp(const int powerUpID, const float duration, const bool playSound = true);
+	void RemovePowerUp(const int powerUpID, const bool playSound = true);
 	bool HasPowerUp(const int powerUpID);
 
 #endif

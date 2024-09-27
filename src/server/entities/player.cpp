@@ -992,7 +992,8 @@ void CBasePlayer::PowerUpThink()
 }
 
 
-bool CBasePlayer::GivePowerUp(const int powerUpID, const float duration)
+bool CBasePlayer::GivePowerUp(const int powerUpID, const float duration,
+	const bool playSound = true)
 {
 	if (HasPowerUp(powerUpID))
 	{
@@ -1003,7 +1004,7 @@ bool CBasePlayer::GivePowerUp(const int powerUpID, const float duration)
 			return false;
 		}
 	}
-	else
+	else if (playSound)
 	{
 		EmitSound(kPowerUpSounds[powerUpID], CHAN_STATIC);
 	}
@@ -1012,15 +1013,22 @@ bool CBasePlayer::GivePowerUp(const int powerUpID, const float duration)
 
 	m_afPowerUpActive |= 1 << powerUpID;
 
-	m_afPowerUpActive &= ~(kPowerUpExpireShift << powerUpID);
+	if (duration > 3.0F)
+	{
+		m_afPowerUpActive &= ~(kPowerUpExpireShift << powerUpID);
+	}
+	else
+	{
+		m_afPowerUpActive |= kPowerUpExpireShift << powerUpID;
+	}
 
 	return true;
 }
 
 
-void CBasePlayer::RemovePowerUp(const int powerUpID)
+void CBasePlayer::RemovePowerUp(const int powerUpID, const bool playSound)
 {
-	if (HasPowerUp(powerUpID))
+	if (playSound && HasPowerUp(powerUpID))
 	{
 		EmitSoundHUD("items/powerdown.wav", CHAN_STATIC);
 	}
