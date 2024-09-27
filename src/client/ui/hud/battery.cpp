@@ -25,6 +25,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <algorithm>
 
 DECLARE_MESSAGE(m_Battery, Battery)
 
@@ -94,7 +95,14 @@ bool CHudBattery::MsgFunc_Battery(const char* pszName, int iSize, void* pbuf)
 
 void CHudBattery::Draw(const float time)
 {
-	const auto percent = m_iBat / (float)sTFClassInfo[g_iPlayerClass].maxArmor;
+	if (sTFClassInfo[g_iPlayerClass].maxArmor == 0)
+	{
+		return;
+	}
+
+	const auto percent = std::clamp (
+		m_iBat / (float)sTFClassInfo[g_iPlayerClass].maxArmor, 0.0F, 1.0F);
+
 	const auto color = CHud::COLOR_PRIMARY;
 	const auto alpha = GetAlpha();
 

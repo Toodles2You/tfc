@@ -27,6 +27,7 @@
 #include "parsemsg.h"
 #include "view.h"
 #include <string.h>
+#include <algorithm>
 
 
 DECLARE_MESSAGE(m_Health, Health)
@@ -155,7 +156,14 @@ bool CHudHealth::MsgFunc_Damage(const char* pszName, int iSize, void* pbuf)
 
 void CHudHealth::Draw(const float time)
 {
-	const auto percent = m_iHealth / (float)sTFClassInfo[g_iPlayerClass].maxHealth;
+	if (sTFClassInfo[g_iPlayerClass].maxHealth == 0)
+	{
+		return;
+	}
+
+	const auto percent = std::clamp (
+		m_iHealth / (float)sTFClassInfo[g_iPlayerClass].maxHealth, 0.0F, 1.0F);
+
 	const auto color = (percent > 0.25F) ? CHud::COLOR_PRIMARY : CHud::COLOR_WARNING;
 	const auto alpha = GetAlpha();
 
