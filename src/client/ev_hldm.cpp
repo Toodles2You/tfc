@@ -894,12 +894,12 @@ static void EV_GibTouch(struct tempent_s* ent, struct pmtrace_s* ptr)
 
 	switch (client::RandomLong(0, 25))
 	{
-	case 0: client::event::PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-	case 1: client::event::PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-	case 2: client::event::PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-	case 3: client::event::PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-	case 4: client::event::PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh6.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
-	case 5: client::event::PlaySound(0, ptr->endpos, CHAN_STATIC, "debris/flesh7.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	case 0: client::event::PlaySound(-1, ptr->endpos, CHAN_STATIC, "debris/flesh1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	case 1: client::event::PlaySound(-1, ptr->endpos, CHAN_STATIC, "debris/flesh2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	case 2: client::event::PlaySound(-1, ptr->endpos, CHAN_STATIC, "debris/flesh3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	case 3: client::event::PlaySound(-1, ptr->endpos, CHAN_STATIC, "debris/flesh5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	case 4: client::event::PlaySound(-1, ptr->endpos, CHAN_STATIC, "debris/flesh6.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
+	case 5: client::event::PlaySound(-1, ptr->endpos, CHAN_STATIC, "debris/flesh7.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
 	default: break;
 	}
 }
@@ -961,14 +961,14 @@ static void EV_SpawnCorpse(event_args_t* args)
 	}
 
 	gib->flags |= (FTENT_COLLIDEWORLD | FTENT_PERSIST | FTENT_GRAVITY | FTENT_FADEOUT);
-	gib->entity.origin = player->origin + Vector(0.0F, 0.0F, 2.0F);;
+	gib->entity.origin = player->origin + Vector(0.0F, 0.0F, 2.0F);
 	gib->entity.angles = player->angles;
 	gib->entity.curstate.sequence = args->iparam1;
 	gib->entity.curstate.frame = 0.0F;
 	gib->entity.curstate.framerate = 1.0F;
 	gib->entity.curstate.renderfx = kRenderFxDeadPlayer;
 	gib->entity.curstate.iuser4 = args->entindex;
-	gib->entity.baseline = gib->entity.curstate;
+	gib->entity.prevstate = gib->entity.curstate;
 	gib->die = client::GetClientTime() + 15.0F;
 }
 
@@ -979,11 +979,11 @@ void EV_Gibbed(event_args_t* args)
 	 || (args->iparam2 == GIB_NORMAL && args->fparam2 < -40.0f)))
 	{
 		client::event::PlaySound(
-			0,
+			-1,
 			args->origin,
 			CHAN_STATIC,
 			"common/bodysplat.wav",
-			1.0,
+			VOL_NORM,
 			ATTN_NORM,
 			0,
 			PITCH_NORM);
@@ -997,11 +997,11 @@ void EV_Gibbed(event_args_t* args)
 void EV_Teleport(event_args_t* args)
 {
 	client::event::PlaySound(
-		0,
+		-1,
 		args->origin,
 		CHAN_STATIC,
 		"misc/r_tele1.wav",
-		1.0,
+		VOL_NORM,
 		ATTN_NORM,
 		0,
 		PITCH_NORM);
