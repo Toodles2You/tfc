@@ -81,11 +81,6 @@ inline void ConsolePrint(const char* string)
 	client::ConsolePrint(string);
 }
 
-inline void CenterPrint(const char* string)
-{
-	client::CenterPrint(string);
-}
-
 
 inline char* safe_strcpy(char* dst, const char* src, int len_dst)
 {

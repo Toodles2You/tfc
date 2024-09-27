@@ -523,6 +523,30 @@ private:
 //-----------------------------------------------------
 //
 
+class CHudPrint : public CHudBase
+{
+public:
+	bool Init() override;
+	void Draw(const float time) override;
+	void Reset() override;
+
+	void CenterPrint(const char* string, const float duration = 2.0F);
+
+protected:
+	enum
+	{
+		kMaxCenterPrintLength = 128,
+	};
+
+	char m_centerPrint[kMaxCenterPrintLength];
+	Rect m_extents;
+	float m_expireTime;
+};
+
+//
+//-----------------------------------------------------
+//
+
 
 class CHud
 {
@@ -684,6 +708,7 @@ public:
 	CHudAmmoSecondary m_AmmoSecondary;
 	CHudTextMessage m_TextMessage;
 	CHudStatusIcons m_StatusIcons;
+	CHudPrint m_Print;
 
 	void Init();
 	void VidInit();
