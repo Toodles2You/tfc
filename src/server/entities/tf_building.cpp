@@ -11,6 +11,7 @@
 #include "player.h"
 #include "weapons.h"
 #include "gamerules.h"
+#include "items.h"
 #include "shake.h"
 #include <algorithm>
 
@@ -1645,5 +1646,70 @@ void CBuilder::RotateBuilding(const int buildingType, const float angle)
 
 	head->v.left_yaw = util::AngleMod(head->v.left_yaw + angle);
 	head->v.right_yaw = util::AngleMod(head->v.right_yaw + angle);
+}
+
+
+void CBuilder::DestroyBuilding(const int buildingType, const bool detonate)
+{
+	if (buildingType == BUILD_NONE)
+	{
+		return;
+	}
+
+	if ((m_iClip & (1 << buildingType)) == 0)
+	{
+		return;
+	}
+
+	CBaseEntity* building = m_pPlayer->m_hBuildings[buildingType - 1];
+
+	if (building != nullptr)
+	{
+		if (detonate)
+		{
+			building->Killed(m_pPlayer, m_pPlayer, DMG_GENERIC);
+		}
+		else
+		{
+			/* Dismantle & refund half of the spent cells. */
+
+			int cells = kBuildCost[buildingType];
+			
+			if (building->v.weapons != 0)
+			{
+				/* Account for each upgrade level. */
+
+				cells += building->v.weapons
+					* static_cast<CBuilding*>(building)->GetUpgradeCost();
+			}
+
+			cells /= 2;
+
+			if (static_cast<int>((m_pPlayer->v.origin - building->v.origin).LengthSquared()) <= 128 * 128)
+			{
+				/* Give the cells to the player. */
+
+				m_pPlayer->GiveAmmo(cells, AMMO_CELLS);
+			}
+			else
+			{
+				/* Toodles: Too far away. Pack the building into a backpack. */
+
+				const auto item = CItem::DropBackpack(
+					building, 0, 0, 0, cells, true);
+
+				if (item != nullptr)
+				{
+					item->SetModel("models/tool_box.mdl");
+				}
+			}
+
+			building->EmitSound("weapons/dismantle.wav", CHAN_WEAPON);
+
+			building->Remove();
+		}
+	}
+
+	m_iClip &= ~(1 << buildingType);
 }
 

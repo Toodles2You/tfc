@@ -445,6 +445,8 @@ CItem* CItem::DropBackpack(CBaseEntity* owner, int shells, int nails, int rocket
 	if (drop)
 	{
 		item->v.velocity = Vector(0.0F, 0.0F, 200.0F);
+
+		item->v.angles.y = owner->v.angles.y;
 	}
 	else
 	{
@@ -461,6 +463,8 @@ CItem* CItem::DropBackpack(CBaseEntity* owner, int shells, int nails, int rocket
 	{
 		item->v.nextthink = gpGlobals->time + 10.0F;
 	}
+
+	return item;
 }
 
 

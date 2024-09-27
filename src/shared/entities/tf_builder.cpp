@@ -12,6 +12,8 @@
 #include "weapons.h"
 
 #ifdef GAME_DLL
+#include "items.h"
+
 extern std::vector<EHANDLE> gNoBuildAreas;
 #endif
 
@@ -431,8 +433,6 @@ void CBuilder::RotateBuilding(const int buildingType, const float angle)
 
 }
 
-#endif
-
 
 void CBuilder::DestroyBuilding(const int buildingType, const bool detonate)
 {
@@ -446,24 +446,8 @@ void CBuilder::DestroyBuilding(const int buildingType, const bool detonate)
 		return;
 	}
 
-#ifdef GAME_DLL
-
-	CBaseEntity* building = m_pPlayer->m_hBuildings[buildingType - 1];
-
-	if (building != nullptr)
-	{
-		if (detonate)
-		{
-			building->Killed(m_pPlayer, m_pPlayer, DMG_GENERIC);
-		}
-		else
-		{
-			building->Remove();
-		}
-	}
-
-#endif /* GAME_DLL */
-
 	m_iClip &= ~(1 << buildingType);
 }
+
+#endif /* CLIENT_DLL */
 

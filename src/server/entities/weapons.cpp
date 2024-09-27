@@ -180,6 +180,7 @@ void W_Precache()
 	engine::PrecacheModel("models/tool_box.mdl");
 	engine::PrecacheSound("weapons/building.wav");
 	engine::PrecacheSound("weapons/turrset.wav");
+	engine::PrecacheSound("weapons/dismantle.wav");
 
 	engine::PrecacheModel("models/dispenser.mdl");
 	engine::PrecacheSound("items/suitchargeok1.wav");
