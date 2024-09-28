@@ -183,8 +183,6 @@ void CSniperRifle::PrimaryAttack()
 		tr.iHitgroup,
 		damageType);
 	
-	hit->ApplyMultiDamage(m_pPlayer, m_pPlayer);
-	
 	if (hit->IsClient())
 	{
 		auto player = static_cast<CBasePlayer*>(hit);
@@ -201,6 +199,8 @@ void CSniperRifle::PrimaryAttack()
 			MessageEnd();
 		}
 	}
+	
+	hit->ApplyMultiDamage(m_pPlayer, m_pPlayer);
 #endif
 }
 
@@ -241,10 +241,12 @@ void CSniperRifle::WeaponPostFrame()
 	}
 	else if (m_pPlayer->InState(CBasePlayer::State::Aiming))
 	{
-		PrimaryAttack();
 		m_pPlayer->LeaveState(CBasePlayer::State::Aiming);
-		m_iNextPrimaryAttack = info.iAttackTime;
 		DestroyLaserEffect();
+		PrimaryAttack();
+		m_iNextPrimaryAttack = info.iAttackTime;
+
+		return;
 	}
 
 #ifdef GAME_DLL

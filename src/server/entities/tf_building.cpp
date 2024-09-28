@@ -240,6 +240,8 @@ void CBuilding::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDa
 
 	const auto center = Center();
 
+	const auto player = m_pPlayer;
+
 	/* Throw some gibs! */
 
 	MessageBegin(MSG_PVS, SVC_TEMPENTITY, center);
@@ -259,7 +261,7 @@ void CBuilding::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDa
 	{
 		tent::Explosion(center, Vector(0.0F, 0.0f, -1.0F), tent::ExplosionType::Normal);
 
-		RadiusDamage(center, attacker, m_pPlayer,
+		RadiusDamage(center, this, player,
 			damage, 0.0F, 2.0F * damage, DMG_BLAST);
 	}
 }

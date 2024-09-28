@@ -139,8 +139,12 @@ void CTFWeapon::PrimaryAttack()
 
 	m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
+	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), m_pPlayer->v.view_ofs.z, m_pPlayer->m_randomSeed, rounds);
+
 #ifdef GAME_DLL
 	CBaseEntity* projectile = nullptr;
+
+	const auto ping = m_pPlayer->m_netPing;
 
 	switch (info.iProjectileType)
 	{
@@ -313,11 +317,9 @@ void CTFWeapon::PrimaryAttack()
 
 	if (projectile != nullptr)
 	{
-		util::LagCompensation(projectile, m_pPlayer->m_netPing);
+		util::LagCompensation(projectile, ping);
 	}
 #endif
-
-	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), m_pPlayer->v.view_ofs.z, m_pPlayer->m_randomSeed, rounds);
 
 	m_iWeaponState &= ~kWpnStateIdle;
 }

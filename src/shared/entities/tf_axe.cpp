@@ -35,6 +35,10 @@ void CTFMelee::PrimaryAttack()
 	Entity* first = tr.pHit;
 	int result = kResultMiss;
 
+	const auto player = m_pPlayer;
+	const auto viewHeight = m_pPlayer->v.view_ofs.z;
+	const auto randomSeed = m_pPlayer->m_randomSeed;
+
 	if (tr.flFraction != 1.0F)
 	{
 		result = HitEntity(tr.pHit->Get<CBaseEntity>(), dir, tr);
@@ -45,6 +49,7 @@ void CTFMelee::PrimaryAttack()
 		}
 	}
 
+#if 0
 	{
 		CBaseEntity* entity = nullptr;
 		CBaseEntity* closest = nullptr;
@@ -62,7 +67,7 @@ void CTFMelee::PrimaryAttack()
 
 				if (dot > bestDot)
 				{
-					util::TraceLine(gun, entity->v.origin + los, &tr, m_pPlayer, util::kTraceBox);
+					util::TraceLine(gun, entity->v.origin + los, &tr, player, util::kTraceBox);
 
 					if (tr.pHit == &entity->v)
 					{
@@ -86,9 +91,10 @@ void CTFMelee::PrimaryAttack()
 			}
 		}
 	}
+#endif
 
 finished:
-	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), m_pPlayer->v.view_ofs.z, m_pPlayer->m_randomSeed, result, true, false, FEV_RELIABLE);
+	player->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), viewHeight, randomSeed, result, true, false, FEV_RELIABLE);
 #endif
 }
 
@@ -151,8 +157,6 @@ int CTFMelee::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& 
 		tr.iHitgroup,
 		DMG_CLUB | DMG_NO_KNOCKBACK);
 
-	hit->ApplyMultiDamage(m_pPlayer, m_pPlayer);
-
 	if (hit->IsClient())
 	{
 		result = kResultHit;
@@ -169,6 +173,8 @@ int CTFMelee::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& 
 			MessageEnd();
 		}
 	}
+
+	hit->ApplyMultiDamage(m_pPlayer, m_pPlayer);
 
 	return result;
 }
@@ -260,9 +266,11 @@ int CMedikit::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& 
 				tr.iHitgroup,
 				DMG_GENERIC);
 
+			const auto ownerPlayer = m_pPlayer;
+
 			if (hit->ApplyMultiDamage(m_pPlayer, m_pPlayer))
 			{
-				dynamic_cast<CBasePlayer*>(hit)->BecomeInfected(m_pPlayer);
+				static_cast<CBasePlayer*>(hit)->BecomeInfected(ownerPlayer);
 			}
 		}
 	}
@@ -478,8 +486,6 @@ int CKnife::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& tr
 		tr.iHitgroup,
 		damageType);
 
-	hit->ApplyMultiDamage(m_pPlayer, m_pPlayer);
-
 	if (hit->IsClient())
 	{
 		result = kResultHit;
@@ -496,6 +502,8 @@ int CKnife::HitEntity(CBaseEntity* hit, const Vector& dir, const TraceResult& tr
 			MessageEnd();
 		}
 	}
+
+	hit->ApplyMultiDamage(m_pPlayer, m_pPlayer);
 
 	return result;
 }

@@ -253,6 +253,11 @@ void CBasePlayer::PostThink()
 
 	WeaponPostFrame();
 
+	if (!IsAlive())
+	{
+		goto pt_end;
+	}
+
 #ifdef GAME_DLL
 	if (PCNumber() != PC_SCOUT
 	 && (v.flags & FL_ONGROUND) != 0
