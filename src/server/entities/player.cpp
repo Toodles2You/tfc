@@ -2638,7 +2638,7 @@ void CBasePlayer::RemoveGoalItems(bool force)
 }
 
 
-bool CBasePlayer::GiveArmor(float type, float amount)
+float CBasePlayer::GiveArmor(float type, float amount)
 {
 	/* Don't pickup if this armor isn't as good as the stuff we've got. */
 
@@ -2646,28 +2646,32 @@ bool CBasePlayer::GiveArmor(float type, float amount)
 	{
 		if (v.armorvalue >= m_flArmorMax)
 		{
-			return false;
+			return 0.0F;
 		}
 
+		const auto oldvalue = v.armorvalue;
+
 		v.armorvalue = std::clamp(v.armorvalue + amount, 0.0F, m_flArmorMax);
+
+		return v.armorvalue - oldvalue;
 	}
 	else
 	{
 		/* Upgrade our armor if a type is not specified. */
 		type = (type > 0.0F) ? std::min(type, m_flArmorTypeMax) : m_flArmorTypeMax;
 
-		amount = std::clamp(amount, 0.0F, m_flArmorMax);
+		const auto newamount = std::clamp(amount, 0.0F, m_flArmorMax);
 
-		if (v.armortype * v.armorvalue >= type * amount)
+		if (v.armortype * v.armorvalue >= type * newamount)
 		{
-			return false;
+			return 0.0F;
 		}
 
-		v.armorvalue = amount;
+		v.armorvalue = newamount;
 		v.armortype = type;
-	}
 
-	return true;
+		return newamount;
+	}
 }
 
 
@@ -2952,7 +2956,7 @@ bool CBasePlayer::SpannerHit(CBaseEntity* other)
 
 	armor = std::min(armor, health);
 
-	if (GiveArmor(v.armortype, armor))
+	if (GiveArmor(v.armortype, armor) != 0.0F)
 	{
 #if 0
 		EmitSound("items/empathy2.wav", CHAN_ITEM);

@@ -288,7 +288,17 @@ protected:
 		if (v.armortype != 0.0F)
 		{
 			/* Team Fortress armor */
-			return player->GiveArmor(v.armortype, v.armorvalue);
+
+			auto give = player->GiveArmor(v.armortype, v.armorvalue);
+
+			/* Engineers convert excess armor to cells. */
+
+			if (player->PCNumber() == PC_ENGINEER && give != v.armorvalue)
+			{
+				give += player->GiveAmmo(v.armorvalue - give, AMMO_CELLS);
+			}
+
+			return give != 0.0F;
 		}
 
 		/* Half-Life battery */

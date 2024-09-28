@@ -443,7 +443,6 @@ protected:
 	constexpr static byte kMaxBurnSources = 4;
 	float m_flNextBurnTime;
 	EHANDLE m_hBurner;
-	const char *m_pszBurnSource;
 	byte m_nBurnCount[kMaxBurnSources];
 	byte m_nBurnSource;
 
@@ -557,7 +556,7 @@ public:
 	unsigned int m_TFItems;
 
 	void RemoveGoalItems(bool force = true);
-	bool GiveArmor(float type, float amount);
+	float GiveArmor(float type, float amount);
 
 	bool SpannerHit(CBaseEntity* other) override;
 
