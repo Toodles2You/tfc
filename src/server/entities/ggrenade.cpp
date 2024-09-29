@@ -618,7 +618,7 @@ void CConcussionGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 	TraceResult tr;
 	Vector difference;
 	float length;
-	float ajdusted;
+	float adjusted;
 
 	while ((entity = util::FindEntityInSphere(entity, v.origin, 280)) != nullptr)
 	{
@@ -646,11 +646,11 @@ void CConcussionGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 
 		entity->v.velocity = difference;
 
-		ajdusted = (240 - length * 0.5F) * 0.03F;
+		adjusted = (240 - length * 0.5F) * 0.03F;
 
-		entity->v.velocity.x *= ajdusted;
-		entity->v.velocity.y *= ajdusted;
-		entity->v.velocity.z *= ajdusted * 1.5F;
+		entity->v.velocity.x *= adjusted;
+		entity->v.velocity.y *= adjusted;
+		entity->v.velocity.z *= adjusted * 1.5F;
 
 		if (entity == owner || g_pGameRules->PlayerRelationship(entity, this) < GR_ALLY)
 		{

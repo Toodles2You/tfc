@@ -236,7 +236,7 @@ void CBasePlayer::FireBullets(
 	const float damageFalloff = damageMin - damageMax;
 	const auto gun = v.origin + v.view_ofs;
 	const auto aim = v.v_angle + v.punchangle;
-	float ajdusted;
+	float adjusted;
 
 	auto traceHits = 0;
 	auto traceFlags = 0;
@@ -281,17 +281,21 @@ void CBasePlayer::FireBullets(
 		
 		if (damageFalloff == 0.0F)
 		{
-			ajdusted = damageMax;
+			adjusted = damageMax;
 		}
 		else
 		{
-			ajdusted = std::max((v.origin - hit->BodyTarget()).Length() - 512.0F, 0.0F) / 512.0F;
-			ajdusted = damageMax + damageFalloff * Bezier(ajdusted);
+			const auto isBrush = hit->IsBSPModel();
+
+			const auto center = isBrush ? tr.vecEndPos : hit->BodyTarget();
+
+			adjusted = std::max((v.origin - center).Length() - 512.0F, 0.0F) / 512.0F;
+			adjusted = damageMax + damageFalloff * Bezier(adjusted);
 		}
 
 		hit->TraceAttack(
 			this,
-			ajdusted,
+			adjusted,
 			dir,
 			tr.iHitgroup,
 			DMG_BULLET | DMG_NEVERGIB);
