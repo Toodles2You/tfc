@@ -433,6 +433,7 @@ void IN_StrafeUp() { KeyUp(&in_strafe); }
 
 // needs capture by hud/vgui also
 extern void __CmdFunc_InputPlayerSpecial();
+extern void __CmdFunc_CloseCommandMenu();
 
 void IN_Attack2Down()
 {
@@ -441,7 +442,14 @@ void IN_Attack2Down()
 	gHUD.m_Spectator.HandleButtonsDown(IN_ATTACK2);
 }
 
-void IN_Attack2Up() { KeyUp(&in_attack2); }
+void IN_Attack2Up()
+{
+	KeyUp(&in_attack2);
+	if (g_iPlayerClass == PC_ENGINEER)
+	{
+		__CmdFunc_CloseCommandMenu();
+	}
+}
 void IN_UseDown()
 {
 	KeyDown(&in_use);

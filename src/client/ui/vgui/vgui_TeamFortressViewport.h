@@ -395,7 +395,6 @@ public:
 
 	void		RemoveAllButtons(void);
 
-
 	bool		KeyInput( int keyNum );
 
 	virtual void paintBackground();
@@ -612,6 +611,7 @@ public:
 	int						m_SpectatorOptionsMenu;
 	int						m_SpectatorCameraMenu;
 	int						m_PlayerMenu; // a list of current player
+	int						m_BuildMenu;
 	CClassMenuPanel	*m_pClassMenu;
 	ScoreBoard		*m_pScoreBoard;
 	SpectatorPanel *		m_pSpectatorPanel;

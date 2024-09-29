@@ -1173,6 +1173,8 @@ CommandButton* TeamFortressViewport::CreateCustomButton(char* pButtonText, char*
 	{
 		// only appears if the player is an engineer, and either they have built something or have enough metal to build
 		pButton = new BuildButton(BUILDSTATE_BASE, 0, pButtonText, 0, BUTTON_SIZE_Y * 2, CMENU_SIZE_X, BUTTON_SIZE_Y);
+
+		m_BuildMenu = m_iNumMenus;
 	}
 	else if (0 == strcmp(pButtonName, "!BUILDSENTRY"))
 	{
@@ -1437,20 +1439,15 @@ void TeamFortressViewport::InputPlayerSpecial()
 	{
 		client::ServerCmd("flaginfo");
 	}
-	else if (g_iPlayerClass == PC_ENGINEER || g_iPlayerClass == PC_SPY)
+	else if (g_iPlayerClass == PC_ENGINEER)
 	{
-		if (m_pCurrentCommandMenu != nullptr)
+		if ((GetBuildState() & BS_BUILDING) != 0)
 		{
-			HideCommandMenu();
+			client::ClientCmd("build");
 		}
 		else
 		{
-			ShowCommandMenu(gViewPort->m_StandardMenu);
-
-			if (m_pCurrentCommandMenu != nullptr)
-			{
-				m_pCurrentCommandMenu->KeyInput('7');
-			}
+			ShowCommandMenu(m_BuildMenu);
 		}
 	}
 	else if (g_iPlayerClass == PC_MEDIC)
