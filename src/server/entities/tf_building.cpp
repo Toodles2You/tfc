@@ -37,6 +37,8 @@ public:
 	bool TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float flDamage, int bitsDamageType) override;
 	void Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDamageType) override;
 
+	bool ElectromagneticPulse(CBaseEntity* attacker, CBaseEntity* inflictor) override;
+
 	virtual const char* GetModelName() { return "models/dispenser.mdl"; }
 	virtual const char* GetClassName() { return "building_dispenser"; }
 	virtual float GetHeight() { return 48.0F; } /* 24.0F */
@@ -264,6 +266,12 @@ void CBuilding::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bitsDa
 		RadiusDamage(center, this, player,
 			damage, 0.0F, 2.0F * damage, DMG_BLAST);
 	}
+}
+
+
+bool CBuilding::ElectromagneticPulse(CBaseEntity* attacker, CBaseEntity* inflictor)
+{
+	return TakeDamage(inflictor, attacker, 200.0F, DMG_BLAST);
 }
 
 
