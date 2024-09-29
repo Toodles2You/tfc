@@ -1567,6 +1567,30 @@ void CTeleporter::Teleport()
 	util::ScreenFade(other, Vector(0.0F, 255.0F, 0.0F),
 		0.5F, 0.0F, 255.0F, FFADE_IN);
 
+	/* Telefrag! */
+
+	CBaseEntity* players[MAX_PLAYERS];
+
+	const auto count = util::EntitiesInBox (
+		players,
+		MAX_PLAYERS,
+		origin + VEC_HULL_MIN,
+		origin + VEC_HULL_MAX,
+		FL_CLIENT);
+
+	for (int i = 0; i < count; i++)
+	{
+		const auto entity = players[i];
+
+		if (entity != other)
+		{
+			if (g_pGameRules->PlayerRelationship(other, entity) < GR_ALLY)
+			{
+				entity->Killed(other, other, DMG_ALWAYSGIB);
+			}
+		}
+	}
+
 	Recharge(kTeleportInterval);
 }
 
