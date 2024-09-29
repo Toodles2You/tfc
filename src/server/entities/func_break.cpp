@@ -513,7 +513,8 @@ bool CBreakable::TakeDamage(CBaseEntity* inflictor, CBaseEntity* attacker, float
 	v.health -= flDamage;
 	if (v.health <= 0)
 	{
-		Killed(inflictor, attacker, bitsDamageType);
+		v.takedamage = DAMAGE_NO;
+		v.deadflag = DEAD_DEAD;
 		Die();
 		return false;
 	}
