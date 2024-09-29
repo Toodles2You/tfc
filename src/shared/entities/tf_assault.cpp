@@ -65,7 +65,11 @@ void CAssaultCannon::GetWeaponInfo(WeaponInfo& i)
 
 bool CAssaultCannon::CanHolster()
 {
+#if 1
+	return true;
+#else
 	return !m_fInAttack;
+#endif
 }
 
 
