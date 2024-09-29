@@ -68,14 +68,19 @@ bool CSpawnPoint::IsValid(CBasePlayer *pPlayer, int attempt)
 		{
 			return false;
 		}
-		
-		CBaseEntity *entity = nullptr;
-		while ((entity = util::FindEntityInSphere(entity, m_origin, 128.0F)) != nullptr)
+
+		CBaseEntity* player;
+
+		const auto count = util::EntitiesInBox (
+			&player,
+			1,
+			m_origin + VEC_HULL_MIN,
+			m_origin + VEC_HULL_MAX,
+			FL_CLIENT);
+
+		if (count != 0 && player != pPlayer)
 		{
-			if (entity->IsPlayer() && entity != pPlayer)
-			{
-				return false;
-			}
+			return false;
 		}
 	}
 	

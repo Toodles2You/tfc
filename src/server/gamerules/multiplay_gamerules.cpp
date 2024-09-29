@@ -1002,14 +1002,25 @@ CSpawnPoint *CHalfLifeMultiplay::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
 	}
 
 	/* Telefrag! */
-	CBaseEntity *entity = nullptr;
-	while ((entity = util::FindEntityInSphere(entity, spawn->m_origin, 128.0F)) != nullptr)
+
+	CBaseEntity* players[MAX_PLAYERS];
+
+	const auto count = util::EntitiesInBox (
+		players,
+		MAX_PLAYERS,
+		spawn->m_origin + VEC_HULL_MIN,
+		spawn->m_origin + VEC_HULL_MAX,
+		FL_CLIENT);
+
+	for (int i = 0; i < count; i++)
 	{
-		if (entity->IsPlayer() && entity != pPlayer)
+		const auto entity = players[i];
+
+		if (entity != pPlayer)
 		{
-			if (FPlayerCanTakeDamage((CBasePlayer *)entity, pPlayer))
+			if (PlayerRelationship(pPlayer, entity) < GR_ALLY)
 			{
-				entity->Killed(CWorld::World, CWorld::World, DMG_ALWAYSGIB);
+				entity->Killed(pPlayer, pPlayer, DMG_ALWAYSGIB);
 			}
 		}
 	}
