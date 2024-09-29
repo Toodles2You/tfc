@@ -169,7 +169,7 @@ void CNail::NailTouch(CBaseEntity* pOther)
 
 		/* Toodles: Have rail gun laser pass through players. */
 
-        if (v.armortype == DMG_CLUB && pOther->IsPlayer())
+        if (((int)v.armortype & DMG_CLUB) != 0 && pOther->IsClient())
         {
             /* Don't touch this guy again.*/
             m_touchedPlayers[pOther->v.GetIndex() - 1] = true;
@@ -200,9 +200,9 @@ void CNail::PleaseGoInTheRightDirection()
 
 bool CNail::ShouldCollide(CBaseEntity* other)
 {
-	if (v.armortype == DMG_CLUB)
+	if (((int)v.armortype & DMG_CLUB) != 0)
 	{
-    	return !other->IsPlayer() || !m_touchedPlayers[other->v.GetIndex() - 1];
+    	return !other->IsClient() || !m_touchedPlayers[other->v.GetIndex() - 1];
 	}
 
 	return true;
