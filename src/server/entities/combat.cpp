@@ -65,7 +65,7 @@ void RadiusDamage(
 {
 	CBaseEntity* entity = nullptr;
 	TraceResult tr;
-	float ajdusted;
+	float adjusted;
 	float falloff = damage / radius;
 
 	while ((entity = util::FindEntityInSphere(entity, origin, radius)) != nullptr)
@@ -75,17 +75,23 @@ void RadiusDamage(
 			continue;
 		}
 
-		util::TraceLine(origin, entity->EyePosition(), &tr, inflictor, util::kTraceBox);
+		const auto isBrush = entity->IsBSPModel();
+
+		const auto eyes = isBrush ? entity->Center() : entity->EyePosition();
+
+		util::TraceLine(origin, eyes, &tr, inflictor, util::kTraceBox);
 
 		if (tr.flFraction != 1.0F && tr.pHit != &entity->v)
 		{
 			continue;
 		}
 
-		ajdusted = (origin - entity->BodyTarget()).Length() * falloff;
-		ajdusted = std::max(damage - ajdusted, 0.0F);
+		const auto center = isBrush ? tr.vecEndPos : entity->BodyTarget();
 
-		entity->TakeDamage(inflictor, attacker, ajdusted, damageType);
+		adjusted = (origin - center).Length() * falloff;
+		adjusted = std::max(damage - adjusted, 0.0F);
+
+		entity->TakeDamage(inflictor, attacker, adjusted, damageType);
 	}
 }
 
