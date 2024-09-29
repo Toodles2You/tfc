@@ -37,13 +37,11 @@ public:
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 
 	int m_iMagnitude;  // how large is the fireball? how much damage?
-	int m_spriteScale; // what's the exact fireball sprite scale?
 };
 
 #ifdef HALFLIFE_SAVERESTORE
 IMPLEMENT_SAVERESTORE(CEnvExplosion)
 	DEFINE_FIELD(CEnvExplosion, m_iMagnitude, FIELD_INTEGER),
-	DEFINE_FIELD(CEnvExplosion, m_spriteScale, FIELD_INTEGER),
 END_SAVERESTORE(CEnvExplosion, CBaseEntity)
 #endif
 
@@ -66,16 +64,6 @@ bool CEnvExplosion::Spawn()
 	v.effects = EF_NODRAW;
 
 	v.movetype = MOVETYPE_NONE;
-
-	float flSpriteScale;
-	flSpriteScale = (m_iMagnitude - 50) * 0.6;
-
-	if (flSpriteScale < 10)
-	{
-		flSpriteScale = 10;
-	}
-
-	m_spriteScale = (int)flSpriteScale;
 
 	return true;
 }
@@ -107,7 +95,7 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	tent::Explosion(
 		v.origin,
 		g_vecZero,
-		(v.spawnflags & SF_ENVEXPLOSION_NOFIREBALL) == 0 ? m_spriteScale : 0,
+		(v.spawnflags & SF_ENVEXPLOSION_NOFIREBALL) == 0 ? m_iMagnitude : 0,
 		(v.spawnflags & SF_ENVEXPLOSION_NOSMOKE) == 0,
 		(v.spawnflags & SF_ENVEXPLOSION_NOSPARKS) == 0);
 
