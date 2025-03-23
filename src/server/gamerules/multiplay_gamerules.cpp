@@ -532,8 +532,8 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 
 	if (addDefault)
 	{
-		pPlayer->GiveNamedItem("weapon_crowbar");
-		pPlayer->GiveNamedItem("weapon_9mmAR");
+		pPlayer->GiveNamedItem("tf_weapon_axe");
+		pPlayer->GiveNamedItem("tf_weapon_shotgun");
 
 		for (int i = 0; i < AMMO_TYPES; i++)
 		{
