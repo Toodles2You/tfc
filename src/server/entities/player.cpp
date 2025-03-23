@@ -1029,11 +1029,6 @@ bool CBasePlayer::GivePowerUp(const int powerUpID, const float duration,
 
 void CBasePlayer::RemovePowerUp(const int powerUpID, const bool playSound)
 {
-	if (playSound && HasPowerUp(powerUpID))
-	{
-		EmitSoundHUD("items/powerdown.wav", CHAN_STATIC);
-	}
-
 	m_afPowerUpActive &= ~(1 << powerUpID);
 }
 

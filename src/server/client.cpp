@@ -1043,7 +1043,6 @@ void ClientPrecache()
 	engine::PrecacheSound("items/inv3.wav");
 	engine::PrecacheSound("items/suit.wav");
 	engine::PrecacheSound("items/suit2.wav");
-	engine::PrecacheSound("items/powerdown.wav");
 
 	engine::PrecacheSound("debris/beamstart1.wav");
 	engine::PrecacheSound("debris/beamstart2.wav");
