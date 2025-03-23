@@ -755,7 +755,7 @@ void CIncendiaryCannon::GetWeaponInfo(WeaponInfo& i)
 	i.pszAnimExt = "rpg";
 
 	i.iAnims[kWeaponAnimIdle] = 0;
-	i.iAnims[kWeaponAnimDeploy] = 4;
+	i.iAnims[kWeaponAnimDeploy] = 5;
 	i.iAnims[kWeaponAnimHolster] = 3;
 	i.iAnims[kWeaponAnimAttack] = 3;
 	i.iAnims[kWeaponAnimReload] = 2;
