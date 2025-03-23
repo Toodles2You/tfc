@@ -382,7 +382,7 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
             30,
             200,
             2,
-            2,
+            4,
         },
         .initAmmo = {
             20,
