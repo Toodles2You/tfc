@@ -531,6 +531,9 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
         }
     }
 
+    pPlayer->SelectWeapon(info.weapons[0]);
+    pPlayer->m_iLastWeapon = info.weapons[1];
+
     for (int i = 0; i < AMMO_TYPES; i++)
     {
 		if (info.initAmmo[i] != 0)
