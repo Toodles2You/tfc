@@ -966,6 +966,7 @@ void EV_LaserDotOn(event_args_t* args)
 
 	if (pLaserDot == nullptr)
 	{
+#if 0
 		if (bMakeNoise)
 		{
 			client::event::PlaySound(
@@ -978,6 +979,7 @@ void EV_LaserDotOn(event_args_t* args)
 				0,
 				PITCH_NORM);
 		}
+#endif
 		
 		pLaserDot = client::efx::TempSprite(
 			args->origin,
@@ -1009,6 +1011,7 @@ void EV_LaserDotOff(event_args_t* args)
 	
 	if (pLaserDot != nullptr)
 	{
+#if 0
 		if (bMakeNoise)
 		{
 			client::event::PlaySound(
@@ -1021,6 +1024,7 @@ void EV_LaserDotOff(event_args_t* args)
 				0,
 				PITCH_NORM);
 		}
+#endif
 		
 		pLaserDot->die = client::GetClientTime();
 		pLaserDot = nullptr;

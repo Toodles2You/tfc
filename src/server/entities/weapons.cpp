@@ -122,9 +122,6 @@ void W_Precache()
 	engine::PrecacheSound("items/9mmclip1.wav");
 	engine::PrecacheSound("items/9mmclip2.wav");
 
-	engine::PrecacheSound("weapons/desert_eagle_sight.wav");
-	engine::PrecacheSound("weapons/desert_eagle_sight2.wav");
-
 	engine::PrecacheSound("items/itembk2.wav");
 	engine::PrecacheSound("items/gunpickup2.wav");
 
