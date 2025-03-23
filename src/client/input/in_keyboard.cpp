@@ -26,6 +26,7 @@
 
 
 extern int g_weaponselect;
+extern int g_CurrentWeaponId;
 
 // Defined in pm_math.c
 float anglemod(float a);
@@ -613,8 +614,10 @@ void CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 	cmd->impulse = in_impulse;
 	in_impulse = 0;
 
-	cmd->weaponselect = g_weaponselect + 1;
-	g_weaponselect = -1;
+	if (g_weaponselect != WEAPON_NONE)
+		cmd->weaponselect = g_weaponselect;
+	else
+		cmd->weaponselect = g_CurrentWeaponId;
 	//
 	// set button and flag bits
 	//

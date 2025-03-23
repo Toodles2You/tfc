@@ -275,7 +275,7 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 
 	data.tfstate = m_StateBits;
 
-	data.m_iId = (m_pActiveWeapon != nullptr) ? m_pActiveWeapon->GetID() + 1 : 0;
+	data.m_iId = m_iActiveWeapon | (m_iLastWeapon << 6);
 
 	byte* ammo = reinterpret_cast<byte*>(&data.ammo_shells);
 	for (int i = 0; i < AMMO_TYPES; i++)
@@ -318,16 +318,21 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 
 	m_StateBits = data.tfstate;
 
-	if (m_pActiveWeapon == nullptr)
+	const auto oldActiveWeapon = m_iActiveWeapon;
+
+	m_iActiveWeapon = data.m_iId & 63;
+	m_iLastWeapon = data.m_iId >> 6;
+
+	if (m_iActiveWeapon != oldActiveWeapon)
 	{
-		if (data.m_iId != 0)
+		if (m_iActiveWeapon == WEAPON_NONE)
 		{
-			m_pActiveWeapon = m_rgpPlayerWeapons[data.m_iId - 1];
+			m_pActiveWeapon = nullptr;
 		}
-	}
-	else if (data.m_iId - 1 != m_pActiveWeapon->GetID())
-	{
-		m_pActiveWeapon = m_rgpPlayerWeapons[data.m_iId - 1];
+		else
+		{
+			m_pActiveWeapon = m_rgpPlayerWeapons[m_iActiveWeapon];
+		}
 	}
 
 	const byte* ammo = reinterpret_cast<const byte*>(&data.ammo_shells);
@@ -359,31 +364,54 @@ void CBasePlayer::DecrementTimers(const int msec)
 
 void CBasePlayer::SelectWeapon(int id)
 {
+	if (id < 0 || id > WEAPON_NONE)
+	{
+		return;
+	}
+
+	if (m_iActiveWeapon == id)
+	{
+		return;
+	}
+
 	if (!HasPlayerWeapon(id))
 	{
 		return;
 	}
 
-	auto weapon = m_rgpPlayerWeapons[id];
-
-	if (weapon == m_pActiveWeapon)
+	CBasePlayerWeapon *weapon;
+	if (id == WEAPON_NONE)
 	{
-		return;
+		weapon = nullptr;
+	}
+	else
+	{
+		weapon = m_rgpPlayerWeapons[id];
 	}
 
-	if (InState(State::Holstered))
+	m_iLastWeapon = m_iActiveWeapon;
+	m_iActiveWeapon = id;
+
+	/* Switch weapons without holstering & deploying. */
+	if (!InState(State::Holstered))
 	{
-		/* Switch weapons without holstering & deploying. */
-		m_pActiveWeapon = weapon;
-		return;
+		if (m_pActiveWeapon != nullptr)
+		{
+			m_pActiveWeapon->Holster();
+		}
+		if (weapon != nullptr)
+		{
+			weapon->Deploy();
+		}
 	}
 
-	if (m_pActiveWeapon != nullptr)
-	{
-		m_pActiveWeapon->Holster();
-	}
 	m_pActiveWeapon = weapon;
-	m_pActiveWeapon->Deploy();
+}
+
+
+void CBasePlayer::SelectLastWeapon()
+{
+	SelectWeapon(m_iLastWeapon);
 }
 
 
@@ -444,11 +472,7 @@ bool CBasePlayer::SetWeaponHolstered(const bool holstered, const bool forceSendA
 
 void CBasePlayer::CmdStart(const usercmd_t& cmd, unsigned int randomSeed)
 {
-	if (cmd.weaponselect != 0)
-	{
-        SelectWeapon(cmd.weaponselect - 1);
-		((usercmd_t*)&cmd)->weaponselect = 0;
-	}
+	SelectWeapon(cmd.weaponselect);
 
 	m_randomSeed = randomSeed;
 }

@@ -35,3 +35,4 @@ bool HUD_FirstTimePredicting();
 
 extern Vector v_angles;
 extern int g_CurrentWeaponId;
+extern int g_LastWeaponId;

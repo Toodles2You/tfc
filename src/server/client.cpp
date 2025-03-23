@@ -456,7 +456,10 @@ void ClientCommand(Entity* pEntity)
 	else if (streq(pcmd, "drop"))
 	{
 		// player is dropping an item.
-		player->DropPlayerWeapon((char*)engine::Cmd_Argv(1));
+		if (engine::Cmd_Argc() > 1)
+			player->DropPlayerWeapon((char*)engine::Cmd_Argv(1));
+		else
+			player->DropPlayerWeapon("");
 	}
 	else if (streq(pcmd, "fov"))
 	{

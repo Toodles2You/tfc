@@ -40,6 +40,7 @@ extern int g_iObserverMode;
 extern int g_iObserverTarget;
 extern int g_iObserverTarget2;
 extern struct local_state_s g_finalstate;
+extern int g_weaponselect;
 
 static bool firstTimePredicting = false;
 
@@ -444,7 +445,11 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 
 	g_finalstate = *to;
 
-	g_CurrentWeaponId = to->client.m_iId - 1;
+	g_CurrentWeaponId = player->m_iActiveWeapon;
+	if (g_CurrentWeaponId == g_weaponselect)
+		g_weaponselect = WEAPON_NONE;
+	g_LastWeaponId = player->m_iLastWeapon;
+
 	g_PunchAngle = to->client.punchangle * 2;
 }
 
