@@ -611,6 +611,7 @@ public:
 	int						m_SpectatorOptionsMenu;
 	int						m_SpectatorCameraMenu;
 	int						m_PlayerMenu; // a list of current player
+	int						m_DisguiseMenu;
 	int						m_BuildMenu;
 	CClassMenuPanel	*m_pClassMenu;
 	ScoreBoard		*m_pScoreBoard;

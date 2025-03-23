@@ -170,6 +170,22 @@ void __CmdFunc_OpenCommandMenu()
 	}
 }
 
+void __CmdFunc_OpenDisguiseMenu()
+{
+	if (gViewPort)
+	{
+		gViewPort->ShowCommandMenu(gViewPort->m_DisguiseMenu);
+	}
+}
+
+void __CmdFunc_OpenBuildMenu()
+{
+	if (gViewPort)
+	{
+		gViewPort->ShowCommandMenu(gViewPort->m_BuildMenu);
+	}
+}
+
 // TFC "special" command
 void __CmdFunc_InputPlayerSpecial()
 {
@@ -316,6 +332,10 @@ void CHud::Init()
 	// TFFree CommandMenu
 	HOOK_COMMAND("+commandmenu", OpenCommandMenu);
 	HOOK_COMMAND("-commandmenu", CloseCommandMenu);
+	HOOK_COMMAND("+disguisemenu", OpenDisguiseMenu);
+	HOOK_COMMAND("-disguisemenu", CloseCommandMenu);
+	HOOK_COMMAND("+buildmenu", OpenBuildMenu);
+	HOOK_COMMAND("-buildmenu", CloseCommandMenu);
 	HOOK_COMMAND("ForceCloseCommandMenu", ForceCloseCommandMenu);
 	HOOK_COMMAND("special", InputPlayerSpecial);
 

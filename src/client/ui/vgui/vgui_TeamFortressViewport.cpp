@@ -1076,6 +1076,8 @@ CommandButton* TeamFortressViewport::CreateCustomButton(char* pButtonText, char*
 	else if (0 == strcmp(pButtonName, "!SPY"))
 	{
 		pButton = new DisguiseButton(0, pButtonText, 0, BUTTON_SIZE_Y, CMENU_SIZE_X, BUTTON_SIZE_Y);
+
+		m_DisguiseMenu = m_iNumMenus;
 	}
 	// Feign
 	else if (0 == strcmp(pButtonName, "!FEIGN"))
