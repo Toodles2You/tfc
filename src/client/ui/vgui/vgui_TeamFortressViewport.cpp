@@ -61,7 +61,6 @@
 extern bool g_iVisibleMouse;
 extern bool g_bForceSpecialDown;
 extern int g_weaponselect;
-extern int g_lastselect;
 class CCommandMenu;
 int g_iPlayerClass;
 int g_iTeamNumber;
@@ -1459,7 +1458,7 @@ void TeamFortressViewport::InputPlayerSpecial()
 		}
 		else
 		{
-			g_weaponselect = g_lastselect;
+			g_weaponselect = g_LastWeaponId;
 		}
 	}
 	else if (g_iPlayerClass == PC_HVYWEAP)
@@ -1471,7 +1470,7 @@ void TeamFortressViewport::InputPlayerSpecial()
 		}
 		else
 		{
-			g_weaponselect = g_lastselect;
+			g_weaponselect = g_LastWeaponId;
 		}
 	}
 	else if (g_iPlayerClass == PC_PYRO)
@@ -1483,7 +1482,7 @@ void TeamFortressViewport::InputPlayerSpecial()
 		}
 		else
 		{
-			g_weaponselect = g_lastselect;
+			g_weaponselect = g_LastWeaponId;
 		}
 	}
 #if 0

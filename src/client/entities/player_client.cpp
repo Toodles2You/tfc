@@ -44,9 +44,13 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 {
 	if (m_pActiveWeapon != nullptr)
     {
-		m_pActiveWeapon->Holster();
+		auto oldWeapon = m_pActiveWeapon;
 		m_pActiveWeapon = nullptr;
+		m_iActiveWeapon = WEAPON_NONE;
+		oldWeapon->Holster();
     }
+
+	m_iActiveWeapon = m_iLastWeapon = WEAPON_NONE;
 
 	ClearEffects();
 }
@@ -62,6 +66,8 @@ bool CBasePlayer::Spawn()
 	m_flSpeedReduction = 0.0F;
 
 	m_bLeftHanded = static_cast<int>(floorf(cl_righthand->value)) == 0;
+
+	m_iActiveWeapon = m_iLastWeapon = WEAPON_NONE;
 
 	return true;
 }
@@ -86,7 +92,7 @@ void CBasePlayer::UpdateHudData()
 	}
 	else
 	{
-		gHUD.m_Ammo.Update_CurWeapon(0, -1, -1, true);
+		gHUD.m_Ammo.Update_CurWeapon(0, WEAPON_NONE, -1, true);
 	}
 
 	for (int i = 0; i < AMMO_SECONDARY; i++)
@@ -177,8 +183,9 @@ void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* weapon)
 
 	if (isActive)
 	{
-		weapon->Holster();
 		m_pActiveWeapon = nullptr;
+		m_iActiveWeapon = WEAPON_NONE;
+		weapon->Holster();
 	}
 
 	ClearWeaponBit(weapon->GetID());

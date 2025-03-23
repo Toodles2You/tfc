@@ -129,6 +129,8 @@ public:
 	CBasePlayerWeapon* m_rgpPlayerWeapons[WEAPON_TYPES];
 	std::forward_list<CBasePlayerWeapon *> m_lpPlayerWeapons;
 	CBasePlayerWeapon* m_pActiveWeapon;
+	byte m_iActiveWeapon;
+	byte m_iLastWeapon;
 
 	std::uint64_t m_WeaponBits;
 
@@ -252,6 +254,7 @@ public:
 	bool HasPlayerWeapon(int iId) { return (m_WeaponBits & (1ULL << iId)) != 0; }
 	bool HasWeapons() { return m_WeaponBits != 0; }
 	void SelectWeapon(int id);
+	void SelectLastWeapon();
 	void WeaponPostFrame();
 	void GiveNamedItem(const char* szName);
 	void EnableControl(bool fControl);

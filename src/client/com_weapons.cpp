@@ -29,7 +29,8 @@
 //  reset it to nullptr as appropriate
 struct local_state_s g_finalstate;
 
-int g_CurrentWeaponId = -1;
+int g_CurrentWeaponId = WEAPON_NONE;
+int g_LastWeaponId = WEAPON_NONE;
 
 /*
 ====================

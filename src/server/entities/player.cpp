@@ -678,6 +678,8 @@ void CBasePlayer::Killed(CBaseEntity* inflictor, CBaseEntity* attacker, int bits
 	RemoveAllWeapons();
 	RemoveGoalItems();
 
+	m_iActiveWeapon = m_iLastWeapon = WEAPON_NONE;
+
 	SetAction(Action::Die);
 
 	m_fDeadTime = gpGlobals->time;
@@ -1343,6 +1345,8 @@ bool CBasePlayer::Spawn()
 
 	m_flSpeedReduction = 0.0F;
 
+	m_iActiveWeapon = m_iLastWeapon = WEAPON_NONE;
+
 	char* infobuffer = engine::GetInfoKeyBuffer(&v);
 	char* value = engine::InfoKeyValue(infobuffer, "cl_righthand");
 
@@ -1765,8 +1769,9 @@ void CBasePlayer::RemovePlayerWeapon(CBasePlayerWeapon* weapon)
 
 	if (isActive)
 	{
-		weapon->Holster();
 		m_pActiveWeapon = nullptr;
+		m_iActiveWeapon = WEAPON_NONE;
+		weapon->Holster();
 	}
 
 	m_rgpPlayerWeapons[weapon->GetID()] = nullptr;

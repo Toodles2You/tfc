@@ -29,6 +29,8 @@
 #include "ammohistory.h"
 #include "vgui_TeamFortressViewport.h"
 
+extern int g_LastWeaponId;
+
 WEAPON* gpActiveSel; // nullptr means off, 1 means just the menu bar, otherwise
 					 // this points to the active weapon menu item
 WEAPON* gpLastSel;	 // Last weapon menu selection
@@ -37,8 +39,7 @@ client_sprite_t* GetSpriteList(client_sprite_t* pList, const char* psz, int iRes
 
 WeaponsResource gWR;
 
-int g_weaponselect = -1;
-int g_lastselect = -1;
+int g_weaponselect = WEAPON_NONE;
 
 void WeaponsResource::LoadAllWeaponSprites()
 {
@@ -494,10 +495,10 @@ void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip, bool bCanHolster
 
 	m_bWeaponSelectDisabled = !bCanHolster;
 
-	if (iId == -1)
+	if (iId == WEAPON_NONE)
 	{
 		m_pWeapon = nullptr;
-		g_lastselect = -1;
+		g_LastWeaponId = WEAPON_NONE;
 		return;
 	}
 
@@ -524,7 +525,7 @@ void CHudAmmo::Update_CurWeapon(int iState, int iId, int iClip, bool bCanHolster
 	{
 		if (m_pWeapon != nullptr)
 		{
-			g_lastselect = m_pWeapon->iId;
+			g_LastWeaponId = m_pWeapon->iId;
 		}
 
 		if (hud_fastswitch->value == 2.0F)
@@ -848,16 +849,16 @@ void CHudAmmo::UserCmd_PrevWeapon()
 // Selects the previous item in the menu
 void CHudAmmo::UserCmd_LastWeapon()
 {
-	if (g_lastselect == -1)
+	if (g_LastWeaponId == WEAPON_NONE)
 	{
 		return;
 	}
 
-	auto pWeapon = gWR.GetWeapon(g_lastselect);
+	auto pWeapon = gWR.GetWeapon(g_LastWeaponId);
 
-	if (!m_bWeaponSelectDisabled && pWeapon && gHUD.HasWeapon(g_lastselect))
+	if (!m_bWeaponSelectDisabled && pWeapon && gHUD.HasWeapon(g_LastWeaponId))
 	{
-		g_weaponselect = g_lastselect;
+		g_weaponselect = g_LastWeaponId;
 		gHUD.m_iKeyBits &= ~IN_ATTACK;
 	}
 	else

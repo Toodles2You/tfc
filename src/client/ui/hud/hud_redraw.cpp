@@ -216,6 +216,9 @@ void CHud::DrawHudSprite(HSPRITE pic, int frame, Rect *rect, int x, int y, int r
 	
 	const auto pSprite = const_cast<model_t *>(client::GetSpritePointer (pic));
 
+	if (pSprite == nullptr)
+		return;
+
 	const auto x1 = roundf (m_flOffsetX + xf * m_flScaleX);
 	const auto y1 = roundf (m_flOffsetY + yf * m_flScaleY);
 	const auto x2 = roundf (m_flOffsetX + (xf + width) * m_flScaleX);
@@ -490,6 +493,9 @@ void CHud::DrawHudBackground(int left, int top, int right, int bottom, const boo
 
 	const auto pSprite = const_cast<model_t *>(client::GetSpritePointer (m_hBackground));
 
+	if (pSprite == nullptr)
+		return;
+
 	/* Shrink the bounds slightly to compensate for the border. */
 	left += 1;
 	top += 1;
@@ -679,6 +685,9 @@ void CHud::DrawWorldSprite(HSPRITE pic, int frame, Rect *rect, Vector origin, hu
 	yf -= (height / 2.0F - 0.5F) * m_flScaleY; 
 
 	auto pSprite = const_cast<model_t *>(client::GetSpritePointer (pic));
+
+	if (pSprite == nullptr)
+		return;
 
 	auto x1 = roundf (xf);
 	auto y1 = roundf (yf);

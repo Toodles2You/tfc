@@ -119,7 +119,7 @@ void CHudDeathNotice::Draw(const float time)
 
 		// Draw the death notice
 
-		int id = (item->iId == -1) ? m_HUD_d_skull : item->iId;
+		int id = (item->iId == WEAPON_NONE) ? m_HUD_d_skull : item->iId;
 
 		auto rect = gHUD.GetSpriteRect(id);
 		int weaponWidth = rect.right - rect.left;
