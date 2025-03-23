@@ -672,7 +672,12 @@ CTFDetect::CTFDetect(Entity* containingEntity) : CBaseEntity(containingEntity)
 
 bool CTFDetect::KeyValue(KeyValueData* pkvd)
 {
-    CTeamFortress* pTFGameRules = dynamic_cast<CTeamFortress*>(g_pGameRules);
+    if (g_pGameRules->GetGameMode() != kGamemodeTeamFortress)
+    {
+        return false;
+    }
+
+    CTeamFortress* pTFGameRules = static_cast<CTeamFortress*>(g_pGameRules);
 
     if (streq(pkvd->szKeyName, "number_of_teams"))
     {
@@ -867,7 +872,12 @@ bool CTFDetect::Spawn()
     v.solid = SOLID_NOT;
     v.movetype = MOVETYPE_NONE;
 
-    CTeamFortress* pTFGameRules = dynamic_cast<CTeamFortress*>(g_pGameRules);
+    if (g_pGameRules->GetGameMode() != kGamemodeTeamFortress)
+    {
+        return false;
+    }
+
+    CTeamFortress* pTFGameRules = static_cast<CTeamFortress*>(g_pGameRules);
     pTFGameRules->m_numTeams = number_of_teams;
     pTFGameRules->InitializeTeams();
 
