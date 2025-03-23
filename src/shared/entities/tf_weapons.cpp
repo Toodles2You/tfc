@@ -586,7 +586,7 @@ void CNailgun::GetWeaponInfo(WeaponInfo& i)
 	i.pszAttackSound = "weapons/airgun_1.wav";
 	i.pszAlternateSound = nullptr;
 	i.pszReloadSound = nullptr;
-	i.flPunchAngle = -2.0F;
+	i.flPunchAngle = 0.0F;
 	i.iSibling = -1;
 	i.bShouldIdle = false;
 }
@@ -632,7 +632,7 @@ void CSuperNailgun::GetWeaponInfo(WeaponInfo& i)
 	i.pszAttackSound = "weapons/spike2.wav";
 	i.pszAlternateSound = nullptr;
 	i.pszReloadSound = nullptr;
-	i.flPunchAngle = -2.0F;
+	i.flPunchAngle = 0.0F;
 	i.iSibling = -1;
 	i.bShouldIdle = false;
 }
