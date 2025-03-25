@@ -3002,14 +3002,17 @@ bool CBasePlayer::ElectromagneticPulse(CBaseEntity* attacker, CBaseEntity* infli
 		detonateAmmo[AMMO_CELLS] = 0.0F;
 	}
 
+	for (int i = 0; i < AMMO_SECONDARY; i++)
+	{
+		if (detonateAmmo[i] < m_rgAmmo[i])
+			m_rgAmmo[i] -= static_cast<int>(detonateAmmo[i]);
+		else
+			m_rgAmmo[i] = 0;
+	}
+
 	if (damage < 1.0F)
 	{
 		return false;
-	}
-
-	for (int i = 0; i < AMMO_SECONDARY; i++)
-	{
-		m_rgAmmo[i] -= (int)detonateAmmo[i];
 	}
 
 	tent::Explosion(v.origin, Vector(0.0F, 0.0F, -1.0F),
