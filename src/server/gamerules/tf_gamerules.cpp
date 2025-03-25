@@ -112,10 +112,12 @@ void CTeamFortress::InitializeTeams()
 CTeamFortress::CTeamFortress()
 {
     m_teams.clear();
-    m_numTeams = 2;
+    m_numTeams = 4;
 
     m_teams.push_back(CTeam{TEAM_BLUE, "Team_Blue"});
     m_teams.push_back(CTeam{TEAM_RED, "Team_Red"});
+    m_teams.push_back(CTeam{TEAM_YELLOW, "Team_Yellow"});
+    m_teams.push_back(CTeam{TEAM_GREEN, "Team_Green"});
 
     memset(display_item_status, 0, sizeof(display_item_status));
 

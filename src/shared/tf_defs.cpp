@@ -53,6 +53,8 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .colormap = {
             {153, 139},
             {255,  10},
+            { 45,  35},
+            {100,  90},
         },
     },
 
@@ -96,6 +98,8 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .colormap = {
             {153, 145},
             {255,  10},
+            { 45,  35},
+            { 80,  90},
         },
     },
     
@@ -139,6 +143,8 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .colormap = {
             {153, 130},
             {250,  28},
+            { 45,  35},
+            {100,  40},
         },
     },
 
@@ -182,6 +188,8 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .colormap = {
             {153, 145},
             {255,  20},
+            { 45,  35},
+            {100,  90},
         },
     },
     
@@ -225,6 +233,8 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .colormap = {
             {153, 140},
             {255, 250},
+            { 45,  35},
+            {100,  90},
         },
     },
 
@@ -268,6 +278,8 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .colormap = {
             {148, 138},
             {255,  25},
+            { 45,  40},
+            {100,  90},
         },
     },
 
@@ -311,6 +323,8 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .colormap = {
             {140, 145},
             {250,  25},
+            { 45,  35},
+            {100,  50},
         },
     },
 
@@ -354,6 +368,8 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .colormap = {
             {150, 145},
             {250, 240},
+            { 45,  35},
+            {100,  90},
         },
     },
 
@@ -397,6 +413,8 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .colormap = {
             {140, 148},
             {  5, 250},
+            { 45,  45},
+            {100,  90},
         },
     },
 
@@ -442,6 +460,8 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .colormap = {
             {150, 140},
             {250, 240},
+            { 45,  35},
+            {100,  90},
         },
     }
 };

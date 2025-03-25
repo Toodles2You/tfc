@@ -37,7 +37,7 @@ struct PCInfo
 	int initAmmo[AMMO_TYPES];
 	const char* model;
 	const char* modelPath;
-	byte colormap[2][2];
+	byte colormap[4][2];
 };
 
 extern PCInfo sTFClassInfo[PC_LASTCLASS];

@@ -87,19 +87,38 @@ static void UpdateLaserDot(const float time, const pmtrace_t *tr)
 
 	pLaserDot->entity.origin = tr->endpos;
 
-	if (g_iTeamNumber == TEAM_BLUE)
+	switch (g_iTeamNumber)
 	{
+	case TEAM_BLUE:
 		pLaserDot->entity.curstate.rendercolor.r = 51;
 		pLaserDot->entity.curstate.rendercolor.g = 51;
 		pLaserDot->entity.curstate.rendercolor.b = 255;
 		pLaserDot->entity.curstate.renderamt = 255;
-	}
-	else
-	{
+		break;
+	case TEAM_RED:
 		pLaserDot->entity.curstate.rendercolor.r = 255;
 		pLaserDot->entity.curstate.rendercolor.g = 0;
 		pLaserDot->entity.curstate.rendercolor.b = 0;
 		pLaserDot->entity.curstate.renderamt = 255;
+		break;
+	case TEAM_YELLOW:
+		pLaserDot->entity.curstate.rendercolor.r = 255;
+		pLaserDot->entity.curstate.rendercolor.g = 255;
+		pLaserDot->entity.curstate.rendercolor.b = 0;
+		pLaserDot->entity.curstate.renderamt = 191;
+		break;
+	case TEAM_GREEN:
+		pLaserDot->entity.curstate.rendercolor.r = 51;
+		pLaserDot->entity.curstate.rendercolor.g = 255;
+		pLaserDot->entity.curstate.rendercolor.b = 51;
+		pLaserDot->entity.curstate.renderamt = 191;
+		break;
+	default:
+		pLaserDot->entity.curstate.rendercolor.r = 255;
+		pLaserDot->entity.curstate.rendercolor.g = 0;
+		pLaserDot->entity.curstate.rendercolor.b = 0;
+		pLaserDot->entity.curstate.renderamt = 255;
+		break;
 	}
 }
 

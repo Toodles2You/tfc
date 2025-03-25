@@ -305,17 +305,33 @@ void CSniperRifle::CreateLaserEffect()
 	m_pLaserBeam->v.flags |= FL_SKIPLOCALHOST;
 	m_pLaserBeam->v.owner = &m_pPlayer->v;
 
-	if (m_pPlayer->TeamNumber() == TEAM_BLUE)
+	switch (m_pPlayer->TeamNumber())
 	{
+	case TEAM_BLUE:
 		m_pLaserDot->SetTransparency(kRenderGlow, 51, 51, 255, 223, kRenderFxNoDissipation);
 		m_pLaserBeam->SetColor(51, 51, 255);
 		m_pLaserBeam->SetBrightness(159);
-	}
-	else
-	{
+		break;
+	case TEAM_RED:
 		m_pLaserDot->SetTransparency(kRenderGlow, 255, 0, 0, 159, kRenderFxNoDissipation);
 		m_pLaserBeam->SetColor(255, 0, 0);
 		m_pLaserBeam->SetBrightness(63);
+		break;
+	case TEAM_YELLOW:
+		m_pLaserDot->SetTransparency(kRenderGlow, 255, 255, 0, 159, kRenderFxNoDissipation);
+		m_pLaserBeam->SetColor(255, 255, 0);
+		m_pLaserBeam->SetBrightness(63);
+		break;
+	case TEAM_GREEN:
+		m_pLaserDot->SetTransparency(kRenderGlow, 51, 255, 51, 159, kRenderFxNoDissipation);
+		m_pLaserBeam->SetColor(51, 255, 51);
+		m_pLaserBeam->SetBrightness(63);
+		break;
+	default:
+		m_pLaserDot->SetTransparency(kRenderGlow, 255, 0, 0, 159, kRenderFxNoDissipation);
+		m_pLaserBeam->SetColor(255, 0, 0);
+		m_pLaserBeam->SetBrightness(63);
+		break;
 	}
 
 	MessageBegin(MSG_ONE, gmsgLaserDot, m_pPlayer);

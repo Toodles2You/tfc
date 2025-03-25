@@ -1244,7 +1244,7 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 
 				const auto& classInfo = sTFClassInfo[playerClass];
 
-				if (playerClass != PC_UNDEFINED && (teamNumber == TEAM_BLUE || teamNumber == TEAM_RED))
+				if (playerClass != PC_UNDEFINED && teamNumber >= TEAM_BLUE && teamNumber <= TEAM_GREEN)
 				{
 					m_nTopColor = classInfo.colormap[teamNumber - 1][0];
 					m_nBottomColor = classInfo.colormap[teamNumber - 1][1];
@@ -1260,7 +1260,7 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 		{
 			const auto teamNumber = m_pCurrentEntity->curstate.team;
 
-			if (teamNumber == TEAM_BLUE || teamNumber == TEAM_RED)
+			if (teamNumber >= TEAM_BLUE && teamNumber <= TEAM_GREEN)
 			{
 				const auto& classInfo = sTFClassInfo[PC_ENGINEER];
 
@@ -1610,7 +1610,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 
 		// get remap colors
-		if (playerClass != PC_UNDEFINED && (teamNumber == TEAM_BLUE || teamNumber == TEAM_RED))
+		if (playerClass != PC_UNDEFINED && teamNumber >= TEAM_BLUE && teamNumber <= TEAM_GREEN)
 		{
 			m_nTopColor = classInfo.colormap[teamNumber - 1][0];
 			m_nBottomColor = classInfo.colormap[teamNumber - 1][1];
