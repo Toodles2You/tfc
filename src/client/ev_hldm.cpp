@@ -1036,7 +1036,7 @@ static void EV_SmokeCallback(TEMPENTITY* ent, float frametime, float currenttime
 	{
 		client::efx::Sprite_Smoke(
 			smonk,
-			(ent->entity.curstate.iuser1 - 50) * 0.08);
+			std::max((ent->entity.curstate.iuser1 - 50) * 0.08F, 1.0F));
 	}
 }
 
@@ -1061,7 +1061,7 @@ void EV_Explosion(event_args_t* args)
 	pmtrace_t tr;
 	EV_TraceLine(origin, origin + dir * 64, PM_STUDIO_BOX, -1, tr);
 	
-	const auto scale = (args->iparam1 - 50) * 0.06F;
+	const auto scale = std::max((args->iparam1 - 50) * 0.06F, 1.0F);
 
 	if (tr.fraction != 1.0F)
 	{

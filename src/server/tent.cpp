@@ -73,7 +73,7 @@ void tent::Explosion(
 		velocity,
 		0.0F,
 		0.0F,
-		damage,
+		std::max(static_cast<int>(damage), 0),
 		0,
 		smoke,
 		sparks
