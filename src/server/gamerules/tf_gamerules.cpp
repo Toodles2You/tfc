@@ -482,14 +482,19 @@ int CTeamFortress::PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget
         return GR_TEAMMATE;
     }
 
-    if (!pTarget->IsClient())
+    if (pPlayer->TeamNumber() >= TEAM_BLUE && pPlayer->TeamNumber() <= TEAM_GREEN
+     && pTarget->TeamNumber() >= TEAM_BLUE && pTarget->TeamNumber() <= TEAM_GREEN)
     {
-        return GR_NOTTEAMMATE;
-    }
+        const auto playerTeam = pPlayer->TeamNumber() - 1;
+        const auto targetTeam = pTarget->TeamNumber() - 1;
 
-    if ((m_TFTeamInfo[pPlayer->TeamNumber() - 1].m_afAlliedTeams & (1 << (pTarget->TeamNumber() - 1))) != 0)
-    {
-        return GR_ALLY;
+        const auto alliedTeams = m_TFTeamInfo[playerTeam].m_afAlliedTeams;
+        const auto teamIndex = 1 << targetTeam;
+
+        if ((alliedTeams & teamIndex) != 0)
+        {
+            return GR_ALLY;
+        }
     }
 
     return GR_NOTTEAMMATE;
