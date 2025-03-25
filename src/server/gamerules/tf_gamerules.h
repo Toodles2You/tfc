@@ -74,6 +74,10 @@ public:
 
 protected:
 	bool ChangePlayerClass(CBasePlayer* pPlayer, int classIndex);
+public:
+	int GetDefaultPlayerClass(CBasePlayer* pPlayer);
+
+protected:
 	void DisplayItemStatus(CBasePlayer* player, const int goalNo);
 
 protected:

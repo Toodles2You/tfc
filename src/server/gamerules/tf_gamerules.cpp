@@ -211,6 +211,14 @@ void CTeamFortress::DisplayItemStatus(CBasePlayer* player, const int goalNo)
 }
 
 
+static inline void SendClassMenu(CBasePlayer *pPlayer)
+{
+    MessageBegin(MSG_ONE, gmsgVGUIMenu, pPlayer);
+    WriteByte(MENU_CLASS);
+    MessageEnd();
+}
+
+
 bool CTeamFortress::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
 {
     if (streq(pcmd, "flaginfo"))
@@ -231,22 +239,24 @@ bool CTeamFortress::ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
         if (strcmp(pcmd, sTFClassSelection[i]) == 0)
         {
             if (!ChangePlayerClass(pPlayer, i))
-            {
-                MessageBegin(MSG_ONE, gmsgVGUIMenu, pPlayer);
-                WriteByte(MENU_CLASS);
-                MessageEnd();
-            }
+                SendClassMenu(pPlayer);
             return true;
         }
     }
+
     if (strcmp(pcmd, sTFClassSelection[PC_CIVILIAN]) == 0)
     {
         if (!ChangePlayerClass(pPlayer, PC_CIVILIAN))
-        {
-            MessageBegin(MSG_ONE, gmsgVGUIMenu, pPlayer);
-            WriteByte(MENU_CLASS);
-            MessageEnd();
-        }
+            SendClassMenu(pPlayer);
+        return true;
+    }
+
+    if (strcmp(pcmd, "randompc") == 0)
+    {
+        const auto pc = GetDefaultPlayerClass(pPlayer);
+
+        if (!ChangePlayerClass(pPlayer, pc))
+            SendClassMenu(pPlayer);
         return true;
     }
 
@@ -271,7 +281,7 @@ void CTeamFortress::InitHUD(CBasePlayer* pPlayer)
     for (auto i = 0; i < 4; i++)
     {
         /* Toodles TODO: */
-        WriteShort(128 | m_TFTeamInfo[i].m_afInvalidClasses);
+        WriteShort(m_TFTeamInfo[i].m_afInvalidClasses);
     }
     MessageEnd();
 }
@@ -397,6 +407,39 @@ bool CTeamFortress::ChangePlayerClass(CBasePlayer* pPlayer, int classIndex)
 		sTFClassSelection[pPlayer->PCNumber()]);
 
     return true;
+}
+
+
+int CTeamFortress::GetDefaultPlayerClass(CBasePlayer* pPlayer)
+{
+    if (pPlayer->TeamNumber() <= TEAM_UNASSIGNED || pPlayer->TeamNumber() > m_numTeams)
+        return PC_UNDEFINED;
+
+    const auto invalidClasses = m_TFTeamInfo[pPlayer->TeamNumber() - 1].m_afInvalidClasses;
+    
+    if (invalidClasses == -1)
+        return PC_CIVILIAN;
+    
+    int validClasses[PC_LASTCLASS];
+    int numValidClasses = 0;
+
+    for (int i = PC_SCOUT; i <= PC_ENGINEER; i++)
+    {
+        int checkFlag = i - 1;
+        if (i >= PC_SPY)
+            checkFlag++;
+
+        if ((invalidClasses & (1 << checkFlag)) == 0)
+        {
+            validClasses[numValidClasses] = i;
+            numValidClasses++;
+        }
+    }
+
+    if (numValidClasses == 0)
+        return PC_UNDEFINED;
+
+    return validClasses[engine::RandomLong(0, numValidClasses - 1)];
 }
 
 
