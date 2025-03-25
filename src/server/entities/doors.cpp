@@ -534,7 +534,7 @@ void CBaseDoor::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 	m_hActivator = pActivator;
 
 	// if not ready to be used, ignore "use" command.
-	if (!FBitSet(v.spawnflags, SF_DOOR_NO_AUTO_RETURN) || m_toggle_state == TS_AT_TOP)
+	if (!FBitSet(v.spawnflags, SF_DOOR_NO_AUTO_RETURN) || m_toggle_state == TS_AT_TOP || m_toggle_state == TS_AT_BOTTOM)
 	{
 		DoorActivate();
 	}
@@ -570,6 +570,15 @@ bool CBaseDoor::DoorActivate()
 			{
 				v.nextthink = v.ltime + m_flWait;
 			}
+		}
+	}
+	else if (FBitSet(v.spawnflags, SF_DOOR_NO_AUTO_RETURN))
+	{
+		if (m_toggle_state == TS_AT_BOTTOM)
+		{
+			/* Door should open. */
+
+			DoorGoUp();
 		}
 	}
 	else if (m_toggle_state != TS_GOING_UP)
