@@ -38,9 +38,9 @@ number_7		640 640hud7	168	0	20	24
 number_8		640 640hud7	192	0	20	24
 number_9		640 640hud7	216	0	20	24
 
-cross			640 640hud7	112	24	32	32
+cross			640 640hud7	80	24	32	32
 
-suit			640 640hud7	32	24	32	32
+suit			640 640hud7	0	24	32	32
 
 stopwatch		640	640hud7	144	72	24	24
 
