@@ -307,7 +307,9 @@ protected:
 			return false;
 		}
 
-		player->v.armorvalue = std::clamp(player->v.armorvalue, 0.0F, player->m_flArmorMax);
+		player->v.armorvalue = std::clamp(player->v.armorvalue + v.armorvalue,
+			0.0F, player->m_flArmorMax);
+
 		return true;
 	}
 
