@@ -1383,6 +1383,12 @@ bool CBasePlayer::Spawn()
 		}
 	}
 
+    const auto goal = spawn->GetTFSpawn();
+    if (goal != nullptr)
+    {
+        goal->AttemptToActivate(this, &goal->tfv);
+    }
+
 	return true;
 }
 
