@@ -100,6 +100,8 @@ typedef enum
 } gamerules_state_e;
 
 
+class CTFSpawn;
+
 class CSpawnPoint
 {
 public:
@@ -107,6 +109,7 @@ public:
 	CSpawnPoint(CBaseEntity *pEntity);
 
 	virtual bool IsValid(CBasePlayer *pPlayer, int attempt);
+	virtual CTFSpawn *GetTFSpawn() { return nullptr; }
 
 	Vector m_origin;
 	Vector m_angles;

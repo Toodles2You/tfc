@@ -567,6 +567,19 @@ bool CTeamFortress::FPlayerCanRespawn(CBasePlayer* pPlayer)
     return CHalfLifeMultiplay::FPlayerCanRespawn(pPlayer);
 }
 
+CSpawnPoint *CTeamFortress::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
+{
+    const auto spawn = CHalfLifeMultiplay::GetPlayerSpawnSpot(pPlayer);
+
+    const auto goal = spawn->GetTFSpawn();
+    if (goal != nullptr)
+    {
+        goal->AttemptToActivate(pPlayer, &goal->tfv);
+    }
+
+    return spawn;
+}
+
 void CTeamFortress::AddPlayerSpawnSpot(CBaseEntity *pEntity)
 {
     if (streq(STRING(pEntity->v.classname), "info_player_start"))
