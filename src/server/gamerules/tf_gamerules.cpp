@@ -332,7 +332,7 @@ bool CTeamFortress::ChangePlayerClass(CBasePlayer* pPlayer, int classIndex)
     {
         return false;
     }
-    else if (classIndex < PC_SCOUT || classIndex > PC_ENGINEER)
+    else if ((classIndex < PC_SCOUT || classIndex > PC_ENGINEER) && classIndex != PC_CIVILIAN)
     {
         return false;
     }
@@ -353,12 +353,11 @@ bool CTeamFortress::ChangePlayerClass(CBasePlayer* pPlayer, int classIndex)
     }
     else if (invalidClasses != 0)
     {
-        int check_flag = classIndex - 1;
+        int checkFlag = classIndex - 1;
         if (classIndex >= PC_SPY)
-        {
-            check_flag++;
-        }
-        if (invalidClasses != 0)
+            checkFlag++;
+
+        if ((invalidClasses & (1 << checkFlag)) != 0)
         {
             return false;
         }
@@ -534,7 +533,10 @@ void CTeamFortress::PlayerSpawn(CBasePlayer* pPlayer)
     }
 
     pPlayer->SelectWeapon(info.weapons[0]);
-    pPlayer->m_iLastWeapon = info.weapons[1];
+    if (info.weapons[1] != -1)
+        pPlayer->m_iLastWeapon = info.weapons[1];
+    else
+        pPlayer->m_iLastWeapon = info.weapons[0];
 
     for (int i = 0; i < AMMO_TYPES; i++)
     {
