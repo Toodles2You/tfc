@@ -2290,6 +2290,11 @@ bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurren
 				m_pTeamMenu->SlotInput(5);
 				return false;
 			}
+			else if (iMenuID == MENU_CLASS)
+			{
+				m_pClassMenu->SlotInput(0);
+				return false;
+			}
 		}
 	}
 
