@@ -889,7 +889,10 @@ void CTFGoal::RemoveResults(CBaseEntity* player)
     {
         if (tfv.ammo_detpack < 0)
         {
-            pl->GiveNamedItem("tf_weapon_detpack");
+            if (!pl->HasPlayerWeapon(WEAPON_DETPACK))
+            {
+                pl->GiveNamedItem("tf_weapon_detpack");
+            }
         }
         else if (tfv.ammo_detpack > 0)
         {
@@ -982,7 +985,10 @@ void CTFGoal::ApplyResults(CBaseEntity* player, CBaseEntity* activating_player, 
         {
             if (tfv.ammo_detpack > 0)
             {
-                pl->GiveNamedItem("tf_weapon_detpack");
+                if (!pl->HasPlayerWeapon(WEAPON_DETPACK))
+                {
+                    pl->GiveNamedItem("tf_weapon_detpack");
+                }
             }
             else if (tfv.ammo_detpack < 0)
             {
