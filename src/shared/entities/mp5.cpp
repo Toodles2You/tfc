@@ -77,6 +77,7 @@ void CMP5::PrimaryAttack()
 
 	m_iClip -= shots;
 
+	SendWeaponAnim(kAnimFire1 + util::SharedRandomLong(m_pPlayer->m_randomSeed, 0, 2));
 	m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
 #ifdef GAME_DLL
@@ -91,6 +92,7 @@ void CMP5::SecondaryAttack()
 {
 	m_pPlayer->m_rgAmmo[iAmmo2()]--;
 
+	SendWeaponAnim(kAnimLaunch);
 	m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
 	m_pPlayer->PlaybackEvent(m_usSecondaryAttack);

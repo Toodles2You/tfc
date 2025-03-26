@@ -91,6 +91,11 @@ void CCrowbar::PrimaryAttack()
 #endif
 	}
 
+	if (hit == kCrowbarMiss)
+		SendWeaponAnim(kAnimAttack1Miss);
+	else
+		SendWeaponAnim(kAnimAttack1Hit);
+
 #ifdef GAME_DLL
 	m_pPlayer->PlaybackEvent(
 		m_usPrimaryAttack,

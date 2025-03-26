@@ -289,6 +289,8 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 	data.punchangle = v.punchangle;
 
 	data.fov = m_iFOV;
+	
+	data.iuser4 = m_iWeaponAnimTime;
 }
 
 
@@ -347,6 +349,8 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 	v.punchangle = data.punchangle;
 
 	m_iFOV = data.fov;
+
+	m_iWeaponAnimTime = data.iuser4;
 }
 
 
@@ -359,6 +363,8 @@ void CBasePlayer::DecrementTimers(const int msec)
 		len = std::max(len, 0.0F);
 		v.punchangle = v.punchangle * len;
 	}
+
+	m_iWeaponAnimTime = std::min(m_iWeaponAnimTime + msec, 16000);
 }
 
 

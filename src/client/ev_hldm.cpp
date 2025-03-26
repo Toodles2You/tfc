@@ -562,10 +562,6 @@ void CMP5::EV_PrimaryAttack(event_args_t* args)
 	if (EV_IsLocal(args->entindex))
 	{
 		EV_MuzzleFlash();
-
-		client::event::WeaponAnimation(
-			kAnimFire1 + client::RandomLong(0, 2), 0);
-
 		V_PunchAxis(0, client::RandomFloat(-2, 2));
 	}
 
@@ -597,8 +593,6 @@ void CMP5::EV_SecondaryAttack(event_args_t* args)
 {
 	if (EV_IsLocal(args->entindex))
 	{
-		client::event::WeaponAnimation(kAnimLaunch, 0);
-
 		V_PunchAxis(0, -10);
 	}
 
@@ -620,8 +614,6 @@ void CMP5::EV_SecondaryAttack(event_args_t* args)
 		client::RandomLong(94, 109));
 }
 
-static int g_iSwing;
-
 void CCrowbar::EV_PrimaryAttack(event_args_t* args)
 {
 	Vector gun;
@@ -640,12 +632,6 @@ void CCrowbar::EV_PrimaryAttack(event_args_t* args)
 		AngleVectors(args->angles, &forward, &right, &up);
 
 		EV_TraceLine(gun, gun + forward * 64, PM_NORMAL, -1, tr);
-
-		if (EV_IsLocal(args->entindex))
-		{
-			g_iSwing++;
-		}
-
 		if (tr.fraction != 1.0F)
 		{
 			auto ent = client::event::GetPhysent(tr.ent);
@@ -667,16 +653,6 @@ void CCrowbar::EV_PrimaryAttack(event_args_t* args)
 
 	if (hit == kCrowbarMiss)
 	{
-		if (EV_IsLocal(args->entindex))
-		{
-			switch (g_iSwing % 3)
-			{
-			case 0: client::event::WeaponAnimation(kAnimAttack1Miss, 0); break;
-			case 1: client::event::WeaponAnimation(kAnimAttack2Miss, 0); break;
-			case 2: client::event::WeaponAnimation(kAnimAttack3Miss, 0); break;
-			}
-		}
-
 		//Play Swing sound
 		client::event::PlaySound(
 			args->entindex,
@@ -690,16 +666,6 @@ void CCrowbar::EV_PrimaryAttack(event_args_t* args)
 	}
 	else
 	{
-		if (EV_IsLocal(args->entindex))
-		{
-			switch (g_iSwing % 3)
-			{
-			case 0: client::event::WeaponAnimation(kAnimAttack1Hit, 0); break;
-			case 1: client::event::WeaponAnimation(kAnimAttack2Hit, 0); break;
-			case 2: client::event::WeaponAnimation(kAnimAttack3Hit, 0); break;
-			}
-		}
-
 		const char* sample;
 
 		if (hit == kCrowbarHitWorld)
