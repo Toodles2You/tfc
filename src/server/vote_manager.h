@@ -54,6 +54,7 @@ public:
 
     void Init();
     void Update();
+    void Shutdown();
 
 	void ClientConnected(const unsigned int playerIndex);
     void ClientDisconnected(const unsigned int playerIndex);

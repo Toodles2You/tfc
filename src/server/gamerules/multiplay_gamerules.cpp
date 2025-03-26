@@ -1327,6 +1327,7 @@ void CHalfLifeMultiplay::Think_GAME_OVER()
 {
 	if (m_stateChangeTime + m_intermissionTime <= gpGlobals->time)
 	{
+		g_VoteManager.Shutdown();
 		ChangeLevel();
 	}
 }

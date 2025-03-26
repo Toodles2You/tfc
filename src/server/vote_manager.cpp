@@ -72,6 +72,16 @@ void CVoteManager::Update()
 }
 
 
+void CVoteManager::Shutdown()
+{
+	if (IsPollRunning())
+	{
+		m_Poll->End();
+		ClearPoll();
+	}
+}
+
+
 void CVoteManager::ClientConnected(const unsigned int playerIndex)
 {
 
