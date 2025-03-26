@@ -426,27 +426,6 @@ void CBasePlayerWeapon::RemoveFromPlayer(bool forceSendAnimations)
 }
 
 
-void CBasePlayerWeapon::SendWeaponAnim(int iAnim)
-{
-	if (iAnim < 0)
-	{
-		return;
-	}
-
-	const bool skiplocal = !m_ForceSendAnimations;
-
-	m_pPlayer->v.weaponanim = iAnim;
-
-	if (skiplocal && engine::CanSkipPlayer(&m_pPlayer->v))
-		return;
-
-	MessageBegin(MSG_ONE, SVC_WEAPONANIM, m_pPlayer);
-	WriteByte(iAnim);
-	WriteByte(v.body);
-	MessageEnd();
-}
-
-
 void CBasePlayerWeapon::Deploy()
 {
 	const auto info = GetInfo();

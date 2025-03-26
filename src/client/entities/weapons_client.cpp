@@ -66,14 +66,3 @@ void CBasePlayerWeapon::RemoveFromPlayer(bool forceSendAnimations)
 	m_ForceSendAnimations = false;
 }
 
-
-void CBasePlayerWeapon::SendWeaponAnim(int iAnim)
-{
-	if (iAnim < 0)
-	{
-		return;
-	}
-	m_pPlayer->v.weaponanim = iAnim;
-	HUD_SendWeaponAnim(iAnim, v.body, false);
-}
-

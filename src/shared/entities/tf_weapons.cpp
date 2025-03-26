@@ -137,6 +137,7 @@ void CTFWeapon::PrimaryAttack()
 
 	m_pPlayer->Undisguise();
 
+	SendWeaponAnim(info.iAnims[kWeaponAnimAttack]);
 	m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
 	m_pPlayer->PlaybackEvent(m_usPrimaryAttack, (float)GetID(), m_pPlayer->v.view_ofs.z, m_pPlayer->m_randomSeed, rounds);

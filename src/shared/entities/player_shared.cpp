@@ -341,7 +341,7 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 	data.vuser4.y = static_cast<float>(m_nLegDamage);
 #ifdef GAME_DLL
 	data.vuser3.x = m_flSpeedReduction;
-	data.iuser4 = m_iConcussionTime;
+	*reinterpret_cast<int*>(&data.vuser3.y) = m_iConcussionTime;
 #endif
 	data.ammo_rockets = m_iGrenadeExplodeTime;
 	data.ammo_cells = m_iFeignTime | (m_iFeignHoldTime << 16);
@@ -366,6 +366,8 @@ void CBasePlayer::GetClientData(clientdata_t& data, bool sendWeapons)
 	data.punchangle = v.punchangle;
 
 	data.fov = m_iFOV;
+
+	data.iuser4 = m_iWeaponAnimTime;
 
 #ifdef CLIENT_DLL
 	if (g_bRunConcussionPrediction)
@@ -406,7 +408,7 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 	m_StateBits = data.tfstate;
 	m_nLegDamage = static_cast<byte>(data.vuser4.y);
 	m_flSpeedReduction = data.vuser3.x;
-	m_iConcussionTime = data.iuser4;
+	m_iConcussionTime = *reinterpret_cast<const int*>(&data.vuser3.y);
 	m_iGrenadeExplodeTime = data.ammo_rockets;
 	m_iFeignTime = data.ammo_cells & UINT16_MAX;
 	m_iFeignHoldTime = data.ammo_cells >> 16;
@@ -447,6 +449,8 @@ void CBasePlayer::SetClientData(const clientdata_t& data)
 	v.punchangle = data.punchangle;
 
 	m_iFOV = data.fov;
+
+	m_iWeaponAnimTime = data.iuser4;
 }
 
 
@@ -459,6 +463,8 @@ void CBasePlayer::DecrementTimers(const int msec)
 		len = std::max(len, 0.0F);
 		v.punchangle = v.punchangle * len;
 	}
+
+	m_iWeaponAnimTime = std::min(m_iWeaponAnimTime + msec, 16000);
 
 	m_iConcussionTime = std::max(m_iConcussionTime - msec, 0);
 

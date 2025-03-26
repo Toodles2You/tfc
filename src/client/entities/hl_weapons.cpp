@@ -64,6 +64,9 @@ template <class T> static void HUD_SpawnWeapon(const int id)
 
 static Vector previousorigin;
 
+int g_iWeaponSequence;
+float g_flWeaponAnimTime;
+
 Vector g_PunchAngle;
 
 
@@ -485,6 +488,9 @@ void HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct
 	if (g_CurrentWeaponId == g_weaponselect)
 		g_weaponselect = WEAPON_NONE;
 	g_LastWeaponId = player->m_iLastWeapon;
+
+	g_iWeaponSequence = to->client.weaponanim;
+	g_flWeaponAnimTime = to->client.iuser4 / 1000.0F;
 
 	g_PunchAngle = to->client.punchangle * 2;
 }

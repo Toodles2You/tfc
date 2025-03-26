@@ -131,6 +131,7 @@ public:
 	CBasePlayerWeapon* m_pActiveWeapon;
 	byte m_iActiveWeapon;
 	byte m_iLastWeapon;
+	int m_iWeaponAnimTime;
 
 	std::uint64_t m_WeaponBits;
 

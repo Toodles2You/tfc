@@ -26,7 +26,6 @@ bool IsMultiplayer();
 bool IsDeathmatch();
 } /* namespace util */
 
-void HUD_SendWeaponAnim(int iAnim, int body, bool force);
 void HUD_PlaySound(const char* sound, float volume);
 void HUD_PlaybackEvent(int flags, const Entity* pInvoker, unsigned short eventindex, float delay, const float* origin, const float* angles, float fparam1, float fparam2, int iparam1, int iparam2, int bparam1, int bparam2);
 Vector HUD_GetLastOrg();

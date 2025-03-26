@@ -674,11 +674,6 @@ void CTFWeapon::EV_PrimaryAttack(event_args_t* args)
 	{
 		EV_MuzzleFlash();
 
-		if (info.iAnims[kWeaponAnimAttack] >= 0)
-		{
-			client::event::WeaponAnimation(info.iAnims[kWeaponAnimAttack], 0);
-		}
-
 		if (info.flPunchAngle != 0.0F)
 		{
 			V_PunchAxis(0, info.flPunchAngle);
@@ -885,11 +880,6 @@ void CTFMelee::EV_MeleeAttack(event_args_t* args)
 
 		if (EV_IsLocal(args->entindex))
 		{
-			if (info.iAnims[kWeaponAnimAttack] >= 0)
-			{
-				client::event::WeaponAnimation(info.iAnims[kWeaponAnimAttack], 0);
-			}
-
 			if (info.flPunchAngle != 0.0F)
 			{
 				V_PunchAxis(0, info.flPunchAngle);
@@ -924,14 +914,6 @@ void CTFMelee::EV_MeleeAttack(event_args_t* args)
 		}
 
 		return;
-	}
-
-	if (EV_IsLocal(args->entindex))
-	{
-		if (info.iAnims[kWeaponAnimReload] >= 0)
-		{
-			client::event::WeaponAnimation(info.iAnims[kWeaponAnimReload], 0);
-		}
 	}
 
 	client::event::PlaySound(

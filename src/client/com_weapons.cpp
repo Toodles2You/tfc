@@ -69,25 +69,6 @@ void COM_Log(const char* pszFile, const char* fmt, ...)
 
 /*
 =====================
-HUD_SendWeaponAnim
-
-Change weapon model animation
-=====================
-*/
-void HUD_SendWeaponAnim(int iAnim, int body, bool force)
-{
-	// Don't actually change it.
-	if (!HUD_FirstTimePredicting() && !force)
-	{
-		return;
-	}
-
-	// Tell animation system new info
-	client::WeaponAnim(iAnim, body);
-}
-
-/*
-=====================
 HUD_PlaySound
 
 Play a sound, if we are seeing this command for the first time

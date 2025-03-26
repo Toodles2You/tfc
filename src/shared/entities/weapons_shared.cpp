@@ -47,3 +47,12 @@ void CBasePlayerWeapon::DecrementTimers(const int msec)
 	m_iNextPrimaryAttack = std::max(m_iNextPrimaryAttack - msec, -1100);
 }
 
+
+void CBasePlayerWeapon::SendWeaponAnim(int iAnim)
+{
+	if (iAnim < 0)
+		return;
+	m_pPlayer->v.weaponanim = iAnim;
+	m_pPlayer->m_iWeaponAnimTime = 0;
+}
+

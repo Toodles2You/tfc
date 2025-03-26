@@ -46,6 +46,8 @@ void HUD_TxferLocalOverrides(struct entity_state_s* state, const struct clientda
 	state->iuser3 = client->iuser3;
 	state->iuser4 = client->iuser4;
 
+	*reinterpret_cast<int *>(&state->vuser3.y) = *reinterpret_cast<const int *>(&client->vuser3.y);
+
 	state->health = static_cast<int>(client->health);
 	state->fuser1 = static_cast<int>(client->vuser4.z);
 }
@@ -90,6 +92,8 @@ void HUD_TxferPredictionData(struct entity_state_s* ps, const struct entity_stat
 	pcd->iuser2 = ppcd->iuser2;
 	pcd->iuser3 = ppcd->iuser3;
 	pcd->iuser4 = ppcd->iuser4;
+
+	*reinterpret_cast<int *>(&pcd->vuser3.y) = *reinterpret_cast<const int *>(&ppcd->vuser3.y);
 
 	if (0 != client::IsSpectateOnly())
 	{

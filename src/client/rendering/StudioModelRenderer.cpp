@@ -1101,6 +1101,9 @@ void CStudioModelRenderer::StudioMergeBones(model_t* m_pSubModel)
 }
 
 
+extern int g_iWeaponSequence;
+extern float g_flWeaponAnimTime;
+
 /*
 ====================
 StudioDrawModel
@@ -1116,6 +1119,15 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 	IEngineStudio.GetTimes(&m_nFrameCount, &m_clTime, &m_clOldTime);
 	IEngineStudio.GetViewInfo(m_vRenderOrigin, m_vUp, m_vRight, m_vNormal);
 	IEngineStudio.GetAliasScale(&m_fSoftwareXScale, &m_fSoftwareYScale);
+
+	const auto bIsViewEntity = (m_pCurrentEntity == IEngineStudio.GetViewEntity());
+
+	if (bIsViewEntity)
+	{
+		m_pCurrentEntity->curstate.sequence = g_iWeaponSequence;
+		m_pCurrentEntity->curstate.animtime = m_clTime - g_flWeaponAnimTime;
+		m_pCurrentEntity->curstate.body = 0;
+	}
 
 	if (m_pCurrentEntity->curstate.renderfx == kRenderFxDeadPlayer)
 	{
@@ -1149,7 +1161,7 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 		return result;
 	}
 
-	if (m_pCurrentEntity == IEngineStudio.GetViewEntity())
+	if (bIsViewEntity)
 	{
 		if (gHUD.IsViewZoomed())
 			return false;
@@ -1234,7 +1246,7 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 		m_nTopColor = m_pCurrentEntity->curstate.colormap & 0xFF;
 		m_nBottomColor = (m_pCurrentEntity->curstate.colormap & 0xFF00) >> 8;
 
-		if (m_pCurrentEntity == IEngineStudio.GetViewEntity())
+		if (bIsViewEntity)
 		{
 			auto player = client::GetLocalPlayer();
 
