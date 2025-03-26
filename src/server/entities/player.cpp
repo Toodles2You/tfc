@@ -1644,6 +1644,15 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 	{
 	case 101:
 		gEvilImpulse101 = true;
+		{
+			const auto& classInfo = sTFClassInfo[PCNumber()];
+
+			GiveHealth(classInfo.maxHealth, DMG_GENERIC);
+			GiveArmor(classInfo.maxArmorType, classInfo.maxArmor);
+
+			for (int i = 0; i < AMMO_TYPES; i++)
+				GiveAmmo(classInfo.maxAmmo[i], i);
+		}
 		gEvilImpulse101 = false;
 		break;
 
