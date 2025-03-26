@@ -49,11 +49,6 @@ Features
     - Supports fullbright textures
     - See `gl_use_triapi`
 
-Building this SDK
-======================
-
-See [BUILDING.md](BUILDING.md)
-
 Half-Life SDK License
 ======================
 
