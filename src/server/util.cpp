@@ -1258,7 +1258,6 @@ bool util::IsDeathmatch()
 
 void util::LagCompensation(CBaseEntity* entity, const int ping)
 {
-#if 0
 	if (AllowLagCompensation() == 0 || ping <= 5)
 	{
 		return;
@@ -1322,5 +1321,4 @@ void util::LagCompensation(CBaseEntity* entity, const int ping)
 			entity->SetOrigin(trace.vecEndPos);
 		}
 	}
-#endif
 }
