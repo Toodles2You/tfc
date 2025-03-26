@@ -390,6 +390,20 @@ void CAxe::GetWeaponInfo(WeaponInfo& i)
 }
 
 
+LINK_ENTITY_TO_CLASS(tf_weapon_umbrella, CUmbrella);
+
+void CUmbrella::GetWeaponInfo(WeaponInfo& i)
+{
+	CAxe::GetWeaponInfo(i);
+
+	i.pszName = "tf_weapon_umbrella";
+	i.iPosition = 4;
+
+	i.pszView = "models/v_umbrella.mdl";
+	i.pszPlayer = "models/p_umbrella.mdl";
+}
+
+
 LINK_ENTITY_TO_CLASS(tf_weapon_knife, CKnife);
 
 void CKnife::GetWeaponInfo(WeaponInfo& i)

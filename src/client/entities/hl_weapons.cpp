@@ -237,6 +237,7 @@ static void HUD_InitClientWeapons()
 	HUD_SpawnWeapon<CPipeBombLauncher>(WEAPON_PIPEBOMB_LAUNCHER);
 	HUD_SpawnWeapon<CKnife>(WEAPON_KNIFE);
 	HUD_SpawnWeapon<CBuilder>(WEAPON_BUILDER);
+	HUD_SpawnWeapon<CUmbrella>(WEAPON_UMBRELLA);
 }
 
 

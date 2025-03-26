@@ -140,6 +140,7 @@ constexpr const char* g_szWeaponNames[WEAPON_TYPES] =
 	"tf_weapon_pl",
 	"tf_weapon_knife",
 	"tf_weapon_builder",
+	"tf_weapon_umbrella",
 };
 #endif
 
@@ -334,6 +335,15 @@ public:
 	CAxe(Entity* containingEntity) : CTFMelee(containingEntity) {}
 
 	int GetID() const override { return WEAPON_AXE; }
+	void GetWeaponInfo(WeaponInfo& i) override;
+};
+
+class CUmbrella : public CAxe
+{
+public:
+	CUmbrella(Entity* containingEntity) : CAxe(containingEntity) {}
+
+	int GetID() const override { return WEAPON_UMBRELLA; }
 	void GetWeaponInfo(WeaponInfo& i) override;
 };
 

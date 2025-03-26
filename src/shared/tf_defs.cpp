@@ -430,7 +430,7 @@ PCInfo sTFClassInfo[PC_LASTCLASS] =
         .armorClasses     = 0,
         .initArmorClasses = 0,
         .weapons = {
-            WEAPON_AXE,
+            WEAPON_UMBRELLA,
             -1,
             -1,
             -1,
