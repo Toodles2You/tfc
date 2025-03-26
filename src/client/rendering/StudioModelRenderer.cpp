@@ -1149,16 +1149,22 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 		return result;
 	}
 
-	if ((flags & STUDIO_RENDER) != 0 && m_pCurrentEntity == IEngineStudio.GetViewEntity())
+	if (m_pCurrentEntity == IEngineStudio.GetViewEntity())
 	{
-		auto player = client::GetLocalPlayer();
+		if (gHUD.IsViewZoomed())
+			return false;
 
-		if (player != nullptr)
+		if ((flags & STUDIO_RENDER) != 0)
 		{
-			m_pCurrentEntity->curstate.rendermode = player->curstate.rendermode;
-			m_pCurrentEntity->curstate.renderfx = player->curstate.renderfx;
-			m_pCurrentEntity->curstate.renderamt = player->curstate.renderamt;
-			m_pCurrentEntity->curstate.rendercolor = player->curstate.rendercolor;
+			auto player = client::GetLocalPlayer();
+
+			if (player != nullptr)
+			{
+				m_pCurrentEntity->curstate.rendermode = player->curstate.rendermode;
+				m_pCurrentEntity->curstate.renderfx = player->curstate.renderfx;
+				m_pCurrentEntity->curstate.renderamt = player->curstate.renderamt;
+				m_pCurrentEntity->curstate.rendercolor = player->curstate.rendercolor;
+			}
 		}
 	}
 

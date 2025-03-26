@@ -1308,6 +1308,11 @@ float CHalfLifeMultiplay::GetMapTimeLeft()
 
 void CHalfLifeMultiplay::EnterState(gamerules_state_e state)
 {
+	if (GetState() == state)
+	{
+		return;
+	}
+
 	CGameRules::EnterState(state);
 
 	m_stateChangeTime = gpGlobals->time;
@@ -1386,6 +1391,7 @@ void CHalfLifeMultiplay::Think_GAME_OVER()
 {
 	if (m_stateChangeTime + m_intermissionTime <= gpGlobals->time)
 	{
+		g_VoteManager.Shutdown();
 		ChangeLevel();
 	}
 }
