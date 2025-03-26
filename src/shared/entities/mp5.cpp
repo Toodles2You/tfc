@@ -93,6 +93,10 @@ void CMP5::SecondaryAttack()
 
 	m_pPlayer->SetAction(CBasePlayer::Action::Attack);
 
+	m_pPlayer->PlaybackEvent(m_usSecondaryAttack);
+
+	m_iNextPrimaryAttack = 1000;
+
 #ifndef CLIENT_DLL
 	util::MakeVectors(m_pPlayer->v.v_angle + m_pPlayer->v.punchangle);
 
@@ -113,10 +117,6 @@ void CMP5::SecondaryAttack()
 
 	util::LagCompensation(grenade, m_pPlayer->m_netPing);
 #endif
-
-	m_pPlayer->PlaybackEvent(m_usSecondaryAttack);
-
-	m_iNextPrimaryAttack = 1000;
 }
 
 
@@ -126,8 +126,8 @@ void CMP5::WeaponPostFrame()
 	{
 		if (m_iNextPrimaryAttack <= 0 || m_fInReload)
 		{
-			SecondaryAttack();
 			m_fInReload = false;
+			SecondaryAttack();
 			return;
 		}
 	}
